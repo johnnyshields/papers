@@ -1,0 +1,7 @@
+Title
+-----
+Sharp coefficientwise positivity for a matrix Turán determinant of ₀F₁
+
+Abstract
+--------
+We prove a sharp coefficientwise positivity theorem for a matrix Turán determinant of the normalized hypergeometric function ₀F₁. From the reciprocal-gamma normalization Z(a,λ) = ₀F₁(;a;λ)/Γ(a) = ∑_{k≥0} λ^k/(k! Γ(a+k)), a > 0, we form symmetric 2×2 matrices 𝒯_κ(a,λ) from parameter and Euler derivatives of Z, and prove that every positive-degree Maclaurin coefficient of Δ^(κ) = det 𝒯_κ is strictly positive for all a > 0 if and only if κ ≥ 1. At the endpoint κ = 1, Δ^(1)(a,·) is strictly absolutely monotone even though the first nonconstant coefficient matrix can be indefinite; its potentially negative degree-two determinant contribution is offset by a manifestly positive Hilbert-space decomposition. Via the identity I_(a−1)(2√λ) = λ^((a−1)/2) Z(a,λ), an explicit diagonal congruence yields a positive-definite Bessel–Schur matrix and a mixed order–argument inequality for I_ν, for every ν > −1; we also fix the exact uniform deformation threshold and, for each fixed ν, the least argument-independent correction. Beyond ν > −1 we exhibit explicit regimes where coefficientwise or pointwise positivity fails.
