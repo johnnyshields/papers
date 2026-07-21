@@ -1,0 +1,7 @@
+Title
+-----
+Coefficientwise log-concavity of the cubic multiple-Pochhammer series
+
+Abstract
+--------
+Let (f_n)_{n≥1} be a nonnegative log-concave sequence with no internal zeros, and define the cubic multiple-Pochhammer series F_f(μ;x) = ∑_{n≥1} f_n (μ)_{3n} x^n/(3n−1)!. Karp and Zhang established coefficientwise log-concavity of the analogous series for multiplicity r=2 and gave numerical counterexamples for r=4, leaving the cubic case open as their Conjecture 3.8. We prove it: for all μ, α, β ≥ 0, every coefficient of the generalized Turánian F_f(μ+α;x)F_f(μ+β;x) − F_f(μ;x)F_f(μ+α+β;x) is nonnegative. The proof is elementary and noncomputational. The degree-m coefficient is represented as a beta-binomial expectation, reducing the theorem to the monotonicity of a weighted residue-class binomial kernel; this monotonicity is established through a Bernstein-basis positivity certificate obtained from a root-of-unity evaluation. A coefficientwise strictness criterion and ordinary log-concavity in μ follow.

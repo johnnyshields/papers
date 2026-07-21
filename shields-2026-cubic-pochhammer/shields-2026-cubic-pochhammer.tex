@@ -1,0 +1,827 @@
+\documentclass[11pt,a4paper]{amsart}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage[expansion=false]{microtype}
+\usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black]{hyperref}
+\usepackage[nameinlink,capitalize]{cleveref}
+\pdfinfo{
+  /Title (Coefficientwise log-concavity of the cubic multiple-Pochhammer series)
+  /Author (John Shields)
+  /ORCID (https://orcid.org/0009-0004-3882-4571)
+  /DOI (10.5281/zenodo.21475821)
+}
+
+\numberwithin{equation}{section}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\E}{\mathbb E}
+\newcommand{\Pp}{\mathbb P}
+\newcommand{\dd}{\,\mathrm d}
+\newcommand{\Tur}{\Delta}
+
+\title[Coefficientwise log-concavity of the cubic multiple-Pochhammer series]
+{Coefficientwise log-concavity\\
+of the cubic multiple-Pochhammer series}
+
+\author{John Shields}
+\date{July 21, 2026}
+\thanks{Independent researcher, Tokyo, Japan. Corresponding author:
+\href{mailto:math@johnnyshields.com}{math@johnnyshields.com}.
+This version is archived at \href{https://doi.org/10.5281/zenodo.21475821}{doi:10.5281/zenodo.21475821}.}
+
+\subjclass[2020]{Primary 26A51, 33C20; Secondary 05A20, 60E15}
+\keywords{coefficientwise log-concavity, Tur\'an inequality, Pochhammer symbol,
+log-concave sequence, beta-binomial distribution, Bernstein basis}
+
+\begin{document}
+
+\begin{abstract}
+Let $(f_n)_{n\ge1}$ be a nonnegative log-concave sequence with no internal
+zeros, and define the cubic multiple-Pochhammer series
+$F_f(\mu;x)=\sum_{n\ge1}f_n\,(\mu)_{3n}\,x^n/(3n-1)!$.
+Karp and Zhang established coefficientwise log-concavity of the analogous
+series for multiplicity $r=2$ and gave numerical counterexamples for $r=4$, leaving the
+cubic case open as their Conjecture~3.8.  We prove it: for all
+$\mu,\alpha,\beta\ge0$, every coefficient of the generalized Tur\'anian
+$F_f(\mu+\alpha;x)F_f(\mu+\beta;x)-F_f(\mu;x)F_f(\mu+\alpha+\beta;x)$ is
+nonnegative.  The proof is elementary and noncomputational.  The degree-$m$ coefficient is
+represented as a beta-binomial expectation, reducing the theorem to the
+monotonicity of a weighted residue-class binomial kernel; this monotonicity
+is established through a Bernstein-basis positivity certificate obtained from
+a root-of-unity evaluation.  A coefficientwise strictness criterion and
+ordinary log-concavity in $\mu$ follow.
+\end{abstract}
+
+\maketitle
+
+\section{Introduction}
+
+A formal power series depending on a parameter $\mu\ge0$ is called
+\emph{coefficientwise log-concave} if, for every $\mu,\alpha,\beta\ge0$, all
+coefficients of the generalized Tur\'anian
+\[
+ F(\mu+\alpha;x)F(\mu+\beta;x)
+ -F(\mu;x)F(\mu+\alpha+\beta;x)
+\]
+are nonnegative.  This property is stronger than ordinary log-concavity of
+$\mu\mapsto F(\mu;x)$ whenever the series converges at a positive value of
+$x$.  It has been studied systematically for reciprocal-gamma, gamma-ratio,
+hypergeometric, and Fox--Wright series; see
+\cite{KalmykovKarp2013Reciprocal,KalmykovKarp2013Ratios,KarpSitnik2010,KarpZhang2024}.
+Turán-type inequalities for hypergeometric and confluent hypergeometric
+functions have also been studied extensively
+\cite{Baricz2008,BarnardGordyRichards2009}.
+
+Karp and Zhang considered, for an integer $r\ge2$, the modified
+multiple-Pochhammer series
+\begin{equation}\label{eq:general-r}
+ F_{f,r}(\mu;x)
+ =\sum_{n\ge1}f_n\frac{(\mu)_{rn}}{(rn-1)!}x^n,
+\end{equation}
+where $(f_n)$ is nonnegative and log-concave.  Karp and Zhang report that
+A.\ Ninh suggested this construction to them in a private communication in
+2017 \cite{KarpZhang2024}; related published work on log-concavity and
+Tur\'an-type inequalities appears in \cite{NinhPham2018}.  They proved
+coefficientwise log-concavity for $r=2$, gave numerical counterexamples for
+$r=4$, and left the cubic case $r=3$ open \cite[Conjecture~3.8]{KarpZhang2024}.
+This note proves that conjecture.
+
+Karp and Zhang index the ambient sequence from $n=0$, although the modified
+series itself begins at $n=1$.  The log-concavity hypothesis is stated here
+directly for the positive-index tail $(f_n)_{n\ge1}$.  This is equivalent to
+their formulation: restriction preserves log-concavity and interval support,
+while any admissible tail extends to $n=0$ by setting $f_0=0$.
+
+Recall that a nonnegative sequence $(f_n)_{n\ge1}$ is log-concave with no
+internal zeros if $f_n^2\ge f_{n-1}f_{n+1}$ whenever the three terms are
+defined, and its positive support is an interval of integers.  We work throughout with formal power series, so no growth
+condition on $(f_n)$ is needed.
+
+\begin{theorem}[Cubic multiple-Pochhammer theorem]\label{thm:main}
+Let $(f_n)_{n\ge1}$ be a nonnegative log-concave sequence with no internal
+zeros, and put
+\begin{equation}\label{eq:F-def}
+ F_f(\mu;x)=\sum_{n\ge1}f_n\frac{(\mu)_{3n}}{(3n-1)!}x^n.
+\end{equation}
+For every $\mu,\alpha,\beta\ge0$, the formal power series
+\begin{equation}\label{eq:Turan-def}
+ \Tur_f(\mu;\alpha,\beta;x)
+ =F_f(\mu+\alpha;x)F_f(\mu+\beta;x)
+ -F_f(\mu;x)F_f(\mu+\alpha+\beta;x)
+\end{equation}
+has nonnegative coefficients.
+\end{theorem}
+
+The proof has three components.  The coefficient of degree $m$ is rewritten as
+a beta-binomial expectation (\Cref{sec:beta-binomial}).  Two elementary
+monotonicity lemmas (\Cref{sec:monotonicity-lemmas}) then supply the tools:
+beta laws with a fixed sum of parameters are ordered by their imbalance against
+symmetric functions increasing toward the midpoint, and a one-sign-change
+weighting principle carries positivity through nondecreasing weights.  The
+weighted residue-class binomial kernel is shown to have the required
+monotonicity (\Cref{sec:kernel}); here complementary residue blocks have a
+single sign change, and the unweighted sum carries a Bernstein-basis positivity
+certificate.  This kernel theorem does not depend on the beta-binomial setup.  The
+components are combined in \Cref{sec:proof}.
+
+\section{Beta-binomial representation}\label{sec:beta-binomial}
+
+This section rewrites the coefficient convolution underlying the Tur\'anian
+\eqref{eq:Turan-def} as a beta-binomial expectation.
+
+For $m\ge2$, put
+\begin{equation}\label{eq:w-from-f}
+ w_r=f_rf_{m-r},\qquad 1\le r\le m-1.
+\end{equation}
+These weights are symmetric.  Log-concavity of $(f_n)$ implies
+\[
+ w_{r+1}=f_{r+1}f_{m-r-1}\ge f_rf_{m-r}=w_r
+ \qquad\Bigl(1\le r<\bigl\lfloor\tfrac m2\bigr\rfloor\Bigr),
+\]
+the standard cross-product consequence $f_{a+1}f_b\ge f_af_{b+1}$ for $a<b$ of
+log-concavity with no internal zeros.  With the symmetry $w_r=w_{m-r}$, the
+weights \eqref{eq:w-from-f} satisfy the hypotheses of \Cref{thm:kernel}.
+
+For $u,v\ge0$, the degree-$m$ coefficient of the product $F_f(u;x)F_f(v;x)$ is
+\begin{equation}\label{eq:C-def}
+ C_{m,f}(u,v)
+ =\sum_{r=1}^{m-1}w_r
+ \frac{(u)_{3r}(v)_{3(m-r)}}{(3r-1)![3(m-r)-1]!},
+\end{equation}
+a finite sum, with $C_{m,f}(0,v)=0$ since $(0)_{3r}=0$.  The beta-binomial
+representation below is used for $u,v>0$.
+Let $N=3m$ and let $J$ have the beta-binomial distribution
+\[
+ \Pp(J=j)=\binom Nj\frac{(u)_j(v)_{N-j}}{(u+v)_N},
+ \qquad 0\le j\le N.
+\]
+For $1\le j\le N-1$,
+\[
+ \frac{(u)_j(v)_{N-j}}{(j-1)!(N-j-1)!}
+ =\frac{(u+v)_N}{N!}\,
+ j(N-j)\Pp(J=j).
+\]
+Defining a weight on all integers $0\le j\le N$ by
+\[
+ \widetilde w_j=
+ \begin{cases}
+  w_{j/3},&0<j<N\ \text{and}\ 3\mid j,\\
+  0,&\text{otherwise},
+ \end{cases}
+\]
+we obtain
+\begin{equation}\label{eq:C-beta-binomial}
+ C_{m,f}(u,v)
+ =\frac{(u+v)_N}{N!}
+ \E\!\left[J(N-J)\widetilde w_J\right].
+\end{equation}
+The factor $J(N-J)$ vanishes at $j=0$ and $j=N$, so the endpoint terms do not
+contribute.
+
+Use the standard mixture representation $P\sim\operatorname{Beta}(u,v)$ and
+$J\mid P\sim\operatorname{Bin}(N,P)$.  The identity
+\[
+ j(N-j)\binom Nj=N(N-1)\binom{N-2}{j-1}
+\]
+then transforms \eqref{eq:C-beta-binomial} into
+\begin{equation}\label{eq:C-beta}
+ C_{m,f}(u,v)
+ =\frac{(u+v)_N}{N!}N(N-1)\E\,G_{m,w}(P),
+\end{equation}
+where the kernel
+\begin{equation}\label{eq:G-weighted}
+ G_{m,w}(p)
+ =\sum_{r=1}^{m-1}w_r\binom{3m-2}{3r-1}
+ p^{3r}(1-p)^{3(m-r)},
+ \qquad 0\le p\le1,
+\end{equation}
+is defined for arbitrary symmetric nonnegative weights $w_r=w_{m-r}$ and is
+symmetric under $p\mapsto1-p$.  The congruence $j\equiv0\pmod3$ becomes
+$j-1\equiv2\pmod3$, which explains the binomial coefficient
+$\binom{3m-2}{3r-1}$.
+
+By \eqref{eq:C-beta}, \Cref{thm:main} reduces to the monotonicity of $G_{m,w}$
+on $[0,1/2]$ (\Cref{sec:kernel}), via the imbalance ordering of
+\Cref{sec:monotonicity-lemmas}.
+
+\section{Two monotonicity lemmas}\label{sec:monotonicity-lemmas}
+
+This section records two elementary monotonicity facts: a weighting principle
+for the paired residue blocks of \Cref{sec:kernel}, of the kind used in the
+multiplicity-two analysis of \cite{KarpZhang2024}, and an ordering of beta laws
+by imbalance used in \Cref{sec:proof}, a fixed-sum likelihood-ratio comparison
+for folded beta laws \cite{BerenhautBergen2011}.
+
+\begin{lemma}[One-sign-change weighting]\label{lem:weighting}
+Let $0\le w_1\le w_2\le\cdots\le w_L$ and suppose the real sequence
+$A_1,\dots,A_L$ has no more than one sign change, necessarily from nonpositive
+to nonnegative.  If
+\[
+ \sum_{k=1}^L A_k\ge0,
+\]
+then
+\[
+ \sum_{k=1}^L w_kA_k\ge0.
+\]
+\end{lemma}
+
+\begin{proof}
+The claim is immediate if all $A_k$ are nonnegative.  Otherwise, let $q$ be the
+largest index for which $A_q<0$.  Put $c=w_q$.  For $k\le q$ we have
+$w_k\le c$ and $A_k\le0$, while for $k>q$ we have $w_k\ge c$ and
+$A_k\ge0$.  Therefore
+\[
+ \sum_{k=1}^L w_kA_k
+ \ge c\sum_{k=1}^L A_k\ge0.
+\]
+\end{proof}
+
+\begin{lemma}[Symmetric beta imbalance ordering]\label{lem:beta-order}
+Fix $s>0$.  For $0\le d<s/2$, let
+$P_d\sim\operatorname{Beta}(s/2+d,\,s/2-d)$.
+If $H:[0,1]\to\mathbb R$ is symmetric, $H(p)=H(1-p)$, and nondecreasing on
+$[0,1/2]$, then
+\begin{equation}\label{eq:beta-order}
+ d_1\le d_2
+ \quad\Longrightarrow\quad
+ \E H(P_{d_1})\ge \E H(P_{d_2}).
+\end{equation}
+If $H$ is strictly increasing on $(0,1/2)$ and $d_1<d_2$, then the inequality
+is strict.
+\end{lemma}
+
+\begin{proof}
+The case $d_1=d_2$ is immediate, so assume $d_1<d_2$.  Put
+$Q_d=P_d(1-P_d)\in(0,1/4)$.  For
+\[
+ p_\pm(q)=\frac{1\pm\sqrt{1-4q}}{2},
+ \qquad
+ \ell(q)=\log\frac{p_+(q)}{p_-(q)},
+\]
+the density of $Q_d$ is
+\[
+ g_d(q)=\frac{2}{B(s/2+d,s/2-d)}\,
+ q^{s/2-1}(1-4q)^{-1/2}\cosh\!\bigl(d\ell(q)\bigr).
+\]
+The densities $g_{d_1}$ and $g_{d_2}$ share the factor
+$q^{s/2-1}(1-4q)^{-1/2}$, so
+\[
+ \frac{g_{d_2}(q)}{g_{d_1}(q)}
+ =\frac{B(s/2+d_1,s/2-d_1)}{B(s/2+d_2,s/2-d_2)}\,
+  \frac{\cosh(d_2\ell(q))}{\cosh(d_1\ell(q))}.
+\]
+The function $\ell$ is strictly decreasing, since $p_+(q)/p_-(q)$ decreases to
+$1$ as $q\uparrow1/4$.  For $d_2>d_1$, $\cosh(d_2\ell)/\cosh(d_1\ell)$ is
+strictly increasing in $\ell>0$, because $d\mapsto d\tanh(d\ell)$ is strictly
+increasing; hence $g_{d_2}/g_{d_1}$ is strictly decreasing in $q$.  Thus
+$Q_{d_2}$ is smaller than $Q_{d_1}$ in the likelihood-ratio order, and
+therefore in the usual stochastic order \cite{ShakedShanthikumar2007}.  Since
+both densities integrate to one and their ratio is strictly monotone, it
+crosses $1$ exactly once; hence $g_{d_1}-g_{d_2}$ has a single sign change,
+negative near $0$ and positive near $1/4$, so for every nondecreasing $\phi$,
+\[
+ \E\phi(Q_{d_1})-\E\phi(Q_{d_2})
+ =\int_0^{1/4}\bigl(\phi(q)-\phi(q^\ast)\bigr)
+   \bigl(g_{d_1}(q)-g_{d_2}(q)\bigr)\dd q\ge0,
+\]
+where $q^\ast$ is the crossing point and the integrand is nonnegative
+throughout.  Finally, symmetry of $H$ gives $H(p)=\widetilde H(p(1-p))$, with
+$\widetilde H$ nondecreasing on $[0,1/4]$ precisely when $H$ is nondecreasing
+on $[0,1/2]$; taking $\phi=\widetilde H$ proves \eqref{eq:beta-order}.  If $H$
+is strictly increasing and $d_1<d_2$, the likelihood ratio is nonconstant, the
+crossing is nondegenerate, and the inequality is strict.
+\end{proof}
+
+\section{The cubic residue kernel}\label{sec:kernel}
+
+For symmetric nonnegative weights $w_r=w_{m-r}$, the kernel of
+\eqref{eq:G-weighted} is
+\[
+ G_{m,w}(p)=\sum_{r=1}^{m-1}w_r\binom{3m-2}{3r-1}
+ p^{3r}(1-p)^{3(m-r)},
+ \qquad G_{m,w}(p)=G_{m,w}(1-p).
+\]
+This section proves that $G_{m,w}$ is monotone on $[0,1/2]$ whenever the
+weights increase toward the center.
+
+\begin{theorem}[Weighted cubic residue monotonicity]\label{thm:kernel}
+Suppose
+\begin{equation}\label{eq:w-monotone}
+ 0\le w_1\le w_2\le\cdots\le w_{\lfloor m/2\rfloor},
+ \qquad w_r=w_{m-r}.
+\end{equation}
+Then $G_{m,w}$ is nondecreasing on $[0,1/2]$.  If the weights are not all zero,
+then $G_{m,w}$ is strictly increasing on $[0,1/2]$.
+\end{theorem}
+
+\subsection{The constant-weight kernel}
+
+Let $w_r\equiv1$, and write $G_m=G_{m,1}$.  Set $n=3m-2$ and $t=p/(1-p)$.
+For $0\le p\le1/2$ one has $0\le t\le1$, and
+\[
+ G_m\!\left(\frac{t}{1+t}\right)
+ =\frac{1}{(1+t)^{3m}}
+ \sum_{r=1}^{m-1}\binom{n}{3r-1}t^{3r}.
+\]
+Differentiation gives
+\begin{equation}\label{eq:G-J}
+ \frac{\dd}{\dd t}G_m\!\left(\frac{t}{1+t}\right)
+ =\frac{3J_m(t)}{(1+t)^{3m+1}},
+\end{equation}
+where
+\begin{equation}\label{eq:J-r}
+ J_m(t)=\sum_{r=1}^{m-1}\binom{n}{3r-1}t^{3r-1}
+ \bigl(r-(m-r)t\bigr).
+\end{equation}
+
+\begin{lemma}[Bernstein certificate]\label{lem:bernstein}
+For every $m\ge2$,
+\[
+ J_m(t)>0\qquad(0<t<1).
+\]
+Consequently, $G_m$ is strictly increasing on $[0,1/2]$.
+\end{lemma}
+
+\begin{proof}
+Writing $k=3r-1$ in \eqref{eq:J-r} gives
+\[
+ J_m(t)=\frac13
+ \sum_{\substack{0\le k\le n\\k\equiv2\, (3)}}
+ \binom nk t^k\bigl((k+1)-(n-k+1)t\bigr).
+\]
+Introduce the projective Bernstein transform
+\begin{equation}\label{eq:P-def}
+ \mathcal P_m(x)
+ =(1+x)^{n+1}J_m\!\left(\frac{x}{1+x}\right).
+\end{equation}
+Then
+\begin{equation}\label{eq:P-sum}
+ \mathcal P_m(x)
+ =\frac13
+ \sum_{k\equiv2\, (3)}
+ \binom nk x^k(1+x)^{n-k}
+ \bigl((k+1)+(2k-n)x\bigr).
+\end{equation}
+For $0\le j\le n+1$, coefficient extraction from \eqref{eq:P-sum} gives
+\begin{align}
+ [x^j]\mathcal P_m(x)
+ &=\frac13
+ \sum_{\substack{0\le k\le j\\k\equiv2\, (3)}}
+ \binom nk
+ \left[
+ (k+1)\binom{n-k}{j-k}
+ +(2k-n)\binom{n-k}{j-k-1}
+ \right]\notag\\
+ &=\frac{\binom{n+1}{j}}{3(n+1)}S_{n,j},
+ \label{eq:P-coeff}
+\end{align}
+where
+\begin{equation}\label{eq:S-def}
+ S_{n,j}
+ =\sum_{\substack{0\le k\le j\\k\equiv2\, (3)}}
+ \binom jk(n-k+1)(2k+1-j).
+\end{equation}
+The second equality in \eqref{eq:P-coeff} follows from the elementary
+identities
+\[
+ \binom nk\binom{n-k}{j-k}=\binom nj\binom jk,
+ \qquad
+ \binom nk\binom{n-k}{j-k-1}
+ =\binom{n+1}{j}\binom jk\frac{j-k}{n+1}.
+\]
+The transform is Bernstein-theoretic: writing
+$J_m(t)=\sum_j b_j\binom{n+1}{j}t^j(1-t)^{n+1-j}$ in the degree-$(n+1)$
+Bernstein basis, one has $[x^j]\mathcal P_m(x)=b_j\binom{n+1}{j}$, so
+nonnegativity of the Bernstein coefficients $b_j$ certifies $J_m(t)\ge0$ on
+$[0,1]$ \cite{PowersReznick2000}.  We claim that every $S_{n,j}$ is nonnegative.
+
+Put $d=n+1-j$.  A third-root-of-unity filter evaluates the sum over the class
+$k\equiv2\pmod3$; its trigonometric terms are periodic modulo $6$ in $j$, so the
+closed form splits into six residue classes,
+\begin{equation}\label{eq:S-table}
+3S_{n,j}=
+\begin{cases}
+ d(2^j-3j-1)-3j(j-1),&j\equiv0\pmod6,\\
+ d(2^j-2)-3j(j-1),&j\equiv1\pmod6,\\
+ d(2^j+3j-1),&j\equiv2\pmod6,\\
+ d(2^j+3j+1)+3j(j-1),&j\equiv3\pmod6,\\
+ d(2^j+2)+3j(j-1),&j\equiv4\pmod6,\\
+ d(2^j-3j+1),&j\equiv5\pmod6.
+\end{cases}
+\end{equation}
+In detail, for
+\[
+ R_a(j)=\sum_{k\equiv a\, (3)}\binom jk
+\]
+and $\omega=e^{2\pi i/3}$,
+\[
+ R_a(j)=\frac13\sum_{\ell=0}^2\omega^{-a\ell}(1+\omega^\ell)^j
+ =\frac13\left(2^j+2\cos\frac{(j-2a)\pi}{3}\right),
+\]
+where $2\cos(x\pi/3)$ runs through $2,1,-1,-2,-1,1$ as
+$x\equiv0,1,2,3,4,5\pmod6$.  The first two moments over the residue class are
+\[
+ \sum_{k\equiv2(3)}k\binom jk=jR_1(j-1),
+ \qquad
+ \sum_{k\equiv2(3)}k^2\binom jk
+ =j(j-1)R_0(j-2)+jR_1(j-1).
+\]
+Writing $d=n+1-j$ and expanding the summand in \eqref{eq:S-def} gives, for
+$j\ge2$,
+\begin{align}
+ S_{n,j}
+ &=d\bigl(2jR_1(j-1)+(1-j)R_2(j)\bigr)\notag\\
+ &\quad+j(j-1)\bigl(-2R_0(j-2)+3R_1(j-1)-R_2(j)\bigr),
+ \label{eq:S-R}
+\end{align}
+with $j=0,1$ following directly from \eqref{eq:S-def}.  Substituting the values
+of $R_2(j)$, $R_1(j-1)$, and $R_0(j-2)$ by residue $j\bmod6$ yields
+\eqref{eq:S-table}.
+
+It remains only to inspect the six cases.  The cases
+$j\equiv2,3,4\pmod6$ are immediate.  If $j\equiv5\pmod6$, then either
+$d=0$, or $j\ge5$ and $2^j-3j+1>0$.
+If $j\equiv1\pmod6$, then $d\ge1$; the case $j=1$ gives zero, while for
+$j\ge7$,
+\begin{equation}\label{eq:exp-bound-1}
+ 2^j-2\ge3j(j-1).
+\end{equation}
+Finally, $n+1=3m-1$ is congruent to $2$ or $5$ modulo $6$.  Thus, when
+$j\equiv0\pmod6$ and $j>0$, one has $d\ge2$, and for $j\ge6$,
+\begin{equation}\label{eq:exp-bound-0}
+ 2(2^j-3j-1)\ge3j(j-1).
+\end{equation}
+The inequalities \eqref{eq:exp-bound-1} and \eqref{eq:exp-bound-0} hold with
+equality at $j=7$ and $j=6$, respectively.  Advancing $j$ by one increases the
+left-minus-right difference by $2^j-6j$ in \eqref{eq:exp-bound-1} and by
+$2^{j+1}-6j-6$ in \eqref{eq:exp-bound-0}, both positive for $j\ge6$; the
+inequalities therefore persist for all larger $j$.  Likewise $2^j-3j+1>0$ at
+$j=5$, with increment $2^j-3>0$ thereafter.  Hence $S_{n,j}\ge0$ in every case.
+
+By \eqref{eq:P-coeff}, all coefficients of $\mathcal P_m$ are nonnegative.
+The coefficient at $x^2$ is positive, since $d=n-1>0$ and
+$3S_{n,2}=9d$.  Therefore $\mathcal P_m(x)>0$ for $x>0$.  The substitution
+$t=x/(1+x)$ in \eqref{eq:P-def} proves $J_m(t)>0$ for $0<t<1$, and
+\eqref{eq:G-J} completes the proof.
+\end{proof}
+
+\subsection{Insertion of log-concave weights}
+
+Arbitrary weights satisfying \eqref{eq:w-monotone} preserve positivity of the
+derivative.
+
+For $0<t<1$, differentiation of \eqref{eq:G-weighted} gives
+\begin{equation}\label{eq:J-weighted}
+ \frac{\dd}{\dd t}G_{m,w}\!\left(\frac{t}{1+t}\right)
+ =\frac{3J_{m,w}(t)}{(1+t)^{3m+1}},
+\end{equation}
+where
+\begin{equation}\label{eq:Jw-def}
+ J_{m,w}(t)
+ =\sum_{r=1}^{m-1}w_r\binom{3m-2}{3r-1}t^{3r-1}
+ \bigl(r-(m-r)t\bigr).
+\end{equation}
+Pair the terms indexed by $r$ and $m-r$.  For $1\le r<m/2$, let
+\begin{align}
+ B_{m,r}(t)
+ &=\binom{3m-2}{3r-1}
+ \Bigl[t^{3r-1}\bigl(r-(m-r)t\bigr)\notag\\
+ &\hspace{36mm}
+ +t^{3(m-r)-1}\bigl((m-r)-rt\bigr)\Bigr].
+ \label{eq:B-def}
+\end{align}
+If $m$ is even, the central block is
+\begin{equation}\label{eq:B-center}
+ B_{m,m/2}(t)
+ =\binom{3m-2}{3m/2-1}\frac m2\,t^{3m/2-1}(1-t)>0.
+\end{equation}
+Then
+\[
+ J_{m,w}(t)
+ =\sum_{r=1}^{\lfloor m/2\rfloor}w_rB_{m,r}(t),
+\]
+with the convention \eqref{eq:B-center} at the center.
+
+\begin{lemma}[Single sign change of the paired blocks]\label{lem:block-sign}
+For each fixed $m\ge2$ and $0<t<1$, the sequence
+\[
+ B_{m,1}(t),B_{m,2}(t),\dots,B_{m,\lfloor m/2\rfloor}(t)
+\]
+has no more than one sign change, from negative to positive.
+\end{lemma}
+
+\begin{proof}
+For $r<m/2$, the sign of $B_{m,r}(t)$ is the sign of
+\[
+ H_{m,r}(t)
+ =r-(m-r)t+t^{3(m-2r)}\bigl((m-r)-rt\bigr).
+\]
+Put $d=m-2r>0$ and $t=e^{-x}$, $x>0$.  Direct rearrangement gives
+\begin{align}
+ H_{m,r}(t)
+ &=\frac12(1+t)(1+t^{3d})
+ \left[
+ m\frac{1-t}{1+t}
+ -d\frac{1-t^{3d}}{1+t^{3d}}
+ \right]\notag\\
+ &=\frac12(1+t)(1+t^{3d})
+ \left[m\tanh\frac{x}{2}-d\tanh\frac{3dx}{2}\right].
+ \label{eq:H-hyperbolic}
+\end{align}
+The function $d\mapsto d\tanh(3dx/2)$ is strictly increasing for $d>0$.
+Therefore, for $2\le r<m/2$, if
+$B_{m,r}(t)\le0$, then the same bracket in \eqref{eq:H-hyperbolic} is strictly
+negative after replacing $d$ by $d+2$, which corresponds to replacing $r$ by
+$r-1$.  Thus
+\[
+ B_{m,r}(t)\le0\quad\Longrightarrow\quad B_{m,r-1}(t)<0
+ \qquad(2\le r<m/2).
+\]
+The final block is always positive.  For even $m$ this is \eqref{eq:B-center}.
+For odd $m$, the final block has $d=1$, and its bracket in
+\eqref{eq:H-hyperbolic} is $m\tanh(x/2)-\tanh(3x/2)>0$,
+because $m\ge3$ and $\tanh(3y)<3\tanh y$ for $y>0$.  Hence the blocks have the
+asserted sign pattern.
+\end{proof}
+
+\begin{proof}[Proof of \Cref{thm:kernel}]
+By \Cref{lem:bernstein},
+\[
+ \sum_{r=1}^{\lfloor m/2\rfloor}B_{m,r}(t)=J_m(t)>0
+ \qquad(0<t<1).
+\]
+The block sequence has one sign change by \Cref{lem:block-sign}.  Applying
+\Cref{lem:weighting} with the nondecreasing weights in
+\eqref{eq:w-monotone} gives
+\[
+ J_{m,w}(t)=\sum_{r=1}^{\lfloor m/2\rfloor}w_rB_{m,r}(t)\ge0.
+\]
+Equation \eqref{eq:J-weighted} proves that $G_{m,w}$ is nondecreasing on
+$[0,1/2]$.
+
+Suppose now that the weights are not all zero, and put $L=\lfloor m/2\rfloor$.
+Then $w_L>0$, and $B_{m,L}(t)>0$ by \Cref{lem:block-sign}.  If every block is
+nonnegative, then $J_{m,w}(t)\ge w_LB_{m,L}(t)>0$.  Otherwise let $q$ be the
+last index with $B_{m,q}(t)<0$, and put $c=w_q$.  The decomposition
+\[
+ \sum_{r=1}^Lw_rB_{m,r}
+ =c\sum_{r=1}^LB_{m,r}
+   +\sum_{r\le q}(w_r-c)B_{m,r}
+   +\sum_{r>q}(w_r-c)B_{m,r}
+\]
+displays the weighted sum as three nonnegative terms: the first because
+$\sum_rB_{m,r}=J_m(t)>0$ and $c\ge0$; the second because $w_r\le c$ and
+$B_{m,r}\le0$ for $r\le q$; the third because $w_r\ge c$ and $B_{m,r}\ge0$ for
+$r>q$.  If $c>0$, the first term is strictly positive; if $c=0$, the third
+term is strictly positive, because $q<L$ and it contains
+$(w_L-c)B_{m,L}(t)=w_LB_{m,L}(t)>0$.  Hence $J_{m,w}(t)>0$ for $0<t<1$, and
+$G_{m,w}$ is strictly increasing on $[0,1/2]$.
+\end{proof}
+
+\section{Proof of the theorem}\label{sec:proof}
+
+The representation \eqref{eq:C-beta} and the two monotonicity facts of
+\Cref{sec:monotonicity-lemmas,sec:kernel} combine to show that the coefficient
+convolution is Schur-concave in its two parameters
+\cite{MarshallOlkinArnold2011} --- equivalently, nonincreasing under increasing
+imbalance at fixed parameter sum --- which gives \Cref{thm:main}.
+
+\begin{proposition}[Schur-concavity of the coefficient convolution]
+\label{prop:C-schur}
+For each $m\ge2$ and each log-concave sequence $(f_n)$ as in
+\Cref{thm:main}, the symmetric function $(u,v)\mapsto C_{m,f}(u,v)$ is
+Schur-concave on $(0,\infty)^2$.  Equivalently, at fixed $s=u+v$,
+\[
+ d\longmapsto
+ C_{m,f}\left(\frac s2+d,\frac s2-d\right)
+\]
+is nonincreasing for $0\le d<s/2$.  If at least one product $f_rf_{m-r}$ is
+positive, then this function is strictly decreasing.
+\end{proposition}
+
+\begin{proof}
+The prefactor in \eqref{eq:C-beta} depends only on $s=u+v$.  By
+\Cref{thm:kernel}, $G_{m,w}$ is symmetric and nondecreasing on $[0,1/2]$.
+The conclusion follows immediately from \Cref{lem:beta-order}.  If at least one
+weight $w_r=f_rf_{m-r}$ is positive, then \Cref{thm:kernel} makes $G_{m,w}$
+strictly increasing, and the strict part of \Cref{lem:beta-order} gives strict
+decrease in $d$.
+\end{proof}
+
+\begin{proof}[Proof of \Cref{thm:main}]
+The coefficients of degrees $0$ and $1$ in \eqref{eq:Turan-def} vanish.  For
+$m\ge2$, direct multiplication gives
+\begin{align}
+ [x^m]\Tur_f(\mu;\alpha,\beta;x)
+ &=C_{m,f}(\mu+\alpha,\mu+\beta)\notag\\
+ &\quad-C_{m,f}(\mu,\mu+\alpha+\beta).
+ \label{eq:delta-C}
+\end{align}
+Assume first that $\mu>0$ and $\alpha,\beta>0$.  The two parameter pairs in
+\eqref{eq:delta-C} have the same sum
+\[
+ s=2\mu+\alpha+\beta.
+\]
+Their imbalances are
+\[
+ d_1=\frac{|\alpha-\beta|}{2},
+ \qquad
+ d_2=\frac{\alpha+\beta}{2},
+\]
+and $d_1\le d_2$.  \Cref{prop:C-schur} therefore gives
+\[
+ C_{m,f}(\mu+\alpha,\mu+\beta)
+ \ge C_{m,f}(\mu,\mu+\alpha+\beta).
+\]
+This proves nonnegativity of every coefficient.  If $\alpha=0$ or $\beta=0$,
+the Tur\'anian is identically zero.  The boundary case $\mu=0$ follows either
+by continuity in $\mu$ or directly from $F_f(0;x)=0$ and the nonnegative
+coefficients of $F_f(\alpha;x)F_f(\beta;x)$.
+\end{proof}
+
+\begin{corollary}[Strict coefficient classification]\label{cor:strict}
+Under the hypotheses of \Cref{thm:main}, let $\mu\ge0$, $\alpha,\beta>0$, and
+$m\ge2$.  Then
+\[
+ [x^m]\Tur_f(\mu;\alpha,\beta;x)>0
+\]
+if and only if there exists $1\le r\le m-1$ with $f_rf_{m-r}>0$.
+\end{corollary}
+
+\begin{proof}
+If every product $f_rf_{m-r}$ vanishes, then both terms of \eqref{eq:delta-C}
+vanish.  Conversely, suppose one such product is positive.  If $\mu>0$, the two
+imbalances in the proof of \Cref{thm:main} satisfy
+\[
+ \frac{|\alpha-\beta|}{2}<\frac{\alpha+\beta}{2},
+\]
+so the strict part of \Cref{prop:C-schur} gives strict inequality.  If $\mu=0$,
+then $F_f(0;x)=0$, so the coefficient equals $C_{m,f}(\alpha,\beta)$, a sum of
+nonnegative terms with at least one strictly positive.
+\end{proof}
+
+\begin{corollary}[Ordinary log-concavity]\label{cor:ordinary}
+Suppose $(f_n)$ is not identically zero, and let $R$ be the radius of
+convergence of $\sum_{n\ge1}f_nx^n$.  For every $0<x<R$, the function
+$\mu\mapsto F_f(\mu;x)$ is finite, continuous, and positive on $(0,\infty)$, and
+$\mu\mapsto\log F_f(\mu;x)$ is concave there.
+\end{corollary}
+
+\begin{proof}
+For each fixed $\mu>0$, Stirling's formula gives
+\[
+ \frac{(\mu)_{3n}}{(3n-1)!}
+ =\frac{\Gamma(3n+\mu)}{\Gamma(\mu)\Gamma(3n)}
+ \sim\frac{(3n)^\mu}{\Gamma(\mu)}
+ \qquad(n\to\infty).
+\]
+Hence $F_f(\mu;\cdot)$ has the same radius of convergence $R$ as
+$\sum_{n\ge1}f_nx^n$.  On every compact set of positive $\mu$ and for
+$0<x<R$, the series converges locally uniformly in $\mu$, since its extra
+factor grows at most polynomially in $n$; thus $\mu\mapsto F_f(\mu;x)$ is
+continuous.  Since $(f_n)$ is not identically zero, its nonnegative
+coefficients give $F_f(\mu;x)>0$ for $\mu,x>0$.  By \Cref{thm:main},
+\[
+ F_f(\mu+\alpha;x)F_f(\mu+\beta;x)
+ \ge F_f(\mu;x)F_f(\mu+\alpha+\beta;x)
+\]
+for all nonnegative shifts.  Taking $\alpha=\beta=h>0$ gives
+\[
+ F_f(\mu+h;x)^2\ge F_f(\mu;x)F_f(\mu+2h;x),
+\]
+so $\mu\mapsto\log F_f(\mu;x)$ is midpoint concave, and by continuity concave,
+on $(0,\infty)$.
+\end{proof}
+
+\section{Concluding remarks}
+
+\begin{remark}[Why the cubic case closes]
+The proof hinges on the special feature of the residue class modulo $3$.  After
+the beta-binomial reduction, the entire conjecture is controlled by the
+monotonicity of
+\[
+ p(1-p)\Pp\{\operatorname{Bin}(3m-2,p)\equiv2\pmod3\}.
+\]
+The projective transform \eqref{eq:P-def} converts its derivative into a
+polynomial whose Bernstein coefficients are nonnegative.  This positivity is
+not termwise obvious in the monomial basis; it appears only after the degree
+lift and the mod-$6$ root-of-unity evaluation.
+\end{remark}
+
+\begin{remark}[The role of log-concavity]
+The log-concavity assumption is used exactly once: it makes the symmetric
+weights $w_r=f_rf_{m-r}$ nondecreasing as $r$ approaches $m/2$.  The paired
+derivative blocks have a single sign change, so \Cref{lem:weighting} transfers
+the constant-weight positivity certificate to the full weighted kernel.
+\end{remark}
+
+\begin{remark}[Higher multiplicities]
+For a general integer $r$, the same beta-binomial reduction produces, in the
+constant-weight case,
+\[
+ p(1-p)\Pp\{\operatorname{Bin}(rm-2,p)\equiv r-1\pmod r\},
+\]
+and in general its analogue weighted by the products $f_kf_{m-k}$.
+The cubic proof suggests testing whether a suitable projective degree lift has
+a positive coefficient array.  The known failure at $r=4$ shows that such
+positivity cannot persist without an additional restriction; locating the
+first coefficient obstruction in the lifted array may explain that threshold.
+\end{remark}
+
+\section*{Acknowledgements}
+During the preparation of this work, the author used OpenAI's GPT-5.6 Sol and Anthropic's Claude Opus 4.8 to assist with manuscript drafting and verification code development.
+
+\section*{Statements and declarations}
+
+\noindent\textbf{Funding.} This research received no external funding.
+
+\smallskip
+\noindent\textbf{Competing interests.} The author has no relevant interests to disclose.
+
+\smallskip
+\noindent\textbf{Data availability.} No datasets were generated or analysed.
+
+\smallskip
+\noindent\textbf{Computational verification.} The proofs do not depend on numerical computation.  Verification scripts are available at \url{https://github.com/johnnyshields/papers}.
+
+\begin{thebibliography}{99}
+
+\bibitem{Baricz2008}
+\'A. Baricz,
+\emph{Tur\'an type inequalities for hypergeometric functions},
+Proc. Amer. Math. Soc. \textbf{136} (2008), no.~9, 3223--3229,
+DOI: \href{https://doi.org/10.1090/S0002-9939-08-09353-2}{10.1090/S0002-9939-08-09353-2}.
+
+\bibitem{BarnardGordyRichards2009}
+R.~W. Barnard, M.~B. Gordy, and K.~C. Richards,
+\emph{A note on Tur\'an type and mean inequalities for the Kummer function},
+J. Math. Anal. Appl. \textbf{349} (2009), no.~1, 259--263,
+DOI: \href{https://doi.org/10.1016/j.jmaa.2008.08.024}{10.1016/j.jmaa.2008.08.024}.
+
+\bibitem{BerenhautBergen2011}
+K.~S. Berenhaut and L.~D. Bergen,
+\emph{Stochastic orderings, folded beta distributions and fairness in coin flips},
+Statist. Probab. Lett. \textbf{81} (2011), no.~6, 632--638,
+DOI: \href{https://doi.org/10.1016/j.spl.2011.01.002}{10.1016/j.spl.2011.01.002}.
+
+\bibitem{KalmykovKarp2013Reciprocal}
+S.~I. Kalmykov and D.~B. Karp,
+\emph{Log-concavity for series in reciprocal gamma functions and applications},
+Integral Transforms Spec. Funct. \textbf{24} (2013), no.~11, 859--872,
+DOI: \href{https://doi.org/10.1080/10652469.2013.764874}{10.1080/10652469.2013.764874}.
+
+\bibitem{KalmykovKarp2013Ratios}
+S.~I. Kalmykov and D.~B. Karp,
+\emph{Log-convexity and log-concavity for series in gamma ratios and applications},
+J. Math. Anal. Appl. \textbf{406} (2013), no.~2, 400--418,
+DOI: \href{https://doi.org/10.1016/j.jmaa.2013.04.061}{10.1016/j.jmaa.2013.04.061}.
+
+\bibitem{KarpSitnik2010}
+D.~Karp and S.~M. Sitnik,
+\emph{Log-convexity and log-concavity of hypergeometric-like functions},
+J. Math. Anal. Appl. \textbf{364} (2010), no.~2, 384--394,
+DOI: \href{https://doi.org/10.1016/j.jmaa.2009.10.057}{10.1016/j.jmaa.2009.10.057}.
+
+\bibitem{KarpZhang2024}
+D.~Karp and Y.~Zhang,
+\emph{Log-concavity and log-convexity of series containing multiple Pochhammer symbols},
+Fract. Calc. Appl. Anal. \textbf{27} (2024), no.~1, 458--486,
+DOI: \href{https://doi.org/10.1007/s13540-023-00238-0}{10.1007/s13540-023-00238-0}.
+
+\bibitem{MarshallOlkinArnold2011}
+A.~W. Marshall, I.~Olkin, and B.~C. Arnold,
+\emph{Inequalities: Theory of Majorization and Its Applications},
+2nd ed., Springer Series in Statistics, Springer, New York, 2011,
+DOI: \href{https://doi.org/10.1007/978-0-387-68276-1}{10.1007/978-0-387-68276-1}.
+
+\bibitem{NinhPham2018}
+A.~Ninh and M.~Pham,
+\emph{Logconcavity, twice-logconcavity and Tur\'an-type inequalities},
+Ann. Oper. Res. \textbf{354} (2025), no.~3, 1271--1283,
+DOI: \href{https://doi.org/10.1007/s10479-018-2923-y}{10.1007/s10479-018-2923-y}.
+
+\bibitem{PowersReznick2000}
+V.~Powers and B.~Reznick,
+\emph{Polynomials that are positive on an interval},
+Trans. Amer. Math. Soc. \textbf{352} (2000), no.~10, 4677--4692,
+DOI: \href{https://doi.org/10.1090/S0002-9947-00-02595-2}{10.1090/S0002-9947-00-02595-2}.
+
+\bibitem{ShakedShanthikumar2007}
+M.~Shaked and J.~G. Shanthikumar,
+\emph{Stochastic Orders},
+Springer Series in Statistics, Springer, New York, 2007,
+DOI: \href{https://doi.org/10.1007/978-0-387-34675-5}{10.1007/978-0-387-34675-5}.
+
+\end{thebibliography}
+
+\end{document}
