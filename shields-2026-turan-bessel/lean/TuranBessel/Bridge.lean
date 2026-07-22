@@ -7,13 +7,13 @@ matrices `N_m`.  Two ingredients of `shields-2026-turan-bessel.tex` sit outside
 current Mathlib and are isolated here as **named axioms**, each documenting the
 missing dependency:
 
-1. **The coefficient formulas** — §4 «Reciprocal-gamma convolution and coefficient
+1. **The coefficient formulas** — §3 «Reciprocal-gamma convolution and coefficient
    formulas» (`sec:coefficients`, `thm:coefficients`, `lem:convolution`).  That the
    Maclaurin coefficient of `det 𝒯` really is `S_m M_m`-structured rests on an
    asymmetric reciprocal-gamma convolution — the Gauss ₂F₁ (Chu–Vandermonde)
    theorem for real parameters, which Mathlib does not have.
 
-2. **The Bessel dictionary** — §3 «Exact reduction from ₀F₁ to the Bessel
+2. **The Bessel dictionary** — §6 «Exact reduction from ₀F₁ to the Bessel
    inequality» (`sec:bessel-reduction`, `eq:I-Z`, `eq:D-Delta`).  The identity
    `I_{a-1}(2√λ) = λ^{(a-1)/2} Z(a,λ)` and the log-derivative dictionary need the
    modified Bessel functions `I_ν, K_ν`, absent from Mathlib.

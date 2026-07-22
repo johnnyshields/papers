@@ -1,15 +1,15 @@
 /-
 # Gram representation and positive definiteness of the stable coefficients
 
-Formalizes `shields-2026-turan-bessel.tex`, §6 «Explicit Gram representations»
-(`sec:gram`, `thm:gram`).  In `ℓ²` set
+Formalizes `shields-2026-turan-bessel.tex`, §4 «Gram structure and the
+exceptional matrix M₁» (`sec:gram`, `thm:gram`).  In `ℓ²` set
 `u_r = (x+r)⁻¹`, `v_r = p (x-1+r)⁻¹` with `x = a+m`, `p = a+m/2-1`.  Then
 `‖u‖² = ψ₁(x) = α_m`, `⟨u,v⟩ = p/(x-1) = β_m`, `‖v‖² = p² ψ₁(x-1)`, and
 Cauchy–Schwarz plus the positive Gram slack
 `ρ_m = g⁻¹ + c_m - p² ψ₁(x-1) > 0` give `det N_m > 0`, hence `N_m ≻ 0`, for
 `m ≥ 2` (all `a>0`) and for `m = 1` (all `a ≥ 1/2`).
 
-The slack `ρ_m > 0` is `eq:slack-lower`: the trigamma upper bound
+The slack `ρ_m` (`eq:rho-m`) is positive: the trigamma upper bound
 `ψ₁(x-1) < 1/(x-3/2)` and `1/g > a-1/2` reduce it to the rational identity
 `(a-1/2) + c_m - p²/(x-3/2) = (m-1)/(2(2a+2m-3)) > 0`.
 
@@ -42,7 +42,7 @@ theorem inv_trigamma_gt (ha : 0 < a) : a - 1 / 2 < (trigamma a)⁻¹ := by
     have hkey := inv_strictAnti₀ hg hub
     rwa [inv_inv] at hkey
 
-/-- The rational slack identity `eq:slack-lower` for `m ≥ 2`. -/
+/-- The rational slack identity for `m ≥ 2` (in the proof of `thm:gram`). -/
 theorem slack_identity (ha : 0 < a) {m : ℕ} (hm : 2 ≤ m) :
     (a - 1 / 2) + ccoef a m - (gramP a m) ^ 2 * (a + (m : ℝ) - 3 / 2)⁻¹
       = (((m : ℝ) - 1) / (2 * (2 * a + 2 * (m : ℝ) - 3))) := by

@@ -2,12 +2,12 @@
 # Real symmetric 2×2 matrices and the mixed determinant
 
 Formalizes the elementary matrix algebra behind
-`shields-2026-turan-bessel.tex`, §7 «Mixed determinants and coefficientwise
+`shields-2026-turan-bessel.tex`, §5 «Mixed determinants and coefficientwise
 positivity» (`sec:determinant`), `lem:MD-positive`:
 
 * `SymMat`               — a real symmetric `2×2` matrix `⟨a11, a12, a22⟩`.
-* `SymMat.MD`            — the mixed determinant `x₁₁y₂₂ + x₂₂y₁₁ - 2x₁₂y₁₂`
-                           (eq:MD), the polarization of `det`.
+* `SymMat.MD`            — the mixed determinant `x₁₁y₂₂ + x₂₂y₁₁ - 2x₁₂y₁₂`,
+                           the polarization of `det`.
 * `MD_nonneg`            — `lem:MD-positive`, non-strict half:
                            `X, Y ⪰ 0 ⟹ MD(X,Y) ≥ 0`.
 * `MD_pos_of_psd_pd`     — `lem:MD-positive`, strict half:
@@ -32,7 +32,7 @@ namespace SymMat
     (h11 : X.a11 = Y.a11) (h12 : X.a12 = Y.a12) (h22 : X.a22 = Y.a22) : X = Y := by
   cases X; cases Y; simp_all
 
-/-- Mixed determinant `x₁₁y₂₂ + x₂₂y₁₁ - 2 x₁₂ y₁₂` (eq:MD); the polarization of
+/-- Mixed determinant `x₁₁y₂₂ + x₂₂y₁₁ - 2 x₁₂ y₁₂`; the polarization of
 `det X = a11 a22 - a12²` (`det (X+Y) = det X + det Y + MD X Y`, in `stale/`). -/
 def MD (X Y : SymMat) : ℝ := X.a11 * Y.a22 + X.a22 * Y.a11 - 2 * X.a12 * Y.a12
 

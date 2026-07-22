@@ -3,7 +3,6 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{amsmath,amssymb,amsthm,mathtools}
 \usepackage[expansion=false]{microtype}
-\usepackage{enumitem}
 \usepackage{aliascnt}
 \usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black]{hyperref}
 \usepackage[nameinlink,capitalize]{cleveref}
@@ -54,7 +53,6 @@
 \Crefname{question}{Question}{Questions}
 
 \newcommand{\E}{\mathbb E}
-\newcommand{\Pp}{\mathbb P}
 \newcommand{\R}{\mathbb R}
 \newcommand{\N}{\mathbb N}
 \newcommand{\Dfin}{\mathsf D}
@@ -62,7 +60,6 @@
 \newcommand{\MD}{\operatorname{MD}}
 \newcommand{\dd}{\,\mathrm d}
 \newcommand{\Turan}{\mathcal T}
-\newcommand{\trig}{\psi_1}
 \newcommand{\Thetal}{\Theta_{\lambda}}
 \newcommand{\Thetaz}{\Theta_z}
 
@@ -70,7 +67,7 @@
 {Sharp coefficientwise positivity\\ for a matrix Tur\'an determinant of ${}_0F_1$}
 
 \author{John Shields}
-\date{July 19, 2026}
+\date{July 22, 2026}
 \thanks{Independent researcher, Ginza 2-15-2, KF Ginza II 5F, Chuo-ku, Tokyo, Japan 104-0061.  Corresponding author: \href{mailto:math@johnnyshields.com}{math@johnnyshields.com}.  This version is archived at \href{https://doi.org/10.5281/zenodo.21438795}{doi:10.5281/zenodo.21438795}.}
 
 \subjclass[2020]{Primary 33C10, 33C20; Secondary 26D15}
@@ -79,17 +76,17 @@
 \begin{document}
 
 \begin{abstract}
-We prove a sharp coefficientwise positivity theorem for a matrix Tur\'an determinant of the normalized hypergeometric function \({}_0F_1\).  From the reciprocal-gamma normalization \(Z(a,\lambda)={}_0F_1(;a;\lambda)/\Gamma(a)=\sum_{k\ge0}\lambda^k/(k!\,\Gamma(a+k))\), \(a>0\), we form symmetric \(2\times2\) matrices \(\Turan_\kappa(a,\lambda)\) from parameter and Euler derivatives of \(Z\), and prove that every positive-degree Maclaurin coefficient of \(\Delta^{(\kappa)}=\det\Turan_\kappa\) is strictly positive for all \(a>0\) if and only if \(\kappa\ge1\).  At the endpoint \(\kappa=1\), \(\Delta^{(1)}(a,\cdot)\) is strictly absolutely monotone even though the first nonconstant coefficient matrix can be indefinite; its potentially negative degree-two determinant contribution is offset by a manifestly positive Hilbert-space decomposition.  Via the identity \(I_{a-1}(2\sqrt\lambda)=\lambda^{(a-1)/2}Z(a,\lambda)\), an explicit diagonal congruence yields a positive-definite Bessel--Schur matrix and a mixed order--argument inequality for \(I_\nu\), for every \(\nu>-1\); we also fix the exact uniform deformation threshold and, for each fixed \(\nu\), the least argument-independent correction.  Beyond \(\nu>-1\) we exhibit explicit regimes where coefficientwise or pointwise positivity fails.
+We prove a sharp coefficientwise positivity theorem for a matrix Tur\'an determinant of the reciprocal-gamma normalization \(Z(a,\lambda)={}_0F_1(;a;\lambda)/\Gamma(a)=\sum_{k\ge0}\lambda^k/(k!\,\Gamma(a+k))\), \(a>0\).  From parameter and Euler derivatives of \(Z\), we form a one-parameter family of symmetric \(2\times2\) matrices \(\Turan_\kappa(a,\lambda)\) and prove that every positive-degree Maclaurin coefficient of \(\Delta^{(\kappa)}=\det\Turan_\kappa\) is strictly positive for all \(a>0\) if and only if \(\kappa\ge1\).  Thus \(\kappa=1\) is the sharp uniform deformation threshold, and \(\Delta^{(1)}(a,\cdot)\) is strictly absolutely monotone.  At this endpoint, coefficientwise determinant positivity persists although the first nonconstant coefficient matrix may be indefinite: a mixed-determinant polarization confines its possible negative contribution to the degree-two coefficient, whose positivity follows from an explicit decomposition.  Via the identity \(I_{a-1}(2\sqrt\lambda)=\lambda^{(a-1)/2}Z(a,\lambda)\), an exact diagonal congruence transfers the endpoint theorem to the modified Bessel function \(I_\nu\), yielding, for every \(\nu>-1\), a positive-definite Bessel--Schur matrix coupling order, argument, and mixed order--argument derivatives of \(\log I_\nu\).  Both the uniform deformation threshold and, for each fixed \(\nu\), the least argument-independent correction are sharp.
 \end{abstract}
 
 \maketitle
 \section{Introduction}
 
 Tur\'an inequalities for modified Bessel functions are closely connected with
-order monotonicity, logarithmic derivatives, and total positivity; see \cite{Baricz2008,Baricz2010,BariczPonnusamy2013,Cochran1967,Watson1944}.
+order monotonicity, logarithmic derivatives, and total positivity; see \cite{Baricz2008,Baricz2010,BariczPonnusamy2013,Watson1944}.
 A complementary literature proves scalar log-concavity and coefficientwise
-Tur\'an inequalities for reciprocal-gamma series
-\cite{KalmykovKarp2013Reciprocal,KalmykovKarp2013Ratios,KalmykovKarp2014}.
+Tur\'an inequalities for reciprocal-gamma and hypergeometric series
+\cite{KalmykovKarp2013Reciprocal,KalmykovKarp2013Ratios,KalmykovKarp2014,KarpZhang2024}.
 Here we study the normalized series
 \[
  Z(a,\lambda)=\sum_{k\ge0}\frac{\lambda^k}{k!\Gamma(a+k)}
@@ -100,24 +97,43 @@ A single theorem underlies the paper: the sharp coefficientwise
 classification of \Cref{sec:main}.  The Bessel inequality is its corollary,
 while the optimality analysis determines the exact $\kappa$-threshold and the
 least $z$-independent correction on the positive-series domain $a>0$
-(equivalently $\nu>-1$), and the negative-order analysis exhibits explicit
-regimes where coefficientwise positivity of $\Delta$ or pointwise positivity of
-the Bessel--Schur determinant fails.  The determinant is a normalized differential Schur
-complement, distinct from scalar parameter-shift Tur\'anians and from
-total-positivity evaluation minors for $I_s(x)$
-\cite{BuchstaberGlutsyuk2019,Salazar2026} (compared in \Cref{sec:context}).  The contributions are as follows.
+(equivalently $\nu>-1$)---the range in which every coefficient of $Z$ is
+positive---and the negative-order analysis exhibits an explicit
+regime where coefficientwise positivity of $\Delta$ fails.  The associated
+Bessel--Schur matrix couples three second-order quantities---the concavity of
+$\log I_\nu$ in the order, the curvature in the argument, and the mixed
+order--argument sensitivity---and $\Delta$ is the corresponding differential
+Schur complement.  By a \emph{matrix Tur\'an determinant} we mean this confluent
+Tur\'anian assembled from derivatives, rather than a determinant of
+parameter-shifted evaluations (compared in \Cref{sec:context}).
 
-\begin{enumerate}[label=(\roman*)]
-\item We embed the matrix in a one-parameter family and determine the exact uniform threshold: coefficientwise positivity for every $a>0$ holds precisely for $\kappa\ge1$ (\Cref{sec:main,sec:determinant}).
+The proof proceeds in several stages.  We begin in \Cref{sec:coefficients} with
+an asymmetric Chu--Vandermonde convolution, from which we derive exact formulas
+for the
+coefficient matrices of $\Turan_\kappa$.  These formulas expose the structure
+of the sharp endpoint $\kappa=1$: the associated finite convolution law
+singles out $m=1$ as the potentially exceptional positive degree.
 
-\item From an asymmetric Chu--Vandermonde convolution we derive exact coefficient formulas and interpret them through a finite conditional reciprocal-gamma law (\Cref{sec:coefficients,sec:conditional}).
+In \Cref{sec:gram}, explicit $\ell^2$ Gram representations prove that every
+coefficient matrix of degree $m\ge2$ is positive definite, whereas $M_1$ can
+be indefinite for small $a>0$.  We then
+pass in \Cref{sec:determinant} from positivity of the individual coefficient
+matrices to positivity of the determinant coefficients by polarizing the
+determinant.  The potentially indefinite matrix $M_1$ can contribute negatively
+only through its self-pairing, which occurs solely in the coefficient
+$\Delta_2$; an independent explicit decomposition proves that this exceptional
+coefficient is nevertheless strictly positive.  This completes the endpoint
+theorem, and the full sharp classification follows by comparing $\Turan_\kappa$
+with $\Turan_1$.
 
-\item At the sharp endpoint we construct explicit $\ell^2$ Gram representations for every stable coefficient matrix.  The only coefficient matrix that can be indefinite is $M_1$ when $0<a<a_*$, where $a_*$ is the unique positive solution of $(4a-1)\psi_1(a)=4$ ($a_*\approx0.369$); its only potentially negative determinant contribution is the self-pairing in $\Delta_2$, which has a separate manifestly positive Hilbert-space factorization (\Cref{sec:gram,sec:determinant}).
-
-\item The endpoint theorem is transported by an explicit diagonal congruence to a positive-definite Bessel--Schur matrix and a mixed order--argument inequality for every $\nu>-1$.  We determine both the sharp deformation threshold and, for each fixed order $\nu>-1$, the least $z$-independent correction (\Cref{sec:bessel-reduction,sec:bessel-consequences}).
-
-\item Beyond the positive-series domain, the leading small-argument term remains positive away from the poles, but coefficientwise positivity of $\Delta$ fails on $-3<\nu<-2$ and the pointwise Bessel inequality fails near every negative integer $-n$, $n\ge2$ (\Cref{sec:bessel-consequences}).
-\end{enumerate}
+Finally, in \Cref{sec:bessel-reduction,sec:bessel-consequences}, an explicit
+diagonal congruence transports the endpoint theorem to a positive-definite
+Bessel--Schur matrix and a mixed order--argument inequality for every
+$\nu>-1$.  The same reduction determines the exact uniform deformation
+threshold and, for each fixed order, the least argument-independent correction.
+We also examine the boundary of the positive-series domain: although the
+leading small-argument term remains positive away from the poles, the continued
+determinant already loses coefficientwise positivity on $-3<\nu<-2$.
 
 \section{Main results}\label{sec:main}
 
@@ -127,18 +143,16 @@ Throughout, $a>0$, $\lambda\ge0$, and $\N_0=\{0,1,2,\ldots\}$.  We use
  =\frac{{}_0F_1(;a;\lambda)}{\Gamma(a)}.
 \end{equation}
 The series in \eqref{eq:Zdef} and all fixed-order $a$- and Euler derivatives
-used below converge locally uniformly on $\{\Re a>0\}\times\mathbb C$: on a
-compact set $\partial_a^{\,j}\bigl[1/\Gamma(a+k)\bigr]$ is $1/\Gamma(a+k)$ times
-a polynomial in the polygamma values $\psi^{(0)},\dots,\psi^{(j-1)}(a+k)$, of at
-most polynomial--logarithmic growth in $k$, while $\lambda\partial_\lambda$
-contributes powers of $k$; each differentiated series is therefore dominated by
-a constant multiple of $\sum_k|\lambda|^k/k!$, so termwise differentiation is
-valid.  Put $\Thetal=\lambda\partial_\lambda$ and $g=\psi_1(a)$, where
+used below converge locally uniformly on $\{\Re a>0\}\times\mathbb C$: the
+polygamma factors arising from $\partial_a^{\,j}\bigl[1/\Gamma(a+k)\bigr]$ grow
+at most polynomial--logarithmically in $k$, so on compact sets each
+differentiated series is dominated by a constant multiple of $e^{|\lambda|}$ and
+termwise differentiation is valid.  Put $\Thetal=\lambda\partial_\lambda$ and $g=\psi_1(a)$, where
 $\psi=\psi^{(0)}$ and $\psi_1=\psi^{(1)}$ are the digamma and trigamma
 functions.  In the Bessel variable we use the distinct notation
 $\Thetaz=z\partial_z$.  Subscripts denote application of the indicated operator,
 so $Z_a=\partial_aZ$, $Z_{\Thetal}=\Thetal Z$, and
-$Z_{a\Thetal}=\partial_a\Thetal Z$.  Define
+$Z_{a\Thetal}=\partial_a\Thetal Z$.  For $\kappa\in\mathbb R$, define
 \begin{align}
  A&=Z_a^2-ZZ_{aa},\label{eq:Adef}\\
  B&=Z^2+ZZ_{a\Thetal}-Z_aZ_{\Thetal},\label{eq:Bdef}\\
@@ -151,8 +165,25 @@ $Z_{a\Thetal}=\partial_a\Thetal Z$.  Define
  \qquad
  \Delta^{(\kappa)}=\det\Turan_\kappa=AC_\kappa-gB^2.
 \end{equation}
-At $\kappa=1$ write $C=C_1$, $\Turan=\Turan_1$, and $\Delta=\Delta^{(1)}$.  A
-function on $(0,\infty)$ is \emph{strictly absolutely monotone} if it and all of
+At $\kappa=1$ write $C=C_1$, $\Turan=\Turan_1$, and $\Delta=\Delta^{(1)}$.
+
+\begin{remark}[Canonical origin of the determinant]\label{rem:canonical-origin}
+Writing $L=\log Z$, direct differentiation gives
+\[
+ \frac{A}{Z^2}=-L_{aa},\qquad
+ \frac{B}{Z^2}=1+L_{a\Thetal},\qquad
+ \frac{C_\kappa}{gZ^2}
+ =\frac1g+\kappa L_{\Thetal}-L_{\Thetal\Thetal}.
+\]
+Thus the entries are logarithmic curvatures of $Z$ in the parameter and
+Euler directions, with $\kappa$ deforming the argument-direction term.
+At the endpoint $\kappa=1$, the normalization is chosen so that the identity
+\eqref{eq:I-Z} and a diagonal congruence carry $\Turan$ to the
+order--argument Bessel--Schur matrix of \Cref{thm:bessel}; see
+\Cref{sec:bessel-reduction}.
+\end{remark}
+
+A function on $(0,\infty)$ is \emph{strictly absolutely monotone} if it and all of
 its derivatives are strictly positive there.  Here \emph{uniform} means that a
 single threshold in $\kappa$ works for every $a>0$; it does not assert a
 positive lower bound uniform in $a$.
@@ -179,22 +210,15 @@ so $\Turan_\kappa(a,0)=\Gamma(a)^{-2}
 \left(\begin{smallmatrix}g&\sqrt g\\ \sqrt g&1\end{smallmatrix}\right)$ has
 rank one and $\Delta^{(\kappa)}(a,0)=0$.
 
-\begin{corollary}[Explicit quantitative lower bound]\label{cor:Delta-lower}
-For every $a,\lambda>0$,
-\begin{equation}\label{eq:Delta-lower}
- \Delta(a,\lambda)>\Delta_1(a)\lambda
- =\frac{2\bigl(a\psi_1(a)-1\bigr)}
- {a^3\Gamma(a)^4}\,\lambda
- >\frac{\lambda}{a^4\Gamma(a)^4}.
-\end{equation}
-\end{corollary}
-
-\begin{proof}
-The exact value of $\Delta_1$ follows from \eqref{eq:Delta1-sharp} in
-\Cref{sec:determinant}.  The first strict inequality follows from
-\Cref{thm:coefficientwise}.  Finally, \eqref{eq:trig-lower} implies
-$a\psi_1(a)-1>(2a)^{-1}$.
-\end{proof}
+\begin{remark}[Rank-one boundary and the sharp threshold]\label{rem:rank-one-threshold}
+The rank-one constant term is shared by the entire family
+$\Turan_\kappa$, so the sign of the first nonzero determinant coefficient
+governs the onset of coefficientwise positivity.  The linear coefficient of
+$\Delta^{(\kappa)}$ is negative for all sufficiently small $a>0$ whenever
+$\kappa<1$, whereas \Cref{thm:coefficientwise} proves positivity of every
+positive-degree coefficient for $\kappa\ge1$.  Thus $\kappa=1$ is the exact
+uniform deformation threshold.
+\end{remark}
 
 For $\nu>-1$ and $z>0$, the identity \eqref{eq:I-Z} and the positive
 coefficients of $Z(a,\lambda)$ show that $I_\nu(z)>0$.  Thus the following
@@ -210,8 +234,10 @@ and
  D_\nu=G_\nu\left(H_\nu+\frac4{\psi_1(\nu+1)}\right)-(1+P_\nu)^2.
 \end{equation}
 The shifts in $1+P_\nu$ and $4/\psi_1(\nu+1)$ are exactly those produced by
-the diagonal congruence \eqref{eq:bessel-congruence}.  For $\kappa\in\mathbb R$,
-define the deformation
+the diagonal congruence \eqref{eq:bessel-congruence}.  Here
+$P_\nu=1+2L_{a\Thetal}$, so $1+P_\nu=2(1+L_{a\Thetal})$; as $z\downarrow0$ one
+has $L_{a\Thetal}\to0$, hence $P_\nu\to1$ and $1+P_\nu\to2$.  For
+$\kappa\in\mathbb R$, define the deformation
 \begin{align}
  H_\nu^{(\kappa)}
  &=2\kappa(\Thetaz\log I_\nu-\nu)-\Thetaz^2\log I_\nu,
@@ -263,82 +289,6 @@ Thus the correction is sharp separately for each fixed $\nu$, whereas the
 deformation threshold is sharp uniformly over the full domain
 $\{(\nu,z):\nu>-1,\ z>0\}$.
 
-\section{Exact reduction from \texorpdfstring{${}_0F_1$}{0F1} to the Bessel inequality}\label{sec:bessel-reduction}
-
-The standard identity
-\begin{equation}\label{eq:I-Z}
- I_{a-1}(2\sqrt\lambda)=\lambda^{(a-1)/2}Z(a,\lambda)
-\end{equation}
-with $L=\log Z$, $z=2\sqrt\lambda$, and $\nu=a-1$ gives
-\begin{align}
- \Thetaz\log I_\nu&=\nu+2L_{\Thetal}, &
- P_\nu&=1+2L_{a\Thetal},\label{eq:U-L}\\
- G_\nu&=-L_{aa}, & H_\nu&=4(L_{\Thetal}-L_{\Thetal\Thetal}).\label{eq:G-L}
-\end{align}
-Moreover,
-\begin{equation}\label{eq:ABC-log}
- \frac A{Z^2}=-L_{aa},\qquad
- \frac B{Z^2}=1+L_{a\Thetal},\qquad
- \frac C{gZ^2}=\frac1g+L_{\Thetal}-L_{\Thetal\Thetal}.
-\end{equation}
-The Bessel--Schur matrix is therefore the congruence
-\begin{equation}\label{eq:bessel-congruence}
- \begin{pmatrix}
-  G_\nu&1+P_\nu\\
-  1+P_\nu&H_\nu+4/g
- \end{pmatrix}
- =\frac1{Z^2}
- \begin{pmatrix}1&0\\0&2/\sqrt g\end{pmatrix}
- \Turan(a,\lambda)
- \begin{pmatrix}1&0\\0&2/\sqrt g\end{pmatrix},
-\end{equation}
-whose determinant is
-\begin{equation}\label{eq:D-Delta}
- D_{a-1}(2\sqrt\lambda)=\frac{4\Delta(a,\lambda)}{gZ(a,\lambda)^4}.
-\end{equation}
-This reduces \Cref{thm:bessel} and \Cref{cor:bessel-matrix} to the endpoint $\kappa=1$ of \Cref{thm:coefficientwise}; the proof is completed in \Cref{sec:bessel-consequences}.  The following calculations supply the two sharpness ingredients.  Their formal use is deferred to \Cref{sec:bessel-consequences}, after positivity of $D_\nu$ has been established.
-
-Replacing $4/\psi_1(\nu+1)$ in \eqref{eq:bessel-main} by a $z$-independent
-$R(\nu)$ and writing $D_{\nu,R}$ for the resulting determinant,
-\[
- D_{\nu,R}(z)\longrightarrow\psi_1(\nu+1)R(\nu)-4
- \qquad(z\downarrow0),
-\]
-so validity for every $z>0$ forces $R(\nu)\ge4/\psi_1(\nu+1)$.  Conversely
-$D_{\nu,R}=D_\nu+G_\nu\bigl(R(\nu)-4/\psi_1(\nu+1)\bigr)>0$ whenever
-$R(\nu)\ge4/\psi_1(\nu+1)$, since $D_\nu>0$ and $G_\nu=A/Z^2>0$ for $\nu>-1$,
-$z>0$.  Hence $4/\psi_1(\nu+1)$ is the exact least $z$-independent correction.
-
-For the fixed-correction deformation
-\eqref{eq:Hnu-kappa}--\eqref{eq:Dnu-kappa-def}, the same calculation gives
-\begin{equation}\label{eq:Dkappa-Delta}
- D_{a-1}^{(\kappa)}(2\sqrt\lambda)
- =\frac{4\Delta^{(\kappa)}(a,\lambda)}{gZ(a,\lambda)^4}.
-\end{equation}
-A direct first-order expansion,
-\[
- Z(a,\lambda)=\frac1{\Gamma(a)}
- \left(1+\frac{\lambda}{a}+O(\lambda^2)\right),
-\]
-together with the corresponding termwise parameter and Euler derivatives in
-\eqref{eq:Adef}--\eqref{eq:Ckappa-def}, gives
-\begin{equation}\label{eq:Deltakappa-linear-direct}
- \Delta^{(\kappa)}(a,\lambda)
- =\frac{2}{a^3\Gamma(a)^4}
- \left[\frac{\kappa-1}{2}(ag)^2+ag-1\right]\lambda
- +O(\lambda^2).
-\end{equation}
-Using \eqref{eq:Dkappa-Delta} and $\lambda=z^2/4$ therefore yields
-\begin{equation}\label{eq:Dkappa-small}
- D_{a-1}^{(\kappa)}(z)=
- \frac{2}{a^3g}\left[\frac{\kappa-1}{2}(ag)^2+ag-1\right]z^2+O(z^4).
-\end{equation}
-For $\kappa<1$, the bracket is negative for all sufficiently small $a>0$,
-because $ag\to+\infty$ as $a\downarrow0$; thus \eqref{eq:Dkappa-small}
-proves necessity of $\kappa\ge1$.  Sufficiency follows from
-\Cref{thm:coefficientwise} through \eqref{eq:Dkappa-Delta}.  Hence the
-fixed-correction family is uniformly valid exactly for $\kappa\ge1$.
-
 \section{Reciprocal-gamma convolution and coefficient formulas}\label{sec:coefficients}
 
 The coefficient calculation rests on a two-parameter Chu--Vandermonde identity.
@@ -374,13 +324,13 @@ Chu--Vandermonde gives $(\alpha+\beta+m-1)_m$.
 \end{proof}
 
 Set
-\begin{equation}\label{eq:Sm}
+\[
  S_m=S_m(a)=\frac{(2a+m-1)_m}{m!\Gamma(a+m)^2}>0.
-\end{equation}
+\]
 Taking $\alpha=\beta=a$ in \Cref{lem:convolution} gives
-\begin{equation}\label{eq:Z2coeff}
+\[
  [\lambda^m]Z(a,\lambda)^2=S_m.
-\end{equation}
+\]
 
 \begin{theorem}[Exact coefficient matrices]\label{thm:coefficients}
 There are expansions
@@ -419,11 +369,11 @@ and, for $m\ge2$,
  {2(2a+2m-3)}.
 \end{equation}
 At the sharp endpoint $\kappa=1$,
-\begin{equation}\label{eq:cm}
+\[
  c_0=c_1=0,
  \qquad
  c_m=\frac{m(m-1)}{2(2a+2m-3)}\quad(m\ge2).
-\end{equation}
+\]
 Consequently,
 \begin{equation}\label{eq:matrix-series}
  \Turan(a,\lambda)=\sum_{m=0}^{\infty}S_mM_m\lambda^m,
@@ -434,7 +384,7 @@ Consequently,
  \sqrt g\,\beta_m&1+gc_m
  \end{pmatrix}.
 \end{equation}
-The theorem does not assert $M_m\succeq0$ for every $m$: $M_1$ can be indefinite for small $a>0$ (precisely, on $0<a<a_*$, where $a_*$ is the unique positive solution of $(4a-1)\psi_1(a)=4$, numerically $a_*\approx0.369$; see \Cref{sec:gram}).  For general $\kappa$, write $M_m^{(\kappa)}$ for the coefficient matrix of $\Turan_\kappa$, obtained by replacing $1+gc_m$ with $1+gc_m^{(\kappa)}$.
+The theorem does not assert $M_m\succeq0$ for every $m$: $M_1$ can be indefinite for small $a>0$ (see \Cref{sec:gram}).  For general $\kappa$, write $M_m^{(\kappa)}$ for the coefficient matrix of $\Turan_\kappa$, obtained by replacing $1+gc_m$ with $1+gc_m^{(\kappa)}$.
 \end{theorem}
 
 \begin{proof}
@@ -470,8 +420,10 @@ For $m=0$, one has $[\lambda^0]B=Z(a,0)^2=S_0$, so $\beta_0=1$.
 Assume henceforth that $m\ge1$.  Let $I$ be the index of the first factor in
 $Z(a+\delta,\lambda)Z(a-\delta,\lambda)=\sum_mF_m(\delta)\lambda^m$, so that
 $[\lambda^m]$ weights $i$ by
-$w_i(\delta)=\bigl[i!(m-i)!\Gamma(a+\delta+i)\Gamma(a-\delta+m-i)\bigr]^{-1}$;
-for real $\delta$ with $|\delta|<a$, write $\E_\delta$ for expectation
+\[
+ w_i(\delta)=\bigl[i!(m-i)!\Gamma(a+\delta+i)\Gamma(a-\delta+m-i)\bigr]^{-1}.
+\]
+For real $\delta$ with $|\delta|<a$, write $\E_\delta$ for expectation
 under the probability weights $w_i(\delta)/F_m(\delta)$, and put
 $\E=\E_0$, $\Dfin=m-2I$, and $J=m-I$.  Applying \Cref{lem:convolution} to
 $\sum_i i\,w_i(\delta)$, with $(\alpha,\beta)=(a+1+\delta,a-\delta)$ and $m-1$ in
@@ -539,62 +491,59 @@ Therefore
  =\frac{m(m-1)(a+m-1)}{2(2a+2m-3)},
 \]
 so
-\begin{equation}\label{eq:ED2}
+\[
  \E\Dfin^2=\frac{m(2a+m-2)}{2a+2m-3}.
-\end{equation}
+\]
 Substitution gives \eqref{eq:cm-kappa-general}; the cases $m=0,1$ are immediate.
 \end{proof}
 
-\section{Probabilistic interpretation: the finite conditional law}\label{sec:conditional}
-
-The normalized weights used in the coefficient calculation admit the following
-finite-law interpretation.  Fix $\lambda>0$ and let $K_1,K_2$ be independent
-Bessel-law variables with
+\begin{remark}[Finite-law mechanism and the exceptional index]\label{rem:finite-law}
+The coefficient calculation has a useful intrinsic interpretation.  For fixed
+$m$, normalize the convolution weights by
 \[
- \Pp(K_j=k)=\frac{\lambda^k}{Z(a,\lambda)\,k!\Gamma(a+k)},
- \qquad k\in\N_0.
+ \pi_{m,a}(i)
+ =\frac1{S_m\,i!(m-i)!\Gamma(a+i)\Gamma(a+m-i)},
+ \qquad 0\le i\le m,
 \]
-Conditional on $K_1+K_2=m$, the common factor $\lambda^m/Z(a,\lambda)^2$
-cancels.  Thus the conditional law of $I:=K_1$ is the symmetric finite law
-\begin{equation}\label{eq:pi-ma}
- \Pp(I=i\mid K_1+K_2=m)
- =\frac1{S_m}\frac1{i!(m-i)!\Gamma(a+i)\Gamma(a+m-i)},
- \qquad 0\le i\le m.
-\end{equation}
-In the expectations below, the conditioning event $K_1+K_2=m$ is understood.
-Put
+and let $\E_m$ denote expectation with respect to this symmetric finite law,
+under which $I$ is the random index.  Put
 \[
- \Dfin=m-2I,\qquad X=\psi(a+m-I)-\psi(a+I),\qquad
+ \Dfin=m-2I,\qquad
+ X=\psi(a+m-I)-\psi(a+I),\qquad
  \varrho=\psi_1(a+I)+\psi_1(a+m-I).
 \]
-Symmetry gives $\E\Dfin=\E X=0$, and the coefficient calculation above gives
-\begin{equation}\label{eq:conditional-identities}
- \alpha_m=\tfrac12\E(\varrho-X^2),\qquad
- \beta_m=1-\tfrac12\E(\Dfin X),\qquad
- c_m^{(\kappa)}=\tfrac{\kappa m}{2}-\tfrac12\E\Dfin^2.
-\end{equation}
-For $m\ge1$, the last two identities are \eqref{eq:EDX} and
-\eqref{eq:c-cond-derivation}; for $m=0$, they are immediate from
-$I=\Dfin=X=0$.  Differentiating $F_m(\delta)$ twice gives
+Then the three normalized coefficient entries may be written as
 \[
- \frac{F_m''(0)}{F_m(0)}=\E(X^2-\varrho)=-2\psi_1(a+m).
+ \alpha_m=\tfrac12\E_m(\varrho-X^2),\qquad
+ \beta_m=1-\tfrac12\E_m(\Dfin X),\qquad
+ c_m^{(\kappa)}=\tfrac{\kappa m}{2}-\tfrac12\E_m\Dfin^2.
 \]
+The first identity follows by writing
+\[
+ \frac{F_m''(0)}{F_m(0)}
+ =\E_m(X^2-\varrho)
+ =-2\psi_1(a+m),
+\]
+while the other two are the expectation identities obtained in \eqref{eq:EDX}
+and \eqref{eq:c-cond-derivation}.  Thus the asymmetric Chu--Vandermonde
+calculation evaluates, respectively, a curvature term, an imbalance--score
+covariance, and an imbalance variance.
 
-Thus, at $\kappa=1$, the normalized coefficient matrix is
-\begin{equation}\label{eq:Nm}
- N_m:=\diag(1,g^{-1/2})M_m\diag(1,g^{-1/2})
- =\begin{pmatrix}
- \tfrac12\E(\varrho-X^2)&1-\tfrac12\E(\Dfin X)\\
- 1-\tfrac12\E(\Dfin X)&g^{-1}+\tfrac m2-\tfrac12\E\Dfin^2
- \end{pmatrix}.
-\end{equation}
-This probabilistic reformulation is not needed for the subsequent Gram proof;
-it records the natural conditional origin of the finite weights and packages
-the coefficient identities in \eqref{eq:conditional-identities}.  The
-probabilistic interpretation is restricted to $a>0$; only the resulting
-algebraic coefficient identities are subsequently continued beyond that range.
+At the sharp endpoint $\kappa=1$, the last identity is especially revealing:
+\[
+ c_m=\tfrac12\bigl(m-\E_m\Dfin^2\bigr)
+ =\frac{m(m-1)}{2(2a+2m-3)}.
+\]
+Hence $m=1$ is the only positive degree at which the lower-right variance slack
+vanishes.  This foreshadows the exceptional-index structure of the proof:
+\Cref{thm:gram} confirms that $M_m$ is positive definite for every $m\ge2$,
+while the mixed-determinant argument shows that the potentially indefinite
+matrix $M_1$ can contribute negatively only through its self-pairing, namely in
+degree $n=2$.  The decomposition of \Cref{lem:Delta2-positive} supplies the
+additional argument required at that single degree.
+\end{remark}
 
-\section{Explicit Gram representations}\label{sec:gram}
+\section{Gram structure and the exceptional matrix \texorpdfstring{\(M_1\)}{M1}}\label{sec:gram}
 
 We require elementary two-sided trigamma estimates.  The integral representation
 \begin{equation}\label{eq:trigamma-integral}
@@ -641,18 +590,18 @@ $\tau/(1-e^{-\tau})<e^{\tau/2}$.  Substitution in \eqref{eq:trigamma-integral} g
 \end{proof}
 
 Fix $m\ge1$ and write
-\begin{equation}\label{eq:xp}
+\[
  x=a+m,
  \qquad
  q=a+\frac m2-1.
-\end{equation}
+\]
 In $\ell^2(\N_0)$ define
-\begin{equation}\label{eq:u-v}
+\[
  u_r^{(m)}=\frac1{x+r},
  \qquad
  v_r^{(m)}=\frac{q}{x+r-1},
  \qquad r\ge0.
-\end{equation}
+\]
 Then
 \begin{equation}\label{eq:u-norm}
  \|u^{(m)}\|^2=\psi_1(x)=\alpha_m,
@@ -671,7 +620,7 @@ Define
  \rho_m(a)=\frac1g+c_m-q^2\psi_1(x-1).
 \end{equation}
 
-Call the coefficient matrix $M_m$ \emph{stable} when $m\ge2$, or $m=1$ and $a\ge1/2$.  For vectors $x,y$ in a Hilbert space, $\operatorname{Gram}(x,y)$ denotes the symmetric $2\times2$ matrix with entries $\langle x,x\rangle$, $\langle x,y\rangle$, $\langle y,y\rangle$.
+Call the coefficient matrix $M_m$ \emph{stable} when $m\ge2$, or $m=1$ and $a\ge1/2$.  For vectors $x,y$ in a Hilbert space, $\operatorname{Gram}(x,y)$ denotes the symmetric $2\times2$ matrix with entries $\langle x,x\rangle$, $\langle x,y\rangle$, $\langle y,y\rangle$.  Write $N_m=\diag(1,g^{-1/2})M_m\diag(1,g^{-1/2})$ for the normalized coefficient matrix.
 
 \begin{theorem}[Gram representation of stable coefficients]\label{thm:gram}
 If either $m\ge2$ and $a>0$, or $m=1$ and $a\ge1/2$, then $\rho_m(a)>0$.  In $\ell^2(\N_0)\oplus\R$, put
@@ -695,11 +644,11 @@ Assume first that $m\ge2$.  Then $x-1>1/2$, so \Cref{lem:trigamma-bounds} gives
  a-\frac12+c_m-\frac{q^2}{x-3/2}.
 \]
 At the sharp endpoint the right-hand side simplifies exactly to
-\begin{equation}\label{eq:slack-lower}
+\[
  a-\frac12+\frac{m(m-1)}{2(2a+2m-3)}
  -\frac{(a+m/2-1)^2}{a+m-3/2}
  =\frac{m-1}{2(2a+2m-3)}>0.
-\end{equation}
+\]
 
 For $m=1$, $q=a-1/2$ and $c_1=0$.  If $a>1/2$, then
 \[
@@ -709,12 +658,12 @@ by \eqref{eq:trig-upper-half} and \eqref{eq:inverse-trig}.  Hence $\rho_1(a)>0$.
 \end{proof}
 
 The constant matrix is
-\begin{equation}\label{eq:M0}
+\[
  M_0=
  \begin{pmatrix}g&\sqrt g\\ \sqrt g&1\end{pmatrix}
  =\begin{pmatrix}\sqrt g\\1\end{pmatrix}
  \begin{pmatrix}\sqrt g&1\end{pmatrix},
-\end{equation}
+\]
 a rank-one positive-semidefinite matrix.  The possible anomaly at $m=1$ is genuine: using $\psi_1(a+1)=g-a^{-2}$ and $\beta_1=(2a-1)/(2a)$,
 \begin{equation}\label{eq:det-M1}
  \det M_1
@@ -725,15 +674,14 @@ Set $f(a)=(4a-1)\psi_1(a)-4$, so that $\det M_1$ has the sign of $f(a)$.  Since 
 \[
  f'(a)=2\sum_{r\ge0}\frac{2r+1-2a}{(a+r)^3}>0,
 \]
-while $f(a)\to-\infty$ as $a\downarrow0$ and $f(1/2)=\psi_1(1/2)-4=\pi^2/2-4>0$.  Hence $f$ has a unique zero $a_*\in(0,1/2)$; numerically,
-$a_*=0.3690738484\ldots$.  Combining this with \Cref{thm:gram} for $a\ge1/2$, and using the positivity of the diagonal entries of $M_1$, we conclude that $M_1$ is indefinite for $0<a<a_*$, positive semidefinite of rank one at $a=a_*$, and positive definite for $a>a_*$.  Thus $M_1$ is the only coefficient matrix that can be indefinite at the endpoint $\kappa=1$.
+while $f(a)\to-\infty$ as $a\downarrow0$ and $f(1/2)=\psi_1(1/2)-4=\pi^2/2-4>0$.  Hence $f$ has a unique zero $a_*\in(0,1/2)$.  Combining this with \Cref{thm:gram} for $a\ge1/2$, and using the positivity of the diagonal entries of $M_1$, we conclude that $M_1$ is indefinite for $0<a<a_*$, positive semidefinite of rank one at $a=a_*$, and positive definite for $a>a_*$.  Thus $M_1$ is the only coefficient matrix that can be indefinite at the endpoint $\kappa=1$.
 
 \section{Mixed determinants and coefficientwise positivity}\label{sec:determinant}
 
 For symmetric $2\times2$ matrices $X=(x_{ij})$ and $Y=(y_{ij})$, define
-\begin{equation}\label{eq:MD}
+\[
  \MD(X,Y)=x_{11}y_{22}+x_{22}y_{11}-2x_{12}y_{12}.
-\end{equation}
+\]
 This is the polarization of the determinant.
 
 \begin{lemma}[Wedge-square positivity]\label{lem:MD-positive}
@@ -766,9 +714,9 @@ Now assume $0<a<1/2$.  By \eqref{eq:beta}, $\beta_1<0$ while $\beta_m>0$ for $m\
  =\alpha_1(1+gc_m)+\alpha_m-2g\beta_1\beta_m>0.
 \end{equation}
 The linear coefficient is also positive.  Indeed,
-\begin{equation}\label{eq:MD01}
+\[
  \MD(M_0,M_1)=\frac{ag-1}{a^2}>0,
-\end{equation}
+\]
 and hence
 \begin{equation}\label{eq:Delta1-sharp}
  \Delta_1=S_0S_1\MD(M_0,M_1)
@@ -780,15 +728,15 @@ one index is $1$, the other is at least $2$ and
 \eqref{eq:M1-Mm-positive} applies.  Thus every summand is nonnegative, and the
 pair $(M_0,M_n)$ is strictly positive.  The indefiniteness of $M_1$ can therefore contribute a potentially negative summand only through its self-pairing $\MD(M_1,M_1)=2\det M_1$ in $\Delta_2$.
 
-\subsection{The exceptional degree-two coefficient}
+\subsection{The exceptional determinant coefficient \texorpdfstring{\(\Delta_2\)}{Delta2}}
 
 \begin{lemma}[Exceptional degree-two decomposition]\label{lem:Delta2-positive}
 For every $a>0$, one has $\Delta_2(a)>0$.  More precisely, let
-\begin{equation}\label{eq:t-def}
+\[
  t=\psi_1(a+1),
  \qquad
  \mathcal R_a=t-\frac1{a+1}.
-\end{equation}
+\]
 Then
 \begin{equation}\label{eq:Delta2-Q}
  \Delta_2=
@@ -834,33 +782,13 @@ $\mathcal R_a+(a+1)^{-1}$ and collecting this polynomial yields the identity
 \eqref{eq:Qstar-decomp}.
 
 By \eqref{eq:trigamma-integral},
-\begin{equation}\label{eq:Rstar-integral}
+\[
  \mathcal R_a
  =\int_0^\infty e^{-(a+1)s}
  \left(\frac{s}{1-e^{-s}}-1\right)\dd s>0.
-\end{equation}
+\]
 All three coefficients in \eqref{eq:Qstar-decomp} are positive for $a>0$,
 so $\Delta_2>0$.
-
-Equivalently, let
-\[
- f_a(s)=e^{-(a+1)s/2}
- \sqrt{\frac{s}{1-e^{-s}}-1},\qquad \|f_a\|_2^2=\mathcal R_a,
-\]
-and define
-\[
- \mathcal H_a=
- \bigl(L^2(0,\infty)\widehat\otimes L^2(0,\infty)\bigr)
- \oplus L^2(0,\infty)\oplus\R.
-\]
-Here $\widehat\otimes$ denotes the Hilbert-space tensor product.  Then
-\begin{equation}\label{eq:Q-norm}
- Q_*=\left\|
- \sqrt2a^2(a+1)f_a\otimes f_a
- \oplus\sqrt2a(a+1)\sqrt{8a^2+3a+1}\,f_a
- \oplus\sqrt{2a(a+1)(5a+3)}
- \right\|_{\mathcal H_a}^2.
-\end{equation}
 \end{proof}
 
 \begin{proof}[Proof of \Cref{thm:coefficientwise}]
@@ -871,10 +799,10 @@ The preceding argument, together with \Cref{lem:Delta2-positive}, proves the end
 every positive-degree coefficient of $AZZ_{\Thetal}$ is strictly positive: in
 degree $n$, for example, the product of the constant coefficients of $A$ and
 $Z$ with $[\lambda^n]Z_{\Thetal}$ is positive.  Therefore
-\begin{equation}\label{eq:Deltakappa-monotone}
+\[
  \Delta^{(\kappa)}
  =\Delta^{(1)}+g(\kappa-1)A\,ZZ_{\Thetal}
-\end{equation}
+\]
 shows that all coefficients remain strictly positive for $\kappa>1$.
 
 For the converse, the general $m=1$ coefficient gives
@@ -892,6 +820,50 @@ Finally, $\Delta(a,\cdot)$ is entire, so each differentiated Maclaurin series co
 \]
 Thus $\Delta(a,\cdot)$ is strictly absolutely monotone.  Also $A>0$ for $\lambda>0$ by \eqref{eq:ABC-expansions} and \eqref{eq:alpha}.  Hence $\Delta>0$ and the leading principal entry is positive, so $\Turan\succ0$.
 \end{proof}
+
+Combining \eqref{eq:Delta1-sharp} with \eqref{eq:trig-lower}, which gives
+$ag-1>(2a)^{-1}$, yields the explicit lower bound
+\[
+ \Delta(a,\lambda)>\Delta_1(a)\lambda
+ =\frac{2\bigl(a\psi_1(a)-1\bigr)}{a^3\Gamma(a)^4}\,\lambda
+ >\frac{\lambda}{a^4\Gamma(a)^4}
+ \qquad(a,\lambda>0).
+\]
+
+\section{Exact reduction from \texorpdfstring{${}_0F_1$}{0F1} to the Bessel inequality}\label{sec:bessel-reduction}
+
+The standard identity \cite[\S10.39]{NISTDLMFBessel},\,\cite[\S3.7]{Watson1944}
+\begin{equation}\label{eq:I-Z}
+ I_{a-1}(2\sqrt\lambda)=\lambda^{(a-1)/2}Z(a,\lambda)
+\end{equation}
+with $L=\log Z$, $z=2\sqrt\lambda$, and $\nu=a-1$ gives
+\begin{align}
+ \Thetaz\log I_\nu&=\nu+2L_{\Thetal}, &
+ P_\nu&=1+2L_{a\Thetal},\label{eq:U-L}\\
+ G_\nu&=-L_{aa}, & H_\nu&=4(L_{\Thetal}-L_{\Thetal\Thetal}).\label{eq:G-L}
+\end{align}
+Moreover,
+\begin{equation}\label{eq:ABC-log}
+ \frac A{Z^2}=-L_{aa},\qquad
+ \frac B{Z^2}=1+L_{a\Thetal},\qquad
+ \frac C{gZ^2}=\frac1g+L_{\Thetal}-L_{\Thetal\Thetal}.
+\end{equation}
+The Bessel--Schur matrix is therefore the congruence
+\begin{equation}\label{eq:bessel-congruence}
+ \begin{pmatrix}
+  G_\nu&1+P_\nu\\
+  1+P_\nu&H_\nu+4/g
+ \end{pmatrix}
+ =\frac1{Z^2}
+ \begin{pmatrix}1&0\\0&2/\sqrt g\end{pmatrix}
+ \Turan(a,\lambda)
+ \begin{pmatrix}1&0\\0&2/\sqrt g\end{pmatrix},
+\end{equation}
+whose determinant is
+\begin{equation}\label{eq:D-Delta}
+ D_{a-1}(2\sqrt\lambda)=\frac{4\Delta(a,\lambda)}{gZ(a,\lambda)^4}.
+\end{equation}
+This reduces \Cref{thm:bessel} and \Cref{cor:bessel-matrix} to the endpoint $\kappa=1$ of \Cref{thm:coefficientwise}; the proofs are completed in \Cref{sec:bessel-consequences}.
 
 \section{Bessel consequences and sharpness}\label{sec:bessel-consequences}
 
@@ -911,41 +883,63 @@ which is the matrix limit stated in \Cref{cor:bessel-matrix}.
 \end{proof}
 
 \begin{proof}[Proof of \Cref{prop:bessel-sharpness}]
-The exact minimality of the $z$-independent correction follows from the argument after
-\eqref{eq:D-Delta}.  The ``if'' direction for the deformation follows from
-\eqref{eq:Dkappa-Delta} and \Cref{thm:coefficientwise}; the ``only if'' direction
-follows from the negative leading term in \eqref{eq:Dkappa-small} for every
-$\kappa<1$ and all sufficiently small $a>0$.
+For the least $z$-independent correction, replace $4/\psi_1(\nu+1)$ in
+\eqref{eq:bessel-main} by a $z$-independent $R(\nu)$ and write $D_{\nu,R}$ for the
+resulting determinant.  Then
+\[
+ D_{\nu,R}(z)\longrightarrow\psi_1(\nu+1)R(\nu)-4
+ \qquad(z\downarrow0),
+\]
+so validity for every $z>0$ forces $R(\nu)\ge4/\psi_1(\nu+1)$.  Conversely
+$D_{\nu,R}=D_\nu+G_\nu\bigl(R(\nu)-4/\psi_1(\nu+1)\bigr)>0$ whenever
+$R(\nu)\ge4/\psi_1(\nu+1)$, since $D_\nu>0$ by \Cref{thm:bessel} and
+$G_\nu=A/Z^2>0$ for $\nu>-1$, $z>0$.  Hence $4/\psi_1(\nu+1)$ is the exact least
+$z$-independent correction.
+
+For the fixed-correction deformation
+\eqref{eq:Hnu-kappa}--\eqref{eq:Dnu-kappa-def}, the same reduction gives
+\begin{equation}\label{eq:Dkappa-Delta}
+ D_{a-1}^{(\kappa)}(2\sqrt\lambda)
+ =\frac{4\Delta^{(\kappa)}(a,\lambda)}{gZ(a,\lambda)^4}.
+\end{equation}
+A direct first-order expansion,
+\[
+ Z(a,\lambda)=\frac1{\Gamma(a)}
+ \left(1+\frac{\lambda}{a}+O(\lambda^2)\right),
+\]
+together with the corresponding termwise parameter and Euler derivatives in
+\eqref{eq:Adef}--\eqref{eq:Ckappa-def}, gives
+\[
+ \Delta^{(\kappa)}(a,\lambda)
+ =\frac{2}{a^3\Gamma(a)^4}
+ \left[\frac{\kappa-1}{2}(ag)^2+ag-1\right]\lambda
+ +O(\lambda^2).
+\]
+Using \eqref{eq:Dkappa-Delta} and $\lambda=z^2/4$ therefore yields
+\begin{equation}\label{eq:Dkappa-small}
+ D_{a-1}^{(\kappa)}(z)=
+ \frac{2}{a^3g}\left[\frac{\kappa-1}{2}(ag)^2+ag-1\right]z^2+O(z^4).
+\end{equation}
+For $\kappa<1$, the bracket is negative for all sufficiently small $a>0$,
+because $ag\to+\infty$ as $a\downarrow0$, proving necessity of $\kappa\ge1$;
+sufficiency follows from \Cref{thm:coefficientwise} through
+\eqref{eq:Dkappa-Delta}.
 \end{proof}
 
-The behavior changes qualitatively once the order crosses the endpoint
-$\nu=-1$ of the positive-series domain.
+\subsection{Continuation beyond the positive-series domain}
 
-\begin{definition}[Negative-order convention]\label{def:negative-order}
-Let $\nu\le-1$ be real.  On each connected component of
-$\{z>0:I_\nu(z)\ne0\}$, define $G_\nu$, $P_\nu$, and $H_\nu$ by
-\eqref{eq:Gnu}--\eqref{eq:Hnu} with $\log I_\nu$ replaced by
-$\log|I_\nu|$.  For nonintegral $\nu$, define $D_\nu$ by
-\eqref{eq:Dnu-def}.  At a negative integer $\nu=-n$, the convention means
-explicitly
-\begin{align*}
- G_{-n}(z)&=
- \left(\frac{\left.\partial_\nu I_\nu(z)\right|_{\nu=-n}}{I_n(z)}\right)^2
- -\frac{\left.\partial_\nu^2I_\nu(z)\right|_{\nu=-n}}{I_n(z)},\\
- P_{-n}(z)&=\Thetaz\left(
- \frac{\left.\partial_\nu I_\nu(z)\right|_{\nu=-n}}{I_n(z)}\right),\\
- H_{-n}(z)&=2\bigl(\Thetaz\log I_n(z)+n\bigr)
- -\Thetaz^2\log I_n(z).
-\end{align*}
-Thus the order derivatives are taken before setting $\nu=-n$.  We interpret
-$1/\psi_1(\nu+1)$ by its local analytic extension, whose value at the pole is
-$0$, and define
+The behavior changes qualitatively once the order crosses the endpoint
+$\nu=-1$ of the positive-series domain.  On the open set
 \[
- D_{-n}(z)=G_{-n}(z)H_{-n}(z)-\bigl(1+P_{-n}(z)\bigr)^2.
+ \mathcal U=\bigl\{(\nu,z)\in
+ (\R\setminus\{-1,-2,\ldots\})\times(0,\infty):I_\nu(z)\ne0\bigr\},
 \]
-On a component where $I_\nu>0$, this convention agrees with the ordinary real
+define $G_\nu$, $P_\nu$, $H_\nu$, and $D_\nu$ by
+\eqref{eq:Gnu}--\eqref{eq:Dnu-def} with $\log I_\nu$ replaced by $\log|I_\nu(z)|$;
+the order derivatives are taken on $\mathcal U$, and for each fixed $\nu$ the
+resulting formulas restrict to any connected component of
+$\{z>0:I_\nu(z)\ne0\}$.  Where $I_\nu>0$ this agrees with the ordinary
 logarithm.
-\end{definition}
 
 For every real $a\notin\{0,-1,-2,\ldots\}$, the partial-fraction expansion
 \begin{equation}\label{eq:trigamma-partial-fraction}
@@ -956,7 +950,7 @@ square root $\sqrt g$ occurring in \eqref{eq:Tkappa} and
 \eqref{eq:bessel-congruence} remains well defined on every real nonpole
 component.
 
-\begin{lemma}[Continuation beyond the positive-series domain]\label{lem:continuation}
+\begin{lemma}[Meromorphic continuation of the coefficient identities]\label{lem:continuation}
 For each fixed coefficient index, the scalar coefficient identities in
 \eqref{eq:ABC-expansions}--\eqref{eq:cm-kappa-general}, and every resulting
 finite-convolution formula for a coefficient of $\Delta$, extend
@@ -977,54 +971,42 @@ $1/\Gamma$, give locally uniform convergence of the series and of every
 fixed-order parameter and Euler derivative on compact subsets of $\mathbb C^2$;
 hence $Z$ and these derivatives are entire in $(a,\lambda)$.  For each fixed
 coefficient index, both sides of each scalar coefficient identity are
-meromorphic functions of the single variable $a$ and agree on $a>0$; the
-one-variable identity theorem gives the continuation.  Each coefficient of
+meromorphic functions of the single variable $a$ and agree on $a>0$; since $a>0$
+has a limit point, the one-variable identity theorem shows they agree throughout
+their common domain, the complement in $\mathbb C$ of the discrete pole set.  Each coefficient of
 $\Delta=AC-gB^2$ is a finite convolution of such scalar coefficient functions
 and is therefore meromorphic as well.
 
 On the real nonpole set, \eqref{eq:trigamma-partial-fraction} gives
 $g=\psi_1(a)>0$, so the positive real square root used in the matrix formulas is
-well defined.  On each connected component of the real nonvanishing set, $Z$
-has constant sign, so $\partial_a\log|Z|=Z_a/Z$ and the corresponding mixed and
-second derivative identities hold there.  Finally, \eqref{eq:I-Z} gives
+well defined.  Let
+\[
+ \mathcal V=\{(a,\lambda):a\notin\{0,-1,-2,\ldots\},\ \lambda>0,\ Z(a,\lambda)\ne0\}.
+\]
+On each connected component of $\mathcal V$, $Z$ has constant sign, so
+$\partial_a\log|Z|=Z_a/Z$ and the corresponding mixed and second derivative
+identities hold there.  Finally, \eqref{eq:I-Z} gives
 $\log|I_{a-1}(2\sqrt\lambda)|=\tfrac{a-1}{2}\log\lambda+\log|Z(a,\lambda)|$ where
 $Z\ne0$, leaving the derivations of \eqref{eq:ABC-log},
 \eqref{eq:bessel-congruence}, and \eqref{eq:D-Delta} unchanged on that
 component.
 \end{proof}
 
-No negative-order obstruction is visible in the leading $z^2$-term away from
-the poles.  The positivity needed below follows from
-\eqref{eq:trigamma-partial-fraction}.
-
-\begin{proposition}[Small-argument expansion away from the poles]\label{prop:small-z}
-Let $a=\nu+1\in\R\setminus\{0,-1,-2,\ldots\}$.  On the nonvanishing
-component of $I_\nu$ adjacent to $z=0$, and for this fixed $a$,
+Away from the poles the leading small-$z$ term keeps its positive sign.  For
+$a=\nu+1\in\R\setminus\{0,-1,-2,\ldots\}$ the ascending series gives
+$I_\nu(z)=(z/2)^\nu\Gamma(\nu+1)^{-1}(1+O(z^2))$, so $I_\nu$ has constant sign
+near $z=0$; by \Cref{lem:continuation}, \eqref{eq:Delta1-sharp} and
+\eqref{eq:D-Delta} with $Z(a,0)=1/\Gamma(a)$ and $\lambda=z^2/4$ give
 \begin{equation}\label{eq:small-z-D}
- D_\nu(z)=
- \frac{2\bigl(a\psi_1(a)-1\bigr)}
- {a^3\psi_1(a)}z^2+O(z^4)
- \qquad(z\downarrow0).
-\end{equation}
-The coefficient is positive for every such real $a$, positive or negative.
-\end{proposition}
-
-\begin{proof}
-For fixed $\nu\notin\{-1,-2,-3,\ldots\}$,
-\[
- I_\nu(z)=\frac{(z/2)^\nu}{\Gamma(\nu+1)}\bigl(1+O(z^2)\bigr)
+ D_\nu(z)=\frac{2\bigl(a\psi_1(a)-1\bigr)}{a^3\psi_1(a)}z^2+O(z^4)
  \qquad(z\downarrow0),
-\]
-so $I_\nu$ is nonzero with constant sign for all sufficiently small $z>0$;
-hence the stated component exists.  By \Cref{lem:continuation},
-\eqref{eq:Delta1-sharp} and \eqref{eq:D-Delta} apply throughout the stated $a$-domain.  Substituting \eqref{eq:Delta1-sharp}, with $Z(a,0)=1/\Gamma(a)$ and $\lambda=z^2/4$, gives \eqref{eq:small-z-D}.  For $a>0$, \eqref{eq:trig-lower} gives $a\psi_1(a)>1$.  For negative nonintegral $a$, \eqref{eq:trigamma-partial-fraction} gives $\psi_1(a)>0$, so $a\psi_1(a)-1<0$ and $a^3\psi_1(a)<0$ and their ratio is positive.
-\end{proof}
-
-Although the first local term is positive, coefficientwise positivity of the
-continued determinant $\Delta$ already fails on the next interval on which
-$1/\Gamma(a)>0$.  Indeed, for $-3<\nu<-2$ one has
-$a=\nu+1\in(-2,-1)$ and $\Gamma(a)>0$, so the constant coefficient
-$1/\Gamma(a)$ of $Z(a,\lambda)$ is positive.
+\end{equation}
+whose coefficient is positive for every such $a$: for $a>0$ by
+\eqref{eq:trig-lower}, and for negative nonintegral $a$ because
+\eqref{eq:trigamma-partial-fraction} makes $a\psi_1(a)-1$ and $a^3\psi_1(a)$ both
+negative.  Coefficientwise positivity of $\Delta$ nonetheless fails already on
+the next interval where $1/\Gamma(a)>0$: for $-3<\nu<-2$ one has
+$a\in(-2,-1)$ and $\Gamma(a)>0$.
 
 \begin{proposition}[Degree-two obstruction beyond the positive-series domain]\label{prop:negative-coeff-failure}
 If $-2<a<-1$, equivalently $-3<\nu<-2$, then
@@ -1050,152 +1032,11 @@ The first term in \eqref{eq:Qstar-decomp} is positive.  The second and third ter
 Indeed, the polynomial in brackets equals $4$ at $b=1$ and has derivative $24b^2-6b-4>0$ for $b\ge1$.  Hence $Q_*(a,t)>0$.  But $2a^6(a+1)^3\Gamma(a)^4<0$, proving \eqref{eq:negative-Delta2}.
 \end{proof}
 
-There is also genuine pointwise failure.  It is detected at the negative integer orders, not by \eqref{eq:small-z-D}.
-
-\begin{lemma}[Order derivatives at a negative integer]\label{lem:pole-order-estimates}
-Let $n\ge2$ be an integer and set
-\[
- b_n=(-1)^{n+1}2^{2n}n!(n-1)!.
-\]
-Then, as $z\downarrow0$,
-\begin{align}
- \frac{\partial_\nu I_\nu(z)|_{\nu=-n}}{I_n(z)}
- &=b_nz^{-2n}\bigl(1+O(z^2)\bigr),\label{eq:pole-first-ratio}\\
- \Thetaz\left(\frac{\partial_\nu I_\nu(z)|_{\nu=-n}}{I_n(z)}\right)
- &=-2nb_nz^{-2n}\bigl(1+O(z^2)\bigr),\label{eq:pole-first-theta}\\
- \frac{\partial_\nu^2I_\nu(z)|_{\nu=-n}}{I_n(z)}
- &=O\bigl(z^{-2n}(1+|\log z|)\bigr).\label{eq:pole-second-ratio}
-\end{align}
-\end{lemma}
-
-\begin{proof}
-The connection formula \cite[Eq.~10.27.4]{NISTDLMFBessel} and its first-order derivative at $\nu=-n$ give
-\begin{equation}\label{eq:I-connection}
- I_\nu(z)=I_{-\nu}(z)-\frac2\pi\sin(\pi\nu)K_\nu(z),
-\end{equation}
-\begin{equation}\label{eq:first-order-at-pole}
- \partial_\nu I_\nu(z)\big|_{\nu=-n}
- =-\partial_\alpha I_\alpha(z)\big|_{\alpha=n}
- -2(-1)^nK_n(z).
-\end{equation}
-The convergent power and power--log expansions at the origin
-\cite[Secs.~10.27, 10.31, and 10.38]{NISTDLMFBessel} imply
-\begin{align*}
- I_n(z)&=\frac{z^n}{2^nn!}\bigl(1+O(z^2)\bigr),
- &\Thetaz I_n(z)&=\frac{nz^n}{2^nn!}\bigl(1+O(z^2)\bigr),\\
- K_n(z)&=2^{n-1}(n-1)!z^{-n}\bigl(1+O(z^2)\bigr),
- &\Thetaz K_n(z)&=-n2^{n-1}(n-1)!z^{-n}\bigl(1+O(z^2)\bigr).
-\end{align*}
-For $\alpha$ near $n$, the series for $I_\alpha(z)$ and its first two
-$\alpha$-derivatives and one application of $\Thetaz$ converge uniformly for
-small $z>0$, since $\partial_\alpha^j\bigl[1/\Gamma(\alpha+k+1)\bigr]$ grows at
-most polynomial--logarithmically against the factorial denominators.  Hence,
-differentiating the prefactor $(z/2)^\alpha$,
-\[
- \partial_\alpha I_\alpha(z)|_{\alpha=n},\quad
- \Thetaz\partial_\alpha I_\alpha(z)|_{\alpha=n}
- =O\bigl(z^n(1+|\log z|)\bigr),
-\]
-\begin{equation}\label{eq:I-order-second-local}
- \partial_\alpha^2 I_\alpha(z)|_{\alpha=n}
- =O\bigl(z^n(1+|\log z|)^2\bigr).
-\end{equation}
-Substitution into \eqref{eq:first-order-at-pole} proves
-\eqref{eq:pole-first-ratio}.  Applying the quotient rule before taking the
-asymptotic expansion proves \eqref{eq:pole-first-theta}.  Here the differentiated
-power--log remainders remain of the displayed order; moreover
-$z^{2n}|\log z|=O(z^2)$ for $n\ge2$.
-
-Differentiating \eqref{eq:I-connection} twice, using $K_{-\nu}=K_\nu$, gives
-\begin{equation}\label{eq:second-order-at-pole}
- \partial_\nu^2 I_\nu(z)\big|_{\nu=-n}
- =\partial_\alpha^2I_\alpha(z)\big|_{\alpha=n}
- +4(-1)^n\partial_\alpha K_\alpha(z)\big|_{\alpha=n}.
-\end{equation}
-The estimate \eqref{eq:I-order-second-local} handles the $I_\alpha$ term.  The
-exact integer-order identity
-\cite[Eq.~10.38.4]{NISTDLMFOrder}
-\[
- \partial_\alpha K_\alpha(z)\big|_{\alpha=n}
- =\frac{n!}{2(z/2)^n}
- \sum_{k=0}^{n-1}\frac{(z/2)^kK_k(z)}{k!(n-k)}
-\]
-and the expansions of $K_0,\ldots,K_{n-1}$ give
-$\partial_\alpha K_\alpha|_{\alpha=n}
- =O(z^{-n}(1+|\log z|))$.  Division by
-$I_n(z)\asymp z^n$ proves \eqref{eq:pole-second-ratio}.
-\end{proof}
-
-\begin{proposition}[Pole-limit pointwise obstruction]\label{prop:pole-limit-failure}
-Under the convention of \Cref{def:negative-order}, for every integer $n\ge2$,
-\begin{equation}\label{eq:pole-limit-asymptotic}
- D_{-n}(z)
- =-4n(n-1)2^{4n}\bigl[n!(n-1)!\bigr]^2
- z^{-4n}\bigl(1+o(1)\bigr)
- \qquad(z\downarrow0).
-\end{equation}
-Consequently, for every $n\ge2$ there exist $z_n>0$ and $\varepsilon_n>0$ such that
-\[
- I_\nu(z_n)>0
- \quad\hbox{and}\quad
- D_\nu(z_n)<0
- \qquad(|\nu+n|<\varepsilon_n).
-\]
-In particular, there exist $z_0>0$ and $\varepsilon>0$ such that
-\[
- D_\nu(z_0)<0
- \qquad(-2-\varepsilon<\nu<-2).
-\]
-For every $\nu\in(-3,-2)$ one has $I_\nu(z)>0$ for all $z>0$, so $\{z>0:I_\nu(z)\ne0\}=(0,\infty)$ and these counterexamples occur inside that global positive component.
-\end{proposition}
-
-\begin{proof}
-First, if $a$ is near the pole $1-n$, then
-\[
- \psi_1(a)=\frac1{(a+n-1)^2}+h_n(a),
-\]
-where $h_n$ is analytic near $1-n$.  It follows that $1/\psi_1(a)$ extends analytically across the pole, with a double zero there.  Thus the reciprocal-trigamma correction in $D_{-n}$ is exactly zero.
-
-Let $\ell_n(z)=\partial_\nu\log I_\nu(z)\big|_{\nu=-n}$.  Since $I_{-n}=I_n$, \Cref{lem:pole-order-estimates} gives
-\begin{align}
- G_{-n}(z)
- &=\ell_n(z)^2-
- \frac{\partial_\nu^2I_\nu(z)|_{\nu=-n}}{I_n(z)}
- =b_n^2z^{-4n}\bigl(1+o(1)\bigr),\label{eq:G-pole-asymptotic}\\
- P_{-n}(z)
- &=\Thetaz\ell_n(z)
- =-2nb_nz^{-2n}\bigl(1+O(z^2)\bigr).\label{eq:P-pole-asymptotic}
-\end{align}
-Finally, since $I_{-n}=I_n$ and $I_n(z)=(z^n/2^nn!)(1+O(z^2))$, one has $\Thetaz\log I_n\to n$ and $\Thetaz^2\log I_n\to0$ as $z\downarrow0$, so
-\begin{equation}\label{eq:H-pole-asymptotic}
- H_{-n}(z)=2\bigl(\Thetaz\log I_n+n\bigr)-\Thetaz^2\log I_n=4n+o(1).
-\end{equation}
-
-Using \eqref{eq:G-pole-asymptotic}--\eqref{eq:H-pole-asymptotic} and the vanishing reciprocal-trigamma correction,
-\begin{align*}
- D_{-n}(z)
- &=G_{-n}(z)H_{-n}(z)-\bigl(1+P_{-n}(z)\bigr)^2\\
- &=\left(4n-4n^2\right)b_n^2z^{-4n}\bigl(1+o(1)\bigr),
-\end{align*}
-which is \eqref{eq:pole-limit-asymptotic} because
-$b_n^2=2^{4n}[n!(n-1)!]^2$.
-
-Choose $z_n>0$ sufficiently small that $D_{-n}(z_n)<0$.  For fixed $z_n$, the function $I_\nu(z_n)$ is entire in $\nu$ and $I_{-n}(z_n)=I_n(z_n)>0$.  Hence there is a neighborhood of $-n$ on which $I_\nu(z_n)\ne0$.  On that neighborhood, all quotients and order derivatives entering $G_\nu(z_n)$, $P_\nu(z_n)$, and $H_\nu(z_n)$ are analytic in $\nu$, and the reciprocal-trigamma term has the analytic extension established above.  Thus $D_\nu(z_n)$ is continuous there.  Shrinking the neighborhood if necessary gives $I_\nu(z_n)>0$ and $D_\nu(z_n)<0$ for $|\nu+n|<\varepsilon_n$ with some $\varepsilon_n>0$.
-
-Taking $n=2$ and restricting to the left-hand neighborhood gives the stated interval adjacent to $-2$.  Finally, if $-3<\nu<-2$ and $s=-\nu\in(2,3)$, then \eqref{eq:I-connection} reads
-\[
- I_\nu(z)=I_s(z)+\frac2\pi\sin(\pi s)K_s(z)>0
- \qquad(z>0),
-\]
-because $I_s$, $K_s$, and $\sin(\pi s)$ are positive.
-\end{proof}
-
-\begin{remark}
-The sharp theorem therefore has three distinct negative-order features:
-positive leading small-$z$ behavior away from poles, failure of coefficientwise
-positivity of $\Delta$ on all of $-3<\nu<-2$, and actual pointwise failure of
-the Bessel inequality in neighborhoods of every negative integer $-n$,
-$n\ge2$.
+\begin{remark}[Negative-order features]\label{rem:negative-order}
+The continued determinant therefore has two distinct negative-order features:
+positive leading small-$z$ behavior away from the poles, yet failure of
+coefficientwise positivity of $\Delta$ on all of $-3<\nu<-2$.  A complete
+classification beyond $\nu>-1$ appears to require separate treatment.
 \end{remark}
 
 \section{Comparison with related positivity results}\label{sec:context}
@@ -1208,7 +1049,7 @@ Kalmykov and Karp specialize to this reciprocal-gamma series and yield
 the scalar coefficient sign of $A$
 \cite{KalmykovKarp2013Reciprocal,KalmykovKarp2017}.  Their gamma-ratio results similarly treat
 scalar two-function Tur\'anians under parameter shifts
-\cite{KalmykovKarp2013Ratios,KalmykovKarp2014}.
+\cite{KalmykovKarp2013Ratios,KalmykovKarp2014}.  The sharp coefficientwise thresholds of Karp and Zhang \cite{KarpZhang2024} are set by the multiplicity of Pochhammer symbols in such scalar series; the threshold here is instead the deformation parameter $\kappa$ of a coupled matrix determinant.
 
 The additional quantities $B$ and $C$ are not scalar parameter-shift
 Tur\'anians: $B$ contains a mixed parameter--Euler derivative, while $C$
@@ -1216,47 +1057,41 @@ contains the sharp argument-curvature expression and the trigamma
 normalization that becomes the least $z$-independent correction under the
 Bessel congruence.  The result proved here is the coefficientwise positivity of the
 coupled determinant $AC-\psi_1(a)B^2$, even though the coefficient matrix $M_1$
-can be indefinite.  We do not know a
-formal deduction of this determinant statement from the scalar
-log-concavity theorems cited above.
+can be indefinite.
 
 Classical Bessel Tur\'an inequalities compare neighboring orders, for example
 $I_\nu^2-I_{\nu-1}I_{\nu+1}$, or control ratios and logarithmic derivatives
-\cite{Baricz2008,Baricz2010,BariczPonnusamy2013,Segura2011}; higher-order
-Tur\'an and Hankel determinants in the order alone have also been studied
-\cite{BariczPogany2014}.  In contrast, \eqref{eq:bessel-main} couples second
+\cite{Baricz2008,Baricz2010,BariczPonnusamy2013,Segura2011}; series
+representations of the modified-Bessel Tur\'anian \cite{MezoBaricz2017},
+positivity of Tur\'an determinants for symmetric orthogonal polynomials
+\cite{BustozIsmail1997}, and higher-order Tur\'an and Hankel determinants in the
+order \cite{BariczPogany2014} have also been studied, as has the monotonicity in
+the argument of determinants with special-function entries
+\cite{IsmailLaforgia2007}.  In contrast, \eqref{eq:bessel-main} couples second
 curvature in the order with first mixed order--argument curvature and second
-argument curvature.
+argument curvature.  Derivatives of $I_\nu$ with respect to the order, which
+supply the individual quantities $G_\nu$, $P_\nu$, and $H_\nu$, have been
+studied in their own right, with closed forms and integral representations
+\cite{NISTDLMFOrder,GonzalezSantander2018}; those results represent the separate
+order derivatives rather than the mixed-curvature determinant proved positive
+here.
 
-Recent work of Salazar proves that the kernel $(x,s)\mapsto I_s(x)$ is strictly
+A recent preprint of Salazar establishes that the kernel $(x,s)\mapsto I_s(x)$ is strictly
 totally positive for $x>0$ and $s\ge0$ \cite{Salazar2026}, extending
 integer-order results of Buchstaber and Glutsyuk \cite{BuchstaberGlutsyuk2019};
-a companion moment-transport framework builds all-order Hankel and Tur\'an
+a companion preprint builds all-order Hankel and Tur\'an
 determinant hierarchies for special functions from positive moment
 representations \cite{SalazarHankel}.  Their determinant hierarchies are
 respectively of evaluation-minor and Hankel-moment type; none of these papers
 states or proves the coefficientwise mixed-derivative determinant studied here.
-To compare the ordinary confluent minors of $I_s(x)$ with our inequality, write
+The signs of all total-positivity minors of $(x,s)\mapsto I_s(x)$, including
+their confluent limits, are preserved under positive row and column rescalings
+of the kernel, whereas the Schur determinant of \eqref{eq:bessel-main} is not.
+To make this explicit, write
 \[
- F(s,y)=\log I_s(e^y),\qquad p=F_{sy},\qquad G=-F_{ss}.
+ F(s,y)=\log I_s(e^y),\qquad p=F_{sy},\qquad G=-F_{ss},
 \]
-On the domain $s\ge0$ of that theorem, the ordinary confluent minors of the
-kernel are nonnegative: the Vandermonde-normalized confluent limits of orders
-two and three give
-\[
- p\ge0
- \qquad\text{and}\qquad
- p+sG_y\ge0
-\]
-(\Cref{prop:tp-confluent}).
-These are related differential inequalities, but these sign inequalities alone
-do not yield the Bessel--Schur inequality proved here.
-
-Indeed, the signs of all total-positivity minors, including their confluent
-limits, are preserved under positive row and column rescalings of the kernel,
-whereas our Schur determinant is not invariant under such rescalings.  To make
-the obstruction explicit, replace $I_s(e^y)$ by
-$e^{cy}I_s(e^y)$ and write $\widetilde F=F+cy$.  Then
+and replace $I_s(e^y)$ by $e^{cy}I_s(e^y)$, so that $\widetilde F=F+cy$ has
 \[
  \widetilde G=-\widetilde F_{ss}=G,
  \qquad
@@ -1273,41 +1108,6 @@ the rescaled kernel has
  \widetilde D_s(e^y)=D_s(e^y)+2cG,
 \]
 although all total-positivity signs are unchanged.
-
-There is also a domain mismatch.  The standard Hankel expansion, locally
-uniformly for complex $s$ in a neighborhood of each compact real $s$-interval,
-gives \cite[Secs.~10.40(i), 10.40(iii)]{NISTDLMFBessel}
-\begin{equation}\label{eq:Hankel-uniform}
- I_s(x)=\frac{e^x}{\sqrt{2\pi x}}
- \left(1-\frac{4s^2-1}{8x}+O(x^{-2})\right),
- \qquad x\to\infty.
-\end{equation}
-On any such fixed complex neighborhood, the parenthesized factor is uniformly
-close to $1$ and hence nonzero for all sufficiently large $x$.  It therefore
-has the analytic logarithm selected by the branch near $1$, and
-\eqref{eq:Hankel-uniform} yields
-\[
- \log I_s(x)
- =x-\frac12\log(2\pi x)-\frac{4s^2-1}{8x}+O(x^{-2}).
-\]
-The $x$-differentiated Hankel expansion gives the corresponding locally uniform
-estimate after applying $x\partial_x$.  Cauchy's integral formula in the order
-variable then permits differentiation of these remainders with respect to $s$,
-whence
-\[
- \partial_s\bigl(x\partial_x\log I_s(x)\bigr)
- =\frac{s}{x}+O(x^{-2}),
- \qquad x\to\infty.
-\]
-Thus the kernel fails even local total positivity of order two for negative $s$
-and sufficiently large $x$, while the present inequality holds throughout
-$-1<\nu<0$.  The inequality therefore cannot be deduced from the
-gauge-invariant sign data of the existing total-positivity theorem or its
-ordinary confluent minors alone.  Any derivation from total positivity would
-require additional Bessel-specific input, such as a canonical endpoint
-normalization or a bordered nonlocal construction.
-
-The reciprocal-gamma normalization $Z(a,\lambda)$ is the partition function of the Bessel law $\Pp(K=k)\propto\lambda^k/(k!\Gamma(a+k))$, whose randomized-gamma representation, simulation, and relation to the von Mises--Fisher family were studied by Yuan and Kalbfleisch \cite{YuanKalbfleisch2000}; see also Devroye \cite{Devroye2002}.  Bessel laws also arise as complete conditionals in Poisson--Gamma latent models \cite{ScheinEtAl2019}.
 
 \section{Further questions}\label{sec:questions}
 
@@ -1334,117 +1134,26 @@ and, for $\kappa\in\R$, define
 For which pairs $(\rho,\kappa)$ does $\Delta_{\rho,\kappa}$ have strictly positive Maclaurin coefficients in every positive degree for all $a>0$; and for each $\rho>0$, what is the sharp threshold in $\kappa$?  At $\rho=1$ the present theorem gives exactly $\kappa\ge1$, and its proof makes essential use of the exact $\rho=1$ Chu--Vandermonde convolution.
 \end{question}
 
-\begin{question}[Negative-order classification]\label{q:negative-order}
-Under the convention of \Cref{def:negative-order}, determine all real $\nu$ for
-which \eqref{eq:bessel-main} holds for every $z>0$ on each connected component
-of $\{z>0:I_\nu(z)\ne0\}$.  Coefficientwise positivity of the continued
-determinant $\Delta$ fails throughout $-3<\nu<-2$, and pointwise failure of the
-Bessel inequality occurs near every negative integer $-n$, $n\ge2$.  The
-exceptional order $\nu=-1$ and the intervening nonintegral ranges remain open.
+\begin{question}[Structural origin]\label{q:tp-origin}
+Is there a canonical normalization, bordered kernel, or nonlocal minor
+associated with $(x,\nu)\mapsto I_\nu(x)$ whose positivity is equivalent to
+the Bessel--Schur inequality of \Cref{thm:bessel}?
+
+The gauge obstruction above shows that any such derivation must incorporate
+additional Bessel-specific normalization or nonlocal information.  A related
+question is whether the coefficientwise positivity of
+$AC-\psi_1(a)B^2$ follows from an appropriately strengthened form of scalar
+reciprocal-gamma log-concavity.
 \end{question}
-
-\begin{question}[Structural origin from total positivity]\label{q:tp-origin}
-Does there exist a canonical normalization or a bordered, possibly nonlocal,
-extension of the kernel $(x,s)\mapsto I_s(x)$ for which total positivity, or the
-positivity of an explicit confluent or bordered minor, is equivalent to the
-inequality $D_\nu(z)>0$ of \Cref{thm:bessel}?
-
-Relatedly, can the coefficientwise positivity of $AC-\psi_1(a)B^2$ be deduced
-formally from the scalar reciprocal-gamma log-concavity theorems of Kalmykov
-and Karp \cite{KalmykovKarp2013Reciprocal,KalmykovKarp2017}?  As shown in
-\Cref{sec:context}, the Bessel--Schur determinant is not invariant under the
-positive row and column rescalings that preserve total-positivity signs.  Any
-such derivation must therefore supply additional Bessel-specific input, for
-example through a canonical normalization, a bordered construction, or a nonlocal
-constraint.
-\end{question}
-
-\appendix
-\section{Confluent minors of the modified Bessel kernel}\label{app:confluent}
-
-\begin{proposition}[Confluent consequences of total positivity]\label{prop:tp-confluent}
-With $F(s,y)=\log I_s(e^y)$, $p=F_{sy}$, and $G=-F_{ss}$ as in
-\Cref{sec:context}, the ordinary confluent limits of the total-positivity minors
-of $(x,s)\mapsto I_s(x)$ satisfy $p\ge0$ and $p+sG_y\ge0$ for $s\ge0$, where at
-$s=0$ the confluent limits are taken one-sidedly.
-\end{proposition}
-
-\begin{proof}
-Since $y\mapsto e^y$ is strictly increasing, replacing the $x$-variable by
-$x=e^y$ preserves the ordering of the nodes and hence every total-positivity
-sign; thus the reparametrized kernel $(y,s)\mapsto I_s(e^y)$ is totally positive.
-For $m\ge1$, let $s_1<\cdots<s_m$ and $y_1<\cdots<y_m$.  The standard
-multivariate divided-difference limit is
-\begin{align}
- &\lim_{\substack{s_1,\ldots,s_m\to s\\y_1,\ldots,y_m\to y}}
- \frac{\det\bigl[I_{s_i}(e^{y_j})\bigr]_{i,j=1}^m}
- {\displaystyle
-  \prod_{1\le i<j\le m}(s_j-s_i)
-  \prod_{1\le i<j\le m}(y_j-y_i)}\notag\\
- &\qquad=
- \frac{\det\left[
-  \partial_s^{\,i-1}\partial_y^{\,j-1}I_s(e^y)
-  \right]_{i,j=1}^m}
- {\displaystyle\prod_{r=0}^{m-1}(r!)^2}.
- \label{eq:general-confluent-limit}
-\end{align}
-The limits are taken through increasing nodes, so total positivity makes the
-left-hand side nonnegative.  At the boundary $s=0$, the $s$-nodes approach
-one-sidedly from $s\ge0$; analyticity in the order identifies the resulting
-limits with the displayed order derivatives.  At order two,
-\eqref{eq:general-confluent-limit} gives
-\[
- \det\begin{pmatrix}
- I_s(e^y)&\partial_y I_s(e^y)\\
- \partial_s I_s(e^y)&\partial_s\partial_y I_s(e^y)
- \end{pmatrix}
- =I_s(e^y)^2p,
-\]
-so $p\ge0$ after division by $I_s(e^y)^2>0$.  By \eqref{eq:general-confluent-limit}, at order three the
-Vandermonde-normalized confluent limit is
-\[
- \frac1{(0!1!2!)^2}
- \det\left[\partial_s^{\,i-1}\partial_y^{\,j-1}I_s(e^y)
- \right]_{i,j=1}^3
- =\frac14
- \det\left[\partial_s^{\,i-1}\partial_y^{\,j-1}I_s(e^y)
- \right]_{i,j=1}^3.
-\]
-Factoring $e^F=I_s(e^y)$ from each row and performing elementary row and
-column eliminations gives
-\begin{align*}
- &\frac1{I_s(e^y)^3}
- \det\left[\partial_s^{\,i-1}\partial_y^{\,j-1}I_s(e^y)
- \right]_{i,j=1}^3\\
- &\qquad=2F_{sy}^3+F_{sy}F_{ssyy}-F_{ssy}F_{syy}
- =2p^3-pG_{yy}+p_yG_y.
-\end{align*}
-After additionally dividing by the positive factor $I_s(e^y)^3$, the
-order-three confluent limit has the same sign, so
-\[
- 2p^3-pG_{yy}+p_yG_y\ge0.
-\]
-The logarithmic Bessel equation
-\[
- F_{yy}+F_y^2=e^{2y}+s^2,
-\]
-differentiated once in $s$, gives $p_y+2F_yp=2s$; differentiated again, and
-using $p_s=F_{ssy}=-G_y$, it gives $G_{yy}=2p^2-2F_yG_y-2$.  Substituting these
-into the Wronskian expression,
-\[
- 2p^3-pG_{yy}+p_yG_y=2(p+sG_y),
-\]
-so the order-three confluent limit gives $p+sG_y\ge0$.
-\end{proof}
 
 \section*{Computational verification}
-The proofs herein do not depend on numerical computation.  Verification scripts are available at \url{https://github.com/johnnyshields/papers}.
-
-\section*{Funding}
-This research received no external funding.
+The proofs are self-contained and do not depend on numerical computation.  The symbolic and numerical scripts that independently verify the exact coefficient formulas \eqref{eq:alpha}--\eqref{eq:cm-kappa-general}, the polynomial decomposition of \Cref{lem:Delta2-positive}, and \Cref{thm:bessel} over sampled ranges of $(\nu,z)$ are available at \url{https://github.com/johnnyshields/papers} and archived with this version at \href{https://doi.org/10.5281/zenodo.21438795}{doi:10.5281/zenodo.21438795}.
 
 \section*{Declaration of generative AI use}
 During the preparation of this work, the author used OpenAI's GPT-5.6 Sol and Anthropic's Claude Opus 4.8 to assist with manuscript drafting and verification code development.  The author takes full responsibility for the content of the work.
+
+\section*{Funding}
+This research received no external funding.
 
 \begin{thebibliography}{99}
 
@@ -1472,18 +1181,22 @@ Proc. Amer. Math. Soc. \textbf{141} (2013), 523--532,\newline DOI: \href{https:/
 V. M. Buchstaber and A. A. Glutsyuk,
 \emph{Total positivity, Grassmannian and modified Bessel functions},
 in \emph{Functional Analysis and Geometry: Selim Grigorievich Krein Centennial},
-Contemp. Math. \textbf{733}, Amer. Math. Soc., 2019, 97--107.
+Contemp. Math. \textbf{733}, Amer. Math. Soc., 2019, 97--107,\newline DOI: \href{https://doi.org/10.1090/conm/733/14736}{10.1090/conm/733/14736}.
 
-\bibitem{Cochran1967}
-J. A. Cochran,
-\emph{The monotonicity of modified Bessel functions with respect to their order},
-Journal of Mathematics and Physics \textbf{46} (1967), 220--222,\newline DOI: \href{https://doi.org/10.1002/sapm1967461220}{10.1002/sapm1967461220}.
+\bibitem{BustozIsmail1997}
+J.~Bustoz and M.~E.~H. Ismail,
+\emph{Tur\'{a}n inequalities for symmetric orthogonal polynomials},
+Int. J. Math. Math. Sci. \textbf{20} (1997), 1--7,\newline DOI: \href{https://doi.org/10.1155/S016117129700001X}{10.1155/S016117129700001X}.
 
-\bibitem{Devroye2002}
-L. Devroye,
-\emph{Simulating Bessel random variables},
-Statist. Probab. Lett. \textbf{57} (2002), 249--257,\newline
-DOI: \href{https://doi.org/10.1016/S0167-7152(02)00055-X}{10.1016/S0167-7152(02)00055-X}.
+\bibitem{GonzalezSantander2018}
+J.~L. Gonz\'alez-Santander,
+\emph{Closed-form expressions for derivatives of Bessel functions with respect to the order},
+J. Math. Anal. Appl. \textbf{466} (2018), 1060--1081,\newline DOI: \href{https://doi.org/10.1016/j.jmaa.2018.06.043}{10.1016/j.jmaa.2018.06.043}.
+
+\bibitem{IsmailLaforgia2007}
+M.~E.~H. Ismail and A.~Laforgia,
+\emph{Monotonicity properties of determinants of special functions},
+Constr. Approx. \textbf{26} (2007), 1--9,\newline DOI: \href{https://doi.org/10.1007/s00365-005-0627-4}{10.1007/s00365-005-0627-4}.
 
 \bibitem{KalmykovKarp2013Reciprocal}
 S. I. Kalmykov and D. B. Karp,
@@ -1505,10 +1218,20 @@ S. I. Kalmykov and D. B. Karp,
 \emph{Log-concavity and Tur\'{a}n-type inequalities for the generalized hypergeometric function},
 Anal. Math. \textbf{43} (2017), 567--580,\newline DOI: \href{https://doi.org/10.1007/s10476-017-0503-z}{10.1007/s10476-017-0503-z}.
 
+\bibitem{KarpZhang2024}
+D.~Karp and Y.~Zhang,
+\emph{Log-concavity and log-convexity of series containing multiple Pochhammer symbols},
+Fract. Calc. Appl. Anal. \textbf{27} (2024), 458--486,\newline DOI: \href{https://doi.org/10.1007/s13540-023-00238-0}{10.1007/s13540-023-00238-0}.
+
+\bibitem{MezoBaricz2017}
+I.~Mez\H{o} and \'{A}.~Baricz,
+\emph{Properties of the Tur\'{a}nian of modified Bessel functions},
+Math. Inequal. Appl. \textbf{20} (2017), 991--1001,\newline DOI: \href{https://doi.org/10.7153/mia-2017-20-63}{10.7153/mia-2017-20-63}.
+
 \bibitem{NISTDLMFBessel}
 NIST Digital Library of Mathematical Functions,
 \emph{Chapter 10: Bessel Functions},
-\url{https://dlmf.nist.gov/10}, accessed 19 July 2026.
+\url{https://dlmf.nist.gov/10}, accessed 22 July 2026.
 
 \bibitem{NISTDLMFGamma}
 NIST Digital Library of Mathematical Functions,
@@ -1518,7 +1241,7 @@ NIST Digital Library of Mathematical Functions,
 \bibitem{NISTDLMFOrder}
 NIST Digital Library of Mathematical Functions,
 \emph{Section 10.38: Derivatives with Respect to Order},
-\url{https://dlmf.nist.gov/10.38}, accessed 19 July 2026.
+\url{https://dlmf.nist.gov/10.38}, accessed 22 July 2026.
 
 \bibitem{Salazar2026}
 D. S. P. Salazar,
@@ -1530,11 +1253,6 @@ D. S. P. Salazar,
 \emph{Order-moment transport and Hankel determinants in special-function inequalities},
 arXiv:2606.31647, 2026,\newline DOI: \href{https://doi.org/10.48550/arXiv.2606.31647}{10.48550/arXiv.2606.31647}.
 
-\bibitem{ScheinEtAl2019}
-A. Schein, S. W. Linderman, M. Zhou, D. M. Blei, and H. Wallach,
-\emph{Poisson-randomized gamma dynamical systems},
-in \emph{Advances in Neural Information Processing Systems 32} (NeurIPS 2019), 781--792.
-
 \bibitem{Segura2011}
 J. Segura,
 \emph{Bounds for ratios of modified Bessel functions and associated Tur\'{a}n-type inequalities},
@@ -1544,12 +1262,6 @@ J. Math. Anal. Appl. \textbf{374} (2011), 516--528,\newline DOI: \href{https://d
 G. N. Watson,
 \emph{A Treatise on the Theory of Bessel Functions}, 2nd ed.,
 Cambridge University Press, 1944.
-
-\bibitem{YuanKalbfleisch2000}
-L. Yuan and J. D. Kalbfleisch,
-\emph{On the Bessel distribution and related problems},
-Ann. Inst. Statist. Math. \textbf{52} (2000), 438--447,\newline
-DOI: \href{https://doi.org/10.1023/A:1004152916478}{10.1023/A:1004152916478}.
 
 \end{thebibliography}
 

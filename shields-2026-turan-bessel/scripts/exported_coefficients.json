@@ -1,5 +1,5 @@
 {
-  "_comment": "Exact integer coefficient lists (highest power of a first) of the three blocks of the exceptional degree-two numerator Q_*(a,t), expanded in R_a = psi_1(a+1) - 1/(a+1); see eqs. (7.10)-(7.12). Since R_a > 0 and all three blocks have strictly positive coefficients for a > 0, Q_*(a,t) > 0 and hence Delta_2(a) > 0. verify_determinant.py re-derives these lists symbolically from the series definition and checks them against this file.",
+  "_comment": "Exact integer coefficient lists (highest power of a first) of the three blocks of the exceptional degree-two numerator Q_*(a,t), expanded in R_a = psi_1(a+1) - 1/(a+1); see eq. (5.5). Since R_a > 0 and all three blocks have strictly positive coefficients for a > 0, Q_*(a,t) > 0 and hence Delta_2(a) > 0. verify_determinant.py re-derives these lists symbolically from the series definition and checks them against this file.",
   "Qstar_Ra_squared": {
     "expression": "2 a^4 (a+1)^2",
     "powers_of_a": [6, 5, 4],

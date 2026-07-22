@@ -1,7 +1,7 @@
 /-
 # Negative-order failure of coefficientwise positivity
 
-Formalizes the algebraic part of `shields-2026-turan-bessel.tex`, §8 «Bessel
+Formalizes the algebraic part of `shields-2026-turan-bessel.tex`, §7 «Bessel
 consequences and sharpness» (`sec:bessel-consequences`), `prop:negative-coeff-failure`
 (via `lem:continuation`): the degree-two
 coefficient of `Δ` continues meromorphically to `-2 < a < -1` and is **negative**
@@ -14,10 +14,9 @@ The trigamma series `∑(a+n)⁻²` continues to negative non-integer `a`
 `Q_* > 0` (paper's `b`-substitution polynomial estimate) while the denominator is
 negative, so `Δ_2 < 0`.
 
-The `log|I_ν|` convention (`def:negative-order`), the pointwise negative-order
-failure (`prop:pole-limit-failure`, `lem:pole-order-estimates`), and the small-`z`
-expansion (`prop:small-z`) need the modified Bessel functions absent from Mathlib
-and are out of scope.
+The `log|I_ν|` convention and the small-`z` expansion `eq:small-z-D` of §7.1,
+together with the pointwise negative-order behavior noted in `rem:negative-order`,
+need the modified Bessel functions absent from Mathlib and are out of scope.
 
 Sorry-free.
 -/

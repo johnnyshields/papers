@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
-r"""Paper section 5 (Probabilistic interpretation: the finite conditional law).
+r"""Paper section 3, Remark 3.3 (Finite-law mechanism and the exceptional index).
 
-Under the symmetric conditional law, eq. (5.1),
+Under the symmetric finite law
     pi_{m,a}(i) = 1/(S_m * i!(m-i)! Gamma(a+i) Gamma(a+m-i)),   0 <= i <= m,
-with D = m-2I, X = psi(a+m-I)-psi(a+I), R = psi_1(a+I)+psi_1(a+m-I), this verifies:
+with D = m-2I, X = psi(a+m-I)-psi(a+I), R = psi_1(a+I)+psi_1(a+m-I) (the paper's
+rho), this verifies the displays of Remark 3.3:
 
   * E D = E X = 0 (symmetry);
-  * the conditional-information identities, eq. (5.2):
+  * the finite-law coefficient identities
         alpha_m = (1/2) E(R - X^2),
         beta_m  = 1 - (1/2) E(DX),
         c_m^(kappa) = kappa m/2 - (1/2) E D^2   (kappa=1 gives c_m);
-  * the second-logarithmic-derivative identity F_m''(0) = -2 S_m psi_1(a+m), eq. (4.14)
-    (equivalently F_m''(0)/F_m(0) = E(X^2 - R) = -2 psi_1(a+m));
+  * the second-logarithmic-derivative identity F_m''(0)/F_m(0) = E(X^2 - R) =
+    -2 psi_1(a+m) (Remark 3.3; cf. F_m''(0) = -2 S_m psi_1(a+m), eq. (3.11));
   * the normalized coefficient matrix N_m = diag(1,g^{-1/2}) M_m diag(1,g^{-1/2})
-    in its conditional form, eq. (5.3).
+    in its finite-law form.
 
 All checks are exact symbolic evaluations of finite sums.
 """
@@ -46,7 +47,7 @@ def c_kappa(m):
 g = sp.polygamma(1, a)
 
 # ---------------------------------------------------------------------------
-# Conditional moments and the information identities (5.1)-(5.2)
+# Finite-law moments and the coefficient identities (Remark 3.3)
 # ---------------------------------------------------------------------------
 for m in range(M_MAX + 1):
     w = [1/(sp.factorial(i)*sp.factorial(m-i)*sp.gamma(a+i)*sp.gamma(a+m-i))
@@ -73,7 +74,7 @@ for m in range(M_MAX + 1):
     assert sp.simplify(sp.expand_func((sp.Rational(m, 2) - sp.Rational(1, 2)*ED2) - c_sharp(m))) == 0, ('c', m)
     assert sp.simplify(sp.expand_func((kap*sp.Rational(m, 2) - sp.Rational(1, 2)*ED2) - c_kappa(m))) == 0, ('c_kappa', m)
 
-    # N_m = diag(1,g^{-1/2}) M_m diag(1,g^{-1/2}) in conditional form, eq. (5.3).
+    # N_m = diag(1,g^{-1/2}) M_m diag(1,g^{-1/2}) in finite-law form (Remark 3.3).
     Nm = sp.Matrix([[sp.Rational(1, 2)*ERmX2, 1 - sp.Rational(1, 2)*EDX],
                     [1 - sp.Rational(1, 2)*EDX, 1/g + sp.Rational(m, 2) - sp.Rational(1, 2)*ED2]])
     Nm_from_M = sp.Matrix([[alpha_m(m), beta_m(m)], [beta_m(m), 1/g + c_sharp(m)]])
@@ -81,8 +82,9 @@ for m in range(M_MAX + 1):
 print('PASS: E D = E X = 0, conditional-information identities, and N_m conditional form')
 
 # ---------------------------------------------------------------------------
-# Second logarithmic derivative of the asymmetric convolution F_m(delta), eq. (4.14):
-# F_m''(0)/F_m(0) = E(X^2 - R) = -2 psi_1(a+m).  Independent of the loop above.
+# Second logarithmic derivative of the asymmetric convolution F_m(delta), eq. (3.11)
+# / Remark 3.3: F_m''(0)/F_m(0) = E(X^2 - R) = -2 psi_1(a+m).  Independent of the
+# loop above.
 # ---------------------------------------------------------------------------
 for m in range(M_MAX + 1):
     Fm = sum(1/(sp.factorial(i)*sp.factorial(m-i)

@@ -4,7 +4,7 @@
 Completes the "if and only if" of `shields-2026-turan-bessel.tex`,
 §2 «Main results» `thm:coefficientwise` and the deformation half of
 `prop:bessel-sharpness` (`D_ν^{(κ)}>0` for all `ν>-1,z>0` iff `κ≥1`); the
-sharpness computation `eq:MD01-kappa` lives in §7 «Mixed determinants and
+sharpness computation `eq:MD01-kappa` lives in §5 «Mixed determinants and
 coefficientwise positivity» (`sec:determinant`).
 For the one-parameter family, the degree-one coefficient
 of the determinant is a positive multiple of `MD(N_0, N_1^{(κ)})`, and

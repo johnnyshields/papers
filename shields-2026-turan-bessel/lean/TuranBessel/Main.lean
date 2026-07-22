@@ -1,7 +1,7 @@
 /-
 # Sharp coefficientwise positivity (`thm:coefficientwise`, endpoint `κ = 1`)
 
-Assembles `shields-2026-turan-bessel.tex`, §7 «Mixed determinants and
+Assembles `shields-2026-turan-bessel.tex`, §5 «Mixed determinants and
 coefficientwise positivity» (`sec:determinant`); the theorem itself is stated in
 §2 «Main results» (`sec:main`, `thm:coefficientwise`).  The `λⁿ` coefficient of the
 Turán determinant is a positive multiple of

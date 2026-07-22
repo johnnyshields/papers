@@ -35,20 +35,20 @@ polygamma. The algebraic identities are cross-checked in `../scripts` (sympy).
 ## Module map
 
 Paper sections (of `../shields-2026-turan-bessel.tex`): 2 `sec:main`, 3
-`sec:bessel-reduction`, 4 `sec:coefficients`, 5 `sec:conditional`, 6 `sec:gram`,
-7 `sec:determinant`, 8 `sec:bessel-consequences`.  Each module header names the
-section(s) it formalizes.
+`sec:coefficients`, 4 `sec:gram`, 5 `sec:determinant`, 6 `sec:bessel-reduction`,
+7 `sec:bessel-consequences`, 8 `sec:context`, 9 `sec:questions`.  Each module
+header names the section(s) it formalizes.
 
 ```
-MatrixMD     — §7      2×2 symmetric matrices, MD, wedge positivity (lem:MD-positive)
-Trigamma     — §6      ψ₁ from series: summability (incl. continuation), bounds, CS
-Coefficients — §4,§5   closed-form matrices N_m (α_m,β_m,c_m), reduced weights s_m
-Gram         — §6      slack identity, CS+cross-sum ⇒ N_m ≻ 0 (thm:gram)
-Degree       — §7      Δ_1>0 (MD01), Q_* identity Dcoeff_two_eq, Δ_2>0, MD(N_1,N_m)≥0
-Main         — §7      coefficientwise_positivity (thm:coefficientwise §2, κ=1)
-Threshold    — §7,§2   κ<1 fails (eq:MD01-kappa; completes the iff)
-NegativeOrder— §8      Δ_2<0 on -2<a<-1 (prop:negative-coeff-failure, lem:continuation)
-Bridge       — §2,§3,§4 external inputs as documented axioms + derived corollaries
+MatrixMD     — §5      2×2 symmetric matrices, MD, wedge positivity (lem:MD-positive)
+Trigamma     — §4      ψ₁ from series: summability (incl. continuation), bounds, CS
+Coefficients — §3,§4   closed-form matrices N_m (α_m,β_m,c_m), reduced weights s_m
+Gram         — §4      slack identity, CS+cross-sum ⇒ N_m ≻ 0 (thm:gram)
+Degree       — §5      Δ_1>0 (MD01), Q_* identity Dcoeff_two_eq, Δ_2>0, MD(N_1,N_m)≥0
+Main         — §5      coefficientwise_positivity (thm:coefficientwise §2, κ=1)
+Threshold    — §5,§2   κ<1 fails (eq:MD01-kappa; completes the iff)
+NegativeOrder— §7      Δ_2<0 on -2<a<-1 (prop:negative-coeff-failure, lem:continuation)
+Bridge       — §2,§3,§6 external inputs as documented axioms + derived corollaries
 stale/       — archived helpers unused by any proof (not in the build target)
 ```
 
@@ -135,31 +135,30 @@ their derivatives with respect to the order (DLMF §10.38). Every Bessel-side
 object in the paper is therefore undefined in Mathlib.
 
 **What would remove them.** A standalone special-functions contribution:
-`I_ν, K_ν` (series definitions, holomorphy, the connection formula `eq:I-connection`),
+`I_ν, K_ν` (series definitions, holomorphy, the identity `eq:I-Z`),
 and order-derivative asymptotics. This is the single largest gap and the one least
 likely to be short. Given it, `besselSchurCoeff_pos` (already derived here from
 `turanDetCoeff_pos`) and then `bessel_schur_ineq` follow.
 
-The paper's supporting negative-order Bessel lemmas — `lem:continuation` (analytic
-continuation, needs the `Z`-calculus of L2), `lem:pole-order-estimates` and
-`prop:pole-limit-failure` (order derivatives of `I_ν, K_ν` at negative integers),
-and `prop:small-z` (small-`z` expansion of `D_ν`) — all sit behind this same gap.
-Their purely-algebraic consequence `prop:negative-coeff-failure` **is** proven
-(`NegativeOrder.Dcoeff_two_neg`), by continuing the trigamma series to `-2<a<-1`
-and reusing the `Q_*` identity.
+The paper's supporting negative-order material — `lem:continuation` (analytic
+continuation, needs the `Z`-calculus of L2), the small-`z` expansion `eq:small-z-D`
+of `D_ν`, and the negative-order behavior noted in `rem:negative-order` — sits
+behind this same gap. Its purely-algebraic consequence `prop:negative-coeff-failure`
+**is** proven (`NegativeOrder.Dcoeff_two_neg`), by continuing the trigamma series to
+`-2<a<-1` and reusing the `Q_*` identity.
 
 ## L4. Deliberately out of scope
 
-- **Explicit `Γ`-form of `cor:Delta-lower`** (`Δ_1(a)>λ/(a⁴Γ(a)⁴)`): a Γ-free
-  lower bound on `MD(N_0,N_1)` is immediate from the sharp trigamma bound already
-  proven; only the literal `Γ`-normalized constant needs `Real.Gamma`.
-- **§5 «Probabilistic interpretation: the finite conditional law»
-  (`sec:conditional`)**: interprets the coefficient weights via Bessel-law
-  variables; an interpretation that does not reprove positivity, so not formalized.
-- **§9 `sec:context` and the §11 appendix «Confluent minors of the modified
-  Bessel kernel» (`app:confluent`, `prop:tp-confluent`)**: a comparison with the
-  strict-total-positivity results for the kernel `I_s(x)`; context only, and
-  Bessel-kernel-dependent, so out of scope (L3).
+- **Explicit `Γ`-form of the §5 lower bound** (`Δ(a,λ)>λ/(a⁴Γ(a)⁴)`, the
+  unlabeled display closing `sec:determinant`): a Γ-free lower bound on
+  `MD(N_0,N_1)` is immediate from the sharp trigamma bound already proven; only the
+  literal `Γ`-normalized constant needs `Real.Gamma`.
+- **The Remark «Finite-law mechanism and the exceptional index» (`rem:finite-law`,
+  §3)**: interprets the coefficient weights via a finite convolution law; an
+  interpretation that does not reprove positivity, so not formalized.
+- **§8 «Comparison with related positivity results» (`sec:context`)**: a comparison
+  with the strict-total-positivity results for the kernel `I_s(x)`, including the
+  gauge obstruction; context only, and Bessel-kernel-dependent, so out of scope (L3).
 
 ## Axiom summary
 

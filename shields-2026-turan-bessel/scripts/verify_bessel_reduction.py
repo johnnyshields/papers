@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-r"""Paper section 3 (Exact reduction to the Bessel inequality) and section 8
-(Bessel consequences and sharpness); definitions G_nu/P_nu/H_nu/D_nu of section 2,
-eqs. (2.8)-(2.11), and Theorem 2.3 / Corollary 2.4.
+r"""Paper section 6 (Exact reduction from 0F1 to the Bessel inequality) and section
+7 (Bessel consequences and sharpness); definitions G_nu/P_nu/H_nu/D_nu of section 2,
+eqs. (2.7)-(2.10), and Theorem 2.4 / Corollary 2.5.
 
 All arithmetic is arbitrary precision (mpmath).  With nu = a-1 and z = 2 sqrt(lambda),
     G_nu(z) = -d_nu^2 log I_nu(z),
@@ -10,18 +10,16 @@ All arithmetic is arbitrary precision (mpmath).  With nu = a-1 and z = 2 sqrt(la
     D_nu(z) = G_nu (H_nu + 4/psi_1(nu+1)) - (1 + P_nu)^2,
 this verifies:
 
-  * I_{a-1}(2 sqrt lambda) = lambda^{(a-1)/2} Z(a,lambda), eq. (3.1);
-  * the bridge identities G_nu = A/Z^2, 1+P_nu = 2B/Z^2, H_nu+4/g = 4C/(g Z^2), eq. (3.4),
-    the matrix congruence eq. (3.5), hence the reduction D_{a-1}(2 sqrt lambda) =
-    4 Delta(a,lambda)/(g Z^4), eq. (3.6);
-  * the boundary-correction optimality D_{nu,R} = D_nu + G_nu(R-4/g), Prop. 2.5 / section 3 (after eq. (3.6));
+  * I_{a-1}(2 sqrt lambda) = lambda^{(a-1)/2} Z(a,lambda), eq. (6.1);
+  * the bridge identities G_nu = A/Z^2, 1+P_nu = 2B/Z^2, H_nu+4/g = 4C/(g Z^2), eqs. (6.2)-(6.4),
+    the matrix congruence eq. (6.5), hence the reduction D_{a-1}(2 sqrt lambda) =
+    4 Delta(a,lambda)/(g Z^4), eq. (6.6);
+  * the boundary-correction optimality D_{nu,R} = D_nu + G_nu(R-4/g), Proposition 2.6 (proof in section 7);
   * boundary limits G->psi_1(nu+1), H->0, P->1 and the rank-one z=0 matrix [[g,2],[2,4/g]]
-    (Corollary 2.4);
-  * small-z law D_nu(z) = 2(a psi_1(a)-1)/(a^3 psi_1(a)) z^2 + O(z^4), Prop. 8.3, eq. (8.2);
-  * the kappa-family small-z coefficient (2/(a^3 g))[(kappa-1)/2 (a g)^2 + a g - 1], eq. (3.9);
-  * negative-order failure Delta_2(a) < 0 on -2<a<-1, Prop. 8.4, eq. (8.3), with the certificate;
-  * the pole order-derivative estimates of Lemma 8.5, eqs. (8.4)-(8.6), and the pole-limit
-    D_{-n}(z) = -4 n(n-1) 2^{4n} [n!(n-1)!]^2 z^{-4n}(1+o(1)) of Prop. 8.6, eq. (8.11), n = 2,3.
+    (Corollary 2.5);
+  * small-z law D_nu(z) = 2(a psi_1(a)-1)/(a^3 psi_1(a)) z^2 + O(z^4), eq. (7.4);
+  * the kappa-family small-z coefficient (2/(a^3 g))[(kappa-1)/2 (a g)^2 + a g - 1], eq. (7.2);
+  * negative-order failure Delta_2(a) < 0 on -2<a<-1, Proposition 7.2, eq. (7.5), with the certificate.
 """
 from __future__ import annotations
 import sympy as sp
@@ -45,7 +43,7 @@ def H(nu, z):
     f2 = mp.diff(lambda zz: logI(nu, zz), z, 2)
     UU = z*f1 + z**2*f2                # (z d_z)^2 log I
     return 2*(U - nu) - UU
-def Hk(nu, z, kappa):                 # kappa-family H^(kappa) eq. (2.12), D^(kappa) eq. (2.13)
+def Hk(nu, z, kappa):                 # kappa-family H^(kappa) eq. (2.11), D^(kappa) eq. (2.12)
     U = zdz(lambda zz: logI(nu, zz), z)
     f1 = mp.diff(lambda zz: logI(nu, zz), z, 1)
     f2 = mp.diff(lambda zz: logI(nu, zz), z, 2)
@@ -81,7 +79,7 @@ def loglog_slope(f, z0, ratio=mp.mpf(2)):
     return mp.log(abs(f(z0)/f(z1)))/mp.log(z0/z1)
 
 # ---------------------------------------------------------------------------
-# eq. (3.1): I_{a-1}(2 sqrt lambda) = lambda^{(a-1)/2} Z(a,lambda)
+# eq. (6.1): I_{a-1}(2 sqrt lambda) = lambda^{(a-1)/2} Z(a,lambda)
 # ---------------------------------------------------------------------------
 for a, lam in [(mp.mpf('1.3'), mp.mpf('0.7')), (mp.mpf('0.4'), mp.mpf('2')), (mp.mpf('3'), mp.mpf('5'))]:
     lhs = mp.besseli(a-1, 2*mp.sqrt(lam))
@@ -102,7 +100,7 @@ for a, lam in [(mp.mpf('1.3'), mp.mpf('0.7')), (mp.mpf('0.4'), mp.mpf('0.2')), (
 print('PASS: bridge identities G=A/Z^2, 1+P=2B/Z^2, H+4/g=4C/(gZ^2), and D=4 Delta/(g Z^4)')
 
 # ---------------------------------------------------------------------------
-# Matrix congruence eq. (3.5): the Bessel-Schur matrix equals
+# Matrix congruence eq. (6.5): the Bessel-Schur matrix equals
 # (1/Z^2) diag(1, 2/sqrt g) T diag(1, 2/sqrt g).
 # ---------------------------------------------------------------------------
 for a, lam in [(mp.mpf('1.3'), mp.mpf('0.7')), (mp.mpf('0.4'), mp.mpf('0.2')), (mp.mpf('3'), mp.mpf('5'))]:
@@ -116,7 +114,7 @@ for a, lam in [(mp.mpf('1.3'), mp.mpf('0.7')), (mp.mpf('0.4'), mp.mpf('0.2')), (
 print('PASS: Bessel-Schur congruence = (1/Z^2) diag(1,2/sqrt g) T diag(1,2/sqrt g)')
 
 # ---------------------------------------------------------------------------
-# Boundary-correction optimality, Prop. 2.5 / section 3 (after eq. (3.6)): with H+R in place of H+4/g,
+# Boundary-correction optimality, Proposition 2.6 (proof in section 7): with H+R in place of H+4/g,
 # D_{nu,R} = D_nu + G_nu (R - 4/g), and D_{nu,R}(z) -> psi_1(nu+1) R - 4 as z->0.
 # ---------------------------------------------------------------------------
 def DnuR(nu, z, Rval):
@@ -145,7 +143,7 @@ for a in [mp.mpf('1.3'), mp.mpf('0.4'), mp.mpf('2.5')]:
 print('PASS: G->psi_1(nu+1), H->0, P->1; z=0 matrix [[g,2],[2,4/g]] is rank one')
 
 # ---------------------------------------------------------------------------
-# small-z expansion, Prop. 8.3, eq. (8.2), with slope-2 rate fit
+# small-z expansion, eq. (7.4), with slope-2 rate fit
 # ---------------------------------------------------------------------------
 for a in [mp.mpf('1.3'), mp.mpf('0.4'), mp.mpf('2.5')]:
     nu = a - 1
@@ -157,7 +155,7 @@ for a in [mp.mpf('1.3'), mp.mpf('0.4'), mp.mpf('2.5')]:
 print('PASS: D_nu(z) = 2(a psi_1(a)-1)/(a^3 psi_1(a)) z^2 + O(z^4), slope 2')
 
 # ---------------------------------------------------------------------------
-# kappa-family small-z coefficient, eq. (3.9)
+# kappa-family small-z coefficient, eq. (7.2)
 # ---------------------------------------------------------------------------
 for a in [mp.mpf('1.3'), mp.mpf('0.6')]:
     nu = a - 1; g = mp.polygamma(1, a)
@@ -168,7 +166,7 @@ for a in [mp.mpf('1.3'), mp.mpf('0.6')]:
 print('PASS: kappa-family small-z coefficient (2/(a^3 g))[(kappa-1)/2 (a g)^2 + a g - 1]')
 
 # ---------------------------------------------------------------------------
-# negative-order failure Delta_2(a) < 0 on -2 < a < -1, Prop. 8.4, eq. (8.3)
+# negative-order failure Delta_2(a) < 0 on -2 < a < -1, Proposition 7.2, eq. (7.5)
 # ---------------------------------------------------------------------------
 def Delta2_Q(a):
     t = mp.polygamma(1, a+1); Ra = t - 1/(a+1)
@@ -186,45 +184,5 @@ assert bracket.subs(b, 1) == 4
 assert d.subs(b, 1) == 14
 assert d.coeff(b, 2) > 0 and -d.coeff(b, 1)/(2*d.coeff(b, 2)) < 1     # vertex < 1
 print('PASS: Delta_2(a) < 0 on -2<a<-1, with polynomial certificate 8b^3-3b^2-4b+3>0 (b>=1)')
-
-# ---------------------------------------------------------------------------
-# Order-derivative estimates at a negative integer, Lemma 8.5, eqs. (8.4)-(8.6):
-#   d_nu I_nu|_{-n} / I_n            = c_n z^{-2n}(1+O(z^2)),   c_n=(-1)^{n+1}2^{2n}n!(n-1)!
-#   Theta(d_nu I_nu|_{-n} / I_n)     = -2n c_n z^{-2n}(1+O(z^2))
-#   d_nu^2 I_nu|_{-n} / I_n          = O(z^{-2n}(1+|log z|))
-# ---------------------------------------------------------------------------
-def ratio1(n, z):
-    return mp.diff(lambda v: mp.besseli(v, z), -n) / mp.besseli(n, z)
-def ratio1_theta(n, z):
-    return z*mp.diff(lambda zz: mp.diff(lambda v: mp.besseli(v, zz), -n)/mp.besseli(n, zz), z)
-def ratio2(n, z):
-    return mp.diff(lambda v: mp.besseli(v, z), -n, 2) / mp.besseli(n, z)
-for n in [2, 3]:
-    c_n = (-1)**(n+1)*mp.mpf(2)**(2*n)*mp.factorial(n)*mp.factorial(n-1)
-    z = mp.mpf('1e-2')
-    assert abs(ratio1(n, z)*z**(2*n) - c_n)/abs(c_n) < mp.mpf('1e-2'), (n, 'r1')
-    assert abs(ratio1_theta(n, z)*z**(2*n) - (-2*n*c_n))/abs(2*n*c_n) < mp.mpf('1e-2'), (n, 'r1t')
-    # second ratio is only O(z^{-2n}(1+|log z|)): the extracted z^{2n}/(1+|log z|) factor
-    # converges to a constant, and |ratio2| z^{4n} -> 0 (so it stays below the leading G order).
-    sc1 = abs(ratio2(n, mp.mpf('2e-2')))*mp.mpf('2e-2')**(2*n)/(1 + abs(mp.log(mp.mpf('2e-2'))))
-    sc2 = abs(ratio2(n, mp.mpf('5e-3')))*mp.mpf('5e-3')**(2*n)/(1 + abs(mp.log(mp.mpf('5e-3'))))
-    assert abs(sc1/sc2 - 1) < mp.mpf('0.05'), (n, 'r2 const')
-    o4a = abs(ratio2(n, mp.mpf('2e-2')))*mp.mpf('2e-2')**(4*n)
-    o4b = abs(ratio2(n, mp.mpf('5e-3')))*mp.mpf('5e-3')**(4*n)
-    assert o4b < o4a < mp.mpf('1e-3'), (n, 'r2 o(z^-4n)')
-print('PASS: pole order-derivative estimates c_n z^{-2n}, -2n c_n z^{-2n}, O(z^{-2n} log)=o(z^{-4n})')
-
-# ---------------------------------------------------------------------------
-# pole-limit asymptotic, Prop. 8.6, eq. (8.11), n = 2, 3
-# ---------------------------------------------------------------------------
-def Dpole(n, z):     # 1/psi_1(nu+1) extends to 0 at the pole, so the correction drops
-    return G(-n, z)*H(-n, z) - (1 + P(-n, z))**2
-for n in [2, 3]:
-    const = -4*n*(n-1)*mp.mpf(2)**(4*n)*(mp.factorial(n)*mp.factorial(n-1))**2
-    slope = loglog_slope(lambda zz: Dpole(n, zz), mp.mpf('0.02'))
-    assert abs(slope - (-4*n)) < mp.mpf('1e-2'), (n, slope)
-    z = mp.mpf('5e-3')
-    assert abs(Dpole(n, z)*z**(4*n) - const)/abs(const) < mp.mpf('1e-3'), (n,)
-print('PASS: D_{-n}(z) = -4 n(n-1) 2^{4n}[n!(n-1)!]^2 z^{-4n}(1+o(1)), n=2,3')
 
 print('ALL PASS: verify_bessel_reduction')

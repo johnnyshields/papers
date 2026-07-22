@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
-r"""Paper section 4 (Reciprocal-gamma convolution and coefficient formulas).
+r"""Paper section 3 (Reciprocal-gamma convolution and coefficient formulas).
 
 Verifies, symbolically and exactly:
 
-  * Lemma 4.1 (asymmetric reciprocal-gamma convolution), eq. (4.1), general (alpha,beta);
-  * S_m = (2a+m-1)_m / (m! Gamma(a+m)^2), eq. (4.2), and [lambda^m] Z^2 = S_m, eq. (4.3);
-  * the coefficient formulas of Theorem 4.2 (Exact coefficient matrices):
-    alpha_m eq. (4.5), beta_m eq. (4.6), gamma_m^(kappa) eq. (4.7), c_m^(kappa)
-    eqs. (4.8)-(4.9), and the sharp endpoint c_m eq. (4.10), including the two
-    algebraic forms of c_m^(kappa);
-  * the convolution moments of the Theorem 4.2 proof: E_delta D = m*delta/(a+m-1)
-    eq. (4.15), E(DX) = m/(a+m-1) eq. (4.16), and E D^2 = m(2a+m-2)/(2a+2m-3) eq. (4.18).
+  * Lemma 3.1 (asymmetric reciprocal-gamma convolution), eq. (3.1), general (alpha,beta);
+  * S_m = (2a+m-1)_m / (m! Gamma(a+m)^2) and [lambda^m] Z^2 = S_m (the displays
+    after Lemma 3.1);
+  * the coefficient formulas of Theorem 3.2 (Exact coefficient matrices):
+    alpha_m eq. (3.3), beta_m eq. (3.4), gamma_m^(kappa) eq. (3.5), c_m^(kappa)
+    eqs. (3.6)-(3.7), and the sharp endpoint c_m (the kappa=1 display in
+    Theorem 3.2), including the two algebraic forms of c_m^(kappa) in eq. (3.7);
+  * the convolution moments of the Theorem 3.2 proof: E_delta D = m*delta/(a+m-1)
+    eq. (3.12), E(DX) = m/(a+m-1) eq. (3.13), and E D^2 = m(2a+m-2)/(2a+2m-3)
+    (the display in the Theorem 3.2 proof).
 
 Every coefficient formula is cross-checked against a direct Maclaurin expansion of
 A, B, and C_kappa in lambda, so the closed forms are pinned to the series that
@@ -25,7 +27,7 @@ lam, g = sp.symbols('lambda g', positive=True)
 M_MAX = 6
 
 # ---------------------------------------------------------------------------
-# Lemma 4.1  (asymmetric reciprocal-gamma convolution), general (alpha, beta)
+# Lemma 3.1  (asymmetric reciprocal-gamma convolution), general (alpha, beta)
 # ---------------------------------------------------------------------------
 for m in range(M_MAX + 1):
     lhs = sum(
@@ -43,21 +45,21 @@ def S(m):
     return sp.rf(2*a+m-1, m)/(sp.factorial(m)*sp.gamma(a+m)**2)
 
 def alpha_m(m):
-    return sp.polygamma(1, a+m)                              # eq. (4.5)
+    return sp.polygamma(1, a+m)                              # eq. (3.3)
 
 def beta_m(m):
     if m == 0:
-        return sp.Integer(1)                                # eq. (4.6)
+        return sp.Integer(1)                                # eq. (3.4)
     return (2*a+m-2)/(2*(a+m-1))
 
-def c_kappa(m):                                             # eqs. (4.8)-(4.9)
+def c_kappa(m):                                             # eqs. (3.6)-(3.7)
     if m == 0:
         return sp.Integer(0)
     if m == 1:
         return (kap-1)/2
     return kap*m/2 - m*(2*a+m-2)/(2*(2*a+2*m-3))
 
-def c_sharp(m):                                            # eq. (4.10), kappa=1
+def c_sharp(m):                                            # sharp endpoint c_m, kappa=1
     if m in (0, 1):
         return sp.Integer(0)
     return m*(m-1)/(2*(2*a+2*m-3))
@@ -65,7 +67,7 @@ def c_sharp(m):                                            # eq. (4.10), kappa=1
 def gamma_kappa(m):
     return 1 + g*c_kappa(m)
 
-# Two algebraic forms of c_m^(kappa) for m>=2 (eq. 4.11) agree, and kappa=1 gives c_m.
+# Two algebraic forms of c_m^(kappa) for m>=2 (eq. (3.7)) agree, and kappa=1 gives c_m.
 for m in range(2, M_MAX + 1):
     form1 = kap*m/2 - m*(2*a+m-2)/(2*(2*a+2*m-3))
     form2 = m*((kap-1)*(2*a+2*m-3) + m-1)/(2*(2*a+2*m-3))
@@ -109,8 +111,8 @@ for m in range(M_MAX):        # top truncated coefficient of the product is unre
 print('PASS: [lambda^m] of A, B, C_kappa equal S_m*(alpha_m, beta_m, gamma_m^kappa)')
 
 # ---------------------------------------------------------------------------
-# Convolution moments, eqs. (4.15)-(4.18).  Weights are the asymmetric law
-# w_i(delta) = 1/(i!(m-i)! Gamma(a+delta+i) Gamma(a-delta+m-i)); D = m-2i.
+# Convolution moments, eqs. (3.12)-(3.13) and the E D^2 display.  Weights are the
+# asymmetric law w_i(delta) = 1/(i!(m-i)! Gamma(a+delta+i) Gamma(a-delta+m-i)); D = m-2i.
 # ---------------------------------------------------------------------------
 delta = sp.symbols('delta', real=True)
 for m in range(1, M_MAX + 1):
@@ -121,7 +123,7 @@ for m in range(1, M_MAX + 1):
     ED0 = sp.simplify(sp.expand_func(ED.subs(delta, 0)))
     assert ED0 == 0                                                # symmetric law at delta=0
     dED = sp.simplify(sp.expand_func(sp.diff(ED, delta).subs(delta, 0)))
-    assert sp.simplify(dED - m/(a+m-1)) == 0, ('E_deltaD slope', m)  # eq. (4.15) d/ddelta
+    assert sp.simplify(dED - m/(a+m-1)) == 0, ('E_deltaD slope', m)  # eq. (3.12) d/ddelta
 
     # E(DX) and E D^2 at delta=0.  X_i = psi(a+m-i) - psi(a+i), score of w_i.
     w0 = [wi.subs(delta, 0) for wi in w]
@@ -129,8 +131,8 @@ for m in range(1, M_MAX + 1):
     X = [sp.digamma(a+m-i) - sp.digamma(a+i) for i in range(m+1)]
     EDX = sp.simplify(sp.expand_func(sum((m-2*i)*X[i]*w0[i] for i in range(m+1))/n0))
     ED2 = sp.simplify(sp.expand_func(sum((m-2*i)**2*w0[i] for i in range(m+1))/n0))
-    assert sp.simplify(EDX - m/(a+m-1)) == 0, ('E(DX)', m)           # eq. (4.16)
-    assert sp.simplify(ED2 - m*(2*a+m-2)/(2*a+2*m-3)) == 0, ('E D^2', m)  # eq. (4.18)
+    assert sp.simplify(EDX - m/(a+m-1)) == 0, ('E(DX)', m)           # eq. (3.13)
+    assert sp.simplify(ED2 - m*(2*a+m-2)/(2*a+2*m-3)) == 0, ('E D^2', m)  # E D^2 display
 print('PASS: convolution moments E_delta D, E(DX), E D^2')
 
 print('ALL PASS: verify_convolution_coefficients')

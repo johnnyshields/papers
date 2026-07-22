@@ -1,23 +1,23 @@
 #!/usr/bin/env python3
-r"""Paper section 6 (Explicit Gram representations of the stable coefficients).
-The paper writes q = a + m/2 - 1 for the vector v scale (denoted p in this script's
-earlier form); the code variable is named q to match.
+r"""Paper section 4 (Gram structure and the exceptional matrix M_1).
+The paper writes q = a + m/2 - 1 for the vector v scale; the code variable is
+named q to match.
 
 Two exact symbolic certificates (sympy):
-  * telescoping cross term  q/(x-1) = beta_m,  eq. (6.8);
-  * the sharp Gram-slack simplification in the Theorem 6.2 proof, eq. (6.13):
+  * telescoping cross term  q/(x-1) = beta_m,  eq. (4.6);
+  * the sharp Gram-slack simplification in the Theorem 4.2 proof:
         a - 1/2 + m(m-1)/(2(2a+2m-3)) - (a+m/2-1)^2/(a+m-3/2)
             = (m-1)/(2(2a+2m-3)) > 0   (m >= 2);
-  * M_0 is the rank-one matrix [[g,sqrt g],[sqrt g,1]], eq. (6.14).
+  * M_0 is the rank-one matrix [[g,sqrt g],[sqrt g,1]] (the display after Theorem 4.2).
 
 High-precision numerics (mpmath):
   * the trigamma integrand bound 1+t/2 < t/(1-e^{-t}) < e^{t/2} and the three bounds of
-    Lemma 6.1: psi_1(y) > 1/y + 1/(2y^2), eq. (6.2); psi_1(y) < 1/(y-1/2), eq. (6.3);
-    1/psi_1(a) > a-1/2, eq. (6.4);
-  * the norms ||u^{(m)}||^2 = psi_1(x) = alpha_m, eq. (6.7), <u,v> = q/(x-1) = beta_m, eq. (6.8),
-    ||v^{(m)}||^2 = q^2 psi_1(x-1), eq. (6.9), each summed as an independent l^2 series;
-  * rho_m(a) = 1/g + c_m - q^2 psi_1(x-1) > 0, eq. (6.10), for (m>=2, a>0) and (m=1, a>=1/2), and
-    Theorem 6.2's Gram identity N_m = Gram(xi_m, eta_m), eq. (6.11), with xi_m=(u,0), eta_m=(v, sqrt(rho_m)).
+    Lemma 4.1: psi_1(y) > 1/y + 1/(2y^2), eq. (4.2); psi_1(y) < 1/(y-1/2), eq. (4.3);
+    1/psi_1(a) > a-1/2, eq. (4.4);
+  * the norms ||u^{(m)}||^2 = psi_1(x) = alpha_m, eq. (4.5), <u,v> = q/(x-1) = beta_m, eq. (4.6),
+    ||v^{(m)}||^2 = q^2 psi_1(x-1), eq. (4.7), each summed as an independent l^2 series;
+  * rho_m(a) = 1/g + c_m - q^2 psi_1(x-1) > 0, eq. (4.8), for (m>=2, a>0) and (m=1, a>=1/2), and
+    Theorem 4.2's Gram identity N_m = Gram(xi_m, eta_m), eq. (4.9), with xi_m=(u,0), eta_m=(v, sqrt(rho_m)).
 """
 from __future__ import annotations
 import sympy as sp
@@ -60,11 +60,11 @@ for tt in [mp.mpf(s) for s in ('0.01', '0.2', '1', '3', '12')]:
     assert 1 + tt/2 < kernel < mp.e**(tt/2)
 for yy in [mp.mpf(s) for s in ('0.05', '0.3', '0.7', '1', '4', '25')]:
     tri = mp.polygamma(1, yy)
-    assert tri > 1/yy + 1/(2*yy**2)                       # eq. (6.2)
+    assert tri > 1/yy + 1/(2*yy**2)                       # eq. (4.2)
     if yy > mp.mpf('0.5'):
-        assert tri < 1/(yy - mp.mpf('0.5'))               # eq. (6.3)
-    assert 1/mp.polygamma(1, yy) > yy - mp.mpf('0.5')     # eq. (6.4)
-print('PASS: trigamma integrand bound and Lemma 6.1')
+        assert tri < 1/(yy - mp.mpf('0.5'))               # eq. (4.3)
+    assert 1/mp.polygamma(1, yy) > yy - mp.mpf('0.5')     # eq. (4.4)
+print('PASS: trigamma integrand bound and Lemma 4.1')
 
 # --- l^2 norms summed independently and matched to closed forms ------------
 def gram_norms(a0, mm):

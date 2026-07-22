@@ -2,7 +2,7 @@
 # Low-degree coefficients and the degree-two repair
 
 Formalizes the coefficient-sector positivity of
-`shields-2026-turan-bessel.tex`, §7 «Mixed determinants and coefficientwise
+`shields-2026-turan-bessel.tex`, §5 «Mixed determinants and coefficientwise
 positivity» (`sec:determinant`).  `Δ_n` is a positive
 multiple of
 ```
@@ -10,7 +10,7 @@ Dcoeff a n = Σ_{k=0}^n s_k s_{n-k} MD(N_k, N_{n-k}),      s_m = sred a m,
 ```
 so `Δ_n > 0 ⇔ Dcoeff a n > 0`.  This file handles the two low degrees:
 
-* `MD_N0_N1_pos`  — `MD(N_0,N_1) = (aψ₁(a)-1)/(a²ψ₁(a)) > 0` (eq:MD01, `Δ_1`).
+* `MD_N0_N1_pos`  — `MD(N_0,N_1) = (aψ₁(a)-1)/(a²ψ₁(a)) > 0` (`eq:Delta1-sharp`, `Δ_1`).
 * `Dcoeff_two_pos` — the exceptional `Δ_2 > 0` (`lem:Delta2-positive`) via the
   sharp `Q_*` decomposition (eq:Delta2-Q, eq:Qstar-decomp):
   `Dcoeff a 2 = Q_*/(a⁶(a+1)³ψ₁(a))` with
@@ -44,7 +44,7 @@ theorem a_trigamma_gt_one (ha : 0 < a) : 1 < a * trigamma a := by
   have hmul := mul_lt_mul_of_pos_left h ha
   rwa [mul_inv_cancel₀ ha.ne'] at hmul
 
-/-- `MD(N_0,N_1) = (aψ₁(a)-1)/(a²ψ₁(a)) > 0` (eq:MD01, `Δ_1`). -/
+/-- `MD(N_0,N_1) = (aψ₁(a)-1)/(a²ψ₁(a)) > 0` (`eq:Delta1-sharp`, `Δ_1`). -/
 theorem MD_N0_N1_pos (ha : 0 < a) : 0 < SymMat.MD (Nmat a 0) (Nmat a 1) := by
   have hg : 0 < trigamma a := trigamma_pos ha
   have ht1 : trigamma (a + 1) = trigamma a - (a ^ 2)⁻¹ := trigamma_succ' ha
@@ -76,7 +76,7 @@ theorem Dcoeff_one_pos (ha : 0 < a) : 0 < Dcoeff a 1 := by
   rw [hcomm]
   nlinarith [mul_pos (mul_pos hs0 hs1) h01, mul_pos (mul_pos hs1 hs0) h01]
 
-/-- `R = ψ₁(a+1) - 1/(a+1) = ψ₁(a) - a⁻² - (a+1)⁻¹` (eq:t-def / `R_a`). -/
+/-- `R = ψ₁(a+1) - 1/(a+1) = ψ₁(a) - a⁻² - (a+1)⁻¹` (the `R_a` of `lem:Delta2-positive`). -/
 noncomputable def Rval (a : ℝ) : ℝ := trigamma a - (a ^ 2)⁻¹ - (a + 1)⁻¹
 
 /-- The degree-two numerator `Q_*` in `R`-form (eq:Qstar-decomp). -/

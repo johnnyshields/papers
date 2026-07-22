@@ -2,10 +2,10 @@
 # Coefficient data of the Turán matrix
 
 Formalizes the closed-form coefficient matrices of
-`shields-2026-turan-bessel.tex`, §4 «Reciprocal-gamma convolution and coefficient
-formulas» (`sec:coefficients`, `thm:coefficients`) and §5 «Probabilistic
-interpretation: the finite conditional law» (`sec:conditional`, `eq:Nm`),
-in the square-root-free normalization `N_m = diag(1,g^{-1/2}) M_m diag(1,g^{-1/2})`:
+`shields-2026-turan-bessel.tex`, §3 «Reciprocal-gamma convolution and coefficient
+formulas» (`sec:coefficients`, `thm:coefficients`, `eq:matrix-series`), in the
+square-root-free normalization `N_m = diag(1,g^{-1/2}) M_m diag(1,g^{-1/2})`
+introduced in §4 (`sec:gram`):
 ```
         ⎛ α_m        β_m      ⎞
 N_m  =  ⎝ β_m    g^{-1}+c_m   ⎠ ,     g = ψ₁(a),
@@ -80,7 +80,8 @@ noncomputable def βcoef (a : ℝ) (m : ℕ) : ℝ :=
 noncomputable def ccoef (a : ℝ) (m : ℕ) : ℝ :=
   if m ≤ 1 then 0 else (m : ℝ) * ((m : ℝ) - 1) / (2 * (2 * a + 2 * (m : ℝ) - 3))
 
-/-- The square-root-free coefficient matrix `N_m` (eq:Nm). -/
+/-- The square-root-free coefficient matrix `N_m` (the normalized `M_m` of
+`eq:matrix-series`). -/
 noncomputable def Nmat (a : ℝ) (m : ℕ) : SymMat :=
   ⟨αcoef a m, βcoef a m, (trigamma a)⁻¹ + ccoef a m⟩
 
