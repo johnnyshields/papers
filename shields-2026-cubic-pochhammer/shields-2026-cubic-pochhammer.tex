@@ -34,7 +34,7 @@
 of the cubic multiple-Pochhammer series}
 
 \author{John Shields}
-\date{July 21, 2026}
+\date{July 23, 2026}
 \thanks{Independent researcher, Tokyo, Japan. Corresponding author:
 \href{mailto:math@johnnyshields.com}{math@johnnyshields.com}.
 This version is archived at \href{https://doi.org/10.5281/zenodo.21475821}{doi:10.5281/zenodo.21475821}.}
@@ -54,12 +54,14 @@ series for multiplicity $r=2$ and gave numerical counterexamples for $r=4$, leav
 cubic case open as their Conjecture~3.8.  We prove it: for all
 $\mu,\alpha,\beta\ge0$, every coefficient of the generalized Tur\'anian
 $F_f(\mu+\alpha;x)F_f(\mu+\beta;x)-F_f(\mu;x)F_f(\mu+\alpha+\beta;x)$ is
-nonnegative.  The proof is elementary and noncomputational.  The degree-$m$ coefficient is
+nonnegative.  Equivalently, the map $(f_n)\mapsto F_f$ carries every
+such sequence to a coefficientwise log-concave family.  The proof is elementary
+and noncomputational.  The degree-$m$ coefficient is
 represented as a beta-binomial expectation, reducing the theorem to the
 monotonicity of a weighted residue-class binomial kernel; this monotonicity
 is established through a Bernstein-basis positivity certificate obtained from
 a root-of-unity evaluation.  A coefficientwise strictness criterion and
-ordinary log-concavity in $\mu$ follow.
+ordinary log-concavity in $\mu$ on $(0,\infty)$ follow.
 \end{abstract}
 
 \maketitle
@@ -73,9 +75,11 @@ coefficients of the generalized Tur\'anian
  F(\mu+\alpha;x)F(\mu+\beta;x)
  -F(\mu;x)F(\mu+\alpha+\beta;x)
 \]
-are nonnegative.  This property is stronger than ordinary log-concavity of
-$\mu\mapsto F(\mu;x)$ whenever the series converges at a positive value of
-$x$.  It has been studied systematically for reciprocal-gamma, gamma-ratio,
+are nonnegative.  This property is stronger than the corresponding pointwise
+inequality: whenever the relevant series converge at a positive value of $x$, summing
+the coefficient inequalities yields the generalized Tur\'an inequality for
+$\mu\mapsto F(\mu;x)$ there, simultaneously for all admissible shifts.  It has been
+studied systematically for reciprocal-gamma, gamma-ratio,
 hypergeometric, and Fox--Wright series; see
 \cite{KalmykovKarp2013Reciprocal,KalmykovKarp2013Ratios,KarpSitnik2010,KarpZhang2024}.
 Turán-type inequalities for hypergeometric and confluent hypergeometric
@@ -121,6 +125,27 @@ For every $\mu,\alpha,\beta\ge0$, the formal power series
 \end{equation}
 has nonnegative coefficients.
 \end{theorem}
+
+\Cref{thm:main} concerns the transform $(f_n)\mapsto F_f$, not a single
+function: every nonnegative log-concave sequence is sent to a parameter family
+whose generalized Tur\'anians have nonnegative coefficients.  Where the series
+converges, these coefficient inequalities sum to the pointwise generalized
+Tur\'an inequalities; setting $\alpha=\beta$ and invoking continuity then yields
+ordinary log-concavity of $\mu\mapsto F_f(\mu;x)$ (\Cref{cor:ordinary}).  The
+cubic case is the intervening multiplicity between the positive case $r=2$ and
+the first known failure at $r=4$, and the residue-class positivity of
+\Cref{sec:kernel} is the mechanism behind it.
+
+For $f_n\equiv1$, the triplication formula for the Pochhammer symbol gives
+\[
+ F_f(\mu;x)
+ =3x\,\frac{\mathrm d}{\mathrm dx}\,
+ {}_3F_2\!\left(\tfrac{\mu}{3},\tfrac{\mu+1}{3},\tfrac{\mu+2}{3};\,
+ \tfrac13,\tfrac23;\,x\right),
+\]
+so the theorem yields coefficientwise generalized Tur\'an inequalities for the
+differentiated ${}_3F_2$ family above; a general log-concave $(f_n)$ gives a
+coefficient-weighted extension.
 
 The proof has three components.  The coefficient of degree $m$ is rewritten as
 a beta-binomial expectation (\Cref{sec:beta-binomial}).  Two elementary
@@ -735,7 +760,7 @@ and in general its analogue weighted by the products $f_kf_{m-k}$.
 The cubic proof suggests testing whether a suitable projective degree lift has
 a positive coefficient array.  The known failure at $r=4$ shows that such
 positivity cannot persist without an additional restriction; locating the
-first coefficient obstruction in the lifted array may explain that threshold.
+first coefficient obstruction in the lifted array may explain the failure at $r=4$.
 \end{remark}
 
 \section*{Acknowledgements}
