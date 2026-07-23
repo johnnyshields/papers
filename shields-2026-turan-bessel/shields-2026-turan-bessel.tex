@@ -67,7 +67,7 @@
 {Sharp coefficientwise positivity\\ for a matrix Tur\'an determinant of ${}_0F_1$}
 
 \author{John Shields}
-\date{July 22, 2026}
+\date{July 24, 2026}
 \thanks{Independent researcher, Ginza 2-15-2, KF Ginza II 5F, Chuo-ku, Tokyo, Japan 104-0061.  Corresponding author: \href{mailto:math@johnnyshields.com}{math@johnnyshields.com}.  This version is archived at \href{https://doi.org/10.5281/zenodo.21438795}{doi:10.5281/zenodo.21438795}.}
 
 \subjclass[2020]{Primary 33C10, 33C20; Secondary 26D15}
@@ -551,7 +551,7 @@ We require elementary two-sided trigamma estimates.  The integral representation
  \qquad y>0,
 \end{equation}
 and the series $\psi_1(y)=\sum_{r\ge0}(y+r)^{-2}$ are standard
-\cite{NISTDLMFGamma}.
+\cite[\S5.9 and eq.~5.15.1]{NISTDLMFGamma}.
 
 \begin{lemma}[Trigamma bounds]\label{lem:trigamma-bounds}
 For every $y>0$,
@@ -664,17 +664,20 @@ The constant matrix is
  =\begin{pmatrix}\sqrt g\\1\end{pmatrix}
  \begin{pmatrix}\sqrt g&1\end{pmatrix},
 \]
-a rank-one positive-semidefinite matrix.  The possible anomaly at $m=1$ is genuine: using $\psi_1(a+1)=g-a^{-2}$ and $\beta_1=(2a-1)/(2a)$,
+a rank-one positive-semidefinite matrix.  With $\psi_1(a+1)=g-a^{-2}$ and $\beta_1=(2a-1)/(2a)$, the remaining coefficient matrix $M_1$ has determinant
 \begin{equation}\label{eq:det-M1}
  \det M_1
  =\psi_1(a+1)-g\left(\frac{2a-1}{2a}\right)^2
  =\frac{(4a-1)g-4}{4a^2}.
 \end{equation}
-Set $f(a)=(4a-1)\psi_1(a)-4$, so that $\det M_1$ has the sign of $f(a)$.  Since $\psi_1(a)=\sum_{r\ge0}(a+r)^{-2}$, for $0<a<1/2$
+
+\begin{remark}[Genuine indefiniteness of \texorpdfstring{\(M_1\)}{M1}]\label{rem:M1-indefinite}
+The anomaly at $m=1$ is genuine.  Set $f(a)=(4a-1)\psi_1(a)-4$, so that $\det M_1$ has the sign of $f(a)$ by \eqref{eq:det-M1}.  Since $\psi_1(a)=\sum_{r\ge0}(a+r)^{-2}$, for $0<a<1/2$
 \[
  f'(a)=2\sum_{r\ge0}\frac{2r+1-2a}{(a+r)^3}>0,
 \]
-while $f(a)\to-\infty$ as $a\downarrow0$ and $f(1/2)=\psi_1(1/2)-4=\pi^2/2-4>0$.  Hence $f$ has a unique zero $a_*\in(0,1/2)$.  Combining this with \Cref{thm:gram} for $a\ge1/2$, and using the positivity of the diagonal entries of $M_1$, we conclude that $M_1$ is indefinite for $0<a<a_*$, positive semidefinite of rank one at $a=a_*$, and positive definite for $a>a_*$.  Thus $M_1$ is the only coefficient matrix that can be indefinite at the endpoint $\kappa=1$.
+while $f(a)\to-\infty$ as $a\downarrow0$ and $f(1/2)=\psi_1(1/2)-4=\pi^2/2-4>0$.  Hence $f$ has a unique zero $a_*\in(0,1/2)$.  With \Cref{thm:gram} for $a\ge1/2$ and the positive diagonal of $M_1$, the matrix $M_1$ is indefinite for $0<a<a_*$, positive semidefinite of rank one at $a=a_*$, and positive definite for $a>a_*$.  It is the only coefficient matrix that can be indefinite at the endpoint $\kappa=1$, so the determinant positivity of \Cref{thm:coefficientwise} cannot follow from pointwise semidefiniteness of the $M_m$ alone.
+\end{remark}
 
 \section{Mixed determinants and coefficientwise positivity}\label{sec:determinant}
 
@@ -702,31 +705,39 @@ Expanding the determinant of \eqref{eq:matrix-series} gives
  \Delta_n
  =\frac12\sum_{k=0}^nS_kS_{n-k}\MD(M_k,M_{n-k}).
 \end{equation}
-If $a\ge1/2$, every $M_m$ is positive semidefinite and every $M_m$ with
-$m\ge1$ is positive definite.  Thus every summand in
-\eqref{eq:Delta-n-MD} is nonnegative, while the pair $(M_0,M_n)$ is strictly
-positive by \Cref{lem:MD-positive}, because $M_0\ne0$ and $M_n\succ0$.
-Hence $\Delta_n>0$.
-
-Now assume $0<a<1/2$.  By \eqref{eq:beta}, $\beta_1<0$ while $\beta_m>0$ for $m\ge2$.  Since every diagonal entry is positive, for $m\ge2$,
-\begin{equation}\label{eq:M1-Mm-positive}
- \MD(M_1,M_m)
- =\alpha_1(1+gc_m)+\alpha_m-2g\beta_1\beta_m>0.
-\end{equation}
-The linear coefficient is also positive.  Indeed,
+For $a\ge1/2$, $M_0$ is rank-one positive semidefinite and $M_m\succ0$ for
+$m\ge1$ by \Cref{thm:gram}, so \Cref{lem:MD-positive} makes every summand of
+\eqref{eq:Delta-n-MD} nonnegative and the pair $(M_0,M_n)$ strictly positive,
+giving $\Delta_n>0$; the argument that follows is uniform in $a>0$.
+The linear coefficient is strictly positive: \eqref{eq:trig-lower} gives
+$\psi_1(a)>1/a$, so $ag>1$ and
 \[
  \MD(M_0,M_1)=\frac{ag-1}{a^2}>0,
 \]
-and hence
+whence
 \begin{equation}\label{eq:Delta1-sharp}
  \Delta_1=S_0S_1\MD(M_0,M_1)
  =\frac{2(ag-1)}{a^3\Gamma(a)^4}>0.
 \end{equation}
-For $n\ge3$, classify the pairs $(k,n-k)$ in
-\eqref{eq:Delta-n-MD}.  If neither index is $1$, Gram positivity applies; if
-one index is $1$, the other is at least $2$ and
-\eqref{eq:M1-Mm-positive} applies.  Thus every summand is nonnegative, and the
-pair $(M_0,M_n)$ is strictly positive.  The indefiniteness of $M_1$ can therefore contribute a potentially negative summand only through its self-pairing $\MD(M_1,M_1)=2\det M_1$ in $\Delta_2$.
+For $m\ge2$ the mixed term satisfies
+\begin{equation}\label{eq:M1-Mm-positive}
+ \MD(M_1,M_m)
+ =\alpha_1(1+gc_m)+\alpha_m-2g\beta_1\beta_m\ge0.
+\end{equation}
+If $a\ge1/2$ then $M_1,M_m\succeq0$ by \Cref{thm:gram} and the nonstrict case of
+\Cref{lem:MD-positive} applies; if $0<a<1/2$ then $\beta_1<0<\beta_m$ by
+\eqref{eq:beta}, and since every diagonal entry is positive the right-hand side
+is strictly positive.
+For $n\ge3$ the self-pair $(1,1)$ does not occur.  Classify the pairs $(k,n-k)$
+in \eqref{eq:Delta-n-MD}: if neither index is $1$, both matrices in the pair are
+positive semidefinite---$M_0$ is rank-one positive semidefinite and $M_m\succ0$
+for $m\ge2$ by \Cref{thm:gram}---so the nonstrict case of \Cref{lem:MD-positive}
+gives a nonnegative summand; if one index is $1$, the other is at least $2$ and
+\eqref{eq:M1-Mm-positive} applies.  Every summand is therefore nonnegative, and
+the pair $(M_0,M_n)$ is strictly positive because $M_0\ne0$ and $M_n\succ0$.
+Hence $\Delta_n>0$.  The self-pairing $\MD(M_1,M_1)=2\det M_1$, excluded by this
+classification, occurs solely in $\Delta_2$; by \Cref{rem:M1-indefinite} the
+indefiniteness of $M_1$ for small $a>0$ can contribute negatively only there.
 
 \subsection{The exceptional determinant coefficient \texorpdfstring{\(\Delta_2\)}{Delta2}}
 
@@ -832,7 +843,7 @@ $ag-1>(2a)^{-1}$, yields the explicit lower bound
 
 \section{Exact reduction from \texorpdfstring{${}_0F_1$}{0F1} to the Bessel inequality}\label{sec:bessel-reduction}
 
-The standard identity \cite[\S10.39]{NISTDLMFBessel},\,\cite[\S3.7]{Watson1944}
+The standard identity \cite[eq.~10.25.2]{NISTDLMFBessel},\,\cite[\S3.7]{Watson1944}
 \begin{equation}\label{eq:I-Z}
  I_{a-1}(2\sqrt\lambda)=\lambda^{(a-1)/2}Z(a,\lambda)
 \end{equation}
@@ -945,7 +956,7 @@ For every real $a\notin\{0,-1,-2,\ldots\}$, the partial-fraction expansion
 \begin{equation}\label{eq:trigamma-partial-fraction}
  \psi_1(a)=\sum_{k=0}^{\infty}\frac1{(a+k)^2}
 \end{equation}
-holds and shows that $g=\psi_1(a)>0$ \cite{NISTDLMFGamma}.  Hence the positive real
+holds and shows that $g=\psi_1(a)>0$ \cite[eq.~5.15.1]{NISTDLMFGamma}.  Hence the positive real
 square root $\sqrt g$ occurring in \eqref{eq:Tkappa} and
 \eqref{eq:bessel-congruence} remains well defined on every real nonpole
 component.
@@ -1044,12 +1055,12 @@ classification beyond $\nu>-1$ appears to require separate treatment.
 The scalar quantity $A=Z_a^2-ZZ_{aa}$ is the infinitesimal symmetric-shift
 Tur\'anian of the reciprocal-gamma series.  Indeed,
 $Z(a+\delta,\lambda)Z(a-\delta,\lambda)-Z(a,\lambda)^2=-A(a,\lambda)\delta^2+O(\delta^4)$.
-The discrete Wright log-concavity and coefficientwise Tur\'an results of
-Kalmykov and Karp specialize to this reciprocal-gamma series and yield
-the scalar coefficient sign of $A$
-\cite{KalmykovKarp2013Reciprocal,KalmykovKarp2017}.  Their gamma-ratio results similarly treat
-scalar two-function Tur\'anians under parameter shifts
-\cite{KalmykovKarp2013Ratios,KalmykovKarp2014}.  The sharp coefficientwise thresholds of Karp and Zhang \cite{KarpZhang2024} are set by the multiplicity of Pochhammer symbols in such scalar series; the threshold here is instead the deformation parameter $\kappa$ of a coupled matrix determinant.
+The scalar coefficient sign of $A$ is the infinitesimal case of the
+coefficientwise reciprocal-gamma Tur\'an inequalities of Kalmykov and Karp
+\cite[Thm.~3.1 and Ex.~1]{KalmykovKarp2013Reciprocal} (the integer-shift form
+in \cite[Lem.~1 and Thm.~3]{KalmykovKarp2017}), whose gamma-ratio results
+similarly treat scalar two-function Tur\'anians under parameter shifts
+\cite{KalmykovKarp2013Ratios,KalmykovKarp2014}.  The sharp coefficientwise thresholds of Karp and Zhang \cite[\S3]{KarpZhang2024} are set by the multiplicity of Pochhammer symbols in such scalar series; the threshold here is instead the deformation parameter $\kappa$ of a coupled matrix determinant.
 
 The additional quantities $B$ and $C$ are not scalar parameter-shift
 Tur\'anians: $B$ contains a mixed parameter--Euler derivative, while $C$
@@ -1062,26 +1073,26 @@ can be indefinite.
 Classical Bessel Tur\'an inequalities compare neighboring orders, for example
 $I_\nu^2-I_{\nu-1}I_{\nu+1}$, or control ratios and logarithmic derivatives
 \cite{Baricz2008,Baricz2010,BariczPonnusamy2013,Segura2011}; series
-representations of the modified-Bessel Tur\'anian \cite{MezoBaricz2017},
+representations of the modified-Bessel Tur\'anian \cite[Thms.~1 and 5]{MezoBaricz2017},
 positivity of Tur\'an determinants for symmetric orthogonal polynomials
-\cite{BustozIsmail1997}, and higher-order Tur\'an and Hankel determinants in the
-order \cite{BariczPogany2014} have also been studied, as has the monotonicity in
+\cite[Thm.~1 and Cor.~1]{BustozIsmail1997}, and higher-order Tur\'an and Hankel determinants in the
+order \cite[\S\S2.2, 3]{BariczPogany2014} have also been studied, as has the monotonicity in
 the argument of determinants with special-function entries
-\cite{IsmailLaforgia2007}.  In contrast, \eqref{eq:bessel-main} couples second
+\cite[Thm.~2.3]{IsmailLaforgia2007}.  In contrast, \eqref{eq:bessel-main} couples second
 curvature in the order with first mixed order--argument curvature and second
-argument curvature.  Derivatives of $I_\nu$ with respect to the order, which
-supply the individual quantities $G_\nu$, $P_\nu$, and $H_\nu$, have been
-studied in their own right, with closed forms and integral representations
-\cite{NISTDLMFOrder,GonzalezSantander2018}; those results represent the separate
+argument curvature.  First-order derivatives of $I_\nu$ with respect to the order, which underlie
+$G_\nu$ and $P_\nu$, have been studied in their own right, with closed forms
+and integral representations \cite[\S10.38]{NISTDLMFOrder},\,\cite{GonzalezSantander2018}; those
+results represent the separate
 order derivatives rather than the mixed-curvature determinant proved positive
 here.
 
 A recent preprint of Salazar establishes that the kernel $(x,s)\mapsto I_s(x)$ is strictly
-totally positive for $x>0$ and $s\ge0$ \cite{Salazar2026}, extending
-integer-order results of Buchstaber and Glutsyuk \cite{BuchstaberGlutsyuk2019};
+totally positive for $x>0$ and $s\ge0$ \cite{Salazar2026Darboux}, extending
+integer-order results of Buchstaber and Glutsyuk \cite[Thm.~1.4]{BuchstaberGlutsyuk2019};
 a companion preprint builds all-order Hankel and Tur\'an
 determinant hierarchies for special functions from positive moment
-representations \cite{SalazarHankel}.  Their determinant hierarchies are
+representations \cite{Salazar2026Hankel}.  Their determinant hierarchies are
 respectively of evaluation-minor and Hankel-moment type; none of these papers
 states or proves the coefficientwise mixed-derivative determinant studied here.
 The signs of all total-positivity minors of $(x,s)\mapsto I_s(x)$, including
@@ -1146,14 +1157,21 @@ $AC-\psi_1(a)B^2$ follows from an appropriately strengthened form of scalar
 reciprocal-gamma log-concavity.
 \end{question}
 
-\section*{Computational verification}
-The proofs are self-contained and do not depend on numerical computation.  The symbolic and numerical scripts that independently verify the exact coefficient formulas \eqref{eq:alpha}--\eqref{eq:cm-kappa-general}, the polynomial decomposition of \Cref{lem:Delta2-positive}, and \Cref{thm:bessel} over sampled ranges of $(\nu,z)$ are available at \url{https://github.com/johnnyshields/papers} and archived with this version at \href{https://doi.org/10.5281/zenodo.21438795}{doi:10.5281/zenodo.21438795}.
+\section*{Declarations}
 
-\section*{Declaration of generative AI use}
-During the preparation of this work, the author used OpenAI's GPT-5.6 Sol and Anthropic's Claude Opus 4.8 to assist with manuscript drafting and verification code development.  The author takes full responsibility for the content of the work.
+\noindent\textbf{Funding.} This research received no external funding.
 
-\section*{Funding}
-This research received no external funding.
+\smallskip
+\noindent\textbf{Competing interests.} The author has no relevant interests to disclose.
+
+\smallskip
+\noindent\textbf{Data availability.} No datasets were generated or analysed.
+
+\smallskip
+\noindent\textbf{Computational verification.} The proofs do not depend on numerical computation.  Verification scripts are available at \url{https://github.com/johnnyshields/papers}.
+
+\smallskip
+\noindent\textbf{Declaration of generative AI and AI-assisted technologies in the manuscript preparation process.} During the preparation of this work, the author used OpenAI's ChatGPT (GPT-5.6 Sol) and Anthropic's Claude (Claude Opus 4.8) to assist with manuscript drafting and the development of auxiliary verification code.  After using these tools, the author reviewed and edited the content as needed and takes full responsibility for the content of the publication.
 
 \begin{thebibliography}{99}
 
@@ -1210,8 +1228,8 @@ J. Math. Anal. Appl. \textbf{406} (2013), 400--418,\newline DOI: \href{https://d
 
 \bibitem{KalmykovKarp2014}
 S. I. Kalmykov and D. B. Karp,
-\emph{On logarithmic concavity of series in gamma ratios},
-Russian Math. \textbf{58} (2014), 63--68.
+\emph{Logarithmic concavity of series in gamma ratios},
+Russian Math. \textbf{58} (2014), 63--68,\newline DOI: \href{https://doi.org/10.3103/S1066369X14060073}{10.3103/S1066369X14060073}.
 
 \bibitem{KalmykovKarp2017}
 S. I. Kalmykov and D. B. Karp,
@@ -1243,12 +1261,12 @@ NIST Digital Library of Mathematical Functions,
 \emph{Section 10.38: Derivatives with Respect to Order},
 \url{https://dlmf.nist.gov/10.38}, accessed 22 July 2026.
 
-\bibitem{Salazar2026}
+\bibitem{Salazar2026Darboux}
 D. S. P. Salazar,
 \emph{Strict total positivity from spectral Darboux and Toeplitz smoothing mechanisms},
 arXiv:2607.02778, 2026,\newline DOI: \href{https://doi.org/10.48550/arXiv.2607.02778}{10.48550/arXiv.2607.02778}.
 
-\bibitem{SalazarHankel}
+\bibitem{Salazar2026Hankel}
 D. S. P. Salazar,
 \emph{Order-moment transport and Hankel determinants in special-function inequalities},
 arXiv:2606.31647, 2026,\newline DOI: \href{https://doi.org/10.48550/arXiv.2606.31647}{10.48550/arXiv.2606.31647}.

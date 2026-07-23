@@ -34,7 +34,7 @@
 of the cubic multiple-Pochhammer series}
 
 \author{John Shields}
-\date{July 23, 2026}
+\date{July 24, 2026}
 \thanks{Independent researcher, Tokyo, Japan. Corresponding author:
 \href{mailto:math@johnnyshields.com}{math@johnnyshields.com}.
 This version is archived at \href{https://doi.org/10.5281/zenodo.21475821}{doi:10.5281/zenodo.21475821}.}
@@ -51,7 +51,7 @@ zeros, and define the cubic multiple-Pochhammer series
 $F_f(\mu;x)=\sum_{n\ge1}f_n\,(\mu)_{3n}\,x^n/(3n-1)!$.
 Karp and Zhang established coefficientwise log-concavity of the analogous
 series for multiplicity $r=2$ and gave numerical counterexamples for $r=4$, leaving the
-cubic case open as their Conjecture~3.8.  We prove it: for all
+cubic case open as their Conjecture~1.  We prove it: for all
 $\mu,\alpha,\beta\ge0$, every coefficient of the generalized Tur\'anian
 $F_f(\mu+\alpha;x)F_f(\mu+\beta;x)-F_f(\mu;x)F_f(\mu+\alpha+\beta;x)$ is
 nonnegative.  Equivalently, the map $(f_n)\mapsto F_f$ carries every
@@ -95,9 +95,9 @@ multiple-Pochhammer series
 where $(f_n)$ is nonnegative and log-concave.  Karp and Zhang report that
 A.\ Ninh suggested this construction to them in a private communication in
 2017 \cite{KarpZhang2024}; related published work on log-concavity and
-Tur\'an-type inequalities appears in \cite{NinhPham2018}.  They proved
+Tur\'an-type inequalities appears in \cite{NinhPham2025}.  They proved
 coefficientwise log-concavity for $r=2$, gave numerical counterexamples for
-$r=4$, and left the cubic case $r=3$ open \cite[Conjecture~3.8]{KarpZhang2024}.
+$r=4$, and left the cubic case $r=3$ open \cite[Conjecture~1]{KarpZhang2024}.
 This note proves that conjecture.
 
 Karp and Zhang index the ambient sequence from $n=0$, although the modified
@@ -242,8 +242,8 @@ on $[0,1/2]$ (\Cref{sec:kernel}), via the imbalance ordering of
 \section{Two monotonicity lemmas}\label{sec:monotonicity-lemmas}
 
 This section records two elementary monotonicity facts: a weighting principle
-for the paired residue blocks of \Cref{sec:kernel}, of the kind used in the
-multiplicity-two analysis of \cite{KarpZhang2024}, and an ordering of beta laws
+for the paired residue blocks of \Cref{sec:kernel}, due to \cite[Lem.~6]{KalmykovKarp2013Ratios} and applied to
+multiplicity two in \cite{KarpZhang2024}, and an ordering of beta laws
 by imbalance used in \Cref{sec:proof}, a fixed-sum likelihood-ratio comparison
 for folded beta laws \cite{BerenhautBergen2011}.
 
@@ -310,7 +310,7 @@ $1$ as $q\uparrow1/4$.  For $d_2>d_1$, $\cosh(d_2\ell)/\cosh(d_1\ell)$ is
 strictly increasing in $\ell>0$, because $d\mapsto d\tanh(d\ell)$ is strictly
 increasing; hence $g_{d_2}/g_{d_1}$ is strictly decreasing in $q$.  Thus
 $Q_{d_2}$ is smaller than $Q_{d_1}$ in the likelihood-ratio order, and
-therefore in the usual stochastic order \cite{ShakedShanthikumar2007}.  Since
+therefore in the usual stochastic order \cite[Thm.~1.C.1]{ShakedShanthikumar2007}.  Since
 both densities integrate to one and their ratio is strictly monotone, it
 crosses $1$ exactly once; hence $g_{d_1}-g_{d_2}$ has a single sign change,
 negative near $0$ and positive near $1/4$, so for every nondecreasing $\phi$,
@@ -454,7 +454,10 @@ and $\omega=e^{2\pi i/3}$,
  =\frac13\left(2^j+2\cos\frac{(j-2a)\pi}{3}\right),
 \]
 where $2\cos(x\pi/3)$ runs through $2,1,-1,-2,-1,1$ as
-$x\equiv0,1,2,3,4,5\pmod6$.  The first two moments over the residue class are
+$x\equiv0,1,2,3,4,5\pmod6$.  These values also follow with no appeal to
+$\mathbb C$: Pascal's rule gives $R_a(j+1)=R_a(j)+R_{a-1}(j)$ (subscripts
+modulo~$3$), and this recurrence with $R_0(0)=1$, $R_1(0)=R_2(0)=0$ fixes them
+by induction.  The first two moments over the residue class are
 \[
  \sum_{k\equiv2(3)}k\binom jk=jR_1(j-1),
  \qquad
@@ -618,7 +621,7 @@ $G_{m,w}$ is strictly increasing on $[0,1/2]$.
 The representation \eqref{eq:C-beta} and the two monotonicity facts of
 \Cref{sec:monotonicity-lemmas,sec:kernel} combine to show that the coefficient
 convolution is Schur-concave in its two parameters
-\cite{MarshallOlkinArnold2011} --- equivalently, nonincreasing under increasing
+\cite[Def.~3.A.1 and Thm.~3.A.4]{MarshallOlkinArnold2011} --- equivalently, nonincreasing under increasing
 imbalance at fixed parameter sum --- which gives \Cref{thm:main}.
 
 \begin{proposition}[Schur-concavity of the coefficient convolution]
@@ -764,7 +767,7 @@ first coefficient obstruction in the lifted array may explain the failure at $r=
 \end{remark}
 
 \section*{Acknowledgements}
-During the preparation of this work, the author used OpenAI's GPT-5.6 Sol and Anthropic's Claude Opus 4.8 to assist with manuscript drafting and verification code development.
+During the preparation of this work, the author used OpenAI's ChatGPT (GPT-5.6 Sol) and Anthropic's Claude (Claude Opus 4.8) to assist with manuscript drafting and the development of auxiliary verification code.
 
 \section*{Statements and declarations}
 
@@ -829,7 +832,7 @@ A.~W. Marshall, I.~Olkin, and B.~C. Arnold,
 2nd ed., Springer Series in Statistics, Springer, New York, 2011,
 DOI: \href{https://doi.org/10.1007/978-0-387-68276-1}{10.1007/978-0-387-68276-1}.
 
-\bibitem{NinhPham2018}
+\bibitem{NinhPham2025}
 A.~Ninh and M.~Pham,
 \emph{Logconcavity, twice-logconcavity and Tur\'an-type inequalities},
 Ann. Oper. Res. \textbf{354} (2025), no.~3, 1271--1283,
