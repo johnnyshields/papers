@@ -12,7 +12,15 @@ that fact over a wide range of m, together with the identities that produce it:
   * nonnegativity of every S_{n,j};
   * the projective Bernstein coefficient identity eq. (4.6), an exact integer,
     equal to the direct residue-class coefficient extraction;
-  * n+1 = 3m-1 = 2 or 5 (mod 6) and the positive x^2 coefficient (3S = 9d).
+  * n+1 = 3m-1 = 2 or 5 (mod 6) and the positive xi^2 coefficient
+    (3 S_{n,2} = 9 delta);
+  * that the congruence is LOAD-BEARING and not decoration: without it S_{n,j}
+    goes negative (67 times for n < 200, first S_{5,6} = -30, S_{6,6} = -15), and
+    every failure sits at one of the two residues n = 3m-2 excludes.
+
+Scope: the certificate and eqs. (4.6)-(4.9).  J_m itself, the link from eq. (4.6)
+back to P_m through eqs. (4.4)-(4.5), and eqs. (4.10)-(4.11) are in
+verify_kernel.py.
 
 Run:  python3 check_kernel_stdlib.py [MAX_M]   (default MAX_M = 120)
 """
@@ -65,6 +73,32 @@ def direct_projective_coefficient(n: int, j: int) -> int:
     return total // 3
 
 
+def check_congruence_is_load_bearing(n_max: int = 199) -> None:
+    """The certificate is FALSE for general n; n+1 = 2,5 (mod 6) is what saves it.
+
+    S_{n,j} >= 0 is the whole cubic proof, and it is not a general fact about the
+    residue-class sum: dropping n = 3m-2 and sweeping every n < n_max finds genuine
+    negative values, all of them at n+1 = 0 or 1 (mod 6) -- the two residues the
+    paper's family cannot take.
+    """
+    negatives = [(n, j) for n in range(2, n_max + 1)
+                 for j in range(n + 2) if S_sum(n, j) < 0]
+    assert negatives, "S_{n,j} should go negative once the congruence is dropped"
+    assert S_sum(5, 6) == -30 and S_sum(6, 6) == -15
+    assert sorted({(n + 1) % 6 for n, _ in negatives}) == [0, 1]
+    assert all((n + 1) % 6 not in (2, 5) for n, _ in negatives)
+    # delta >= 2 rescues the j = 0 (mod 6) branch, and j = 6 is the only place it
+    # is needed: at delta = 1 that branch is -45 at j = 6 and positive from j = 12
+    assert (2 ** 6 - 3 * 6 - 1) - 3 * 6 * 5 == -45
+    assert 2 * (2 ** 6 - 3 * 6 - 1) - 3 * 6 * 5 == 0
+    assert all((2 ** j - 3 * j - 1) - 3 * j * (j - 1) > 0 for j in range(12, 200, 6))
+    # both exponential bounds are ATTAINED at m = 3, so neither can be weakened
+    assert S_sum(7, 6) == 0 and S_sum(7, 7) == 0
+    print(f"PASS: the congruence n+1 = 2,5 (mod 6) is load-bearing -- "
+          f"{len(negatives)} negative S_(n,j) without it (n<={n_max}), first "
+          f"S_(5,6)=-30, S_(6,6)=-15; and eqs. (4.10)-(4.11) are attained at m=3")
+
+
 def main() -> None:
     max_m = int(sys.argv[1]) if len(sys.argv) > 1 else 120
     if max_m < 2:
@@ -74,16 +108,23 @@ def main() -> None:
         assert (n + 1) % 6 in (2, 5)
         for j in range(n + 2):
             s = S_sum(n, j)
+            d = n + 1 - j
             if j >= 2:
                 assert s == S_from_R(n, j), (m, j)          # eq. (4.9)
             assert 3 * s == three_S_table(n, j), (m, j)     # eq. (4.8)
             assert s >= 0, (m, j, s)                        # the certificate
+            if j % 6 == 1:
+                assert d >= 1, (m, j)                       # j = 1 (mod 6)
+            if j % 6 == 0 and j > 0:
+                assert d >= 2, (m, j)                       # j = 0 (mod 6), j > 0
             num = comb(n + 1, j) * s
             den = 3 * (n + 1)
             assert num % den == 0, (m, j)                   # integrality
             assert num // den == direct_projective_coefficient(n, j), (m, j)  # eq. (4.6)
         assert three_S_table(n, 2) == 9 * (n - 1) and S_sum(n, 2) > 0
-    print(f"PASS: eqs. (4.6)-(4.9) and S_{{n,j}} >= 0 for all 2 <= m <= {max_m}")
+    print(f"PASS: eqs. (4.6)-(4.9), S_{{n,j}} >= 0, and the delta bounds for all "
+          f"2 <= m <= {max_m}")
+    check_congruence_is_load_bearing()
     print("ALL PASS: check_kernel_stdlib (positivity certificate, no dependencies)")
 
 

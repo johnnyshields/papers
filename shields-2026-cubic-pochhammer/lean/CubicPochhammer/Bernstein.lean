@@ -5,7 +5,7 @@ Formalizes `shields-2026-cubic-pochhammer.tex`, §4 «The cubic residue
 kernel» (`sec:kernel`), `lem:bernstein`.  With `n = 3m-2`, the constant-weight
 derivative polynomial
 
-  `J_m(t) = ∑_{r=1}^{m-1} C(3m-2, 3r-1) t^{3r-1} (r - (m-r) t)`   (`eq:J-r`)
+  `J_m(t) = ∑_{k=1}^{m-1} C(3m-2, 3k-1) t^{3k-1} (k - (m-k) t)`   (`eq:J-r`)
 
 controls the monotonicity of the constant-weight kernel `G_m`.  Its
 Bernstein-basis representation (`eq:P-def`–`eq:P-coeff`) is
@@ -17,7 +17,7 @@ side is strictly positive on `(0,1)`; hence `J_m(t) > 0`.
 
 Identity (★) is a finite polynomial coefficient identity — the coefficient
 extraction `eq:P-coeff` from the projective Bernstein transform — verified
-exhaustively for `2 ≤ m ≤ 100` by `../scripts/verify_cubic_pochhammer.py` and
+exhaustively for `2 ≤ m ≤ 100` by `../scripts/verify_kernel.py` and
 checked here by hand at `m=2` (both sides equal `90 t²(1-t)`).  It is the one
 purely-combinatorial step carried as an axiom (`Jm_bernstein`); everything
 consuming it, including the positivity `Jm_pos` and all of `Kernel.lean`, is
@@ -40,7 +40,7 @@ noncomputable def Jm (m : ℕ) (t : ℝ) : ℝ :=
 `n = 3m-2`, `J_m` has Bernstein coefficients `S_{n,j}/(3(n+1))`.  A finite
 polynomial identity (projective Bernstein transform + third-root-of-unity
 coefficient extraction); it introduces **no analytic content** and is verified
-symbolically in `../scripts/verify_cubic_pochhammer.py`.  Its positive
+symbolically in `../scripts/verify_kernel.py`.  Its positive
 consequences below are proven from it and the theorem `Snj_nonneg`. -/
 axiom Jm_bernstein (m : ℕ) (t : ℝ) :
     3 * ((3 * m - 1 : ℕ) : ℝ) * Jm m t

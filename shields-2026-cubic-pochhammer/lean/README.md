@@ -5,7 +5,7 @@ Formalizes the core of `../shields-2026-cubic-pochhammer.tex` against Mathlib
 green with **no `sorry`** and a small, fully localized set of three documented
 bridge axioms, all listed below.
 
-The paper proves Karp–Zhang Conjecture 3.8 (`KarpZhang2024`): for a nonnegative
+The paper proves Karp–Zhang Conjecture 1 (`KarpZhang2024`): for a nonnegative
 log-concave sequence `(f_n)`, the cubic multiple-Pochhammer series
 `F_f(μ;x) = Σ_{n≥1} f_n (μ)_{3n} x^n/(3n-1)!` is coefficientwise log-concave.
 
@@ -102,7 +102,7 @@ ordinary theorem.
 
 ## A2. `block_certificate` — block decomposition and single sign change (§4.2)
 
-Pairs the terms `r ↔ m-r` of `J_{m,w}` into blocks `B_{m,r}` (`eq:B-def`); the
+Pairs the terms `k ↔ m-k` of `J_{m,w}` into blocks `B_{m,k}` (`eq:B-def`); the
 block sequence has at most one sign change (`lem:block-sign`) and sums to `J_m`.
 
 **What it is.** Two facts: (i) the algebraic pairing reindexing `eq:B-def`; and

@@ -16,7 +16,10 @@ so `Δ_n > 0 ⇔ Dcoeff a n > 0`.  This file handles the two low degrees:
   `Dcoeff a 2 = Q_*/(a⁶(a+1)³ψ₁(a))` with
   `Q_* = 2a⁴(a+1)²R² + 2a²(a+1)²(8a²+3a+1)R + 2a(a+1)(5a+3)`,
   `R = ψ₁(a+1)-1/(a+1) > 0`.
-* `MD_N1_Nm_nonneg` — `MD(N_1,N_m) ≥ 0` for `m ≥ 2` (eq:M1-Mm-positive).
+* `MD_N1_Nm_nonneg` — `MD(N_1,N_m) ≥ 0` for `m ≥ 2` (eq:M1-Mm-positive, eq. (5.3)).
+  The paper states this strictly (`> 0`); only the non-strict form is needed for
+  `coefficientwise_positivity`, since the `(0,n)` pair already contributes strictly,
+  so `≥ 0` is what is proven here.
 
 Sorry-free.
 -/

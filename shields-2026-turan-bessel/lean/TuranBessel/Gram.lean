@@ -2,16 +2,17 @@
 # Gram representation and positive definiteness of the stable coefficients
 
 Formalizes `shields-2026-turan-bessel.tex`, §4 «Gram structure and the
-exceptional matrix M₁» (`sec:gram`, `thm:gram`).  In `ℓ²` set
-`u_r = (x+r)⁻¹`, `v_r = p (x-1+r)⁻¹` with `x = a+m`, `p = a+m/2-1`.  Then
-`‖u‖² = ψ₁(x) = α_m`, `⟨u,v⟩ = p/(x-1) = β_m`, `‖v‖² = p² ψ₁(x-1)`, and
-Cauchy–Schwarz plus the positive Gram slack
-`ρ_m = g⁻¹ + c_m - p² ψ₁(x-1) > 0` give `det N_m > 0`, hence `N_m ≻ 0`, for
+exceptional matrix M₁» (`sec:gram`, Theorem 4.2 = `thm:gram`).  In `ℓ²` set
+`u_r = (x+r)⁻¹`, `v_r = q (x-1+r)⁻¹` with `x = a+m`, `q = a+m/2-1` (the Lean
+identifier for the scale `q` is `gramP`).  Then `‖u‖² = ψ₁(x) = α_m`,
+`⟨u,v⟩ = q/(x-1) = β_m`, `‖v‖² = q² ψ₁(x-1)`,
+and Cauchy–Schwarz plus the positive Gram slack
+`ρ_m = g⁻¹ + c_m - q² ψ₁(x-1) > 0` give `det N_m > 0`, hence `N_m ≻ 0`, for
 `m ≥ 2` (all `a>0`) and for `m = 1` (all `a ≥ 1/2`).
 
-The slack `ρ_m` (`eq:rho-m`) is positive: the trigamma upper bound
+The slack `ρ_m` (`eq:rho-m`, eq. (4.8)) is positive: the trigamma upper bound
 `ψ₁(x-1) < 1/(x-3/2)` and `1/g > a-1/2` reduce it to the rational identity
-`(a-1/2) + c_m - p²/(x-3/2) = (m-1)/(2(2a+2m-3)) > 0`.
+`(a-1/2) + c_m - q²/(x-3/2) = (m-1)/(2(2a+2m-3)) > 0`.
 
 Sorry-free.
 -/

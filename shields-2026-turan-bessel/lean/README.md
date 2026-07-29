@@ -23,11 +23,18 @@ and no project-specific axioms — `#print axioms` reports only Lean/Mathlib's
 | Sharp coefficientwise positivity, `Δ_n(a)>0`, `κ=1` | `thm:coefficientwise` | `Main.coefficientwise_positivity` |
 | Threshold sharp: `κ<1` fails / `κ≥1` deformation | `thm:coefficientwise`, `prop:bessel-sharpness`, `eq:MD01-kappa` | `Threshold.MDkappa_neg_exists` / `MDkappa_ge_pos` |
 | Gram positive-definiteness of stable coeffs | `thm:gram` | `Gram.Nmat_pd_two`, `Gram.Nmat_pd_one` |
+| Degree-one inertia trichotomy and the threshold `a✱` | `lem:M1-indefinite` | `Anomaly.M1_inertia_trichotomy`, `Nmat_one_not_psd`, `Nmat_one_pd_of_fM1_pos` |
 | Degree-two `Q_*` decomposition, `Δ_2>0` | `lem:Delta2-positive`, `eq:Qstar-decomp` | `Degree.Dcoeff_two_pos` |
 | Negative-order failure `Δ_2(a)<0` on `-2<a<-1` | `prop:negative-coeff-failure` | `NegativeOrder.Dcoeff_two_neg` |
-| Wedge/MD positivity | `lem:MD-positive` | `MatrixMD.MD_nonneg`, `MD_pos_of_psd_pd` |
+| Wedge/MD positivity | `lem:MD-positive` | `MatrixMD.SymMat.MD_nonneg`, `SymMat.MD_pos_of_psd_pd` |
 | Trigamma bounds (both sharp, trapezoidal) | `lem:trigamma-bounds`, `eq:trig-lower`, `eq:trig-upper-half` | `Trigamma.trigamma_gt_inv_sharp`, `trigamma_lt_upper` |
 | ℓ² Cauchy–Schwarz | (Gram argument) | `Trigamma.tsum_mul_sq_le` |
+
+In this table `Δ_n` is the coefficient in its proven mixed-determinant form
+(`Dcoeff`, `eq:Delta-n-MD`), and the axiom-free positivity is of that
+combinatorial sum; its identification with the genuine Maclaurin coefficient
+`[λⁿ] det 𝒯` (`turanDetCoeff_pos`) is axiom-backed via `turanDetCoeff_eq`
+(see L2 below).
 
 Trigamma `ψ₁` is **built from scratch** (`∑(y+n)⁻²`) because Mathlib has no
 polygamma. The algebraic identities are cross-checked in `../scripts` (sympy).
@@ -36,21 +43,58 @@ polygamma. The algebraic identities are cross-checked in `../scripts` (sympy).
 
 Paper sections (of `../shields-2026-turan-bessel.tex`): 2 `sec:main`, 3
 `sec:coefficients`, 4 `sec:gram`, 5 `sec:determinant`, 6 `sec:bessel-reduction`,
-7 `sec:bessel-consequences`, 8 `sec:context`, 9 `sec:questions`.  Each module
-header names the section(s) it formalizes.
+7 `sec:bessel-consequences`, 8 `sec:continuation`, 9 `sec:context`, 10
+`sec:questions`.  Each module header names the section(s) it formalizes.
 
 ```
 MatrixMD     — §5      2×2 symmetric matrices, MD, wedge positivity (lem:MD-positive)
 Trigamma     — §4      ψ₁ from series: summability (incl. continuation), bounds, CS
 Coefficients — §3,§4   closed-form matrices N_m (α_m,β_m,c_m), reduced weights s_m
 Gram         — §4      slack identity, CS+cross-sum ⇒ N_m ≻ 0 (thm:gram)
+Anomaly      — §4      f(a)=(4a-1)ψ₁(a)-4, its monotonicity and continuity, the
+                       threshold a✱ and the N_1 inertia trichotomy (lem:M1-indefinite)
 Degree       — §5      Δ_1>0 (MD01), Q_* identity Dcoeff_two_eq, Δ_2>0, MD(N_1,N_m)≥0
 Main         — §5      coefficientwise_positivity (thm:coefficientwise §2, κ=1)
 Threshold    — §5,§2   κ<1 fails (eq:MD01-kappa; completes the iff)
-NegativeOrder— §7      Δ_2<0 on -2<a<-1 (prop:negative-coeff-failure, lem:continuation)
+NegativeOrder— §8      Δ_2<0 on -2<a<-1 (prop:negative-coeff-failure, lem:continuation)
 Bridge       — §2,§3,§6 external inputs as documented axioms + derived corollaries
-stale/       — archived helpers unused by any proof (not in the build target)
 ```
+
+## Coverage against the paper
+
+Every result of `../shields-2026-turan-bessel.tex` carrying algebraic content, with
+its Lean status.  `proven` means sorry-free and axiom-clean.
+
+| Paper | Lean | Status |
+|---|---|---|
+| 4.1 `lem:trigamma-bounds` | `trigamma_gt_inv_sharp`, `trigamma_lt_upper`, `Gram.inv_trigamma_gt` | proven |
+| 4.2 `thm:gram` | `Nmat_pd_two`, `Nmat_pd_one`, `slack_identity`, `rho_pos_of_two`, `rho_pos_one`, `cross_sum`, `Nmat_det_pos` | proven |
+| 4.3 `lem:M1-indefinite` | `Anomaly.M1_inertia_trichotomy`, `Nmat_one_not_psd`, `Nmat_one_pd_of_fM1_pos` | proven (the decimal `a✱` is a locator, not formalized) |
+| 5.1 `lem:MD-positive` | `SymMat.MD_nonneg`, `SymMat.MD_pos_of_psd_pd` | proven |
+| 5.2 `lem:Delta-n-noneq2` | `MD_Nmat_nonneg`, `MD_N0_Nn_pos`, `MD_N0_N1_pos`, `Dcoeff_one_pos`, `MD_N1_Nm_nonneg` | proven (the last as `>=0`; eq. (5.3) states `>0`, and `>=0` is what the assembly consumes) |
+| 5.3 `lem:Delta2-positive` | `Dcoeff_two_eq`, `Rval_pos_of_pos`, `Qstar2_pos_of_pos`, `Dcoeff_two_pos` | proven |
+| 2.2 `thm:coefficientwise`, `κ=1` | `coefficientwise_positivity` | proven, on `Dcoeff` |
+| 2.2 the "only if" half | `MDkappa_eq`, `MDkappa_neg_exists`, `MDkappa_ge_pos` | proven |
+| 2.3 `rem:rank-one-threshold` | `Nmat_zero_psd`, `Nmat_zero_ne` | proven |
+| 8.2 `prop:negative-coeff-failure` | `NegativeOrder.Dcoeff_two_neg` | proven |
+| 2.2 → the true Maclaurin coefficient | `turanDetCoeff_pos` | axiom (L2) |
+| 3.1 `lem:convolution` | — | axiom (L2) |
+| 3.2 `thm:coefficients` | `Nmat`, `ccoef`, `sred` are definitions | axiom that they are the coefficients (L2) |
+| 6.1 / 6.5 / 6.6 the Bessel bridge | `besselG/P/H`, `besselSchurCoeff`, `_eq` | axiom (L3) |
+| 2.4 `thm:bessel` | `bessel_schur_ineq` | `sorry` (L1) |
+| 2.5 `cor:bessel-matrix` | `bessel_schur_matrix_pd` | `sorry` + `besselG_pos` (L1/L3) |
+| 2.6 least-constant half | — | missing (L3) |
+| 7.1 `lem:large-argument-limit` | — | missing (L3) |
+| 7.2 `cor:converse-fixed-a` | — | missing pointwise (L3); the coefficient-level `κ<1` failure is proven |
+| 7.3 `rem:first-negative-degree` | — | missing (L3) |
+| 8.1 `lem:continuation` | `trigamma_summable_shift`, `trigamma_succ_of_summable`, `trigamma_recurrences_neg`, `trigamma_pos_neg` | **partial** — the trigamma series continues to negative non-integer `a`; the meromorphic continuation of the coefficient identities does not (L2) |
+| 3.4 `rem:finite-law`, §9 `sec:context`, §5 closing `Γ`-bound | — | out of scope (L4) |
+
+**100% coverage is not reachable from Mathlib as it stands.**  Every remaining row
+is blocked on L2 or L3, and both are Mathlib gaps rather than effort gaps: there
+are no modified Bessel functions, no polygamma family, and no real-parameter Gauss
+₂F₁.  Closing them means contributing a special-functions library first; nothing in
+this development can route around that.
 
 ---
 
@@ -140,10 +184,13 @@ and order-derivative asymptotics. This is the single largest gap and the one lea
 likely to be short. Given it, `besselSchurCoeff_pos` (already derived here from
 `turanDetCoeff_pos`) and then `bessel_schur_ineq` follow.
 
-The paper's supporting negative-order material — `lem:continuation` (analytic
-continuation, needs the `Z`-calculus of L2), the small-`z` expansion `eq:small-z-D`
-of `D_ν`, and the negative-order behavior noted in `rem:negative-order` — sits
-behind this same gap. Its purely-algebraic consequence `prop:negative-coeff-failure`
+The paper's supporting negative-order material of §8 — Lemma 8.1 `lem:continuation`,
+whose trigamma half **is** proven (`trigamma_summable_shift`,
+`trigamma_succ_of_summable`, `NegativeOrder.trigamma_recurrences_neg`) while its
+coefficient-identity half needs the `Z`-calculus of L2 — the small-`z` expansion
+`eq:small-z-D` (eq. (8.2)) of `D_ν`, and the accompanying claim that the leading
+small-`z` term keeps its positive sign away from the poles — sits behind this same
+gap. Its purely-algebraic consequence, Proposition 8.2 `prop:negative-coeff-failure`,
 **is** proven (`NegativeOrder.Dcoeff_two_neg`), by continuing the trigamma series to
 `-2<a<-1` and reusing the `Q_*` identity.
 
@@ -153,11 +200,11 @@ behind this same gap. Its purely-algebraic consequence `prop:negative-coeff-fail
   unlabeled display closing `sec:determinant`): a Γ-free lower bound on
   `MD(N_0,N_1)` is immediate from the sharp trigamma bound already proven; only the
   literal `Γ`-normalized constant needs `Real.Gamma`.
-- **The Remark «Finite-law mechanism and the exceptional index» (`rem:finite-law`,
-  §3)**: interprets the coefficient weights via a finite convolution law; an
-  interpretation that does not reprove positivity, so not formalized.
-- **§8 «Comparison with related positivity results» (`sec:context`)**: a comparison
-  with the strict-total-positivity results for the kernel `I_s(x)`, including the
+- **Remark 3.4 (`rem:finite-law`, §3)**: interprets the coefficient weights via a
+  finite convolution law; an interpretation that does not reprove positivity, so not
+  formalized.
+- **§9 «Comparison with related positivity results» (`sec:context`)**: a comparison
+  with the strict-total-positivity results for the kernel `I_ν(z)`, including the
   gauge obstruction; context only, and Bessel-kernel-dependent, so out of scope (L3).
 
 ## Axiom summary
@@ -172,6 +219,7 @@ behind this same gap. Its purely-algebraic consequence `prop:negative-coeff-fail
 
 `#print axioms coefficientwise_positivity` = `[propext, Classical.choice,
 Quot.sound]` — no `sorry`, no L1–L3 axioms. The same holds for the sharpness
-results (`MDkappa_neg_exists`, `Dcoeff_two_neg`) and the analytic lemmas
-(`trigamma_gt_inv_sharp`, `tsum_mul_sq_le`). Algebraic identities (slack, `Q_*`,
+results (`MDkappa_neg_exists`, `Dcoeff_two_neg`), the inertia trichotomy
+(`M1_inertia_trichotomy`, `Nmat_one_not_psd`, `Nmat_one_pd_of_fM1_pos`), and the
+analytic lemmas (`trigamma_gt_inv_sharp`, `tsum_mul_sq_le`, `continuousOn_trigamma`). Algebraic identities (slack, `Q_*`,
 cross-sum) are checked symbolically in `../scripts`.

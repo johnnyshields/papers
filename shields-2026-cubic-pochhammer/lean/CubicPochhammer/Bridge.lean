@@ -6,8 +6,8 @@ Formalizes the coefficient convolution `C_{m,f}(u,v)` (`eq:C-def`) of
 the proven kernel monotonicity (`Kernel.Jmw_nonneg`) into Schur-concavity of
 `C_{m,f}` (`prop:C-schur`).
 
-`C_{m,f}(u,v) = ∑_{r=1}^{m-1} f_r f_{m-r} (u)_{3r}(v)_{3(m-r)} /
-              ((3r-1)!(3(m-r)-1)!)`   (`eq:C-def`)
+`C_{m,f}(u,v) = ∑_{k=1}^{m-1} f_k f_{m-k} (u)_{3k}(v)_{3(m-k)} /
+              ((3k-1)!(3(m-k)-1)!)`   (`eq:C-def`)
 
 is the degree-`m` coefficient of `F_f(u;x)F_f(v;x)`.
 
@@ -31,8 +31,8 @@ namespace CubicPochhammer
 noncomputable def poch (u : ℝ) (k : ℕ) : ℝ := ∏ i ∈ Finset.range k, (u + (i : ℝ))
 
 /-- The degree-`m` coefficient of `F_f(u;x) F_f(v;x)` (`eq:C-def`):
-`C_{m,f}(u,v) = ∑_{r=1}^{m-1} f_r f_{m-r} (u)_{3r}(v)_{3(m-r)} /
-              ((3r-1)!(3(m-r)-1)!)`. -/
+`C_{m,f}(u,v) = ∑_{k=1}^{m-1} f_k f_{m-k} (u)_{3k}(v)_{3(m-k)} /
+              ((3k-1)!(3(m-k)-1)!)`. -/
 noncomputable def Cmf (f : ℕ → ℝ) (m : ℕ) (u v : ℝ) : ℝ :=
   ∑ r ∈ Finset.Icc 1 (m - 1),
     f r * f (m - r) * (poch u (3 * r) * poch v (3 * (m - r)))
@@ -40,7 +40,7 @@ noncomputable def Cmf (f : ℕ → ℝ) (m : ℕ) (u v : ℝ) : ℝ :=
 
 /-- **Bridge — Schur-concavity of the coefficient convolution** (`prop:C-schur`,
 via `eq:C-beta` + `lem:beta-order`).  For nonnegative `f` whose symmetric weights
-`w_r = f_r f_{m-r}` give a nondecreasing (hence monotone kernel `hker`)
+`w_k = f_k f_{m-k}` give a nondecreasing (hence monotone kernel `hker`)
 configuration, `C_{m,f}` is Schur-concave: at fixed parameter sum, a smaller
 imbalance yields the larger value.
 

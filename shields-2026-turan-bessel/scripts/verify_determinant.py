@@ -1,23 +1,27 @@
 #!/usr/bin/env python3
-r"""Paper section 5 (Mixed determinants and coefficientwise positivity), kappa=1;
-also the m=1 anomaly of section 4 (det M_1 and the threshold a_*).
+r"""Paper section 5 (Mixed determinants and coefficientwise positivity), sec:determinant,
+kappa=1; also the m=1 anomaly of section 4 (sec:gram: det M_1 and the threshold a_*).
+
+Result numbers below are paired with the paper's labels, which survive renumbering:
+Lemma 5.1 = lem:MD-positive, Lemma 5.2 = lem:Delta-n-noneq2, Lemma 5.3 =
+lem:Delta2-positive, Theorem 2.2 = thm:coefficientwise, Theorem 4.2 = thm:gram.
 
   * MD(X,Y) = x11 y22 + x22 y11 - 2 x12 y12 is the polarization of det (the display
     opening section 5), and for rank-one X=xx^T, Y=yy^T equals (x1 y2 - x2 y1)^2 (Lemma 5.1).
   * Delta_n = (1/2) sum_{k=0}^n S_k S_{n-k} MD(M_k, M_{n-k}), eq. (5.1), matches the
     direct Maclaurin coefficient [lambda^n] Delta for n = 1..5.
   * MD(M_0, M_1) = (a g - 1)/a^2 (unnumbered display in section 5);
-    Delta_1 = 2(a g -1)/(a^3 Gamma(a)^4), eq. (5.3); and the lower bound
+    Delta_1 = 2(a g -1)/(a^3 Gamma(a)^4), eq. (5.2); and the lower bound
     Delta_1(a) > 1/(a^4 Gamma(a)^4) (the display at the end of section 5).
   * A(a,0)=g/Gamma(a)^2, B(a,0)=C_kappa(a,0)=1/Gamma(a)^2, so Delta^(kappa)(a,0)=0 and the
     series starts at degree one (section 2, after Theorem 2.2).
   * det M_1 = ((4a-1)g-4)/(4a^2), eq. (4.11), and the sharp anomaly threshold
     a_* = 0.3690738484... of section 4 (M_1 indefinite for a<a_*, PD for a>a_*).
   * for 0<a<1/2, the sign pattern beta_1 = (2a-1)/(2a) < 0, beta_m > 0 (m>=2), and
-    MD(M_1, M_m) = alpha_1(1+g c_m) + alpha_m - 2 g beta_1 beta_m > 0, eq. (5.2).
-  * Delta_2(a) > 0 (Lemma 5.2): Delta_2 = Q_*(a,t) / (2 a^6 (a+1)^3 Gamma(a)^4), eq. (5.4), with
+    MD(M_1, M_m) = alpha_1(1+g c_m) + alpha_m - 2 g beta_1 beta_m > 0, eq. (5.3).
+  * Delta_2(a) > 0 (Lemma 5.3, lem:Delta2-positive): Delta_2 = Q_*(a,t) / (2 a^6 (a+1)^3 Gamma(a)^4), eq. (5.4), with
         Q_* = 2a^4(a+1)^2 R_a^2 + 2a^2(a+1)^2(8a^2+3a+1) R_a + 2a(a+1)(5a+3), eq. (5.5),
-        R_a = psi_1(a+1) - 1/(a+1),   t = psi_1(a+1) (Lemma 5.2),
+        R_a = psi_1(a+1) - 1/(a+1),   t = psi_1(a+1) (Lemma 5.3),
     via Delta_2 = S_0 S_2 MD(M_0,M_2) + S_1^2 det M_1 (eq. (5.6)), its intermediate t-form,
     and the manifestly positive sum-of-squares form of eq. (5.5) (||f||^2 = R_a).
   * MD(M_0, M_1^(kappa)) = ((kappa-1)/2 (a g)^2 + a g - 1)/a^2, eq. (5.7), and the
@@ -94,7 +98,9 @@ for a0 in [mp.mpf(s) for s in ('0.02', '0.1', '0.25', '0.36', '0.49')]:
 assert f(mp.mpf('1e-6')) < 0 and abs(f(mp.mpf('0.5')) - (mp.pi**2/2 - 4)) < mp.mpf('1e-30')
 assert mp.pi**2/2 - 4 > 0
 a_star = mp.findroot(f, mp.mpf('0.37'))
-assert abs(a_star - mp.mpf('0.3690738484')) < mp.mpf('1e-9')
+# exact to the digits the paper prints: a 1e-9/1e-10 tolerance would accept a
+# wrong final digit (|a_* - 0.3690738485| = 8.85e-11)
+assert mp.nstr(a_star, 10) == '0.3690738484', mp.nstr(a_star, 20)
 assert f(a_star*(1 - mp.mpf('1e-6'))) < 0 < f(a_star*(1 + mp.mpf('1e-6')))
 # det M_1 sign: indefinite (det<0) for a<a_*, positive definite (det>0) for a>a_*.
 det_M1 = lambda a0: ((4*a0 - 1)*mp.polygamma(1, a0) - 4)/(4*a0**2)
@@ -146,20 +152,53 @@ for n in range(1, 6):
 print('PASS: Delta_n (MD-sum) equals direct [lambda^n] Delta, n=1..5')
 
 # ---------------------------------------------------------------------------
-# 0 < a < 1/2 sign structure; MD(M_1,M_m) > 0 is eq. (5.2)  (numeric grid)
+# eq. (5.3): MD(M_1,M_m) > 0 for EVERY a>0 and m>=2.  The display is strict, and
+# the paper proves it in two branches:
+#   0 < a < 1/2 : beta_1 < 0 < beta_m with every diagonal entry positive;
+#   a >= 1/2    : M_1, M_m > 0 by Theorem 4.2, so the STRICT case of Lemma 5.1
+#                 applies (that case needs M_1 != 0 and M_m > 0).
+# Both branches are asserted below, so weakening either the display or the
+# "strict case" attribution in section 5 fails here.
 # ---------------------------------------------------------------------------
 def alpha_n(a0, mm): return mp.polygamma(1, a0 + mm)
 def beta_n(a0, mm): return mp.mpf(1) if mm == 0 else (2*a0+mm-2)/(2*(a0+mm-1))
 def c_n(a0, mm): return mp.mpf(0) if mm in (0, 1) else mp.mpf(mm*(mm-1))/(2*(2*a0+2*mm-3))
-for a0 in [mp.mpf(s) for s in ('0.01', '0.1', '0.25', '0.45', '0.499')]:
+def md_1m(a0, mm):
     g0 = mp.polygamma(1, a0)
+    return (alpha_n(a0, 1)*(1 + g0*c_n(a0, mm)) + alpha_n(a0, mm)
+            - 2*g0*beta_n(a0, 1)*beta_n(a0, mm))
+def det_M_num(a0, mm):
+    g0 = mp.polygamma(1, a0)
+    return alpha_n(a0, mm)*(1 + g0*c_n(a0, mm)) - g0*beta_n(a0, mm)**2
+
+# branch 1: 0 < a < 1/2, via the beta sign pattern
+for a0 in [mp.mpf(s) for s in ('0.001', '0.01', '0.1', '0.25', '0.45', '0.499')]:
     assert beta_n(a0, 1) < 0 and abs(beta_n(a0, 1) - (2*a0-1)/(2*a0)) < mp.mpf('1e-30')
     for mm in range(2, 9):
         assert beta_n(a0, mm) > 0
-        md1m = (alpha_n(a0, 1)*(1 + g0*c_n(a0, mm)) + alpha_n(a0, mm)
-                - 2*g0*beta_n(a0, 1)*beta_n(a0, mm))
-        assert md1m > 0, (a0, mm, md1m)
+        assert md_1m(a0, mm) > 0, (a0, mm, md_1m(a0, mm))
 print('PASS: beta signs and MD(M_1,M_m) > 0 for 0<a<1/2, m>=2')
+
+# branch 2: a >= 1/2.  The strict case of Lemma 5.1 is only available if M_1 and
+# M_m are positive DEFINITE there (a_* = 0.369... < 1/2, so M_1 is), which is what
+# section 5 now invokes in place of the nonstrict case.
+for a0 in [mp.mpf(s) for s in ('0.5', '0.5000001', '0.75', '1', '2', '10', '100', '1000')]:
+    assert alpha_n(a0, 1) > 0 and det_M_num(a0, 1) > 0, ('M_1 not PD at', a0)
+    for mm in range(2, 9):
+        assert alpha_n(a0, mm) > 0 and det_M_num(a0, mm) > 0, ('M_m not PD at', a0, mm)
+        assert md_1m(a0, mm) > 0, (a0, mm, md_1m(a0, mm))
+print('PASS: M_1, M_m > 0 and MD(M_1,M_m) > 0 for a>=1/2, m>=2 (strict case of Lemma 5.1)')
+
+# The strengthened display is strict but admits NO uniform positive lower bound:
+# the m=2 value decays like a^{-3} as a -> oo (9.0e-4, 9.9e-7, 1.0e-9 at a=10,100,
+# 1000), so ">0" is the correct strengthening and no positive constant is claimable.
+# This matches the caveat before Theorem 2.2 that one threshold serving every a>0
+# does not assert a lower bound uniform in a.
+tail = [md_1m(mp.mpf(s), 2) for s in ('10', '100', '1000')]
+assert all(v > 0 for v in tail)
+assert tail[0] > tail[1] > tail[2]
+assert tail[2] < mp.mpf('1e-9')
+print('PASS: MD(M_1,M_2) > 0 yet decreasing in a -- no uniform positive lower bound')
 
 # ---------------------------------------------------------------------------
 # Exceptional degree-two coefficient, eqs. (5.4)-(5.6) and the sum-of-squares form
@@ -186,7 +225,7 @@ Delta2_unsimpl = sp.expand_func((S(0)*S(2)*MD(M(0), M(2)) + S(1)**2*M(1).det()).
 assert sp.simplify(sp.expand_func(Delta2_unsimpl - Delta2_paper)) == 0
 print('PASS: S_0,S_1,S_2, MD(M_0,M_2), and Delta_2 = S_0 S_2 MD(M_0,M_2) + S_1^2 det M_1')
 
-# Intermediate t-form of Q_* (Lemma 5.2 proof, before substituting t = R_a + 1/(a+1)):
+# Intermediate t-form of Q_* (Lemma 5.3 proof, before substituting t = R_a + 1/(a+1)):
 # Q_* = 2a^4(a+1)^2 t^2 + 2a^2(8a^4+17a^3+13a^2+5a+1) t + 2a(-8a^4-10a^3+a^2+7a+3).
 t_sym = sp.symbols('t_sym', positive=True)
 Q_in_t = (2*a**4*(a+1)**2*t_sym**2
@@ -253,5 +292,14 @@ Delta1_k_direct = coeff(Delta_k_ser, 1).subs(g, gg)
 Delta1_k_claim = (2/(a**3*sp.gamma(a)**4))*(sp.Rational(1, 2)*(kap-1)*(a*gg)**2 + a*gg - 1)
 assert sp.simplify(sp.expand_func(Delta1_k_direct - Delta1_k_claim)) == 0
 print('PASS: Delta_1^(kappa) = (2/(a^3 Gamma^4))[(kappa-1)/2 (a g)^2 + a g - 1]')
+
+# The "only if" half of Theorem 2.2, demonstrated (not merely the closed form):
+# for kappa < 1 the coefficient is negative at small a, since a g -> +inf drives
+# the bracket (kappa-1)/2 (a g)^2 + a g - 1 negative.  So the endpoint kappa = 1
+# is sharp: no kappa < 1 keeps Delta_1^(kappa) nonnegative for all a > 0.
+for aval in (sp.Rational(1, 1000), sp.Rational(1, 100), sp.Rational(1, 10)):
+    v = Delta1_k_claim.subs({kap: sp.Rational(1, 2), a: aval}).evalf(30)
+    assert v < 0, (aval, v)
+print('PASS: kappa<1 fails: Delta_1^(kappa)(a) < 0 at small a (only-if half of Theorem 2.2)')
 
 print('ALL PASS: verify_determinant')

@@ -5,7 +5,7 @@ Re-derives the reduction of the degree-m coefficient convolution to a
 beta-binomial expectation, pinning every step to the definitions rather than
 transcribing.  With N = 3m and P ~ Beta(u,v), J | P ~ Bin(N,P):
 
-  * the paired weights w_r = f_r f_{m-r}, eq. (2.1), are symmetric and, under
+  * the paired weights w_k = f_k f_{m-k}, eq. (2.1), are symmetric and, under
     log-concavity with no internal zeros, nondecreasing toward the center;
   * the coefficient convolution C_{m,f}(u,v), eq. (2.2), with C_{m,f}(0,v)=0;
   * the Pochhammer identity
@@ -31,8 +31,16 @@ import sympy as sp
 
 
 # ===========================================================================
-# 2.1  Paired weights w_r = f_r f_{m-r}: symmetry and center-monotonicity
+# 2.1  Paired weights w_k = f_k f_{m-k}: symmetry and center-monotonicity
 # ===========================================================================
+def _poch(u: Fraction, j: int) -> Fraction:
+    """(u)_j = u(u+1)...(u+j-1), exact."""
+    out = Fraction(1)
+    for i in range(j):
+        out *= (u + i)
+    return out
+
+
 def rand_logconcave(rng: random.Random, lo: int, hi: int) -> dict:
     """Positive log-concave sequence with no internal zeros on [lo, hi]."""
     f = {lo: Fraction(rng.randint(1, 6))}
@@ -58,10 +66,10 @@ def check_weight_structure(trials: int = 400, seed: int = 20260721) -> None:
             return f.get(k, Fraction(0))
 
         w = {r: fval(r) * fval(m - r) for r in range(1, m)}
-        # symmetry w_r = w_{m-r}
+        # symmetry w_k = w_{m-k}
         for r in range(1, m):
             assert w[r] == w[m - r]
-        # nondecreasing toward the center: w_{r+1} >= w_r for 1 <= r < floor(m/2)
+        # nondecreasing toward the center: w_{k+1} >= w_k for 1 <= k < floor(m/2)
         for r in range(1, m // 2):
             assert w[r + 1] >= w[r]
         # the underlying cross-product consequence f_{a+1}f_b >= f_a f_{b+1}, a<b
@@ -70,14 +78,14 @@ def check_weight_structure(trials: int = 400, seed: int = 20260721) -> None:
             for j in range(i + 1, len(ks)):
                 a, b = ks[i], ks[j]                                  # a < b
                 assert fval(a + 1) * fval(b) >= fval(a) * fval(b + 1)
-    print("PASS: w_r symmetric and nondecreasing toward the center (eq. 2.1)")
+    print("PASS: w_k symmetric and nondecreasing toward the center (eq. 2.1)")
 
 
 # ===========================================================================
 # 2.2  Coefficient convolution and its vanishing at u=0
 # ===========================================================================
 def C_def(m: int, w: dict, u, v):
-    """C_{m,f}(u,v), eq. (2.2), with weights w_r = f_r f_{m-r}."""
+    """C_{m,f}(u,v), eq. (2.2), with weights w_k = f_k f_{m-k}."""
     total = 0
     for r in range(1, m):
         total += (
@@ -126,6 +134,59 @@ def check_endpoint_identity(n_max: int = 60) -> None:
     print("PASS: j(N-j)C(N,j) = N(N-1)C(N-2,j-1), endpoints vanish")
 
 
+def check_beta_binomial_is_a_law() -> None:
+    r"""P(J=j) = C(N,j)(u)_j(v)_{N-j}/(u+v)_N is a probability distribution.
+
+    Everything downstream reads this as a law -- eq. (2.3) is an expectation
+    against it -- so its total mass must be one and its terms nonnegative.  This
+    is the Chu-Vandermonde identity sum_j C(N,j)(u)_j(v)_{N-j} = (u+v)_N; checked
+    symbolically in (u,v) so it is the identity rather than sampled instances.
+    """
+    u, v = sp.symbols("u v", positive=True)
+    for m in range(2, 7):
+        N = 3 * m
+        mass = sum(comb(N, j) * sp.rf(u, j) * sp.rf(v, N - j) for j in range(N + 1))
+        assert sp.simplify(sp.expand(mass - sp.rf(u + v, N))) == 0, m
+        # and nonnegativity of each term for u, v > 0, on concrete rationals
+        for uu, vv in [(Fraction(1, 2), Fraction(3)), (Fraction(7, 3), Fraction(1, 5))]:
+            terms = [Fraction(comb(N, j)) * _poch(uu, j) * _poch(vv, N - j)
+                     / _poch(uu + vv, N) for j in range(N + 1)]
+            assert all(x >= 0 for x in terms), (m, uu, vv)
+            assert sum(terms) == 1, (m, uu, vv, sum(terms))
+    print("PASS: the beta-binomial pmf is a law (Chu-Vandermonde: unit mass, "
+          "nonnegative terms)")
+
+
+def check_eq_2_3_as_an_equation() -> None:
+    r"""eq. (2.3) itself: C_{m,f}(u,v) = (u+v)_N/N! * E[J(N-J) wtilde_J].
+
+    check_pochhammer_identity verifies the termwise identity that PRODUCES eq.
+    (2.3), and check_mixture_identity verifies eq. (2.4) downstream of it, but the
+    assembled equation -- with wtilde_j supported on 0 < j < N, 3 | j, and zero
+    elsewhere -- is asserted here, symbolically in (u,v) with symbolic weights.
+    """
+    u, v = sp.symbols("u v", positive=True)
+    for m in range(2, 7):
+        N = 3 * m
+        wsyms = sp.symbols(f"w1:{m}")
+        w = {r: wsyms[r - 1] for r in range(1, m)}
+        # wtilde_j = w_{j/3} when 0 < j < N and 3 | j, else 0
+        def wtilde(j):
+            return w[j // 3] if (0 < j < N and j % 3 == 0) else 0
+        pmf = [comb(N, j) * sp.rf(u, j) * sp.rf(v, N - j) / sp.rf(u + v, N)
+               for j in range(N + 1)]
+        E = sum(wtilde(j) * j * (N - j) * pmf[j] for j in range(N + 1))
+        rhs = sp.rf(u + v, N) / factorial(N) * E
+        assert sp.simplify(C_def(m, w, u, v) - rhs) == 0, m
+        # the J(N-J) factor is what kills the endpoints, so wtilde's value there
+        # cannot matter: perturbing it leaves the expectation unchanged
+        E_perturbed = sum((wtilde(j) + (5 if j in (0, N) else 0)) * j * (N - j) * pmf[j]
+                          for j in range(N + 1))
+        assert sp.simplify(E - E_perturbed) == 0, m
+    print("PASS: eq. (2.3) as an assembled equation, and J(N-J) makes the endpoint "
+          "weights irrelevant")
+
+
 # ===========================================================================
 # 2.4-2.5  Mixture identity  C = (u+v)_N/N! * N(N-1) * E G_{m,w}(P)
 # ===========================================================================
@@ -164,7 +225,7 @@ def check_mixture_identity() -> None:
 
 
 def check_G_symmetry() -> None:
-    """G_{m,w}(p) = G_{m,w}(1-p) for symmetric weights w_r = w_{m-r}."""
+    """G_{m,w}(p) = G_{m,w}(1-p) for symmetric weights w_k = w_{m-k}."""
     p = sp.symbols("p")
     for m in range(2, 8):
         base = sp.symbols(f"a0:{m // 2 + 1}")
@@ -173,7 +234,7 @@ def check_G_symmetry() -> None:
             assert w[r] == w[m - r]
         diff = sp.expand(G_weighted(m, w, p) - G_weighted(m, w, 1 - p))
         assert diff == 0, m
-        # the index reflection underlying it: C(3m-2,3r-1)=C(3m-2,3(m-r)-1)
+        # the index reflection underlying it: C(3m-2,3k-1)=C(3m-2,3(m-k)-1)
         for r in range(1, m):
             assert comb(3 * m - 2, 3 * r - 1) == comb(3 * m - 2, 3 * (m - r) - 1)
     print("PASS: G_{m,w}(p) = G_{m,w}(1-p) for symmetric weights (eq. 2.5)")
@@ -191,6 +252,8 @@ def main() -> None:
     check_C_vanishes()
     check_pochhammer_identity()
     check_endpoint_identity()
+    check_beta_binomial_is_a_law()
+    check_eq_2_3_as_an_equation()
     check_mixture_identity()
     check_G_symmetry()
     check_congruence()

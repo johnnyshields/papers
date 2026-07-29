@@ -2,7 +2,7 @@
 # Main theorem: coefficientwise log-concavity of the cubic Pochhammer series
 
 Assembles `shields-2026-cubic-pochhammer.tex`, `thm:main` (the cubic
-multiple-Pochhammer theorem, `KarpZhang2024` Conjecture 3.8): for every
+multiple-Pochhammer theorem, `KarpZhang2024` Conjecture 1): for every
 nonnegative sequence whose symmetric weights increase toward the centre and all
 `μ, α, β > 0`, the degree-`m` coefficient of the generalized Turánian
 
@@ -17,8 +17,8 @@ Schur-concavity bridge `C_schur_of_kernel` (`prop:C-schur`) and reads off the
 imbalance comparison `|α-β| ≤ α+β`.
 
 The weight hypothesis `hwmono` is the standard cross-product consequence of
-log-concavity with no internal zeros (`eq:w-from-f`, §2): `f_r f_{m-r}` is
-nondecreasing as `r` approaches `m/2`.
+log-concavity with no internal zeros (`eq:w-from-f`, §2): `f_k f_{m-k}` is
+nondecreasing as `k` approaches `m/2`.
 
 Sorry-free.  Uses `C_schur_of_kernel` (§2,§3,§5) and, transitively, the §4
 bridges `block_certificate` and `Jm_bernstein`.
@@ -30,7 +30,7 @@ open scoped BigOperators
 namespace CubicPochhammer
 
 /-- **Cubic multiple-Pochhammer theorem** (`thm:main`).  With `f` nonnegative and
-its symmetric weights `w_r = f_r f_{m-r}` nondecreasing toward the centre, every
+its symmetric weights `w_k = f_k f_{m-k}` nondecreasing toward the centre, every
 degree-`m` (`m ≥ 2`) coefficient of the generalized Turánian is nonnegative for
 `μ, α, β > 0`:
 
@@ -49,6 +49,10 @@ theorem turan_coeff_nonneg (f : ℕ → ℝ) (m : ℕ) (hm : 2 ≤ m)
     exact Jmw_nonneg m hm (fun r => f r * f (m - r))
       (fun i j hi hij hj => hwmono i j hi hij hj)
       (fun i _ _ => mul_nonneg (hfnn i) (hfnn (m - i)))
+      (fun r _ hr2 => by
+        show f r * f (m - r) = f (m - r) * f (m - (m - r))
+        have h : m - (m - r) = r := by omega
+        rw [h]; ring)
       t ht0 ht1
   have himb : |(μ + α) - (μ + β)| ≤ |μ - (μ + α + β)| := by
     rw [show (μ + α) - (μ + β) = α - β by ring, show μ - (μ + α + β) = -(α + β) by ring,

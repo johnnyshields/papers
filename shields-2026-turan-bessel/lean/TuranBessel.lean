@@ -2,6 +2,7 @@ import TuranBessel.MatrixMD
 import TuranBessel.Trigamma
 import TuranBessel.Coefficients
 import TuranBessel.Gram
+import TuranBessel.Anomaly
 import TuranBessel.Degree
 import TuranBessel.Main
 import TuranBessel.Threshold

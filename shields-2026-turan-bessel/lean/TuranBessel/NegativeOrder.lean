@@ -1,9 +1,9 @@
 /-
 # Negative-order failure of coefficientwise positivity
 
-Formalizes the algebraic part of `shields-2026-turan-bessel.tex`, §7 «Bessel
-consequences and sharpness» (`sec:bessel-consequences`), `prop:negative-coeff-failure`
-(via `lem:continuation`): the degree-two
+Formalizes the algebraic part of `shields-2026-turan-bessel.tex`, §8 «Continuation
+beyond the positive-series domain» (`sec:continuation`), Proposition 8.2
+(`prop:negative-coeff-failure`, via Lemma 8.1 `lem:continuation`): the degree-two
 coefficient of `Δ` continues meromorphically to `-2 < a < -1` and is **negative**
 there, so the sharp coefficientwise theorem cannot extend past the positive-series
 domain.
@@ -14,9 +14,10 @@ The trigamma series `∑(a+n)⁻²` continues to negative non-integer `a`
 `Q_* > 0` (paper's `b`-substitution polynomial estimate) while the denominator is
 negative, so `Δ_2 < 0`.
 
-The `log|I_ν|` convention and the small-`z` expansion `eq:small-z-D` of §7.1,
-together with the pointwise negative-order behavior noted in `rem:negative-order`,
-need the modified Bessel functions absent from Mathlib and are out of scope.
+The `log|I_ν|` convention of §8, the small-`z` expansion `eq:small-z-D` (eq. (8.2)),
+and the accompanying statement that the leading small-`z` term keeps its positive sign
+away from the poles all need the modified Bessel functions absent from Mathlib, and
+are out of scope.
 
 Sorry-free.
 -/

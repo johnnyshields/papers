@@ -33,7 +33,7 @@ namespace SymMat
   cases X; cases Y; simp_all
 
 /-- Mixed determinant `x₁₁y₂₂ + x₂₂y₁₁ - 2 x₁₂ y₁₂`; the polarization of
-`det X = a11 a22 - a12²` (`det (X+Y) = det X + det Y + MD X Y`, in `stale/`). -/
+`det X = a11 a22 - a12²` (`det (X+Y) = det X + det Y + MD X Y`). -/
 def MD (X Y : SymMat) : ℝ := X.a11 * Y.a22 + X.a22 * Y.a11 - 2 * X.a12 * Y.a12
 
 /-- Positive semidefinite: nonnegative diagonal and nonnegative determinant. -/
