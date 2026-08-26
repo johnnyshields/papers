@@ -1,6 +1,6 @@
 # Papers
 
-Papers by John Shields ([ORCID 0009-0004-3882-4571](https://orcid.org/0009-0004-3882-4571)), an independent researcher in Tokyo, Japan.
+Papers by John Shields ([ORCID 0009-0004-3882-4571](https://orcid.org/0009-0004-3882-4571))
 
 ## Index
 
