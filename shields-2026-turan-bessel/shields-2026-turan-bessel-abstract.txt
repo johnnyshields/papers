@@ -1,25 +1,22 @@
 Title
 -----
-Sharp coefficientwise positivity for a matrix Turán determinant of ₀F₁
+Canonical–microcanonical positivity and phase geometry for a Bessel–₀F₁ matrix Turán determinant
 
 Keywords
 --------
+matrix Turán determinant
+canonical–microcanonical positivity
+phase geometry
 coefficientwise positivity
-Turán inequality
+critical scaling
 modified Bessel function
+discrete Bessel distribution
 reciprocal-gamma series
-hypergeometric function
-order derivative
-absolute monotonicity
 
 Abstract (Plain)
 ----------------
-Let Z(a,λ) = ₀F₁(;a;λ)/Γ(a) = ∑_{k≥0} λ^k/(k! Γ(a+k)) for a > 0. We prove a sharp coefficientwise positivity theorem for a confluent matrix Turán determinant of this reciprocal-gamma normalization. From parameter and Euler derivatives of Z, we form a one-parameter family of symmetric 2×2 matrices 𝒯_κ(a,λ) and prove that, for each fixed a > 0, every positive-degree Maclaurin coefficient of Δ^(κ) = det 𝒯_κ is strictly positive if and only if κ ≥ 1. Thus κ = 1 is the exact deformation threshold at every parameter value, and Δ^(κ)(a,·) is strictly absolutely monotone for every κ ≥ 1. At this endpoint, coefficientwise determinant positivity holds even though the first nonconstant coefficient matrix may be indefinite: a mixed-determinant polarization confines its possible negative contribution to the degree-two coefficient, whose positivity follows from an explicit decomposition.
-
-Via the identity I_{a−1}(2√λ) = λ^((a−1)/2) Z(a,λ), an exact diagonal congruence transfers the endpoint theorem to the modified Bessel function I_ν, yielding, for every ν > −1 and z > 0, a positive-definite Bessel–Schur matrix coupling order, argument, and mixed order–argument derivatives of log I_ν. For each fixed ν, neither the deformation threshold κ = 1 nor the argument-independent correction 4/ψ₁(ν+1) can be lowered.
+Order log-concavity and the argument Turán inequality are two classical positivity directions for modified Bessel functions. We prove that they admit a sharp matrix coupling: the symmetric matrix formed from the order curvature, the mixed order–argument derivative, and the classical Turánian is positive definite throughout the full range ν > −1, z > 0, after a trigamma correction forced by the vacuum limit. Passing to a reciprocal-gamma series identifies the coefficient matrices with Schur deficits of conditioned discrete Bessel ensembles; mixed-determinant polarization then localizes the endpoint defect to one fiber and one determinant degree. This representation separates coefficientwise and pointwise positivity into microcanonical and canonical phase boundaries controlled by the vacuum, one-particle, and thermodynamic sectors. Equivalence of ensembles then matches the high-degree coefficient walls with the large-argument Bessel boundary, with cubic agreement at a unique critical point.
 
 Abstract (Rich Text)
 --------------------
-Let \(Z(a,\lambda)={}_0F_1(;a;\lambda)/\Gamma(a)=\sum_{k\ge0}\lambda^k/(k!\,\Gamma(a+k))\) for \(a>0\). We prove a sharp coefficientwise positivity theorem for a confluent matrix Turán determinant of this reciprocal-gamma normalization. From parameter and Euler derivatives of \(Z\), we form a one-parameter family of symmetric \(2\times2\) matrices \(\mathcal T_\kappa(a,\lambda)\) and prove that, for each fixed \(a>0\), every positive-degree Maclaurin coefficient of \(\Delta^{(\kappa)}=\det\mathcal T_\kappa\) is strictly positive if and only if \(\kappa\ge1\). Thus \(\kappa=1\) is the exact deformation threshold at every parameter value, and \(\Delta^{(\kappa)}(a,\cdot)\) is strictly absolutely monotone for every \(\kappa\ge1\). At this endpoint, coefficientwise determinant positivity holds even though the first nonconstant coefficient matrix may be indefinite: a mixed-determinant polarization confines its possible negative contribution to the degree-two coefficient, whose positivity follows from an explicit decomposition.
-
-Via the identity \(I_{a-1}(2\sqrt\lambda)=\lambda^{(a-1)/2}Z(a,\lambda)\), an exact diagonal congruence transfers the endpoint theorem to the modified Bessel function \(I_\nu\), yielding, for every \(\nu>-1\) and \(z>0\), a positive-definite Bessel–Schur matrix coupling order, argument, and mixed order–argument derivatives of \(\log I_\nu\). For each fixed \(\nu\), neither the deformation threshold \(\kappa=1\) nor the argument-independent correction \(4/\psi_1(\nu+1)\) can be lowered.
+Order log-concavity and the argument Turán inequality are two classical positivity directions for modified Bessel functions. We prove that they admit a sharp matrix coupling: the symmetric matrix formed from the order curvature, the mixed order–argument derivative, and the classical Turánian is positive definite throughout the full range \(\nu>-1\), \(z>0\), after a trigamma correction forced by the vacuum limit. Passing to a reciprocal-gamma series identifies the coefficient matrices with Schur deficits of conditioned discrete Bessel ensembles; mixed-determinant polarization then localizes the endpoint defect to one fiber and one determinant degree. This representation separates coefficientwise and pointwise positivity into microcanonical and canonical phase boundaries controlled by the vacuum, one-particle, and thermodynamic sectors. Equivalence of ensembles then matches the high-degree coefficient walls with the large-argument Bessel boundary, with cubic agreement at a unique critical point.

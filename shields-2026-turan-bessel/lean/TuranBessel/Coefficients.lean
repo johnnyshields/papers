@@ -1,11 +1,20 @@
 /-
+Copyright (c) 2026 Johnny Shields. All rights reserved.
+Released under the MIT license as described in the file LICENSE.txt.
+Authors: Johnny Shields
+-/
+import TuranBessel.MatrixMD
+import TuranBessel.Trigamma
+
+/-!
 # Coefficient data of the Turán matrix
 
 Formalizes the closed-form coefficient matrices of
-`shields-2026-turan-bessel.tex`, §3 «Reciprocal-gamma convolution and coefficient
-formulas» (`sec:coefficients`, `thm:coefficients`, `eq:matrix-series`), in the
+`shields-2026-turan-bessel.tex`, «Reciprocal-gamma convolution and
+canonical--microcanonical structure» (`sec:coefficients`, `thm:coefficients`,
+`eq:matrix-series`), in the
 square-root-free normalization `N_m = diag(1,g^{-1/2}) M_m diag(1,g^{-1/2})`
-introduced in §4 (`sec:gram`):
+introduced in `subsec:gram` (`subsec:gram`):
 ```
         ⎛ α_m        β_m      ⎞
 N_m  =  ⎝ β_m    g^{-1}+c_m   ⎠ ,     g = ψ₁(a),
@@ -13,15 +22,14 @@ N_m  =  ⎝ β_m    g^{-1}+c_m   ⎠ ,     g = ψ₁(a),
 with `α_m = ψ₁(a+m)`, `β_0 = 1`, `β_m = (2a+m-2)/(2(a+m-1))` (`m ≥ 1`),
 `c_0 = c_1 = 0`, `c_m = m(m-1)/(2(2a+2m-3))` (`m ≥ 2`).
 
-The reduced weight `sred a m = (2a+m-1)_m / (m! ((a)_m)²)` is `S_m Γ(a)²`; the
+The reduced weight `sred a m = (2a+m-1)_m / (m! ((a)_m)²)` is `S_m Γ(a)²`
+(proved in `Zseries` as `sred_eq_sweight_mul`); the
 common factor `Γ(a)^{-4}` is positive and drops out of every sign in
 `Δ_n = ½ Σ S_k S_{n-k} MD(M_k,M_{n-k})`, so the paper's `S_m` are replaced by
 `sred` throughout.
 
 Only sign facts live here; positive-definiteness of `N_m` is proved in `Gram`.
 -/
-import TuranBessel.MatrixMD
-import TuranBessel.Trigamma
 
 open scoped BigOperators
 

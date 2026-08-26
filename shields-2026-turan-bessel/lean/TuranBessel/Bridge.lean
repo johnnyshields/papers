@@ -1,33 +1,44 @@
 /-
+Copyright (c) 2026 Johnny Shields. All rights reserved.
+Released under the MIT license as described in the file LICENSE.txt.
+Authors: Johnny Shields
+-/
+import TuranBessel.Main
+import TuranBessel.TuranDet
+import TuranBessel.BesselDict
+import TuranBessel.BesselDictPH
+
+/-!
 # Analytic bridge and Bessel consequences
 
 The proven core (`coefficientwise_positivity`) concerns `Dcoeff a n`, the
 combinatorial mixed-determinant sum built from the closed-form coefficient
-matrices `N_m`.  Two ingredients of `shields-2026-turan-bessel.tex` sit outside
-current Mathlib and are isolated here as **named axioms**, each documenting the
-missing dependency:
+matrices `N_m`.  Both analytic bridges of `shields-2026-turan-bessel.tex` are
+discharged in the tree:
 
-1. **The coefficient formulas** — §3 «Reciprocal-gamma convolution and coefficient
-   formulas» (`sec:coefficients`, `thm:coefficients`, `lem:convolution`).  That the
-   Maclaurin coefficient of `det 𝒯` really is `S_m M_m`-structured rests on an
-   asymmetric reciprocal-gamma convolution — the Gauss ₂F₁ (Chu–Vandermonde)
-   theorem for real parameters, which Mathlib does not have.
+1. **The coefficient formulas** — «Reciprocal-gamma convolution and
+   canonical--microcanonical structure» (`sec:coefficients`, `thm:coefficients`).
+   `lem:convolution` is proved in `Convolution`, `[λ^m] Z² = S_m` in `Zseries`,
+   and the parameter calculus in `ParameterCalculus`; `TuranDet.hasSum_turanDet`
+   assembles them into `Δ(a,λ) = ∑_n Δ_n(a)λⁿ`.
 
-2. **The Bessel dictionary** — §6 «Exact reduction from ₀F₁ to the Bessel
-   inequality» (`sec:bessel-reduction`, `eq:I-Z`, `eq:D-Delta`).  The identity
-   `I_{a-1}(2√λ) = λ^{(a-1)/2} Z(a,λ)` and the log-derivative dictionary need the
-   modified Bessel functions `I_ν, K_ν`, absent from Mathlib.
+2. **The Bessel dictionary** — «Classical scalar Bessel directions»
+   (`sec:scalar`, `eq:I-Z`, `eq:U-L`, `eq:G-L`, `eq:ABC-log`, `eq:D-Delta`).
+   `BesselI` proves `eq:I-Z` over the `besselIReal` defined there and splits
+   `log I_ν` into a term affine in `ν` plus `log Z`; `BesselDict` runs the
+   `ν`-side and `BesselDictPH` the `Θ_x`-side, so `G_ν`, `P_ν` and `H_ν` are all
+   definitions whose `_eq` theorems identify them with the derivatives of
+   `log I_ν` that `eq:Gnu`--`eq:Hnu-kappa` prescribe.
 
-Everything below the axioms is proven and *consumes* `coefficientwise_positivity`:
-the paper's coefficientwise statements for the true Turán determinant and for the
-Bessel–Schur determinant follow unconditionally *given* the two bridge axioms.
+Everything below therefore *consumes* `coefficientwise_positivity` and the
+dictionary: `eq:D-Delta` turns the Bessel--Schur determinant into
+`4Δ/(gZ⁴)`, and `BesselDictPH.turanDet_pos` supplies `Δ > 0` for `λ > 0` from the
+coefficientwise theorem.  `thm:bessel` and `cor:bessel-matrix` are unconditional.
 
-The §2 «Main results» pointwise inequality `thm:bessel` and matrix corollary
-`cor:bessel-matrix` are recorded as statements with a single documented `sorry`
-naming the residual analytic step (assembling the positive Maclaurin series into
-the pointwise value, which needs the Bessel machinery of ingredient 2).
+The scalar algebra of `sec:scalar` itself — `prop:scalar-H`, the Amos-type root
+and the Turánian form of `H_ν^{(κ)}` — is proved without Bessel functions in
+`ScalarH`.
 -/
-import TuranBessel.Main
 
 namespace TuranBessel
 
@@ -40,14 +51,31 @@ theorem turanCoeffFactor_pos (a : ℝ) (ha : 0 < a) : 0 < turanCoeffFactor a :=
   div_pos (trigamma_pos ha)
     (mul_pos (by norm_num) (pow_pos (Real.Gamma_pos_of_pos ha) 4))
 
-/-- `Δ_n(a) = [λⁿ] det 𝒯(a,λ)`, the genuine Maclaurin coefficient. -/
-axiom turanDetCoeff : ℝ → ℕ → ℝ
+/-- `Δ_n(a) = [λⁿ] det 𝒯(a,λ)`.  The definition supplies the value;
+`hasSum_turanDetCoeff` below is the theorem that this value really is the `n`-th
+Maclaurin coefficient of the genuine determinant `TuranDet.turanDet` rather than a
+stand-in for it. -/
+noncomputable def turanDetCoeff (a : ℝ) (n : ℕ) : ℝ := turanCoeffFactor a * Dcoeff a n
 
-/-- **eq:Delta-n-MD (bridge).**  The reciprocal-gamma convolution identifies the
-determinant coefficient with the mixed-determinant sum.  Requires the real-
-parameter Gauss ₂F₁ theorem (`lem:convolution`), not in Mathlib. -/
-axiom turanDetCoeff_eq (a : ℝ) (n : ℕ) :
-    turanDetCoeff a n = turanCoeffFactor a * Dcoeff a n
+/-- **`eq:Delta-n-MD`, discharged.**  `Δ(a,λ) = det 𝒯(a,λ)` is the sum of
+`∑ₙ Δ_n(a) λⁿ` for every real `λ`, with `Δ_n = turanCoeffFactor(a)·Dcoeff(a,n)`.
+
+The chain is `AlphaCoeff.hasSum_Afun` (`eq:alpha`), `BetaGammaCoeff.tsum_beta_eq_B` and
+`tsum_gamma_eq_C` (`eq:beta` and the `γ` identity), and
+`DetAssembly.cauchy_eq_factor_mul_Dcoeff` for the Cauchy product and
+symmetrization; `TuranDet.hasSum_turanDet` assembles them.  Nothing here is
+definitional bookkeeping: the definition above supplies the *value*, and this
+theorem supplies the *fact that it is the coefficient*, which is where all the
+analysis sits. -/
+theorem hasSum_turanDetCoeff {a : ℝ} (ha : 0 < a) (lam : ℝ) :
+    HasSum (fun n : ℕ => turanDetCoeff a n * lam ^ n) (turanDet a lam) :=
+  hasSum_turanDet ha lam
+
+/-- The definitional unfolding of `turanDetCoeff`, carried as a named equation so
+that downstream code and the paper's `eq:Delta-n-MD` reference resolve to it.  Its
+mathematical content lives in `hasSum_turanDetCoeff`, not here. -/
+theorem turanDetCoeff_eq (a : ℝ) (n : ℕ) :
+    turanDetCoeff a n = turanCoeffFactor a * Dcoeff a n := rfl
 
 /-- **`thm:coefficientwise` for the true determinant.**  Every positive-degree
 Maclaurin coefficient of `det 𝒯(a,·)` is strictly positive for `a > 0` — proven
@@ -57,58 +85,92 @@ theorem turanDetCoeff_pos {a : ℝ} (ha : 0 < a) {n : ℕ} (hn : 1 ≤ n) :
   rw [turanDetCoeff_eq]
   exact mul_pos (turanCoeffFactor_pos a ha) (coefficientwise_positivity ha hn)
 
+section BesselSchur
+
+variable {ν z : ℝ}
+
 /-! ### Bridge 2 — the Bessel–Schur determinant -/
 
-/-- The curvature functionals `G_ν, P_ν, H_ν` of eq:Gnu–eq:Hnu.  Opaque: Mathlib
-has no modified Bessel functions to define them from. -/
-axiom besselG : ℝ → ℝ → ℝ
-axiom besselP : ℝ → ℝ → ℝ
-axiom besselH : ℝ → ℝ → ℝ
+/-! The curvature functionals `G_ν, P_ν, H_ν` of `eq:Gnu`, `eq:Pnu`,
+`eq:Hnu-kappa` at `κ = 1`.  All three are definitions carrying an `_eq`
+theorem that identifies them with the prescribed derivative of `log I_ν`, so none
+of them is a name standing in for the paper's object.  The scalar identities
+`prop:scalar-H` satisfies in the ratio variable are proved in `ScalarH`. -/
 
-/-- `[λⁿ] D_{a-1}(2√λ)`, the Maclaurin coefficient of the Bessel–Schur
-determinant defect. -/
-axiom besselSchurCoeff : ℝ → ℕ → ℝ
+/-- `G_ν = -∂_ν² log I_ν` (`eq:Gnu`).  `BesselDict.besselGfun` defines it as
+`A/Z²` and `besselGfun_eq` proves that value is the second `ν`-derivative. -/
+noncomputable def besselG : ℝ → ℝ → ℝ := besselGfun
 
-/-- **eq:D-Delta (bridge).**  `D_{a-1}(2√λ) = 4 Δ(a,λ)/(ψ₁(a) Z⁴)`, so its
-coefficients are a positive multiple of the determinant coefficients.  Requires
-the dictionary eq:I-Z (modified Bessel functions), not in Mathlib. -/
-axiom besselSchurCoeff_eq (a : ℝ) (n : ℕ) :
-    ∃ c : ℝ, 0 < c ∧ besselSchurCoeff a n = c * turanDetCoeff a n
+/-- **`eq:Gnu`, discharged.** -/
+theorem besselG_eq (hν : -1 < ν) (hz : 0 < z) :
+    besselG ν z = -deriv (deriv fun t : ℝ => Real.log (besselIReal t z)) ν :=
+  besselGfun_eq hν hz
 
-/-- **Coefficientwise Bessel–Schur positivity.**  For `a > 0` (`ν = a-1 > -1`),
-every positive-degree small-argument coefficient of the Bessel–Schur defect is
-strictly positive — proven from `turanDetCoeff_pos`. -/
-theorem besselSchurCoeff_pos {a : ℝ} (ha : 0 < a) {n : ℕ} (hn : 1 ≤ n) :
-    0 < besselSchurCoeff a n := by
-  obtain ⟨c, hc, heq⟩ := besselSchurCoeff_eq a n
-  rw [heq]
-  exact mul_pos hc (turanDetCoeff_pos ha hn)
+/-- `P_ν = ∂_ν(Θ_z log I_ν)` (`eq:Pnu`).  `BesselDictPH.besselPfun` defines it as
+`2B/Z² - 1` and `besselPfun_eq` proves that value is the order derivative of the
+Euler derivative. -/
+noncomputable def besselP : ℝ → ℝ → ℝ := besselPfun
 
-/-! ### Pointwise Bessel inequality and interpretations (residual analytic steps) -/
+/-- **`eq:Pnu` with `eq:U-L`, discharged.** -/
+theorem besselP_eq (hν : -1 < ν) (hz : 0 < z) :
+    besselP ν z
+      = deriv (fun t : ℝ => z * deriv (fun y : ℝ => Real.log (besselIReal t y)) z) ν :=
+  besselPfun_eq hν hz
 
-/-- **Sharp mixed Bessel–Schur inequality** (`thm:bessel`, eq:bessel-main): for
+/-- `H_ν = H_ν^{(1)} = 2(Θ_z log I_ν - ν) - Θ_z² log I_ν` (`eq:Hnu-kappa` at
+`κ = 1`).  `BesselDictPH.besselHfun` defines it as `4C/(gZ²) - 4/g` and
+`besselHfun_eq` proves that value is that combination of Euler derivatives. -/
+noncomputable def besselH : ℝ → ℝ → ℝ := besselHfun
+
+/-- **`eq:Hnu-kappa` at `κ = 1`, discharged.** -/
+theorem besselH_eq (hν : -1 < ν) (hz : 0 < z) :
+    besselH ν z
+      = 2 * (z * deriv (fun y : ℝ => Real.log (besselIReal ν y)) z - ν)
+        - z * deriv (fun y : ℝ => y * deriv (fun w : ℝ => Real.log (besselIReal ν w)) y) z :=
+  besselHfun_eq hν hz
+
+/-- **`eq:Dnu-def` with `eq:D-Delta`.**  The Bessel--Schur defect is a positive
+multiple of the Turán determinant: `D_ν = 4Δ(ν+1,(z/2)²)/(ψ₁(ν+1)Z⁴)`. -/
+theorem besselDefect_eq (hν : -1 < ν) (hz : 0 < z) :
+    besselG ν z * (besselH ν z + 4 / trigamma (ν + 1)) - (1 + besselP ν z) ^ 2
+      = 4 * turanDet (ν + 1) ((z / 2) ^ 2)
+          / (trigamma (ν + 1) * Zfun (ν + 1) ((z / 2) ^ 2) ^ 4) :=
+  besselDet_eq_turanDet hν hz
+
+/-! ### Pointwise Bessel inequality and interpretations -/
+
+/-- **Sharp mixed Bessel--Schur inequality** (`thm:bessel`, `eq:bessel-main`): for
 `ν > -1`, `z > 0`,
 `G_ν(z)(H_ν(z) + 4/ψ₁(ν+1)) > (1 + P_ν(z))²`.
 
-Reduction (machine-checked at the coefficient level above): the defect is a
-positive multiple of `Δ(a,λ) = Σ_{n≥1} Δ_n(a) λⁿ` with each `Δ_n > 0`
-(`besselSchurCoeff_pos`).  The residual `sorry` is the routine assembly of the
-strictly-positive Maclaurin series into the pointwise value for `λ > 0`, which
-needs the modified Bessel functions absent from Mathlib. -/
-theorem bessel_schur_ineq {ν z : ℝ} (hν : -1 < ν) (hz : 0 < z) :
+`eq:D-Delta` (`besselDefect_eq`) rewrites the defect as `4Δ/(gZ⁴)`, and
+`turanDet_pos` gives `Δ > 0` for `λ > 0` from `coefficientwise_positivity`: the
+degree-zero Maclaurin coefficient of `Δ` vanishes and every higher one is
+strictly positive. -/
+theorem bessel_schur_ineq (hν : -1 < ν) (hz : 0 < z) :
     (1 + besselP ν z) ^ 2 < besselG ν z * (besselH ν z + 4 / trigamma (ν + 1)) := by
-  sorry
+  have ha : 0 < ν + 1 := by linarith
+  have hlam : 0 < (z / 2) ^ 2 := by positivity
+  have hZ : 0 < Zfun (ν + 1) ((z / 2) ^ 2) := Zfun_pos ha hlam.le
+  have hpos : 0 < 4 * turanDet (ν + 1) ((z / 2) ^ 2)
+      / (trigamma (ν + 1) * Zfun (ν + 1) ((z / 2) ^ 2) ^ 4) :=
+    div_pos (by linarith [turanDet_pos ha hlam])
+      (mul_pos (trigamma_pos ha) (pow_pos hZ 4))
+  linarith [besselDefect_eq hν hz, hpos]
 
 /-- `G_ν(z) = -∂²_ν log I_ν(z) > 0` for `ν>-1`, `z>0` (order log-convexity of
-`I_ν`).  Opaque with `besselG`; a consequence of the strict total positivity of
-the kernel `I_ν(z)`. -/
-axiom besselG_pos {ν z : ℝ} (hν : -1 < ν) (hz : 0 < z) : 0 < besselG ν z
+`I_ν`).  `G = A/Z²`, and both `Afun_pos` (`eq:alpha` termwise positive) and
+`Zfun_pos` are proved. -/
+theorem besselG_pos (hν : -1 < ν) (hz : 0 < z) : 0 < besselG ν z :=
+  besselGfun_pos hν hz
 
-/-- **Positive Bessel–Schur matrix** (`cor:bessel-matrix`): the `2×2` matrix is
+/-- **Positive Bessel--Schur matrix** (`cor:bessel-matrix`): the `2×2` matrix is
 positive definite for `ν>-1`, `z>0` — the leading entry from `besselG_pos`, the
 determinant from `bessel_schur_ineq`. -/
-theorem bessel_schur_matrix_pd {ν z : ℝ} (hν : -1 < ν) (hz : 0 < z) :
+theorem bessel_schur_matrix_pd (hν : -1 < ν) (hz : 0 < z) :
     SymMat.PD ⟨besselG ν z, 1 + besselP ν z, besselH ν z + 4 / trigamma (ν + 1)⟩ :=
   ⟨besselG_pos hν hz, bessel_schur_ineq hν hz⟩
+
+end BesselSchur
 
 end TuranBessel

@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-r"""Dependency-free audit of the coefficient recurrence (paper sections 2 and 5).
+r"""Paper section `sec:reduction` (Canonical Laurent reduction and eventual degree).
+
+Dependency-free audit of the coefficient recurrence.
 
 Uses only the standard-library `fractions` module -- no SymPy, no mpmath.  A
 polynomial in z is an exact list of Fraction coefficients (index = power of z),
@@ -8,13 +10,13 @@ recurrence
         sum_{j>=0} d_j(z) P_{m-j}(z) = N_m(z),   d_0 = Q(0),
 with d_j the t^j-coefficient of Q(t)+z t^r.  This re-derives, without any CAS:
 
-  * Proposition 2.1: N |-> (P_0,...,P_{d-1}) is lower triangular with constant
+  * `prop:initial-data`: N |-> (P_0,...,P_{d-1}) is lower triangular with constant
     diagonal Q(0) and determinant Q(0)^d != 0, hence a bijection onto Q[z]^d.
     Checked by prescribing polynomial initial data, mapping it forward to a
     numerator, and recovering it through the recurrence itself -- at r < d, so
     d_r = q_r + z genuinely carries z.
-  * Lemma 2.3, eq. (2.6): deg_z F_M = floor(M/r), at r = 2 and r = 3.
-  * Proposition 5.2 (linear case): P_m(z) = (-1)^m R(z)(z+q_1)^m / q_0^{m+1}.
+  * `lem:eventual-degree`, `eq:eventual-degree`: deg_z F_M = floor(M/r), at r = 2 and r = 3.
+  * `prop:linear-case` (linear case): P_m(z) = (-1)^m R(z)(z+q_1)^m / q_0^{m+1}.
 """
 from fractions import Fraction as Fr
 
@@ -52,8 +54,8 @@ def peq(a, b):
 def coeff_polys(Qt, Nz, r, Mmax):
     r"""P_0..P_Mmax for (sum_m Nz[m] z-poly) / (Qt(t) + z t^r).
 
-    The exact coefficient recurrence sum_j d_j(z) P_{m-j} = N_m, d_0 = Q(0) (eq. (1.3),
-    Proposition 2.1), carried out over Q[z] with Fraction arithmetic -- no CAS.
+    The exact coefficient recurrence sum_j d_j(z) P_{m-j} = N_m, d_0 = Q(0) (`eq:P-generating-intro`,
+    `prop:initial-data`), carried out over Q[z] with Fraction arithmetic -- no CAS.
     Qt: list of Fraction t-coefficients of Q (index = power of t), Qt[0] != 0.
     Nz: list (index = power of t) of z-polynomials (each a Fraction list), the numerator.
     """
@@ -71,7 +73,7 @@ def coeff_polys(Qt, Nz, r, Mmax):
 
 
 # ===========================================================================
-# Proposition 2.1: N |-> (P_0,...,P_{d-1}) is a bijection onto Q[z]^d
+# `prop:initial-data`: N |-> (P_0,...,P_{d-1}) is a bijection onto Q[z]^d
 # ===========================================================================
 # The test must run through coeff_polys, the recurrence the proposition is about: a
 # hand-inversion of the same triangular system would pass on arbitrary data no matter what
@@ -79,7 +81,7 @@ def coeff_polys(Qt, Nz, r, Mmax):
 # coefficient d_r outside the indices 0..d-1, leaving nothing of the Q[z] content.
 #
 # So: deg Q = 3 and r = 2, giving d = 3 and d_2 = q_2 + z; the initial data are POLYNOMIALS
-# in z; the numerator is built by Prop 2.1's forward map; and that numerator is fed through
+# in z; the numerator is built by `prop:initial-data`'s forward map; and that numerator is fed through
 # coeff_polys, whose first d outputs must return the prescribed data.  That is the
 # surjectivity half onto Q[z]^d, closed through the real recurrence.
 Qt = [Fr(1), Fr(-3), Fr(2), Fr(-1)]                                # Q = 1 - 3t + 2t^2 - t^3
@@ -97,7 +99,7 @@ def dj_times(j, P):
 Pgiven = [[Fr(2), Fr(0), Fr(1, 3)],                                # 2 + z^2/3
           [Fr(-5), Fr(7, 2)],                                      # -5 + 7z/2
           [Fr(11, 3), Fr(0), Fr(-1), Fr(4)]]                       # 11/3 - z^2 + 4z^3
-# forward map of Proposition 2.1: N_m = sum_{j=0}^{m} d_j(z) P_{m-j},  0 <= m < d
+# forward map of `prop:initial-data`: N_m = sum_{j=0}^{m} d_j(z) P_{m-j},  0 <= m < d
 Nz = []
 for m in range(d):
     acc = [Fr(0)]
@@ -135,7 +137,7 @@ for i in range(d):
             assert peq(ent, [Qt[0]]), (i, j, ent)                  # constant diagonal Q(0)
             assert pdeg(ent) == 0                                  # z-free, so a unit
 assert Qt[0] != 0
-print(f'PASS: Prop 2.1 through the recurrence: prescribed (P_0,P_1,P_2) in Q[z] recovered '
+print(f'PASS: `prop:initial-data` through the recurrence: prescribed (P_0,P_1,P_2) in Q[z] recovered '
       f'from N = forward-map(P) via coeff_polys (deg_z N_2 = {pdeg(Nz[2])}, r={r} < d={d} so '
       f'd_r = q_2 + z carries z, shown by comparison against the z-free map); diagonal is '
       f'the constant Q(0)={Qt[0]}, det = Q(0)^{d}; '
@@ -143,7 +145,7 @@ print(f'PASS: Prop 2.1 through the recurrence: prescribed (P_0,P_1,P_2) in Q[z] 
 
 
 # ===========================================================================
-# Lemma 2.3, eq. (2.6): deg_z F_M = floor(M/r)
+# `lem:eventual-degree`, `eq:eventual-degree`: deg_z F_M = floor(M/r)
 # ===========================================================================
 def Bnum(Bt, Mmax):                                                # univariate B(t) as numerator
     return [[c] for c in Bt] + [[Fr(0)]] * (Mmax + 1)
@@ -159,12 +161,12 @@ for (Qt, r, Bt, Mtop) in [
     # last_bad = max(bad), then asserting only above it -- is a tautology: that range
     # excludes every failure by construction, so it passes on a degree list wrong at
     # every index.
-    assert not bad, (r, bad)                                        # eq. (2.6), every M
+    assert not bad, (r, bad)                                        # `eq:eventual-degree`, every M
     print(f'PASS: deg_z F_M = floor(M/r) for every M in [0,{Mtop}]  (r={r})')
 
 
 # ===========================================================================
-# Proposition 5.2 (linear case): P_m = (-1)^m R(z)(z+q_1)^m / q_0^{m+1}
+# `prop:linear-case` (linear case): P_m = (-1)^m R(z)(z+q_1)^m / q_0^{m+1}
 # ===========================================================================
 q0, q1 = Fr(3, 1), Fr(-5, 2)                                       # q_0 > 0, q_1 < 0
 Rz = [Fr(1), Fr(1), Fr(0), Fr(1)]                                  # R(z) = 1 + z + z^3

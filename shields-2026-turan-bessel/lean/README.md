@@ -1,9 +1,28 @@
-# Lean 4 formalization — Sharp coefficientwise positivity for a matrix Turán determinant of ₀F₁
+# Lean 4 formalization — Canonical–microcanonical positivity and phase geometry for a Bessel–₀F₁ matrix Turán determinant
 
-Formalizes the core of `../shields-2026-turan-bessel.tex` against Mathlib
-(`leanprover/lean4:v4.30.0-rc2`, namespace `TuranBessel`).  `lake build` is green
-with **one** `sorry` and a small, fully localized set of bridge axioms, all
-documented below.
+Formalizes the core of `shields-2026-turan-bessel.tex` against Mathlib
+(`leanprover/lean4:v4.30.0-rc2`, namespace `TuranBessel`).  **The development is
+unconditional: no `sorry`, no project axiom anywhere in the tree.**  Every result
+below reports `[propext, Classical.choice, Quot.sound]` under `#print axioms`.
+
+Every theorem of the paper carrying algebraic content is proved: the endpoint
+classification, `lem:boundary-positivity` in full, `thm:two-parameter-coeff` as
+an iff in `τ` on every `κ ≥ 1` slice, `prop:scalar-H` with both directions of
+`eq:H-kappa-global`, the sharp quadrant of `prop:bessel-sharpness`,
+`prop:c-monotone` entire, and the ensemble hierarchy of
+`thm:ensemble-hierarchy` and `prop:four-copy` at general `(κ,τ)`.
+
+Two absences in the pinned Mathlib bound the remainder, and L6 below separates
+them.  Bessel large-argument asymptotics gate `lem:large-argument-limit`, and
+through it the `κ < 1` exclusion at fixed `a` in `thm:two-parameter-coeff` and
+`thm:coefficientwise`, together with the least-constant half of
+`prop:bessel-sharpness`.  Hoeffding's sampling-without-replacement inequality
+gates the tail estimate of `lem:central-moments` and the critical-scaling
+asymptotics downstream of it; the two exact inputs to that lemma —
+`eq:Sm-asymptotic` and the base-law moments of `eq:hypergeom-moments` — are
+proved.
+
+The proofs in the paper are noncomputational and do not depend on the code here.
 
 ## Build
 
@@ -12,214 +31,171 @@ lake exe cache get   # fetch the pinned Mathlib build cache (once)
 lake build
 ```
 
-## What is proven (unconditionally)
+## Result coverage
 
-The **central theorem of the paper** and its sharpness are proven with no `sorry`
-and no project-specific axioms — `#print axioms` reports only Lean/Mathlib's
-`[propext, Classical.choice, Quot.sound]`:
+The **central theorem of the paper** and its sharpness.  Every Lean name below is
+pinned to the standard footprint by a `#guard_msgs` in
+`TuranBessel/AxiomCheck.lean`, so a `sorry` or a stray axiom entering any
+dependency fails the build rather than silently weakening a row here.
 
 | Result | Paper | Lean |
 |---|---|---|
 | Sharp coefficientwise positivity, `Δ_n(a)>0`, `κ=1` | `thm:coefficientwise` | `Main.coefficientwise_positivity` |
-| Threshold sharp: `κ<1` fails / `κ≥1` deformation | `thm:coefficientwise`, `prop:bessel-sharpness`, `eq:MD01-kappa` | `Threshold.MDkappa_neg_exists` / `MDkappa_ge_pos` |
-| Gram positive-definiteness of stable coeffs | `thm:gram` | `Gram.Nmat_pd_two`, `Gram.Nmat_pd_one` |
+| Degree-one threshold sharp, uniformly in `a`: `κ<1` fails / `κ≥1` holds | `rem:uniform-degree-one`, `eq:MD01-kappa` | `Threshold.MDkappa_uniform_iff`, `MDkappa_neg_exists`, `MDkappa_ge_pos` |
+| Gram positive-definiteness of the coefficient fiber, at a free shift | `thm:gram`, `eq:Nm-gram`, `eq:Mm-gram` | `GramRep.NmatS_eq_gram`, `Mmat_eq_gram_smul`, `NmatS_pd`; `Gram.Nmat_pd_two`, `Nmat_pd_one` at `s = 1/g` |
 | Degree-one inertia trichotomy and the threshold `a✱` | `lem:M1-indefinite` | `Anomaly.M1_inertia_trichotomy`, `Nmat_one_not_psd`, `Nmat_one_pd_of_fM1_pos` |
 | Degree-two `Q_*` decomposition, `Δ_2>0` | `lem:Delta2-positive`, `eq:Qstar-decomp` | `Degree.Dcoeff_two_pos` |
 | Negative-order failure `Δ_2(a)<0` on `-2<a<-1` | `prop:negative-coeff-failure` | `NegativeOrder.Dcoeff_two_neg` |
+| Two-parameter affine identity, in `MD` and coefficientwise | `eq:affine-two-param` | `Phase.MD_NmatKT`, `Phase.DcoeffKT_affine` |
+| `τ_cw` is the exact degree-one root, and `τ_cw < 1` | `eq:tau-cw`, `thm:two-parameter-coeff` | `Phase.DcoeffKT_degree_one_boundary`, `Phase.tauCw_lt_one`, `Phase.tauCw_antitone` |
+| Boundary pieces: `det N̂_1 ≥ 0`, `s_*+c_2>0`, `P_2>0` | `lem:boundary-positivity` | `Phase.det_N1_boundary_eq`, `det_N1_boundary_nonneg`, `sStar_add_c_two_pos`, `P2boundary_pos` |
+| Cubic trigamma bound; `1 < a²ψ₁(a)`; `c(a) > 3/2` | `eq:trig-upper-cubic`, `eq:tau-cw`, `lem:large-argument-limit` | `Phase.trigamma_lt_cubic`, `Phase.sq_mul_trigamma_gt_one`, `Phase.cCrit_gt` |
+| Asymmetric reciprocal-gamma convolution | `lem:convolution`, `eq:asymmetric-convolution` | `Convolution.gamma_convolution`, `Convolution.poch_vandermonde` |
+| `Z` entire in `λ`, positive, and `[λᵐ]Z² = S_m` | `eq:Zdef`, `sec:coefficients` | `Zseries.summable_zterm`, `Zseries.Zfun_pos`, `Zseries.Zfun_sq` |
+| `sred a m = S_m Γ(a)²` | `sec:coefficients` | `Zseries.sred_eq_sweight_mul` |
+| Scalar forms of `H_ν^{(κ)}`: Amos root, Turánian, and `κ ≥ 1` in both directions | `prop:scalar-H`, `eq:H-Amos-general`, `eq:Amos-bound-exact`, `eq:H-turan-exact`, `eq:H-kappa-global` | `ScalarH.Hratio_pos_iff_ratio`, `ScalarH.Hratio_one_pos_iff_amos`, `ScalarH.Hratio_eq_turan`, `ScalarH.Hratio_pos_of_one_le`; `Sharpness.besselHkappa_pos_iff` |
+| Rank-one boundary determinant `4(τ-1)` | `rem:schur-correction` | `ScalarH.schur_boundary_det` |
 | Wedge/MD positivity | `lem:MD-positive` | `MatrixMD.SymMat.MD_nonneg`, `SymMat.MD_pos_of_psd_pd` |
 | Trigamma bounds (both sharp, trapezoidal) | `lem:trigamma-bounds`, `eq:trig-lower`, `eq:trig-upper-half` | `Trigamma.trigamma_gt_inv_sharp`, `trigamma_lt_upper` |
 | ℓ² Cauchy–Schwarz | (Gram argument) | `Trigamma.tsum_mul_sq_le` |
+| Sharp pointwise Bessel–Schur inequality, and the PD matrix | `thm:bessel`, `cor:bessel-matrix` | `Bridge.bessel_schur_ineq`, `bessel_schur_matrix_pd` |
+| `Δ = det 𝒯` is its own Maclaurin sum, every real `λ` | `eq:Delta-n-MD` | `TuranDet.hasSum_turanDet`, `Bridge.hasSum_turanDetCoeff` |
+| The Bessel dictionary `G_ν, P_ν, H_ν^{(κ)}, det 𝒮_ν` | `eq:Gnu`–`eq:Hnu-kappa`, `eq:D-Delta` | `BesselDict`, `BesselDictPH`, `BesselLaw.besselHkappa_eq` |
+| The discrete Bessel law and the covariance deficit | `cor:bessel-law`, `eq:covariance-ineq` | `BesselLaw.normalizedTuran_eq`, `covariance_ineq` |
+| `lem:boundary-positivity`, all four steps and the chain | `lem:boundary-positivity` | `Boundary.boundary_positivity` |
+| Two-parameter coefficientwise positivity, `κ ≥ 1` | `thm:two-parameter-coeff` | `WallOrder.DcoeffKT_pos_of_gt`, `DcoeffKT_nonneg_of_ge`, `two_parameter_boundary` |
+| `S_m` as a pair of gamma ratios (Legendre duplication) | `eq:Sm-gamma-ratio` | `Scaling.sweight_eq_gamma_ratio` |
+| `3/2 < c(a) < 7/2` | `eq:c-range` | `Scaling.cCrit_mem` |
+| `c(a)` strictly decreasing, with range exactly `(3/2,7/2)` | `prop:c-monotone` | `CriticalConstant.cCrit_strictAnti_and_range`; `Tetragamma.trigamma_sq_add_tetragamma_pos`, `hasDerivAt_trigamma` |
+| Two-term expansion of `S_m`, remainder two-sided with its constant written out | `eq:Sm-asymptotic` | `GammaRatio.abs_sweight_div_sub_le` |
+| Exact variance of the symmetric hypergeometric base law | `eq:hypergeom-moments` | `GammaRatio.hyperWeight_variance`, `hyperWeight_second_moment_scaled` |
+| The microcanonical fiber law, its three moments, and its differential form | `thm:ensemble-hierarchy` | `Microcanonical.hasSum_pairPMF`, `sum_condPMF`, `NmatKT_eq_condExp`, `NmatKT_eq_baseline_sub_cov`, `NmatKT_eq_ellUV`, `normalizedTuran_eq_pairExp` |
+| Four-copy sectors, and the defect as a canonical sector average | `prop:four-copy` | `FourCopy.hasSum_fourPMF`, `DcoeffKT_eq_kExp`, `besselDefect_eq_sectorAverage`; `SectorAverage.besselDefectKT_eq_sectorAverage` at general `(κ,τ)` |
+| The determinant series at general `(κ,τ)`, and its degree-zero coefficient | `eq:Tkt`, `eq:Delta0-tau` | `TuranDetKT.hasSum_turanDetKT`, `DcoeffKT_zero`, `turanDetKT_pos` |
+| `τ` converse of the coefficientwise phase diagram | `thm:two-parameter-coeff` | `Sharpness.DcoeffKT_pos_iff_of_one_le`, `DcoeffKT_nonneg_iff_of_one_le` |
+| Bessel–Schur positivity on the sharp quadrant `κ,τ ≥ 1`, and `τ ≥ 1` forced | `prop:bessel-sharpness`, `eq:Dkappa-tau-Delta` | `Sharpness.besselDefectKT_eq`, `bessel_sharpness_pos`, `bessel_schur_matrix_KT_pd`, `exists_bessel_defect_neg_of_lt_one` |
+| The Schur matrix at `z = 0`, rank one exactly at `τ = 1` | `cor:bessel-matrix`, `rem:schur-correction` | `Sharpness.schurMatKT_arg_zero`, `schurMatKT_arg_zero_det`, `schurMat_arg_zero_rank_one` |
 
 In this table `Δ_n` is the coefficient in its proven mixed-determinant form
-(`Dcoeff`, `eq:Delta-n-MD`), and the axiom-free positivity is of that
-combinatorial sum; its identification with the genuine Maclaurin coefficient
-`[λⁿ] det 𝒯` (`turanDetCoeff_pos`) is axiom-backed via `turanDetCoeff_eq`
-(see L2 below).
+(`Dcoeff`, `eq:Delta-n-MD`); its identification with the genuine Maclaurin
+coefficient `[λⁿ] det 𝒯` is `Bridge.hasSum_turanDetCoeff`, and
+`turanDetCoeff_pos` is an ordinary theorem.
 
 Trigamma `ψ₁` is **built from scratch** (`∑(y+n)⁻²`) because Mathlib has no
 polygamma. The algebraic identities are cross-checked in `../scripts` (sympy).
 
-## Module map
-
-Paper sections (of `../shields-2026-turan-bessel.tex`): 2 `sec:main`, 3
-`sec:coefficients`, 4 `sec:gram`, 5 `sec:determinant`, 6 `sec:bessel-reduction`,
-7 `sec:bessel-consequences`, 8 `sec:continuation`, 9 `sec:context`, 10
-`sec:questions`.  Each module header names the section(s) it formalizes.
-
-```
-MatrixMD     — §5      2×2 symmetric matrices, MD, wedge positivity (lem:MD-positive)
-Trigamma     — §4      ψ₁ from series: summability (incl. continuation), bounds, CS
-Coefficients — §3,§4   closed-form matrices N_m (α_m,β_m,c_m), reduced weights s_m
-Gram         — §4      slack identity, CS+cross-sum ⇒ N_m ≻ 0 (thm:gram)
-Anomaly      — §4      f(a)=(4a-1)ψ₁(a)-4, its monotonicity and continuity, the
-                       threshold a✱ and the N_1 inertia trichotomy (lem:M1-indefinite)
-Degree       — §5      Δ_1>0 (MD01), Q_* identity Dcoeff_two_eq, Δ_2>0, MD(N_1,N_m)≥0
-Main         — §5      coefficientwise_positivity (thm:coefficientwise §2, κ=1)
-Threshold    — §5,§2   κ<1 fails (eq:MD01-kappa; completes the iff)
-NegativeOrder— §8      Δ_2<0 on -2<a<-1 (prop:negative-coeff-failure, lem:continuation)
-Bridge       — §2,§3,§6 external inputs as documented axioms + derived corollaries
-```
-
-## Coverage against the paper
+## Structural coverage
 
 Every result of `../shields-2026-turan-bessel.tex` carrying algebraic content, with
-its Lean status.  `proven` means sorry-free and axiom-clean.
+its Lean status.  `proven` means sorry-free and axiom-clean.  Rows are keyed by
+`\label`, not by number.
 
 | Paper | Lean | Status |
 |---|---|---|
-| 4.1 `lem:trigamma-bounds` | `trigamma_gt_inv_sharp`, `trigamma_lt_upper`, `Gram.inv_trigamma_gt` | proven |
-| 4.2 `thm:gram` | `Nmat_pd_two`, `Nmat_pd_one`, `slack_identity`, `rho_pos_of_two`, `rho_pos_one`, `cross_sum`, `Nmat_det_pos` | proven |
-| 4.3 `lem:M1-indefinite` | `Anomaly.M1_inertia_trichotomy`, `Nmat_one_not_psd`, `Nmat_one_pd_of_fM1_pos` | proven (the decimal `a✱` is a locator, not formalized) |
-| 5.1 `lem:MD-positive` | `SymMat.MD_nonneg`, `SymMat.MD_pos_of_psd_pd` | proven |
-| 5.2 `lem:Delta-n-noneq2` | `MD_Nmat_nonneg`, `MD_N0_Nn_pos`, `MD_N0_N1_pos`, `Dcoeff_one_pos`, `MD_N1_Nm_nonneg` | proven (the last as `>=0`; eq. (5.3) states `>0`, and `>=0` is what the assembly consumes) |
-| 5.3 `lem:Delta2-positive` | `Dcoeff_two_eq`, `Rval_pos_of_pos`, `Qstar2_pos_of_pos`, `Dcoeff_two_pos` | proven |
-| 2.2 `thm:coefficientwise`, `κ=1` | `coefficientwise_positivity` | proven, on `Dcoeff` |
-| 2.2 the "only if" half | `MDkappa_eq`, `MDkappa_neg_exists`, `MDkappa_ge_pos` | proven |
-| 2.3 `rem:rank-one-threshold` | `Nmat_zero_psd`, `Nmat_zero_ne` | proven |
-| 8.2 `prop:negative-coeff-failure` | `NegativeOrder.Dcoeff_two_neg` | proven |
-| 2.2 → the true Maclaurin coefficient | `turanDetCoeff_pos` | axiom (L2) |
-| 3.1 `lem:convolution` | — | axiom (L2) |
-| 3.2 `thm:coefficients` | `Nmat`, `ccoef`, `sred` are definitions | axiom that they are the coefficients (L2) |
-| 6.1 / 6.5 / 6.6 the Bessel bridge | `besselG/P/H`, `besselSchurCoeff`, `_eq` | axiom (L3) |
-| 2.4 `thm:bessel` | `bessel_schur_ineq` | `sorry` (L1) |
-| 2.5 `cor:bessel-matrix` | `bessel_schur_matrix_pd` | `sorry` + `besselG_pos` (L1/L3) |
-| 2.6 least-constant half | — | missing (L3) |
-| 7.1 `lem:large-argument-limit` | — | missing (L3) |
-| 7.2 `cor:converse-fixed-a` | — | missing pointwise (L3); the coefficient-level `κ<1` failure is proven |
-| 7.3 `rem:first-negative-degree` | — | missing (L3) |
-| 8.1 `lem:continuation` | `trigamma_summable_shift`, `trigamma_succ_of_summable`, `trigamma_recurrences_neg`, `trigamma_pos_neg` | **partial** — the trigamma series continues to negative non-integer `a`; the meromorphic continuation of the coefficient identities does not (L2) |
-| 3.4 `rem:finite-law`, §9 `sec:context`, §5 closing `Γ`-bound | — | out of scope (L4) |
+| `lem:trigamma-bounds` | `trigamma_gt_inv_sharp`, `trigamma_lt_upper`, `Gram.inv_trigamma_gt` | proven |
+| `eq:trig-upper-cubic` | `Phase.trigamma_lt_cubic` | proven |
+| `thm:gram`, `eq:Nm-gram`, `eq:Mm-gram`, `eq:rho-m` | `GramRep.NmatS_eq_gram`, `Mmat_eq_gram_smul`, `NmatS_det_pos`, `NmatS_pd`, `inner_xi_xi`, `inner_xi_eta`, `inner_eta_eta`; `Gram.slack_identity`, `rho_pos_of_two`, `rho_pos_one`, `cross_sum`, `Nmat_det_pos`, `Nmat_pd_two`, `Nmat_pd_one` | proven — at the free shift `s` the theorem is stated at; the `Gram` names are the case `s = 1/g` |
+| `lem:M1-indefinite` | `Anomaly.M1_inertia_trichotomy`, `Nmat_one_not_psd`, `Nmat_one_pd_of_fM1_pos` | proven (the decimal `a✱` is a locator, not formalized) |
+| `lem:MD-positive` | `SymMat.MD_nonneg`, `SymMat.MD_pos_of_psd_pd` | proven |
+| `lem:Delta-n-noneq2` | `MD_Nmat_nonneg`, `MD_N0_Nn_pos`, `MD_N0_N1_pos`, `Dcoeff_one_pos`, `MD_N1_Nm_pos` | proven |
+| `lem:Delta2-positive` | `Dcoeff_two_eq`, `Rval_pos_of_pos`, `Qstar2_pos_of_pos`, `Dcoeff_two_pos` | proven |
+| `thm:coefficientwise`, `κ=1` | `coefficientwise_positivity` | proven, on `Dcoeff` |
+| `rem:uniform-degree-one`, `eq:MD01-kappa` — degree-one sharpness uniform in `a` | `MDkappa_eq`, `MDkappa_ge_pos`, `MDkappa_neg_exists`, `MDkappa_uniform_iff` | proven |
+| `thm:gram`, degree 0 (`N_0` rank one) | `Nmat_zero_psd`, `Nmat_zero_ne` | proven |
+| `thm:two-parameter-coeff`, the boundary | `Phase.DcoeffKT_degree_one_boundary`, `Phase.tauCw_lt_one`, `Phase.tauCw_antitone`, `Phase.DcoeffKT_affine`, `Phase.pRed_pos`, `Phase.qRed_pos` | proven — the boundary equation, `τ_cw<1`, and the affine structure; positivity of every degree `n ≥ 2` on it is `WallOrder.two_parameter_boundary` |
+| `lem:boundary-positivity`, its algebraic steps | `Phase.det_N1_boundary_eq`, `det_N1_boundary_nonneg`, `det_N1_boundary_factor_pos`, `sStar_add_c_two_pos`, `P2boundary_pos` | proven |
+| `lem:large-argument-limit`, the bound `c(a) > 3/2` | `Phase.cCrit_gt` | proven (the expansion itself is L6) |
+| `prop:negative-coeff-failure` | `NegativeOrder.Dcoeff_two_neg` | proven |
+| `lem:convolution`, `eq:asymmetric-convolution` | `Convolution.gamma_convolution`, `Convolution.poch_vandermonde`, `Convolution.Gamma_add_natCast` | proven |
+| `eq:Zdef`; `[λᵐ]Z² = S_m` | `Zseries.summable_zterm`, `Zseries.Zfun_pos`, `Zseries.Zfun_sq`, `Zseries.sred_eq_sweight_mul` | proven |
+| `eq:Zdef` — `Z` **is** Mathlib's regularized `₀F₁` | `Hypergeometric.ofReal_Zfun` | proven (no hypothesis; both sides are `tsum`s) |
+| `eq:I-Z`, the `J`-side: `J_{a-1}(x) = (x/2)^{a-1} Z(a,-(x/2)²)` | `Hypergeometric.besselJ_eq_Zfun` | proven |
+| **`eq:I-Z`**: `I_{a-1}(2√λ) = λ^{(a-1)/2} Z(a,λ)` | `BesselI.besselIReal_eq_rpow_mul_Zfun`, `BesselI.ofReal_besselI_eq_Zfun` | proven, over `BesselI.besselI` defined there |
+| `I_ν` analytic; `I_ν>0` for `ν>-1, x>0`; `log I_ν` splits off `log Z` | `BesselI.analyticAt_besselI`, `besselIReal_pos`, `log_besselIReal` | proven |
+| `ψ' = ψ₁`, tying `Trigamma.trigamma` to `Real.Gamma` and to Mathlib's `digamma` | `ParameterCalculus.deriv_realDigamma_eq_trigamma`, `deriv_digamma_ofReal` | proven |
+| `∂_a Z`, `∂_a² Z` termwise (differentiation under the sum) | `ParameterCalculus.hasDerivAt_Zfun_param`, `hasDerivAt_deriv_Zfun` | proven |
+| `eq:F-second-delta`, `F_m''(0) = -2S_mψ₁(a+m)` | `ParameterCalculus.deriv_deriv_Fdelta` | proven |
+| `eq:alpha`, `[λᵐ]A = S_mψ₁(a+m)` | `AlphaCoeff.hasSum_Afun` | proven |
+| `eq:beta`, `[λᵐ]B = S_mβ_m` | `BetaGammaCoeff.tsum_beta_eq_B` | proven |
+| `[λᵐ]C_{κ,τ} = S_m(τ+gc_m^{(κ)})` | `BetaGammaCoeff.tsum_gamma_eq_C` | proven, at general `(κ,τ)` |
+| **`eq:Delta-n-MD`** — `Δ = det 𝒯` is the sum of `∑ₙ Δ_n λⁿ`, `Δ_n = ψ₁(a)Γ(a)⁻⁴/2·Dcoeff`, and `Δ_n` as an expectation over `eq:Tn-Kn-law` | `TuranDet.hasSum_turanDet`, `Bridge.hasSum_turanDetCoeff`; `FourCopy.DcoeffKT_eq_kExp`, `Dcoeff_eq_kExp`, `turanDetCoeff_eq_kExp` | proven — both equalities, the probabilistic one at general `(κ,τ)` |
+| `thm:coefficientwise` → the true Maclaurin coefficient | `turanDetCoeff_pos` | proven |
+| `prop:scalar-H` — `eq:H-Amos-general`, `eq:Amos-bound-exact`, `eq:H-turan-exact` | `ScalarH.Hratio_pos_iff`, `Hratio_pos_iff_ratio`, `Hratio_one_pos_iff_amos`, `Hratio_eq_turan`, `Hratio_shift`, `Hratio_pos_of_one_le`, `amosRoot_eq_div`, `amosRoot_antitone` | proven **in the ratio variable** — every claim about the quadratic `r²+2(ν+κ)r-z²` and about the ratio recurrence.  Identifying `H_ν^{(κ)}` with that quadratic (`eq:H-r-forms`) is `BesselLaw.besselHkappa_eq`, at general `κ` |
+| `eq:H-kappa-global`, both directions | `Sharpness.besselHkappa_pos_iff`, `besselHkappa_pos_of_one_le`, `exists_besselHkappa_neg_of_lt_one`, `besselHfun_pos`, `besselHkappa_eq_zform`, `strictConcaveOn_log_Zfun`, `Zfun_turan`, `ZEulerSeries_eq_shift`, `ZEuler2Series_eq_shift` | proven — `H_ν^{(κ)}>0` on `z>0` iff `κ ≥ 1`.  The `κ ≥ 1` half is internal rather than cited: `Z_1² > ZZ_2` is the midpoint case of strict concavity of `a ↦ log Z(a,λ)`, which is `A/Z² > 0`.  The `κ<1` half is the `λ ↓ 0` value `(κ-1)/a` of the same bracket |
+| `cor:bessel-law`'s underdispersion reading, unconditionally | `Sharpness.besselLaw_underdispersed` | proven — `Var Y < E Y` for every `ν>-1`, `z>0` |
+| `rem:schur-correction`, the `z ↓ 0` matrix and its determinant `4(τ-1)` | `ScalarH.schur_boundary_det`; `Sharpness.schurMatKT_arg_zero`, `schurMatKT_arg_zero_det`, `continuousAt_besselG_arg`, `continuousAt_besselP_arg`, `continuousAt_besselHkappa_arg` | proven |
+| `thm:coefficients` | `Nmat`, `ccoef`, `sred` are definitions; their coefficient identities are proven (`AlphaCoeff`, `BetaGammaCoeff`) | proven |
+| `eq:Gnu`–`eq:Hnu-kappa`, `eq:D-Delta` | `Bridge.besselG_eq`, `besselP_eq`, `besselH_eq`, `besselDefect_eq`; `BesselLaw.besselHkappa_eq` at general `κ` | proven |
+| `thm:bessel` | `Bridge.bessel_schur_ineq` | proven |
+| `cor:bessel-matrix` | `Bridge.bessel_schur_matrix_pd`; `Sharpness.schurMatKT_arg_zero`, `schurMat_arg_zero_rank_one`, `continuousAt_besselG_arg`, `continuousAt_besselP_arg`, `continuousAt_besselHkappa_arg` | proven, including the limit clause — the extension to the rank-one matrix `((g,2),(2,4/g))` is a two-sided `ContinuousAt` at `z = 0`, stronger than the paper's `z ↓ 0` |
+| `lem:boundary-positivity` | `Boundary.boundary_positivity`, `NmatHat_pd`, `MD_NmatHat_zero_pos`, `MD_NmatHat_one_pos`, `DcoeffKT_boundary_two_pos` | proven |
+| `cor:bessel-law`, `eq:bessel-law-meanvar`, `eq:bessel-law-param`, `eq:covariance-deficit-matrix`, `eq:covariance-loewner`, `eq:H-dispersion`, `eq:covariance-ineq` | `BesselLaw` (`hasSum_besselPMF`, `Afun_div_sq_eq`, `Bseries_div_sq_eq`, `Cseries_div_eq`, `normalizedTuran_eq`, `besselHkappa_eq_dispersion`, `covariance_ineq`, `besselDefect_eq_covariance`) | proven |
+| `thm:ensemble-hierarchy`, `eq:pair-total-law` | `Microcanonical.pairPMF_eq_conv`, `hasSum_pairPMF`, `besselPMF_div_pairPMF`, `sum_condPMF`, `condPMF_reflect` | proven — both identities, and the conditional law carries no `λ` |
+| `eq:finite-law-entries` | `Microcanonical.alpha_eq_condExp`, `beta_eq_condExp`, `ckappa_eq_condExp`, `condExp_dfin`, `condExp_xiScore` | proven — all three entries, with the two vanishing means `E Ξ_m = E D_m = 0` |
+| `eq:microcanonical-covariance-deficit` | `Microcanonical.NmatKT_eq_condExp`, `NmatKT_eq_baseline_sub_cov` | proven, at general `(κ,τ)` |
+| `eq:microcanonical-schur` | `Microcanonical.NmatKT_eq_ellUV`, `deriv_deriv_log_eq` | proven — a genuine second logarithmic derivative of the two-parameter fiber weight `Fuv` at the origin, in both variables and mixed |
+| `eq:canonical-fiber-average` | `Microcanonical.normalizedTuran_eq_pairExp`, `pairExp_alpha`, `pairExp_beta`, `pairExp_gamma` | proven, at general `(κ,τ)` |
+| `prop:four-copy`, `eq:four-total-law`, `eq:Tn-Kn-law` | `FourCopy.Zfun_pow_four`, `hasSum_fourPMF`, `sum_kPMF`, `pairPMF_div_fourPMF` | proven |
+| `eq:sector-density`, `eq:D-canonical-average` | `FourCopy.hasSum_sectorDensity`, `besselDefect_eq_sectorAverage`; `SectorAverage.hasSum_sectorDensityKT`, `besselDefectKT_eq_sectorAverage` | proven, at general `(κ,τ)` |
+| `rem:ensemble-positivity`, the vacuum sector `d_0^{(κ,τ)} = 4(τ-1)` | `FourCopy.sectorDensityKT_zero` | proven |
+| `eq:Tkt`, `eq:Delta0-tau` — the determinant series at general `(κ,τ)` | `TuranDetKT.turanDetKT`, `turanDetKT_endpoint`, `cauchy_eq_factor_mul_DcoeffKT`, `hasSum_turanDetKT`, `DcoeffKT_zero`, `turanDetKT_lam_zero`, `turanDetKT_pos` | proven — positivity holds on the quadrant `κ ≥ 1`, `τ ≥ 1`, and no further: the degree-zero coefficient is `2(τ-1)`, so `Δ^{(κ,τ)}` is negative near `λ = 0` throughout `τ_cw < τ < 1` |
+| `prop:bessel-sharpness`, sufficiency, and `τ ≥ 1` forced; `eq:Dkappa-tau-Delta` at general `(κ,τ)` | `Sharpness.besselDefectKT_eq`, `bessel_sharpness_pos`, `bessel_schur_matrix_KT_pd`, `exists_bessel_defect_neg_of_lt_one` | proven — the correction term is `4τ/g`, as `eq:Dnu-kt-def` writes it |
+| `eq:qn-pn-ratio`, `eq:q1-p1`, `eq:q-ratio-gap` | `WallOrder.n_pRed_lt_two_qRed`, `pRed_one`, `qRed_one`, `qRed_pRed_cross` | proven |
+| `thm:two-parameter-coeff`, every `κ ≥ 1` slice as an iff in `τ` | `WallOrder.DcoeffKT_pos_of_gt`, `DcoeffKT_nonneg_of_ge`, `two_parameter_boundary`; `Sharpness.DcoeffKT_degree_one_neg_of_lt`, `DcoeffKT_pos_iff_of_one_le`, `DcoeffKT_nonneg_iff_of_one_le` | proven in both directions — strict positivity of every positive degree holds iff `τ_cw < τ`, nonnegativity iff `τ_cw ≤ τ` |
+| `eq:Sm-gamma-ratio` | `Scaling.sweight_eq_gamma_ratio` | proven (Legendre duplication) |
+| `eq:c-range` | `Scaling.cCrit_mem` | proven, both ends |
+| `eq:alpha-asymptotic` | `Scaling.abs_alpha_sub_three_term_le` | proven, all three terms |
+| `eq:beta-asymptotic`, `eq:c-asymptotic` | `Scaling.betacoef_three_term`, `ccoef_three_term`, and their bounds | proven, exactly — both are rational in `m` |
+| DLMF §5.11(i), the digamma expansion | `Digamma.digamma_sandwich` | proven with an explicit `x⁻³` remainder |
+| `prop:c-monotone` | `CriticalConstant.cCrit_strictAnti_and_range`, `strictAntiOn_cCrit`, `hasDerivAt_cCrit`, `deriv_cCrit_neg`, `tendsto_cCrit_atTop`, `tendsto_cCrit_zero`, `exists_cCrit_eq`; `Tetragamma.trigamma_sq_add_tetragamma_pos`, `hasDerivAt_trigamma` | proven entire — strict antitonicity on `(0,∞)`, both endpoint limits, and surjectivity onto `(3/2,7/2)` |
+| `eq:Sm-asymptotic` | `GammaRatio.abs_sweight_div_sub_le`, `abs_gammaRatioFactor_div_rpow_sub_le`, `stirling_diff_sandwich`, `stirlingLam_add`, `abs_shiftRem_sub_le`, `abs_four_shift_sub_le` | proven — a two-sided bound with the threshold and the remainder constant written out, not an `IsBigO` |
+| `thm:two-parameter-coeff`, the `κ<1` exclusion at fixed `a` | — | missing (L6) — the paper routes it through `lem:large-argument-limit`.  The `τ` half of the converse is proven above, and the coefficient-level `κ<1` failure at `τ=1`, uniform in `a`, is `Threshold.MDkappa_neg_exists` |
+| `thm:coefficientwise`, the fixed-`a` "only if" half | — | missing (L6) — the paper defers it to the necessity part of `thm:two-parameter-coeff`, above, so it rests on the same absence.  Degree one cannot reach it: what `Threshold` proves is the uniform-in-`a` converse (`MDkappa_uniform_iff`), which is strictly weaker |
+| `prop:bessel-sharpness`, the single zero on `(0,∞)` for `τ_cw ≤ τ < 1` | `ZeroCount.exists_unique_zero_besselDefectKT`, `exists_unique_zero_turanDetKT`, `strictMonoOn_turanDetKT`, `tendsto_turanDetKT_atTop`, `continuous_turanDetKT_lam`, `two_term_le_turanDetKT`, `DcoeffKT_pos_of_ge_two` | proven — from the coefficient signs alone: a strictly negative constant term, nonnegative coefficients above it, and degree two strictly positive give strict monotonicity and divergence, so the crossing is unique.  Needs no large-argument input |
+| `prop:bessel-sharpness`, the least-constant half | — | missing (L6) — needs `lem:large-argument-limit` |
+| `lem:large-argument-limit`, the expansion | — | missing (L6) |
+| `eq:hypergeom-moments`, the base-law moments `lem:central-moments` consumes | `GammaRatio.hyperWeight_sum`, `hyperWeight_first_moment`, `hyperWeight_second_moment`, `hyperWeight_variance`, `hyperWeight_second_moment_scaled` | proven — the exact variance `n²/(4(2n-1))`, from Chu–Vandermonde.  The fourth and sixth moments are not; they are not needed for the variance and they sit behind the tail bound below |
+| `lem:central-moments`, `eq:X2-asymptotic`, `eq:X4-asymptotic`, `eq:tilt-comparison`, `eq:tilted-tail`, and everything downstream: `eq:MD-central-expansion`, `eq:den-central-expansion`, `eq:MD-expectation-two-term`, `eq:den-expectation`, `thm:critical-scaling`, `thm:wall-fan`, `thm:cubic-multicritical`, `cor:wall-orientation`, `cor:eventual-negative-tail`, `rem:jet-transfer-factor` | — | missing (L6) — needs Hoeffding's sampling-without-replacement inequality |
+| `lem:continuation` | `trigamma_summable_shift`, `trigamma_succ_of_summable`, `trigamma_recurrences_neg`, `trigamma_pos_neg` | **partial** — the trigamma series continues to negative non-integer `a`; `lem:coefficient-continuation`, which carries each coefficient identity across by the one-variable identity theorem, is not formalized and is in no L-bucket |
+| `sec:context`, the closing `Γ`-bound of `subsec:endpoint-sufficiency` | — | out of scope (L4) |
 
-**100% coverage is not reachable from Mathlib as it stands.**  Every remaining row
-is blocked on L2 or L3, and both are Mathlib gaps rather than effort gaps: there
-are no modified Bessel functions, no polygamma family, and no real-parameter Gauss
-₂F₁.  Closing them means contributing a special-functions library first; nothing in
-this development can route around that.
+**L1, L2, L3, L5 and L7 are all closed**, and L6 has narrowed from an area to
+two missing primitives.  `thm:bessel` and `cor:bessel-matrix` are proved
+outright, the corollary's limit clause included; `lem:boundary-positivity` is
+proved in full and transported to every `κ ≥ 1`; `cor:bessel-law` is proved with
+the Bessel law itself and with the microcanonical fibers and four-copy sectors
+underneath it; and `thm:two-parameter-coeff` is an iff in `τ` on every `κ ≥ 1`
+slice.  Inside `sec:scaling` the division is sharp: `eq:Sm-gamma-ratio`,
+`eq:Sm-asymptotic` with its constants written out, `eq:c-range`, all three
+expansions of `subsec:asymptotics-degree-thresholds`, the three-term digamma
+sandwich, `prop:c-monotone` entire, and the exact base-law moments of
+`eq:hypergeom-moments` are all proved.  What is left is Hoeffding's
+sampling-without-replacement inequality and Bessel large-argument asymptotics.
+None of the paper's headline results depends on either.  `K_ν` and the
+order-derivative asymptotics are also still absent from Mathlib, and nothing in
+this paper consumes them: the dictionary went through `I_ν` alone.
 
----
 
-# Known limitations, axioms, and how to remove them
+## Dependencies
 
-Nothing below weakens the proven core: `coefficientwise_positivity` and the
-sharpness results do **not** transitively use any of these (verified by
-`#print axioms`). They isolate exactly the paper results that require machinery
-Mathlib does not yet have.
+This development depends on modules in the repository-wide `_lean_shared/` tree,
+outside the paper's `lean/` directory.
 
-## L1. One `sorry` — the pointwise Bessel inequality `thm:bessel`
-
-`Bridge.bessel_schur_ineq`:
-`(1+P_ν(z))² < G_ν(z)(H_ν(z)+4/ψ₁(ν+1))` for `ν>-1`, `z>0`.
-
-**Why it is unproven.** The statement is phrased with the opaque Bessel
-functionals `besselG/P/H`. The paper derives it from
-`D_{a-1}(2√λ)=4Δ(a,λ)/(ψ₁(a)Z⁴)` and the **pointwise** positivity `Δ(a,λ)>0`
-(`λ>0`). We prove the *coefficientwise* positivity `Δ_n>0`; converting that to a
-pointwise value is a real-analysis step, and the Bessel objects themselves are
-not defined.
-
-**What would remove it.**
-1. Modified Bessel functions `I_ν, K_ν` in Mathlib (see L3) — the hardest part.
-2. Define `Z`, `A`, `B`, `C` (see L2) and prove `eq:I-Z`, `eq:D-Delta`.
-3. Assemble the strictly-positive Maclaurin series `Σ_{n≥1} Δ_n(a) λⁿ > 0` into
-   the pointwise value: needs a coefficient growth bound giving summability of
-   `Δ_n(a) λⁿ` (routine given the analytic `Z`, but not yet in place). This third
-   step alone, given L2/L3, is small.
-
-The matrix corollary `cor:bessel-matrix` (`Bridge.bessel_schur_matrix_pd`) is
-*derived* from `bessel_schur_ineq` plus one extra axiom `besselG_pos`
-(`G_ν(z)>0`, order log-convexity of `I_ν`), so it inherits the same `sorry`.
-
-`prop:bessel-sharpness` has two halves: the **deformation** half (`D_ν^{(κ)}>0`
-for all `ν>-1,z>0` iff `κ≥1`) is proven at coefficient level in `Threshold`; the
-**boundary-correction** half (`4/ψ₁(ν+1)` is the least admissible `R`) is a `z↓0`
-limit of `G_ν,H_ν,P_ν` and is Bessel-dependent (L3).
-
-## L2. Coefficient-formula bridge — `turanDetCoeff`, `turanDetCoeff_eq`
-
-These assert that the *genuine* Maclaurin coefficient `[λⁿ] det 𝒯(a,λ)` equals
-`turanCoeffFactor(a) · Dcoeff a n`.  The factor `turanCoeffFactor(a) =
-ψ₁(a)/(2Γ(a)⁴)` is a definition (`Real.Gamma`) with proven positivity
-`turanCoeffFactor_pos`; the axioms are `turanDetCoeff` (the analytic coefficient)
-and the identity `turanDetCoeff_eq`.
-`Dcoeff` (proven positive) is the combinatorial mixed-determinant sum built from
-the closed-form matrices `N_m`.
-
-**Why they are axioms.** Discharging `turanDetCoeff_eq` = proving `eq:Delta-n-MD`
-= re-deriving §3–§5 analytically, which needs three things absent from Mathlib:
-- **`lem:convolution`** — the asymmetric reciprocal-gamma convolution, i.e. the
-  Gauss ₂F₁ / Chu–Vandermonde theorem *for real parameters*. Mathlib has the
-  binomial Vandermonde (`Nat.add_choose`) but not the real-Γ (terminating ₂F₁)
-  form.
-- **The reciprocal-gamma series `Z` and its calculus** — `Z(a,λ)=Σ λ^k/(k!Γ(a+k))`
-  and `A,B,C_κ` as its `a`- and Euler-derivatives.
-- **Polygamma** — parameter differentiation of `1/Γ(a+k)` produces `ψ_j(a+k)`;
-  Mathlib has only `digamma = logDeriv Γ`, no higher polygamma. (We built `ψ₁`
-  ourselves but not the general family.)
-
-**What would remove them.**
-1. Formalize `lem:convolution` (a finite identity; provable by induction / the
-   terminating ₂F₁ evaluated at 1, on top of `Real.Gamma`, `Real.Gamma_add_one`).
-2. Define `Z` and its `A,B,C`; port the polygamma coefficient formulas
-   (`thm:coefficients`, `α_m=ψ₁(a+m)`, etc.).
-3. `turanCoeffFactor` is a `Real.Gamma` definition with proven positivity, so only
-   `turanDetCoeff` and its identity `turanDetCoeff_eq` need the analytic layer.
-
-Estimated effort: several hundred lines plus the polygamma and real-₂F₁
-prerequisites. Once done, `turanDetCoeff_pos` (already derived here) becomes an
-ordinary theorem.
-
-## L3. Bessel dictionary — `besselG`, `besselP`, `besselH`, `besselSchurCoeff`, `besselSchurCoeff_eq`, `besselG_pos`
-
-Introduce the modified Bessel `I_ν` and the curvature functionals `G_ν,P_ν,H_ν`
-(`eq:Gnu`–`eq:Hnu`), and assert their small-argument coefficients are positive
-multiples of the determinant coefficients (`eq:I-Z`, `eq:D-Delta`).
-
-**Why they are axioms.** Mathlib has **no** modified Bessel functions at all, nor
-their derivatives with respect to the order (DLMF §10.38). Every Bessel-side
-object in the paper is therefore undefined in Mathlib.
-
-**What would remove them.** A standalone special-functions contribution:
-`I_ν, K_ν` (series definitions, holomorphy, the identity `eq:I-Z`),
-and order-derivative asymptotics. This is the single largest gap and the one least
-likely to be short. Given it, `besselSchurCoeff_pos` (already derived here from
-`turanDetCoeff_pos`) and then `bessel_schur_ineq` follow.
-
-The paper's supporting negative-order material of §8 — Lemma 8.1 `lem:continuation`,
-whose trigamma half **is** proven (`trigamma_summable_shift`,
-`trigamma_succ_of_summable`, `NegativeOrder.trigamma_recurrences_neg`) while its
-coefficient-identity half needs the `Z`-calculus of L2 — the small-`z` expansion
-`eq:small-z-D` (eq. (8.2)) of `D_ν`, and the accompanying claim that the leading
-small-`z` term keeps its positive sign away from the poles — sits behind this same
-gap. Its purely-algebraic consequence, Proposition 8.2 `prop:negative-coeff-failure`,
-**is** proven (`NegativeOrder.Dcoeff_two_neg`), by continuing the trigamma series to
-`-2<a<-1` and reusing the `Q_*` identity.
-
-## L4. Deliberately out of scope
-
-- **Explicit `Γ`-form of the §5 lower bound** (`Δ(a,λ)>λ/(a⁴Γ(a)⁴)`, the
-  unlabeled display closing `sec:determinant`): a Γ-free lower bound on
-  `MD(N_0,N_1)` is immediate from the sharp trigamma bound already proven; only the
-  literal `Γ`-normalized constant needs `Real.Gamma`.
-- **Remark 3.4 (`rem:finite-law`, §3)**: interprets the coefficient weights via a
-  finite convolution law; an interpretation that does not reprove positivity, so not
-  formalized.
-- **§9 «Comparison with related positivity results» (`sec:context`)**: a comparison
-  with the strict-total-positivity results for the kernel `I_ν(z)`, including the
-  gauge obstruction; context only, and Bessel-kernel-dependent, so out of scope (L3).
-
-## Axiom summary
-
-| Axiom | Kind | Blocking Mathlib gap |
+| Component | Used by | Description |
 |---|---|---|
-| `turanDetCoeff`, `turanDetCoeff_eq` | coefficient bridge (L2) | real-parameter Gauss ₂F₁; polygamma; `Z`-calculus |
-| `besselG/P/H`, `besselSchurCoeff`, `_eq`, `besselG_pos` | Bessel dictionary (L3) | modified Bessel functions + order derivatives |
-| `bessel_schur_ineq` (`sorry`, L1) | pointwise inequality | L3 + positive-series assembly |
+| `Vendor.MathlibPR.PR42760.Bessel` | `Hypergeometric`, for `Complex.besselJ` in `besselJ_eq_Zfun` | `J_ν` as `(x/2)^ν · ₀F̃₁(;ν+1;-(x/2)²)`, with its analyticity in the argument.  Vendored from Mathlib pull request #42760, *feat(Analysis/SpecialFunction): bessel function of the first kind*, by Weiyi Wang (GitHub `wwylele`).  Retires when that PR merges and the Mathlib pin is bumped past it |
+| `Vendor.MathlibPR.PR42760.RegularizedHypergeometric` | reached transitively, through `Bessel`; `Hypergeometric` names `Complex.regularizedHGFun`, `regularizedHGFunSeries` and `regularizedHGFunCoeff` from it in `ofReal_Zfun` | The generalized hypergeometric function and its regularization, by which `Zfun a` **is** `regularizedHGFun 0 {a}` rather than a private construction.  Upstream file by Moritz Doll.  It is already on Mathlib master but postdates our pin, so it retires on the same pin bump |
 
-## Verification
+## License
 
-`#print axioms coefficientwise_positivity` = `[propext, Classical.choice,
-Quot.sound]` — no `sorry`, no L1–L3 axioms. The same holds for the sharpness
-results (`MDkappa_neg_exists`, `Dcoeff_two_neg`), the inertia trichotomy
-(`M1_inertia_trichotomy`, `Nmat_one_not_psd`, `Nmat_one_pd_of_fM1_pos`), and the
-analytic lemmas (`trigamma_gt_inv_sharp`, `tsum_mul_sq_le`, `continuousOn_trigamma`). Algebraic identities (slack, `Q_*`,
-cross-sum) are checked symbolically in `../scripts`.
+Code is made available under the MIT license (see `LICENSE.txt`), or as
+otherwise noted in the comments of the file.  The vendored modules under
+`_lean_shared/Vendor` are the latter: each keeps its upstream header.
+
+## References
+
+1. D. Karp and Y. Zhang, *Log-concavity and log-convexity of series containing
+   multiple Pochhammer symbols*, Fractional Calculus and Applied Analysis **27**
+   (2024), 458–486. [doi:10.1007/s13540-023-00238-0](https://doi.org/10.1007/s13540-023-00238-0)
+
+Refer to the paper for references.

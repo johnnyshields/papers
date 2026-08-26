@@ -1,8 +1,15 @@
 /-
+Copyright (c) 2026 Johnny Shields. All rights reserved.
+Released under the MIT license as described in the file LICENSE.txt.
+Authors: Johnny Shields
+-/
+import TuranBessel.Gram
+
+/-!
 # The degree-one inertia transition (`lem:M1-indefinite`)
 
-Formalizes `shields-2026-turan-bessel.tex`, §4 «Gram structure and the exceptional
-matrix M₁» (`sec:gram`), Lemma 4.3 (`lem:M1-indefinite`): there is a threshold
+Formalizes `shields-2026-turan-bessel.tex`, «Gram structure and the exceptional
+matrix M₁» (`subsec:gram`, `lem:M1-indefinite`): there is a threshold
 `a✱ ∈ (0,1/2)` with `N₁` indefinite for `0 < a < a✱`, singular positive
 semidefinite at `a✱`, and positive definite for `a > a✱`.
 
@@ -29,7 +36,6 @@ and the inertia on each side.
 
 Sorry-free.
 -/
-import TuranBessel.Gram
 
 open Set Topology
 
@@ -56,8 +62,7 @@ theorem fM1_eq_det (ha : 0 < a) :
   rw [hα, hβ, hc, fM1]
   have ha' : a ≠ 0 := ne_of_gt ha
   have hg' : trigamma a ≠ 0 := ne_of_gt hg
-  field_simp
-  ring
+  field
 
 /-- Each summand of `f(a)+4 = ∑ (4a-1)(a+n)⁻²` is strictly increasing on `(0,1/2]`. -/
 theorem fM1_term_lt (ha : 0 < a) (hab : a < b) (hb : b ≤ 1 / 2) (n : ℕ) :
@@ -172,7 +177,7 @@ theorem continuousOn_fM1 : ContinuousOn fM1 (Icc (1 / 4 : ℝ) (1 / 2)) := by
   exact (((continuous_const.mul continuous_id).sub continuous_const).continuousOn.mul
     continuousOn_trigamma).sub continuousOn_const
 
-/-- **Lemma 4.3** (`lem:M1-indefinite`), the inertia transition of the degree-one
+/-- **`lem:M1-indefinite`**, the inertia transition of the degree-one
 coefficient matrix.  There is a threshold `c ∈ (1/4, 1/2)` — the paper's
 `a✱ = 0.3690738484…`, whose decimal value is a locator and is not formalized — with
 `N₁` indefinite below it, singular positive semidefinite at it, and positive definite
@@ -209,7 +214,7 @@ theorem M1_inertia_trichotomy :
     · have hc0' : 0 < c := by linarith
       have := fM1_strictMonoOn hc0' hcx hx2
       linarith
-    · push_neg at hx2
+    · push Not at hx2
       exact fM1_pos_of_half_lt hx2
 
 /-- `det N₁ > 0` exactly when `f(a) > 0` (eq:det-M1). -/

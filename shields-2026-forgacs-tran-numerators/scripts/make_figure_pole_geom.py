@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-r"""Paper section 3 (Pole geometry and the weighted principal amplitude), Figure 1.
+r"""Paper section `sec:geometry` (Spectral geometry, residues, and the principal amplitude), `fig:decomposition-and-defect`.
 
-Generates the two-panel figure inlined as Figure 1 (fig:decomposition-and-defect).
-The figure sits in section 3, but its caption also draws on Lemma 2.2 (the index
-shift), eq. (3.7)/(3.8), eq. (3.11), Theorem 4.1 with eqs. (4.1)-(4.3),
-Proposition 5.1 and Proposition 6.3.
+Generates the two-panel figure inlined as `fig:decomposition-and-defect`.
+The figure sits in section `sec:geometry`, but its caption also draws on `lem:laurent-reduction` (the index
+shift), `eq:W-def`, `eq:W-endpoint-form`, `thm:weighted-dominance` with `eq:amplitude-deletion`,
+`prop:angular-discrepancy` and the numerator-dependence example of `sec:introduction`.
 
 Emits the pgfplots coordinate blocks for the figure and asserts every claim its
 caption makes.  Symbolic work uses SymPy over the rationals; numerical work uses
@@ -17,39 +17,41 @@ Both panels use the same denominator
 so I_{Q,r} = (a,b) is bounded (b = g(t_b) is finite precisely when r = 1) and
 the smallest zero of Q is simple, giving a > 0.
 
-Panel A -- the weighted principal decomposition (3.8) for the proper numerator
+Panel A -- the weighted principal decomposition `eq:principal-decomposition` for the proper numerator
 N(t,z) = B(t) = 7t^2 + 8, at m = M = 14:
 
-  * Lemma 2.2 with E = deg_z N = 0 gives A = B and mu = 0, so P_m = F_m and the
+  * `lem:laurent-reduction` with E_N = deg_z N = 0 gives lambda_N = 0, so P_m = F_m and the
     index shift is trivial; asserted, not assumed.
   * The arc point at theta = pi/2 is t_+ = i sqrt(8/7) with z = 45/28 exactly,
-    so B(t_+(pi/2)) = 0 and W of (3.7) has an amplitude zero at theta_1 = pi/2
-    of multiplicity nu_1 = 1 (Lemma 3.6).  Both values asserted in closed form.
-  * eq. (3.8): tau^{M+1} F_M(z(theta)) = 2 Re(W e^{-i(M+1)theta}) + R_M.
-  * Theorem 4.1, eq. (4.2): |R_M| <= |W|/2 on the plotted range.  The window
+    so B(t_+(pi/2)) = 0 and W of `eq:W-def` has an amplitude zero at theta_1 = pi/2
+    of multiplicity nu_1 = 1 (`lem:amplitude-divisor`).  Both values asserted in closed form.
+  * `eq:principal-decomposition`: tau^{M+1} F_M(z(theta)) = 2 Re(W e^{-i(M+1)theta}) + R_M.
+  * `thm:weighted-dominance`, `eq:dominance-bound`: |R_M| <= |W|/2 on the plotted range.  The window
     around theta_1 where dominance FAILS is measured on both sides by bisection
-    and asserted below 1e-11 -- the caption's "too narrow to draw".  This is not
-    Theta_{1,M} of eq. (4.1), whose width turns on the unpinned constant c; the
-    caption must not attribute the measured number to (4.1).
-  * Proposition 5.1: the sign changes of the plotted curve are counted and
+    and asserted below 1e-11, which is what licenses the caption's "omitted
+    from the drawing".  This is not
+    Theta_{1,M} of `eq:amplitude-deletion`, whose width turns on the unpinned constant c; the
+    caption must not attribute the measured number to that window.
+  * `prop:angular-discrepancy`: the sign changes of the plotted curve are counted and
     matched against the real zeros of F_M in z([theta_L, theta_R]).
 
 Panel B -- zeros of P_m in the z-plane for the genuinely bivariate numerator
 N(t,z) = (1+z+z^2) + t(2-z), at m = 14 and m = 38:
 
-  * The index shift of Lemma 2.2 is r E - mu = 2, so deg P_m = m + 2, with
+  * `lem:laurent-reduction` gives lambda_N = mu - r E_N = -2, so
+    `eq:exact-eventual-degree-shift` predicts deg P_m = floor((m - lambda_N)/r) = m + 2, with
     exactly m simple zeros in I_{Q,r} and exactly 2 elsewhere: the bulk grows
-    while the defect does not (Theorem 1.1).  The degree is predicted from the
+    while the defect does not (`thm:main`).  The degree is predicted from the
     reduction rather than read off the computed polynomial.
   * The exceptional pair is NOT fixed in m -- it converges geometrically.  The
     drift is measured, not assumed away: from m = 14 to m = 38 it is 1.9e-14, so
     the caption claims agreement to thirteen decimals and nothing stronger.
   * This numerator is irreducible, hence not a product R(z)S(t), so the pair is
     created by the initial data rather than factored out of it as in
-    Proposition 6.3; asserted.
+    `sec:introduction`; asserted.
 
 Panel A additionally verifies the caption's p = -1: B has no real zero and both
-endpoint collisions are double, so eq. (3.11) gives p = nu - (k-1) = -1 and |W|
+endpoint collisions are double, so `eq:W-endpoint-form` gives p = nu - (k-1) = -1 and |W|
 blows up at either endpoint.  Checked by delta * 2|W| approaching a positive
 constant from both sides.
 """
@@ -72,10 +74,10 @@ d = max(n, r)
 Qc = [sp.Rational(Qp.nth(k)) for k in range(n + 1)]
 Qm = [mp.mpf(Qc[k].p) / Qc[k].q for k in range(n + 1)]
 
-assert Q.subs(t, 0) > 0                                  # eq. (1.1): Q(0) > 0
-assert all(rt > 0 for rt in sp.real_roots(Qp))           # eq. (1.1): positive zeros
-assert len(sp.real_roots(Qp)) == n                       # eq. (1.1): all zeros real
-assert max(n, r) > 1                                     # Theorem 1.1 hypothesis
+assert Q.subs(t, 0) > 0                                  # `eq:Q-hypotheses`: Q(0) > 0
+assert all(rt > 0 for rt in sp.real_roots(Qp))           # `eq:Q-hypotheses`: positive zeros
+assert len(sp.real_roots(Qp)) == n                       # `eq:Q-hypotheses`: all zeros real
+assert max(n, r) > 1                                     # `thm:main` hypothesis
 print(f'Q = {Q}   r = {r}   d = {d}')
 
 
@@ -92,7 +94,7 @@ t_a = min(c for c in crit if c > 0)                      # smallest positive cri
 t_b = max(c for c in crit if c < 0)                      # the negative one (r = 1)
 a = mp.mpf(str(sp.N(g.subs(t, t_a), 35)))
 b = mp.mpf(str(sp.N(g.subs(t, t_b), 35)))
-assert 0 < a < b < mp.inf                                # eq. (3.1), bounded since r = 1
+assert 0 < a < b < mp.inf                                # `eq:ab-def`, bounded since r = 1
 print(f'I_(Q,r) = ({mp.nstr(a, 10)}, {mp.nstr(b, 10)})')
 
 
@@ -103,7 +105,7 @@ def arc_point(th):
         Im[Q(tau e^{i th}) e^{-i th}] = sum_k q_k tau^k sin((k-1) th) = 0,
     a polynomial in tau.  Each positive root is tested by recomputing every
     denominator zero and checking that tau is attained exactly twice and is
-    strictly smallest -- Theorem 3.1's minimum-modulus assertion.
+    strictly smallest -- `thm:FT-geometry`'s minimum-modulus assertion.
     """
     th = mp.mpf(th)
     co = [Qm[k] * mp.sin((k - 1) * th) for k in range(n + 1)]
@@ -128,7 +130,7 @@ def arc_point(th):
 
 
 def W_of(th, Bc):
-    r"""eq. (3.7): W = -B(t_+)/(Q'(t_+) + r z t_+^{r-1}).  Returns (W, tau, z)."""
+    r"""`eq:W-def`: W = -B(t_+)/(Q'(t_+) + r z t_+^{r-1}).  Returns (W, tau, z)."""
     tau, zz = arc_point(th)
     tp = tau * mp.exp(mp.mpc(0, mp.mpf(th)))
     Bv = sum(Bc[k] * tp**k for k in range(len(Bc)))
@@ -137,7 +139,7 @@ def W_of(th, Bc):
 
 
 def coeffs_P(N, mmax):
-    r"""P_0..P_mmax of N/(Q + z t^r) by the exact recurrence of Proposition 2.1."""
+    r"""P_0..P_mmax of N/(Q + z t^r) by the exact recurrence of `prop:initial-data`."""
     D = sp.Poly(sp.expand(Q + z * t**r), t)
     Nn = sp.Poly(sp.expand(N), t)
     d0 = D.nth(0)
@@ -150,11 +152,18 @@ def coeffs_P(N, mmax):
 
 
 def reduce_numerator(N):
-    r"""Lemma 2.2: A(t) = t^{rE} N(t, -Q/t^r) = t^mu B(t), B(0) != 0.  Returns (B, mu, E)."""
+    r"""`lem:laurent-reduction`, the canonical Laurent factorization.
+
+    L_N(t) = N(t, -Q/t^r) is the Laurent restriction, and A(t) = t^{r E_N} L_N(t)
+    is a polynomial.  Writing A = t^mu B_N with B_N(0) != 0 gives the canonical
+    factorization L_N = t^{lambda_N} B_N, with lambda_N = mu - r E_N.
+
+    Returns (B_N, mu, E_N).
+    """
     E = sp.Poly(sp.expand(N), z).degree() if sp.expand(N).has(z) else 0
     A = sp.expand(sp.simplify(t**(r * E) * sp.expand(N).subs(z, -Q / t**r)))
     A = sp.expand(sp.cancel(A))
-    assert sp.Poly(A, t).is_univariate and A != 0        # Lemma 2.2: A in R[t]\{0}
+    assert sp.Poly(A, t).is_univariate and A != 0        # `lem:laurent-reduction`: A in R[t]\{0}
     mu = 0
     while sp.simplify(sp.Poly(A, t).nth(mu)) == 0:
         mu += 1
@@ -173,7 +182,9 @@ assert sp.Poly(sp.expand(NA), t).degree() < d            # proper numerator
 
 BA, muA, EA = reduce_numerator(NA)
 assert EA == 0 and muA == 0 and sp.expand(BA - NA) == 0  # the reduction is trivial here
-print(f'N = B = {NA}: E = {EA}, mu = {muA}, so P_m = F_m with no index shift')
+lamA = muA - r * EA                                      # lambda_N
+assert lamA == 0
+print(f'N = B_N = {NA}: lambda_N = mu - r E_N = {lamA}, so P_m = F_(m-lambda_N) = F_m')
 BAc = [mp.mpf(sp.Rational(sp.Poly(BA, t).nth(k)).p) / sp.Rational(sp.Poly(BA, t).nth(k)).q
        for k in range(sp.Poly(BA, t).degree() + 1)]
 
@@ -191,7 +202,7 @@ print(f'amplitude zero: theta_1 = pi/2, tau = sqrt(8/7) = {mp.nstr(tau1, 12)}, '
 
 FA = coeffs_P(NA, M)
 FMp = sp.Poly(FA[M], z)
-assert FMp.degree() == M // r                            # Lemma 2.3, eq. (2.6)
+assert FMp.degree() == M // r                            # `lem:eventual-degree`, `eq:eventual-degree`
 FMc = [mp.mpf(sp.Rational(FMp.nth(k)).p) / sp.Rational(FMp.nth(k)).q
        for k in range(FMp.degree() + 1)]
 print(f'deg F_{M} = {FMp.degree()} = floor(M/r)')
@@ -218,7 +229,7 @@ for th in grid:
     envs.append(e)
     ratios.append(q)
 
-# eq. (3.8) + Theorem 4.1: dominance on the plotted range, away from theta_1
+# `eq:principal-decomposition` + `thm:weighted-dominance`: dominance on the plotted range, away from theta_1
 far = [q for th, q in zip(grid, ratios) if abs(th - th1) > mp.mpf('0.02')]
 assert max(far) <= mp.mpf('0.5'), f'dominance fails: max ratio {mp.nstr(max(far), 6)}'
 print(f'max |R_M|/|W| on the plotted range (|theta-theta_1| > 0.02) = {mp.nstr(max(far), 6)}')
@@ -226,9 +237,11 @@ print(f'max |R_M|/|W| on the plotted range (|theta-theta_1| > 0.02) = {mp.nstr(m
 # the window around theta_1 where dominance fails: |R_M| > |W|/2, i.e. |W| < 2|R_M|
 RM_scale = max(abs(v - 2 * mp.re(W_of(th, BAc)[0] * mp.exp(mp.mpc(0, -(M + 1) * th))))
                for th, v in zip(grid, vals))
-# The caption states that eq. (4.2) fails only within 1e-11 of theta_1 at this M.
+# The deleted neighborhood of theta_1 is exponentially small in M, and the caption
+# omits it from the drawing.  Measure the width so that omission is justified
+# rather than assumed: `eq:dominance-bound` must fail only within 1e-11 of theta_1 at this M.
 # That is a claim about the DOMINANCE-FAILURE set {|R_M| > |W|/2}, not about
-# Theta_{1,M} of eq. (4.1), whose width depends on the unpinned constant c: the
+# Theta_{1,M} of `eq:amplitude-deletion`, whose width depends on the unpinned constant c: the
 # proof allows any c in (0,-log sigma), and at M = 14 even the largest admissible
 # c leaves e^{-cM} well above 1e-11.  Measure the failure set on BOTH sides --
 # a one-sided bisection would not certify the caption -- and check that the
@@ -245,7 +258,8 @@ for side, sgn in (('left', -1), ('right', +1)):
             hi = mid
     half[side] = hi
 half_width = max(half.values())
-assert half_width < mp.mpf('1e-11'), f'caption claim broken: {mp.nstr(half_width, 6)}'
+assert half_width < mp.mpf('1e-11'), \
+    f'the omitted window is not negligible: {mp.nstr(half_width, 6)}'
 outside = [th for th in grid
            if abs(th - th1) > 10 * half_width and curve(th)[2] > mp.mpf('0.5')]
 assert not outside, f'dominance also fails away from theta_1: {len(outside)} points'
@@ -254,7 +268,7 @@ print(f'dominance \\eqref{{eq:dominance-bound}} fails only within '
       f'right {mp.nstr(half["right"], 4)}; unique crossing; '
       f'|R_M| <= {mp.nstr(RM_scale, 4)})')
 
-# Proposition 5.1: sign changes of the plotted curve vs real zeros of F_M in the window
+# `prop:angular-discrepancy`: sign changes of the plotted curve vs real zeros of F_M in the window
 sign_changes = sum(1 for i in range(len(vals) - 1)
                    if mp.sign(vals[i]) * mp.sign(vals[i + 1]) < 0)
 zL, zR = arc_point(TH_L)[1], arc_point(TH_R)[1]
@@ -271,7 +285,7 @@ ymax = max(envs)
 print(f'envelope max on the plotted range = {mp.nstr(ymax, 6)} at theta = '
       f'{mp.nstr(grid[envs.index(ymax)], 6)}')
 
-# Lemma 3.6, eq. (3.11): W = delta^p V(delta).  Here B has no real zero, so
+# `lem:amplitude-divisor`, `eq:W-endpoint-form`: W = delta^p V(delta).  Here B has no real zero, so
 # nu = 0 at both finite endpoints, where the principal pair collides to order
 # k = max{rho,2} = 2 at the lower and k = 2 at the upper; hence p = -1 and |W|
 # grows without bound at either endpoint.  The caption states p = -1, so verify
@@ -301,15 +315,17 @@ NB = sp.expand((1 + z + z**2) + t * (2 - z))
 assert sp.Poly(NB, t).degree() < d                       # proper numerator
 assert sp.expand(NB).has(t) and sp.expand(NB).has(z)     # genuinely bivariate
 # irreducible over Q, so N is not a product R(z)S(t): the exceptional pair is
-# created by the initial data, not factored out of it as in Proposition 6.3
+# created by the initial conditions, not factored out of it as in `sec:introduction`
 assert len(sp.factor_list(NB)[1]) == 1 and sp.factor_list(NB)[1][0][1] == 1
 print(f'N = {NB}   (irreducible, so not a product R(z)S(t))')
 
-# Lemma 2.2: the index shift, so the degree is predicted rather than observed
+# `lem:laurent-reduction`: the index shift, so the degree is predicted rather than observed
 BB, muB, EB = reduce_numerator(NB)
-shift = r * EB - muB
-print(f'reduction: E = {EB}, mu = {muB}, deg B = {sp.Poly(BB, t).degree()}, '
-      f'so M = m + {shift} and deg P_m = floor((m+{shift})/r)')
+lamB = muB - r * EB                                      # lambda_N
+assert lamB == -2
+print(f'reduction: E_N = {EB}, mu = {muB}, lambda_N = {lamB}, '
+      f'deg B_N = {sp.Poly(BB, t).degree()}, so P_m = F_(m-lambda_N) and '
+      f'deg P_m = floor((m-lambda_N)/r)')
 
 MS = [14, 38]
 PB = coeffs_P(NB, max(MS))
@@ -321,7 +337,7 @@ for m in MS:
     for rt in poly.nroots(n=35, maxsteps=1500):
         re_, im_ = mp.mpf(str(sp.re(rt))), mp.mpf(str(sp.im(rt)))
         (inI if (abs(im_) < mp.mpf('1e-25') and a < re_ < b) else exc).append((re_, im_))
-    assert poly.degree() == (m + shift) // r              # Lemma 2.3 + Remark 2.4
+    assert poly.degree() == (m - lamB) // r               # `lem:eventual-degree` + `eq:exact-eventual-degree-shift`
     assert len(inI) == poly.degree() - 2                  # the bulk grows with m
     assert len(exc) == 2                                  # the defect does not
     exc.sort(key=lambda p: p[1])
@@ -332,8 +348,9 @@ for m in MS:
     else:
         drift = max(mp.sqrt((x1 - x2)**2 + (y1 - y2)**2)
                     for (x1, y1), (x2, y2) in zip(exc, exc_ref))
-        # the caption claims agreement to thirteen decimals, i.e. drift < 5e-14;
-        # assert exactly that, not a looser bound the caption does not rely on
+        # the caption says "already extremely close", and this is what pins it:
+        # the two indices agree to thirteen decimals.  Kept at 5e-14 rather than
+        # loosened, so the caption's adverb has a measured floor under it
         assert drift < mp.mpf('5e-14'), f'pair moves by {mp.nstr(drift, 6)}'
     assert abs(exc[0][0] - exc[1][0]) < mp.mpf('1e-25')  # a conjugate pair
     assert abs(exc[0][1] + exc[1][1]) < mp.mpf('1e-25')
@@ -344,6 +361,24 @@ for m in MS:
     print(f'  m = {m:2d}: deg P_m = {poly.degree():2d}, {len(inI)} zeros in I, '
           f'{len(exc)} exceptional at {mp.nstr(exc[1][0], 8)} +- {mp.nstr(exc[1][1], 8)}i'
           + (f', drift from m = {MS[0]}: {mp.nstr(drift, 4)}' if drift else ''))
+
+
+# `cor:panel-B-attractor`'s limit point, computed from the curves rather than
+# read off the plotted zeros: N(t,z) = 0 gives t = (z^2+z+1)/(z-2), and
+# substituting into D leaves an irreducible sextic whose roots are the algebraic
+# cancellation points.  The x markers in panel B are these, so the picture and
+# the corollary have to agree -- asserted here, not eyeballed.
+_tsub = sp.solve(sp.Eq(NB, 0), t)[0]
+_R = sp.Poly(sp.expand(sp.fraction(sp.cancel((Q + z * t**r).subs(t, _tsub)))[0]), z)
+assert _R.degree() == 6 and len(sp.factor_list(_R.as_expr())[1]) == 1, \
+    'the cancellation polynomial is not an irreducible sextic'
+_cands = [(mp.mpf(str(sp.re(rt))), mp.mpf(str(sp.im(rt)))) for rt in _R.nroots(n=40)]
+zstar = min(_cands, key=lambda c: (c[0] - exc_ref[1][0])**2 + (c[1] - exc_ref[1][1])**2)
+_gap = mp.sqrt((zstar[0] - exc_ref[1][0])**2 + (zstar[1] - exc_ref[1][1])**2)
+assert _gap < mp.mpf('5e-14'), f'the exceptional pair is not at z_*: gap {mp.nstr(_gap, 6)}'
+assert abs(zstar[1]) > mp.mpf('1e-3'), 'z_* is real; the pair would not be exceptional'
+print(f'  z_* = {mp.nstr(zstar[0], 10)} + {mp.nstr(zstar[1], 10)}i, a root of an '
+      f'irreducible sextic; plotted pair sits within {mp.nstr(_gap, 3)} of it')
 
 # ===========================================================================
 # emit the pgfplots coordinate blocks
@@ -375,8 +410,16 @@ yA = 5 * mp.ceil(ymax * mp.mpf('1.13') / 5)              # panel A half-height, 
 xB_lo, xB_hi = mp.mpf('-1.05'), mp.mpf('4.05')
 yB = mp.mpf('1.72')
 
+# Float placement is `[t]` because that is what the manuscript uses and has used
+# throughout; the generator emitted `[!b]` while the manuscript emitted `[t]`, and
+# since `check_C0` asserts byte equality of the two float environments, the two
+# had disagreed for the whole visible history without anyone seeing it -- the
+# guard only fires on a full `run_all.sh`.  Fixed here rather than in the paper:
+# re-inlining `[!b]` would move a figure that has been typeset at the top of its
+# page for eighty-odd commits, which is a visible change to the PDF made to
+# satisfy a tool.
 TEMPLATE = r"""% Generated by scripts/make_figure_pole_geom.py -- do not edit by hand.
-\begin{figure}[p]
+\begin{figure}[t]
 \centering
 \begin{tikzpicture}
 \begin{axis}[
@@ -404,7 +447,7 @@ TEMPLATE = r"""% Generated by scripts/make_figure_pole_geom.py -- do not edit by
 \addplot[black!60, dashed, line width=0.8pt, forget plot] coordinates {
 @@ENVLO@@
 };
-\addplot[black!78, line width=0.9pt, forget plot] coordinates {
+\addplot[mkblue, line width=0.9pt, forget plot] coordinates {
 @@CURVE@@
 };
 \node[font=\scriptsize, rotate=90, black!70] at (axis cs:@@THLMID@@,0)
@@ -414,7 +457,7 @@ TEMPLATE = r"""% Generated by scripts/make_figure_pole_geom.py -- do not edit by
 \node[font=\scriptsize, anchor=south east] at (axis cs:1.5560,40)
   {\(\theta_1=\pi/2\)};
 \node[font=\scriptsize, anchor=west] at (axis cs:2.02,36) {\(\pm2|W(\theta)|\)};
-\draw[black!55, line width=0.4pt] (axis cs:2.24,31.2) -- (axis cs:2.35,14.6);
+\draw[black!35, line width=0.4pt] (axis cs:2.24,31.2) -- (axis cs:2.35,14.6);
 \end{axis}
 
 \begin{axis}[
@@ -430,9 +473,9 @@ TEMPLATE = r"""% Generated by scripts/make_figure_pole_geom.py -- do not edit by
     tick label style={font=\footnotesize}, label style={font=\small},
     title={\footnotesize(B)},
     title style={at={(0,1)}, anchor=south west, yshift=1pt},
-    legend style={at={(0.985,0.94)}, anchor=north east, draw=black!40,
+    legend style={at={(0.90,1.07)}, anchor=north east, draw=black!40,
                   font=\footnotesize, row sep=-1pt},
-    axis lines=middle, axis on top=false, clip=true,
+    axis lines=middle, axis on top=false, clip=false,
     x label style={at={(ticklabel* cs:1.0)}, anchor=west},
     y label style={at={(ticklabel* cs:1.0)}, anchor=south},
 ]
@@ -443,52 +486,51 @@ TEMPLATE = r"""% Generated by scripts/make_figure_pole_geom.py -- do not edit by
   coordinates {(@@A@@,-@@YB@@) (@@A@@,@@YB@@)};
 \addplot[black!40, dotted, line width=0.6pt, forget plot]
   coordinates {(@@B@@,-@@YB@@) (@@B@@,@@YB@@)};
-\addplot[black, only marks, mark=o, mark size=1.9pt, line width=0.5pt] coordinates {
+\addplot[mkred, only marks, mark=o, mark size=1.9pt, line width=0.9pt] coordinates {
 @@BULK14@@
 };
 \addlegendentry{\(m=14\)}
-\addplot[black, only marks, mark=*, mark size=0.9pt] coordinates {
+\addplot[mkblue, only marks, mark=*, mark size=0.9pt] coordinates {
 @@BULK38@@
 };
 \addlegendentry{\(m=38\)}
-\addplot[black, only marks, mark=o, mark size=1.9pt, line width=0.5pt, forget plot]
+\addplot[mkred, only marks, mark=o, mark size=1.9pt, line width=0.9pt, forget plot]
   coordinates {@@EXC@@};
-\addplot[black, only marks, mark=*, mark size=0.9pt, forget plot]
+\addplot[mkblue, only marks, mark=*, mark size=0.9pt, forget plot]
   coordinates {@@EXC@@};
-\draw[black!45, line width=0.5pt]
-  (axis cs:@@EXCX@@,@@EXCY@@) circle [radius=5.6pt];
-\draw[black!45, line width=0.5pt]
-  (axis cs:@@EXCX@@,-@@EXCY@@) circle [radius=5.6pt];
-\node[font=\scriptsize, anchor=west, align=left] at (axis cs:0.32,1.22)
-  {exceptional pair,\\[-2pt] both indices};
-\draw[black!55, line width=0.4pt] (axis cs:0.30,1.22) -- (axis cs:-0.45,1.34);
+\addplot[mkgreen, only marks, mark=x, mark size=3.2pt, line width=0.7pt]
+  coordinates {(@@ZSX@@,@@ZSY@@) (@@ZSX@@,-@@ZSY@@)};
+\addlegendentry{\(z_*,\overline{z_*}\)}
+% These two sit diagonally off their marks rather than level with them, so
+% their Im values are literals and do not track @@ZSY@@; re-place them if
+% the worked example ever changes.
+\node[font=\scriptsize, anchor=east] at (axis cs:-0.575,1.60) {\(z_*\)};
+\node[font=\scriptsize, anchor=east] at (axis cs:-0.575,-1.51)
+  {\(\overline{z_*}\)};
+\node[font=\scriptsize, anchor=east, align=right] at (axis cs:-0.86,0.75)
+  {both indices,\\[-2pt] near the limit point};
+\draw[black!35, line width=0.4pt, shorten >=4pt]
+  (axis cs:-0.83,0.75) -- (axis cs:@@EXCX@@,@@EXCY@@);
+\draw[black!35, line width=0.4pt, shorten >=4pt]
+  (axis cs:-0.83,0.75) -- (axis cs:@@EXCX@@,-@@EXCY@@);
 \end{axis}
 \end{tikzpicture}
-\caption{One denominator, two numerators.  Throughout
-\(Q(t)=(1-t)(1-t/2)(1-t/4)\) and \(r=1\).  The upper endpoint is finite because
-\(r=1\), and the smallest zero of \(Q\) is simple, so \(a>0\); thus
-\(I_{Q,r}=(a,b)=(0.0559\ldots,3.7466\ldots)\).
-\textbf{(A)}~The decomposition \eqref{eq:principal-decomposition} at \(M=14\)
-for \(N(t,z)=B(t)=7t^2+8\), which \Cref{lem:laurent-reduction} leaves
-unshifted, with the principal-pair envelope \(\pm2|W(\theta)|\) of
-\eqref{eq:W-def} dashed.
-Consecutive phase points enclose distinct zeros in \(I_{Q,r}\)
-(\Cref{prop:univariate-main}).  Since \(t_+(\pi/2)=i\sqrt{8/7}\) and
-\(z(\pi/2)=45/28\), one has \(B(t_+(\pi/2))=0\), so \(W\) has an amplitude zero
-at \(\theta_1=\pi/2\) and the envelope pinches there; the neighborhood of
-\(\theta_1\) deleted in \eqref{eq:amplitude-deletion} is exponentially small in
-\(M\).  Numerically, the dominance inequality \eqref{eq:dominance-bound} fails
-only within \(10^{-11}\) of \(\theta_1\) at this \(M\), too narrow
-to draw.  The shaded endpoint windows of
-\eqref{eq:retained-range} are drawn wider than \(h\) requires, which keeps on
-scale an envelope that grows without bound at either endpoint.
-\textbf{(B)}~Zeros of \(P_m\) for the numerator
-\(N(t,z)=(1+z+z^2)+t(2-z)\), which is not of the form \(R(z)S(t)\): its
-exceptional zeros are created by the initial data rather than factored out of it
-as in \Cref{prop:N-dependence}.  At each displayed index, \(\deg P_m=m+2\), with
-\(m\) simple zeros in \(I_{Q,r}\) and exactly two elsewhere, a conjugate pair at
-\(-0.5655\ldots\pm1.3674\ldots i\) agreeing to thirteen decimals at the two
-indices.  The bulk grows with \(m\); the defect does not.}
+\caption{The two numerator-sensitive spectral mechanisms, for one denominator
+\(Q(t)=(1-t)(1-t/2)(1-t/4)\) with \(r=1\) and
+\(I_{Q,r}=(0.0559\ldots,3.7466\ldots)\), and one numerator each.
+\textbf{(A)}~Co-dominant suppression.  For \(B(t)=7t^2+8\) at \(M=14\), the
+normalized coefficient in \eqref{eq:principal-decomposition} is shown with
+principal-pair envelope \(\pm2|W(\theta)|\) dashed.  The envelope pinches at
+\(\theta=\pi/2\), where \(B(t_+(\pi/2))=0\) and the canonical weight suppresses
+the two-branch oscillation; the exponentially small deleted neighborhood is not
+visible.  The shaded endpoint windows schematically represent
+\eqref{eq:retained-range} and are drawn wider than required.
+\textbf{(B)}~Uniquely dominant cancellation.  Zeros for
+\(N(t,z)=1+z+z^2+t(2-z)\) at \(m=14\) and \(m=38\): the positive-real bulk grows
+while the exceptional conjugate pair is already extremely close to the
+algebraic limit points \(z_*,\overline{z_*}\).
+\Cref{cor:panel-B-attractor} proves \(\deg P_m=m+2\) for every \(m\)
+and \(z_m=z_*+O(3^{-m})\) for that pair.}
 \label{fig:decomposition-and-defect}
 \end{figure}
 """
@@ -513,6 +555,8 @@ subs = {
     '@@BULK14@@': wrap([fmt(x, 0) for x, _ in panelB[MS[0]][0]]),
     '@@BULK38@@': wrap([fmt(x, 0) for x, _ in panelB[MS[1]][0]]),
     '@@EXC@@': ' '.join(fmt(x, y) for x, y in exc_ref),
+    '@@ZSX@@': mp.nstr(zstar[0], 10, strip_zeros=False),
+    '@@ZSY@@': mp.nstr(zstar[1], 10, strip_zeros=False),
 }
 out = TEMPLATE
 for k, v in subs.items():

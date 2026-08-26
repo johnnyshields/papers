@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-r"""Paper section 2 (Laurent reduction and eventual degree).
+r"""Paper section `sec:reduction` (Canonical Laurent reduction and eventual degree).
 
 Everything is re-derived from the generating function
         N(t,z)/(Q(t)+z t^r) = sum_{m>=0} P_m(z) t^m
@@ -7,20 +7,27 @@ via the exact coefficient recurrence, so the identities are pinned to the
 objects that define them rather than transcribed.
 
 Exact symbolic certificates (sympy):
-  * Proposition 2.1: N |-> (P_0,...,P_{d-1}) is the lower-triangular system with
+  * `prop:initial-data`: N |-> (P_0,...,P_{d-1}) is the lower-triangular system with
     constant diagonal d_0 = Q(0); it is a bijection onto R[z]^d.
-  * Lemma 2.2 (Laurent-Gauss reduction): A(t) = t^{rE} N(t,-Q/t^r) is a polynomial,
-    eq. (2.1); the division identity N = D S + t^{-rE} A, eq. (2.2); and the reduced
-    coefficient formula P_m(z) = [t^{m+rE-mu}] B/D, eq. (2.3), with A = t^mu B and
-    B(0) != 0.  The mechanism A = 0 <=> D | N is exhibited on N = D.
-  * eq. (2.4): P_m = sum_j b_j H_{m+rE-mu-j}, a fixed finite linear combination of the
-    denominator-only sequence H_m of eq. (1.2).
-  * Lemma 2.3 (eventual degree): deg F_M = floor(M/r), eq. (2.6).  The z^ell coefficient
-    eq. (2.9) is Q(0)^{-(ell+1)} times a polynomial in ell of degree <= s with leading
+  * `lem:laurent-reduction`, by the clearing-denominators route, run here as a
+    second and independent path to the same objects: A(t) = t^{rE} N(t,-Q/t^r) is a
+    polynomial, the division identity N = D S + t^{-rE} A holds, and the reduced
+    coefficient formula is P_m(z) = [t^{m+rE-mu}] B/D with A = t^mu B, B(0) != 0.  The
+    paper states the reduction intrinsically instead, as the restriction
+    L_N = N(t,g(t)) = t^{lambda_N} B_N of `eq:Laurent-restriction`, and
+    check_canonical_reduction.py verifies THAT form; the point of keeping this one is
+    that the two routes must produce the same weight and the same shift, which is
+    asserted below as B = B_N and lambda_N = mu - rE.  The mechanism A = 0 <=> D | N is
+    exhibited on N = D.
+  * `eq:P-linear-combination`: P_m = sum_j b_j H_{m+rE-mu-j}, a fixed finite linear combination of the
+    denominator-only sequence H_m of `eq:H-generating`.
+  * `lem:eventual-degree` (eventual degree): deg F_M = floor(M/r), `eq:eventual-degree`.  The z^ell coefficient
+    `eq:leading-z-coeff` is Q(0)^{-(ell+1)} times a polynomial in ell of degree <= s with leading
     coefficient B(0) lambda^s / s! != 0, lambda = -Q'(0)/Q(0), so the top degree is attained.
-  * Remark 2.4: deg P_m = m/r + O(1) after the fixed index shift M = m + rE - mu.
+  * `eq:exact-eventual-degree-shift`: deg P_m = floor((m - lambda_N)/r) eventually, which
+    in the cleared-denominator bookkeeping is the shift M = m + rE - mu.
   * Scope: max{deg Q, r} > 1 is load-bearing.  At deg Q = r = 1 the eventual degree
-    still holds, but I_{Q,r} does not exist and Proposition 5.1's count fails for every
+    still holds, but I_{Q,r} does not exist and `prop:angular-discrepancy`'s count fails for every
     fixed C_B -- exhibited at the end of this file.
 """
 from __future__ import annotations
@@ -32,9 +39,9 @@ t, z, ell = sp.symbols('t z ell')
 def ratio_coeffs(Q, num, r, Mmax):
     r"""[t^0..t^Mmax] of num/(Q + z t^r) as sympy expressions in z (Poincare recurrence).
 
-    The coefficient recurrence of the generating function eq. (1.3),
+    The coefficient recurrence of the generating function `eq:P-generating-intro`,
     num = (Q + z t^r) * sum_m P_m t^m, solved for P_m using only Q(0) != 0
-    (Proposition 2.1).  This is the workhorse behind every section-2 identity below.
+    (`prop:initial-data`).  This is the workhorse behind every section-2 identity below.
     """
     Qp = sp.Poly(sp.expand(Q), t)
     q0 = Qp.nth(0)
@@ -59,7 +66,7 @@ def zdeg(expr):
 
 
 # ===========================================================================
-# Proposition 2.1: numerator <-> initial data is a bijection (triangular solve)
+# `prop:initial-data`: numerator <-> initial data is a bijection (triangular solve)
 # ===========================================================================
 # Generic proper numerator over R[z]: Q of degree 2, r = 3, so d = max(deg Q, r) = 3.
 # The map (P_0,P_1,P_2) |-> (N_0,N_1,N_2) is lower triangular with diagonal d_0 = Q(0).
@@ -118,13 +125,13 @@ print('PASS: coefficient recurrence reproduces the initial-data system and its t
 
 
 # ===========================================================================
-# Lemma 2.2: Laurent-Gauss reduction  N = D S + t^{-rE} A,  P_m = [t^{m+rE-mu}] B/D
+# `lem:laurent-reduction`: Laurent-Gauss reduction  N = D S + t^{-rE} A,  P_m = [t^{m+rE-mu}] B/D
 # ===========================================================================
 def laurent_reduce(Q, N, r):
     E = sp.Poly(sp.expand(N), z).degree()
     A = sp.expand(sp.cancel(t**(r * E) * N.subs(z, -Q / t**r)))
     Ap = sp.Poly(A, t)
-    assert all(e >= 0 for (e,), _ in Ap.terms()), 'A must be an ordinary polynomial'   # eq. (2.1)
+    assert all(e >= 0 for (e,), _ in Ap.terms()), 'A must be an ordinary polynomial'   # `eq:Laurent-restriction`
     assert A != 0
     mu = min(e for (e,), _ in Ap.terms())
     B = sp.expand(sp.cancel(A / t**mu))
@@ -148,17 +155,42 @@ D = Qc + z * t**r
 E, A, mu, B = laurent_reduce(Qc, Nc, r)
 
 S = sp.cancel((Nc - t**(-r * E) * A) / D)
-assert sp.cancel(Nc - (D * S + t**(-r * E) * A)) == 0            # eq. (2.2)
-# S in R[t,t^{-1},z] is the substantive half of eq. (2.2): assert it directly by
+assert sp.cancel(Nc - (D * S + t**(-r * E) * A)) == 0            # `eq:canonical-Laurent-division`
+# S in R[t,t^{-1},z] is the substantive half of `eq:canonical-Laurent-division`: assert it directly by
 # checking the denominator of S is a pure t-monomial (a unit of R[t,t^{-1}]).
 Sden = sp.denom(sp.cancel(sp.together(S)))
 assert sp.simplify(Sden / t**sp.degree(sp.Poly(Sden, t), t)).is_number, Sden
 assert sp.Poly(Sden, z).degree() == 0, Sden                      # no z in the denominator
 cutoff = max_t_exp(S)
 print(f'PASS: A(t) = t^(rE) N(t,-Q/t^r) polynomial, A = t^{mu} B with B(0) = {sp.Poly(B, t).nth(0)}')
+
+# The two routes must agree.  The paper's canonical form restricts N to the
+# denominator curve, L_N = N(t, g(t)) = t^{lambda_N} B_N with B_N(0) != 0; the
+# clearing route clears denominators first, A = t^{rE} L_N = t^{mu} B.  Since
+# t^{rE} is a unit in R[t,t^-1], the weights must be EQUAL and the valuations must
+# differ by exactly rE.  Neither is true by construction -- each is computed from
+# its own definition -- so this is a genuine cross-check of `eq:Laurent-restriction`
+# against the bookkeeping it replaced.
+def _canonical(Qe, Ne, r_):
+    Qe, Ne = sp.expand(Qe), sp.expand(Ne)
+    L = sp.cancel(sp.together(sp.expand(Ne.subs(z, -Qe / t**r_))))
+    num, den = sp.fraction(L)
+    dp = sp.Poly(sp.expand(den), t)
+    kden, cden = dp.degree(), dp.LC()
+    npn = sp.Poly(sp.expand(num), t)
+    low = min(mm[0] for mm in npn.monoms())
+    BN = sp.expand(sp.cancel(npn.as_expr() / (t**low * cden)))
+    return low - kden, BN
+
+lam_N, B_N = _canonical(Qc, Nc, r)
+assert sp.simplify(sp.expand(B_N - B)) == 0, (B_N, B)
+assert lam_N == mu - r * E, (lam_N, mu, r, E)
+print(f'PASS: the canonical restriction and the cleared route agree: B_N = B and '
+      f'lambda_N = {lam_N} = mu - rE = {mu} - {r*E}, so `eq:Laurent-restriction` '
+      f'reproduces the bookkeeping it replaced')
 print(f'PASS: N = D S + t^(-rE) A holds (Laurent correction S has top t-exponent {cutoff})')
 
-# Question 7.1: deg A <= deg_t N + E max{deg Q, r}
+# `q:quantitative`: deg A <= deg_t N + E max{deg Q, r}
 for (Qe, Ne, re) in [(Qc, Nc, r),
                      ((1 - t)**2 * (1 - t / 3), 1 + t + z * (2 - t) + z**2 + z**3 * t, 3),
                      ((1 - t) * (1 - t / 2) * (1 - t / 4), z**2 * (1 + t) + z * (3 - t**2) + 5, 1)]:
@@ -166,17 +198,17 @@ for (Qe, Ne, re) in [(Qc, Nc, r),
     Ae = sp.expand(sp.cancel(t**(re * Ee) * Ne.subs(z, -Qe / t**re)))
     bound = sp.Poly(Ne, t).degree() + Ee * max(sp.Poly(sp.expand(Qe), t).degree(), re)
     assert sp.Poly(Ae, t).degree() <= bound
-print('PASS: deg[t^(rE) N(t,-Q/t^r)] <= deg_t N + E max{deg Q, r} (Question 7.1)')
+print('PASS: deg[t^(rE) N(t,-Q/t^r)] <= deg_t N + E max{deg Q, r} (`q:quantitative`)')
 
 Mmax = max(24, cutoff + 8)
 P = ratio_coeffs(Qc, Nc, r, Mmax)
 F = ratio_coeffs(Qc, B, r, Mmax + r * E - mu)
 assert mu == 0, mu                                               # this N gives no factorization
 for m in range(cutoff + 1, Mmax + 1):
-    assert sp.expand(P[m] - F[m + r * E - mu]) == 0             # eq. (2.3)
+    assert sp.expand(P[m] - F[m + r * E - mu]) == 0             # `eq:reduction-coeff`
 print(f'PASS: P_m = [t^(m+rE-mu)] B/D for m = {cutoff+1},...,{Mmax} (mu = 0)')
 
-# eq. (2.3) with mu > 0, so the A = t^mu B factorization is actually exercised and the
+# `eq:reduction-coeff` with mu > 0, so the A = t^mu B factorization is actually exercised and the
 # shift m -> m + rE - mu is not just m -> m + rE.  Every case above has mu = 0, which left
 # the factorization step and the -mu in the shift untested.
 for (Qm, Nm, rm) in (((1 - t) * (1 - 2 * t), t * (1 + z), 2),
@@ -189,7 +221,7 @@ for (Qm, Nm, rm) in (((1 - t) * (1 - 2 * t), t * (1 + z), 2),
     assert sp.Poly(Bm, t).nth(0) != 0                            # B(0) != 0
     Dm = Qm + z * t**rm
     Sm = sp.cancel((Nm - t**(-rm * Em) * Am) / Dm)
-    assert sp.cancel(Nm - (Dm * Sm + t**(-rm * Em) * Am)) == 0    # eq. (2.2) at mu > 0
+    assert sp.cancel(Nm - (Dm * Sm + t**(-rm * Em) * Am)) == 0    # `eq:canonical-Laurent-division` at mu > 0
     cut_m = max_t_exp(Sm)
     # clamp at 0: S's top t-exponent can be negative (it is -2 for the r=3 case below), and
     # a negative start index would silently wrap round the coefficient list in Python
@@ -198,12 +230,12 @@ for (Qm, Nm, rm) in (((1 - t) * (1 - 2 * t), t * (1 + z), 2),
     Pm_ = ratio_coeffs(Qm, Nm, rm, Mm)
     Fm_ = ratio_coeffs(Qm, Bm, rm, Mm + rm * Em)     # + mum extra, for the no--mu comparison
     for m in range(m_from, Mm + 1):
-        assert sp.expand(Pm_[m] - Fm_[m + rm * Em - mum]) == 0    # eq. (2.3)
+        assert sp.expand(Pm_[m] - Fm_[m + rm * Em - mum]) == 0    # `eq:reduction-coeff`
     # and the -mu really matters: dropping it breaks the identity
     bad_shift = [m for m in range(m_from, Mm + 1)
                  if sp.expand(Pm_[m] - Fm_[m + rm * Em]) != 0]
     assert bad_shift, (Nm, 'shift without -mu accidentally agreed')
-    print(f'PASS: eq. (2.3) at mu = {mum} (E = {Em}, r = {rm}): '
+    print(f'PASS: `eq:reduction-coeff` at mu = {mum} (E = {Em}, r = {rm}): '
           f'P_m = [t^(m+rE-mu)] B/D for m = {m_from},...,{Mm}; '
           f'omitting -mu fails at {len(bad_shift)} of those indices')
 
@@ -215,7 +247,7 @@ print('PASS: A = 0 exactly when D | N (checked on N = D); proper N gives A != 0'
 
 
 # ===========================================================================
-# Lemma 2.3, eq. (2.6): deg F_M = floor(M/r), and the exact z^ell coefficient law
+# `lem:eventual-degree`, `eq:eventual-degree`: deg F_M = floor(M/r), and the exact z^ell coefficient law
 # ===========================================================================
 # The threshold below is a FIXED constant.  Reading it off the failures instead --
 # last_bad = max(bad), then asserting the law on range(last_bad+1, Mtop+1) -- is a
@@ -228,7 +260,7 @@ for (Q, r, B, Mtop) in [
 ]:
     F = ratio_coeffs(Q, B, r, Mtop)
     bad = [m for m in range(Mtop + 1) if zdeg(F[m]) != m // r]
-    # Lemma 2.3 claims eq. (2.6) for all SUFFICIENTLY LARGE M, not for every M.  Asserting
+    # `lem:eventual-degree` claims `eq:eventual-degree` for all SUFFICIENTLY LARGE M, not for every M.  Asserting
     # `not bad` is stronger than the paper and passed only by luck of these examples: with
     # Q = 1-t, B = 1-2t, r = 2 the law fails at M = 3 (deg F_3 = 0, not 1), and with
     # B = 1-3t at M = 5 -- both exhibited below.  Assert the paper's form instead, with the
@@ -238,13 +270,13 @@ for (Q, r, B, Mtop) in [
     M_LO = 12                                                      # fixed, not derived from bad
     assert Mtop > M_LO + 5, Mtop
     tail_bad = [m for m in range(M_LO, Mtop + 1) if zdeg(F[m]) != m // r]
-    assert not tail_bad, (sp.Poly(Q, t).degree(), r, tail_bad)     # eq. (2.6) for M >= M_LO
+    assert not tail_bad, (sp.Poly(Q, t).degree(), r, tail_bad)     # `eq:eventual-degree` for M >= M_LO
     assert len(bad) <= 1, (sp.Poly(Q, t).degree(), r, bad)         # finitely many exceptions
     print(f'PASS: deg F_M = floor(M/r) for every M in [{M_LO},{Mtop}]  '
           f'(deg Q={sp.Poly(Q, t).degree()}, r={r}); exceptions below {M_LO}: {bad}')
 
 # "Sufficiently large" is load-bearing: two admissible (Q, B, r) where a small M fails.
-# The mechanism is eq. (2.9): the z^ell coefficient is (-1)^ell [t^s] B/Q^{ell+1} with
+# The mechanism is `eq:leading-z-coeff`: the z^ell coefficient is (-1)^ell [t^s] B/Q^{ell+1} with
 # ell = floor(M/r), s = M - r*ell, and for Q = 1-t, B = 1-ct that coefficient is
 # C(ell+s,s) - c*C(ell+s-1,s-1), which vanishes for small (ell,s) at suitable c.
 for (Qw, Bw, rw, Mw) in ((1 - t, 1 - 2 * t, 2, 3), (1 - t, 1 - 3 * t, 2, 5)):
@@ -252,16 +284,94 @@ for (Qw, Bw, rw, Mw) in ((1 - t, 1 - 2 * t, 2, 3), (1 - t, 1 - 3 * t, 2, 5)):
     assert zdeg(Fw[Mw]) < Mw // rw, (Qw, Bw, rw, Mw, zdeg(Fw[Mw]))
     Fw2 = ratio_coeffs(Qw, Bw, rw, 30)
     assert all(zdeg(Fw2[m]) == m // rw for m in range(Mw + 1, 31)), (Qw, Bw, rw)
-    print(f'PASS: eq. (2.6) FAILS at M={Mw} for Q={Qw}, B={Bw}, r={rw} '
+    print(f'PASS: `eq:eventual-degree` FAILS at M={Mw} for Q={Qw}, B={Bw}, r={rw} '
           f'(deg {zdeg(Fw[Mw])} < {Mw // rw}) but holds for every M in [{Mw + 1},30] -- '
           f'so "sufficiently large" cannot be dropped')
+
+# `rem:degree-attainment` states the general family rather than single instances:
+# for Q = 1-t, r = 2 and B^(L) = 1-(L+1)t the degree drops at M = 2L+1, for EVERY L.  The
+# arbitrarily-late drop is what shows the onset cannot be uniform over weights of a fixed
+# degree -- every B^(L) is linear.  The two instances above are L = 1 and L = 2.  The sweep
+# only reaches M = 30, so close the infinite claim symbolically: with Q = 1-t and B = 1-ct the z^ell coefficient of `eq:leading-z-coeff` is
+# C(ell+s,s) - c*C(ell+s-1,s-1), and for r = 2 the reachable s are 0 and 1.
+# `rem:degree-attainment`'s FAMILY: B^(L) = 1-(L+1)t drops at M = 2L+1, for every L.  Run
+# it out to L = 14, i.e. an index 29 -- the drops are arbitrarily late among weights of
+# degree ONE, which is the whole force of the observation.
+drops = []
+for L in range(1, 15):
+    BL = 1 - (L + 1) * t
+    ML = 2 * L + 1
+    FL = ratio_coeffs(1 - t, BL, 2, ML + 6)
+    assert zdeg(FL[ML]) < ML // 2, (L, ML, zdeg(FL[ML]))          # the drop
+    assert all(zdeg(FL[m]) == m // 2 for m in range(ML + 1, ML + 7)), (L, 'drop not isolated')
+    assert all(zdeg(FL[m]) == m // 2 for m in range(0, ML)), (L, 'an earlier drop too')
+    drops.append((L, ML, zdeg(FL[ML])))
+assert [d[1] for d in drops] == [2 * L + 1 for L in range(1, 15)]
+print(f'PASS: `rem:degree-attainment` family -- B^(L) = 1-(L+1)t has deg F_(2L+1) < L for '
+      f'every L in [1,14] (indices {drops[0][1]},...,{drops[-1][1]}), the drop isolated at '
+      f'that index alone; every B^(L) is LINEAR, so the onset of `eq:eventual-degree` cannot '
+      f'be bounded by deg B')
+
+lsym = sp.Symbol('lsym', integer=True, nonnegative=True)
+for cw, Mfail in ((2, 3), (3, 5)):
+    roots_all = []
+    for sdx in (0, 1):                                             # 0 <= s < r = 2
+        expr = sp.binomial(lsym + sdx, sdx) - cw * sp.binomial(lsym + sdx - 1, sdx - 1)
+        expr = sp.simplify(sp.expand_func(expr))
+        # cross-check the closed form against the recurrence at a few indices
+        for lv in range(0, 6):
+            Mv = 2 * lv + sdx
+            Fchk = ratio_coeffs(1 - t, 1 - cw * t, 2, Mv)
+            got = sp.Poly(sp.expand(Fchk[Mv]), z).nth(lv) * (-1)**lv
+            assert sp.simplify(got - expr.subs(lsym, lv)) == 0, (cw, sdx, lv, got)
+        roots_all += [(sdx, int(rt)) for rt in sp.solve(sp.Eq(expr, 0), lsym)
+                      if rt.is_integer and rt >= 0]
+    Ms = sorted(2 * lv + sdx for sdx, lv in roots_all)
+    assert Ms == [Mfail], (cw, Ms)                                 # the ONLY failure, for all M
+    print(f'PASS: Q=1-t, B=1-{cw}t, r=2 -- the z^ell coefficient is '
+          f'C(ell+s,s)-{cw}C(ell+s-1,s-1), matched against the recurrence, and its only '
+          f'nonnegative integer root gives M={Mfail}; `eq:eventual-degree` therefore holds at EVERY '
+          f'other M, not merely up to 30')
+
+# `rem:degree-attainment`: the COMPLEMENT of the two witnesses above.  At B = 1 there is
+# no exception at all -- the bound is attained at EVERY M -- so the "sufficiently large"
+# of `eq:eventual-degree` is forced by a nonconstant B and is not an artifact of the argument.
+# Two routes, so the remark's stated MECHANISM is checked and not just its conclusion:
+#   (i) the outcome, deg F_m = floor(m/r) for every m, read off the recurrence;
+#   (ii) the reason, Q(t)^{-(ell+1)} = Q(0)^{-(ell+1)} prod_j (1 - t/x_j)^{-(ell+1)} has
+#        positive coefficients, so `eq:leading-z-coeff` vanishes for no ell.
+for (Q1, r1, M1) in [
+    (sp.expand(1 - t), 2, 34),                                     # the witnesses' own Q and r
+    (sp.expand((1 - t) * (1 - 2 * t) * (1 - 3 * t)), 2, 34),
+    (sp.expand((1 - t)**2 * (1 - 4 * t)), 3, 36),
+    (sp.expand((1 - t) * (1 - t / 5)), 1, 30),
+    (sp.expand((1 - t)**3), 5, 36),
+]:
+    F1 = ratio_coeffs(Q1, sp.Integer(1), r1, M1)
+    bad1 = [m for m in range(M1 + 1) if zdeg(F1[m]) != m // r1]
+    assert not bad1, (sp.Poly(Q1, t).degree(), r1, bad1)           # NO exception, unlike B != 1
+    # (ii) the mechanism, over the (ell, s) actually reachable: 0 <= s < r
+    worst = None
+    for lval in range(0, 9):                                       # NOT `ell`: that is a
+        expn = sp.series(sp.expand(Q1.subs(t, 0)**(lval + 1)       # module-level sympy Symbol
+                                   / Q1**(lval + 1)),
+                         t, 0, r1 + 1).removeO()
+        pexp = sp.Poly(sp.expand(expn), t)
+        for sdx in range(0, r1):
+            cf = sp.nsimplify(pexp.nth(sdx))
+            assert cf > 0, (Q1, r1, lval, sdx, cf)                 # positive, hence nonzero
+            worst = cf if worst is None or cf < worst else worst
+    print(f'PASS: B = 1 has NO exception -- deg F_m = floor(m/r) for every m in [0,{M1}] '
+          f'(deg Q={sp.Poly(Q1, t).degree()}, r={r1}), and the mechanism holds: every '
+          f'[t^s] Q(0)^(ell+1)/Q^(ell+1) with 0 <= s < r, 0 <= ell <= 8 is positive '
+          f'(min {worst})')
 
 
 def leading_zcoeff_poly_in_ell(Q, B, smax):
     r"""Q(0)^{ell+1} [t^s]( B/Q^{ell+1} ) as a function of ell; assert it is a
     polynomial in ell of degree <= s with leading coefficient
     B(0) lambda^s / s!, and that this leading coefficient is NONZERO -- the step
-    that yields attainment of the degree bound (eq. (2.9))."""
+    that yields attainment of the degree bound (`eq:leading-z-coeff`)."""
     Q0 = Q.subs(t, 0)
     lam = -sp.diff(Q, t).subs(t, 0) / Q0
     B0 = B.subs(t, 0)
@@ -291,8 +401,9 @@ for xs in ([1, 2, 4], [sp.Rational(1, 2), 3, 3], [1, 1, 5, 5]):
     assert sp.simplify(lam - sum(sp.Integer(1) / x for x in xs)) == 0
 print('PASS: lambda = -Q\'(0)/Q(0) = sum_j 1/x_j')
 
-# eq. (2.7)/(2.8): F_M(z) = sum_{0<=j<=M/r} (-z)^j [t^{M-rj}] B/Q^{j+1}
-# eq. (2.9):       [z^ell] F_M = (-1)^ell [t^s] B/Q^{ell+1}, ell = floor(M/r), s = M - r*ell
+# `eq:geometric-expansion` and the coefficient form `eq:F-coefficient-expansion`:
+# F_M(z) = sum_{0<=j<=M/r} (-z)^j [t^{M-rj}] B/Q^{j+1}
+# `eq:leading-z-coeff`:       [z^ell] F_M = (-1)^ell [t^s] B/Q^{ell+1}, ell = floor(M/r), s = M - r*ell
 Qc = (1 - t) * (1 - t / 2)
 Bc = 1 + 2 * t + t**3
 r = 2
@@ -300,16 +411,16 @@ F = ratio_coeffs(Qc, Bc, r, 25)
 for M in (10, 15, 21, 25):
     expansion = sum((-z)**j * sp.series(Bc / Qc**(j + 1), t, 0, M - r * j + 1).removeO().coeff(t, M - r * j)
                     for j in range(M // r + 1))
-    assert sp.expand(F[M] - expansion) == 0                        # eq. (2.7)/(2.8)
+    assert sp.expand(F[M] - expansion) == 0        # `eq:F-coefficient-expansion`
     qq, s = M // r, M - r * (M // r)
     lead = sp.Poly(F[M], z).nth(qq)
     ts = sp.series(Bc / Qc**(qq + 1), t, 0, s + 1).removeO().coeff(t, s)
-    assert sp.expand(lead - (-1)**qq * ts) == 0                    # eq. (2.9)
+    assert sp.expand(lead - (-1)**qq * ts) == 0                    # `eq:leading-z-coeff`
 print('PASS: F_M = sum (-z)^j [t^{M-rj}] B/Q^{j+1}, and [z^q]F_M = (-1)^q [t^s] B/Q^{q+1}')
 
 
 # ===========================================================================
-# Remark 2.4: deg P_m = m/r + O(1) with the fixed shift M = m + rE - mu
+# `eq:exact-eventual-degree-shift`: deg P_m = m/r + O(1) with the fixed shift M = m + rE - mu
 # ===========================================================================
 Qc = sp.expand((1 - t) * (1 - 2 * t))
 Nc = (1 + z + z**2) + t * (2 - z)
@@ -322,12 +433,12 @@ print(f'PASS: deg P_m = floor((m+rE-mu)/r) eventually (rE-mu = {r*E-mu} fixed)')
 
 
 # ===========================================================================
-# eq. (2.4): P_m = sum_j b_j H_{m+rE-mu-j}, with 1/(Q+z t^r) = sum_m H_m t^m
+# `eq:P-linear-combination`: P_m = sum_j b_j H_{m+rE-mu-j}, with 1/(Q+z t^r) = sum_m H_m t^m
 # ===========================================================================
 # The reduced coefficient is a FIXED finite linear combination of the
-# denominator-only sequence of eq. (1.2).  Both sides are compared exactly as
-# polynomials in z.  The loop must start past deg S: eq. (2.4) is expanded from
-# eq. (2.3), which itself holds only for m > deg S.
+# denominator-only sequence of `eq:H-generating`.  Both sides are compared exactly as
+# polynomials in z.  The loop must start past deg S: `eq:P-linear-combination` is expanded from
+# `eq:reduction-coeff`, which itself holds only for m > deg S.
 for (Qe, Ne, re) in [
     (sp.expand((1 - t) * (1 - 2 * t)), (1 + z + z**2) + t * (2 - z), 2),
     (sp.expand((1 - t)**2 * (1 - t / 3)), 1 + t + z * (2 - t) + z**2, 3),
@@ -341,21 +452,21 @@ for (Qe, Ne, re) in [
     bcoef = sp.Poly(Be, t).all_coeffs()[::-1]                      # b_0, b_1, ...
     Mhi = 22
     Pe = ratio_coeffs(Qe, Ne, re, Mhi)
-    He = ratio_coeffs(Qe, sp.Integer(1), re, Mhi + shift)          # eq. (1.2)
+    He = ratio_coeffs(Qe, sp.Integer(1), re, Mhi + shift)          # `eq:H-generating`
     for m in range(max(cut + 1, 0), Mhi + 1):
         rhs = sum(bcoef[j] * He[m + shift - j]
                   for j in range(len(bcoef)) if 0 <= m + shift - j <= Mhi + shift)
-        assert sp.expand(Pe[m] - rhs) == 0, (re, m)                # eq. (2.4)
+        assert sp.expand(Pe[m] - rhs) == 0, (re, m)                # `eq:P-linear-combination`
     print(f'PASS: P_m = sum_j b_j H_(m+rE-mu-j) for m = {max(cut+1,0)},...,{Mhi} '
           f'(deg Q={sp.Poly(Qe, t).degree()}, r={re}, shift={shift})')
 
 
 # ===========================================================================
-# Scope: max{deg Q, r} > 1 is load-bearing (the standing hypothesis of section 1)
+# Scope: max{deg Q, r} > 1 is load-bearing (the standing hypothesis of section `sec:introduction`)
 # ===========================================================================
-# At deg Q = r = 1 the eventual degree of eq. (2.6) still holds, but g = -Q/t^r
+# At deg Q = r = 1 the eventual degree of `eq:eventual-degree` still holds, but g = -Q/t^r
 # has NO positive critical point, so t_a, a and I_{Q,r} do not exist, and the
-# count of Proposition 5.1 fails for every fixed C_B.  Witness:
+# count of `prop:angular-discrepancy` fails for every fixed C_B.  Witness:
 #     Q = 1 - t, r = 1, B = 1 + 2t + 5t^2
 #     F_M = (1-z)^{M-2} [ (1-z)^2 + 2(1-z) + 5 ],
 # so deg F_M = M while the distinct-zero set is {1, 2-2i, 2+2i}: bounded by 3.

@@ -1,21 +1,21 @@
 Title
 -----
-Coefficientwise log-concavity of the cubic multiple-Pochhammer series
+The cubic threshold for coefficientwise log-concavity of multiple-Pochhammer series
 
 Keywords
 --------
 coefficientwise log-concavity
+coefficientwise Schur-concavity
+multiple-Pochhammer series
+multiplicity threshold
 Turán inequality
-Pochhammer symbol
-log-concave sequence
 beta-binomial distribution
 Bernstein basis
-Schur-concavity
 
 Abstract (Plain)
 ----------------
-Let (f_n)_{n≥1} be a nonnegative log-concave sequence with no internal zeros, and define the cubic multiple-Pochhammer series F_f(μ;x) = ∑_{n≥1} f_n (μ)_{3n} x^n/(3n−1)!. Karp and Zhang established coefficientwise log-concavity of the analogous series for multiplicity r=2 and gave numerical counterexamples for r=4, leaving the cubic case open as their Conjecture 1. We prove it: for all μ, α, β ≥ 0, every coefficient of the generalized Turánian F_f(μ+α;x)F_f(μ+β;x) − F_f(μ;x)F_f(μ+α+β;x) is nonnegative. Equivalently, the map (f_n) ↦ F_f carries every such sequence to a coefficientwise log-concave family. The proof is elementary and noncomputational. The degree-m coefficient of each product F_f(u;x)F_f(v;x) is represented as a beta-binomial expectation, reducing the theorem to the monotonicity of a weighted residue-class binomial kernel. The constant-weight case rests on a Bernstein-basis positivity certificate obtained from a root-of-unity filter; monotone weights are then inserted through a one-sign-change decomposition of the complementary residue blocks. A coefficientwise strictness criterion follows, as does ordinary log-concavity in μ on (0,∞) for (f_n) ≢ 0 at every positive x within the radius of convergence.
+Multiple-Pochhammer power series associated with a nonnegative log-concave sequence with no internal zeros were shown by Karp and Zhang to be coefficientwise log-concave at multiplicity two, while the cubic case remained open. We prove the cubic conjecture, in the equivalent fixed-sum form of coefficientwise Schur-concavity. Together with a degree-three obstruction for larger multiplicities, this yields the sharp classification: universal coefficientwise log-concavity holds precisely at multiplicities two and three. The proof reduces the coefficient inequalities to monotonicity of a symmetric residue kernel and shows that, in the cubic case, this kernel preserves the central ordering imposed by log-concavity.
 
 Abstract (Rich Text)
 --------------------
-Let \((f_n)_{n\ge1}\) be a nonnegative log-concave sequence with no internal zeros, and define the cubic multiple-Pochhammer series \(F_f(\mu;x)=\sum_{n\ge1}f_n\,(\mu)_{3n}\,x^n/(3n-1)!\). Karp and Zhang established coefficientwise log-concavity of the analogous series for multiplicity \(r=2\) and gave numerical counterexamples for \(r=4\), leaving the cubic case open as their Conjecture 1. We prove it: for all \(\mu,\alpha,\beta\ge0\), every coefficient of the generalized Turánian \(F_f(\mu+\alpha;x)F_f(\mu+\beta;x)-F_f(\mu;x)F_f(\mu+\alpha+\beta;x)\) is nonnegative. Equivalently, the map \((f_n)\mapsto F_f\) carries every such sequence to a coefficientwise log-concave family. The proof is elementary and noncomputational. The degree-\(m\) coefficient of each product \(F_f(u;x)F_f(v;x)\) is represented as a beta-binomial expectation, reducing the theorem to the monotonicity of a weighted residue-class binomial kernel. The constant-weight case rests on a Bernstein-basis positivity certificate obtained from a root-of-unity filter; monotone weights are then inserted through a one-sign-change decomposition of the complementary residue blocks. A coefficientwise strictness criterion follows, as does ordinary log-concavity in \(\mu\) on \((0,\infty)\) for \((f_n)\not\equiv0\) at every positive \(x\) within the radius of convergence.
+Multiple-Pochhammer power series associated with a nonnegative log-concave sequence with no internal zeros were shown by Karp and Zhang to be coefficientwise log-concave at multiplicity two, while the cubic case remained open. We prove the cubic conjecture, in the equivalent fixed-sum form of coefficientwise Schur-concavity. Together with a degree-three obstruction for larger multiplicities, this yields the sharp classification: universal coefficientwise log-concavity holds precisely at multiplicities two and three. The proof reduces the coefficient inequalities to monotonicity of a symmetric residue kernel and shows that, in the cubic case, this kernel preserves the central ordering imposed by log-concavity.

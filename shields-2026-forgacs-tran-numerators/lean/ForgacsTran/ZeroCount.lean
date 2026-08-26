@@ -1,11 +1,14 @@
 /-
+Copyright (c) 2026 Johnny Shields. All rights reserved.
+Released under the MIT license as described in the file LICENSE.txt.
+Authors: Johnny Shields
+-/
+import Mathlib
+
+/-!
 # Exceptional-zero counting engine
 
-Formalizes the combinatorial core of
-`../shields-2026-forgacs-tran-numerators.tex`, §5 «Proof of the fixed-numerator
-theorem» (`sec:proof`, `prop:univariate-main`): the elementary step that turns a
-lower bound on the number of *interior* zeros of a polynomial into an upper
-bound on the number of its zeros lying *outside* a prescribed set.
+## Main statements
 
 * `exceptionalRoots P S` — the multiset of roots of `P` (with multiplicity)
   lying outside `S`; the "exceptional zeros" of `thm:main`.
@@ -14,29 +17,44 @@ bound on the number of its zeros lying *outside* a prescribed set.
 * `exceptionalRoots_card_le` — if `Z` has at least `deg P - C` elements, then
   `P` has at most `C` roots outside `S`, counted with multiplicity.
 
+## Implementation notes
+
 In the paper `S = I_{Q,r}` (or `(0,∞)`), `Z` is the family of `⌊M/r⌋ - C`
-distinct positive zeros produced by the phase count of `prop:univariate-main`,
+distinct positive zeros produced by the phase count of `prop:angular-discrepancy`,
 and `deg P = deg P_m = ⌊M/r⌋`, so the exceptional zeros number at most `C`.
 
 Stated over an arbitrary integral domain, so it applies both to the real
 coefficient polynomials and to their complex zero sets.  Sorry-free; uses only
 `Polynomial.roots` cardinality (`card_roots'`) and `Multiset` bookkeeping.
--/
-import Mathlib
 
-open Classical Polynomial
+## References
+
+Formalizes the combinatorial core of
+`../shields-2026-forgacs-tran-numerators.tex`, «Angular discrepancy and
+proof of the main theorem» (`subsec:proof`, `prop:angular-discrepancy`): the elementary step that
+turns a
+lower bound on the number of *interior* zeros of a polynomial into an upper
+bound on the number of its zeros lying *outside* a prescribed set.
+
+## Tags
+
+exceptional zeros, root counting, multiset, integral domain
+-/
+
+open Polynomial
 
 namespace ForgacsTran
 
 variable {K : Type*} [CommRing K] [IsDomain K]
 
+open scoped Classical in
 /-- The roots of `P` (with multiplicity) lying outside `S`; the "exceptional
 zeros" of `thm:main`. -/
 noncomputable def exceptionalRoots (P : K[X]) (S : Set K) : Multiset K :=
   P.roots.filter (fun x => x ∉ S)
 
 omit [CommRing K] [IsDomain K] in
-/-- Paper §5 `sec:proof` — supporting Multiset lemma for the counting engine
+/-- Paper `subsec:proof` — supporting Multiset lemma for the counting engine
 (no separate paper statement).  Partition of a multiset by a decidable predicate
 `p`: the counts satisfying `p` and its negation add to the total.  Immediate from
 `Multiset.filter_add_not` and additivity of `card`. -/
@@ -45,15 +63,16 @@ theorem card_filter_add_card_filter_not_pred (p : K → Prop) [DecidablePred p]
     (s.filter p).card + (s.filter (fun x => ¬ p x)).card = s.card := by
   rw [← Multiset.card_add, Multiset.filter_add_not]
 
+open scoped Classical in
 omit [CommRing K] [IsDomain K] in
-/-- Paper §5 `sec:proof` — supporting lemma for the counting engine (no separate
+/-- Paper `subsec:proof` — supporting lemma for the counting engine (no separate
 paper statement).  Partition by membership in `S`: the counts inside and outside
 add to the total. -/
 theorem card_filter_add_card_filter_not (s : Multiset K) (S : Set K) :
     (s.filter (fun x => x ∈ S)).card + (s.filter (fun x => x ∉ S)).card = s.card :=
   card_filter_add_card_filter_not_pred (fun x => x ∈ S) s
 
-/-- Paper §5 `sec:proof` — supporting step for `prop:univariate-main`.  The
+/-- Paper `subsec:proof` — supporting step for `prop:angular-discrepancy`.  The
 distinct roots of `P` satisfying a decidable predicate `p` embed, with
 multiplicity, into the `p`-part of the root multiset. -/
 theorem le_card_filter {p : K → Prop} [DecidablePred p] {P : K[X]} {Z : Finset K}
@@ -64,13 +83,15 @@ theorem le_card_filter {p : K → Prop} [DecidablePred p] {P : K[X]} {Z : Finset
   rw [Finset.mem_val] at ha
   exact Multiset.mem_filter.mpr ⟨mem_roots'.mpr ⟨hP, hZr a ha⟩, hZp a ha⟩
 
-/-- Paper §5 `sec:proof` — set-membership wrapper for `le_card_filter`. -/
+open scoped Classical in
+/-- Paper `subsec:proof` — set-membership wrapper for `le_card_filter`. -/
 theorem le_card_roots_filter {P : K[X]} {S : Set K} {Z : Finset K} (hP : P ≠ 0)
     (hZr : ∀ x ∈ Z, P.IsRoot x) (hZS : ∀ x ∈ Z, x ∈ S) :
     Z.card ≤ (P.roots.filter (fun x => x ∈ S)).card :=
   le_card_filter hP hZr hZS
 
-/-- **Exceptional-zero counting engine** (mechanism of `prop:univariate-main`).
+open scoped Classical in
+/-- **Exceptional-zero counting engine** (mechanism of `prop:angular-discrepancy`).
 A nonzero polynomial `P` with at least `deg P - C` distinct roots inside `S` has
 at most `C` roots outside `S`, counted with multiplicity. -/
 theorem exceptionalRoots_card_le {P : K[X]} {S : Set K} {C : ℕ} {Z : Finset K}
@@ -94,11 +115,11 @@ Forgács–Tran interval are viewed as subsets of `ℂ`. -/
 zeros lying in its complement. -/
 def posRay : Set ℂ := Complex.ofReal '' Set.Ioi 0
 
-/-- Paper §3 `sec:geometry`, `thm:FT-geometry` (`eq:ab-def`) — the Forgács–Tran
+/-- Paper `sec:geometry`, `thm:FT-geometry` (`eq:ab-def`) — the Forgács–Tran
 interval `I_{Q,r} = (a,b)`, as a subset of `ℂ`. -/
 def ftInterval (a b : ℝ) : Set ℂ := Complex.ofReal '' Set.Ioo a b
 
-/-- Paper §3 `sec:geometry` — `I_{Q,r} ⊂ (0,∞)` once the left endpoint is
+/-- Paper `sec:geometry` — `I_{Q,r} ⊂ (0,∞)` once the left endpoint is
 nonnegative.  Nonnegativity, not positivity, is the right hypothesis: the paper
 has `a = 0` exactly when the smallest zero of `Q` is repeated (`ρ ≥ 2`), and
 openness of `Set.Ioo` already forces the members to be positive. -/
@@ -106,12 +127,12 @@ theorem ftInterval_subset_posRay {a b : ℝ} (ha : 0 ≤ a) : ftInterval a b ⊆
   rintro z ⟨x, hx, rfl⟩
   exact ⟨x, lt_of_le_of_lt ha hx.1, rfl⟩
 
-/-- Paper §3 `sec:geometry`, `eq:ab-def` — the Forgács–Tran interval in the case
+/-- Paper `sec:geometry`, `eq:ab-def` — the Forgács–Tran interval in the case
 `b = +∞`, which by `eq:ab-def` is exactly the case `r > 1`.  A real right endpoint
 cannot express this, so the unbounded interval gets its own constructor. -/
 def ftRay (a : ℝ) : Set ℂ := Complex.ofReal '' Set.Ioi a
 
-/-- Paper §3 `sec:geometry` — `I_{Q,r} = (a,∞) ⊂ (0,∞)` for `a ≥ 0`; the `r > 1`
+/-- Paper `sec:geometry` — `I_{Q,r} = (a,∞) ⊂ (0,∞)` for `a ≥ 0`; the `r > 1`
 companion of `ftInterval_subset_posRay`. -/
 theorem ftRay_subset_posRay {a : ℝ} (ha : 0 ≤ a) : ftRay a ⊆ posRay := by
   rintro z ⟨x, hx, rfl⟩

@@ -1,16 +1,23 @@
 /-
+Copyright (c) 2026 Johnny Shields. All rights reserved.
+Released under the MIT license as described in the file LICENSE.txt.
+Authors: Johnny Shields
+-/
+import Mathlib
+
+/-!
 # The trigamma function as a series, with the bounds used in the paper
 
 Mathlib has `digamma := logDeriv Gamma` but no polygamma/trigamma.  We define
 `trigamma y = ∑' n, (y + n)⁻² = ψ₁(y)` directly and prove exactly the analytic
 facts the coefficientwise argument of `shields-2026-turan-bessel.tex` consumes.
-These are `lem:trigamma-bounds` of §4 «Gram structure and the exceptional matrix
-M₁» (`sec:gram`): the sharp lower bound `eq:trig-lower` `ψ₁(y)>1/y+1/(2y²)` —
+These are `lem:trigamma-bounds` of «Endpoint coefficientwise positivity»
+(`sec:endpoint`): the sharp lower bound `eq:trig-lower` `ψ₁(y)>1/y+1/(2y²)` —
 proved here, as in the paper, by the trapezoidal/convexity inequality
 `∫_r^{r+1}f < (f(r)+f(r+1))/2` (`trigamma_gt_inv_sharp`) — the upper bound
 `eq:trig-upper-half` `ψ₁(y)<1/(y-1/2)` (`trigamma_lt_upper`), and `eq:inverse-trig`.
 The crude `ψ₁(y)>1/y` (`trigamma_gt_inv`) also feeds `Δ_1>0` (`eq:Delta1-sharp`,
-§5) via `aψ₁(a)>1`.
+`subsec:finite-defect`) via `aψ₁(a)>1`.
 
 * `trigamma_summable`, `trigamma_pos`, `trigamma_succ` — the defining series is
   summable, positive, and satisfies the recurrence `ψ₁(y) = y⁻² + ψ₁(y+1)`.
@@ -23,7 +30,6 @@ The crude `ψ₁(y)>1/y` (`trigamma_gt_inv`) also feeds `Δ_1>0` (`eq:Delta1-sha
 
 Everything here is sorry-free.
 -/
-import Mathlib
 
 open Filter Topology
 open scoped BigOperators

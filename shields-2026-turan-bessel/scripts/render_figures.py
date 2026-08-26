@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 r"""Render the manuscript's figure to a one-figure-per-page PDF.
 
-The paper carries a single float, fig:det-M1, holding one pgfplots axis.
-Journal submission systems want the artwork as its own file, one figure per
-page, with the caption left in the manuscript text.  This script extracts the
+The paper carries three floats: fig:phase-diagram, a bare tikzpicture schematic,
+fig:defect-localization (a bare tikzpicture) and fig:wall-fan (a pgfplots axis).  Journal
+submission systems want the artwork as its own file, one figure per page, with
+the caption left in the manuscript text.  This script extracts the
 axis environment from the manuscript itself -- not from a hand-kept copy, so
 the artwork cannot drift from the paper -- and typesets it on its own A4 page in
 
@@ -16,7 +17,11 @@ Output format is PDF because that is what Elsevier accepts for vector artwork
 (EPS is the only other accepted vector format; SVG is not accepted).
 
 Every structural property of the output is asserted, so a broken extraction
-fails the script rather than producing a plausible-looking wrong figure.
+fails the script rather than producing a plausible-looking wrong figure.  The
+governing invariant is that the number of figure floats in the manuscript equals
+the number of pages rendered here, checked against the built PDF rather than
+against a hard-coded page count -- so a float added to the paper and forgotten
+here fails this script instead of silently shipping incomplete artwork.
 """
 
 import re
@@ -31,17 +36,36 @@ PAPER = PAPER_DIR / "shields-2026-turan-bessel.tex"
 WRAPPER = PAPER_DIR / "scripts" / "figures_pages.tex"
 OUTPUT = PAPER_DIR / "shields-2026-turan-bessel-figure.pdf"
 
-# every float to render, in page order; one page per axis environment found
-FIGURE_LABELS = ("fig:det-M1",)
-
-# expected \addplot count per axis, flattened in page order; a change here means
-# the figure was edited and its caption claims need rechecking too
-EXPECTED_ADDPLOTS = (4,)
-
-# text that must survive into each page, so a silently empty or reordered
-# render fails
-LANDMARKS = (
-    ("0.3690738484", "indefinite", "0.25", "0.50"),
+# every float to render, in the order it appears in the manuscript; one page
+# each.  `kind` is "axis" for a pgfplots axis inside the tikzpicture and "tikz"
+# for a bare tikzpicture whose body is the artwork.  `plots` is the expected
+# number of \addplot blocks (axis) or \draw commands (tikz): a change means the
+# figure was edited and its caption claims need rechecking too.  `landmarks` is
+# text that must survive into the page, so a silently empty or reordered render
+# fails, and `segments` is a floor on the vector path segments on that page.
+FIGURES = (
+    {
+        "label": "fig:phase-diagram",
+        "kind": "tikz",
+        "plots": 5,
+        "segments": 8,
+        "landmarks": ("pointwise positivity", "coefficientwise failure",
+                      "one positive zero"),
+    },
+    {
+        "label": "fig:defect-localization",
+        "kind": "tikz",
+        "plots": 26,
+        "segments": 80,
+        "landmarks": ("0.3690738484", "indefinite", "self-pair", "mixed pairing"),
+    },
+    {
+        "label": "fig:wall-fan",
+        "kind": "axis",
+        "plots": 26,
+        "segments": 40,
+        "landmarks": ("0.90", "1.15", "48"),
+    },
 )
 
 A4_PT = (595.276, 841.89)
@@ -126,46 +150,61 @@ def strip_relative_placement(axis_block):
 
 
 def extract_panels(paper_text):
-    """Return every axis environment of every configured float, in page order."""
+    """Return (kind, body) for every configured float, in manuscript order."""
     n_floats = paper_text.count(r"\begin{figure}")
-    assert n_floats == len(FIGURE_LABELS), (
-        f"paper has {n_floats} figure floats but {len(FIGURE_LABELS)} are "
-        "configured; a figure was added or removed"
+    assert n_floats == len(FIGURES), (
+        f"paper has {n_floats} figure floats but {len(FIGURES)} are configured; "
+        "a figure was added or removed"
     )
 
     panels = []
-    for label in FIGURE_LABELS:
-        figure, _ = find_environment(paper_text, "figure", must_contain=label)
+    for spec in FIGURES:
+        label, kind = spec["label"], spec["kind"]
+        # match the declaration, not the name: another float's caption may
+        # cross-reference this label, and a bare substring would find that one
+        figure, _ = find_environment(
+            paper_text, "figure", must_contain=rf"\label{{{label}}}"
+        )
         picture, _ = find_environment(figure, "tikzpicture")
-        pos = 0
-        while True:
+
+        if kind == "tikz":
             try:
-                body, (_, j) = find_environment(picture, "axis", start=pos)
+                find_environment(picture, "axis")
             except LookupError:
-                break
-            panels.append(body)
-            pos = j
+                pass
+            else:
+                raise AssertionError(
+                    f"{label} is configured as a bare tikzpicture but now holds "
+                    "an axis environment"
+                )
+            body, counted = picture, picture.count(r"\draw")
+        else:
+            bodies = []
+            pos = 0
+            while True:
+                try:
+                    axis, (_, j) = find_environment(picture, "axis", start=pos)
+                except LookupError:
+                    break
+                bodies.append(axis)
+                pos = j
+            assert len(bodies) == 1, (
+                f"{label}: expected one axis environment, found {len(bodies)}"
+            )
+            body, _ = strip_relative_placement(bodies[0])
+            assert "panelA" not in body, (
+                f"{label}: axis still references a sibling axis after stripping"
+            )
+            counted = body.count(r"\addplot")
 
-    assert len(panels) == len(EXPECTED_ADDPLOTS), (
-        f"expected {len(EXPECTED_ADDPLOTS)} axis environments across "
-        f"{', '.join(FIGURE_LABELS)}, found {len(panels)}"
-    )
-    for k, (body, expected) in enumerate(zip(panels, EXPECTED_ADDPLOTS)):
-        got = body.count(r"\addplot")
-        assert got == expected, (
-            f"panel {k + 1}: expected {expected} \\addplot blocks, found {got}; "
-            "the figure changed -- update EXPECTED_ADDPLOTS and recheck the "
-            "caption claims"
+        assert counted == spec["plots"], (
+            f"{label}: expected {spec['plots']} plot commands, found {counted}; "
+            "the figure changed -- update FIGURES and recheck the caption claims"
         )
+        panels.append((kind, body))
 
-    cleaned = []
-    for body in panels:
-        body, _ = strip_relative_placement(body)
-        assert "panel" not in body or "panelA" not in body, (
-            "axis still references a sibling axis after stripping"
-        )
-        cleaned.append(body)
-    return cleaned
+    assert len(panels) == n_floats
+    return panels
 
 
 # ---------------------------------------------------------------------------
@@ -178,6 +217,7 @@ PREAMBLE = r"""% Generated by scripts/render_figures.py -- do not edit by hand.
 \usepackage{amsmath,amssymb,mathtools}
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.18}
+%(macros)s
 \pagestyle{empty}
 \begin{document}
 """
@@ -185,21 +225,37 @@ PREAMBLE = r"""% Generated by scripts/render_figures.py -- do not edit by hand.
 PAGE = r"""
 \begin{center}
 \vspace*{\fill}
-\begin{tikzpicture}
-\begin{axis}%(body)s\end{axis}
-\end{tikzpicture}
+%(art)s
 \vspace*{\fill}
 \end{center}
 \newpage
 """
 
+ART = {
+    "axis": "\\begin{tikzpicture}\n\\begin{axis}%s\\end{axis}\n\\end{tikzpicture}",
+    "tikz": "\\begin{tikzpicture}%s\\end{tikzpicture}",
+}
 
-def build_wrapper(panels):
-    pages = "".join(PAGE % {"body": body} for body in panels).rstrip()
+
+MACRO = re.compile(r"^\\newcommand\{\\[A-Za-z]+\}(\[\d+\])?\{.*\}$", re.M)
+
+
+def paper_macros(paper_text):
+    """The artwork must render standalone, so the wrapper inherits every
+    zero-argument macro the manuscript defines -- a figure body using one
+    (\\MD, say) would otherwise fail to compile or, worse, render wrong."""
+    head = paper_text[: paper_text.index(r"\begin{document}")]
+    return "\n".join(m.group(0) for m in MACRO.finditer(head))
+
+
+def build_wrapper(panels, macros):
+    pages = "".join(
+        PAGE % {"art": ART[kind] % body} for kind, body in panels
+    ).rstrip()
     # the trailing \newpage would leave an empty final page
     assert pages.endswith(r"\newpage")
     pages = pages[: -len(r"\newpage")]
-    return PREAMBLE + pages + "\n\\end{document}\n"
+    return PREAMBLE.replace("%(macros)s", macros) + pages + "\n\\end{document}\n"
 
 
 def compile_pdf(wrapper_path):
@@ -249,17 +305,18 @@ def verify(n_panels):
         # what tracks the plotted data.
         paths = page.get_drawings()
         segments = sum(len(p["items"]) for p in paths)
-        assert len(paths) >= 10, f"page {k + 1} has only {len(paths)} vector paths"
-        assert segments >= 100, (
-            f"page {k + 1} has only {segments} path segments; curve data lost?"
-        )
+        assert len(paths) >= 6, f"page {k + 1} has only {len(paths)} vector paths"
         assert not page.get_images(), (
             f"page {k + 1} contains a raster image; artwork must stay vector"
         )
         text = page.get_text()
-        for landmark in LANDMARKS[k]:
+        assert segments >= FIGURES[k]["segments"], (
+            f"page {k + 1} has only {segments} path segments; curve data lost?"
+        )
+        for landmark in FIGURES[k]["landmarks"]:
             assert landmark in text, (
-                f"page {k + 1} is missing the landmark {landmark!r}"
+                f"page {k + 1} ({FIGURES[k]['label']}) is missing the "
+                f"landmark {landmark!r}"
             )
         print(
             f"  page {k + 1}: {w:.0f}x{h:.0f}pt, "
@@ -269,19 +326,40 @@ def verify(n_panels):
 
 
 def main():
-    assert shutil.which("pdflatex"), "pdflatex not found"
-    panels = extract_panels(PAPER.read_text(encoding="utf-8"))
-    print(f"extracted {len(panels)} panels from {', '.join(FIGURE_LABELS)}")
+    text = PAPER.read_text(encoding="utf-8")
 
-    WRAPPER.write_text(build_wrapper(panels), encoding="utf-8")
+    # the float-count and plot-count invariants are pure Python and always run:
+    # a float added to the paper and forgotten here must fail on a clean clone,
+    # whose requirements.txt carries only sympy and mpmath
+    panels = extract_panels(text)
+    print("extracted "
+          + ", ".join(f"{s['label']} ({s['kind']})" for s in FIGURES))
+
+    missing = [] if shutil.which("pdflatex") else ["pdflatex"]
+    try:
+        import fitz  # noqa: F401
+    except ImportError:
+        missing.append("PyMuPDF")
+    if missing:
+        print(f"SKIP: rendering needs {' and '.join(missing)}; the "
+              f"{len(panels)}-float invariant and the per-figure plot counts "
+              "were checked")
+        print(f"\nALL PASS: render_figures -- {len(panels)} floats configured "
+              "and counted (render skipped)")
+        return
+
+    WRAPPER.write_text(build_wrapper(panels, paper_macros(text)), encoding="utf-8")
     print(f"wrote {WRAPPER.relative_to(PAPER_DIR)}")
 
     compile_pdf(WRAPPER)
     verify(len(panels))
+    assert len(panels) == text.count(r"\begin{figure}")
     print(
         f"wrote {OUTPUT.relative_to(PAPER_DIR)} "
         f"({OUTPUT.stat().st_size / 1024:.0f} KB)"
     )
+    print(f"\nALL PASS: render_figures -- {len(panels)} figure floats in the "
+          f"manuscript, {len(panels)} vector pages rendered")
 
 
 if __name__ == "__main__":

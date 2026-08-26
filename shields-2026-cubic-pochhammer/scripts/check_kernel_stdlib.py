@@ -3,14 +3,15 @@
 
 Uses only the Python standard library (math.comb).  The whole cubic proof
 rests on one fact: every Bernstein coefficient S_{n,j} of the projective
-transform is nonnegative (paper section 4.1, Lemma 4.2).  This script confirms
-that fact over a wide range of m, together with the identities that produce it:
+transform is nonnegative (paper section `subsec:constant-weight-kernel`,
+`lem:bernstein`).  This script confirms that fact over a wide range of m,
+together with the identities that produce it:
 
-  * the direct residue-class sum S_{n,j}, eq. (4.7);
-  * the R-expansion eq. (4.9) (for j >= 2);
-  * the six-case closed form eq. (4.8);
+  * the direct residue-class sum S_{n,j}, `eq:S-def`;
+  * the R-expansion `eq:S-R` (for j >= 2);
+  * the six-case closed form `eq:S-table`;
   * nonnegativity of every S_{n,j};
-  * the projective Bernstein coefficient identity eq. (4.6), an exact integer,
+  * the projective Bernstein coefficient identity `eq:P-coeff`, an exact integer,
     equal to the direct residue-class coefficient extraction;
   * n+1 = 3m-1 = 2 or 5 (mod 6) and the positive xi^2 coefficient
     (3 S_{n,2} = 9 delta);
@@ -18,8 +19,9 @@ that fact over a wide range of m, together with the identities that produce it:
     goes negative (67 times for n < 200, first S_{5,6} = -30, S_{6,6} = -15), and
     every failure sits at one of the two residues n = 3m-2 excludes.
 
-Scope: the certificate and eqs. (4.6)-(4.9).  J_m itself, the link from eq. (4.6)
-back to P_m through eqs. (4.4)-(4.5), and eqs. (4.10)-(4.11) are in
+Scope: the certificate and `eq:P-coeff`-`eq:S-R`.  J_m itself, the link from `eq:P-coeff`
+back to P_m through `eq:P-def`-`eq:P-sum`, and the general inequalities of
+`eq:exp-bound-1`-`eq:exp-bound-0` with their increments, are in
 verify_kernel.py.
 
 Run:  python3 check_kernel_stdlib.py [MAX_M]   (default MAX_M = 120)
@@ -64,7 +66,7 @@ def three_S_table(n: int, j: int) -> int:
 
 
 def direct_projective_coefficient(n: int, j: int) -> int:
-    """First equality of eq. (4.6): [x^j] P_m from residue-class extraction."""
+    """First equality of `eq:P-coeff`: [xi^j] P_m from residue-class extraction."""
     total = sum(
         comb(n, k) * ((k + 1) * comb2(n - k, j - k) + (2 * k - n) * comb2(n - k, j - k - 1))
         for k in range(j + 1) if k % 3 == 2
@@ -96,7 +98,7 @@ def check_congruence_is_load_bearing(n_max: int = 199) -> None:
     assert S_sum(7, 6) == 0 and S_sum(7, 7) == 0
     print(f"PASS: the congruence n+1 = 2,5 (mod 6) is load-bearing -- "
           f"{len(negatives)} negative S_(n,j) without it (n<={n_max}), first "
-          f"S_(5,6)=-30, S_(6,6)=-15; and eqs. (4.10)-(4.11) are attained at m=3")
+          f"S_(5,6)=-30, S_(6,6)=-15; and `eq:exp-bound-1`-`eq:exp-bound-0` are attained at m=3")
 
 
 def main() -> None:
@@ -110,8 +112,8 @@ def main() -> None:
             s = S_sum(n, j)
             d = n + 1 - j
             if j >= 2:
-                assert s == S_from_R(n, j), (m, j)          # eq. (4.9)
-            assert 3 * s == three_S_table(n, j), (m, j)     # eq. (4.8)
+                assert s == S_from_R(n, j), (m, j)          # `eq:S-R`
+            assert 3 * s == three_S_table(n, j), (m, j)     # `eq:S-table`
             assert s >= 0, (m, j, s)                        # the certificate
             if j % 6 == 1:
                 assert d >= 1, (m, j)                       # j = 1 (mod 6)
@@ -120,9 +122,9 @@ def main() -> None:
             num = comb(n + 1, j) * s
             den = 3 * (n + 1)
             assert num % den == 0, (m, j)                   # integrality
-            assert num // den == direct_projective_coefficient(n, j), (m, j)  # eq. (4.6)
+            assert num // den == direct_projective_coefficient(n, j), (m, j)  # `eq:P-coeff`
         assert three_S_table(n, 2) == 9 * (n - 1) and S_sum(n, 2) > 0
-    print(f"PASS: eqs. (4.6)-(4.9), S_{{n,j}} >= 0, and the delta bounds for all "
+    print(f"PASS: `eq:P-coeff`-`eq:S-R`, S_{{n,j}} >= 0, and the delta bounds for all "
           f"2 <= m <= {max_m}")
     check_congruence_is_load_bearing()
     print("ALL PASS: check_kernel_stdlib (positivity certificate, no dependencies)")

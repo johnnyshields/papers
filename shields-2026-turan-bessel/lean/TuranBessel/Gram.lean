@@ -1,8 +1,15 @@
 /-
+Copyright (c) 2026 Johnny Shields. All rights reserved.
+Released under the MIT license as described in the file LICENSE.txt.
+Authors: Johnny Shields
+-/
+import TuranBessel.Coefficients
+
+/-!
 # Gram representation and positive definiteness of the stable coefficients
 
-Formalizes `shields-2026-turan-bessel.tex`, §4 «Gram structure and the
-exceptional matrix M₁» (`sec:gram`, Theorem 4.2 = `thm:gram`).  In `ℓ²` set
+Formalizes `shields-2026-turan-bessel.tex`, «Gram structure and the
+exceptional matrix M₁» (`subsec:gram`, `thm:gram`).  In `ℓ²` set
 `u_r = (x+r)⁻¹`, `v_r = q (x-1+r)⁻¹` with `x = a+m`, `q = a+m/2-1` (the Lean
 identifier for the scale `q` is `gramP`).  Then `‖u‖² = ψ₁(x) = α_m`,
 `⟨u,v⟩ = q/(x-1) = β_m`, `‖v‖² = q² ψ₁(x-1)`,
@@ -10,13 +17,13 @@ and Cauchy–Schwarz plus the positive Gram slack
 `ρ_m = g⁻¹ + c_m - q² ψ₁(x-1) > 0` give `det N_m > 0`, hence `N_m ≻ 0`, for
 `m ≥ 2` (all `a>0`) and for `m = 1` (all `a ≥ 1/2`).
 
-The slack `ρ_m` (`eq:rho-m`, eq. (4.8)) is positive: the trigamma upper bound
+The slack `ρ_m` is `eq:rho-m` at the endpoint shift `s = 1/g`, and is positive: the trigamma upper
+bound
 `ψ₁(x-1) < 1/(x-3/2)` and `1/g > a-1/2` reduce it to the rational identity
 `(a-1/2) + c_m - q²/(x-3/2) = (m-1)/(2(2a+2m-3)) > 0`.
 
 Sorry-free.
 -/
-import TuranBessel.Coefficients
 
 open scoped BigOperators
 
@@ -38,7 +45,7 @@ theorem inv_trigamma_gt (ha : 0 < a) : a - 1 / 2 < (trigamma a)⁻¹ := by
   by_cases h : a ≤ 1 / 2
   · have : (0 : ℝ) < (trigamma a)⁻¹ := inv_pos.mpr hg
     linarith
-  · push_neg at h
+  · push Not at h
     have hub : trigamma a < (a - 1 / 2)⁻¹ := trigamma_lt_upper h
     have hkey := inv_strictAnti₀ hg hub
     rwa [inv_inv] at hkey
@@ -128,10 +135,12 @@ theorem βcoef_eq_gram (ha : 0 < a) {m : ℕ} (hm : 1 ≤ m) :
   rw [if_neg (by omega)]
   field_simp
 
-/-- `det N_m > 0` for `m ≥ 1` given `ρ_m > 0`: Cauchy–Schwarz plus the Gram
-slack.  This is `β_m² < α_m (g⁻¹ + c_m)`. -/
-theorem Nmat_det_pos (ha : 0 < a) {m : ℕ} (hm : 1 ≤ m) (hρ : 0 < rho a m) :
-    (βcoef a m) ^ 2 < αcoef a m * ((trigamma a)⁻¹ + ccoef a m) := by
+/-- The Cauchy--Schwarz half of `thm:gram`, stated without reference to the `(2,2)`
+entry: `β_m² ≤ α_m p²ψ₁(a+m-1)`.  Any `(2,2)` entry strictly above
+`p²ψ₁(a+m-1)` therefore gives a positive determinant, which is what the boundary
+family of `lem:boundary-positivity` needs at `s_*` rather than at `g⁻¹`. -/
+theorem βcoef_sq_le_gram (ha : 0 < a) {m : ℕ} (hm : 1 ≤ m) :
+    (βcoef a m) ^ 2 ≤ αcoef a m * ((gramP a m) ^ 2 * trigamma (a + (m : ℝ) - 1)) := by
   have hmr : (1 : ℝ) ≤ (m : ℝ) := by exact_mod_cast hm
   have hx : 0 < a + (m : ℝ) := by linarith
   have hxm1 : 0 < a + (m : ℝ) - 1 := by linarith
@@ -154,12 +163,19 @@ theorem Nmat_det_pos (ha : 0 < a) {m : ℕ} (hm : 1 ≤ m) (hρ : 0 < rho a m) :
         = gramP a m * ((a + (m : ℝ) + (r : ℝ))⁻¹ * (a + (m : ℝ) - 1 + (r : ℝ))⁻¹))]
     rw [tsum_mul_left, cross_sum ha hm]
   rw [hnu, hnv, huv] at hcs
+  rw [βcoef_eq_gram ha hm]
+  linarith [hcs]
+
+/-- `det N_m > 0` for `m ≥ 1` given `ρ_m > 0`: Cauchy--Schwarz plus the Gram
+slack.  This is `β_m² < α_m (g⁻¹ + c_m)`. -/
+theorem Nmat_det_pos (ha : 0 < a) {m : ℕ} (hm : 1 ≤ m) (hρ : 0 < rho a m) :
+    (βcoef a m) ^ 2 < αcoef a m * ((trigamma a)⁻¹ + ccoef a m) := by
+  have hcs := βcoef_sq_le_gram ha hm
   -- `p² ψ₁(x-1) = (g⁻¹ + c_m) - ρ_m`
   have hpm : αcoef a m * ((gramP a m) ^ 2 * trigamma (a + (m : ℝ) - 1))
       = αcoef a m * ((trigamma a)⁻¹ + ccoef a m) - αcoef a m * rho a m := by
     unfold rho; ring
   have hαpos : 0 < αcoef a m := αcoef_pos ha m
-  rw [βcoef_eq_gram ha hm]
   linarith [hcs, hpm, mul_pos hαpos hρ]
 
 /-- `N_m ≻ 0` for `m ≥ 2` and any `a > 0`. -/

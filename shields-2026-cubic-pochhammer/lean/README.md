@@ -1,13 +1,18 @@
-# Lean 4 formalization — Coefficientwise log-concavity of the cubic multiple-Pochhammer series
+# Lean 4 formalization — The cubic threshold for coefficientwise log-concavity of multiple-Pochhammer series
 
-Formalizes the core of `../shields-2026-cubic-pochhammer.tex` against Mathlib
+Formalizes the core of `shields-2026-cubic-pochhammer.tex` against Mathlib
 (`leanprover/lean4:v4.30.0-rc2`, namespace `CubicPochhammer`).  `lake build` is
-green with **no `sorry`** and a small, fully localized set of three documented
-bridge axioms, all listed below.
+green with **no `sorry`** and **no project axiom**: every result below rests on
+Lean's own `[propext, Classical.choice, Quot.sound]` and nothing else.
 
-The paper proves Karp–Zhang Conjecture 1 (`KarpZhang2024`): for a nonnegative
-log-concave sequence `(f_n)`, the cubic multiple-Pochhammer series
-`F_f(μ;x) = Σ_{n≥1} f_n (μ)_{3n} x^n/(3n-1)!` is coefficientwise log-concave.
+The paper proves a statement stronger than Karp–Zhang Conjecture 1 [1]: for a nonnegative log-concave sequence `(f_n)` and
+`F_f(μ;x) = Σ_{n≥1} f_n (μ)_{3n} x^n/(3n-1)!`, every coefficient of
+`F_f(s/2+d;x)F_f(s/2-d;x)` is nonincreasing in the imbalance `d` over
+`0 ≤ d ≤ s/2`, at each fixed parameter sum `s > 0`.  The conjecture —
+coefficientwise log-concavity — is the comparison of the imbalances `|α-β|/2`
+and `(α+β)/2`.
+
+The proofs in the paper are noncomputational and do not depend on the code here.
 
 ## Build
 
@@ -19,153 +24,100 @@ lake build
 The project is self-contained: its own `lakefile.lean`, `lean-toolchain`, and
 pinned `lake-manifest.json`.  (`.lake/` is a gitignored build directory.)
 
-## What is proven (unconditionally, no project axioms)
+## Result coverage
 
-The **combinatorial heart of the paper** — the third-root-of-unity positivity
-certificate and the weighting principle — is proven with no `sorry` and no
-project-specific axioms.  `#print axioms` reports only Lean/Mathlib's
-`[propext, Classical.choice, Quot.sound]`:
+The table below indicates coverage of the paper's theorems, propositions and
+corollaries -- the statements the paper is for, and what the formalization is
+measured against.  Every entry marked full is proven unconditionally.
 
-| Result | Paper | Lean |
-|---|---|---|
-| One-sign-change weighting principle | `lem:weighting` | `Weighting.sum_weighted_nonneg`, `sum_weighted_pos_of_pivot_pos` |
-| Residue-class sums, period-6 closed form `3R = 2^·+corr` | `eq:S-table` root-of-unity filter | `ResidueSums.three_R_closed` (`R_succ`, `corr_rec`) |
-| Residue-class moments `∑k·C`, `∑k(k-1)·C` | `eq:S-R` | `ResidueSums.moment1_c2`, `moment_kk_c2` |
-| Certificate closed form `3S_{n,j} = d·2^j + …` | `eq:S-table` | `Snj.three_Snj_dform` |
-| Exponential bounds `2^j ≥ …` (equality at `j=6,7`) | `eq:exp-bound-0`, `eq:exp-bound-1` | `Snj.expb_quad0`, `expb_quad1`, `expb_a` |
-| **Certificate nonnegativity `S_{n,j} ≥ 0`** | `lem:bernstein` (via `eq:S-table`) | **`Snj.Snj_nonneg`** |
-| Strictly positive `[x²]` coefficient `S_{n,2}=3(n-1)` | `lem:bernstein` | `Bernstein.Snj_two_eq`, `Snj_two_pos` |
+**Work in progress.**  All proofs in the paper are unconditional and
+noncomputational.  A row marked below anything but ✅ reflects the state of the
+Lean formalization, not of the paper.
 
-`S_{n,j} ≥ 0` for **all** `m` is the paper's main new positivity, proven here in
-full: a single period-6 induction for the root-of-unity evaluation, then a
-six-way case split with the two exponential bounds.  It is cross-checked in
-`../scripts/verify_kernel.py` (symbolic) and `../scripts/check_kernel_stdlib.py`
-(integer audit over a wide `m`-range).
+**Status.**  ✅ Full · ⚠️ Partial, some clauses carried · ❌ Missing · — not
+applicable.
 
-## What is proven modulo the documented bridges
+| § | Paper item | Kind | Coverage | Lean (file:line) | Notes |
+|---|---|---|---|---|---|
+| §1.1 Thm 1.1 | `thm:main` | theorem | ✅ Full | `Main.turan_coeff_nonneg`, `Main.schur_coeff_nonneg` | Proved for an arbitrary symmetric weight family increasing toward the center, which is more general than the paper's `w_k = f_k f_{m-k}`. |
+| §2 Prop 2.4 | `prop:kernel-exact` | proposition | ✅ Full | `Bridge.kernel_exact_iff`, `Bridge.cmw_strictAntiOn_imbalance` | Both directions (`kernel_exact_iff`) and the strict clause.  The converse needed no concentration argument: `G_{m,w}` is a polynomial, so the `s → ∞` limit is algebraic. |
+| §3 Thm 3.1 | `thm:kernel` | theorem | ✅ Full | `Kernel.gmw_monotoneOn`, `Kernel.gmw_strictMonoOn` | Both clauses, the strict one included. |
+| §4 Cor 4.1 | `cor:C-schur` | corollary | ✅ Full | `Bridge.cmw_schur_of_kernel`, `Bridge.cmw_schur_of_kernel_closed` | — |
+| §4 Cor 4.2 | `cor:strict` | corollary | ✅ Full | `Bridge.cmf_delta_pos_iff`, `Main.cmf_delta_pos_iff_of_logConcave` | Both halves, plus the Turánian restatement.  `cmf_delta_pos_iff_of_logConcave` gives it at `thm:main`'s own sequence hypothesis rather than the wider degree-local chain. |
+| §5 Prop 5.1 | `prop:multiplicity-threshold` | proposition | ✅ Full | `Multiplicity.GeneralOrder.twoTerm_degreeThree`, `Multiplicity.GeneralOrder.twoTerm_degreeThree_neg_iff` | The closed form, the threshold `μ > 4r/(r−3)` for `r ≥ 4`, and both minimality clauses (`degreeTwo_nonneg`, `onePoint_nonneg`). |
+| §5 Cor 5.2 | `cor:multiplicity` | corollary | ✅ Full | `Multiplicity.Classification.multiplicity_classification` | `multiplicity_classification`, unconditional.  The `r = 2` case, which the paper cites, is **proven here** as `universalLogConcave_two`, so nothing in the module rests on a cited result. |
+| §6.2 Cor 6.1 | `cor:ordinary` | corollary | ✅ Full | `Consequences.cor_ordinary` | All five clauses.  Convergence is taken as a hypothesis rather than the radius formalized; the Γ-ratio needs only a polynomial majorant, not the paper's asymptotic. |
+| §6.3 Cor 6.2 | `cor:differential` | corollary | ⚠️ Partial | `Differential.dcoeff_tsum_eq`, `Differential.dcoeff_nonneg`, `Differential.dcoeff_two_pos_iff` | `dcoeff_tsum_eq` identifies `dcoeff` with the `x^m` coefficient of the analytic differential Turánian, by termwise `μ`-differentiation of `eq:F-def`; `dcoeff_nonneg` gives the corollary's nonnegativity clause at every `μ ≥ 0`; `dcoeff_two_pos_iff` closes both directions at `m = 2`, and the vanishing off `I+I` and the `μ = 0` case hold at every `m`.  Missing: strict positivity for `μ > 0` at `m ≥ 3`, reduced in `Differential.lean`'s gap note to the single sequence `f ≡ 1` — it does **not** follow from `thm:main`, which gives only `Φ_m''(0) ≤ 0`, a bound a quartically flat maximum also satisfies.  No Mathlib primitive is missing.  Checked in `../scripts/check_structural.py` and `../scripts/check_differential_coefficients.py`, which show the reduced inequality is true, is not pairwise, and is tight to relative margin `2/(3m)`. |
 
-| Result | Paper | Lean | Uses |
-|---|---|---|---|
-| Bernstein certificate `J_m(t) > 0` on `(0,1)` | `lem:bernstein` | `Bernstein.Jm_pos` | `Jm_bernstein` |
-| Weighted kernel `J_{m,w}(t) ≥ 0` (`G_{m,w}` monotone) | `thm:kernel` | `Kernel.Jmw_nonneg` | + `block_certificate` |
-| **Cubic multiple-Pochhammer theorem** | `thm:main` | **`Main.turan_coeff_nonneg`** | + `C_schur_of_kernel` |
+## Structural coverage
 
-Each bridge is stated to **consume the proven results below it**, so exactly the
-listed axiom is added at each step and nothing else (see `#print axioms`).
+The table below indicates coverage of the paper's lemmas, equations, remarks,
+figures and unnumbered prose claims -- the machinery the results above run
+through, plus the two subsections that state a claim without a numbered
+environment.  Several items are formalized by a **different route** than the
+paper's own, and those are marked as such in the notes: the route taken here is
+stated and proven, and it reaches the paper's statement, but a reader following
+the paper's argument will not find the same intermediate steps.
 
-## Module map
+| § | Paper item | Kind | Coverage | Lean (file:line) | Notes |
+|---|---|---|---|---|---|
+| §1.1 eq. (1.1) | `eq:general-r` | equation | - | — | Definition fixing notation; its claims are `prop:multiplicity-threshold` and `cor:multiplicity`. |
+| §1.1 eq. (1.2) | `eq:F-def` | equation | ✅ Full | `Consequences.aser`, `Consequences.fser` | `aser` is the coefficient `f_n (μ)_{3n}/(3n-1)!` and `fser` the series. |
+| §1.1 eq. (1.3) | `eq:schur-def` | equation | ✅ Full | `Consequences.sum_range_aser`, `Main.schur_coeff_nonneg` | Carried coefficientwise, which is the only way the paper asserts anything about it: `sum_range_aser` is the degree-`m` coefficient of the product, unconditionally, and `schur_coeff_nonneg` compares it at the two imbalances.  No formal power series object is formed. |
+| §1.1 eq. (1.4) | `eq:Turan-def` | equation | ✅ Full | `Consequences.sum_range_aser`, `Main.turan_coeff_nonneg` | As `eq:schur-def`, in the shift parametrization. |
+| §2 Lem 2.1 | `lem:central-products` | lemma | ✅ Full | `CentralProducts.centralProducts_iff` | Both directions. |
+| §2 eq. (2.1) | `eq:central-products` | equation | ✅ Full | `CentralProducts.centralProducts_chain` | — |
+| §2 Rmk 2.2 | `rem:internal-zeros` | remark | ❌ Missing | — | A concrete witness; nothing blocks it. |
+| §2 eq. (2.2) | `eq:C-def` | equation | ✅ Full | `Bridge.cmw` | — |
+| §2 eq. (2.3) | `eq:C-beta-binomial` | equation | ❌ Missing | — | Checked in `../scripts/verify_beta_binomial.py`.  The discrete law is bypassed: `aint_eq` goes from `eq:C-def` straight to the beta integral. |
+| §2 eq. (2.4) | `eq:C-beta` | equation | ✅ Full | `Bridge.aint_eq` | **Different route.**  Carried with the normalizations cleared rather than as an expectation, so no probability measure appears in the tree. |
+| §2 eq. (2.5) | `eq:G-weighted` | equation | ✅ Full | `Kernel.gmw_symm` | — |
+| §2 eq. (2.6) | `eq:fixed-sum` | equation | ❌ Missing | — | `kappa_{m,s}` is never formed; the constants cancel inside `aint_eq`.  Checked in `../scripts/check_fixed_sum_schur.py`. |
+| §2 Lem 2.3 | `lem:beta-order` | lemma | ✅ Full | `BetaOrder.beta_order`, `BetaOrder.beta_order_strict` | Both clauses.  The strict one, `beta_order_strict`, is at the paper's hypothesis -- `H` strictly increasing on the open `(0,1/2)` and `d₁ < d₂`. |
+| §2 eq. (2.7) | `eq:beta-order` | equation | ✅ Full | `BetaOrder.beta_order` | — |
+| §2 Rmk 2.5 | `rem:fixed-total` | remark | ⚠️ Partial | `Consequences.sum_range_aser`, `Bridge.cmf_eq_zero_of_not_memSumset`, `Bridge.cmw_pos` | Three of the four claims are carried: `C_{m,w}(u,v) = [x^m]F_f(u;x)F_f(v;x)` (`sum_range_aser`), vanishing off `I+I` (`cmf_eq_zero_of_not_memSumset`), and positivity on `I+I` (`cmw_pos`).  Missing: the conditional law `ℙ_x(N_u=k ∣ N_u+N_v=m)`, which needs a probability measure the tree never names. |
+| §3 eq. (3.1) | `eq:w-monotone` | equation | ✅ Full | `Kernel.jmw_nonneg` | Carried as the hypothesis of `jmw_nonneg`. |
+| §3.1 eq. (3.2) | `eq:G-J` | equation | ✅ Full | `Kernel.hasDerivAt_gmw_proj` | **Different route.**  Not stated separately; it is `hasDerivAt_gmw_proj` at `w = 1`. |
+| §3.1 eq. (3.3) | `eq:J-k` | equation | ✅ Full | `Bernstein.three_jm_monomial` | — |
+| §3.1 Lem 3.2 | `lem:bernstein` | lemma | ✅ Full | `Bernstein.jm_pos`, `Snj.snj_nonneg` | — |
+| §3.1 eq. (3.4) | `eq:P-def` | equation | ✅ Full | `BernsteinBasis.bernstein_reconstruction` | — |
+| §3.1 eq. (3.5) | `eq:P-sum` | equation | ✅ Full | `Bernstein.three_jm_monomial` | — |
+| §3.1 eq. (3.6) | `eq:P-coeff` | equation | ✅ Full | `Bernstein.pcoef_transform` | — |
+| §3.1 eq. (3.7) | `eq:S-def` | equation | ✅ Full | `Snj.snj` | — |
+| §3.1 eq. (3.8) | `eq:S-table` | equation | ✅ Full | `ResidueSums.three_residueSum_closed`, `Snj.three_snj_dform`, `Snj.three_snj_table_zero`–`three_snj_table_five` | **Different route.**  Proven as a period-6 closed form by Pascal induction; no complex root of unity appears anywhere in the tree.  The `three_snj_table_*` family states the display's six printed lines, one per residue class of `j` mod 6. |
+| §3.1 eq. (3.9) | `eq:S-R` | equation | ✅ Full | `ResidueSums.moment1_c2` | — |
+| §3.1 eq. (3.10) | `eq:exp-bound-1` | equation | ✅ Full | `Snj.expb_quad0` | — |
+| §3.1 eq. (3.11) | `eq:exp-bound-0` | equation | ✅ Full | `Snj.expb_quad0` | — |
+| §3.2 Lem 3.3 | `lem:weighting` | lemma | ✅ Full | `Weighting.sum_weighted_nonneg`, `Weighting.sum_weighted_pos` | All three parts, both branches of the strict clause. |
+| §3.2 eq. (3.12) | `eq:abel-weight` | equation | ✅ Full | `Weighting.sum_weighted_abel` | — |
+| §3.2 eq. (3.13) | `eq:J-weighted` | equation | ✅ Full | `Kernel.hasDerivAt_gmw_proj` | — |
+| §3.2 eq. (3.14) | `eq:Jw-def` | equation | ✅ Full | `Kernel.jmw_nonneg` | — |
+| §3.2 eq. (3.15) | `eq:B-def` | equation | ✅ Full | `Blocks.bblock` | — |
+| §3.2 eq. (3.16) | `eq:B-center` | equation | ✅ Full | `Blocks.bblock_center_pos` | — |
+| §3.2 Lem 3.4 | `lem:block-sign` | lemma | ✅ Full | `Blocks.block_sign_change` | — |
+| §3.2 eq. (3.17) | `eq:H-hyperbolic` | equation | ✅ Full | `Blocks.hgap`, `Blocks.bblock_eq_hgap` | **Different route.**  The sign change is proven rationally rather than hyperbolically; `Real.tanh` never appears. |
+| §4 eq. (4.1) | `eq:w-from-f` | equation | ✅ Full | `Bridge.cmf` | — |
+| §4 eq. (4.2) | `eq:delta-C` | equation | ✅ Full | `Consequences.sum_range_aser`, `Consequences.fser_mul` | `sum_range_aser` is the coefficient identity, with no convergence hypothesis; `fser_mul` identifies the series product with `∑_m C_{m,f}(u,v)x^m` inside the disc. |
+| §4 Rmk 4.3 | `rem:local-weight` | remark | ✅ Full | `Main.turan_coeff_nonneg`, `CentralProducts.centralProducts_iff`, `Bridge.memSumset_iff_of_Icc_support` | All three claims.  `turan_coeff_nonneg`'s hypothesis `hwmono` **is** the remark's degree-local chain, so the degree-`m` conclusion is stated at exactly that condition; `centralProducts_iff` is the global equivalence; `memSumset_iff_of_Icc_support` is `I+I` an interval. |
+| §5 eq. (5.1) | `eq:r-central-slope` | equation | ✅ Full | `Multiplicity.CentralSlope.ghat_central_slope_three` | The sign pattern driving the threshold: `+1/2` at `r = 2`, exactly `0` at `r = 3`, negative for every `r ≥ 4`. |
+| §5 eq. (5.2) | `eq:r-degree-three` | equation | ✅ Full | `Multiplicity.GeneralOrder.twoTerm_degreeThree` | Closed form for the two-term sequence, via the Pochhammer identity `pochDegreeThree_identity`. |
+| §5 Fig 1 | `fig:multiplicity-threshold` | figure | ❌ Missing | — | The curves need nothing, but the caption asserts three numbers: the central value `binom(3r-2,r-1)2^{1-3r}`, the normalized endpoint slope `2r(3-r)`, and the interior maxima at `+6.59%` and `+21.12%` for `r = 4, 5`.  The first two are one step from `dickE_center` and `ghat_central_slope`; the maxima are numerical, and are checked in `../scripts/make_figure_multiplicity.py`. |
+| §5.1 | `subsec:first-supercritical-case` | prose | ❌ Missing | — | Two claims: the closed forms of `a_7`, `a_8` in `(1+ξ)^{4m-1}J^{(4)}_m(ξ/(1+ξ))`, and the factorization `J^{(4)}_4(t) = 52t^7(1-t)(7z^4+42z^3+42(z-1)^2+6) > 0` at `z = (1-t)^2/t`.  The tree carries no `r = 4` numerator; both are checked in `../scripts/check_r4_obstruction.py`. |
+| §6.1 | `subsec:hypergeometric-specialization` | prose | ❌ Missing | — | The triplication identity `F_f(μ;x) = 3x\,d/dx\,{}_3F_2(μ/3,(μ+1)/3,(μ+2)/3;1/3,2/3;x)` at `f_n ≡ 1`.  Mathlib carries no generalized hypergeometric function; the identity is checked in `../scripts/verify_theorem.py`. |
 
-Paper sections of `../shields-2026-cubic-pochhammer.tex`: §1 introduction, §2
-`sec:beta-binomial`, §3 `sec:monotonicity-lemmas`, §4 `sec:kernel`, §5
-`sec:proof`.
+## Dependencies
 
-```
-Weighting     — §3      one-sign-change weighting (lem:weighting)          [proven]
-ResidueSums   — §4      R_a, period-6 closed form, residue-class moments   [proven]
-Snj           — §4      S_{n,j} closed form + S_{n,j} ≥ 0 (eq:S-table)     [proven]
-Bernstein     — §4      J_m definition, J_m(t) > 0 (lem:bernstein)         [axiom Jm_bernstein]
-Kernel        — §4      J_{m,w}(t) ≥ 0 (thm:kernel)                        [+ block_certificate]
-Bridge        — §2,§3,§5 C_{m,f}, Schur-concavity (eq:C-def, prop:C-schur)  [+ C_schur_of_kernel]
-Main          — §5      turan_coeff_nonneg (thm:main)                      [assembles the above]
-AxiomCheck    —         #print axioms regression guard
-```
+None.
 
----
+## License
 
-# The three bridge axioms, and how to remove them
+Code is made available under the MIT license (see `LICENSE.txt`), or as
+otherwise noted in the comments of the file.
 
-Nothing below weakens the proven core: `Snj_nonneg`, `three_R_closed`,
-`sum_weighted_nonneg` do **not** transitively use any of these (verified by
-`#print axioms`).  Each isolates one paper step and is stated so that the proven
-results feed into it.
+## References
 
-## A1. `Jm_bernstein` — the Bernstein coefficient identity (§4, `eq:P-coeff`)
+1. D. Karp and Y. Zhang, *Log-concavity and log-convexity of series containing
+   multiple Pochhammer symbols*, Fractional Calculus and Applied Analysis **27**
+   (2024), no. 1, 458–486. [doi:10.1007/s13540-023-00238-0](https://doi.org/10.1007/s13540-023-00238-0)
 
-`3(n+1) J_m(t) = Σ_{j=0}^{n+1} S_{n,j} C(n+1,j) t^j (1-t)^{n+1-j}`, `n = 3m-2`.
-
-**What it is.** A finite polynomial identity: the coefficients of `J_m` in the
-degree-`(n+1)` Bernstein basis are `S_{n,j}/(3(n+1))`.  It is the projective
-Bernstein transform `eq:P-def` together with the coefficient extraction
-`eq:P-coeff`.  It is **purely combinatorial** — no analysis, no Mathlib gap.
-
-**Why it is an axiom here.** Discharging it is a `Polynomial` coefficient
-computation (two binomial revision identities and a Cauchy product); it is
-verified symbolically in `../scripts/verify_kernel.py` (eq:P-coeff, the two
-binomial identities, and the Bernstein reconstruction of `J_m`) and by hand at
-`m=2` (both sides `90 t²(1-t)`).  Its **positive consequence** `Jm_pos` is proven
-here from it and the theorem `Snj_nonneg`.
-
-**What would remove it.** Formalize `eq:P-coeff` with `Polynomial.coeff` and the
-two binomial revision identities `C(n,k)C(n-k,j-k)=C(n,j)C(j,k)` and
-`C(n,k)C(n-k,j-k-1)=C(n+1,j)C(j,k)(j-k)/(n+1)`.  Then `Jm_pos` becomes an
-ordinary theorem.
-
-## A2. `block_certificate` — block decomposition and single sign change (§4.2)
-
-Pairs the terms `k ↔ m-k` of `J_{m,w}` into blocks `B_{m,k}` (`eq:B-def`); the
-block sequence has at most one sign change (`lem:block-sign`) and sums to `J_m`.
-
-**What it is.** Two facts: (i) the algebraic pairing reindexing `eq:B-def`; and
-(ii) the single sign change `lem:block-sign`, a `tanh` monotonicity —
-`d ↦ d·tanh(3dx/2)` is strictly increasing.
-
-**Why it is an axiom here.** The sign change is a real-analytic monotonicity;
-Mathlib has `Real.tanh` but the argument (and the pairing reindexing) is §4.2
-bookkeeping.  The **transfer** of the block structure to `J_{m,w} ≥ 0` — the
-proven one-sign-change weighting `sum_weighted_nonneg` applied to the proven
-constant-weight positivity `Jm_pos` — is done in `Kernel.Jmw_nonneg`.
-
-**What would remove it.** Prove the pairing by `Finset` reflection and the sign
-change from `Real.tanh` strict monotonicity plus the algebraic
-`(1-t³)/(1+t³) < 3(1-t)/(1+t)` (the odd-`m` central case, an elementary
-`(1-t)²(1+t) > 0`).
-
-## A3. `C_schur_of_kernel` — the beta-binomial reduction (§2, §3, §5)
-
-Schur-concavity of the coefficient convolution `C_{m,f}` (`prop:C-schur`): at
-fixed parameter sum, smaller imbalance gives the larger value of `C_{m,f}`.
-
-**What it is.** The beta-binomial representation `eq:C-beta`
-(`C_{m,f} = Λ(s)·𝔼 G_{m,w}(P)`, `P ∼ Beta(u,v)`) followed by the likelihood-ratio
-order of `lem:beta-order`.  This is the **only genuinely measure-theoretic**
-step.  It is stated to consume the proven kernel monotonicity as the explicit
-hypothesis `hker` (= `Kernel.Jmw_nonneg`), so the bridged content is exactly
-`eq:C-beta` + `lem:beta-order`.
-
-**Why it is an axiom.** It needs the `Beta(u,v)` law, its density after the
-`q = p(1-p)` change of variables, and the likelihood-ratio ⇒ usual stochastic
-order (`ShakedShanthikumar2007`).  Mathlib has pieces but not an off-the-shelf
-route.
-
-**What would remove it.** Formalize the Beta-Binomial mixture and `lem:beta-order`
-(`cosh(d₂ℓ)/cosh(d₁ℓ)` strictly increasing ⇒ single density crossing ⇒ stochastic
-order).  Then `turan_coeff_nonneg` follows from `Jmw_nonneg` with no axioms.
-
-## Deliberately out of scope
-
-- **`cor:ordinary`** (ordinary log-concavity of `μ ↦ F_f(μ;x)`): Stirling
-  asymptotics, radius of convergence, and continuity in `μ` — analytic.
-- **`cor:strict`** (strict coefficient classification): the strict half of
-  `lem:beta-order`; same bridge as A3.
-
-## Axiom summary
-
-| Axiom | Paper | Kind |
-|---|---|---|
-| `Jm_bernstein` | `eq:P-coeff` (§4) | finite polynomial identity (combinatorial) |
-| `block_certificate` | `eq:B-def`, `lem:block-sign` (§4.2) | algebraic reindex + `tanh` monotonicity |
-| `C_schur_of_kernel` | `eq:C-beta`, `lem:beta-order`, `prop:C-schur` (§2,§3,§5) | beta-binomial / stochastic order |
-
-## Verification
-
-`#print axioms` (module `AxiomCheck`):
-
-- `Snj_nonneg`, `three_R_closed`, `sum_weighted_nonneg` →
-  `[propext, Classical.choice, Quot.sound]` (no `sorry`, no project axioms).
-- `Jm_pos` → `+ Jm_bernstein`.
-- `Jmw_nonneg` → `+ Jm_bernstein, block_certificate`.
-- `turan_coeff_nonneg` → `+ Jm_bernstein, block_certificate, C_schur_of_kernel`.
-
-The combinatorial identities (`eq:P-coeff`, `eq:S-table`, `eq:S-R`) are
-cross-checked symbolically in `../scripts/verify_kernel.py`, and `thm:main` /
-`prop:C-schur` in `../scripts/verify_theorem.py`.
+Refer to the paper for references.

@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""Paper section 5 (Mixed determinants and coefficientwise positivity), Lemma 5.3
-(lem:Delta2-positive), eq. (5.5): dependency-free positivity audit of the exported
-degree-two coefficient tables.
+"""Paper section `subsec:endpoint-sufficiency` (The exceptional degree and endpoint sufficiency),
+subsec:endpoint-sufficiency: lem:Delta2-positive, eq. (Qstar-decomp) --
+dependency-free positivity audit of the exported degree-two coefficient tables.
 
 Reads exported_coefficients.json and asserts that every block of the exceptional
 numerator Q_*(a,t), expanded in R_a = psi_1(a+1) - 1/(a+1), has strictly positive
-integer coefficients -- the manifestly positive decomposition of eq. (5.5).
+integer coefficients -- the manifestly positive decomposition of eq. (Qstar-decomp).
 
-Scope: given eqs. (5.4)-(5.5) as identities -- which verify_determinant.py re-derives
+Scope: given eqs. (Delta2-Q), (Qstar-decomp) as identities -- which verify_determinant.py re-derives
 symbolically from the series definition of Z -- positivity of these blocks together
 with R_a > 0 is what yields Delta_2(a) > 0 for every a > 0.  This script checks only
 the positivity of the blocks, in exact integer arithmetic and without SymPy or mpmath;
@@ -33,7 +33,7 @@ def poly(*factors):
     return r
 
 
-# The three blocks of eq. (5.5), expanded here in exact integer arithmetic so the
+# The three blocks of eq. (Qstar-decomp), expanded here in exact integer arithmetic so the
 # JSON is checked against the paper rather than merely checked for shape.
 #   2 a^4 (a+1)^2,   2 a^2 (a+1)^2 (8a^2+3a+1),   2 a (a+1) (5a+3)
 A1, AP1, Q8 = [0, 1], [1, 1], [1, 3, 8]          # a, a+1, 8a^2+3a+1
@@ -49,7 +49,7 @@ for name, dense in expected.items():
     block = data[name]
     coeffs = block['coefficients']
     powers = block['powers_of_a']
-    # {power: coefficient} from eq. (5.5), dropping the zero terms
+    # {power: coefficient} from eq. (Qstar-decomp), dropping the zero terms
     want = {p: c for p, c in enumerate(dense) if c != 0}
     assert len(coeffs) == len(powers), name
     assert powers == sorted(powers, reverse=True), name
@@ -59,6 +59,6 @@ for name, dense in expected.items():
     assert all(c > 0 for c in coeffs), name
     assert dict(zip(powers, coeffs)) == want, (name, dict(zip(powers, coeffs)), want)
     print(f'PASS {name}: {len(coeffs)} strictly positive integer coefficients,'
-          f' matching eq. (5.5) at powers {powers}')
-print('ALL PASS: the exported Q_* blocks are exactly eq. (5.5) and strictly positive,'
-      ' so with eqs. (5.4)-(5.5) Delta_2(a) > 0 for a > 0')
+          f' matching eq. (Qstar-decomp) at powers {powers}')
+print('ALL PASS: the exported Q_* blocks are exactly eq. (Qstar-decomp) and strictly positive,'
+      ' so with eqs. (Delta2-Q), (Qstar-decomp) Delta_2(a) > 0 for a > 0')

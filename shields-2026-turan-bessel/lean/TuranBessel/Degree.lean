@@ -1,9 +1,17 @@
 /-
+Copyright (c) 2026 Johnny Shields. All rights reserved.
+Released under the MIT license as described in the file LICENSE.txt.
+Authors: Johnny Shields
+-/
+import TuranBessel.Gram
+
+/-!
 # Low-degree coefficients and the degree-two repair
 
 Formalizes the coefficient-sector positivity of
-`shields-2026-turan-bessel.tex`, §5 «Mixed determinants and coefficientwise
-positivity» (`sec:determinant`).  `Δ_n` is a positive
+`shields-2026-turan-bessel.tex`, «Finite-defect localization»
+(`subsec:finite-defect`), with the degree-two repair of «The exceptional degree
+and endpoint sufficiency» (`subsec:endpoint-sufficiency`).  `Δ_n` is a positive
 multiple of
 ```
 Dcoeff a n = Σ_{k=0}^n s_k s_{n-k} MD(N_k, N_{n-k}),      s_m = sred a m,
@@ -16,14 +24,10 @@ so `Δ_n > 0 ⇔ Dcoeff a n > 0`.  This file handles the two low degrees:
   `Dcoeff a 2 = Q_*/(a⁶(a+1)³ψ₁(a))` with
   `Q_* = 2a⁴(a+1)²R² + 2a²(a+1)²(8a²+3a+1)R + 2a(a+1)(5a+3)`,
   `R = ψ₁(a+1)-1/(a+1) > 0`.
-* `MD_N1_Nm_nonneg` — `MD(N_1,N_m) ≥ 0` for `m ≥ 2` (eq:M1-Mm-positive, eq. (5.3)).
-  The paper states this strictly (`> 0`); only the non-strict form is needed for
-  `coefficientwise_positivity`, since the `(0,n)` pair already contributes strictly,
-  so `≥ 0` is what is proven here.
+* `MD_N1_Nm_pos` — `MD(N_1,N_m) > 0` for `m ≥ 2` (`eq:M1-Mm-positive`).
 
 Sorry-free.
 -/
-import TuranBessel.Gram
 
 open scoped BigOperators
 
@@ -56,8 +60,7 @@ theorem MD_N0_N1_pos (ha : 0 < a) : 0 < SymMat.MD (Nmat a 0) (Nmat a 1) := by
     simp only [SymMat.MD, Nmat_a11, Nmat_a12, Nmat_a22, αcoef, βcoef_zero, βcoef_one,
       ccoef_zero, ccoef_one, Nat.cast_zero, Nat.cast_one, add_zero]
     rw [ht1]
-    field_simp
-    ring
+    field
   rw [hval]
   exact div_pos (by linarith [a_trigamma_gt_one ha]) (mul_pos (pow_pos ha 2) hg)
 
@@ -101,8 +104,7 @@ theorem Dcoeff_two_eq (hane : a ≠ 0) (ha1ne : a + 1 ≠ 0) (h2a1 : (2 * a + 1)
     ccoef_one, ccoef_two]
   simp only [Nat.cast_zero, Nat.cast_one, Nat.cast_ofNat, add_zero]
   rw [ht1, ht2]
-  field_simp
-  ring
+  field
 
 /-- `R > 0` for `a > 0` (`eq:trig-lower`/`inverse-trig` at `a+1`). -/
 theorem Rval_pos_of_pos (ha : 0 < a) : 0 < Rval a := by
@@ -135,14 +137,22 @@ theorem Dcoeff_two_pos (ha : 0 < a) : 0 < Dcoeff a 2 := by
   rw [Dcoeff_two_eq ha.ne' ha1.ne' (by linarith : (0 : ℝ) < 2 * a + 1).ne' hg.ne' ht1 ht2]
   exact div_pos (Qstar2_pos_of_pos ha) (mul_pos (mul_pos (pow_pos ha 6) (pow_pos ha1 3)) hg)
 
-/-- `MD(N_1,N_m) ≥ 0` for `m ≥ 2` and any `a > 0` (eq:M1-Mm-positive).  For
-`a ≥ 1/2` both matrices are `⪰ 0`; for `0 < a < 1/2`, `β_1 < 0 < β_m` makes every
+/-- `N_1 ≠ 0` for `a ≥ 1/2`, from the strictly positive `(1,1)` entry. -/
+theorem Nmat_one_ne_zero (ha : 1 / 2 ≤ a) : Nmat a 1 ≠ 0 := by
+  intro h
+  have hp := (Nmat_pd_one ha).1
+  rw [h] at hp
+  simp at hp
+
+/-- `MD(N_1,N_m) > 0` for `m ≥ 2` and any `a > 0` (eq:M1-Mm-positive).  For
+`a ≥ 1/2` both matrices are `≻ 0`; for `0 < a < 1/2`, `β_1 < 0 < β_m` makes every
 term of `MD` positive. -/
-theorem MD_N1_Nm_nonneg (ha : 0 < a) {m : ℕ} (hm : 2 ≤ m) :
-    0 ≤ SymMat.MD (Nmat a 1) (Nmat a m) := by
+theorem MD_N1_Nm_pos (ha : 0 < a) {m : ℕ} (hm : 2 ≤ m) :
+    0 < SymMat.MD (Nmat a 1) (Nmat a m) := by
   by_cases h : 1 / 2 ≤ a
-  · exact SymMat.MD_nonneg (Nmat_pd_one h).psd (Nmat_pd_two ha hm).psd
-  · push_neg at h
+  · exact SymMat.MD_pos_of_psd_pd (Nmat_pd_one h).psd (Nmat_one_ne_zero h)
+      (Nmat_pd_two ha hm)
+  · push Not at h
     -- `0 < a < 1/2`: `β_1 < 0`, `β_m > 0`, positive diagonals.
     have hg : 0 < trigamma a := trigamma_pos ha
     have hβ1 : βcoef a 1 < 0 := by

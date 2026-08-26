@@ -1,30 +1,38 @@
 #!/usr/bin/env python3
-r"""Paper section 4 (Weighted principal-pair dominance).
+r"""Paper section `sec:dominance` (Principal-pair dominance and the fixed-numerator theorem),
+section `subsec:weighted-dominance`.
 
 All numerics use mpmath at arbitrary precision (no floating-point arithmetic in
 the verification loops).  Denominator roots come from mpmath.polyroots.
 
-  * eq. (4.8): at a denominator root t_j one has z = -Q(t_j)/t_j^r, so
+  * `eq:Dprime-identity`: at a denominator root t_j one has z = -Q(t_j)/t_j^r, so
         Q'(t_j) + r z t_j^{r-1} = Q'(t_j) - r Q(t_j)/t_j.
   * The endpoint O(1) prefactor.  Each normalized nonprincipal residue is the
     principal amplitude times |zeta_j|^{-(M+1)} times the bounded ratio
         [B(t_j)/B(t_+)] * [D'(t_+)/D'(t_j)].
     Lower endpoint (repeated smallest zero x1, mult rho): B(t_j) has common order
-    theta^nu, eq. (4.7), and D'(t_j) common order theta^{rho-1}, eq. (4.5)-(4.8),
-    so both ratios are bounded.  Upper endpoint (r > 1, tau -> 0):
+    theta^nu and D'(t_j) common order theta^{rho-1}, from the cluster expansion
+    `eq:lower-cluster-expansion` through the derivative identity
+    `eq:Dprime-identity`, so both ratios are bounded.  Upper endpoint (r > 1, tau -> 0):
     D'(t_j) = -r Q(0)/(tau zeta_j)(1+o(1)), so tau^{-1} cancels and only the bounded
     zeta_+/zeta_j survives; B(0) != 0 keeps the numerator ratios bounded.
-  * Theorem 4.1, eq. (4.2): |R_M(theta)| <= (1/2)|W(theta)| on the retained range
+  * `thm:weighted-dominance`, `eq:dominance-bound`: |R_M(theta)| <= (1/2)|W(theta)| on the retained range
     [h/M, pi/r - h/M] (checked for genuine lower- and upper-endpoint clusters, with
     B chosen with no zero on the branch so |W| is bounded below).
-  * The role of the h/M truncation (eq. (4.3)): the nonprincipal contribution is
+  * The role of the h/M truncation (`eq:retained-range`): the nonprincipal contribution is
     exactly geometric in M with rate proportional to theta, so |R_M|/|W| ~ e^{-c_0 M theta};
     truncating at theta >= h/M converts the linear modulus gap into fixed e^{-c_0 h} control.
-  * Theorem 4.1 proof, upper endpoint with deg Q > r (r > 1): the deg Q - r outer roots
+  * `thm:weighted-dominance` proof, upper endpoint with deg Q > r (r > 1): the deg Q - r outer roots
     escape to infinity; on a fixed contour |t| = R0 the r small-cluster roots lie inside and
     the outer roots outside, and the grouped outer contribution obeys
     |tau^{M+1} C_out| <= (tau/R0)^{M+r} |W|.
-  * Theorem 4.1 proof, lower endpoint with deg Q < r: at a repeated smallest zero x1
+  * `eq:interior-remainder`: on the compact interior |R_M(theta)| <= C_I sigma_I^M.  The
+    rate is measured per theta and its maximum taken, so the uniform sigma is asserted
+    rather than assumed; and the display itself is asserted with both constants exhibited,
+    against R_M taken twice -- once from the rescaled coefficient recurrence of
+    `eq:principal-decomposition`, which never sees a root, and once from the nonprincipal
+    residues, which is what the bound is proved from.
+  * `thm:weighted-dominance` proof, lower endpoint with deg Q < r: at a repeated smallest zero x1
     (mult rho >= 2) the lower endpoint value is a = g(x1) = -Q(x1)/x1^r = 0, so z(theta) -> 0
     and r - deg Q roots escape to infinity as theta -> 0.  On a fixed contour |t| = R0
     (exceeding every zero of Q) the deg Q finite roots lie inside and the escaping roots
@@ -77,12 +85,12 @@ def nonprincipal_of(rts):
 
 
 def in_ft_interval(rts):
-    r"""Is z inside I_{Q,r}?  Theorem 3.1 puts the two MINIMUM-MODULUS zeros there in a
+    r"""Is z inside I_{Q,r}?  `thm:FT-geometry` puts the two MINIMUM-MODULUS zeros there in a
     conjugate pair t_pm = tau e^{+-i theta}; outside I_{Q,r} they need not be, and nothing
-    in section 4 is claimed.  This must be checked, not assumed: at r = 1 the interval is
+    in section `sec:dominance` is claimed.  This must be checked, not assumed: at r = 1 the interval is
     bounded, so a z-sweep that runs past b leaves the regime, and `principal` would then
     return some other nonreal root -- one not in the minimum-modulus pair -- making
-    |R_M|/|W| tend to 2 for reasons that have nothing to do with eq. (4.2).
+    |R_M|/|W| tend to 2 for reasons that have nothing to do with `eq:dominance-bound`.
     """
     o = sorted(rts, key=lambda w: abs(w))[:2]
     return (abs(mp.im(o[0])) > mp.mpf('1e-25')
@@ -103,7 +111,7 @@ def RM_over_W(Qc, Bc, r, zval, M):
 
 
 # ===========================================================================
-# eq. (4.8): derivative identity at a denominator root
+# `eq:Dprime-identity`: derivative identity at a denominator root
 # ===========================================================================
 Qc = qlow((1 - t)**3 * (1 - t / 4))
 for r in (2, 3):
@@ -132,7 +140,7 @@ def lower_prefactor(Qexpr, Bexpr, r, x1):
                 Brat.append(abs(pval(Bc, w)) / abs(Bpr))
                 Drat.append(abs((dval(Qc, w) + r * zval * w**(r - 1)) / Dpr))
     assert zetas, 'no nonprincipal cluster member (need a repeated smallest zero of mult >= 3)'
-    # eq. (4.6) claims |zeta_j| >= 1 + c0*theta -- a LINEAR rate.  Asserting only
+    # `eq:lower-cluster-gap` claims |zeta_j| >= 1 + c0*theta -- a LINEAR rate.  Asserting only
     # zj > 1 would pass for a gap collapsing like 1 + theta^2, so assert the rate too.
     assert all(zj > 1 for zj in zetas)                             # necessary, not sufficient
     rate_pairs = []
@@ -184,7 +192,7 @@ upper_prefactor(1 - t, 4)
 
 
 # ===========================================================================
-# Theorem 4.1, eq. (4.2): |R_M(theta)| <= (1/2)|W(theta)| on the retained range
+# `thm:weighted-dominance`, `eq:dominance-bound`: |R_M(theta)| <= (1/2)|W(theta)| on the retained range
 # ===========================================================================
 def retained_worst(Qexpr, Bexpr, r, M, h):
     Qc, Bc = qlow(Qexpr), qlow(Bexpr)
@@ -211,8 +219,8 @@ for (Qexpr, Bexpr, r, label) in [
     ((1 - t)**3 * (1 - t / 4), (1 - t) * (2 + t), 2, 'lower cluster rho=3, r=2'),
     ((1 - t)**3 * (1 - t / 4), (2 + t), 3, 'lower+upper clusters, r=3'),
     # r = 1 is a distinct case in the proof -- the upper endpoint is a FINITE collision at
-    # theta = pi rather than tau -> 0, and Lemma 3.3's parameter interval may include b --
-    # and it is the case Figure 1 illustrates.  No r = 1 config was exercised here before.
+    # theta = pi rather than tau -> 0, and the separating contour's parameter interval may include b --
+    # and it is the case `fig:decomposition-and-defect` illustrates.  No r = 1 config was exercised here before.
     ((1 - t) * (1 - t / 2) * (1 - t / 4), (1 - t) * (2 + t), 1, 'r=1, finite upper endpoint'),
     ((1 - t)**3 * (1 - t / 4), (2 + t), 1, 'r=1 with a repeated smallest zero (rho=3)'),
 ]:
@@ -221,10 +229,10 @@ for (Qexpr, Bexpr, r, label) in [
     # at r = 1 the interval is bounded, so the sweep must actually leave it; at r > 1 it is
     # (a, +inf) and every sampled z above a stays inside
     assert (skipped > 0) == (r == 1), (label, r, skipped)
-    assert worst < mp.mpf('0.5'), (label, worst)                   # eq. (4.2)
+    assert worst < mp.mpf('0.5'), (label, worst)                   # `eq:dominance-bound`
     # Where the bound is tightest is an observation about these configs, not a claim of
-    # Theorem 4.1.  At r > 1 the worst point sits against a truncated endpoint; at r = 1 the
-    # upper endpoint is a finite collision (k = 2 in eq. (3.11)) rather than tau -> 0, so |W|
+    # `thm:weighted-dominance`.  At r > 1 the worst point sits against a truncated endpoint; at r = 1 the
+    # upper endpoint is a finite collision (k = 2 in `eq:W-endpoint-form`) rather than tau -> 0, so |W|
     # does not blow up the same way and the worst point can be interior.  Assert the
     # endpoint-tightness only where it is actually the geometry, and report the location
     # either way.
@@ -257,8 +265,10 @@ print(f'PASS: |R_M|/|W| decays exactly geometrically in M, rate scales with thet
 
 
 # ===========================================================================
-# eq. (4.5): lower cluster t_j(theta) = x1 + c_j theta + O(theta^2), c_j != 0
-# eq. (4.7): B(t_j) = b_j theta^nu (1 + O(theta)), nu = ord_{x1} B
+# `eq:lower-cluster-expansion`: lower cluster t_j = x1 + alpha_j theta + O(theta^2),
+# alpha_j != 0; and B(t_j) = [B^(nu)(x1)/nu!] alpha_j^nu theta^nu (1 + O(theta)),
+# nu = ord_{x1} B -- an unnumbered display in the residue comparison since the
+# the proof carries it inline rather than as a numbered equation
 # ===========================================================================
 Qc, Bc, r, x1 = qlow((1 - t)**3 * (1 - t / 4)), qlow((1 - t) * (2 + t)), 2, mp.mpf(1)
 seq_c, seq_B = [], []
@@ -277,12 +287,12 @@ assert max(rem_c) < mp.mpf('50') * (abs(c_lim) + 1), rem_c        # remainder is
 slopeB = ((mp.log(seq_B[-1][1]) - mp.log(seq_B[-2][1]))
           / (mp.log(seq_B[-1][0]) - mp.log(seq_B[-2][0])))
 assert abs(slopeB - 1) < mp.mpf('0.02')                           # B zero at x1 has order nu = 1
-print(f'PASS: cluster t_j = x1 + c_j theta + O(theta^2), |c_j| -> {mp.nstr(seq_c[-1][1], 5)} != 0; '
+print(f'PASS: cluster t_j = x1 + alpha_j theta + O(theta^2), |alpha_j| -> {mp.nstr(seq_c[-1][1], 5)} != 0; '
       f'B(t_j) ~ theta^nu, nu = {mp.nstr(slopeB, 5)}')
 
 
 # ===========================================================================
-# Theorem 4.1, eq. (4.1)/(4.2) with a genuine amplitude zero: the deletion window
+# `thm:weighted-dominance`, `eq:amplitude-deletion` with a genuine amplitude zero: the deletion window
 # Theta_{j,M} = {|theta-theta_j| < e^{-cM/nu_j}} is needed and is exponentially short
 # ===========================================================================
 Qc, r, theta_j = qlow((1 - t) * (1 - t / 2) * (1 - t / 4)), 2, mp.mpf('0.8')
@@ -316,7 +326,7 @@ while zval < z_j * mp.mpf('2'):
     if abs(th - theta_j) > Jhalf and W > 0:
         worst = max(worst, R / W)
     zval *= mp.mpf('1.002')
-assert worst < mp.mpf('0.5')                                # eq. (4.2) holds outside Theta_{j,M}
+assert worst < mp.mpf('0.5')                                # `eq:dominance-bound` holds outside Theta_{j,M}
 # The paper's claim is asserted from measured quantities: the total deleted length
 # sum_{j=1..J} 2 e^{-cM/nu_j} over the ACTUAL amplitude zeros of W, times M, tends to 0 (so
 # the total is o(1/M)).  Building that length from literals -- the factor 2, the rate c and
@@ -355,7 +365,7 @@ def Wmag_at(th):
 # B above was constructed to vanish at -- an independent-route agreement, not an
 # assumption.
 # Search the INTERIOR only: |W| also tends to 0 at the upper endpoint (p = 1 there
-# by Lemma 3.6), so a global minimum over (0, pi/r) would find the endpoint, not the
+# by `lem:amplitude-divisor`), so a global minimum over (0, pi/r) would find the endpoint, not the
 # amplitude zero.  Stay a fixed margin away from both ends.
 margin = mp.mpf('0.20')
 lo_s, hi_s = margin, mp.pi / r - margin
@@ -408,8 +418,8 @@ print(f'PASS: amplitude zero at theta_j: |R_M| > (1/2)|W|=0 there (deletion need
 # ===========================================================================
 # The c < log(1/sigma) linkage, ON the configuration that HAS an amplitude zero.
 #
-# eq. (4.1) picks the deletion half-width e^{-cM/nu_j}; eq. (4.2) then needs
-# |W| >~ e^{-cM} at that edge to beat |R_M| = O(sigma^M) of eq. (4.4).  So the
+# `eq:amplitude-deletion` picks the deletion half-width e^{-cM/nu_j}; `eq:dominance-bound` then needs
+# |W| >~ e^{-cM} at that edge to beat |R_M| = O(sigma^M) of `eq:interior-remainder`.  So the
 # constraint is c < log(1/sigma) -- and it BITES: a c above the bound makes the
 # window too narrow, and dominance fails at its own edge.
 #
@@ -462,13 +472,13 @@ assert C_lk > 0, C_lk
 
 
 def edge_ratio(c_lk, MM):
-    r"""|R_M|/|W| at the edge of the window eq. (4.1) prescribes for this c."""
+    r"""|R_M|/|W| at the edge of the window `eq:amplitude-deletion` prescribes for this c."""
     return (K_lk / C_lk) * mp.e**(MM * (mp.log(sig_lk) + c_lk))
 
 
 M_lk = 2000
 c_ok, c_bad = c_bound_lk / 2, c_bound_lk * 2
-assert edge_ratio(c_ok, M_lk) < mp.mpf('0.5'), edge_ratio(c_ok, M_lk)    # c below: (4.2) holds
+assert edge_ratio(c_ok, M_lk) < mp.mpf('0.5'), edge_ratio(c_ok, M_lk)    # c below: `eq:dominance-bound` holds
 assert edge_ratio(c_bad, M_lk) > mp.mpf('0.5'), edge_ratio(c_bad, M_lk)  # c above: window too narrow
 # and the direction is monotone in M, not an artifact of one index
 assert edge_ratio(c_ok, 2 * M_lk) < edge_ratio(c_ok, M_lk)
@@ -482,12 +492,12 @@ print(f'PASS: c < log(1/sigma) linkage on the amplitude-zero config: measured '
 
 
 # ===========================================================================
-# Theorem 4.1 proof, upper endpoint with deg Q > r (r > 1): the deg Q - r roots
+# `thm:weighted-dominance` proof, upper endpoint with deg Q > r (r > 1): the deg Q - r roots
 # outside the finite normalized cluster escape to infinity as z(theta) -> +inf.
 # On a fixed contour |t| = R0 the r small-cluster roots lie inside and every
 # escaping root outside; the grouped outer contribution C_out satisfies, after
 # tau^{M+1} scaling, |tau^{M+1} C_out| <= (tau/R0)^{M+r} |W|, uniformly negligible.
-# (The eq. (4.2) sweep above already reaches this regime -- its second config has
+# (The `eq:dominance-bound` sweep above already reaches this regime -- its second config has
 # deg Q = 4 > r = 3 -- but only through the aggregate |R_M|/|W|, never through the
 # grouped outer contribution on its own contour, which is what this block isolates.)
 # ===========================================================================
@@ -514,7 +524,7 @@ for M in (60, 120):
           f'tau^(M+1) C_out <= (tau/R0)^(M+r) |W| (worst {mp.nstr(worst, 4)})')
 
 # ===========================================================================
-# Theorem 4.1 proof, lower endpoint with deg Q < r: at a repeated smallest zero
+# `thm:weighted-dominance` proof, lower endpoint with deg Q < r: at a repeated smallest zero
 # x1 (mult rho >= 2) the lower endpoint value a = g(x1) = -Q(x1)/x1^r = 0, so
 # z(theta) -> 0 and r - deg Q roots escape to infinity as theta -> 0.  On a
 # fixed contour |t| = R0 (exceeding every zero of Q) the deg Q finite roots lie
@@ -551,7 +561,7 @@ for M in (60, 120):
 
 
 # ===========================================================================
-# eq. (4.4): R_M(theta) = O(sigma^M) on the compact interior, UNIFORMLY in theta,
+# `eq:interior-remainder`: R_M(theta) = O(sigma^M) on the compact interior, UNIFORMLY in theta,
 # and the linkage c < log(1/sigma) that fixes the deletion-window constant
 # ===========================================================================
 # sigma is computed per theta and its maximum taken, so the "uniform sigma" underpinning
@@ -581,14 +591,14 @@ for i in range(1, 10):
 assert len(sigmas) >= 6, sigmas
 sig_max = max(v for _, v in sigmas)
 assert sig_max < 1, sig_max                                        # UNIFORM sigma < 1
-# eq. (4.4) with the uniform rate: |R_M/W| <= K sigma_max^M for a fixed K
+# `eq:interior-remainder` with the uniform rate: |R_M/W| <= K sigma_max^M for a fixed K
 K_ir = max(RM_over_W(Qc_ir, Bc_ir, r_ir, z_of_theta(th, Qc_ir, r_ir), 60)[0] / sig_max**60
            for th, _ in sigmas)
 for MM in (60, 90, 120):
     for th, _ in sigmas:
         zz = z_of_theta(th, Qc_ir, r_ir)
         assert RM_over_W(Qc_ir, Bc_ir, r_ir, zz, MM)[0] <= K_ir * sig_max**MM * mp.mpf('1.5'), (th, MM)
-print(f'PASS: eq. (4.4) R_M = O(sigma^M) uniformly on [{mp.nstr(th_lo,3)},'
+print(f'PASS: `eq:interior-remainder` R_M = O(sigma^M) uniformly on [{mp.nstr(th_lo,3)},'
       f'{mp.nstr(th_hi,3)}]: sigma(theta) in '
       f'[{mp.nstr(min(v for _,v in sigmas),4)},{mp.nstr(sig_max,4)}], uniform bound '
       f'K sigma_max^M with K = {mp.nstr(K_ir,4)}')
@@ -598,6 +608,122 @@ print(f'PASS: eq. (4.4) R_M = O(sigma^M) uniformly on [{mp.nstr(th_lo,3)},'
 assert mp.mpf('0.15') < mp.log(1 / sig_max), (sig_max, mp.log(1 / sig_max))
 print(f'PASS: the c = 0.15 used above is below log(1/sigma_max) = '
       f'{mp.nstr(mp.log(1 / sig_max), 5)} on this compact interior too')
+
+
+# ===========================================================================
+# `eq:interior-remainder` as the paper displays it: |R_M(theta)| <= C_I sigma_I^M
+# on [epsilon, pi/r - epsilon], with both constants exhibited and R_M taken twice
+# ===========================================================================
+# The sweep above measures the ratio |R_M|/|W| and reads sigma off two indices.
+# The display itself is asserted here, on the same compact interiors, with one
+# (C_I, sigma_I) fixed across every angle and every M -- and with R_M computed by
+# two independent routes, since the bound is only about R_M if R_M is what the
+# paper says it is.  Route 1 is `eq:principal-decomposition` read as the
+# definition: the rescaled coefficient recurrence for tau^{M+1} F_M, minus the
+# principal pair, with no root-finding anywhere in it.  Route 2 is the
+# nonprincipal residues of `eq:contour-separated-expansion`, each amplitude from
+# `eq:residue-amplitude`; with deg B < deg D the contour may be pushed past every
+# root, so those residues are the whole coefficient and no contour error remains.
+# The constants then follow from the residues alone:
+#     sigma_I = max_theta max_j tau/|t_j|,   C_I = max_theta sum_j |W_j| tau/|t_j|
+# over the nonprincipal roots, both computed on the sampled interior rather than
+# fitted to a pair of indices.  A pair of constants can always be made true by
+# inflating them, so the last assertion is that this pair is attained: somewhere
+# on the interior the bound is within a small factor of |R_M| itself.
+def normalized_coeff(Qlow, Blow, rr, zval, tau, M):
+    r"""tau^{M+1} F_M(z), F_M = [t^M] B/(Q + z t^r), from the rescaled recurrence.
+
+    Rescaling by tau keeps every intermediate O(1) instead of growing like
+    tau^{-m}, and the whole computation is a linear recurrence in the
+    coefficients of Q, z and B -- it never sees a denominator root.
+    """
+    d = max(len(Qlow) - 1, rr)
+    D = [mp.mpf(0)] * (d + 1)
+    for i, co in enumerate(Qlow):
+        D[i] += mp.mpf(co)
+    D[rr] += zval
+    while len(D) > 1 and D[-1] == 0:
+        D.pop()
+    fhat = []
+    for m in range(M + 1):
+        acc = (tau**m * mp.mpf(Blow[m])) if m < len(Blow) else mp.mpf(0)
+        for k in range(1, min(m, len(D) - 1) + 1):
+            acc -= D[k] * tau**k * fhat[m - k]
+        fhat.append(acc / D[0])
+    return tau * fhat[M]
+
+
+_dps_ir = mp.mp.dps
+mp.mp.dps = 90                    # R_M is exponentially small against an O(1)
+                                  # coefficient, so route 1 is a cancellation
+M_IDENT, M_BOUND = (10, 20, 30), (30, 60, 120)
+# Both configurations are the ones built above -- the compact-interior sweep's own
+# (Q, B, r) and the upper-endpoint block's -- taken by reference, so a change to
+# either is a change here too rather than a second copy that drifts.
+for _name, _Qc, _Bc, _rr, _eps in (
+        ('Q = (1-t)^3(1-t/4), B = (1-t)(2+t), r = 2', Qc_ir, Bc_ir, r_ir, eps_ir),
+        ('Q = (1-t)(1-t/2)(1-t/4), B = 1+t^2, r = 2', Qc_out, Bc_out, 2, eps_ir)):
+    assert len(_Bc) - 1 < max(len(_Qc) - 1, _rr), \
+        'deg B < deg D is what makes the residue sum the whole coefficient'
+    _thlo, _thhi = _eps, mp.pi / _rr - _eps
+    _rows, _worst_rel = [], mp.mpf(0)
+    for _i in range(1, 10):
+        _th = _thlo + (_thhi - _thlo) * mp.mpf(_i) / 10
+        _z = z_of_theta(_th, _Qc, _rr)
+        assert _z is not None, (_name, _th)
+        _rts = d_roots(_Qc, _rr, _z)
+        assert in_ft_interval(_rts), (_name, _th)
+        _pair = sorted(_rts, key=lambda w: abs(w))[:2]
+        # the principal root is the one in the UPPER half-plane: R_M is a phase
+        # statement, and its conjugate would carry the opposite phase
+        _pr = max(_pair, key=mp.im)
+        _tau, _tha = abs(_pr), mp.arg(_pr)
+        assert _thlo <= _tha <= _thhi, (_name, _tha)
+        _nonp = [w for w in _rts if all(abs(w - q) > mp.mpf('1e-18') for q in _pair)]
+        assert _nonp, (_name, 'no nonprincipal root: R_M would vanish identically')
+
+        def _Dp(w, _Qc=_Qc, _rr=_rr, _z=_z):
+            return dval(_Qc, w) + _rr * _z * w**(_rr - 1)
+
+        _W = -pval(_Bc, _pr) / _Dp(_pr)                      # `eq:residue-amplitude`
+        _sig = max(_tau / abs(w) for w in _nonp)
+        _CI = sum(abs(-pval(_Bc, w) / _Dp(w)) * _tau / abs(w) for w in _nonp)
+        _rows.append((_tha, _tau, _z, _nonp, _W, _sig, _CI))
+        for _M in M_IDENT:
+            _Rres = _tau**(_M + 1) * sum(-pval(_Bc, w) / (w**(_M + 1) * _Dp(w))
+                                         for w in _nonp)
+            _Rrec = (normalized_coeff(_Qc, _Bc, _rr, _z, _tau, _M)
+                     - 2 * mp.re(_W * mp.expj(-(_M + 1) * _tha)))
+            assert abs(_Rres) > mp.mpf(10)**(-mp.mp.dps + 20), \
+                (_name, _th, _M, 'R_M is at the precision floor: nothing is compared')
+            _rel = abs(_Rrec / _Rres - 1)
+            assert _rel < mp.mpf('1e-28'), (_name, _th, _M, mp.nstr(_rel, 6))
+            _worst_rel = max(_worst_rel, _rel)
+    assert len(_rows) == 9, _rows
+    print(f'PASS: `eq:interior-remainder`, {_name}: R_M from the coefficient '
+          f'recurrence equals the nonprincipal residues at {len(_rows)} interior '
+          f'angles x {len(M_IDENT)} indices (worst relative {mp.nstr(_worst_rel, 4)})')
+
+    sigma_I = max(x[5] for x in _rows)
+    C_I = max(x[6] for x in _rows)
+    assert sigma_I < 1, sigma_I
+    assert C_I < mp.inf and C_I > 0, C_I
+    tight = mp.inf
+    for _M in M_BOUND:
+        for _tha, _tau, _z, _nonp, _W, _sig, _ci in _rows:
+            def _Dp(w, _Qc=_Qc, _rr=_rr, _z=_z):
+                return dval(_Qc, w) + _rr * _z * w**(_rr - 1)
+            _R = abs(_tau**(_M + 1) * sum(-pval(_Bc, w) / (w**(_M + 1) * _Dp(w))
+                                          for w in _nonp))
+            assert _R <= C_I * sigma_I**_M, (_name, _M, mp.nstr(_tha, 6))
+            tight = min(tight, C_I * sigma_I**_M / _R)
+    assert tight < 10, tight          # the pair is attained, not merely true
+    print(f'PASS: `eq:interior-remainder` |R_M(theta)| <= C_I sigma_I^M on '
+          f'[{mp.nstr(_thlo, 3)},{mp.nstr(_thhi, 3)}] for M = '
+          f'{", ".join(str(M) for M in M_BOUND)}, with C_I = {mp.nstr(C_I, 5)} and '
+          f'sigma_I = {mp.nstr(sigma_I, 5)} -- attained to within a factor '
+          f'{mp.nstr(tight, 4)}')
+mp.mp.dps = _dps_ir
 
 
 print('ALL PASS: verify_dominance')

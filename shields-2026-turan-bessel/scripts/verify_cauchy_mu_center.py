@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Paper section 7 (Bessel consequences and sharpness), Lemma 7.1
-(lem:large-argument-limit): the Cauchy estimate in the order variable, evaluated at
-the centre mu = nu.
+"""Paper section `subsec:large-argument-deformation-wall` (Large argument and the deformation wall), sec:phase,
+lem:large-argument-limit:
+the Cauchy estimate in the order variable, evaluated at the center mu = nu.
 
 A circle of fixed positive radius in the order variable cannot be chosen uniformly
 for every mu in the interior of the closed disc K, since dist(mu, boundary K) -> 0
-near the boundary.  The Lemma 7.1 proof does not need that: the estimate is required
-at mu = nu, the centre of K, and only there, because G_nu = -d^2/dnu^2 log I_nu and
+near the boundary.  The lem:large-argument-limit proof does not need that: the estimate is required
+at mu = nu, the center of K, and only there, because G_nu = -d^2/dnu^2 log I_nu and
 P_nu = d/dnu (Theta_z log I_nu) are evaluated at the prescribed order.  This script
 checks
 
@@ -30,8 +30,8 @@ checks
                             > lambda / (a^4 Gamma(a)^4)
       holds for a > 0 (equivalently a psi_1(a) - 1 > 1/(2a));
 
-  (5) the fixed-a first-negative-degree argument of Remark 7.3
-      (rem:first-negative-degree), in the form the monotonicity identity
+  (5) the fixed-a first-negative-degree argument of thm:critical-scaling, in the form
+      the monotonicity identity
       Delta^(kappa) = Delta^(1) + (kappa-1) g A Z Z_Theta supplies: with
       c_n = [lambda^n] g A Z Z_Theta > 0 and Delta_n^(1) > 0, degree n stays
       positive exactly while 1 - kappa < Delta_n^(1)/c_n, so the admissible window
@@ -44,7 +44,7 @@ from mpmath import mp, mpf, mpc, besseli, log, exp, pi, sqrt, psi, gamma, cos, s
 
 mp.dps = 40
 
-NU = mpf("0.7")          # prescribed order; centre of K
+NU = mpf("0.7")          # prescribed order; center of K
 RAD_K = mpf(1)           # radius of K
 R_CIRC = RAD_K / 2       # Cauchy circle radius, fixed and inside K
 KAPPA = mpf("0.6")       # a kappa < 1, where the limit 2(kappa-1) < 0
@@ -94,7 +94,7 @@ def bessel_quantities(z, kappa):
     return G, P, H, D
 
 
-print("== (1)+(2) Cauchy estimate at the centre mu = nu =", NU)
+print("== (1)+(2) Cauchy estimate at the center mu = nu =", NU)
 print("   K = disc(nu, %s), Cauchy circle radius %s\n" % (RAD_K, R_CIRC))
 print("%8s %3s %22s %22s %14s" % ("w", "j", "d^j R (Cauchy)", "d^j R (direct)", "w^2 |d^j R|"))
 scaled = {0: [], 1: [], 2: []}
@@ -136,7 +136,7 @@ assert D < 0, "D^(kappa) limit must be negative for kappa < 1: %s" % D
 print("\n   D^(kappa) -> 2(kappa-1) = %s, negative for kappa < 1. OK\n"
       % mp.nstr(2 * (KAPPA - 1), 10))
 
-print("== (4) lower bound chain of the end of section 5\n")
+print("== (4) lower bound chain closing sec:endpoint\n")
 print("%10s %22s %22s" % ("a", "Delta_1(a)", "1/(a^4 Gamma(a)^4)"))
 for a in [mpf("0.01"), mpf("0.1"), mpf("0.5"), mpf(1), mpf(2), mpf(5), mpf(20)]:
     g = psi(1, a)

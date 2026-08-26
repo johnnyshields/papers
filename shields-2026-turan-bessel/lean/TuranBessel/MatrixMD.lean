@@ -1,9 +1,17 @@
 /-
+Copyright (c) 2026 Johnny Shields. All rights reserved.
+Released under the MIT license as described in the file LICENSE.txt.
+Authors: Johnny Shields
+-/
+import Mathlib.Tactic
+
+/-!
 # Real symmetric 2×2 matrices and the mixed determinant
 
 Formalizes the elementary matrix algebra behind
-`shields-2026-turan-bessel.tex`, §5 «Mixed determinants and coefficientwise
-positivity» (`sec:determinant`), `lem:MD-positive`:
+`shields-2026-turan-bessel.tex`, «Four-copy determinant sectors»
+(`subsec:four-copy`, `lem:MD-positive`).  The polarization itself opens «Finite-defect
+localization» (`subsec:finite-defect`):
 
 * `SymMat`               — a real symmetric `2×2` matrix `⟨a11, a12, a22⟩`.
 * `SymMat.MD`            — the mixed determinant `x₁₁y₂₂ + x₂₂y₁₁ - 2x₁₂y₁₂`,
@@ -15,7 +23,6 @@ positivity» (`sec:determinant`), `lem:MD-positive`:
 
 Everything here is sorry-free (pure `ring`/`nlinarith`).
 -/
-import Mathlib.Tactic
 
 namespace TuranBessel
 

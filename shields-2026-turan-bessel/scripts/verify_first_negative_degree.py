@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-"""Paper section 7 (Bessel consequences and sharpness), Remark 7.3
-(rem:first-negative-degree): first-negative-degree behaviour of Delta_n^{(kappa)}(a)
-for kappa < 1.
+"""Paper section `sec:scaling` (Critical wall fan and equivalence of ensembles), sec:scaling,
+where thm:critical-scaling of section `sec:main` is proved; eq. (first-negative-asymptotic):
+first-negative-degree behavior of Delta_n^{(kappa)}(a) for kappa < 1.
 
-Remark 7.3 fixes a > 0 and asserts that "no bounded set of degrees detects every
-kappa < 1, since the degree of the first negative coefficient tends to infinity as
-kappa -> 1".  The two quantifiers are separated here:
+The theorem fixes a > 0 and gives N_a(kappa) ~ c(a)/(1-kappa) as kappa -> 1, so in
+particular no bounded set of degrees detects every kappa < 1.  The rate itself is
+checked in verify_critical_scaling.py; what is separated here are the two
+quantifiers behind the qualitative statement:
 
-  (Q1) fixed a, kappa -> 1   : n_min(a,kappa) -> infinity      [what Remark 7.3 claims]
+  (Q1) fixed a, kappa -> 1   : n_min(a,kappa) -> infinity      [what the theorem gives]
   (Q2) fixed kappa < 1, all a: is n_min(.,kappa) unbounded in a? [not claimed by the
        paper; recorded as context for why the remark fixes a first]
 
@@ -173,9 +174,80 @@ def n_min(a, kappa, nmax=60):
 
 
 print()
+print("=== lem:Delta-n-noneq2, the necessity part of thm:two-parameter-coeff, cor:eventual-negative-tail ===")
+NCAP = 60
+AGRID = [mp.mpf("0.05"), mp.mpf("0.3"), mp.mpf("0.5"), mp.mpf(1), mp.mpf(4), mp.mpf(30)]
+
+
+def delta_and_q(a, N):
+    """Delta_n and q_n = [lambda^n] Q for n <= N, from the thm:coefficients entries.
+
+    Delta_n^(kappa) = Delta_n + (kappa-1) q_n, because c_m^(kappa) = c_m + (kappa-1)m/2
+    for every m >= 0; that is eq. (affine-two-param) on the tau = 1 slice, and it is
+    cross-checked against delta_paper below rather than assumed.
+    """
+    g = mp.polygamma(1, a)
+    Ss = [S(a, k) for k in range(N + 1)]
+    al = [alpha(a, k) for k in range(N + 1)]
+    be = [beta(a, k) for k in range(N + 1)]
+    ga = [gamma_(a, k, mp.mpf(1)) for k in range(N + 1)]
+    d, q = [mp.mpf(0)]*(N + 1), [mp.mpf(0)]*(N + 1)
+    for n in range(N + 1):
+        d[n] = mp.fsum(Ss[k]*Ss[n-k]*(al[k]*ga[n-k] - g*be[k]*be[n-k])
+                       for k in range(n + 1))
+        q[n] = g/2*mp.fsum(Ss[k]*Ss[n-k]*al[k]*(n - k) for k in range(n + 1))
+    return d, q
+
+
+COEFF = {}
+for a in AGRID:
+    COEFF[a] = delta_and_q(a, NCAP)
+    d, q = COEFF[a]
+    for n, kappa in [(1, mp.mpf("0.5")), (7, mp.mpf("0.8")), (NCAP, mp.mpf("0.95"))]:
+        fast = d[n] + (kappa - 1)*q[n]
+        slow = delta_paper(a, n, kappa)
+        assert abs(fast - slow) <= mp.mpf("1e-40")*max(abs(slow), mp.mpf(1)), (float(a), n)
+
+# lem:Delta-n-noneq2: at the endpoint kappa = 1 every coefficient of degree n != 2 is
+# strictly positive.  (Degree two is the exceptional case, closed separately by
+# lem:Delta2-positive; it is checked here too, but named on its own line.)
+for a in AGRID:
+    d, _ = COEFF[a]
+    for n in range(1, NCAP + 1):
+        assert d[n] > 0, (float(a), n, d[n])
+print(f"  OK  Delta_n(a) > 0 for 1 <= n <= {NCAP} on the a-grid, lem:Delta-n-noneq2")
+print("      (n = 2 included; that degree is lem:Delta2-positive's, proved separately)")
+
+# Neither corollary carries an effective n, so the cap has to be chosen where the
+# transition is reachable: eq. (first-negative-asymptotic) puts it near c(a)/(1-kappa),
+# and a kappa too close to 1 pushes it past any finite cap -- at a = 0.05, kappa = 0.95
+# it already sits above n = 60.  Only kappa with 3 c(a)/(1-kappa) <= NCAP is tested.
+# The sign pattern is also not monotone -- at a = 0.05, kappa = 1/2 degree 2 is negative
+# and degree 3 positive again -- so the eventual claim is read at the top of the ladder,
+# not from the first negative degree onward.
+tested = 0
+for a in AGRID:
+    d, q = COEFF[a]
+    c_a = 4/mp.polygamma(1, a) - 4*a + mp.mpf(7)/2
+    kappas = [k for k in [mp.mpf("0.5"), mp.mpf("0.8"), mp.mpf("0.95")]
+              if 3*c_a/(1 - k) <= NCAP]
+    assert kappas, (float(a), float(c_a))
+    for kappa in kappas:
+        signs = [d[n] + (kappa - 1)*q[n] < 0 for n in range(1, NCAP + 1)]
+        assert any(signs), (float(a), float(kappa), "no negative degree under the cap")
+        nonneg = [n for n in range(1, NCAP + 1) if not signs[n-1]]
+        last_nonneg = max(nonneg) if nonneg else 0     # 0 = negative from degree one on
+        assert last_nonneg <= NCAP - 10, (float(a), float(kappa), last_nonneg)
+        tested += 1
+print(f"  OK  on {tested} (a,kappa) pairs whose predicted transition c(a)/(1-kappa) sits")
+print(f"      under the cap, a negative degree appears (the necessity part of thm:two-parameter-coeff) and the")
+print(f"      last nonnegative degree is at most {NCAP - 10}, so the top of the ladder is")
+print("      all negative (cor:eventual-negative-tail)")
+
+print()
 print("=== (Q1) fixed a, kappa -> 1: n_min grows without bound ===")
-# This is exactly the claim rem:first-negative-degree makes ("Fix a>0; then ... the
-# degree of the first negative coefficient tends to infinity as kappa -> 1"), so it
+# This is the qualitative content of eq. (first-negative-asymptotic): with a fixed,
+# the degree of the first negative coefficient tends to infinity as kappa -> 1.  It
 # is asserted, not merely printed: n_min must be nondecreasing along the kappa
 # ladder, and must eventually exceed the cap.
 for a in [mp.mpf("0.3"), mp.mpf(1), mp.mpf(5)]:

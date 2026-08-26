@@ -1,25 +1,26 @@
 #!/usr/bin/env python3
-r"""Paper section 4 (Gram structure and the exceptional matrix M_1), sec:gram.
+r"""Paper section `subsec:gram` (Gram structure and the exceptional matrix M_1), subsec:gram.
 
-Result numbers are paired with the paper's labels, which survive renumbering:
-Lemma 4.1 = lem:trigamma-bounds, Theorem 4.2 = thm:gram.  The paper writes
+The paper writes
 q = a + m/2 - 1 for the vector v scale; the code variable is named q to match.
 
 Two exact symbolic certificates (sympy):
-  * telescoping cross term  q/(x-1) = beta_m,  eq. (4.6);
-  * the sharp Gram-slack simplification in the Theorem 4.2 proof:
+  * telescoping cross term  q/(x-1) = beta_m,  eq. (uv-cross);
+  * the sharp Gram-slack simplification in the thm:gram proof:
         a - 1/2 + m(m-1)/(2(2a+2m-3)) - (a+m/2-1)^2/(a+m-3/2)
             = (m-1)/(2(2a+2m-3)) > 0   (m >= 2);
-  * M_0 is the rank-one matrix [[g,sqrt g],[sqrt g,1]] (the display after Theorem 4.2).
+  * M_0 is the rank-one matrix [[g,sqrt g],[sqrt g,1]] (the display after thm:gram).
 
 High-precision numerics (mpmath):
   * the trigamma integrand bound 1+t/2 < t/(1-e^{-t}) < e^{t/2} and the three bounds of
-    Lemma 4.1: psi_1(y) > 1/y + 1/(2y^2), eq. (4.2); psi_1(y) < 1/(y-1/2), eq. (4.3);
-    1/psi_1(a) > a-1/2, eq. (4.4);
-  * the norms ||u^{(m)}||^2 = psi_1(x) = alpha_m, eq. (4.5), <u,v> = q/(x-1) = beta_m, eq. (4.6),
-    ||v^{(m)}||^2 = q^2 psi_1(x-1), eq. (4.7), each summed as an independent l^2 series;
-  * rho_m(a) = 1/g + c_m - q^2 psi_1(x-1) > 0, eq. (4.8), for (m>=2, a>0) and (m=1, a>=1/2), and
-    Theorem 4.2's Gram identity N_m = Gram(xi_m, eta_m), eq. (4.9), with xi_m=(u,0), eta_m=(v, sqrt(rho_m)).
+    lem:trigamma-bounds: psi_1(y) > 1/y + 1/(2y^2), eq. (trig-lower);
+    psi_1(y) < 1/(y-1/2), eq. (trig-upper-half);
+    1/psi_1(a) > a-1/2, eq. (inverse-trig);
+  * the norms ||u^{(m)}||^2 = psi_1(x) = alpha_m, eq. (u-norm), <u,v> = q/(x-1) = beta_m, eq. (uv-cross),
+    ||v^{(m)}||^2 = q^2 psi_1(x-1), eq. (v-norm), each summed as an independent l^2 series;
+  * rho_m(a) = 1/g + c_m - q^2 psi_1(x-1) > 0, eq. (rho-m), for (m>=2, a>0) and (m=1, a>=1/2), and
+    thm:gram's Gram identity N_m = Gram(xi_m, eta_m), eq. (Nm-gram), with xi_m=(u,0)
+    and eta_m=(v, sqrt(rho_m)).
 """
 from __future__ import annotations
 import sympy as sp
@@ -60,18 +61,18 @@ mp.mp.dps = 40
 for tt in [mp.mpf(s) for s in ('0.01', '0.2', '1', '3', '12')]:
     kernel = tt/(1 - mp.e**(-tt))
     assert 1 + tt/2 < kernel < mp.e**(tt/2)
-# eq. (4.1): the integral representation itself, against the defining series
+# eq. (trigamma-integral): the integral representation itself, against the defining series
 for yy in [mp.mpf(s) for s in ('0.05', '0.3', '1', '4', '25')]:
     quad = mp.quad(lambda tau: mp.e**(-yy*tau)*tau/(1 - mp.e**(-tau)), [0, mp.inf])
     assert abs(quad - mp.polygamma(1, yy)) < mp.mpf('1e-25')*max(1, abs(quad)), yy
-print('PASS: psi_1(y) = int_0^inf e^{-y tau} tau/(1-e^{-tau}) dtau, eq. (4.1)')
+print('PASS: psi_1(y) = int_0^inf e^{-y tau} tau/(1-e^{-tau}) dtau, eq. (trigamma-integral)')
 for yy in [mp.mpf(s) for s in ('0.05', '0.3', '0.7', '1', '4', '25')]:
     tri = mp.polygamma(1, yy)
-    assert tri > 1/yy + 1/(2*yy**2)                       # eq. (4.2)
+    assert tri > 1/yy + 1/(2*yy**2)                       # eq. (trig-lower)
     if yy > mp.mpf('0.5'):
-        assert tri < 1/(yy - mp.mpf('0.5'))               # eq. (4.3)
-    assert 1/mp.polygamma(1, yy) > yy - mp.mpf('0.5')     # eq. (4.4)
-print('PASS: trigamma integrand bound and Lemma 4.1')
+        assert tri < 1/(yy - mp.mpf('0.5'))               # eq. (trig-upper-half)
+    assert 1/mp.polygamma(1, yy) > yy - mp.mpf('0.5')     # eq. (inverse-trig)
+print('PASS: trigamma integrand bound and lem:trigamma-bounds')
 
 # --- l^2 norms summed independently and matched to closed forms ------------
 def gram_norms(a0, mm):
@@ -98,26 +99,27 @@ for a0, mm in [(mp.mpf('0.3'), 2), (mp.mpf('0.3'), 5), (mp.mpf('1.7'), 3),
     rho = 1/g0 + cm0 - vnorm
     if mm >= 2 or (mm == 1 and a0 >= mp.mpf('0.5')):
         assert rho > 0, (a0, mm, rho)
-    # eq. (4.9): N_m = Gram(xi_m, eta_m), xi=(u,0), eta=(v, sqrt rho).
+    # eq. (Nm-gram): N_m = Gram(xi_m, eta_m), xi=(u,0), eta=(v, sqrt rho).
     G11, G12, G22 = unorm, cross, vnorm + rho
     N = mp.matrix([[alpha0, beta0], [beta0, 1/g0 + cm0]])
     err = max(abs(G11-N[0, 0]), abs(G12-N[0, 1]), abs(G22-N[1, 1]))
     assert err < mp.mpf('1e-30') and mp.det(N) > 0, (a0, mm, err)
 
-    # eq. (4.10): M_m = Gram(xi_m, sqrt(g) eta_m), the unnormalized statement.
+    # eq. (Mm-gram): M_m = Gram(xi_m, sqrt(g) eta_m), the unnormalized statement.
     rg = mp.sqrt(g0)
     M11, M12, M22 = unorm, rg*cross, g0*(vnorm + rho)
     Mm = mp.matrix([[alpha0, rg*beta0], [rg*beta0, 1 + g0*cm0]])
     errM = max(abs(M11-Mm[0, 0]), abs(M12-Mm[0, 1]), abs(M22-Mm[1, 1]))
     # strictness: positive leading entry and positive determinant give M_m > 0,
-    # which is the linear-independence conclusion of the Theorem 4.2 proof.
+    # which is the linear-independence conclusion of the thm:gram proof.
     assert errM < mp.mpf('1e-28') and Mm[0, 0] > 0 and mp.det(Mm) > 0, (a0, mm, errM)
-print('PASS: ||u||^2, <u,v>, ||v||^2 match closed forms; N_m = Gram(xi,eta) eq. (4.9),'
-      ' M_m = Gram(xi,sqrt(g) eta) eq. (4.10), rho_m>0, both matrices positive definite')
+print('PASS: ||u||^2, <u,v>, ||v||^2 match closed forms; N_m = Gram(xi,eta) eq. (Nm-gram),'
+      ' M_m = Gram(xi,sqrt(g) eta) eq. (Mm-gram), rho_m>0, both matrices positive definite')
 
 # --- the m=1 hypothesis a >= 1/2 is load-bearing, not ornamental ------------
-# Theorem 4.2 restricts the m=1 Gram construction to a >= 1/2.  Below that the slack
-# rho_1(a) = 1/g - (a-1/2)^2 psi_1(a) really does go negative, so eta_1 does not exist
+# thm:gram supplies its hypothesis rho_m(s) > 0 at s = 1/g only for a >= 1/2 when
+# m = 1.  Below that the slack rho_1(1/g) = 1/g - (a-1/2)^2 psi_1(a) really does go
+# negative, so eta_1 does not exist
 # and the construction genuinely fails -- the hypothesis is not a convenience.
 for a0 in [mp.mpf(s) for s in ('0.05', '0.1', '0.2', '0.3')]:
     _, q0, _, _, vnorm = gram_norms(a0, 1)
@@ -127,7 +129,7 @@ for a0 in [mp.mpf(s) for s in ('0.5', '1', '2.2', '9')]:
     _, q0, _, _, vnorm = gram_norms(a0, 1)
     rho1 = 1/mp.polygamma(1, a0) - vnorm
     assert rho1 >= 0, (a0, rho1)
-print('PASS: rho_1(a) < 0 for small a and >= 0 for a >= 1/2, so Theorem 4.2\'s m=1'
+print('PASS: rho_1(a) < 0 for small a and >= 0 for a >= 1/2, so thm:gram\'s m=1'
       ' hypothesis a >= 1/2 is load-bearing')
 
 print('ALL PASS: verify_gram')

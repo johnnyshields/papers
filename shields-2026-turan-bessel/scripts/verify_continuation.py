@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""Paper section 8 (Continuation beyond the positive-series domain),
-Lemma 8.1 (lem:continuation), first assertion: the series (2.1) and all of its
+"""Paper section `sec:main` (Reciprocal-gamma formulation and positivity phase diagram), sec:main, lem:continuation,
+first assertion: the series eq. (Zdef) and all of its
 fixed-order parameter and Euler derivatives converge locally uniformly on C^2,
 so Z and those derivatives are entire in (a, lambda).
 
-Section 2 leans on this twice -- once after (2.1), and once to justify that the
+section `sec:main` leans on this twice -- once after eq. (Zdef), and once to justify that the
 Bessel-side order derivatives of log I_nu exist at all -- so it is checked here
 rather than left to the proof text.  The checks are
 
   (1) Z is finite at a = 0, -1, -2, -3, where the quotient 0F1(;a;lambda)/Gamma(a)
-      that (2.1) also names is not defined termwise: the summands with a + k a
+      that eq. (Zdef) also names is not defined termwise: the summands with a + k a
       nonpositive integer vanish because 1/Gamma does;
 
   (2) holomorphy in a by Cauchy's theorem: the contour integral of Z around a
@@ -80,9 +80,9 @@ def euler(F, x, l):
 
 
 def contour(f, centre, radius, order=0):
-    """(order! / 2 pi i) * oint f(w) / (w - centre)^{order+1} dw over |w-c|=radius.
+    """(order! / 2 pi i) * oint f(w) / (w - center)^{order+1} dw over |w-c|=radius.
 
-    order = 0 with f = Z reproduces Z(centre) when Z is holomorphic inside;
+    order = 0 with f = Z reproduces Z(center) when Z is holomorphic inside;
     the bare integral (see cauchy_theorem_integral) vanishes for entire f.
     """
     def integrand(th):
@@ -94,7 +94,7 @@ def contour(f, centre, radius, order=0):
 
 
 def cauchy_theorem_integral(f, centre, radius):
-    """oint f(w) dw over |w - centre| = radius; zero for f holomorphic inside."""
+    """oint f(w) dw over |w - center| = radius; zero for f holomorphic inside."""
     def integrand(th):
         w = centre + radius * exp(mpc(0, 1) * th)
         dw = mpc(0, 1) * radius * exp(mpc(0, 1) * th)
@@ -162,7 +162,7 @@ print('PASS: oint Z dlambda vanishes (%.3e at a = 3/5, %.3e at a = -1), so Z is'
 #     fixed-order parameter and Euler derivatives the paper uses
 # ---------------------------------------------------------------------------
 A_PTS = [mpf("0.6"), mpf("2.3"), mpf("-0.4"), mpf("-1.7")]
-R_SMALL = mpf("0.25")      # small circle, avoids the neighbouring 1/Gamma zeros
+R_SMALL = mpf("0.25")      # small circle, avoids the neighboring 1/Gamma zeros
 for a_v in A_PTS:
     for j in (1, 2):
         cauchy_j = contour(lambda w: Z(w, LAM0), a_v, R_SMALL, order=j)

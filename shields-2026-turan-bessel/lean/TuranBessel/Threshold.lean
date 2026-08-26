@@ -1,24 +1,39 @@
 /-
-# Sharpness of the threshold `κ = 1`
+Copyright (c) 2026 Johnny Shields. All rights reserved.
+Released under the MIT license as described in the file LICENSE.txt.
+Authors: Johnny Shields
+-/
+import TuranBessel.Degree
 
-Completes the "if and only if" of `shields-2026-turan-bessel.tex`,
-§2 «Main results» `thm:coefficientwise` and the deformation half of
-`prop:bessel-sharpness` (`D_ν^{(κ)}>0` for all `ν>-1,z>0` iff `κ≥1`); the
-sharpness computation `eq:MD01-kappa` lives in §5 «Mixed determinants and
-coefficientwise positivity» (`sec:determinant`).
-For the one-parameter family, the degree-one coefficient
-of the determinant is a positive multiple of `MD(N_0, N_1^{(κ)})`, and
+/-!
+# Sharpness of the threshold `κ = 1`, uniformly in `a`
+
+Formalizes `shields-2026-turan-bessel.tex`, «The exceptional degree and endpoint
+sufficiency» (`subsec:endpoint-sufficiency`, `rem:uniform-degree-one`,
+`eq:MD01-kappa`): degree one alone rules out every `κ < 1` that is to serve all
+`a > 0` at once.  For the one-parameter family, the degree-one coefficient of the
+determinant is a positive multiple of `MD(N_0, N_1^{(κ)})`, and
 ```
 MD(N_0, N_1^{(κ)}) = MD(N_0, N_1) + ψ₁(a)·(κ-1)/2      (eq:MD01-kappa)
                    = (aψ₁(a)-1)/(a²ψ₁(a)) + ψ₁(a)(κ-1)/2.
 ```
-For `κ ≥ 1` this is `> 0` (`MDkappa_ge_pos`).  For `κ < 1`, taking `a = (1-κ)/2`
-and using `ψ₁(a) ≥ a⁻²` (the first series term) makes it `< 0`
-(`MDkappa_neg_exists`).  Hence uniform coefficientwise positivity holds iff `κ≥1`.
+For `κ ≥ 1` this is `> 0` at every `a > 0` (`MDkappa_ge_pos`).  For `κ < 1`,
+taking `a = (1-κ)/2` and using `ψ₁(a) ≥ a⁻²` (the first series term) makes it
+`< 0` (`MDkappa_neg_exists`).  So degree-one positivity *uniform in `a`* holds
+exactly for `κ ≥ 1` (`MDkappa_uniform_iff`).
+
+The **fixed-`a`** converse of `thm:coefficientwise` — for each `a > 0`,
+positivity of every `Δ_n^{(κ)}(a)` forces `κ ≥ 1` — is not established here, and
+degree one cannot deliver it: at fixed `a` the degree-one coefficient stays
+positive for `κ` just below `1`.  The paper defers that converse to the necessity
+part of `thm:two-parameter-coeff`, which routes through
+`lem:large-argument-limit`; both are recorded as missing in `../README.md`.  The
+same boundary applies to `prop:bessel-sharpness`, whose sharp quadrant is the
+two-parameter `κ ≥ 1, τ ≥ 1` for `D_ν^{(κ,τ)}(z) > 0` at every `z > 0`; only its
+`κ ≥ 1` deformation direction is what `MDkappa_ge_pos` speaks to.
 
 Sorry-free.
 -/
-import TuranBessel.Degree
 
 namespace TuranBessel
 
@@ -38,8 +53,7 @@ theorem MDkappa_eq (ha : 0 < a) (κ : ℝ) :
   simp only [SymMat.MD, N1kappa, Nmat_a11, Nmat_a12, Nmat_a22, αcoef, βcoef_zero, βcoef_one,
     ccoef_zero, Nat.cast_zero, Nat.cast_one, add_zero]
   rw [ht1]
-  field_simp
-  ring
+  field
 
 /-- **Forward:** for `κ ≥ 1` the degree-one coefficient is strictly positive. -/
 theorem MDkappa_ge_pos (ha : 0 < a) {κ : ℝ} (hκ : 1 ≤ κ) :
@@ -82,5 +96,20 @@ theorem MDkappa_neg_exists {κ : ℝ} (hκ : κ < 1) :
   have heq0 : 1 / a = (1 - κ) / (2 * a ^ 2) := by
     rw [ha_def]; field_simp
   linarith
+
+/-- **Uniform sharpness** (`rem:uniform-degree-one`): the degree-one coefficient is
+positive at *every* `a > 0` exactly when `κ ≥ 1`.  This is the uniform-in-`a`
+statement; the fixed-`a` converse of `thm:coefficientwise` is a different, stronger
+claim and is not proved here. -/
+theorem MDkappa_uniform_iff (κ : ℝ) :
+    (∀ a : ℝ, 0 < a → 0 < SymMat.MD (Nmat a 0) (N1kappa a κ)) ↔ 1 ≤ κ := by
+  constructor
+  · intro h
+    by_contra hκ
+    push Not at hκ
+    obtain ⟨a, ha, hneg⟩ := MDkappa_neg_exists hκ
+    exact absurd (h a ha) (not_lt.mpr hneg.le)
+  · intro hκ a ha
+    exact MDkappa_ge_pos ha hκ
 
 end TuranBessel

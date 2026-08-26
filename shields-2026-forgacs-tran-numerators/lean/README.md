@@ -1,14 +1,20 @@
-# Lean 4 formalization — Bounded exceptional zeros in the Forgács–Tran family
+# Lean 4 formalization — Fixed numerators in the Forgács–Tran family: bounded defect and angular zero discrepancy
 
-Formalizes the core of `../shields-2026-forgacs-tran-numerators.tex` against
+Formalizes the core of `shields-2026-forgacs-tran-numerators.tex` against
 Mathlib (`leanprover/lean4:v4.33.0-rc1`, namespace `ForgacsTran`).  `lake build`
-is green.  The elementary and combinatorial content of the paper is proven with
-**no `sorry` and no project-specific `axiom`**; the analytic inputs (Forgács–Tran
-pole geometry, weighted dominance, the argument-principle phase count) — none of
-which Mathlib yet supports — are not posited as global axioms but carried as the
-fields of a single hypothesis structure `FTInputs`, so `#print axioms` on *every*
-result, the main theorem included, reports only Lean/Mathlib's three standard
-axioms.
+is green with **no `sorry`** and **no project axiom**: every result below rests
+on Lean's own `[propext, Classical.choice, Quot.sound]` and nothing else.
+
+For `1/(Q(t)+zt^r)` with `Q` real-rooted and positive, Forgács and Tran proved
+that every sufficiently large coefficient polynomial is real-rooted, with its
+zeros in an explicit interval [1].  Fixing a numerator `B` breaks that, and the
+paper shows the failure is confined: the number of exceptional zeros is bounded
+by a constant depending on `B` alone, uniformly in the index, and the zeros that
+remain equidistribute in angle.  The bounded defect is the counterpart, in this
+generating-function setting, of what is known for linear combinations of
+orthogonal polynomials [2].
+
+The proofs in the paper are noncomputational and do not depend on the code here.
 
 ## Build
 
@@ -17,214 +23,258 @@ lake exe cache get   # fetch the pinned Mathlib build cache (once)
 lake build
 ```
 
-## What is proven (unconditionally)
+## Result coverage
 
-The following are proven with no `sorry` and no project-specific axioms;
-`#print axioms` reports only Lean/Mathlib's `[propext, Classical.choice,
-Quot.sound]`.
+The theorems, propositions and corollaries of the manuscript.
 
-| Result | Paper | Lean |
-|---|---|---|
-| Exceptional-zero counting engine (many interior zeros ⟹ few exterior) | `prop:univariate-main` (mechanism) | `ZeroCount.exceptionalRoots_card_le` |
-| Interior roots embed into the root multiset | `prop:univariate-main` (step) | `ZeroCount.le_card_roots_filter` |
-| `I_{Q,r} ⊆ (0,∞)`, finite `b` | `sec:geometry`, `eq:ab-def` | `ZeroCount.ftInterval_subset_posRay` |
-| `I_{Q,r} = (a,∞) ⊆ (0,∞)`, the `r > 1` case | `sec:geometry`, `eq:ab-def` | `ZeroCount.ftRay_subset_posRay` |
-| Numerator = initial data (uniqueness) | `prop:initial-data` | `Reduction.initial_data_unique` |
-| Eventual degree (upper bound) `deg_z P_m ≤ ⌊m/r⌋` | `lem:eventual-degree` | `Reduction.eventual_natDegree_le` |
-| Linear case closed form / recurrence | `prop:linear-case` | `LinearCase.Plin_recurrence` |
-| Linear case: the recurrence **determines** the sequence (so the closed form *is* the coefficient sequence) | `prop:linear-case` | `LinearCase.Plin_unique`, `denomConv_dlin_Plin` |
-| Linear case: exceptional zeros are `R`'s, `m`-uniformly | `prop:linear-case` | `LinearCase.Plin_exceptional_eq`, `Plin_exceptional_card_le` |
-| Witness family with `L` roots off `(0,∞)`, `L` arbitrary — **an ingredient of** `prop:N-dependence`, not the proposition | `prop:N-dependence` | `Necessity.exceptional_unbounded` |
-| Root counts inherited by any multiple `R ∣ P` — the second ingredient | `prop:N-dependence` | `Necessity.dvd_exceptional_le` |
+**Work in progress.**  All proofs in the paper are unconditional and
+noncomputational.  Anything noted below as not yet carried reflects the state of
+the Lean formalization, not of the paper.
 
-`eventual_natDegree_le` is stated over an arbitrary field: the paper uses `ℝ` in
-§2, and the bridge instantiates it at `ℂ` (see below).
+Eight of the manuscript's twelve numbered results are formalized in full.  The
+other four — `thm:main`, `prop:angular-discrepancy`, `prop:equidistribution` and
+`cor:angular-rigidity` — are formalized against an `FTPhaseSupply` the tree states
+but does not yet produce for the general pencil; at the cubic pencil they are
+complete, since `CubicMain.cubic_shrinkingWindow` is proved rather than assumed.
+
+| Where | Result | Paper | Lean |
+|---|---|---|---|
+| §2 Prop 2.1 | Numerator = initial data (existence): every prescribed vector of polynomial initial conditions is realized by a proper numerator | `prop:initial-data` | `Reduction.exists_denomConv_eq` |
+| §2 Prop 2.1 | The bijection itself, as an `Equiv` — a fixed proper `N` **is** a fixed vector of initial conditions | `prop:initial-data` | `Reduction.initialDataEquivFin` |
+| §2 Prop 2.1 | Numerator = initial data (uniqueness) | `prop:initial-data` | `Reduction.initial_data_unique` |
+| §2 Prop 2.6 | Linear case closed form / recurrence | `prop:linear-case` | `LinearCase.linCoeffPoly_recurrence` |
+| §2 Prop 2.6 | Linear case: the recurrence **determines** the sequence (so the closed form *is* the coefficient sequence) | `prop:linear-case` | `LinearCase.linCoeffPoly_unique`, `denomConv_dlin_linCoeffPoly` |
+| §2 Prop 2.6 | Linear case: exceptional zeros are `R`'s, `m`-uniformly | `prop:linear-case` | `LinearCase.linCoeffPoly_exceptional_eq`, `linCoeffPoly_exceptional_card_le` |
+| §3 Thm 3.1 | Compact-uniform separation — the one sentence `thm:FT-geometry` proves rather than cites: a strict pointwise modulus gap between `τ` and finitely many continuously varying zeros is one uniform ratio on a compact set of angles | `thm:FT-geometry` | `FTGeometryAssembly.ft_compact_uniform_separation`, `ft_geometry_compact_separation` |
+| §3 Thm 3.1 | `z` maps the viewing arc onto `I_{Q,r}`, in both endpoint conventions of `eq:ab-def` | `thm:FT-geometry`, `eq:ab-def` | `FTGeometryAssembly.ft_geometry_image_Ioo`, `ft_geometry_image_Ioi` |
+| §3 Thm 3.1 | The theorem assembled from named hypotheses — the abstract form, which the branch instantiations below discharge | `thm:FT-geometry` | `FTGeometryAssembly.ft_geometry`, `ft_geometry_unbounded` |
+| §3 Thm 3.1 | **`thm:FT-geometry` at the branch, with nothing assumed, at every in-scope `(n, r)`.**  The binders are the admissible class alone — `0 < a k`, `0 < c`, and a bound on `n` or `r`.  Four statements cover the four regimes: `r = 1` with `n ≥ 3` and with `n = 2`, and `r ≥ 2` with `n ≥ 2` and with `n = 1`.  The remaining corner `n = r = 1` is **proved vacuous** rather than skipped: the pencil then has degree at most one, so it cannot carry the conjugate pair of `eq:principal-pair`, and `g` has no positive critical point, so the `t_a` of `eq:ab-def` does not exist either.  `eq:Q-hypotheses` admits that case and the theorem built on it does not | `thm:FT-geometry`, `eq:principal-pair`, `eq:ab-def` | `FTGeometryClosure.ft_geometry_at_branch_pi`, `FTGeometryBoundary.ft_geometry_at_branch_quadratic`, `FTGeometryCone.ft_geometry_unbounded_at_branch_two_le`, `FTGeometryBoundary.ft_geometry_unbounded_at_branch_one`, `PrincipalSimpleBranch.not_ftBranchAt_one_one` |
+| §3 Cor 3.7 | `κ₀ + κ₁ deg B` for the summed variation of `arg W`, with `κ₁ = 𝒦_γ + π` and the per-root cap **discharged** from the arc's regularity rather than assumed.  Neither constant sees `B`, which is the uniformity separating `thm:main` clause 3 from clause 2.  The zero-on-the-arc case is covered too, not excluded: `hbranch` is a disjunction whose second branch supplies an `m` with `γ m = β`, splitting the arc at it and moving the base point, which is the manuscript's own passage to the components of `(0,π/r) ∖ {W = 0}`.  `linear_phase_variation_components_regular` is the form the counting consumes — it bounds the variation summed over an ordered family by one `κ₀ + (𝒦_γ + π)deg B`, where capping each component separately would give `(J+1)(κ₀ + κ₁ deg B)`, quadratic in `deg B` once `J ≤ deg B`, and would destroy exactly the uniformity the corollary exists for | `cor:linear-phase-variation`, `eq:linear-phase-variation` | `PhaseVariation.linear_phase_variation_regular`, `phase_variation_le_laurentWeight_of_arc` |
+| §4 Thm 4.2, §4 eq. (4.8) | Fixed gap against an endpoint amplitude of either sign: `θ^(-p) ≤ h^(-p) M^p` and `θ^n ≤ ε^n` | `thm:weighted-dominance`, `eq:endpoint-contour-relative-bound` | `Dominance.endpoint_inv_pow_le`, `endpoint_pow_le` |
+| §4 Thm 4.2, §4 eq. (4.7) | Interior relative remainder `(C/A) e^(-αM/2)` at the deletion exponent `c = α/2` | `thm:weighted-dominance`, `eq:interior-relative-remainder` | `Dominance.interior_ratio_le` |
+| §4 Thm 4.2, §4 eq. (4.3) | The closing accounting `1/4 + 1/4 ≤ 1/2` | `thm:weighted-dominance`, `eq:dominance-bound` | `Dominance.dominance_of_quarters` |
+| §4 Prop 4.4 | Exceptional-zero counting engine (many interior zeros ⟹ few exterior) | `prop:angular-discrepancy` (mechanism) | `ZeroCount.exceptionalRoots_card_le` |
+| §4 Prop 4.4 | Interior roots embed into the root multiset | `prop:angular-discrepancy` (step) | `ZeroCount.le_card_roots_filter` |
+| §4 Prop 4.4 | A continuous function of opposite signs at `u < v` vanishes strictly between | `prop:angular-discrepancy` (step) | `SignAlternation.exists_zero_Ioo` |
+| §4 Prop 4.4 | `n + 1` increasing points with alternating signs ⟹ a strictly increasing family of `n` zeros, one per gap | `prop:angular-discrepancy` | `SignAlternation.exists_strictMono_zeros_of_alternating` |
+| §4 Prop 4.4, §4 eq. (4.16) | Hence `n` **distinct** complex roots of the complexified polynomial inside the real interval — the `interiorZeros` supply, derived | `prop:angular-discrepancy`, `eq:angular-distinct-lower` | `SignAlternation.exists_interiorZeros_of_alternating` |
+| §5.1 Prop 5.1 | Normalized by `deg P_m = ⌊M/r⌋`, the zero counting measure tracks the uniform angular density `r(β−α)/π` to `O(1/d)`, uniformly over subintervals — the reindexing derivation the paper's own proof carries out, plus the composed form off the counts.  **Conditional** on the angular discrepancy `eq:angular-discrepancy`, taken as explicit numeric hypotheses, since `prop:angular-discrepancy` is not formalized in this tree | `prop:equidistribution`, `eq:normalized-angular-discrepancy` | `Consequences.equidistribution_of_angular_discrepancy`, `ConsequencesComposition.PhaseQuantization.ft_equidistribution` |
+| §5.1 Cor 5.2 | The angular clock `\|θ_{j,m} − πj/(M+1)\| ≤ π(E₀ + E₁ deg B_N)/(M+1)`, the rigidity form of the same discrepancy, and its composition against the bracketing counts.  **Conditional** on the same hypothesis | `cor:angular-rigidity`, `eq:angular-clock` | `Consequences.angular_rigidity`, `angular_clock`, `ConsequencesComposition.PhaseQuantization.ft_angular_clock` |
+| §5.3 Cor 5.6 | `deg P_m = m+2` and `[z^{m+2}]P_m = (-1)^m` for every `m`, so `P_m ≠ 0` | `cor:panel-B-attractor` | `AttractorCoeff.panelP_natDegree`, `panelP_coeff_top`, `panelP_ne_zero` |
+| §5.3 Cor 5.6 | The Rouché split on `\|t\| = 1/2`: `‖ℋ‖ ≤ 2625/64 < ‖𝒬‖`, hence exactly one conjugate pair of zeros of `B` inside, both simple and nonreal | `cor:panel-B-attractor` | `AttractorRouche.panelB64_two_zeros`, `exists_panelRoot` |
+| §5.3 Cor 5.6 | The Vieta separation `‖u‖, ‖v‖ > 3/2`, hence the spectral ratio `χ_* < 1/3` | `cor:panel-B-attractor`, `eq:local-spectral-ratio` | `AttractorVieta.vieta_separation`, `spectral_ratio_lt_third` |
+| §5.3 Cor 5.6 | **The corollary itself**: `t_*` the unique upper-half zero of `B` in `\|t\| < 1/2`, `z_*` nonreal and algebraic, the numerator vanishing at `(t_*, z_*)`, the three denominator zeros, and `χ_* < 1/3` | `cor:panel-B-attractor`, `rem:cancellation-meaning` | `Attractor.panelB_attractor` |
+| §3 Thm 3.1 | Forgács--Tran Lemma 4(ii): `z` is strictly increasing along the branch on the viewing arc.  The one hypothesis that stood in this tree with no supplier anywhere, and on which the Prop. 1 closing step rested | `thm:FT-geometry`, via `Forgacs2017RationalDenominator` | `FTBranchZMono.ftBranchZ_strictMonoOn` |
+| §3 Thm 3.1 | Forgács--Tran Prop. 1's closing step, now unconditional — the same statement with the monotonicity discharged rather than assumed | `thm:FT-geometry`, via `Forgacs2017RationalDenominator` | `FTBranchZMono.ftProp1_angle_eq` |
+| §3 Thm 3.1 | Forgács--Tran Lemma 3 at the witness pencil: `τ` strictly decreasing on `[0,π]`, with no derivative of `τ` formed — the closed form makes the `cos`-dependence visible, so two inequalities replace the general branch's level-set argument | `thm:FT-geometry`, via `Forgacs2017RationalDenominator` | `CubicWitness.cubicTau_strictAntiOn` |
+| §3 Thm 3.1 | The endpoint limit at a **repeated** smallest zero: `τ(θ) → x₁` itself rather than to some zero of `ftCritical`, by the bracket collapsing at multiplicity `≥ 2`.  This is what makes `lem:amplitude-divisor`'s `k = ρ` case unconditional | `thm:FT-geometry` | `FTBranchLimitPoint.tendsto_ftTau_nhdsGT_zero_of_repeated_min` |
+| §3 Thm 3.1 | The branch radius to second order, from a **first-order** bound on the angle count through the exact identity `x₁/τ = cos θ − sin θ cot β` — the branch derivative never enters | `thm:FT-geometry`, and Prop. 3's principal leg | `FTBranchLimitPoint.exists_bound_ftTau_sub_linear` |
+| §3 Thm 3.1 | The endpoint limit lies strictly **inside the first gap**, `x₁ < L < x₂`, with **no hypothesis on `x₂` at all** — the angle count gives `x₂/τ ≥ 1 + c/(2π)` uniformly in `θ`, which the critical-polynomial route cannot, since `E(x₂) = 0` at a repeated `x₂` | `thm:FT-geometry`, and `lem:amplitude-divisor`'s `ρ = 1` case | `FTBranchGap.exists_tendsto_ftTau_mem_first_gap` |
+| §3 Thm 3.1 | The rescaled spectral parameter has a **nonzero** limit, `z(δ)/δ^ρ → z₀ > 0`, with closed form `c(x₁/sin(π/ρ))^ρ∏_{k∉S}(a_k−x₁)/x₁^r`.  Not derivable from any upper bound on `z`, at any constant | `thm:FT-geometry`, and Prop. 3's member leg | `FTBranchZRate.exists_tendsto_ftBranchZ_div_pow` |
+| §3 Thm 3.1 | Prop. 3 Case 2's member leg at `ρ > 1`: each of the `ρ` cluster directions carries a root of the pencil, expanding as `eq:lower-cluster-expansion` to `O(δ²)` **at that direction**.  The count is produced by Rouché against the model rather than read off an asymptotic, and the direction is matched consuming only `ω^ρ = −1` | `thm:FT-geometry`, and Prop. 3's member leg | `FTMinModulus.ScaleMatching.exists_cluster_member_expansion_family` |
+| §4 Thm 4.2 | `thm:weighted-dominance`'s `hexp₀` at the pencil: the normalized members expand as `1 + [(cos(π/ρ) − ω_i)/sin(π/ρ)]δ + O(δ²)`, with the family produced rather than taken as given.  Five inputs are named hypotheses here — four about the principal branch, one the scalar model identity — and all five are discharged in the next row | `thm:weighted-dominance`, `eq:lower-cluster-expansion` | `FTMinModulus.ScaleMatching.exists_cluster_normalized_expansion_of_pencil` |
+| §4 Thm 4.2 | **`hexp₀` at the branch, with no hypothesis about the branch left.**  The binders are the admissible class alone — `2 ≤ n`, positive zeros, `1 ≤ r`, the fiber of the smallest zero, `ρ ≥ 2`, minimality, `c > 0` — and the pencil, the spectral parameter, the principal point and the normalizing radius are `ftRootPoly`, `ftBranchZ`, `ftPrincipal (ftTau …)` and `ftTau`.  The model identity is a sign question and it is where the `(−1)^ρ` from `∏(a_k−t) = (t−x₁)^ρq(t)` cancels the one from `α_j = −x₁ω_j/sin(π/ρ)` against `ω_j^ρ = −1` | `thm:weighted-dominance`, `eq:lower-cluster-expansion` | `FTClusterSupply.cluster_normalized_expansion_at_branch`, `..._nonvacuous` |
+| §4 Thm 4.2 | The retained-set hypothesis block of `thm:weighted-dominance` **jointly satisfied** at a concrete pencil — eighteen binders discharged together rather than separately, so the set is inhabited rather than merely consistent | `thm:weighted-dominance` | `CubicWitness.cubicWitness_retainedSet_block` |
+| §4 Thm 4.2 | `thm:weighted-dominance`'s **lower** cluster binders jointly at that pencil — `hginj₀`, `hgmem₀`, `hgcard₀` and `hexp₀` on one window, `hexp₀` in the binder's complex-difference shape | `thm:weighted-dominance`, `eq:lower-cluster-expansion` | `CubicWitnessCluster.cubicWitness_cluster_block` |
+| §4 Thm 4.2 | `thm:weighted-dominance`'s **upper** cluster binders jointly, at `Q = 1 − t`, `r = 3` — the smallest `r` whose upper cluster has a nonprincipal member, so these binders are witnessed non-vacuously.  `hωne₁` and `hωne'₁` ride along because they are what pin `idx₁ i = 2`, and `hexp₁` is the modulus form, which is not the lower one's shape and is not derivable from it | `thm:weighted-dominance`, `eq:endpoint-linear-gap` | `UpperClusterWitness.upperWitness_cluster_block` |
+| §4 Thm 4.2 | The upper witness's retained set is the pencil's own, not a set of the right shape: `1 − t + zt³ = z(t − t₊)(t − conj t₊)(t − t₃)` at `z = 1/(2τ³cos θ)`, giving `hroot₁`, `huniq₁`, `hsimple₁`, `haR₁`, `hrootplus₁` and `hne₁` | `thm:weighted-dominance` | `UpperClusterWitness.upperDen_eval`, `upperDen_eval_eq_zero_iff`, `upperDen_deriv_ne_zero`, `norm_lt_four_of_mem_upperRootSet` |
+| §4 Thm 4.2 | **Both cluster binder families at one pencil**, `Q = (1−t)³` with `r = 3`: `ρ = 3` gives `n₀ = 1` and `r = 3` gives `n₁ = 1`, so twelve binders hold on two windows of a single branch.  Every earlier witness had one endpoint empty | `thm:weighted-dominance`, `eq:lower-cluster-expansion`, `eq:endpoint-linear-gap` | `JointWitness.jointWitness_both_clusters_block` |
+| §4 Thm 4.2 | That pencil's branch in closed form and its zeros: `z = ρ³` along a ray, so nothing is solved; `1 − t + …` factors by the sum of cubes; `τ` is the minimum modulus exactly on the arc; and one degeneracy at `θ = π/6`, where the leading coefficient vanishes and both clusters are empty | `thm:weighted-dominance` | `JointWitness.jointDen_eval`, `jointDen_eval_eq_zero_iff`, `jointTau_lt_norm_third`, `jointRatio_reflect` |
+| §4 Thm 4.2 | The joint pencil's retained-set binders: `hroot`/`huniq` from the factorization, `hsimple` with no case split over the three zeros (a common zero of `D` and `D'` forces `za² = 0`, and `z > 0` on the arc while `D(0) = 1`), `haR` at radius 2 wherever the arc is kept off `θ = π/6`, and `hne` | `thm:weighted-dominance` | `JointWitness.jointDen_deriv_ne_zero`, `norm_lt_two_of_mem_jointRootSet`, `jointPrincipal_ne_conj`, `jointZ_pos` |
+| §4 Thm 4.2 | `thm:weighted-dominance`'s **interior** binder `hinterior` in full at that pencil, with `B = 3t^2 + 1` — the geometry group, the amplitude divisor of `lem:amplitude-divisor`, the branch's derivative, and the window inequality.  The divisor is the single angle `π/2`, not the empty set that would satisfy every clause quantified over it | `thm:weighted-dominance`, `lem:amplitude-divisor` | `CubicWitnessInterior.cubicWitness_hinterior` |
+| §4 Thm 4.2 | **Under the compatibility wrapper's binder order, the deleted windows cannot shrink.**  In `weighted_dominance_of_branch`, `Θ` is bound before `hinterior`'s `∀ e` while the window constant `σ` is produced inside it, and `σ > τ(e)^3 → 1` as `e → 0`, so every admissible family contains one fixed interval about `π/2` at every `M`.  This is a property of that wrapper alone: the `_at` forms conclude `∃ ε > 0, ∀ Θ, …`, choosing the windows after `σ` exactly as `subsec:proof` does, so neither `thm:weighted-dominance` nor the paper carries a gap here.  The wrapper keeps `Θ` early so its seventeen consumers need no restatement | `subsec:proof`, `eq:amplitude-window-negligible` | `CubicWitnessInterior.cubicWitness_window_forced`, `cubicTheta_forced_of_hinterior`, `cubicTheta_leaves_room` |
+| §4 Thm 4.2 | **`thm:weighted-dominance` with nothing assumed.**  Every binder of `weighted_dominance_of_branch` supplied at once at `Q = (1-t)^3`, `r = 1`, `B = 3t^2 + 1`, `b = π`, so its conclusion holds unconditionally.  That is *joint* satisfiability, which no per-binder check can see — three defects in this tree were binders that could not hold together.  `r = 1` is where `hEp₁` is coherent; the price is that the upper cluster is empty there, `n₁ = 0`, and its binders are met by `Fin.elim0` rather than tested | `thm:weighted-dominance` | `CubicWitnessComposition.cubic_weighted_dominance` |
+| §4 Thm 4.2 | **`thm:weighted-dominance` at the branch, unconditional, at the `ρ ≥ 2`, `r ≥ 2` corner.**  The binders are the admissible class alone — `2 ≤ n`, positive zeros, `0 < c`, `2 ≤ r`, `0 < x₁` minimal, the fiber of the smallest zero of size `ρ ≥ 2`.  `h` is quantified **before** `∀ B`, matching the manuscript's `h = h(Q,r)`, and the exponentially small measure of `eq:amplitude-deletion` is a conjunct of the conclusion rather than an `∃ Θ` — that form is trivially true at `Θ M := univ`.  One of the manuscript's four corners | `thm:weighted-dominance`, `eq:dominance-bound`, `eq:amplitude-deletion`, `eq:retained-range` | `InteriorBranchSeparation.ft_weighted_dominance_unconditional`, `WeightedDominanceBranch.ft_weighted_dominance` |
+| §4 Thm 4.2 | **The `ρ ≥ 2`, `r = 1` corner, at `n = 3`, `b = π`.**  Not the row above with a hypothesis relaxed: at `r = 1` the upper endpoint is finite rather than at the origin, so the amplitude floor takes the other of the two routes `eq:ab-def` distinguishes, and the whole upper block is a separate producer against one collision point `L`, one circle `2L` and one window.  `L` is quantified beside `h` and ahead of `B`, because `ord_{−L}(B) ≤ 1` cannot be stated until `L` is fixed — and that is the **weaker** numerator hypothesis, the range where `p₁ = 0` is true.  Checked rather than trusted, since it compiled first try: all eleven block projections consumed exactly once, and mutating `σ₁`, `R₁`, `n₁`, `p₁` is rejected at 3, 6, 9 and 3 errors — so `n₁ = 0` is forced by `hgcard₁` and the `2 ≤ r` exponent does not typecheck here | `thm:weighted-dominance`, `eq:ab-def`, `eq:amplitude-deletion` | `WeightedDominanceBranchOne.ft_weighted_dominance_one_unconditional`, `ft_weighted_dominance_one`, `exists_upper_endpoint_block_one`, `ft_weighted_dominance_one_hypotheses_nonvacuous` |
+| §4 Thm 4.2 | **The `ρ = 1`, `r = 1` corner.**  The binders are the admissible class alone — `3 ≤ n`, positive zeros, `0 < c`, a minimal index, and that minimum simple.  What made this corner hard is that at a simple smallest zero the endpoint is not `x₁` but a critical point strictly inside the first gap, so the cluster machinery describes nothing: the separation `t_a < ‖w‖` at every other zero of the pencil has to be proved outright.  It is, and by a route that does **not** indent a contour.  `σ = 0` is a zero of `∏(1 − v_kσ) − (1+σ)^r` of order exactly two and the only one on `‖1+σ‖ = 1`, so dividing it out leaves a quotient zero-free on the circle and the ordinary circular argument principle applies with no indentation; the count is then pinned by deforming the **configuration** along a segment that stays one-negative by proof rather than by sampling.  Not Rouché — no `\|G\|` is compared to `\|H\|`, and their equality at `σ = 0` is exactly the off-by-one that refutes it | `thm:weighted-dominance` | `RhoOneDominanceComposition.ft_weighted_dominance_rho_one_unconditional`, `ft_weighted_dominance_rho_one_hypotheses_nonvacuous`, `LowerSeparationQuotient.one_lt_norm_one_add_of_prod_eq_pow`, `card_rootsIn_eq_of_continuous_family` |
+| §4 Thm 4.2 | **The `ρ = 1`, `2 ≤ r` corner**, at `2 ≤ n` rather than `3 ≤ n` — the stronger bound on the `r = 1` corners comes from the manuscript's own `(deg Q, r) ≠ (2,1)` exclusion and from the `r = 1` interior, neither of which applies here.  It was assembly rather than analysis: the `ρ = 1` lower group is `r`-general on every declaration, and only the composition had been restricted.  Its non-vacuity witness is a **conjunction across the `r = 2` boundary** — once at `r ≥ 3` where the upper cluster has content, once at `r = 2` where `Fin (r − 2)` is `Fin 0` and the upper binders are met by `Fin.elim0`.  A witness on one side alone would certify precisely the case it exists to test, since at `r = 2` a statement about the cluster is satisfied by there being no cluster | `thm:weighted-dominance` | `RhoOneDominanceComposition.ft_weighted_dominance_rho_one_two_le_unconditional`, `ft_weighted_dominance_rho_one_two_le_hypotheses_nonvacuous` |
+| §4 Thm 4.2 | **The four corners exhaust the admissible class, as a theorem rather than as a reading of four signatures.**  Given `2 ≤ n`, `1 ≤ r`, the manuscript's `(n, r) ≠ (2,1)` exclusion and `ρ` as the fiber cardinality of the smallest zero, every admissible pencil lands in one of `(ρ = 1, r = 1, 3 ≤ n)`, `(ρ = 1, 2 ≤ r, 2 ≤ n)`, `(2 ≤ ρ, r = 1, 3 ≤ n)`, `(2 ≤ ρ, 2 ≤ r, 2 ≤ n)`.  This is the row that keeps the coverage honest: `ρ` governs the lower endpoint and `r` the upper, independently, so the corners are a 2×2 grid — and counting the `n`-split of one cell as a corner is how a whole cell sat empty while four names appeared to cover four | `thm:weighted-dominance` | `DominanceCellPartition.ft_dominance_cell_of_admissible` |
+| §5.3 Prop 5.4 | **`prop:isolated-dominant-cancellation` itself**, in the generality the paper states it — quantified over `Q`, `B`, `r`, the dominant root and its multiplicity, concluding about `ftCoeffPoly` | `prop:isolated-dominant-cancellation` | `AttractorPole.isolated_dominant_cancellation` |
+| §5.3 Prop 5.3 | **`prop:local-strong-clock` itself, at the general admissible pencil, with nothing about the remainder assumed.**  All five clauses of the manuscript's sentence in one conclusion: every zero of `F_M` in `z(𝒥)` is simple; it is `z(θ)` for a unique `θ` — stated for every point of the image, without the `eval = 0` antecedent the manuscript carries, since the proof does not use it; the indices run consecutively, `k' = k + 1` for adjacent zeros; `eq:local-phase-quantization`, which matches `(k+½)π` exactly rather than approximately, because `cos u₀ = 0` makes `{u₀ + kπ}` the half-integer multiples of `π` whatever admissible `u₀` is chosen; and `eq:local-strong-clock` about a genuinely successive pair.  Binders are the admissible class, the paper's own zero-free subarc, its own `𝒥 ⋐ 𝒥₀`, and `0 < δ ≤ π/4`.  **The hypothesis set is exhibited inhabited** — the conclusion carries `∃ u₀` alongside `∀ u₀`, with the quantization point constructed through `Int.ceil` rather than shown to exist, and `lo < hi` strict so the degenerate subarc is excluded in the binder rather than tolerated in the conclusion | `prop:local-strong-clock`, `eq:local-phase-quantization`, `eq:local-strong-clock` | `BranchStrongClock.exists_ft_local_strong_clock_at_branch_closed`, `ft_local_strong_clock_at_branch_closed_applies` |
+| §5.3 Prop 5.3 | The first display of `prop:local-strong-clock`'s own proof: `G_M = 2\|W\|cos((M+1)θ − ψ) + R_M` on a compact zero-free subarc, every constant produced rather than assumed | `prop:local-strong-clock` | `ConsequencesComposition.PhaseQuantization.interior_cos_decomposition_on_subarc` |
+| §5.3 Prop 5.3 | One zero of the phase function inside each phase window, unique there, and two consecutive ones ordered | `prop:local-strong-clock`, `eq:local-phase-quantization` | `ConsequencesComposition.PhaseQuantization.exists_unique_phase_zero`, `exists_two_consecutive_phase_zeros` |
+| §5.3 Prop 5.3 | `eq:local-phase-quantization` in both halves: the relation, which is `eq:Phi-def` rearranged and carries no analytic content, and the exponentially small bound on the offset | `eq:local-phase-quantization` | `ConsequencesComposition.PhaseQuantization.phase_quantization_identity`, `phase_quantization_error` |
+| §5.3 Prop 5.3 | **`eq:local-strong-clock`**: the spacing of two consecutive zero angles, and the same at rate `O(M^{-3})` with a constant carrying no `M` | `eq:local-strong-clock` | `ConsequencesComposition.ClockSpacing.ft_local_strong_clock`, `ft_local_strong_clock_rate` |
+| §5.3 Prop 5.3 | The passage back to the paper's object: a zero of the phase is a zero of `F_M` itself, the `τ^{M+1}` and `2\|W\|` normalizations divided out | `prop:local-strong-clock` | `ConsequencesComposition.ClockSpacing.ftCoeffPoly_eval_eq_zero_of_phase_zero` |
+| §1 Thm 1.1 | **Clause 3**, the numerator-uniform defect: constants bound before the numerator, onset after it, count under `C₀ + C₁ deg B_N`, with no side condition in the conclusion.  Conditional on the interior-zero supply alone — the seam clauses 1 and 2 also rest on | `thm:main` (third clause) | `ClauseThreeDefect.exceptionalRoots_numeratorUniform_of_ne_zero` |
 
 The **main theorem** is proven from the analytic-input hypothesis bundle
 `FTInputs`: the counting engine, the absorption of the finitely many initial
 indices, and the reduction of the degree bound to the phase count are all genuine;
 only the analytic *supply* of interior zeros lives in the hypothesis.
 
-| Result | Paper | Lean |
+| Where | Result | Paper | Lean |
+|---|---|---|---|
+| §1 Thm 1.1 | `≤ C` zeros off `(0,∞)`, all `m` | `thm:main` (first clause) | `Main.main_bound` |
+| §1 Thm 1.1 | `≤ C` zeros off `I_{Q,r}`, large `m` | `thm:main` (second clause) | `Main.main_bound_interval` |
+| §1 Thm 1.1 | off-ray bound from recurrence + phase count | `thm:main` (first clause) | `Main.main_bound_ofRecurrence` |
+| §1 Thm 1.1 | `≤ C` zeros off `I_{Q,r}`, large `m`, with **`P_m ≠ 0` derived** rather than assumed — clause 2 parts (i) and (ii) both proven | `thm:main` (second clause) | `Main.main_bound_interval_ofRecurrence` |
+| §4 Prop 4.4 | `≥ deg P_m - C` **distinct** zeros inside `I_{Q,r}`, large `m` | abstract, `prop:angular-discrepancy` | `Main.interior_distinct_count` (restates a hypothesis — see below) |
+
+## Structural coverage
+
+The supporting statements — lemmas, displayed equations, remarks, and the
+section-level ingredients — under the same axiom hygiene.
+
+| Where | Result | Paper | Lean |
+|---|---|---|---|
+| §1 | Witness family with `L` roots off `(0,∞)`, `L` arbitrary — **an ingredient of** the `sec:introduction` argument, not the claim | `sec:introduction` | `Necessity.exceptional_unbounded` |
+| §1 | Root counts inherited by any multiple `R ∣ P` — the second ingredient | `sec:introduction` | `Necessity.dvd_exceptional_le` |
+| §2 Lem 2.4 | Eventual degree (**attainment**): `deg F_M = ⌊M/r⌋` for all large `M`, the equality the paper states | `lem:eventual-degree`, `eq:eventual-degree` | `EventualDegree.eventual_natDegree_eq` |
+| §2 Lem 2.4 | The same on the paper's own data, with `Q'(0) ≠ 0` **derived** from the positivity of the zeros rather than assumed | `lem:eventual-degree` under `eq:Q-hypotheses` | `EventualDegree.eventual_natDegree_eq_of_positive_zeros` |
+| §2 Lem 2.4 | `Λ_Q = ∑_j 1/x_j`, and it is positive for a nonconstant `Q` with positive zeros | `eq:Q-hypotheses`, `eq:leading-z-coeff` | `EventualDegree.lambdaQ_eq_sum`, `lambdaQ_pos` |
+| §2 Lem 2.4 | `P_m ≠ 0` for all large `m` — `thm:main` clause 2(i), out of the same top coefficient | `lem:eventual-degree` | `EventualDegree.eventual_ne_zero`, `eventual_ne_zero_of_positive_zeros` |
+| §2 Lem 2.4 | Eventual degree (upper bound) `deg_z P_m ≤ ⌊m/r⌋` | `lem:eventual-degree` | `Reduction.eventual_natDegree_le` |
+| §2.2 Rmk 2.3 | Both sharpness claims of the reduction bounds, each exhibited rather than re-derived: `eq:reduced-degree-complexity` is attained at every admissible `p` and every `E` in the regime `q ≥ r`, and `eq:reduction-threshold` sits at the right index — the quotient of `eq:canonical-Laurent-division` is exhibited, where `exists_canonical_division` supplies it only existentially, and its top Laurent exponent is `E(q−r) − 1`, one below the threshold.  **Not covered**: the `q ≤ r` branch of the degree claim, and the failure of `eq:reduction-coeff` at `E(q−r) − 1` | `rem:canonical-bounds-sharp`, `eq:reduced-degree-complexity`, `eq:reduction-threshold` | `Sharpness.reduced_degree_bound_attained`, `canonical_division_threshold_sharp` |
+| §2.3 Rmk 2.5 | The onset of `lem:eventual-degree` is not a function of `deg B`: at `Q = 1 − t` and `r = 2` the degree-one weight `B^{(L)} = 1 − (L+1)t` drops the degree at `M = 2L+1`, and `L` is arbitrary.  A sharpness claim, so the witness is the whole content | `rem:degree-attainment`, `eq:leading-z-coeff` | `Sharpness.exists_lateDrop`, `natDegree_lt_of_lateWeight` |
+| §3 Lem 3.6 | Radon's viewing-angle bound: the summed variation of `arg(γ − β)` along an arc of bounded rotation is at most `𝒦_γ + π`, whatever the vantage point.  The argument branches are **built** by integrating `γ'/(γ − β)` rather than hypothesized, so the lift comes out of the fundamental theorem of calculus where Mathlib carries no covering-space theory for `exp` | `lem:viewing-angle`, `eq:viewing-angle-bound` | `ViewingAngle.viewing_angle_bound_of_finite`, `viewing_angle_bound_polar`, `viewing_angle_bound_regular` |
+| §2.2 eq. (2.1) | `K[t,z]/(D) ≅ K[t,t⁻¹]`, the coordinate ring of the denominator curve, with `z ↦ g(t)` | `eq:denominator-coordinate-ring` | `LaurentReduction.denomCoordRingEquiv` |
+| §2.2 Lem 2.2 | `L_N = t^{λ_N} B_N` exists and is unique with `B_N(0) ≠ 0` | `lem:laurent-reduction`, `eq:canonical-Laurent-factorization` | `LaurentReduction.exists_canonical_factorization`, `canonical_factorization_unique` |
+| §2.2 Lem 2.2 | The division identity `N = D S_N + t^{λ_N} B_N` | `eq:canonical-Laurent-division` | `LaurentReduction.exists_canonical_division` |
+| §2.2 Lem 2.2 | `P_m = [t^{m-λ_N}] B_N/D` for all sufficiently large `m` | `eq:reduction-coeff` | `LaurentReduction.reduction_coeff`, `reduction_coeff_eventually` |
+| §2.2 eq. (2.7) | `deg B_N ≤ p_N + E_N max{q,r}`, and the threshold above which the reduction holds | `eq:reduced-degree-complexity`, `eq:reduction-threshold` | `LaurentReduction.natDegree_laurentWeight_le`, `clearedRestrict_eq` |
+| §2 eq. (2.8) | The reduced tail as the fixed finite combination `∑_j b_j H_{M-j}` | `eq:P-linear-combination` | `LaurentReduction.reduced_tail_linear_combination` |
+| §2 eq. (2.14) | `deg P_m = ⌊(m-λ_N)/r⌋` eventually, composing the reduction with the eventual degree | `eq:exact-eventual-degree-shift` | `LaurentReduction.exact_eventual_degree_shift` |
+| §2 Lem 2.4 | `P_m ≠ 0` eventually for a **general bivariate** numerator, by composing the reduction with the reduced sequence's nonvanishing rather than assuming it | `lem:eventual-degree`, `eq:reduction-coeff` | `ClauseThreeReduction.eventual_coeffPoly_ne_zero` |
+| §3 eq. (3.1) | `I_{Q,r} ⊆ (0,∞)`, finite `b` | `sec:geometry`, `eq:ab-def` | `ZeroCount.ftInterval_subset_posRay` |
+| §3 eq. (3.1) | `I_{Q,r} = (a,∞) ⊆ (0,∞)`, the `r > 1` case | `sec:geometry`, `eq:ab-def` | `ZeroCount.ftRay_subset_posRay` |
+| §3 Lem 3.4 | The retained cluster contour is immaterial: two circles enclosing the same nodes in one annulus give the same integral, repeated nodes included | `lem:contour-separation` (the contour may be redrawn around the roots it retains) | `ClusterContour.circleIntegral_cluster_indep`, `circleIntegral_cluster_indep_poly` |
+| §3 Lem 3.4 | The integrand `B(t)/(c t^(M+1))` of `eq:contour-separated-expansion` is analytic off the origin | `lem:contour-separation` | `ClusterContour.analyticOnNhd_clusterIntegrand` |
+| §3 Rmk 3.3 | Shohat's count, the third-party statement the remark cites: a nonzero real polynomial orthogonal against a positive weight to every lower degree vanishes to odd order at at least `n` points of the **open** interval | `rem:quadratic-case`, via `Duran2026LinearCombinations` | `QuasiOrthogonalZeros.card_oddOrderRoots_ge` |
+| §3 Rmk 3.3 | The same for a fixed combination `∑_{j≤K} γ_j p_{n-j}` of consecutive members of an orthogonal system with `γ_0 ≠ 0` — the cited lemma itself | `rem:quadratic-case` | `QuasiOrthogonalZeros.card_oddOrderRoots_linearCombination_ge` |
+| §3 Rmk 3.3 | The Favard branch `p_m` is an orthogonal system on `closure(I_{Q,1})` against the second-kind Chebyshev weight — the hypothesis the remark leaves implicit in "the classical quasi-orthogonal case" | `rem:quadratic-case` | `QuadraticDefect.quadFavard_orthogonal` |
+| §3 Rmk 3.3 | `eq:P-linear-combination` for the coefficient polynomials: `F_M = ∑_j b_j H_{M-j}` | `eq:P-linear-combination` | `QuadraticDefect.ftCoeffPoly_linearCombination` |
+| §3 Rmk 3.3 | The reduced defect: at least `M - deg B` distinct real zeros of `F_M` in `I_{Q,1}`, hence at most `deg B` elsewhere with multiplicity | `rem:quadratic-case` | `QuadraticDefect.ftCoeffPoly_quadratic_card_interior_ge`, `quadReduced_card_outside_le` |
+| §3 Rmk 3.3 | The remark's own sentence, `M - deg B - 2` distinct zeros in `I_{Q,1}`, through the endpoint concession `card_Ioo_ge_of_card_Icc` — weaker than the row above by exactly the two endpoints it gives away | `rem:quadratic-case` | `QuadraticDefect.quadReduced_card_interior_ge` |
+| §3 Thm 3.1 | The second member of the principal pair, and that the pair exhausts the closed disk `\|t\| ≤ τ(θ)` | `eq:principal-pair` | `FTGeometryAssembly.ftPrincipal_conj_eval_eq_zero`, `ft_principal_pair_of_norm_le` |
+| §3 Thm 3.1 | The two endpoint gaps on one constant and one threshold | `eq:endpoint-linear-gap`, `eq:endpoint-fixed-gap` | `FTGeometryAssembly.ft_geometry_endpoint_gaps` |
+| §3 Thm 3.1 | `eq:principal-pair` differentiated on the arc, `t_+'(θ) = (τ'(θ)+iτ(θ))e^{iθ}`, and the interior branch-derivative hypothesis of `weighted_dominance_of_branch` discharged from it.  The two endpoint derivatives are **not** covered — they are `eq:principal-finite-endpoint-regularity`, a different statement | `eq:principal-pair`, `lem:principal-endpoint-regularity` | `FTGeometryAssembly.hasDerivAt_ftPrincipal_ftTau`, `ftPrincipal_hasDerivAt_of_subset` |
+| §4 Lem 4.1 | Linear modulus gap ⟹ exponential decay: `1 + cθ ≤ ζ`, `θ ≤ ε` give `exp(γMθ) ≤ ζ^(M+1)`, `γ = c/(1+cε)` | `lem:near-cluster-suppression` (proof) | `Dominance.exp_le_pow_of_one_add_le`, `inv_pow_le_exp_neg` |
+| §4 Lem 4.1 | A whole nonprincipal cluster, each member of amplitude `≤ C_W W` with that gap, contributes `≤ C_W n e^(-γMθ) W` | `lem:near-cluster-suppression`, `eq:near-cluster-suppression` (the paper applies it at `C_W = 2`, which `eq:lower-residue-ratio` supplies) | `Dominance.cluster_sum_le` |
+| §4 Lem 4.1 | Existence of an `h` beyond which `K e^(-γx)` falls below a prescribed `δ` | `lem:near-cluster-suppression` (final clause) | `Dominance.exists_gap_threshold` |
+| §4 Lem 4.1, §4 eq. (4.4) | One `h`, fixed before `θ` and `W`, on which the whole cluster contributes `≤ δ W` throughout `θ ≥ h/M` | `lem:near-cluster-suppression` (final clause), `eq:retained-range` (the paper spends it at `δ = 1/4`), `rem:endpoint-sign-free` | `Dominance.exists_cluster_threshold` |
+
+`eventual_natDegree_le` is stated over an arbitrary field: the paper uses `ℝ` in
+`sec:reduction`, and the bridge instantiates it at `ℂ` (see below).
+
+## Differences from the paper
+
+Where a Lean proof takes a route the manuscript does not.
+
+| § | Item | Lean (declaration) | Description |
+|---|---|---|---|
+| §3 | Thm.~3.1 `thm:FT-geometry` | `FTBranchEndpointUpper.exists_tendsto_ftTau_nhdsLT_pi` | `eq:ab-def` defines the upper endpoint from the critical polynomial — `t_b` is the negative critical point of `g`, and `b = g(t_b)` follows.  Here the limit is produced first, from the angle count alone, and its identification as a zero of `E` comes afterwards through the Rolle argument `FTBranchEndpoint` runs at `0⁺`; nothing is assumed about the number or the sign of the critical points of `g`, and the negativity of `t_b` is a conclusion rather than a definition |
+| §3 | Cor.~3.7 `cor:linear-phase-variation` | `PhaseVariationSupply.eVariationOn_polarAngle_le` | `cor:linear-phase-variation` gets finiteness of its constants from real-analyticity of the arc on the closed interval, which makes the tangent angle of bounded variation.  Here `C^1` regularity plus a pointwise derivative bound gives a Lipschitz constant, and Lipschitz gives variation — so the constant is named rather than merely shown finite, at the cost of one derivative instead of analyticity |
+| §2 | Rmk.~2.5 `rem:degree-attainment` | `Sharpness.leadCoeffPoly_lateWeight_eval` | `rem:degree-attainment` extracts that coefficient directly from the series and observes the two terms cancel; here the same vanishing is read off `eq:leading-z-coeff`'s polynomial in `ℓ`, which… |
+| §3 | Lem.~3.2 `lem:principal-endpoint-regularity` | `EndpointRegularity.finiteEndpoint_leadingCoeff_pow` | `lem:principal-endpoint-regularity` builds the branch from a real one-sided `y ≥ 0` with `z - z_e = ε y^k` and an analytic `k`-th root `Λ = (-ε t^r/G(t))^{1/k}`, and reads `γ ≠ 0` off that… |
+| §3 | Rmk.~3.3 `rem:quadratic-case` | `QuadraticCase.quadFavard` | `rem:quadratic-case` defines `p_m = q₀(-q₀)^m H_m` from the generating function and derives the recurrence. Here the recurrence is the definition and the identification with `q₀(-q₀)^m H_m` is… |
+| §3 | Rmk.~3.3 `rem:quadratic-case` | `QuasiOrthogonalZeros.card_oddOrderRoots_linearCombination_ge` | The cited lemma places its zeros in the convex hull of the support of a positive measure and states them for a general orthogonal polynomial system. Here the measure is a weight positive on an… |
+| §3 | Lem.~3.4 `lem:contour-separation` | `AttractorPole.div_ftDen_eq` | The paper reaches this through `lem:contour-separation`, reading the residue off a contour integral and treating the difference as a removable singularity. Here it is polynomial algebra: `D = (t-\tau)S`, and the pole is divided out directly. |
+| §3 | Lem.~3.4 `lem:contour-separation` | `ContourRemainder.norm_contourRemainder_le` | `lem:contour-separation` states this for an arbitrary rectifiable Jordan contour, with `L_Γ` its length. Mathlib's circle integral is over `sphere 0 R`, so the estimate is taken there and `L_Γ = 2πR`… |
+| §3 | Lem.~3.4 `lem:contour-separation` | `PoleExpansion.div_eq_poleSum_add_rem` | `lem:contour-separation` is stated as a contour integral, its remainder estimated by the length of the contour and the sup of `B/D` on it. Here the decomposition is partial fractions by polynomial… |
+| §3 | Lem.~3.4 `lem:contour-separation` | `PoleExpansion.hasDerivAt_ftContourRem` | The paper bounds `∂_zE_M` through holomorphy — `lem:contour-separation` makes `E_M` holomorphic in `z` over a complex neighborhood and Cauchy's estimate on a fixed disk gives the same exponential.  Here the parameter is real and the expansion exact, so neither holomorphy nor a disk is formed, which is why the hypotheses are a real interval and a zero-free circle. |
+| §3 | Lem.~3.5 `lem:amplitude-divisor` | `Geometry.rootMultiplicity_ftCritical` | `lem:amplitude-divisor` reads this order off the fiber map: `z_e - g(t)` vanishes to order `k` at `t_e`, hence `t^r g'(t)` to order `k-1`. Here it is a statement about the single polynomial `E`,… |
+| §3 | Lem.~3.6 `lem:viewing-angle` | `ViewingAngle.viewing_angle_bound` | `lem:viewing-angle` cites Radon's theorem on the viewing angle of an arc of bounded rotation; here the bound is proven, by cutting the parameter interval where `sin(ϑ - φ)` vanishes and telescoping… |
+| §3 | eq.~(3.10) `eq:contour-remainder-bound` | `DominanceFT` | The manuscript gets that uniformity by decreasing `\varepsilon` until `eq:contour-remainder-bound`'s hypotheses hold on each region; here it is compactness, and the bound is stated on `B/D` over a… |
+| §3 | eq.~(3.15) `eq:principal-decomposition` | `ContourRemainder.principal_decomposition_of_pair` | The paper reaches `eq:principal-decomposition` through the residue expansion `eq:contour-separated-expansion` of `lem:contour-separation`. Here the pair is divided out algebraically instead —… |
+| §3 | eq.~(3.20) `eq:viewing-angle-bound` | `ViewingAngle.logLift` | `eq:viewing-angle-bound` quantifies over a continuous branch of the argument and does not construct one; here the branch is built, as `log(γ(a) - β) + ∫ γ'/(γ - β)`. Mathlib has no… |
+| §3 | eq.~(3.21) `eq:linear-phase-variation` | `PhaseVariation.linear_phase_variation` | `eq:linear-phase-variation` bounds the summed variations over the components of `(0, π/r)` with the zeros of `W` deleted; here the bound is on the variation of one branch over one set, and… |
+| §3 | eq.~(3.21) `eq:linear-phase-variation` | `PhaseVariation.linear_phase_variation` | A second, independent difference at the same equation: what the regularity hypothesis **costs**, not how the variation is summed.  The manuscript *derives* finite total variation — `W` differs near each endpoint from a real-analytic nonvanishing function by the factor `d^p` alone — while `linear_phase_variation` assumes that conclusion directly, as `eVariationOn ψ s ≤ ofReal κ₀`.  Bounded variation is strictly weaker, and is never discharged from analyticity anywhere in the tree. |
+| §4 | Thm.~4.2 `thm:weighted-dominance` | `Amplitude.exists_amplitude_divisor_lower_bound` | `thm:weighted-dominance` chooses *pairwise disjoint* neighborhoods of the `θ_j` and raises `M_0` until every deleted window sits inside its own. Here the collars need not be disjoint and there is no… |
+| §4 | eq.~(4.2) `subsec:proof` | `ClauseThreeComposition` | `subsec:proof` runs one narrative: the dominance bound, the phase count, and the defect split are established in sequence over the same picture. Here the branch geometry is isolated from… |
+| §4 | eq.~(4.2) `subsec:proof` | `MainClauses.DominanceSupply` | `subsec:proof` obtains the interior zero set inside the count of `prop:angular-discrepancy` and reads `thm:main`'s clauses off that one narrative; here the supply of `thm:weighted-dominance` is… |
+| §4 | eq.~(4.4) `eq:retained-range` | `DominanceFT.ftPrincipalAmp_lower_bound` | The paper writes the two endpoints as separate passages, `\theta\downarrow0` and `\theta\uparrow\pi/r`, each with its own constants. Here both are covered at once by a **chart** `w : ℝ → ℝ` mapping… |
+| §4 | Prop.~4.4 `prop:angular-discrepancy` | `PhaseCount.exists_phase_points_of_length` | The paper counts `L/\pi - 1` phase points, reading the first one off the position of `Φ(a)`. Here the endpoints of the integer range are taken as `\lceil Φ(a)/\pi\rceil` and `\lfloor Φ(b)/\pi\rfloor`, so no first point has to be located. |
+| §5 | eq.~(5.9) `eq:isolated-cancellation-rate` | `AttractorPole.isolated_dominant_cancellation` | The paper obtains `eq:isolated-cancellation-rate` by a second Rouché argument on a shrinking disk `\|z - z_0\| = C_*η^{M/ν}`. Here the rate is pointwise: at a zero of `F_M` the two sides of… |
+| §1 | Thm.~1.1 `thm:main` (cl. 3) | `ClauseThreeDefect` (module header) | `subsec:proof` reads the exceptional bound and the defect decomposition off one phase count.  Here the interior supply, `lem:eventual-degree`'s upper half and the counting engine are three separate inputs, because the defect family must be carried in a form whose constants are visible outside the quantifier over numerators. |
+| §3 | Thm.~3.1 `thm:FT-geometry` | `FTMinModulus.RealCritical` | `Forgacs2017RationalDenominator` Prop. 1 reaches "the derivative does not vanish on `(0, t_a)`" by naming `t_a` as the first positive critical point and citing their Lemma 3 for `τ < t_a`.  Here `t_a` is not named separately: the endpoint limit of `τ` **is** the first positive zero of the critical polynomial, proved so by a gap count on `Σ`, and Lemma 3 enters as `ftTau_strictAnti` against that limit.  Naming one object rather than two is what lets the comparison be stated with no auxiliary existence claim |
+| §3 | Thm.~3.1 `thm:FT-geometry` | `FTMinModulus.ArgumentCone.negDivPow_ftTau_lt_ftBranchZ` | `Forgacs2017RationalDenominator` obtains the magnitude comparison from the minimum-modulus property on the circle `\|t\| = τ(θ)`, so it sits downstream of their Props. 1--2.  Here it is a chord inequality using no complex geometry at all — each chord `\|a_k − τ\|` beats `\|a_k − τe^{−iθ}\|` by exactly `2 a_k τ (1 − cos θ)`.  Taking it first is what lets the argument condition be approached without the minimum-modulus statement it would otherwise depend on |
+| §3 | Thm.~3.1 `thm:FT-geometry` | `FTMinModulus.PrincipalGap.ftProp1_closing_principal` | `Forgacs2017RationalDenominator`'s squeeze runs on the *intermediate* index, so continuity of the index-`l` radius supplies an angle between the two compared ones — which needs that branch to exist at both, and it need not: the index-`l` branch lives only on an initial segment of the arc, and `not_arc_wide_of_two_mul_lt` exhibits an arc angle outside it whenever `2r < n`.  The squeeze here runs on the *principal* index instead, in the other direction |
+| §3 | Lem.~3.5 `lem:amplitude-divisor` | `CubicPhaseDerivative.cubicTau_branch_deriv` | `lem:amplitude-divisor` argues qualitatively — the singular part of `W'/W` at an amplitude zero or an endpoint is real, so it drops from the imaginary part, and compactness of what is left supplies `κ`.  At this pencil the phase derivative has a closed form instead, rational in the branch radius alone with no angle surviving, in which the three would-be singularities cancel visibly between a numerator and the modulus of the same factor.  The closed form is not in the manuscript, and it is what makes `κ` a constant rather than a function of the subarc |
+| §4 | Thm.~4.2 `thm:weighted-dominance` | `CubicMain.cubic_shrinkingWindow` | `thm:weighted-dominance` proves the whole retained range in one pass with the windows of `eq:amplitude-deletion`, whose half-width `e^{−cM/ν_j}` is exponentially small.  Here the arc is covered twice — the composed dominance bound off a fixed window, and this band inside it — and the half-width obtained is `h/M`, weaker than the manuscript's and all `eq:retained-range` needs |
+| §4 | Thm.~4.2 `thm:weighted-dominance` | `CubicPhaseDerivative.cubicPsi` | `lem:amplitude-divisor` bounds `ψ'` on each component of `(0,π/r)` minus the amplitude's zeros, endpoints included, by identifying and discarding the real singular parts.  Here the bound is on a compact subarc of the open arc that misses the zero, which is the only form `exists_phaseZeros` consumes; the endpoint analysis of `eq:W-endpoint-form` is not reproduced |
+| §5 | Cor.~5.6 `cor:panel-B-attractor` | `AttractorRate.eval_derivative_ftDen_panel_factor` | `cor:panel-B-attractor` reads simplicity of the dominant root off the factorization of the cubic directly.  Here the factorization is not differentiated: the two Vieta relations are substituted into the derivative, which becomes an identity of rational functions of `t_*` alone.  The routes agree; this one avoids carrying a polynomial identity through `derivative` |
+| §4 | Thm.~4.2 `thm:weighted-dominance` | `InteriorSupply.exists_interior_data_on_subinterval` | `subsec:proof` works with one separating circle across the compact interior.  Here the circle is allowed to change finitely often, because one circle for the whole interior is a comparison between `sup \tau` and the non-principal infimum at *different* angles, and `thm:FT-geometry`'s modulus ratio is a same-angle statement that does not supply it.  Nothing is lost — the constants reassemble over a finite set — and `check_interior_fixed_radius.py` records that a single circle does in fact serve on every pencil measured, as a measurement rather than an assumption |
+| §3 | Thm.~3.1 `thm:FT-geometry` | `FTGeometryBoundary` | The manuscript locates `t_a`, the smallest positive critical point of `g`, by the sign analysis of the angle sum.  At `n = 1` that analysis has nothing to do: `E` is linear, so `t_a = ra/(r-1)` is read off it, and the branch radius is available in closed form `\tau = a\sin(r\theta)/\sin((r-1)\theta)` rather than as the solution of an implicit equation.  Not a different theorem — the same statement where the general machinery is unnecessary |
+| §3 | Thm.~3.1 `thm:FT-geometry` | `FTGeometryCone` | The manuscript closes the negative-real exclusion as a separate paragraph — their Lemma 5 at `r = 1`, and for `r ≥ 2` the assertion that `C₁ ∩ C₂` can meet `ℝ₋` only when `r = 1`.  Here it is not a step at all: both cases of the dichotomy bound `\|\arg w\|` strictly below `π/r ≤ π/2`, so the negative axis is excluded outright and the odd `r ≥ 3` case that `RealCritical` records as out of reach through their route never has to be reached.  Only the *positive* real exclusion is still consumed, and only to keep `\|\arg w\|` away from `0` |
+| §3 Thm 3.1 | `thm:FT-geometry` | `EndpointSeparation` | The manuscript takes the separating circle as given, describing it as a contour with the retained zeros inside and the rest outside.  Here the radius is **constructed** from the spectrum, so the contour is produced rather than posited and the count on it is proved rather than assumed. |
+| §4 Thm 4.2 | `thm:weighted-dominance`, `eq:endpoint-linear-gap` | `EndpointPackage.exists_linear_gap_of_slopes` | Prop.~3 states the cluster expansion with an `O(δ²)` remainder and reads the gap off it.  Here only the **first-order limit** is used — a limit above `c₀` is eventually above `c₀` — so the endpoint's second-order behavior never enters, and the `sin θ` degeneracy of `ftAngleSumDerivTau` at `θ = 0` is never approached.  `τ` is not differentiated either: `‖γ(δ)‖ = τ(δ)`, so the ratio is a modulus of a quotient and the branch radius enters only through the principal point's own slope. |
+| §5 | Prop.~5.3 `prop:local-strong-clock` | `ConsequencesComposition.ClockSpacing.phase_mvt_bound` | The manuscript obtains the bounded second derivative from real-analyticity of `W`; analyticity is how the paper *gets* it, not what the Taylor step *uses*, so the formalization takes the weaker `C²` hypothesis the step consumes. |
+| §3 | Thm.~3.1 `thm:FT-geometry` | `CubicBranchBridge` (module header) | `thm:FT-geometry` identifies the branch through the implicit angle-sum equation and its monotonicity in `τ`, which is what `ftTau_eq_of` reproduces.  The verification here goes the other way: the witness has a closed form, so the branch angle is *computed* — with `ψ = (π-θ)/3` it is `π - ψ`, and the whole content collapses to `sin 2ψ = sin 2ψ` after the triple-angle formulas.  The paper has no reason to do this, since it never fixes a pencil; it is available only because this one is concrete |
+| §5 | Prop.~5.3 `prop:local-strong-clock` | `CubicClockSpacing.cubicTauDeriv2` | `subsec:strong-clock` bounds `ψ''` by declaring `W` real-analytic and nonvanishing on `𝒥₀` and appealing to compactness, which is the right move where `τ` is only implicitly defined.  At this pencil `cubicTau_closed_form` makes `τ = 1/(2cos((π-θ)/3))`, so `τ''`, `γ''`, `L'(γ)` and `W''` are written down by the product, quotient and chain rules and no compactness argument is needed.  The paper's route is the general one; this one is available only because the pencil is concrete |
+| §3 | Lem.~3.5 `lem:amplitude-divisor` | `Geometry.posShiftProd_deriv_pos` | The paper and the cited work invoke **interlacing** of the zeros of `Q'` and `Q''` with those of `Q`.  Nothing about zeros is used here: the product rule gives `R'' = 2R₀' + (X+a)R₀''` at each step, so the three sign facts prove themselves together in one induction. |
+| §3 | Lem.~3.5 `lem:amplitude-divisor` | `Geometry.exists_eval_derivative_eq_zero_between` | The classical statement is interlacing of `Q'`'s zeros with `Q`'s, by Rolle in every gap plus a degree count — which needs `Q`'s zeros **distinct**, and `eq:Q-hypotheses` does not give that.  Only one gap is used here. |
+| §3 | Lem.~3.5 `lem:amplitude-divisor` | `Geometry.eval_derivative_two_eq_mul_logDeriv` | The leave-two-out form of `Polynomial.derivative_prod` would have to separate diagonal terms — erasing one element twice — and **repeated roots are the normal case** under `eq:Q-hypotheses`, not an edge one.  Differentiating `P' = P·S₁` avoids the split entirely. |
+
+## Differences from cited works
+
+Third-party results the argument consumes are formalized here too.  These are the
+departures our Lean formalization makes from third-party proofs as written.
+
+### Forgács–Tran [1]
+
+| Their result | Lean (declaration) | Description |
 |---|---|---|
-| `≤ C` zeros off `(0,∞)`, all `m` | `thm:main` (first clause) | `Main.main_bound` |
-| `≤ C` zeros off `I_{Q,r}`, large `m` | `thm:main` (second clause) | `Main.main_bound_interval` |
-| off-ray bound from recurrence + phase count | `thm:main` (first clause) | `Main.main_bound_ofRecurrence` |
-| `≥ deg P_m - C` **distinct** zeros inside `I_{Q,r}`, large `m` | abstract, `Corollary 6.2` | `Main.interior_distinct_count` (restates a hypothesis — see below) |
+| — | `AttractorPole.taylorCoeff_div_ftDen` | The paper reads `F_M` off the generating function `B/D` as a coefficient and never needs it to be a polynomial in `z`. Rouché in the parameter does need that, so here `F_M` is *defined* by… |
+| — | `AttractorPole.exists_unique_root_nearby` | The paper shrinks the `z`-neighborhood so that `t(z)` is the only denominator zero inside `Γ_0`, by continuity of the roots. Here the same conclusion is Rouché in `t`, comparing `D(·,z)`… |
+| — | `Cluster.cos_clusterAngle_lt` | The paper reads the sign off the position of `\omega_j` on the unit circle. Here it is the strict monotonicity of `\cos` on `[0,\pi]` applied twice, the angles above `\pi` reflected through… |
+| — | `Consequences.local_clock_spacing` | The paper obtains the first-order bound `Δ_M = O(M^{-1})` from `Φ_M' ≍ M`. Here it is derived from the quantization identity together with the mean-value bound on `ψ`, so `Φ_M'` is never… |
+| — | `Consequences.exists_unique_zero_near_phase_point` | The paper indexes the phase points as `(k+1/2)π` and splits on the parity of `k`. Here the window is keyed to `cos u₀ = 0`, from which `sin u₀ = ±1` follows, so that value carries the sign… |
+| — | `EndpointDominance.interior_remainder_bound_of_bound` | The paper gives the compact interior its own passage. Here it is the endpoint split at `s = \{t_+, t_-\}`: the nonprincipal sum is then empty, so one theorem covers both regions and the… |
+| — | `EndpointRegularity.z_endpoint_order` | In the paper the order is immediate because the parameter is *defined* by `z - z_e = ±y^k`. Here `δ` is the angular distance, an independent variable, so the order is derived: substituting… |
+| — | `EndpointRegularity.infiniteEndpoint_z_asymptotic` | The paper passes to `w = z^{-1/r}` and applies the implicit function theorem. Here the same content is stated as a limit of `η^r z(η)`, obtained by solving the root equation for `z`… |
+| Lemma 2 | `FTBranchAngle` | The paper produces the `n`-tuple from the complex implicit function theorem in `n + 1` variables followed by analytic continuation. The relation `a sin y = τ sin (y - θ)` is instead solved… |
+| Case 1 | `FTBranchAngleBound` (module header) | The paper's Case 1 changes variables to `η₁ = θ₁`, `η_k = π - θ_k` and applies (17) to the resulting angles. Here the same content is carried by `abs_sin_sum_le` and `sin_nat_mul_lt`… |
+| (15) | `FTBranchAngleBound.sum_sin_two_mul_sub_lt` | They split into `r ≥ n/2` and `n > 2r` and prove the second by peeling (18)–(20) one term at a time.  Both cases are handled at once by `ftPhaseWeight_merge`: in the reflected angles `ψ_k = π - θ_k`, positive and summing to `π - rθ`, merging any two angles never increases the weight. |
+| — | `FTBranchDeriv` | The paper obtains this derivative by logarithmic differentiation of `∏_k (τ_k - t₀ e^{2iθ}) = e^{2irθ} ∏_k (τ_k - t₀)` and then eliminates `dτ`; here `τ` is held fixed and the closed form… |
+| — | `FTBranchEndpoint` | The paper argues that `τ(θ)e^{±iθ}` are two zeros of `P + z t^r` which collide as `θ → 0`, so the limit is a multiple zero, and then reads the critical polynomial off the derivative. Here… |
+| Lemma 2 | `FTBranchExistence` | Two departures, both forced. The tuple is built from the closed form of `FTBranchAngle` rather than from the complex implicit function theorem, so existence reduces to the intermediate… |
+| — | `FTBranchMonotone` | The paper differentiates `τ(θ)` itself, which needs the branch to be known differentiable; here `τ` is never differentiated. Only the partial derivative in `θ` at fixed `τ` is used, and… |
+| — | `FTBranchRegularity` | The paper invokes the complex implicit function theorem in `n + 1` variables and then continues analytically. Here the angle system has already been reduced to the single scalar equation… |
+| — | `PoleExpansion.taylorCoeff_poleRem_eq_contour` | The paper writes the expansion in this direction from the start, defining `E_M` by the contour integral and reading the residues off it. Here the expansion is built algebraically, by… |
+| — | `QuadraticCase.quadFavard_eval_eq_chebyshev` | The paper writes the constant as `(q₀q₂)^{m/2}`. Here it is `s^m` for `s = √(q₀q₂)` — the same number, but a natural-number power, so the induction on the Chebyshev recurrence runs in… |
+| — | `QuadraticDefect.quadFavard_orthogonal` | The paper names the case classical and takes the orthogonality of the Chebyshev system as known. Mathlib carries the first-kind orthogonality only, so the second-kind relation is proved… |
+| — | `QuadraticDefect.quadReduced_card_oddOrderRoots_ge` | The paper reads the count off `Duran2026LinearCombinations` in the closed interval and concedes two endpoints to reach the open one, so it states `M - deg B - 2`. `card_oddOrderRoots_ge`… |
+| Prop. 1 | `FTBranchProp1` | Their "we conclude that in fact `θ̃ = θ* = θ`" compresses a two-case argument, and the non-strict equivalences displayed do not close it — `θ̃ ≥ θ ↔ θ̃ ≥ θ*` with `θ̃` between the two gives only `θ̃ = θ*`.  The strict form of the same equivalences closes it, and both cases are carried explicitly. |
+| Lem. 4(ii) | `FTBranchZMono` (module header) | They differentiate the closed form logarithmically and eliminate `dτ` to reach their (23).  Here `z = g(t₊(θ))` is differentiated as a composite, and the elimination is replaced by a fact about the codomain: `z` is real-valued, so the imaginary part of the composite derivative vanishes, and that vanishing **is** the relation between `τ'` and `Σ`. |
+| Prop. 3, Case 2 | `FTMinModulus.ClusterExpansion.cnorm_sq` | The paper reads the cluster directions off the displayed asymptotics.  Here the root of unity is constructed from the polar decomposition, so no branch of a `ρ`-th root is chosen and no asymptotic is taken; the fractional-power step a product-of-factors argument needs is avoided entirely. |
+| Prop. 3 | `EndpointBranch.tendsto_ftTau_blowup` | The manuscript reads the endpoint expansion off `Forgacs2017RationalDenominator` Prop. 3's cluster expansion, an asymptotic statement about the `ρ` roots.  Here nothing is expanded: the blow-up `τ = x₁ − sθ` makes the angle-sum equation regular at `θ = 0`, its limit is strictly increasing in `s`, and its value is pinned by `arg_blowup_root`.  The convergence is an intermediate-value squeeze against a monotone family — no implicit function theorem, and no expansion whose remainder has to be controlled. |
+| — | `FTMinModulus.ClusterExpansion.abs_sub_linear_le_of_deriv_bound` | `subsec:FT-geometry` states the endpoint behavior as an asymptotic.  Here the second-order bound is obtained from the first-order one by the mean value theorem on `[a,δ]`, the left endpoint then sent to `0` against the limit of `τ`, so the conclusion is pointwise on the window with an explicit constant — which an asymptotic does not give. |
+| — | `CubicWitnessInterior` | `lem:amplitude-divisor` reads the divisor off `B`'s zeros through injectivity of the branch.  Here the branch is injective for a stronger reason — `τ` is strictly monotone, so the modulus alone separates angles — and that is what the proof uses; nothing is assumed about `B` beyond what is computed. |
+| — | `CubicPhaseSign.cubic_hsign` | `subsec:proof` keeps the amplitude's zero set and the deleted windows apart — the windows are sized by the remainder, the divisor is handled by `lem:amplitude-divisor`.  Here one deletion serves both, because the compatibility wrapper `weighted_dominance_of_branch` binds `Θ` ahead of `hinterior`'s per-epsilon quantifier and so forces an `M`-independent window wide enough to contain the divisor, and on the retained range the amplitude is then nonzero for the same reason the remainder is small.  A consequence of that wrapper's binder order, not a simplification of the argument — the `_at` forms bind `Θ` after `ε` and would not force it. |
+| — | `FTBranchUpperRefutation` | The paper states the upper-endpoint expansion under `r > 1` and never evaluates the principal point *at* the endpoint, so nothing here contradicts it.  What is refuted is a Lean binder: `hγ0₁` pins `te₁` to `ftPrincipal τ b` while the collapse forces `τ(b) = 0`, so `hte₁ : te₁ ≠ 0` cannot hold for any `r ≥ 2`. |
+| Prop. 3, Case 2 | `FTMinModulus.ScaleMatching.exists_cluster_member_expansion_family` | The cited proposition asserts the `ρ` cluster members and their directions from the displayed asymptotics.  Here they are produced: Rouché against the model `q(x₁)(t−x₁)^ρ + z₀x₁^rδ^ρ` puts a root in each of `ρ` disjoint disks, and the direction is matched to the ratio step's using only `ω^ρ = −1`, through the crude gap `‖α‖/(4ρ)` rather than the sharp `2x₁`, so no trigonometry enters.  The count becomes a theorem rather than a reading — an asymptotic displaying `ρ` branches does not by itself say `ρ` roots exist at each small `δ`. |
+| Lem. 6 | `FTMinModulus.UpperEndpoint.continuousOn_ftBranchZ` | `subsec:FT-geometry` reads continuity off the regularity of the branch and computes the derivative.  Here it comes from the chord-product form, whose factors are square roots of polynomials in `τ(θ)` and `cos θ`, so only continuity of `τ` is consumed and no derivative is formed. |
+| Lem. 3 | `FTBranchGap` (module header) | They locate the limit through the critical polynomial `E`, which has zeros in later gaps too.  Here the bound never mentions `E` — it is the angle count against a fixed-radius observation. |
+| Lem. 3 | `FTBranchGap.lt_of_tendsto_ftTau` | `E` cannot give this at all: at a repeated `a j`, `E(a j) = 0`, so the critical-point characterization does not separate `L` from `a j`.  The angle count does, and uniformly in `θ`. |
+| Lem. 5 | `FTBranchLemma5` (module header) | Their proof is the classical multiplier-sequence one; Mathlib carries no Pólya--Schur theory at the pin, so the route here is a root count. |
+| Lem. 2 | `FTBranchLimitPoint` (module header) | Forgács--Tran's Figures 1--2 carry the count; here each angle's limit comes from `FTBranchAngle`'s closed form, so no figure is consulted. |
+| Lem. 6 | `FTBranchUpper` (module header) | They reach the endpoint through the critical polynomial; the collapse is proved here from the angle count alone. |
+| Lem. 6 | `FTBranchUpper.tendsto_ftTau_div_nhdsLT_upper` | The angle count once more, at the upper endpoint: the complements `π - θ_k` sum to `π - rθ = rδ` exactly, each is `ftArccot` of an argument growing like `a_k/(τ sin(π/r))`, so the sum gives `rδ = τ sin(π/r) ∑ 1/a_k`.  No derivative and no critical point enters. |
+| Prop. 3 | `FTBranchZRate` (module header) | They read the size of `z` off the cluster expansion, which would be **circular** here — that expansion is what the rate is wanted for.  The rate comes from the principal point alone. |
 
-## Module map
+## Dependencies
 
-Paper sections (of `../shields-2026-forgacs-tran-numerators.tex`): 1
-`sec:introduction`, 2 `sec:reduction`, 3 `sec:geometry`, 4 `sec:dominance`, 5
-`sec:proof`, 6 `sec:consequences`, 7 `sec:questions`.  Each module header names
-the section(s) it formalizes.
+This development depends on modules in the repository-wide `_lean_shared/` tree,
+outside the paper's `lean/` directory.
 
-```
-ZeroCount    — §5,§3    exceptional-zero engine; posRay / ftInterval / ftRay geometry
-Reduction    — §2       prop:initial-data uniqueness; eventual-degree upper bound
-LinearCase   — §5,§2    prop:linear-case: closed form over ℂ, m-uniform count,
-                        and its identification via Reduction.initial_data_unique
-Necessity    — §6       two ingredients of prop:N-dependence (NOT the proposition)
-Bridge       — §2,§3,§4 analytic inputs as the FTInputs hypothesis structure
-Main         — §1,§5    thm:main from the engine + the bridge
-AxiomCheck   —          regression guards; #print axioms footprints
-```
-
-The engine (`ZeroCount`) is stated over an arbitrary integral domain, so it
-applies both to the real coefficient polynomials (`Necessity`) and to their
-complex zero sets (`LinearCase`, `Main`).
-
----
-
-# The analytic bridge — `FTInputs`
-
-The proven core (`ZeroCount.exceptionalRoots_card_le`) turns a supply of
-guaranteed interior zeros into an exceptional-zero bound.  The *supply* itself is
-the analytic content of §§2–4 and sits well outside current Mathlib.
-
-Rather than positing that content with global `axiom`s — where a jointly
-inconsistent set would silently make every downstream statement provable — it is
-collected as the fields of a single **`structure FTInputs`** (`Bridge.lean`) and
-passed to `Main` as an explicit hypothesis.  Consequently `#print axioms
-main_bound` reports only `[propext, Classical.choice, Quot.sound]`: the analytic
-dependence lives in the theorem's *type*, not in the ambient axiom set.
-`ftInputsWitness` exhibits a concrete model, so `ftInputs_nonempty` certifies the
-fields are jointly satisfiable and `main_bound` is not vacuously conditional on a
-contradictory bundle.
-
-## Fields of `FTInputs`
-
-| Field(s) | Paper | Content |
+| Component | Used by | Description |
 |---|---|---|
-| `coeffPoly` | §2 `lem:laurent-reduction` | the coefficient polynomials `P_m ∈ ℝ[z]`, promoted to `ℂ[X]`; their `ℂ`-zeros are the object of `thm:main` |
-| `ftSet`, `ftSet_subset` | §3 `thm:FT-geometry`, `eq:ab-def` | `I_{Q,r}` as a *set* with `ftSet ⊆ posRay`.  Carried as a set, not a pair of real endpoints: `eq:ab-def` puts `b = +∞` precisely when `r > 1`, which no `ftB : ℝ` can express, and `a = 0` exactly when the smallest zero of `Q` is repeated, which `0 < ftA` would have excluded.  Build with `ftInterval a b` or `ftRay a`; both inclusions need only `0 ≤ a` |
-| `interiorZeros`, `interiorZeros_root`, `interiorZeros_mem` | §4–§5 `thm:weighted-dominance`, `prop:univariate-main` | the distinct genuine zeros of `P_m` inside `I_{Q,r}` produced by the phase count |
-| `Cbulk` | §5 `prop:univariate-main` | the bulk-defect constant `C = C(Q,r,N)` |
-| `bulk_zero_count` | §2 + §4–§5 | for large `m`, `deg P_m - C ≤ #interiorZeros` |
+| `Shields.Analysis.Complex.CircleDeformation` | `ClusterContour`, for `Shields.circleIntegral_cluster_deform` | Cauchy's theorem across a doubly connected region: two concentric circles with a non-concentric small disc of poles between them, repeated nodes allowed |
+| `Shields.Analysis.Complex.NewtonInterpolation` | reached transitively, through `CircleDeformation` | The Newton form of a divided difference, by which `CircleDeformation` splits the integrand into proper rational terms plus an analytic remainder (`Shields.exists_newton_form_div`) |
 
-**Missing Mathlib machinery.**  Mathlib has none of: the real-analytic implicit
-description of the minimum-modulus branch `t_±(θ)` of `Forgacs2017` and its
-endpoint expansions; the contour/residue estimates of `lem:cluster-safe` and
-`lem:degree-drop`; or the bounded-phase-variation argument-principle count.  These
-are the analysis of a one-parameter family of complex polynomial roots (Rouché,
-the argument principle, log-derivative estimates).  Discharging the
-geometry/dominance fields means building that theory; `coeffPoly` additionally
-needs the coefficient-extraction apparatus of a rational generating function.
+## License
 
-## The degree bound is derived, not assumed
+Code is made available under the MIT license (see `LICENSE.txt`), or as
+otherwise noted in the comments of the file.
 
-The `bulk_zero_count` field bundles two facts: the eventual-degree bound
-`deg P_m ≤ ⌊m/r⌋` (§2 `lem:eventual-degree`, upper half) and the phase count
-`⌊m/r⌋ - C ≤ #interiorZeros` (§4–§5).  The first is **not** analytic — it is a
-purely algebraic consequence of the §2 recurrence, and it is proven in
-`Reduction.eventual_natDegree_le`.
+## References
 
-`Bridge.FTInputs.ofRecurrence` uses this: it assembles an `FTInputs` from the §2
-defining recurrence `∑_i d_i F_{m-i} = C(b_m)` (`d_i = C(Q.coeff i) + [i=r]·X` over
-`ℂ`) together with the genuinely analytic phase count alone, and *derives*
-`bulk_zero_count` by combining `eventual_natDegree_le` with the count.  So the
-degree half of `lem:eventual-degree` is not an independent hypothesis of
-`thm:main`.  `Main.main_bound_ofRecurrence` states the off-ray bound directly over
-these strictly weaker inputs.
+1. T. Forgács and K. Tran, *Zeros of polynomials generated by a rational function
+   with a hyperbolic-type denominator*, Constructive Approximation **46** (2017),
+   no. 3, 617–643. [doi:10.1007/s00365-017-9378-2](https://doi.org/10.1007/s00365-017-9378-2)
+2. A. J. Durán, *Zeros of linear combinations of orthogonal polynomials*,
+   Mediterranean Journal of Mathematics **23** (2026), Art. 148.
+   [doi:10.1007/s00009-026-03145-9](https://doi.org/10.1007/s00009-026-03145-9)
 
-## What the proven core supplies
-
-Given the interior-zero supply, `ZeroCount.exceptionalRoots_card_le` converts
-"`≥ deg P_m - C` interior zeros" into "`≤ C` exceptional zeros", and `Main`
-absorbs the finitely many small `m` by the maximum degree over `range m0`.  That
-conversion — the logical crux that makes the bound *uniform in `m`* — is
-machine-checked, as is the reduction of the degree bound to the phase count.
-
-## What remains — the honest scope of this development
-
-`lake build` is green with no `sorry` and no project axiom, and that is a claim
-about *axiom hygiene*, not about coverage.  This section records what the
-development does **not** establish, so the green build cannot be misread.
-
-### 1. `main_bound` and `main_bound_interval` are conditional, and the condition carries the analysis
-
-All three `Main` theorems take `FTInputs` (or, for `ofRecurrence`, the recurrence
-plus `phase_count`) as an explicit hypothesis.  What is machine-checked is the
-*bookkeeping* of `thm:main`: the conversion of an interior-zero supply into an
-exceptional-zero bound uniform in `m`, the absorption of small `m`, and the
-derivation of the degree half from the §2 recurrence.  The analytic substance —
-§3 pole geometry, §4 dominance, the §5 phase count — is assumed.  So these are
-formalizations of `thm:main` **conditional on §§3–5**, not unconditional proofs of
-it.
-
-### 2. `Necessity` does not prove `prop:N-dependence`
-
-It proves two mechanical ingredients: a witness family with arbitrarily many
-off-ray roots (`exceptional_unbounded`) and root-count inheritance under
-divisibility (`dvd_exceptional_le`).  Four links to the proposition are missing:
-quantification over the denominator; the hypothesis `R ∣ P_m` that
-`dvd_exceptional_le` consumes and nothing supplies; the passage from these
-`ℝ`-side `roots.filter` counts to the `ℂ`-side `exceptionalRoots … posRay` that
-`main_bound` bounds; and the negation `¬ ∃ C, ∀ N, …` itself.
-`rem:optimality-of-bounded-defect` is not formalized at all.  The module docstring
-states this.
-
-### 3. `interior_distinct_count` restates a hypothesis
-
-`FTInputs.interiorZeros m` is a `Finset ℂ`, so its members are already
-pairwise-distinct, and `bulk_zero_count` already asserts the cardinality bound.
-The corollary exists so the Lean statement mirrors the shape of the paper's
-distinct-zero claim; it derives no new content.
-
-### 4. `thm:main` clause 2 is formalized in one of its three parts
-
-Clause 2 asserts, for all large `m`: (i) `P_m ≠ 0`; (ii) at most `C` zeros outside
-`I_{Q,r}` with multiplicity; (iii) at least `deg P_m - C` distinct zeros inside.
-Only (ii) is proven — `main_bound_interval`.  Part (iii) is `interior_distinct_count`,
-i.e. assumed (see 3).  Part (i) appears as the hypothesis `coeffPoly m ≠ 0` on all
-three theorems and rests on the **lower** half of `lem:eventual-degree`
-(`deg F_M = ⌊M/r⌋`, not merely `≤`), which `eventual_natDegree_le` does not
-provide.  That lower half — the paper's attainment argument via the leading
-coefficient `B(0)λ^s/s! ≠ 0` — is the one place the paper concludes what this
-development assumes.
-
-### 5. The `P_m ↦ F_{m+rE-μ}` reduction is not formalized
-
-`ofRecurrence` posits a recurrence with constant right-hand side `C (b m)`, which
-is the recurrence of the **reduced** sequence `F_M` of `eq:F-M-def`.  For a general
-bivariate `N`, `prop:initial-data` gives right-hand side `N_m(z)`, a polynomial in
-`z`.  The Laurent–Gauss reduction `lem:laurent-reduction` and the index shift
-`rem:degree-shift` that connect the two are absent, so `coeffPoly` is effectively
-being identified with `F_M`.  `eq:P-linear-combination` (2.4) and the
-denominator-only sequence `H_m` are likewise unformalized.
-
-### 6. `ftInputsWitness` certifies non-vacuity only
-
-It exhibits `P_m = 1`, no interior zeros, `Cbulk = 0` on `ftInterval 1 2`.  That
-establishes `FTInputs` is inhabited, so the theorems are not vacuously conditional
-on an empty hypothesis type.  It does **not** exhibit a non-degenerate model (every
-`natDegree` is `0`, so the degree/count interaction is never exercised), and it is
-not the paper's data — the structure mentions no `Q`, `r`, or `N`, so it certifies
-nothing about consistency of the §§2–4 analytic claims themselves.
-
-### 7. Not attempted
-
-`prop:equidistribution` and `eq:portmanteau-lower` (§6), the §3 geometry and §4
-dominance as *theorems* rather than hypotheses, and the §7 open questions.
-
-## Out of scope
-
-- The **asymptotic-concentration corollary** (`sec:consequences`,
-  `#{x ∈ I_{Q,r} : P_m(x)=0}/deg P_m → 1`) follows from `bulk_zero_count` once
-  `deg P_m → ∞`; the limit is a routine consequence not formalized here.
-- The **further questions** of §7 are open problems, not results.
-
-## Verification
-
-`AxiomCheck.lean` pins the axiom footprint of every headline result with
-`#guard_msgs in #print axioms …`: `exceptionalRoots_card_le`,
-`le_card_roots_filter`, `ftInterval_subset_posRay`, `ftRay_subset_posRay`,
-`initial_data_unique`, `eventual_natDegree_le`, `Plin_recurrence`,
-`Plin_exceptional_eq`, `Plin_exceptional_card_le`, `Plin_ne_zero`,
-`denomConv_dlin_Plin`, `Plin_unique`, `exceptional_unbounded`,
-`dvd_exceptional_le`, `ftInputsWitness`, `ftInputs_nonempty`,
-`FTInputs.ofRecurrence`, `main_bound`, `main_bound_interval`,
-`main_bound_ofRecurrence`, and `interior_distinct_count` all report exactly
-`[propext, Classical.choice, Quot.sound]`.  If a `sorry` or a stray `axiom` ever
-enters a dependency the reported footprint changes and `#guard_msgs` turns the
-mismatch into a `lake build` error.
+Refer to the paper for references.

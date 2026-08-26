@@ -1,28 +1,38 @@
 #!/usr/bin/env python3
-r"""Paper sections 5-6 (Proof of the fixed-numerator theorem; Consequences and sharpness).
+r"""Paper section `subsec:proof` (Angular discrepancy and proof of the main theorem),
+with the section `subsec:linear-case` and section `sec:introduction` witnesses it draws on.
 
 Symbolic work uses SymPy; branch numerics use mpmath at arbitrary precision.
 Coefficient polynomials P_m(z), F_M(z) come from the exact recurrence for
 N(t,z)/(Q(t)+z t^r); real-root counts use SymPy nroots (degree-many roots with
 multiplicity).  "Exceptional" means a zero outside (0, +inf) -- complex or
-nonpositive-real -- the count bounded by Theorem 1.1.
+nonpositive-real -- the count bounded by `thm:main`.
 
-  * Proposition 5.1, eq. (5.1): for a fixed univariate B (B(0) != 0) the exceptional-zero
+  * `prop:angular-discrepancy`, `eq:angular-distinct-lower`: for a fixed univariate B (B(0) != 0) the exceptional-zero
     count of F_M is a fixed constant C_B, independent of M, and the positive-real count is
     deg F_M - C_B = floor(M/r) - C_B.  Checked for C_B = 0 (B = 1, 1+t^2) and for a genuine
     C_B = 2 (B with a conjugate root pair on the branch arc).
-  * Lemma 3.6, eq. (3.12), as consumed by Proposition 5.1: psi(theta) = arg W(theta) has
+  * `lem:amplitude-divisor`, `eq:phase-derivative-bound`, as consumed by `prop:angular-discrepancy`: psi(theta) = arg W(theta) has
     bounded derivative on compact interior subintervals, independent of M, so the
-    Phi_M of eq. (5.4) -- Phi_M(theta) = (M+1)theta - psi(theta) -- has
+    Phi_M of `eq:Phi-def` -- Phi_M(theta) = (M+1)theta - psi(theta) -- has
     Phi_M' = M+1 - psi' > 0 for large M and is strictly increasing.
-  * Proposition 5.2 (linear case deg Q = r = 1): N(t,z) = R(z) forces
+  * `thm:main` clause (iii): ONE pair of constants C_0 = C_0(Q,r), C_1 = C_1(Q,r) --
+    independent of the numerator -- bounds the clause (ii) defect by C_0 + C_1 deg B.
+    Run on five (Q,r) spanning r = 1,2,3 and all of deg Q < r, deg Q = r, deg Q > r.
+    The defect is asserted M-free at each (Q,r,B) first; the pair is then read off the
+    low-degree B alone and asserted on B held OUT of that fit, since a pair fitted on
+    all of the data holds identically and a per-B refit is clause (ii), not (iii).
+  * `prop:linear-case` (linear case deg Q = r = 1): N(t,z) = R(z) forces
         P_m(z) = (-1)^m R(z) (z+q_1)^m / q_0^{m+1},
     with moving zero -q_1 > 0 and all exceptional zeros carried by the fixed R.
-  * Proposition 6.3: N(t,z) = R(z) gives P_m = R(z) H_m(z); with R(z) = prod_{j=1}^L (z+j)
+  * `sec:introduction`: N(t,z) = R(z) gives P_m = R(z) H_m(z); with R(z) = prod_{j=1}^L (z+j)
     every P_m carries the same L negative zeros, so no bound uniform in N exists.
-  * Corollary 6.2: #{positive-real zeros of P_m} / deg P_m -> 1 along the nonzero P_m.
+  * The positive-real fraction #{positive-real zeros of P_m} / deg P_m -> 1 along the
+    nonzero P_m.  The paper states this in prose rather than as a numbered result:
+    it is the full-interval case alpha = 0, beta = pi/r of
+    `prop:angular-discrepancy`.  The limit is measured here.
 
-Proposition 6.1 (equidistribution of the zero bulk) is verified separately in
+`prop:equidistribution` (equidistribution of the zero bulk) is verified separately in
 verify_equidistribution.py.
 """
 from __future__ import annotations
@@ -66,7 +76,7 @@ def root_counts(poly):
 
 
 # ===========================================================================
-# Proposition 5.1, eq. (5.1): fixed exceptional-zero constant C_B, positive bulk = floor(M/r) - C_B
+# `prop:angular-discrepancy`, `eq:angular-distinct-lower`: fixed exceptional-zero constant C_B, positive bulk = floor(M/r) - C_B
 # ===========================================================================
 Q = (1 - t) * (1 - t / 2) * (1 - t / 4)
 r = 2
@@ -91,7 +101,8 @@ for Bexpr, C_B, label in cases:
 
 
 # ===========================================================================
-# Prop 5.1 / abstract: distinct zeros in I=(a,b), at most C_B outside I with multiplicity
+# `prop:angular-discrepancy` / abstract: distinct zeros in I=(a,b), at most C_B outside I
+# with multiplicity
 # ===========================================================================
 def _qlow(expr):
     p = sp.Poly(sp.expand(expr), t)
@@ -152,7 +163,7 @@ for Bexpr, C_B, label in [
 
 
 # ===========================================================================
-# Proposition 5.1, eq. (5.4): psi' bounded on compact interior => Phi_M strictly increasing
+# `prop:angular-discrepancy`, `eq:Phi-def`: psi' bounded on compact interior => Phi_M strictly increasing
 # ===========================================================================
 def qlow(expr):
     p = sp.Poly(sp.expand(expr), t)
@@ -207,7 +218,7 @@ for th in band:
     tps.append(pr); zs.append(zv); prev = pr
 Ws = [-pval(Bc, tps[i]) / (dval(Qc, tps[i]) + r * zs[i] * tps[i]**(r - 1)) for i in range(len(band))]
 
-# eq. (5.4): psi'(theta) = (arg W)' is bounded on the compact band (independent of M), so
+# `eq:Phi-def`: psi'(theta) = (arg W)' is bounded on the compact band (independent of M), so
 # Phi_M(theta) = (M+1)theta - psi(theta) has Phi_M' = M+1 - psi' > 0 and is strictly increasing.
 K = max(abs(mp.arg(Ws[i + 1] / Ws[i]) / (band[i + 1] - band[i])) for i in range(len(band) - 1))
 assert K < mp.mpf('5')                                             # bounded (converges under refinement)
@@ -220,7 +231,7 @@ for M in (100, 1000):
 print(f'PASS: interior |psi\'(theta)| <= {mp.nstr(K, 5)} (M-independent); Phi_M(theta) strictly '
       f'increasing (checked M = 100, 1000)')
 
-# eq. (5.5): the advance of Phi_M over the band equals the number of sign changes of
+# `eq:Phi-def`: the advance of Phi_M over the band equals the number of sign changes of
 # tau^{M+1} F_M(z(theta)); both equal floor(M/r) - O(1) (the O(1) is the untracked endpoint band).
 # The O(1) deficit has to be measured on the SHRINKING retained range [h/M, pi/r - h/M],
 # which is where the paper claims it, and over an M ladder.  On a FIXED band the deficit is
@@ -231,7 +242,7 @@ h_pc = mp.mpf('3')
 deficits_pc = []
 for Mpc in (40, 80, 160):
     lo_pc, hi_pc = h_pc / Mpc, mp.pi / r - h_pc / Mpc
-    # psi has bounded variation (eq. (3.12)), so a coarse grid resolves Var psi; the
+    # psi has bounded variation (`eq:phase-derivative-bound`), so a coarse grid resolves Var psi; the
     # phase advance then gives the sign-change count without a fine sign scan.
     npc = 60
     grid = [lo_pc + (hi_pc - lo_pc) * mp.mpf(i) / npc for i in range(npc + 1)]
@@ -259,7 +270,7 @@ for Mpc in (40, 80, 160):
 dvals_pc = [d for _, d in deficits_pc]
 assert max(dvals_pc) - min(dvals_pc) <= 2, deficits_pc             # M-free
 assert max(dvals_pc) <= 6, deficits_pc                             # and small
-print(f'PASS: eq. (5.5) on the shrinking range [h/M, pi/r-h/M] (h={mp.nstr(h_pc,3)}): '
+print(f'PASS: `eq:Phi-def` on the shrinking range [h/M, pi/r-h/M] (h={mp.nstr(h_pc,3)}): '
       f'deficit floor(M/r) - phase advance = {dvals_pc} at M = '
       f'{[m for m, _ in deficits_pc]} -- bounded independently of M '
       f'(on a FIXED band it would be Theta(M))')
@@ -278,7 +289,7 @@ print(f'PASS: phase advance {mp.nstr(advance, 5)} = {sign_changes} sign changes 
 
 
 # ===========================================================================
-# eq. (5.2)/(5.3): Omega_M = [h/M, pi/r - h/M] \ union_j Theta_{j,M} has a number of
+# `eq:Omega-M`: Omega_M = [h/M, pi/r - h/M] \ union_j Theta_{j,M} has a number of
 # components bounded independently of M, and |Omega_M| = pi/r - 2h/M + o(1/M).
 #
 # Two things make this non-vacuous.  First, B must have a genuine branch root: for a B whose
@@ -324,11 +335,11 @@ h_om, c_om = mp.mpf('3'), mp.mpf('0.15')
 resid = []
 for MM in (100, 200, 400, 800):
     lo_om, hi_om = h_om / MM, mp.pi / r - h_om / MM
-    hw = mp.e**(-c_om * MM / nu_j_om)                      # eq. (4.1) half-width, measured nu_j
+    hw = mp.e**(-c_om * MM / nu_j_om)                      # `eq:amplitude-deletion` half-width, measured nu_j
     # walk the retained components explicitly: the window sits strictly inside the range
     assert lo_om < theta_j_found - hw and theta_j_found + hw < hi_om, (MM, hw)
     comps = [(lo_om, theta_j_found - hw), (theta_j_found + hw, hi_om)]
-    assert len(comps) == 2                                 # eq. (5.2): bounded in M
+    assert len(comps) == 2                                 # `eq:Omega-M`: bounded in M
     Omega_len = sum(b - a for a, b in comps)               # route 1: sum of components
     closed = (mp.pi / r - 2 * h_om / MM) - 2 * hw          # route 2: closed form
     assert abs(Omega_len - closed) < mp.mpf('1e-40'), (MM, Omega_len, closed)
@@ -340,21 +351,22 @@ assert resid[-1] < mp.mpf('1e-3'), resid[-1]
 # o(1/M), so the measured nu_j is load-bearing rather than decorative
 bad_nu = int(mp.ceil(c_om * 800 / mp.log(800)))            # makes e^{-c M/nu} ~ 1/M at M = 800
 assert 800 * 2 * mp.e**(-c_om * 800 / bad_nu) > mp.mpf('1e-3'), bad_nu
-print(f'PASS: eq. (5.2)/(5.3): amplitude zero located at theta_j = '
+print(f'PASS: `eq:Omega-M`, and the o(1/M) half of `eq:amplitude-window-negligible`: '
+      f'amplitude zero located at theta_j = '
       f'{mp.nstr(theta_j_found, 8)} (constructed {mp.nstr(theta_j_om, 3)}), measured '
       f'nu_j = {mp.nstr(nu_om, 4)}; Omega_M has 2 components by both routes, '
       f'M x deleted -> {mp.nstr(resid[-1], 3)} (o(1/M)); at nu_j = {bad_nu} it would not be')
 
 
 # ===========================================================================
-# Proposition 5.2 (linear case): P_m(z) = (-1)^m R(z)(z+q_1)^m / q_0^{m+1}
+# `prop:linear-case` (linear case): P_m(z) = (-1)^m R(z)(z+q_1)^m / q_0^{m+1}
 # ===========================================================================
 q0s, q1s = sp.symbols('q0 q1')
 R = 1 + z + z**3                                                   # arbitrary fixed R(z)
-Plin = ratio_coeffs(q0s + q1s * t, R, 1, 7)
+linCoeffPoly = ratio_coeffs(q0s + q1s * t, R, 1, 7)
 for m in range(8):
     closed = (-1)**m * R * (z + q1s)**m / q0s**(m + 1)
-    assert sp.simplify(Plin[m] - closed) == 0
+    assert sp.simplify(linCoeffPoly[m] - closed) == 0
 # concrete instance: q_0 > 0, q_1 < 0, so the moving zero -q_1 is a positive real zero of every P_m
 q0v, q1v = sp.Rational(3), sp.Rational(-5, 2)
 Pnum = ratio_coeffs(q0v + q1v * t, R, 1, 6)
@@ -364,7 +376,7 @@ print('PASS: linear case P_m = (-1)^m R(z)(z+q_1)^m / q_0^{m+1}; moving zero -q_
 
 
 # ===========================================================================
-# Proposition 6.3 and Corollary 6.2: N = R(z) => P_m = R H_m; concentration ratio -> 1
+# `sec:introduction` and `prop:angular-discrepancy`: N = R(z) => P_m = R H_m; ratio -> 1
 # ===========================================================================
 Q = (1 - t) * (1 - t / 2) * (1 - t / 4)
 r = 2
@@ -381,7 +393,7 @@ for L in (2, 3, 5):
     print(f'PASS: N=R(z), R=prod_{{1}}^{{{L}}}(z+j): P_m = R H_m, exactly {L} negative zeros '
           f'in every P_m (no N-uniform bound)')
 
-# Corollary 6.2: positive-real fraction -> 1 for a fixed nonhyperbolic numerator
+# `prop:angular-discrepancy`: positive-real fraction -> 1 for a fixed nonhyperbolic numerator
 Rz = (z + 1) * (z**2 + 1)                                          # forces 3 exceptional zeros
 P = ratio_coeffs(Q, Rz, r, 80)
 ratios = []
@@ -397,7 +409,7 @@ print(f'PASS: #positive-real / deg P_m -> 1 (ratios {[mp.nstr(x, 5) for x in rat
 
 
 # ===========================================================================
-# Theorem 1.1 end-to-end for a genuinely bivariate N(t,z) (both t and z present):
+# `thm:main` end-to-end for a genuinely bivariate N(t,z) (both t and z present):
 # P_m computed directly from N/(Q+z t^r), exceptional-zero count bounded uniformly in m
 # ===========================================================================
 Q = (1 - t) * (1 - t / 2) * (1 - t / 4)
@@ -415,5 +427,231 @@ for N, C, label in [
     assert all(e == C for e in excs)                               # bounded, constant in m
     print(f'PASS: bivariate {label}: P_m has exactly {C} exceptional zeros for m=30,40,50 '
           f'(end-to-end, C = C(Q,r,N))')
+
+
+# ===========================================================================
+# `prop:angular-discrepancy`, `eq:angular-discrepancy`: the finite-M statement
+# that replaced the global and local phase counts.  What has to be seen is that
+# the discrepancy is bounded UNIFORMLY in the angular subinterval AND does not
+# grow with M -- a per-M or per-interval bound would be the weaker old result.
+# ===========================================================================
+print()
+
+# `eq:angular-subinterval`: I_{alpha,beta} = {z(theta) : alpha < theta < beta} is
+# a genuine subinterval of I_{Q,r}, which is what lets a zero count over an angle
+# window be read as a zero count over a z-window.  By `thm:FT-geometry` z is
+# strictly increasing on (0, pi/r) with z -> a at the lower end, so the content
+# is: strict monotonicity, nesting of the images of nested angle windows, and
+# every z(theta) above the lower endpoint a = lim_{theta -> 0} z(theta).
+_g = [mp.pi / r * mp.mpf(k) / 12 for k in range(1, 12)]
+_zg = [z_of_theta(th) for th in _g]
+_a = z_of_theta(mp.mpf('1e-6'))
+assert all(_zg[i] < _zg[i + 1] for i in range(len(_zg) - 1)), _zg
+assert all(zv > _a for zv in _zg), (_a, _zg)
+for i in range(len(_g)):
+    for j in range(i + 1, len(_g)):
+        for k in range(i, j + 1):
+            assert _zg[i] <= _zg[k] <= _zg[j]                # nesting of images
+print(f'PASS: `eq:angular-subinterval`: z is strictly increasing on the angle grid, every '
+      f'z(theta) exceeds the lower endpoint a = {mp.nstr(_a, 6)}, and nested angle windows '
+      f'have nested images -- so I_(alpha,beta) is a subinterval of I_(Q,r) and an angular '
+      f'count is a z-count')
+
+disc_rows = []
+for Bexp, tag in [(sp.Integer(1), 'deg B = 0'),
+                  (1 + t**2, 'deg B = 2'),
+                  (sp.expand((1 + t**2) * (1 - t / 3)), 'deg B = 3'),
+                  (sp.expand((1 + t**2) * (1 - t / 3) * (1 + t / 5) * (2 + t)),
+                   'deg B = 5'),
+                  (sp.expand((1 + t**2) * (1 - t / 3) * (1 + t / 5) * (2 + t)
+                             * (1 + t**2 / 7)), 'deg B = 7')]:
+    Bl = qlow(sp.expand(Bexp))
+    K = sp.Poly(sp.expand(Bexp), t).degree() if sp.expand(Bexp).has(t) else 0
+    per_M = []
+    for M in (30, 45, 60, 75):
+        FM = ratio_coeffs(Q, sp.expand(Bexp), r, M)[M]
+        if FM == 0:
+            continue
+        rts = []
+        for rr in sp.Poly(FM, z).nroots(n=40, maxsteps=800):
+            re_, im_ = mp.mpf(str(sp.re(rr))), mp.mpf(str(sp.im(rr)))
+            if abs(im_) < mp.mpf('1e-18'):
+                rts.append(re_)
+        worst = mp.mpf(0)
+        grid = [mp.pi / r * mp.mpf(k) / 12 for k in range(13)]
+        zg = [None] + [z_of_theta(th) for th in grid[1:-1]] + [None]
+        for i in range(len(grid)):
+            for j in range(i + 1, len(grid)):
+                al, be = grid[i], grid[j]
+                lo = mp.mpf(0) if i == 0 else zg[i]
+                hi = mp.inf if j == len(grid) - 1 else zg[j]
+                Zc = sum(1 for x in rts if lo < x < hi)
+                d = abs(Zc - (M + 1) * (be - al) / mp.pi)
+                if d > worst:
+                    worst = d
+        per_M.append((M, worst))
+    spread = max(w for _, w in per_M) / max(min(w for _, w in per_M), mp.mpf('1e-9'))
+    disc_rows.append((K, max(w for _, w in per_M)))
+    assert spread < 3, (tag, per_M)
+    print(f'PASS: `eq:angular-discrepancy` [{tag}] max over 78 angular subintervals of '
+          f'|Z_M - (M+1)(beta-alpha)/pi| is '
+          f'{[f"{M}:{mp.nstr(w,4)}" for M, w in per_M]} at M = 30,45,60,75 -- '
+          f'FLAT in M (spread {mp.nstr(spread,3)}x), so the bound is uniform in both '
+          f'the subinterval and the degree')
+# ---------------------------------------------------------------------------
+# and the dependence on deg B.  A line FITTED through these points is not a test
+# of `eq:angular-discrepancy`: C_1 = max_i (W_i - W_0)/K_i satisfies
+# W_i <= W_0 + C_1 K_i identically, on any data whatever.  What is asserted here
+# instead is the shape, over a ladder reaching past the degrees a fit would use:
+# the discrepancy stays inside a linear envelope anchored on the low degrees, so
+# superlinear growth in deg B would break it.  Doubling the degree at most
+# doubles a linear quantity, plus the additive constant, so held <= 2 max(train)
+# + 1 is the envelope; under quadratic growth the deg B = 7 point exceeds it.
+#
+# The LINEARITY itself is not decidable from a finite ladder, and is not claimed
+# here.  It comes from `cor:linear-phase-variation`/`eq:linear-phase-variation`,
+# which check_viewing_angle.py (V6) asserts over deg B = 0..8 against Radon's own
+# constant kappa_1 = K_gamma + pi -- a constant of the arc, not of the data.
+# ---------------------------------------------------------------------------
+train = [w for k, w in disc_rows if k <= 3]
+held = [(k, w) for k, w in disc_rows if k > 3]
+assert train and held, disc_rows
+envelope = 2 * max(train) + 1
+for k, w in held:
+    assert w <= envelope, (f'`eq:angular-discrepancy` at deg B = {k}: {mp.nstr(w, 6)} '
+                           f'exceeds the linear envelope {mp.nstr(envelope, 6)}', disc_rows)
+print(f'PASS: `eq:angular-discrepancy` over deg B = {[k for k, _ in disc_rows]}: the '
+      f'discrepancy is {[f"{k}:{mp.nstr(w,4)}" for k, w in disc_rows]}, and the held-out '
+      f'degrees {[k for k, _ in held]} stay inside the envelope '
+      f'{mp.nstr(envelope,4)} anchored on deg B <= 3 -- so the growth in deg B is at '
+      f'most linear on this ladder.  The linear law itself is `eq:linear-phase-variation`, '
+      f'asserted in check_viewing_angle.py against Radon\'s constant rather than fitted')
+
+
+# ===========================================================================
+# `thm:main` clause (iii): ONE pair of constants C_0 = C_0(Q,r), C_1 = C_1(Q,r),
+# INDEPENDENT OF THE NUMERATOR, with the clause (ii) conclusions holding at
+# defect at most C_0 + C_1 deg B for all large M.  The N-independence is the
+# entire content of (iii) against (ii), so it is what has to be seen, and it
+# has two directions.
+#
+#   * Across NUMERATORS at one (Q,r).  The pair is read off the LOW-degree B
+#     only and then asserted on B held OUT of that fit.  A pair fitted on all
+#     of the data would say nothing -- C_1 = max_K (D_K - D_0)/K satisfies
+#     D_K <= D_0 + C_1 K identically, on any data whatever -- and a per-B refit
+#     would be clause (ii), which already allows C = C(Q,r,N).
+#   * Across DENOMINATORS.  The ladder runs on five (Q,r) spanning r = 1,2,3
+#     and all three degree relations deg Q < r, deg Q = r, deg Q > r, each with
+#     its own pair.  Nothing here asserts one pair across the five: (iii) lets
+#     C_0 and C_1 depend on (Q,r), and only forbids a dependence on N.
+#
+# The measured quantity is the defect of clause (ii) itself -- the larger of the
+# zero count outside I_{Q,r} with multiplicity and deg F_M minus the number of
+# DISTINCT zeros inside it -- not the angular discrepancy of the block above.
+# It is asserted M-free at every (Q,r,B) before any constant is read off it, so
+# the pair bounds a quantity that does not grow with M.
+# ===========================================================================
+print()
+
+
+def ft_interval(Qe, rr):
+    r"""`eq:ab-def`: a = g(t_a) at the smallest positive critical point of
+    g = -Q/t^r; b = +inf for r > 1, and b = g(t_b) at the unique negative
+    critical point for r = 1.  Returned exactly, b as None when b = +inf."""
+    phi = sp.expand(rr * Qe - t * sp.diff(Qe, t))
+    rts = sp.real_roots(sp.Poly(phi, t))
+    pos = sorted({sp.nsimplify(x) for x in rts if x.is_real and x > 0},
+                 key=lambda e: sp.N(e, mp.mp.dps))
+    assert pos, 'no positive critical point of g'
+    a_ = sp.simplify(-Qe.subs(t, pos[0]) / pos[0]**rr)
+    if rr > 1:
+        return a_, None
+    neg = sorted({sp.nsimplify(x) for x in rts if x.is_real and x < 0},
+                 key=lambda e: sp.N(e, mp.mp.dps))
+    assert len(neg) == 1, neg                                      # the FT negative critical point
+    return a_, sp.simplify(-Qe.subs(t, neg[0]) / neg[0]**rr)
+
+
+def main_defect(poly, a_, b_):
+    r"""The defect of `thm:main` (ii): max of the zero count outside I_{Q,r}
+    with multiplicity and deg F_M minus the count of DISTINCT zeros inside."""
+    p = sp.Poly(poly, z)
+    if p.degree() < 1:
+        return 0
+    # nroots is arbitrary precision, so every threshold is an mpf derived from the
+    # working precision, never a float64 literal.
+    tol = mp.mpf(10)**(-mp.mp.dps // 2)
+    sep = mp.mpf(10)**(-mp.mp.dps // 4)
+    a_m = mp.mpf(str(sp.N(a_, mp.mp.dps)))
+    b_m = mp.inf if b_ is None else mp.mpf(str(sp.N(b_, mp.mp.dps)))
+    reals = sorted(mp.mpf(str(sp.re(x))) for x in p.nroots(n=40, maxsteps=800)
+                   if abs(mp.mpf(str(sp.im(x)))) < tol)
+    inside = [x for x in reals if a_m + tol < x < b_m - tol]
+    distinct = []
+    for x in inside:
+        if not distinct or abs(x - distinct[-1]) > sep:
+            distinct.append(x)
+    return max(p.degree() - len(inside), p.degree() - len(distinct))
+
+
+# Every B on the ladder is prod_{j=1}^{K}(t - j/10), so B(0) != 0 as `eq:F-M-def`
+# requires, deg B = K exactly, and each new factor is a root in the region the
+# branch arc sweeps -- which is what makes the defect respond to deg B at all.
+# A ladder of B whose extra roots sit outside that region has defect flat in
+# deg B, and would satisfy the envelope with C_1 = 0 without testing anything.
+K_LADDER = (0, 1, 2, 3, 5, 6, 8)
+K_TRAIN = 3
+
+CLAUSE3 = [
+    ('deg Q = 3 > r = 1', sp.expand((1 - t) * (1 - t / 2) * (1 - t / 4)), 1, (20, 26, 32)),
+    ('deg Q = 3 > r = 2', sp.expand((1 - t) * (1 - t / 2) * (1 - t / 4)), 2, (30, 45, 60)),
+    ('deg Q = 2 = r = 2', sp.expand((1 - t) * (1 - t / 2)), 2, (30, 45, 60)),
+    ('deg Q = 3 = r = 3', sp.expand((1 - t) * (1 - t / 2) * (1 - t / 3)), 3, (48, 57, 66)),
+    ('deg Q = 2 < r = 3', sp.expand((1 - t) * (1 - t / 3)), 3, (48, 57, 66)),
+]
+assert {rr for _, _, rr, _ in CLAUSE3} == {1, 2, 3}
+assert {('<' if sp.Poly(Qc3, t).degree() < rr else
+         '=' if sp.Poly(Qc3, t).degree() == rr else '>')
+        for _, Qc3, rr, _ in CLAUSE3} == {'<', '=', '>'}
+
+pairs3 = []
+for lab3, Q3, r3, ML3 in CLAUSE3:
+    a3, b3 = ft_interval(Q3, r3)
+    assert a3 > 0, (lab3, a3)                                      # I_{Q,r} inside (0,inf)
+    D3 = {}
+    for K in K_LADDER:
+        B3 = sp.Integer(1)
+        for j in range(1, K + 1):
+            B3 *= (t - sp.Rational(j, 10))
+        B3 = sp.expand(B3)
+        assert sp.Poly(B3, t).nth(0) != 0                          # `eq:F-M-def`: B(0) != 0
+        assert (sp.Poly(B3, t).degree() if K else 0) == K
+        F3 = ratio_coeffs(Q3, B3, r3, max(ML3))
+        ds = [main_defect(F3[MM], a3, b3) for MM in ML3]
+        assert len(set(ds)) == 1, (lab3, K, ML3, ds)               # M-free at this (Q,r,B)
+        D3[K] = ds[0]
+    # the pair, from the TRAINING degrees alone
+    C0_3 = D3[0]
+    C1_3 = max(sp.Rational(D3[K] - C0_3, K) for K in K_LADDER if 0 < K <= K_TRAIN)
+    held3 = [K for K in K_LADDER if K > K_TRAIN]
+    assert held3
+    for K in K_LADDER:                                             # ONE pair, every B
+        assert D3[K] <= C0_3 + C1_3 * K, (lab3, K, D3[K], C0_3, C1_3)
+    # and the pair is doing work: without the C_1 term the held-out B break it,
+    # and the defect is exactly proportional to deg B on the ladder, so a
+    # superlinear law in deg B is refuted rather than merely unobserved.
+    assert max(D3[K] for K in held3) > C0_3, (lab3, D3)
+    assert len({sp.Rational(D3[K], K) for K in K_LADDER if K > 0}) == 1, (lab3, D3)
+    pairs3.append((lab3, C0_3, C1_3, D3))
+    print(f'PASS: `thm:main` (iii) [{lab3}]: defect is M-free at M = {list(ML3)} for every '
+          f'B on the ladder, and the single pair (C_0, C_1) = ({C0_3}, {C1_3}) read off '
+          f'deg B <= {K_TRAIN} bounds the held-out deg B = {held3} as well '
+          f'(defects {[(K, D3[K]) for K in K_LADDER]})')
+
+assert len(pairs3) == len(CLAUSE3)
+print(f'PASS: `thm:main` (iii): across the five (Q,r) with r = 1,2,3 and deg Q <, =, > r, '
+      f'each denominator needs ONE pair {[(lab, str(c0), str(c1)) for lab, c0, c1, _ in pairs3]} '
+      f'and no numerator on the ladder needs its own -- which is what separates (iii) from '
+      f'(ii), where C = C(Q,r,N) may move with the numerator')
 
 print('ALL PASS: verify_proof')

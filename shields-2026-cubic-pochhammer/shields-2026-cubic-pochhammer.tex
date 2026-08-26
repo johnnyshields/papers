@@ -3,14 +3,18 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{amsmath,amssymb,amsthm,mathtools}
 \usepackage[expansion=false]{microtype}
+\usepackage{pgfplots}
+% compat is pinned deliberately: without it pgfplots warns and may change
+% defaults between installed versions.
+\pgfplotsset{compat=1.18}
 \usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black]{hyperref}
 \usepackage[nameinlink,capitalize]{cleveref}
 \hypersetup{
-  pdftitle={Coefficientwise log-concavity of the cubic multiple-Pochhammer series},
+    pdftitle={The cubic threshold for coefficientwise log-concavity of multiple-Pochhammer series},
   pdfauthor={John Shields},
-  pdfkeywords={coefficientwise log-concavity, Turan inequality, Pochhammer symbol,
-    log-concave sequence, beta-binomial distribution, Bernstein basis,
-    Schur-concavity}
+  pdfkeywords={coefficientwise log-concavity, coefficientwise Schur-concavity,
+    multiple-Pochhammer series, multiplicity threshold, Turan inequality,
+    beta-binomial distribution, Bernstein basis}
 }
 \pdfinfo{
   /ORCID (https://orcid.org/0009-0004-3882-4571)
@@ -26,116 +30,99 @@
 \newtheorem{corollary}[theorem]{Corollary}
 
 \theoremstyle{definition}
-\newtheorem{definition}[theorem]{Definition}
 \newtheorem{remark}[theorem]{Remark}
 
 \newcommand{\E}{\mathbb E}
 \newcommand{\Pp}{\mathbb P}
 \newcommand{\Tur}{\Delta}
 
-\title[Coefficientwise log-concavity of the cubic multiple-Pochhammer series]
-{Coefficientwise log-concavity\\
-of the cubic multiple-Pochhammer series}
+\title[Cubic threshold for coefficientwise log-concavity of multiple-Pochhammer series]
+{The cubic threshold for coefficientwise log-concavity\\
+of multiple-Pochhammer series}
 
 \author{John Shields}
-\date{July 28, 2026}
-\thanks{Independent researcher, Ginza 2-15-2, KR Ginza II 5F, Chuo-ku, Tokyo,
-Japan 104-0061.  Corresponding author:
-\href{mailto:math@johnnyshields.com}{math@johnnyshields.com}.
-ORCID: \href{https://orcid.org/0009-0004-3882-4571}{0009-0004-3882-4571}.
-This work is archived at \href{https://doi.org/10.5281/zenodo.21475821}{doi:10.5281/zenodo.21475821}.}
+\date{August 23, 2026}
+\thanks{Independent researcher, Ginza 2-15-2, KR Ginza II 5F, Chuo-ku, Tokyo, Japan 104-0061.\\
+\hspace*{\parindent}Corresponding author: \href{mailto:math@johnnyshields.com}{math@johnnyshields.com}.  ORCID: \href{https://orcid.org/0009-0004-3882-4571}{0009-0004-3882-4571}.\\
+\hspace*{\parindent}This work is archived at \href{https://doi.org/10.5281/zenodo.21475821}{doi:10.5281/zenodo.21475821}.}
 
 \subjclass[2020]{Primary 26A51; Secondary 05A20, 33C20, 60E15}
-\keywords{coefficientwise log-concavity, Tur\'an inequality, Pochhammer symbol,
-log-concave sequence, beta-binomial distribution, Bernstein basis,
-Schur-concavity}
+\keywords{coefficientwise log-concavity, coefficientwise Schur-concavity,
+multiple-Pochhammer series, multiplicity threshold, Tur\'an inequality,
+beta-binomial distribution, Bernstein basis}
 
 \begin{document}
 
 \begin{abstract}
-Let \((f_n)_{n\ge1}\) be a nonnegative log-concave sequence with no internal
-zeros, and define the cubic multiple-Pochhammer series
-\(F_f(\mu;x)=\sum_{n\ge1}f_n\,(\mu)_{3n}\,x^n/(3n-1)!\).
-Karp and Zhang established coefficientwise log-concavity of the analogous
-series for multiplicity \(r=2\) and gave numerical counterexamples for \(r=4\), leaving the
-cubic case open as their Conjecture~1.  We prove it: for all
-\(\mu,\alpha,\beta\ge0\), every coefficient of the generalized Tur\'anian
-\(F_f(\mu+\alpha;x)F_f(\mu+\beta;x)-F_f(\mu;x)F_f(\mu+\alpha+\beta;x)\) is
-nonnegative.  Equivalently, the map \((f_n)\mapsto F_f\) carries every
-such sequence to a coefficientwise log-concave family.  The proof is elementary
-and noncomputational.  The degree-\(m\) coefficient of each product
-\(F_f(u;x)F_f(v;x)\) is represented as a beta-binomial expectation, reducing
-the theorem to the monotonicity of a weighted residue-class binomial kernel.
-The constant-weight case rests on a Bernstein-basis positivity certificate
-obtained from a root-of-unity filter; monotone weights are then inserted through
-a one-sign-change decomposition of the complementary residue blocks.
-A coefficientwise strictness criterion follows, as does ordinary log-concavity
-in \(\mu\) on \((0,\infty)\) for \((f_n)\not\equiv0\) at every positive \(x\)
-within the radius of convergence.
+Multiple-Pochhammer power series associated with a nonnegative log-concave sequence with no internal zeros
+were shown by Karp and Zhang to be coefficientwise log-concave at multiplicity two,
+while the cubic case remained open.  We prove the cubic conjecture, in the equivalent
+fixed-sum form of coefficientwise Schur-concavity.  Together with a degree-three
+obstruction for larger multiplicities, this yields the sharp classification:
+universal coefficientwise log-concavity holds precisely at multiplicities two and
+three.  The proof reduces the coefficient inequalities to monotonicity of a symmetric
+residue kernel and shows that, in the cubic case, this kernel preserves the central
+ordering imposed by log-concavity.
 \end{abstract}
 
 \maketitle
 
-\section{Introduction}
+\section{Introduction}\label{sec:introduction}
 
-A formal power series depending on a parameter \(\mu\ge0\) is called
-\emph{coefficientwise log-concave} if, for every \(\mu,\alpha,\beta\ge0\), all
-coefficients of the generalized Tur\'anian
-\[
- F(\mu+\alpha;x)F(\mu+\beta;x)
- -F(\mu;x)F(\mu+\alpha+\beta;x)
-\]
-are nonnegative.  This property is stronger than the corresponding pointwise
-inequality: whenever the relevant series converge at a positive value of \(x\), summing
-the coefficient inequalities yields the generalized Tur\'an inequality for
-\(\mu\mapsto F(\mu;x)\) there, simultaneously for all admissible shifts.  It has been
-studied systematically for reciprocal-gamma, gamma-ratio,
-hypergeometric, and Fox--Wright series; see
-\cite{KalmykovKarp2013Reciprocal,KalmykovKarp2013Ratios,KarpSitnik2010,KarpZhang2024}.
-Tur\'an-type inequalities for hypergeometric and confluent hypergeometric
-functions have also been studied extensively
-\cite{Baricz2008,BarnardGordyRichards2009}.
-
-Karp and Zhang considered, for an integer \(r\ge2\), the modified
-multiple-Pochhammer series
+For an integer \(r\ge2\), consider the modified multiple-Pochhammer series
 \begin{equation}\label{eq:general-r}
  F_{f,r}(\mu;x)
  =\sum_{n\ge1}f_n\frac{(\mu)_{rn}}{(rn-1)!}x^n,
 \end{equation}
-where \((f_n)\) is nonnegative and log-concave.  Karp and Zhang report that
-A.\ Ninh suggested this construction to them in a private communication in
-2017 \cite{KarpZhang2024}; related published work on log-concavity and
-Tur\'an-type inequalities appears in \cite{NinhPham2025}.  They proved
-coefficientwise log-concavity for \(r=2\) \cite[Thm.~2]{KarpZhang2024} and
-gave numerical counterexamples for \(r=4\) \cite[Rem.~5]{KarpZhang2024},
-leaving the cubic case \(r=3\) open as their Conjecture~1.  This note proves it.
+where \((f_n)\) is a nonnegative log-concave sequence with no internal zeros.  Karp
+and Zhang proved coefficientwise log-concavity for \(r=2\)
+\cite[Thm.~2]{KarpZhang2024LogConcavity}, gave numerical counterexamples for
+\(r\ge4\) \cite[Rem.~5]{KarpZhang2024LogConcavity}, and formulated the cubic case
+\(r=3\) as their Conjecture~1.  Karp and Zhang report that A.~Ninh suggested the construction
+to them and conjectured log-concavity for the resulting family
+\cite[\S3]{KarpZhang2024LogConcavity}; related results on log-concavity and
+Tur\'an-type inequalities appear in
+\cite{KalmykovKarp2013Reciprocal,KalmykovKarp2013Ratios,KarpSitnik2010LogConvexity,NinhPham2025LogConcavity}.
 
-Recall that a nonnegative sequence \((f_n)_{n\ge1}\) is log-concave with no
-internal zeros if \(f_n^2\ge f_{n-1}f_{n+1}\) whenever the three terms are
-defined, and its positive support is an interval of integers.  A nontrivial such
-sequence is a P\'olya frequency sequence of order two, or \(\mathrm{PF}_2\), also
-called doubly positive.  The interval-support condition does not follow from the
-inequality, and \Cref{thm:main} fails without it (\Cref{rem:internal-zeros}).
+A parameter-dependent formal power series \(F(\mu;x)\) is
+\emph{coefficientwise log-concave} if, for every \(\mu,\alpha,\beta\ge0\), all
+coefficients of
+\[
+ F(\mu+\alpha;x)F(\mu+\beta;x)
+ -F(\mu;x)F(\mu+\alpha+\beta;x)
+\]
+are nonnegative.  This is stronger than pointwise log-concavity wherever the series
+converges.  Here ``log-concave with no internal zeros'' means that
+\(f_n^2\ge f_{n-1}f_{n+1}\) wherever defined and that the positive support is an
+interval of integers.  These are Karp and Zhang's hypotheses
+\cite[Def.~1]{KarpZhang2024LogConcavity}; the interval-support condition is essential
+(\Cref{rem:internal-zeros}).  Except in \Cref{cor:ordinary}, the arguments are
+formal and require no growth assumption.  We use \((\mu)_j\) for the rising
+factorial.
 
-Karp and Zhang build the inequality and the interval-support condition into
-their definition of log-concavity \cite[Def.~1]{KarpZhang2024}.  They index the
-ambient sequence from \(n=0\), although the modified series itself begins at
-\(n=1\).  The log-concavity hypothesis is stated here directly for the
-positive-index tail \((f_n)_{n\ge1}\).  The two formulations are equivalent:
-restriction preserves log-concavity and interval support, while any admissible
-tail extends to \(n=0\) by setting \(f_0=0\).  The hypotheses of \Cref{thm:main}
-are therefore those of their Conjecture~1.
+\subsection{Main results}\label{subsec:intro-main}
 
-Except in \Cref{cor:ordinary}, we work with formal power series, so no growth
-condition on \((f_n)\) is needed.
+We prove the missing cubic case in an equivalent, base-point-free form.  A
+symmetric function of two variables is Schur-concave
+\cite[Def.~3.A.1]{MarshallOlkinArnold2011Majorization} exactly when, at each fixed
+sum, it decreases as the two variables move apart.
 
-\begin{theorem}[Cubic multiple-Pochhammer theorem]\label{thm:main}
+\begin{theorem}[Cubic coefficientwise Schur-concavity]\label{thm:main}
 Let \((f_n)_{n\ge1}\) be a nonnegative log-concave sequence with no internal
 zeros, and put
 \begin{equation}\label{eq:F-def}
  F_f(\mu;x)=\sum_{n\ge1}f_n\frac{(\mu)_{3n}}{(3n-1)!}x^n.
 \end{equation}
-For every \(\mu,\alpha,\beta\ge0\), the formal power series
+For every \(s>0\) and every \(0\le d_1\le d_2\le s/2\), the formal power series
+\begin{equation}\label{eq:schur-def}
+ \begin{split}
+ \mathcal S_f(s;d_1,d_2;x)
+ &=F_f\left(\tfrac s2+d_1;x\right)F_f\left(\tfrac s2-d_1;x\right)\\
+ &\quad-F_f\left(\tfrac s2+d_2;x\right)F_f\left(\tfrac s2-d_2;x\right)
+ \end{split}
+\end{equation}
+has nonnegative coefficients.  Equivalently, for every \(\mu,\alpha,\beta\ge0\),
+the generalized Tur\'anian
 \begin{equation}\label{eq:Turan-def}
  \Tur_f(\mu;\alpha,\beta;x)
  =F_f(\mu+\alpha;x)F_f(\mu+\beta;x)
@@ -144,77 +131,143 @@ For every \(\mu,\alpha,\beta\ge0\), the formal power series
 has nonnegative coefficients.
 \end{theorem}
 
-\Cref{thm:main} concerns the transform \((f_n)\mapsto F_f\), not a single
-function: every nonnegative log-concave sequence is sent to a parameter family
-whose generalized Tur\'anians have nonnegative coefficients.  Summing at
-\(\alpha=\beta\) and invoking continuity yields ordinary log-concavity of
-\(\mu\mapsto F_f(\mu;x)\) where the series converges (\Cref{cor:ordinary}).  The
-cubic case is the intervening multiplicity between the positive case \(r=2\) and
-the first known failure at \(r=4\), and the residue-class positivity of
-\Cref{sec:kernel} is the mechanism behind it.
-
-For \(f_n\equiv1\), the triplication formula for the Pochhammer symbol gives
+The fixed-sum statement is equivalent to the generalized Tur\'anian formulation.  A
+triple \((\mu,\alpha,\beta)\) corresponds to
 \[
- F_f(\mu;x)
- =3x\,\frac{\mathrm d}{\mathrm dx}\,
- {}_3F_2\!\left(\tfrac{\mu}{3},\tfrac{\mu+1}{3},\tfrac{\mu+2}{3};\,
- \tfrac13,\tfrac23;\,x\right),
+ s=2\mu+\alpha+\beta,\qquad
+ d_1=\frac{|\alpha-\beta|}{2},\qquad
+ d_2=\frac{\alpha+\beta}{2},
 \]
-so the theorem yields coefficientwise generalized Tur\'an inequalities for the
-differentiated \({}_3F_2\) family above; a general log-concave \((f_n)\) gives a
-coefficient-weighted extension.
+and conversely
+\[
+ \mu=\frac s2-d_2,\qquad
+ \alpha=d_2+d_1,\qquad
+ \beta=d_2-d_1.
+\]
+The inverse correspondence is determined up to the symmetry
+\(\alpha\leftrightarrow\beta\).  Thus the two families of coefficient inequalities
+are identical, including the boundary case \(\mu=0\).
 
-The proof has three components.  The degree-\(m\) coefficient of each product
-\(F_f(u;x)F_f(v;x)\) is rewritten as a beta-binomial expectation
-(\Cref{sec:beta-binomial}).  Two elementary
-monotonicity lemmas (\Cref{sec:monotonicity-lemmas}) then supply the tools:
-beta laws with a fixed sum of parameters are ordered by their imbalance against
-symmetric functions increasing toward the midpoint, and a one-sign-change
-weighting principle carries positivity through nondecreasing weights.  The
-weighted residue-class binomial kernel is shown to have the required
-monotonicity (\Cref{sec:kernel}); here complementary residue blocks have a
-single sign change, and the unweighted sum carries a Bernstein-basis positivity
-certificate.  This kernel theorem does not depend on the beta-binomial setup.  The
-components are combined in \Cref{sec:proof}.
+Together with the quadratic theorem of Karp and Zhang, the cubic result yields the
+sharp multiplicity classification: universal coefficientwise log-concavity holds
+exactly for \(r=2,3\) (\Cref{cor:multiplicity}).  For every \(r\ge4\), failure already
+occurs in degree three for a two-term log-concave sequence
+(\Cref{prop:multiplicity-threshold}).
 
-\section{Beta-binomial representation}\label{sec:beta-binomial}
+\subsection{Central-slope cancellation at multiplicity three}\label{subsec:intro-central-slope}
 
-This section rewrites the coefficient convolution underlying the Tur\'anian
-\eqref{eq:Turan-def} as a beta-binomial expectation.
+The threshold is not accidental.  At degree three, the derivative at the center of
+the constant-weight residue kernel contains the factor \(r(3-r)\); see
+\eqref{eq:r-central-slope}.  The quadratic case has ordinary central curvature;
+for every \(r\ge4\), the curvature reverses sign and gives an obstruction.  At
+\(r=3\) the quadratic term vanishes exactly: the center is a quartically flat
+maximum.  The main work of the paper is to show that this critical local cancellation
+extends to global kernel monotonicity in every degree and for every admissible weight
+sequence.
 
-For \(m\ge2\), put
-\begin{equation}\label{eq:w-from-f}
- w_k=f_kf_{m-k},\qquad 1\le k\le m-1.
+\subsection{Proof strategy and organization}\label{subsec:intro-organization}
+
+The proof aligns one notion of centrality at three levels.  On the sequence side,
+log-concavity with interval support is equivalent to central increase of every
+anti-diagonal product sequence \(f_kf_{m-k}\) (\Cref{lem:central-products}).  On the
+parameter side, a beta-binomial representation turns the degree-\(m\) coefficient
+into an expectation of a symmetric residue kernel in the coordinate
+\(q=p(1-p)\); increasing parameter imbalance moves this coordinate away from the
+center in likelihood-ratio order (\Cref{lem:beta-order}).  The cubic-specific input
+is therefore the kernel theorem \Cref{thm:kernel}: centrally increasing symmetric
+weights produce a kernel increasing toward \(p=1/2\).  Beta concentration gives the
+converse implication, so the kernel condition is an exact reduction rather than only
+a sufficient device (\Cref{prop:kernel-exact}).
+
+\Cref{sec:reduction} establishes this exact reduction.  \Cref{sec:kernel} proves the
+cubic kernel theorem, first for constant weights and then for the full monotone-weight
+cone.  \Cref{sec:cubic-proof} assembles the proof of \Cref{thm:main} and determines
+its strict coefficient support.  \Cref{sec:threshold} proves the sharp multiplicity
+threshold, and \Cref{sec:consequences} records analytic and hypergeometric
+consequences.  Finally, \Cref{sec:conclusion} summarizes what remains beyond the
+universal threshold.
+
+\section{Exact reduction to a residue kernel}\label{sec:reduction}
+
+The sequence condition and the parameter comparison can both be converted into
+centrality statements.  On the sequence side, Levit and Mandrescu
+\cite[Lem.~2.2(ii)]{LevitMandrescu2006LogConcavity} give
+a cross-product characterization of nonnegative log-concave functions without
+internal zeros; the following adjacent anti-diagonal form is the interface needed
+here.
+
+\begin{lemma}\label{lem:central-products}
+Let \((f_n)_{n\ge1}\) be a nonzero nonnegative sequence.  The following are
+equivalent.
+\begin{enumerate}
+\item \((f_n)\) is log-concave and has no internal zeros.
+\item For every \(m\ge2\), the anti-diagonal products are nondecreasing toward
+the center:
+\begin{equation}\label{eq:central-products}
+ f_kf_{m-k}\le f_{k+1}f_{m-k-1}
+ \qquad(1\le k<\lfloor m/2\rfloor).
 \end{equation}
-Log-concavity of \((f_n)\) implies
-\[
- w_{k+1}=f_{k+1}f_{m-k-1}\ge f_kf_{m-k}=w_k
- \qquad\Bigl(1\le k<\bigl\lfloor\tfrac m2\bigr\rfloor\Bigr),
-\]
-the standard cross-product consequence \(f_{a+1}f_b\ge f_af_{b+1}\) for \(a<b\) of
-log-concavity with no internal zeros.  With the symmetry \(w_k=w_{m-k}\), the
-weights \eqref{eq:w-from-f} satisfy the hypotheses of \Cref{thm:kernel}.
+\end{enumerate}
+\end{lemma}
 
-For \(u,v\ge0\), the degree-\(m\) coefficient of the product \(F_f(u;x)F_f(v;x)\) is
+\begin{proof}
+Assume first that \(f\) is log-concave with interval support.  If
+\(f_kf_{m-k}=0\), \eqref{eq:central-products} is immediate.  Otherwise interval
+support gives \(f_j>0\) for \(k\le j\le m-k\).  With
+\(\rho_j=f_{j+1}/f_j\), log-concavity makes \((\rho_j)\) nonincreasing, and
+\(k\le m-k-1\) gives
+\[
+ \frac{f_{k+1}f_{m-k-1}}{f_kf_{m-k}}
+ =\frac{\rho_k}{\rho_{m-k-1}}\ge1.
+\]
+
+Conversely, assume \eqref{eq:central-products} for every \(m\).  Taking
+\(m=2j\) and \(k=j-1\) gives \(f_j^2\ge f_{j-1}f_{j+1}\),
+so \(f\) is log-concave.  If \(f_a,f_b>0\) with \(b\ge a+2\), take
+\(m=a+b\) and \(k=a\).  Then
+\[
+ f_{a+1}f_{b-1}\ge f_af_b>0.
+\]
+Thus both inward neighbors are positive; iteration fills every gap between two
+positive terms.  Hence the positive support is an interval.
+\end{proof}
+
+\begin{remark}\label{rem:internal-zeros}
+The central-product characterization also explains why interval support is
+essential.  A gap in the positive support forces some anti-diagonal product
+sequence outside the centrally nondecreasing cone: if \(f_a,f_b>0\) but an
+intermediate term vanishes, the inward inequality used in the converse of
+\Cref{lem:central-products} must fail somewhere.  This is not merely a
+limitation of the proof.  Take \(f_1=f_4=1\) and \(f_n=0\) otherwise.  The
+log-concavity inequalities still hold, but the support \(\{1,4\}\) is not an
+interval.  At \(m=5\) the anti-diagonal products are \(f_1f_4=f_4f_1=1\) and
+\(f_2f_3=f_3f_2=0\), so they decrease toward the center, and
+\[
+ [x^5]\Tur_f(2;1,1;x)=-9360.
+\]
+Thus failure of sequence centrality can produce an actual sign reversal.
+\end{remark}
+
+We now pass from anti-diagonal weights to the parameter comparison, keeping the
+weights arbitrary for the moment.  Fix \(m\ge2\) and nonnegative weights
+\((w_k)_{1\le k\le m-1}\).  For \(u,v\ge0\), define
 \begin{equation}\label{eq:C-def}
- C_{m,f}(u,v)
+ C_{m,w}(u,v)
  =\sum_{k=1}^{m-1}w_k
- \frac{(u)_{3k}(v)_{3(m-k)}}{(3k-1)![3(m-k)-1]!},
+ \frac{(u)_{3k}(v)_{3(m-k)}}{(3k-1)![3(m-k)-1]!}.
 \end{equation}
-with \(C_{m,f}(0,v)=0\) since \((0)_{3k}=0\).  The beta-binomial
-representation below is used for \(u,v>0\).
-Let \(N=3m\) and let \(J\) have the beta-binomial distribution
+Both \(C_{m,w}(0,v)\) and \(C_{m,w}(u,0)\) vanish.  For \(u,v>0\), put
+\(N=3m\) and let \(J\) have the beta-binomial law
 \[
  \Pp(J=j)=\binom Nj\frac{(u)_j(v)_{N-j}}{(u+v)_N},
  \qquad 0\le j\le N.
 \]
-For \(1\le j\le N-1\),
+Since
 \[
  \frac{(u)_j(v)_{N-j}}{(j-1)!(N-j-1)!}
- =\frac{(u+v)_N}{N!}\,
- j(N-j)\Pp(J=j).
+ =\frac{(u+v)_N}{N!}\,j(N-j)\Pp(J=j),
 \]
-Defining a weight on all integers \(0\le j\le N\) by
+defining
 \[
  \widetilde w_j=
  \begin{cases}
@@ -222,86 +275,70 @@ Defining a weight on all integers \(0\le j\le N\) by
   0,&\text{otherwise},
  \end{cases}
 \]
-we obtain
+gives
 \begin{equation}\label{eq:C-beta-binomial}
- C_{m,f}(u,v)
- =\frac{(u+v)_N}{N!}
- \E\!\left[J(N-J)\widetilde w_J\right].
+ C_{m,w}(u,v)
+ =\frac{(u+v)_N}{N!}\E\!\left[J(N-J)\widetilde w_J\right].
 \end{equation}
-The factor \(J(N-J)\) vanishes at \(j=0\) and \(j=N\), so the endpoint terms do not
-contribute.
+The endpoint terms vanish because of the factor \(J(N-J)\).
 
-Use the standard mixture representation \(P\sim\operatorname{Beta}(u,v)\) and
-\(J\mid P\sim\operatorname{Bin}(N,P)\).  The identity
+Using the standard mixture \(P\sim\operatorname{Beta}(u,v)\),
+\(J\mid P\sim\operatorname{Bin}(N,P)\), together with
 \[
- j(N-j)\binom Nj=N(N-1)\binom{N-2}{j-1}
+ j(N-j)\binom Nj=N(N-1)\binom{N-2}{j-1},
 \]
-then transforms \eqref{eq:C-beta-binomial} into
+we obtain
 \begin{equation}\label{eq:C-beta}
- C_{m,f}(u,v)
+ C_{m,w}(u,v)
  =\frac{(u+v)_N}{N!}N(N-1)\E\,G_{m,w}(P),
 \end{equation}
-where the kernel
+where
 \begin{equation}\label{eq:G-weighted}
  G_{m,w}(p)
  =\sum_{k=1}^{m-1}w_k\binom{3m-2}{3k-1}
  p^{3k}(1-p)^{3(m-k)},
- \qquad 0\le p\le1,
+ \qquad 0\le p\le1.
 \end{equation}
-is defined for arbitrary symmetric nonnegative weights \(w_k=w_{m-k}\) and is
-symmetric under \(p\mapsto1-p\).  The congruence \(j\equiv0\pmod3\) becomes
-\(j-1\equiv2\pmod3\), which explains the binomial coefficient
-\(\binom{3m-2}{3k-1}\).
-
-By \eqref{eq:C-beta} and \Cref{lem:beta-order}, \Cref{thm:main} reduces to the
-monotonicity of \(G_{m,w}\) on \([0,1/2]\) (\Cref{sec:kernel}).
-
-\section{Two monotonicity lemmas}\label{sec:monotonicity-lemmas}
-
-This section records two elementary monotonicity facts.  The weighting principle
-for the paired residue blocks of \Cref{sec:kernel} is due to
-\cite[Lem.~6]{KalmykovKarp2013Ratios}, proved in
-\cite[Lem.~2.1]{KalmykovKarp2013Reciprocal}, and was applied to multiplicity two
-in \cite{KarpZhang2024}.  The ordering of beta laws by imbalance used in
-\Cref{sec:proof} is a fixed-sum likelihood-ratio comparison for folded beta
-laws, obtained in \cite[Thm.~3]{BerenhautBergen2011} under the restriction that
-each parameter gap be \(0\) or at least \(1\), and proved below without that
-restriction.
-
-\begin{lemma}\label{lem:weighting}
-Let \(0\le w_1\le w_2\le\cdots\le w_L\) and suppose the real sequence
-\(A_1,\dots,A_L\) has no more than one sign change, from nonpositive
-to nonnegative.  If
+The shift from \(3k\) to \(3k-1\) comes from
+\(j-1\equiv2\pmod3\).  If \(w_k=w_{m-k}\), then
+\(G_{m,w}(p)=G_{m,w}(1-p)\).  In that case write
+\(\widehat G_{m,w}(q)\) for the common value of \(G_{m,w}(p)\) at the two points
+satisfying \(p(1-p)=q\), \(0\le q\le1/4\).  For fixed \(s>0\), let
 \[
- \sum_{k=1}^L A_k\ge0,
+ P_d\sim\operatorname{Beta}\left(\frac s2+d,\frac s2-d\right),
+ \qquad Q_d=P_d(1-P_d).
 \]
-then
-\[
- \sum_{k=1}^L w_kA_k\ge0.
-\]
-If in addition \(\sum_{k=1}^LA_k>0\), \(w_L>0\), and \(A_L>0\), then
-\(\sum_{k=1}^Lw_kA_k>0\).
-\end{lemma}
+Then \eqref{eq:C-beta} becomes
+\begin{equation}\label{eq:fixed-sum}
+ C_{m,w}\left(\frac s2+d,\frac s2-d\right)
+ =\kappa_{m,s}\,\E\,\widehat G_{m,w}(Q_d),
+ \qquad
+ \kappa_{m,s}=\frac{(s)_{3m}}{(3m)!}\,3m(3m-1)>0.
+\end{equation}
+Thus \(q=p(1-p)\) is the common centrality coordinate for the residue kernel and
+the beta mixture: kernel monotonicity toward \(p=1/2\) is exactly monotonicity
+of \(\widehat G_{m,w}\) in \(q\), while \Cref{lem:beta-order} will show that
+parameter imbalance moves \(Q_d\) in the opposite direction.
 
-\begin{proof}
-The claim is immediate if all \(A_k\) are nonnegative.  Otherwise, let \(k_0\) be the
-largest index for which \(A_{k_0}<0\).  Put \(c=w_{k_0}\).  For \(k\le k_0\) we have
-\(w_k\le c\) and \(A_k\le0\), while for \(k>k_0\) we have \(w_k\ge c\) and
-\(A_k\ge0\).  Therefore
-\[
- \sum_{k=1}^L w_kA_k
- \ge c\sum_{k=1}^L A_k\ge0.
-\]
-For the strict statement, assume \(\sum_kA_k>0\), \(w_L>0\), and \(A_L>0\).  If every
-\(A_k\) is nonnegative, then \(\sum_kw_kA_k\ge w_LA_L>0\).  Otherwise \(A_L>0\) forces
-\(k_0<L\).  If \(c>0\), then \(\sum_kw_kA_k\ge c\sum_kA_k>0\).  If \(c=0\), then
-\(w_k=0\) for all \(k\le k_0\), so \(\sum_kw_kA_k=\sum_{k>k_0}w_kA_k\ge w_LA_L>0\).
-\end{proof}
+
+
+At fixed parameter sum, imbalance is ordered monotonically by the beta mixture.  The
+comparison is a likelihood-ratio order; see
+\cite[\S1.C]{ShakedShanthikumar2007StochasticOrders}.  It compares the symmetric
+transforms \(P(1-P)\); since \(p\mapsto p(1-p)\) increases on \([0,1/2]\), this
+is the folded-beta comparison of
+\cite[Thm.~3]{BerenhautBergen2011StochasticOrderings}, whose hypotheses reduce at a
+fixed parameter sum to
+\(2d_1,2d_2\in\{0\}\cup[1,\infty)\).  The direct proof below removes that
+restriction, giving the comparison for every \(0\le d_1<d_2<s/2\).
 
 \begin{lemma}\label{lem:beta-order}
 Fix \(s>0\).  For \(0\le d<s/2\), let
-\(P_d\sim\operatorname{Beta}(s/2+d,\,s/2-d)\).
-If \(H:[0,1]\to\mathbb R\) is symmetric, \(H(p)=H(1-p)\), and nondecreasing on
+\(P_d\sim\operatorname{Beta}(s/2+d,\,s/2-d)\) and \(Q_d=P_d(1-P_d)\).  If
+\(0\le d_1<d_2<s/2\), then \(Q_{d_2}\le_{\mathrm{lr}}Q_{d_1}\), where
+\(X\le_{\mathrm{lr}}Y\) means that the ratio of the density of \(Y\) to the
+density of \(X\) is nondecreasing on their common support.
+Consequently, if \(H:[0,1]\to\mathbb R\) is symmetric, \(H(p)=H(1-p)\), and nondecreasing on
 \([0,1/2]\), then
 \begin{equation}\label{eq:beta-order}
  d_1\le d_2
@@ -313,14 +350,19 @@ is strict.
 \end{lemma}
 
 \begin{proof}
-The case \(d_1=d_2\) is immediate, so assume \(d_1<d_2\).  Put
-\(Q_d=P_d(1-P_d)\in(0,1/4)\).  For
+Such an \(H\) is bounded and Borel measurable, so the expectations in
+\eqref{eq:beta-order} exist.  The case \(d_1=d_2\) is immediate, so assume
+\(d_1<d_2\).  Here
+\(Q_d\in(0,1/4)\).  For
 \[
  p_\pm(q)=\frac{1\pm\sqrt{1-4q}}{2},
  \qquad
  \ell(q)=\log\frac{p_+(q)}{p_-(q)},
 \]
-the density of \(Q_d\) is
+the two preimages of \(q\) satisfy \(p_+p_-=q\) and \(p_-=1-p_+\), so they contribute
+\(p_+^{s/2+d-1}p_-^{s/2-d-1}+p_-^{s/2+d-1}p_+^{s/2-d-1}
+ =2q^{s/2-1}\cosh\bigl(d\ell(q)\bigr)\).  Since
+\(|\mathrm dq/\mathrm dp|=\sqrt{1-4q}\), the density of \(Q_d\) is
 \[
  g_d(q)=\frac{2}{B(s/2+d,s/2-d)}\,
  q^{s/2-1}(1-4q)^{-1/2}\cosh\!\bigl(d\ell(q)\bigr).
@@ -335,12 +377,10 @@ The densities \(g_{d_1}\) and \(g_{d_2}\) share the factor
 The function \(\ell\) is strictly decreasing, since \(p_+(q)/p_-(q)\) decreases to
 \(1\) as \(q\uparrow1/4\).  For \(d_2>d_1\), \(\cosh(d_2\ell)/\cosh(d_1\ell)\) is
 strictly increasing in \(\ell>0\), because \(d\mapsto d\tanh(d\ell)\) is strictly
-increasing; hence \(g_{d_2}/g_{d_1}\) is strictly decreasing in \(q\).  Thus
-\(Q_{d_2}\) is smaller than \(Q_{d_1}\) in the likelihood-ratio order, and
-therefore in the usual stochastic order \cite[Thm.~1.C.1]{ShakedShanthikumar2007}.  Since
-both densities integrate to one and their ratio is strictly monotone, it
-crosses \(1\) exactly once; hence \(g_{d_1}-g_{d_2}\) has a single sign change,
-negative near \(0\) and positive near \(1/4\), so for every nondecreasing \(\phi\),
+increasing; hence \(g_{d_2}/g_{d_1}\) is strictly decreasing in \(q\).  Thus \(Q_{d_2}\le_{\mathrm{lr}}Q_{d_1}\).  Since both densities integrate to one,
+the strictly monotone ratio crosses \(1\) exactly once; hence
+\(g_{d_1}-g_{d_2}\) changes sign once, from negative to positive, and for every
+nondecreasing \(\phi\),
 \[
  \E\phi(Q_{d_1})-\E\phi(Q_{d_2})
  =\int_0^{1/4}\bigl(\phi(q)-\phi(q^\ast)\bigr)
@@ -350,21 +390,103 @@ where \(q^\ast\) is the crossing point and the integrand is nonnegative
 throughout.  Finally, symmetry of \(H\) gives \(H(p)=\widetilde H(p(1-p))\), with
 \(\widetilde H\) nondecreasing on \([0,1/4]\) precisely when \(H\) is nondecreasing
 on \([0,1/2]\); taking \(\phi=\widetilde H\) proves \eqref{eq:beta-order}.  If \(H\)
-is strictly increasing and \(d_1<d_2\), the likelihood ratio is nonconstant, the
-crossing is nondegenerate, and the inequality is strict.
+is strictly increasing and \(d_1<d_2\), then \(\widetilde H\) is strictly increasing
+and \(g_{d_1}-g_{d_2}\) vanishes only at \(q^\ast\); hence the integrand in the
+preceding display is positive off \(q^\ast\), and the inequality is strict.
 \end{proof}
+
+The beta representation and the likelihood-ratio order give one direction of the
+reduction.  Concentration of beta laws gives the converse.
+
+\begin{proposition}\label{prop:kernel-exact}
+Fix \(m\ge2\) and symmetric nonnegative weights \(w_k=w_{m-k}\).  Then the
+following are equivalent:
+\begin{enumerate}
+\item \(G_{m,w}\) is nondecreasing on \([0,1/2]\);
+\item \((u,v)\mapsto C_{m,w}(u,v)\) is Schur-concave on
+\([0,\infty)^2\).
+\end{enumerate}
+If \(G_{m,w}\) is strictly increasing and the weights are not all zero, then at
+each fixed \(s>0\),
+\[
+ d\longmapsto C_{m,w}\left(\frac s2+d,\frac s2-d\right)
+\]
+is strictly decreasing on \([0,s/2]\).
+\end{proposition}
+
+\begin{proof}
+Assume first that \(G_{m,w}\) is nondecreasing on \([0,1/2]\).  For
+\(0\le d<s/2\), the fixed-sum representation \eqref{eq:fixed-sum} and \Cref{lem:beta-order} give the required monotonicity; if \(G_{m,w}\) is strictly
+increasing, the inequality is strict.  At the endpoint, \(C_{m,w}(s,0)=0\)
+by \eqref{eq:C-def}, while every interior value is nonnegative and is positive
+when the weights are not all zero.  Symmetry completes the Schur-concavity
+statement.
+
+Conversely, suppose \(C_{m,w}\) is Schur-concave for every fixed sum.  Choose
+\(1/2\le p_1<p_2<1\), and for \(s>0\) let
+\[
+ P_{s,i}\sim\operatorname{Beta}(sp_i,s(1-p_i)),
+ \qquad i=1,2.
+\]
+The corresponding imbalances are \(d_i=s(p_i-1/2)\).  Since the prefactor in
+\eqref{eq:C-beta} is common at fixed \(s\), Schur-concavity gives
+\[
+ \E G_{m,w}(P_{s,1})\ge \E G_{m,w}(P_{s,2}).
+\]
+But
+\[
+ \E P_{s,i}=p_i,\qquad
+ \operatorname{Var}(P_{s,i})=\frac{p_i(1-p_i)}{s+1},
+\]
+so \(P_{s,i}\to p_i\) in probability as \(s\to\infty\).  Since \(G_{m,w}\) is a
+bounded continuous polynomial on \([0,1]\), letting \(s\to\infty\) yields
+\(G_{m,w}(p_1)\ge G_{m,w}(p_2)\).  Thus \(G_{m,w}\) is nonincreasing on
+\([1/2,1)\), hence by continuity on \([1/2,1]\).  Symmetry makes it
+nondecreasing on \([0,1/2]\).
+\end{proof}
+
+Kernel monotonicity is therefore precisely the analytic obstruction to
+coefficientwise Schur-concavity at a fixed degree.
+
+\begin{remark}\label{rem:fixed-total}
+For the weights \(w_k=f_kf_{m-k}\) arising from \Cref{thm:main},
+\[
+ C_{m,w}(u,v)=[x^m]F_f(u;x)F_f(v;x).
+\]
+Assume \(f\not\equiv0\) and that \(F_f(u;x)\) and \(F_f(v;x)\) converge at
+some \(x>0\), with \(u,v>0\).  Let \(N_u,N_v\) be independent with
+\[
+ \Pp_x(N_u=n)
+ =\frac{f_n(u)_{3n}x^n}{(3n-1)!F_f(u;x)},
+ \qquad n\ge1,
+\]
+and analogously for \(N_v\), and write \(I=\{n\ge1:f_n>0\}\).  If
+\(m\notin I+I\), then \(C_{m,w}(u,v)=0\) and the degree-\(m\) sector
+vanishes.  If \(m\in I+I\), then \(C_{m,w}(u,v)>0\), the conditioning event
+has positive probability, and the power of \(x\) cancels under conditioning:
+\[
+ \Pp_x(N_u=k\mid N_u+N_v=m)
+ =\frac{f_kf_{m-k}(u)_{3k}(v)_{3(m-k)}}
+ {(3k-1)![3(m-k)-1]!\,C_{m,w}(u,v)}.
+\]
+Thus, degree by degree, \Cref{thm:main} is a microcanonical Schur-concavity
+statement; summing these fixed-total inequalities against \(x^m\) yields the
+ordinary pointwise Tur\'an inequality.  The beta-binomial identity
+\eqref{eq:C-beta-binomial} makes these fixed-total sectors explicit, while the
+fixed-sum form \eqref{eq:fixed-sum} compares parameter imbalance by stochastic
+order.
+\end{remark}
 
 \section{The cubic residue kernel}\label{sec:kernel}
 
-For symmetric nonnegative weights \(w_k=w_{m-k}\), the kernel of
+The exact reduction leaves one genuinely cubic question: whether the residue kernel
+preserves central order.  For symmetric nonnegative weights \(w_k=w_{m-k}\), the kernel of
 \eqref{eq:G-weighted} is
 \[
  G_{m,w}(p)=\sum_{k=1}^{m-1}w_k\binom{3m-2}{3k-1}
  p^{3k}(1-p)^{3(m-k)},
  \qquad G_{m,w}(p)=G_{m,w}(1-p).
 \]
-This section proves that \(G_{m,w}\) is monotone on \([0,1/2]\) whenever the
-weights increase toward the center.
 
 \begin{theorem}[Weighted cubic residue monotonicity]\label{thm:kernel}
 Suppose
@@ -376,7 +498,7 @@ Then \(G_{m,w}\) is nondecreasing on \([0,1/2]\).  If the weights are not all ze
 then \(G_{m,w}\) is strictly increasing on \([0,1/2]\).
 \end{theorem}
 
-\subsection{The constant-weight kernel}
+\subsection{The constant-weight kernel}\label{subsec:constant-weight-kernel}
 
 Let \(w_k\equiv1\), and write \(G_m=G_{m,1}\).  Set \(n=3m-2\) and \(t=p/(1-p)\).
 For \(0\le p\le1/2\) one has \(0\le t\le1\), and
@@ -396,12 +518,18 @@ where
  \bigl(k-(m-k)t\bigr).
 \end{equation}
 
-\begin{lemma}\label{lem:bernstein}
-For every \(m\ge2\),
+\begin{lemma}[Bernstein-basis positivity certificate]\label{lem:bernstein}
+For every \(m\ge2\), with \(n=3m-2\), write
 \[
- J_m(t)>0\qquad(0<t<1).
+ J_m(t)=\sum_{j=0}^{n+1}b_j\binom{n+1}{j}t^j(1-t)^{n+1-j}
 \]
-Consequently, \(G_m\) is strictly increasing on \([0,1/2]\).
+in the degree-\((n+1)\) Bernstein basis.  Then \(b_j\ge0\) for every
+\(0\le j\le n+1\), and
+\[
+ b_2=\frac{n-1}{n+1}>0.
+\]
+Consequently, \(J_m(t)>0\) for \(0<t<1\), and \(G_m\) is strictly increasing on
+\([0,1/2]\).
 \end{lemma}
 
 \begin{proof}
@@ -411,7 +539,14 @@ Writing \(\nu=3k-1\) in \eqref{eq:J-k} gives
  \sum_{\substack{0\le\nu\le n\\\nu\equiv2\, (3)}}
  \binom{n}{\nu} t^\nu\bigl((\nu+1)-(n-\nu+1)t\bigr).
 \]
-Introduce the projective Bernstein transform
+To certify positivity on \([0,1]\), we compute the degree-\((n+1)\)
+Bernstein coefficients of \(J_m\).  The projective substitution
+\(t=\xi/(1+\xi)\) is chosen because
+\[
+ (1+\xi)^{n+1}t^j(1-t)^{n+1-j}=\xi^j;
+\]
+thus it converts the Bernstein basis into the ordinary monomial basis.
+Introduce
 \begin{equation}\label{eq:P-def}
  \mathcal P_m(\xi)
  =(1+\xi)^{n+1}J_m\!\left(\frac{\xi}{1+\xi}\right).
@@ -449,17 +584,27 @@ identities
  \binom{n}{\nu}\binom{n-\nu}{j-\nu}=\binom nj\binom{j}{\nu},
  \qquad
  \binom{n}{\nu}\binom{n-\nu}{j-\nu-1}
- =\binom{n+1}{j}\binom{j}{\nu}\frac{j-\nu}{n+1}.
+ =\binom{n+1}{j}\binom{j}{\nu}\frac{j-\nu}{n+1},
 \]
-The transform is Bernstein-theoretic: writing
-\(J_m(t)=\sum_j b_j\binom{n+1}{j}t^j(1-t)^{n+1-j}\) in the degree-\((n+1)\)
-Bernstein basis, one has \([\xi^j]\mathcal P_m(\xi)=b_j\binom{n+1}{j}\), so
-nonnegativity of the Bernstein coefficients \(b_j\) certifies \(J_m(t)\ge0\) on
-\([0,1]\) \cite{PowersReznick2000}.  We claim that every \(S_{n,j}\) is nonnegative.
+the second of which is the first at \(j-1\), after
+\(\binom n{j-1}=\binom{n+1}{j}\frac j{n+1}\) and
+\(\binom{j-1}{\nu}=\binom{j}{\nu}\frac{j-\nu}{j}\).
+For the coefficients \(b_j\) in the Bernstein expansion of
+\Cref{lem:bernstein}, the defining property of the transform gives
+\([\xi^j]\mathcal P_m(\xi)=b_j\binom{n+1}{j}\); hence \eqref{eq:P-coeff} yields
+\[
+ b_j=\frac{S_{n,j}}{3(n+1)}.
+\]
+Since every Bernstein basis function is nonnegative on \([0,1]\), nonnegative
+\(b_j\) directly certify \(J_m(t)\ge0\) there; see
+\cite{PowersReznick2000PositiveInterval} for background on positivity
+representations on an interval.  It remains to prove that every \(S_{n,j}\) is
+nonnegative.
 
-Put \(\delta=n+1-j\).  A third-root-of-unity filter evaluates the sum over the class
-\(\nu\equiv2\pmod3\); its trigonometric terms are periodic modulo \(6\) in \(j\), so the
-closed form splits into six residue classes,
+Put \(\delta=n+1-j\).  A third-root-of-unity filter evaluates the sum over the
+class \(\nu\equiv2\pmod3\).  With \(\omega=e^{2\pi i/3}\), one has
+\(1+\omega=e^{i\pi/3}\), so the nontrivial Fourier terms have period \(6\) in
+\(j\), and the closed form naturally splits into six residue classes,
 \begin{equation}\label{eq:S-table}
 3S_{n,j}=
 \begin{cases}
@@ -473,18 +618,15 @@ closed form splits into six residue classes,
 \end{equation}
 In detail, for
 \[
- R_a(j)=\sum_{\nu\equiv a\, (3)}\binom{j}{\nu}
+ R_a(j)=\sum_{\nu\equiv a\, (3)}\binom{j}{\nu},
 \]
-and \(\omega=e^{2\pi i/3}\),
+the root-of-unity filter gives
 \[
- R_a(j)=\frac13\sum_{\ell=0}^2\omega^{-a\ell}(1+\omega^\ell)^j
+ R_a(j)=\frac13\sum_{\lambda=0}^2\omega^{-a\lambda}(1+\omega^\lambda)^j
  =\frac13\left(2^j+2\cos\frac{(j-2a)\pi}{3}\right),
 \]
 where \(2\cos((j-2a)\pi/3)\) equals \(2,1,-1,-2,-1,1\) according as
-\(j-2a\equiv0,1,2,3,4,5\pmod6\).  These values also follow with no appeal to
-\(\mathbb C\): Pascal's rule gives \(R_a(j+1)=R_a(j)+R_{a-1}(j)\) (subscripts
-modulo~\(3\)), and this recurrence with \(R_0(0)=1\), \(R_1(0)=R_2(0)=0\) fixes them
-by induction.  The first two moments over the residue class are
+\(j-2a\equiv0,1,2,3,4,5\pmod6\).  The first two moments over the residue class are
 \[
  \sum_{\nu\equiv2\, (3)}\nu\binom{j}{\nu}=jR_1(j-1),
  \qquad
@@ -523,19 +665,73 @@ equality at \(j=7\) and \(j=6\), respectively.  Advancing \(j\) by one increases
 left-minus-right difference by \(2^j-6j\) in \eqref{eq:exp-bound-1} and by
 \(2^{j+1}-6j-6\) in \eqref{eq:exp-bound-0}, both positive for \(j\ge6\); the
 inequalities therefore persist for all larger \(j\).  Likewise \(2^j-3j+1>0\) at
-\(j=5\), with increment \(2^j-3>0\) thereafter.  Hence \(S_{n,j}\ge0\) in every case.
-
-By \eqref{eq:P-coeff}, all coefficients of \(\mathcal P_m\) are nonnegative.
-The coefficient at \(\xi^2\) is positive, since \(\delta=n-1>0\) and
-\(3S_{n,2}=9\delta\).  Therefore \(\mathcal P_m(\xi)>0\) for \(\xi>0\).  The substitution
+\(j=5\), with increment \(2^j-3>0\) thereafter.  Hence \(S_{n,j}\ge0\) in every
+case.  Therefore \(b_j\ge0\) for every \(j\).  At
+\(j=2\), since \(\delta=n-1\), one has \(3S_{n,2}=9(n-1)\), and hence
+\[
+ b_2=\frac{n-1}{n+1}>0.
+\]
+Equivalently, all coefficients of \(\mathcal P_m\) are nonnegative and its
+coefficient at \(\xi^2\) is positive.  Therefore \(\mathcal P_m(\xi)>0\) for
+\(\xi>0\).  The substitution
 \(t=\xi/(1+\xi)\) in \eqref{eq:P-def} proves \(J_m(t)>0\) for \(0<t<1\), and
 \eqref{eq:G-J} completes the proof.
 \end{proof}
 
-\subsection{Insertion of monotone weights}
 
-Arbitrary weights satisfying \eqref{eq:w-monotone} preserve nonnegativity of the
-derivative.
+\subsection{Insertion of monotone weights}\label{subsec:insertion-monotone-weights}
+
+The constant-weight certificate is enough because the admissible weight cone is
+generated by symmetric central windows.  The following summation-by-parts identity
+characterizes the relevant dual cone.  Its one-sign-change form is the standard weighting
+device used in this circle of coefficientwise Tur\'an inequalities; compare
+\cite[Lem.~6]{KalmykovKarp2013Ratios} and
+\cite[Lem.~2.1]{KalmykovKarp2013Reciprocal}.
+
+\begin{lemma}\label{lem:weighting}
+Let \(A_1,\dots,A_L\in\mathbb R\), put
+\[
+ T_\sigma=\sum_{k=\sigma}^L A_k\qquad(1\le \sigma\le L),
+\]
+and let \(0\le w_1\le\cdots\le w_L\), with \(w_0=0\).  Then
+\begin{equation}\label{eq:abel-weight}
+ \sum_{k=1}^L w_kA_k
+ =\sum_{\sigma=1}^L(w_\sigma-w_{\sigma-1})T_\sigma.
+\end{equation}
+Consequently,
+\[
+ \sum_{k=1}^L w_kA_k\ge0
+ \quad\text{for every }0\le w_1\le\cdots\le w_L
+\]
+if and only if \(T_\sigma\ge0\) for every \(\sigma\).  If all \(T_\sigma>0\), the weighted sum
+is strictly positive for every nonzero such weight sequence.
+
+In particular, if \(A_1,\dots,A_L\) has no more than one sign change, from
+nonpositive to nonnegative, and \(\sum_kA_k\ge0\), then all \(T_\sigma\ge0\).
+If moreover \(\sum_kA_k>0\) and \(A_L>0\), then all \(T_\sigma>0\).
+\end{lemma}
+
+\begin{proof}
+Since \(A_k=T_k-T_{k+1}\), with \(T_{L+1}=0\), summation by parts gives
+\eqref{eq:abel-weight}.  The cone equivalence follows because the increments
+\(w_\sigma-w_{\sigma-1}\) are nonnegative, while choosing
+\(w_k=\mathbf 1_{\{k\ge \sigma\}}\) recovers the individual tail \(T_\sigma\).
+
+For the final assertion, suppose the signs change at most once from nonpositive
+to nonnegative.  After the crossing, each \(T_\sigma\) is a sum of nonnegative
+terms.  Before the crossing,
+\[
+ T_\sigma=\sum_{k=1}^L A_k-\sum_{k<\sigma}A_k
+ \ge \sum_{k=1}^L A_k\ge0,
+\]
+because the omitted prefix is nonpositive.  If the total sum is positive and
+\(A_L>0\), the same argument is strict before the crossing, while every tail
+after it contains a positive term.  Hence all \(T_\sigma>0\).
+\end{proof}
+
+After pairing complementary residue blocks, a radial one-sign-change property shows
+that every central window has positive derivative.  The duality lemma then inserts
+arbitrary weights increasing toward the center.
 
 For \(0<t<1\), differentiation of \eqref{eq:G-weighted} gives
 \begin{equation}\label{eq:J-weighted}
@@ -548,7 +744,8 @@ where
  =\sum_{k=1}^{m-1}w_k\binom{3m-2}{3k-1}t^{3k-1}
  \bigl(k-(m-k)t\bigr).
 \end{equation}
-Pair the terms indexed by \(k\) and \(m-k\).  For \(1\le k<m/2\), let
+Pair the terms indexed by \(k\) and \(m-k\), as in the proof of
+\cite[Thm.~2]{KarpZhang2024LogConcavity}.  For \(1\le k<m/2\), let
 \begin{align}
  B_{m,k}(t)
  &=\binom{3m-2}{3k-1}
@@ -584,204 +781,546 @@ For \(k<m/2\), the sign of \(B_{m,k}(t)\) is the sign of
  H_{m,k}(t)
  =k-(m-k)t+t^{3(m-2k)}\bigl((m-k)-kt\bigr).
 \]
-Put \(d=m-2k>0\) and \(t=e^{-z}\), \(z>0\).  Direct rearrangement gives
+The natural radial coordinate of the paired block is its distance
+\(\eta=m-2k>0\) from the center.  Put \(t=e^{-z}\), \(z>0\).  Direct rearrangement
+gives
 \begin{align}
  H_{m,k}(t)
- &=\frac12(1+t)(1+t^{3d})
+ &=\frac12(1+t)(1+t^{3\eta})
  \left[
  m\frac{1-t}{1+t}
- -d\frac{1-t^{3d}}{1+t^{3d}}
+ -\eta\frac{1-t^{3\eta}}{1+t^{3\eta}}
  \right]\notag\\
- &=\frac12(1+t)(1+t^{3d})
- \left[m\tanh\frac{z}{2}-d\tanh\frac{3dz}{2}\right].
+ &=\frac12(1+t)(1+t^{3\eta})
+ \left[m\tanh\frac{z}{2}-\eta\tanh\frac{3\eta z}{2}\right].
  \label{eq:H-hyperbolic}
 \end{align}
-The function \(d\mapsto d\tanh(3dz/2)\) is strictly increasing for \(d>0\).
-Therefore, for \(2\le k<m/2\), if
-\(B_{m,k}(t)\le0\), then the same bracket in \eqref{eq:H-hyperbolic} is strictly
-negative after replacing \(d\) by \(d+2\), which corresponds to replacing \(k\) by
-\(k-1\).  Thus
+The function \(\eta\mapsto \eta\tanh(3\eta z/2)\) is strictly increasing for \(\eta>0\).
+Thus moving outward from the center, which increases \(\eta\) and decreases \(k\),
+can only decrease the bracket in \eqref{eq:H-hyperbolic}.  In particular, for
+\(2\le k<m/2\), if \(B_{m,k}(t)\le0\), then the bracket is strictly negative
+after replacing \(\eta\) by \(\eta+2\), equivalently \(k\) by \(k-1\).  Hence
 \[
  B_{m,k}(t)\le0\quad\Longrightarrow\quad B_{m,k-1}(t)<0
  \qquad(2\le k<m/2).
 \]
 The final block is always positive.  For even \(m\) this is \eqref{eq:B-center}.
-For odd \(m\), the final block has \(d=1\), and its bracket in
+For odd \(m\), the final block has \(\eta=1\), and its bracket in
 \eqref{eq:H-hyperbolic} is \(m\tanh(z/2)-\tanh(3z/2)>0\),
 because \(m\ge3\) and \(\tanh(3y)<3\tanh y\) for \(y>0\).  Hence the blocks have the
 asserted sign pattern.
 \end{proof}
 
 \begin{proof}[Proof of \Cref{thm:kernel}]
+Put \(L=\lfloor m/2\rfloor\) and define the central-window tails
+\[
+ T_{m,\sigma}(t)=\sum_{k=\sigma}^L B_{m,k}(t),
+ \qquad 1\le \sigma\le L.
+\]
 By \Cref{lem:bernstein},
 \[
- \sum_{k=1}^{\lfloor m/2\rfloor}B_{m,k}(t)=J_m(t)>0
+ T_{m,1}(t)=J_m(t)>0
  \qquad(0<t<1).
 \]
-The block sequence has one sign change by \Cref{lem:block-sign}.  Applying
-\Cref{lem:weighting} with the nondecreasing weights in
-\eqref{eq:w-monotone} gives
+By \Cref{lem:block-sign}, the block sequence has at most one sign change from
+negative to positive and \(B_{m,L}(t)>0\).  The strict one-sign-change
+consequence of \Cref{lem:weighting} therefore gives
 \[
- J_{m,w}(t)=\sum_{k=1}^{\lfloor m/2\rfloor}w_kB_{m,k}(t)\ge0.
+ T_{m,\sigma}(t)>0
+ \qquad(1\le \sigma\le L,\ 0<t<1).
 \]
-Equation \eqref{eq:J-weighted} proves that \(G_{m,w}\) is nondecreasing on
-\([0,1/2]\).
+These tails are precisely the \(J\)-numerators corresponding to the extreme
+central-window weights \(\mathbf1_{\{k\ge \sigma\}}\) in the paired indexing.
 
-Suppose now that the weights are not all zero, and put \(L=\lfloor m/2\rfloor\).
-Then \(w_L>0\), and \(B_{m,L}(t)>0\) by \Cref{lem:block-sign}.  Since
-\(\sum_{k=1}^LB_{m,k}(t)=J_m(t)>0\), the strict part of \Cref{lem:weighting} gives
-\(J_{m,w}(t)>0\) for \(0<t<1\), and \(G_{m,w}\) is strictly increasing on
-\([0,1/2]\).
+Now set \(w_0=0\).  The duality identity \eqref{eq:abel-weight} gives
+\[
+ J_{m,w}(t)
+ =\sum_{\sigma=1}^L(w_\sigma-w_{\sigma-1})T_{m,\sigma}(t).
+\]
+Every increment is nonnegative by \eqref{eq:w-monotone}; hence
+\(J_{m,w}(t)\ge0\), and it is strictly positive for \(0<t<1\) whenever the
+weights are not all zero.  Equation \eqref{eq:J-weighted} proves the asserted
+nonstrict and strict monotonicity of \(G_{m,w}\) on \([0,1/2]\).
 \end{proof}
 
-\section{Proof of the theorem}\label{sec:proof}
+The step weight \(\mathbf1_{\{k\ge\sigma\}}\) retains exactly the central index
+window \(\sigma\le k\le m-\sigma\); the cone of centrally nondecreasing symmetric
+weights is the positive span of these windows, with coefficients
+\(w_\sigma-w_{\sigma-1}\).  Thus the constant-weight certificate and the radial
+one-sign-change property first prove positivity for every central truncation, and
+monotone weighting is then only a cone decomposition.
 
-The representation \eqref{eq:C-beta} and the two monotonicity facts of
-\Cref{sec:monotonicity-lemmas,sec:kernel} combine to show that the coefficient
-convolution is Schur-concave in its two parameters
-\cite[Def.~3.A.1]{MarshallOlkinArnold2011}, which gives \Cref{thm:main}.
 
-\begin{proposition}
-\label{prop:C-schur}
-For each \(m\ge2\) and each log-concave sequence \((f_n)\) as in
-\Cref{thm:main}, the symmetric function \((u,v)\mapsto C_{m,f}(u,v)\) is
-Schur-concave on \((0,\infty)^2\).  Equivalently, at fixed \(s=u+v\),
+\section{Proof of the cubic theorem}\label{sec:cubic-proof}
+
+With the exact reduction and the cubic kernel theorem in place, the main result is an
+immediate degreewise consequence.
+
+\begin{corollary}
+\label{cor:C-schur}
+Fix \(m\ge2\), and let \((w_k)\) satisfy
+\eqref{eq:w-monotone}.  Then \((u,v)\mapsto C_{m,w}(u,v)\) is Schur-concave on
+\([0,\infty)^2\).  Equivalently, at fixed \(s>0\),
 \[
- d\longmapsto
- C_{m,f}\left(\frac s2+d,\frac s2-d\right)
+ d\longmapsto C_{m,w}\left(\frac s2+d,\frac s2-d\right)
 \]
-is nonincreasing for \(0\le d<s/2\).  If at least one product \(f_kf_{m-k}\) is
-positive, then this function is strictly decreasing.
-\end{proposition}
-
-\begin{proof}
-The prefactor in \eqref{eq:C-beta} depends only on \(s=u+v\), and \(G_{m,w}\) is
-symmetric by \eqref{eq:G-weighted}.  By \Cref{thm:kernel} it is nondecreasing on
-\([0,1/2]\), and strictly increasing when at least one weight \(w_k=f_kf_{m-k}\)
-is positive; \Cref{lem:beta-order} and its strict part give the two conclusions.
-\end{proof}
-
-\begin{proof}[Proof of \Cref{thm:main}]
-The coefficients of degrees \(0\) and \(1\) in \eqref{eq:Turan-def} vanish.  For
-\(m\ge2\), direct multiplication gives
-\begin{align}
- [x^m]\Tur_f(\mu;\alpha,\beta;x)
- &=C_{m,f}(\mu+\alpha,\mu+\beta)\notag\\
- &\quad-C_{m,f}(\mu,\mu+\alpha+\beta).
- \label{eq:delta-C}
-\end{align}
-Assume first that \(\mu>0\) and \(\alpha,\beta>0\).  The two parameter pairs in
-\eqref{eq:delta-C} have the same sum \(s=2\mu+\alpha+\beta\) and imbalances
-\[
- d_1=\frac{|\alpha-\beta|}{2}\le\frac{\alpha+\beta}{2}=d_2.
-\]
-\Cref{prop:C-schur} therefore gives
-\[
- C_{m,f}(\mu+\alpha,\mu+\beta)
- \ge C_{m,f}(\mu,\mu+\alpha+\beta).
-\]
-This proves nonnegativity of every coefficient.  If \(\alpha=0\) or \(\beta=0\),
-the Tur\'anian is identically zero.  The boundary case \(\mu=0\) follows from
-\(F_f(0;x)=0\) and the nonnegative coefficients of
-\(F_f(\alpha;x)F_f(\beta;x)\).
-\end{proof}
-
-\begin{corollary}\label{cor:strict}
-Under the hypotheses of \Cref{thm:main}, let \(\mu\ge0\), \(\alpha,\beta>0\), and
-\(m\ge2\).  Then
-\[
- [x^m]\Tur_f(\mu;\alpha,\beta;x)>0
-\]
-if and only if there exists \(1\le k\le m-1\) with \(f_kf_{m-k}>0\).
+is nonincreasing for \(0\le d\le s/2\), and is strictly decreasing on this
+interval if the weights are not all zero.
 \end{corollary}
 
 \begin{proof}
-If every product \(f_kf_{m-k}\) vanishes, then both terms of \eqref{eq:delta-C}
-vanish.  Conversely, suppose one such product is positive.  If \(\mu>0\), the two
-imbalances in the proof of \Cref{thm:main} satisfy \(d_1<d_2\), so the strict
-part of \Cref{prop:C-schur} gives strict inequality.  If \(\mu=0\),
-then \(F_f(0;x)=0\), so the coefficient equals \(C_{m,f}(\alpha,\beta)\), a sum of
-nonnegative terms with at least one strictly positive.
+Apply \Cref{thm:kernel,prop:kernel-exact}, including their strict parts.
 \end{proof}
+
+\begin{proof}[Proof of \Cref{thm:main}]
+The zero sequence is trivial, so assume \(f\not\equiv0\).  The coefficients of
+degrees \(0\) and \(1\) vanish.  Fix \(m\ge2\) and set
+\begin{equation}\label{eq:w-from-f}
+ w_k=f_kf_{m-k},\qquad 1\le k\le m-1.
+\end{equation}
+These weights are symmetric, and \Cref{lem:central-products} gives
+\eqref{eq:w-monotone}.  Direct multiplication gives
+\begin{align}
+ [x^m]\mathcal S_f(s;d_1,d_2;x)
+ &=C_{m,w}\left(\tfrac s2+d_1,\tfrac s2-d_1\right)\notag\\
+ &\quad-C_{m,w}\left(\tfrac s2+d_2,\tfrac s2-d_2\right).
+ \label{eq:delta-C}
+\end{align}
+This is nonnegative by \Cref{cor:C-schur}, which proves the fixed-sum
+statement.  The equivalent Tur\'anian form follows from the parameter
+correspondence after \Cref{thm:main}; the case \(s=0\) is trivial.
+\end{proof}
+
+The strict part of the kernel theorem also determines exactly where the coefficient
+inequalities are nontrivial.
+
+\begin{corollary}\label{cor:strict}
+Under the hypotheses of \Cref{thm:main}, put \(I=\{n\ge1:f_n>0\}\) and
+\(I+I=\{i+j:i,j\in I\}\).  If \(s>0\) and \(0\le d_1<d_2\le s/2\), then
+\[
+ [x^m]\mathcal S_f(s;d_1,d_2;x)>0
+ \quad\Longleftrightarrow\quad m\in I+I
+ \qquad(m\ge2).
+\]
+Thus if \(I=\{a,\ldots,b\}\) the positive degrees are exactly
+\(2a,\ldots,2b\), while if \(I=\{a,a+1,\ldots\}\) they are exactly
+\(m\ge2a\).  The same description holds for \eqref{eq:Turan-def} whenever
+\(\alpha,\beta>0\).
+\end{corollary}
+
+\begin{proof}
+The condition \(m\in I+I\) is exactly that the weights \eqref{eq:w-from-f} are
+not all zero.  If they all vanish, so does \eqref{eq:delta-C}; otherwise
+strictness follows directly from \Cref{cor:C-schur}.  Since
+\(I\) is an integer interval, so is \(I+I\).  The Tur\'anian statement follows
+from the parameter equivalence and the fact that \(\alpha,\beta>0\) exactly
+corresponds to \(d_1<d_2\).
+\end{proof}
+
+\begin{remark}\label{rem:local-weight}
+At a fixed degree \(m\), only the single chain
+\[
+ f_1f_{m-1}\le f_2f_{m-2}\le\cdots\le
+ f_{\lfloor m/2\rfloor}f_{\lceil m/2\rceil}
+\]
+is needed.  Thus the degree-\(m\) conclusions hold for any nonnegative sequence
+satisfying that local condition.  Globally, however,
+\Cref{lem:central-products} shows that log-concavity together with interval
+support is not merely a convenient sufficient hypothesis: it is exactly the
+condition that all of these anti-diagonal product chains are centrally
+nondecreasing simultaneously.  Interval support also makes \(I+I\) an interval
+in \Cref{cor:strict}.
+\end{remark}
+
+\section{The sharp multiplicity threshold}\label{sec:threshold}
+
+The cubic theorem closes the only unresolved universal case.  Degree three already
+explains why no larger multiplicity can satisfy the same statement.
+
+\begin{proposition}[Degree-three multiplicity threshold]
+\label{prop:multiplicity-threshold}
+For every integer \(r\ge2\), the degree-three constant-weight kernel is
+\[
+ G^{(r)}_3(p)
+ =\binom{3r-2}{r-1}[p(1-p)]^r\bigl(p^r+(1-p)^r\bigr),
+\]
+and, writing it as \(\widehat G^{(r)}_3(q)\) with \(q=p(1-p)\),
+\begin{equation}\label{eq:r-central-slope}
+ \left.\frac{\mathrm d}{\mathrm d q}\widehat G^{(r)}_3(q)\right|_{q=1/4}
+ =\binom{3r-2}{r-1}r(3-r)2^{2-3r}.
+\end{equation}
+For the two-term sequence \(f_1=f_2=1\), \(f_n=0\) for \(n\ge3\),
+\begin{equation}\label{eq:r-degree-three}
+ \begin{split}
+ &[x^3]\Bigl(
+ F_{f,r}(\mu+1;x)^2-F_{f,r}(\mu;x)F_{f,r}(\mu+2;x)\Bigr)\\
+ &\qquad=
+ \frac{r\bigl(4r-(r-3)\mu\bigr)
+ (\mu+2)_{r-2}(\mu+1)_{2r-1}}
+ {(r-1)!(2r-1)!}.
+ \end{split}
+\end{equation}
+Hence for every \(r\ge4\) this coefficient is negative exactly when
+\(\mu>4r/(r-3)\).  Moreover, this counterexample is minimal both in degree and
+in positive-support size: degree two is nonnegative for every \(r\), and no
+one-point-support sequence can produce a negative coefficient.
+\end{proposition}
+
+Dividing each kernel by its central value puts the multiplicities
+\(r=2,\dots,5\) on one scale (\Cref{fig:multiplicity-threshold}).
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    width=10.2cm, height=6.6cm,
+    xlabel={\(q\)},
+    ylabel={\(\widehat G^{(r)}_3(q)\big/\widehat G^{(r)}_3(1/4)\)},
+    xmin=0, xmax=0.255, ymin=0, ymax=1.24,
+    xtick={0,0.05,0.1,0.15,0.2,0.25},
+    xticklabel style={/pgf/number format/fixed,
+                      /pgf/number format/precision=2},
+    ytick={0,0.25,0.5,0.75,1,1.2},
+    tick label style={font=\footnotesize},
+    label style={font=\small},
+    axis lines=left,
+    axis on top,
+    legend entries={\(r=2\),\(r=3\),\(r=4\),\(r=5\)},
+    legend style={font=\footnotesize, draw=none, fill=none,
+                  at={(0.98,0.04)}, anchor=south east,
+                  cells={anchor=west}, row sep=-2pt},
+]
+\addplot[black!35, dashed, line width=0.6pt, forget plot]
+  coordinates {(0,1) (0.25,1)};
+\addplot[blue!65!black, line width=0.9pt] coordinates {(0.0,0.0) (0.0020833333,0.00013831019) (0.0041666667,0.00055092593) (0.0062500000,0.0012343750) (0.0083333333,0.0021851852) (0.010416667,0.0033998843) (0.012500000,0.0048750000) (0.014583333,0.0066070602) (0.016666667,0.0085925926) (0.018750000,0.010828125) (0.020833333,0.013310185) (0.022916667,0.016035301) (0.025000000,0.019000000) (0.027083333,0.022200810) (0.029166667,0.025634259) (0.031250000,0.029296875) (0.033333333,0.033185185) (0.035416667,0.037295718) (0.037500000,0.041625000) (0.039583333,0.046169560) (0.041666667,0.050925926) (0.043750000,0.055890625) (0.045833333,0.061060185) (0.047916667,0.066431134) (0.050000000,0.072000000) (0.052083333,0.077763310) (0.054166667,0.083717593) (0.056250000,0.089859375) (0.058333333,0.096185185) (0.060416667,0.10269155) (0.062500000,0.10937500) (0.064583333,0.11623206) (0.066666667,0.12325926) (0.068750000,0.13045312) (0.070833333,0.13781019) (0.072916667,0.14532697) (0.075000000,0.15300000) (0.077083333,0.16082581) (0.079166667,0.16880093) (0.081250000,0.17692187) (0.083333333,0.18518519) (0.085416667,0.19358738) (0.087500000,0.20212500) (0.089583333,0.21079456) (0.091666667,0.21959259) (0.093750000,0.22851563) (0.095833333,0.23756019) (0.097916667,0.24672280) (0.10000000,0.25600000) (0.10208333,0.26538831) (0.10416667,0.27488426) (0.10625000,0.28448437) (0.10833333,0.29418519) (0.11041667,0.30398322) (0.11250000,0.31387500) (0.11458333,0.32385706) (0.11666667,0.33392593) (0.11875000,0.34407812) (0.12083333,0.35431019) (0.12291667,0.36461863) (0.12500000,0.37500000) (0.12708333,0.38545081) (0.12916667,0.39596759) (0.13125000,0.40654687) (0.13333333,0.41718519) (0.13541667,0.42787905) (0.13750000,0.43862500) (0.13958333,0.44941956) (0.14166667,0.46025926) (0.14375000,0.47114062) (0.14583333,0.48206019) (0.14791667,0.49301447) (0.15000000,0.50400000) (0.15208333,0.51501331) (0.15416667,0.52605093) (0.15625000,0.53710938) (0.15833333,0.54818519) (0.16041667,0.55927488) (0.16250000,0.57037500) (0.16458333,0.58148206) (0.16666667,0.59259259) (0.16875000,0.60370312) (0.17083333,0.61481019) (0.17291667,0.62591030) (0.17500000,0.63700000) (0.17708333,0.64807581) (0.17916667,0.65913426) (0.18125000,0.67017187) (0.18333333,0.68118519) (0.18541667,0.69217072) (0.18750000,0.70312500) (0.18958333,0.71404456) (0.19166667,0.72492593) (0.19375000,0.73576562) (0.19583333,0.74656019) (0.19791667,0.75730613) (0.20000000,0.76800000) (0.20208333,0.77863831) (0.20416667,0.78921759) (0.20625000,0.79973437) (0.20833333,0.81018519) (0.21041667,0.82056655) (0.21250000,0.83087500) (0.21458333,0.84110706) (0.21666667,0.85125926) (0.21875000,0.86132813) (0.22083333,0.87131019) (0.22291667,0.88120197) (0.22500000,0.89100000) (0.22708333,0.90070081) (0.22916667,0.91030093) (0.23125000,0.91979687) (0.23333333,0.92918519) (0.23541667,0.93846238) (0.23750000,0.94762500) (0.23958333,0.95666956) (0.24166667,0.96559259) (0.24375000,0.97439062) (0.24583333,0.98306019) (0.24791667,0.99159780) (0.25000000,1.0000000)};
+\addplot[black, line width=1.4pt] coordinates {(0.0,0.0) (0.0020833333,2.3003472e-6) (0.0041666667,1.8287037e-5) (0.0062500000,6.1328125e-5) (0.0083333333,0.00014444444) (0.010416667,0.00028030961) (0.012500000,0.00048125000) (0.014583333,0.00075924479) (0.016666667,0.0011259259) (0.018750000,0.0015925781) (0.020833333,0.0021701389) (0.022916667,0.0028691985) (0.025000000,0.0037000000) (0.027083333,0.0046724392) (0.029166667,0.0057960648) (0.031250000,0.0070800781) (0.033333333,0.0085333333) (0.035416667,0.010164337) (0.037500000,0.011981250) (0.039583333,0.013991884) (0.041666667,0.016203704) (0.043750000,0.018623828) (0.045833333,0.021259028) (0.047916667,0.024115726) (0.050000000,0.027200000) (0.052083333,0.030517578) (0.054166667,0.034073843) (0.056250000,0.037873828) (0.058333333,0.041922222) (0.060416667,0.046223365) (0.062500000,0.050781250) (0.064583333,0.055599523) (0.066666667,0.060681481) (0.068750000,0.066030078) (0.070833333,0.071647917) (0.072916667,0.077537254) (0.075000000,0.083700000) (0.077083333,0.090137717) (0.079166667,0.096851620) (0.081250000,0.10384258) (0.083333333,0.11111111) (0.085416667,0.11865739) (0.087500000,0.12648125) (0.089583333,0.13458216) (0.091666667,0.14295926) (0.093750000,0.15161133) (0.095833333,0.16053681) (0.097916667,0.16973378) (0.10000000,0.17920000) (0.10208333,0.18893286) (0.10416667,0.19892940) (0.10625000,0.20918633) (0.10833333,0.21970000) (0.11041667,0.23046642) (0.11250000,0.24148125) (0.11458333,0.25273980) (0.11666667,0.26423704) (0.11875000,0.27596758) (0.12083333,0.28792569) (0.12291667,0.30010531) (0.12500000,0.31250000) (0.12708333,0.32510299) (0.12916667,0.33790718) (0.13125000,0.35090508) (0.13333333,0.36408889) (0.13541667,0.37745045) (0.13750000,0.39098125) (0.13958333,0.40467244) (0.14166667,0.41851481) (0.14375000,0.43249883) (0.14583333,0.44661458) (0.14791667,0.46085184) (0.15000000,0.47520000) (0.15208333,0.48964813) (0.15416667,0.50418495) (0.15625000,0.51879883) (0.15833333,0.53347778) (0.16041667,0.54820948) (0.16250000,0.56298125) (0.16458333,0.57778008) (0.16666667,0.59259259) (0.16875000,0.60740508) (0.17083333,0.62220347) (0.17291667,0.63697337) (0.17500000,0.65170000) (0.17708333,0.66636827) (0.17916667,0.68096273) (0.18125000,0.69546758) (0.18333333,0.70986667) (0.18541667,0.72414350) (0.18750000,0.73828125) (0.18958333,0.75226272) (0.19166667,0.76607037) (0.19375000,0.77968633) (0.19583333,0.79309236) (0.19791667,0.80626989) (0.20000000,0.81920000) (0.20208333,0.83186341) (0.20416667,0.84424051) (0.20625000,0.85631133) (0.20833333,0.86805556) (0.21041667,0.87945253) (0.21250000,0.89048125) (0.21458333,0.90112036) (0.21666667,0.91134815) (0.21875000,0.92114258) (0.22083333,0.93048125) (0.22291667,0.93934142) (0.22500000,0.94770000) (0.22708333,0.95553355) (0.22916667,0.96281829) (0.23125000,0.96953008) (0.23333333,0.97564444) (0.23541667,0.98113656) (0.23750000,0.98598125) (0.23958333,0.99015299) (0.24166667,0.99362593) (0.24375000,0.99637383) (0.24583333,0.99837014) (0.24791667,0.99958795) (0.25000000,1.0000000)};
+\addplot[red!45!black, dashed, line width=1.0pt] coordinates {(0.0,0.0) (0.0020833333,3.8259080e-8) (0.0041666667,6.0701732e-7) (0.0062500000,3.0471191e-6) (0.0083333333,9.5486968e-6) (0.010416667,2.3113193e-5) (0.012500000,4.7515625e-5) (0.014583333,8.7267088e-5) (0.016666667,0.00014757750) (0.018750000,0.00023431860) (0.020833333,0.00035398716) (0.022916667,0.00051366846) (0.025000000,0.00072100000) (0.027083333,0.00098413546) (0.029166667,0.0013117089) (0.031250000,0.0017127991) (0.033333333,0.0021968944) (0.035416667,0.0027738575) (0.037500000,0.0034538906) (0.039583333,0.0042475010) (0.041666667,0.0051654664) (0.043750000,0.0062188010) (0.045833333,0.0074187217) (0.047916667,0.0087766143) (0.050000000,0.010304000) (0.052083333,0.012012503) (0.054166667,0.013913815) (0.056250000,0.016019668) (0.058333333,0.018341796) (0.060416667,0.020891904) (0.062500000,0.023681641) (0.064583333,0.026722560) (0.066666667,0.030026096) (0.068750000,0.033603526) (0.070833333,0.037465942) (0.072916667,0.041624224) (0.075000000,0.046089000) (0.077083333,0.050870626) (0.079166667,0.055979149) (0.081250000,0.061424280) (0.083333333,0.067215364) (0.085416667,0.073361350) (0.087500000,0.079870766) (0.089583333,0.086751682) (0.091666667,0.094011689) (0.093750000,0.10165787) (0.095833333,0.10969676) (0.097916667,0.11813434) (0.10000000,0.12697600) (0.10208333,0.13622649) (0.10416667,0.14588993) (0.10625000,0.15596976) (0.10833333,0.16646871) (0.11041667,0.17738879) (0.11250000,0.18873127) (0.11458333,0.20049660) (0.11666667,0.21268447) (0.11875000,0.22529370) (0.12083333,0.23832229) (0.12291667,0.25176732) (0.12500000,0.26562500) (0.12708333,0.27989059) (0.12916667,0.29455838) (0.13125000,0.30962173) (0.13333333,0.32507294) (0.13541667,0.34090333) (0.13750000,0.35710314) (0.13958333,0.37366155) (0.14166667,0.39056665) (0.14375000,0.40780540) (0.14583333,0.42536363) (0.14791667,0.44322600) (0.15000000,0.46137600) (0.15208333,0.47979589) (0.15416667,0.49846673) (0.15625000,0.51736832) (0.15833333,0.53647918) (0.16041667,0.55577656) (0.16250000,0.57523639) (0.16458333,0.59483328) (0.16666667,0.61454047) (0.16875000,0.63432985) (0.17083333,0.65417191) (0.17291667,0.67403574) (0.17500000,0.69388900) (0.17708333,0.71369790) (0.17916667,0.73342719) (0.18125000,0.75304015) (0.18333333,0.77249852) (0.18541667,0.79176258) (0.18750000,0.81079102) (0.18958333,0.82954100) (0.19166667,0.84796813) (0.19375000,0.86602641) (0.19583333,0.88366823) (0.19791667,0.90084438) (0.20000000,0.91750400) (0.20208333,0.93359460) (0.20416667,0.94906200) (0.20625000,0.96385034) (0.20833333,0.97790209) (0.21041667,0.99115798) (0.21250000,1.0035570) (0.21458333,1.0150365) (0.21666667,1.0255319) (0.21875000,1.0349770) (0.22083333,1.0433037) (0.22291667,1.0504423) (0.22500000,1.0563210) (0.22708333,1.0608665) (0.22916667,1.0640034) (0.23125000,1.0656545) (0.23333333,1.0657410) (0.23541667,1.0641819) (0.23750000,1.0608944) (0.23958333,1.0557939) (0.24166667,1.0487939) (0.24375000,1.0398059) (0.24583333,1.0287394) (0.24791667,1.0155022) (0.25000000,1.0000000)};
+\addplot[red!75!black, dotted, line width=1.3pt] coordinates {(0.0,0.0) (0.0020833333,6.3632011e-10) (0.0041666667,2.0149248e-8) (0.0062500000,1.5139771e-7) (0.0083333333,6.3123000e-7) (0.010416667,1.9058224e-6) (0.012500000,4.6914062e-6) (0.014583333,1.0030454e-5) (0.016666667,1.9343393e-5) (0.018750000,3.4475922e-5) (0.020833333,5.7741993e-5) (0.022916667,9.1962537e-5) (0.025000000,0.00014050000) (0.027083333,0.00020728875) (0.029166667,0.00029686147) (0.031250000,0.00041437149) (0.033333333,0.00056561134) (0.035416667,0.00075702733) (0.037500000,0.00099573047) (0.039583333,0.0012895036) (0.041666667,0.0016468050) (0.043750000,0.0020767683) (0.045833333,0.0025891991) (0.047916667,0.0031945679) (0.050000000,0.0039040000) (0.052083333,0.0047292620) (0.054166667,0.0056827448) (0.056250000,0.0067774441) (0.058333333,0.0080269371) (0.060416667,0.0094453569) (0.062500000,0.011047363) (0.064583333,0.012848111) (0.066666667,0.014863217) (0.068750000,0.017108720) (0.070833333,0.019601042) (0.072916667,0.022356949) (0.075000000,0.025393500) (0.077083333,0.028728005) (0.079166667,0.032377973) (0.081250000,0.036361061) (0.083333333,0.040695016) (0.085416667,0.045397625) (0.087500000,0.050486652) (0.089583333,0.055979779) (0.091666667,0.061894543) (0.093750000,0.068248272) (0.095833333,0.075058019) (0.097916667,0.082340496) (0.10000000,0.090112000) (0.10208333,0.098388347) (0.10416667,0.10718480) (0.10625000,0.11651598) (0.10833333,0.12639581) (0.11041667,0.13683745) (0.11250000,0.14785316) (0.11458333,0.15945430) (0.11666667,0.17165119) (0.11875000,0.18445305) (0.12083333,0.19786793) (0.12291667,0.21190261) (0.12500000,0.22656250) (0.12708333,0.24185161) (0.12916667,0.25777240) (0.13125000,0.27432575) (0.13333333,0.29151084) (0.13541667,0.30932506) (0.13750000,0.32776395) (0.13958333,0.34682109) (0.14166667,0.36648801) (0.14375000,0.38675413) (0.14583333,0.40760664) (0.14791667,0.42903044) (0.15000000,0.45100800) (0.15208333,0.47351935) (0.15416667,0.49654193) (0.15625000,0.52005053) (0.15833333,0.54401718) (0.16041667,0.56841110) (0.16250000,0.59319858) (0.16458333,0.61834291) (0.16666667,0.64380430) (0.16875000,0.66953976) (0.17083333,0.69550306) (0.17291667,0.72164464) (0.17500000,0.74791150) (0.17708333,0.77424713) (0.17916667,0.80059146) (0.18125000,0.82688073) (0.18333333,0.85304745) (0.18541667,0.87902032) (0.18750000,0.90472412) (0.18958333,0.93007969) (0.19166667,0.95500380) (0.19375000,0.97940913) (0.19583333,1.0032042) (0.19791667,1.0262931) (0.20000000,1.0485760) (0.20208333,1.0699483) (0.20416667,1.0903010) (0.20625000,1.1095209) (0.20833333,1.1274899) (0.21041667,1.1440854) (0.21250000,1.1591801) (0.21458333,1.1726422) (0.21666667,1.1843347) (0.21875000,1.1941161) (0.22083333,1.2018400) (0.22291667,1.2073549) (0.22500000,1.2105045) (0.22708333,1.2111275) (0.22916667,1.2090576) (0.23125000,1.2041233) (0.23333333,1.1961481) (0.23541667,1.1849505) (0.23750000,1.1703437) (0.23958333,1.1521357) (0.24166667,1.1301296) (0.24375000,1.1041230) (0.24583333,1.0739086) (0.24791667,1.0392735) (0.25000000,1.0000000)};
+\addplot[red!45!black, mark=*, only marks, mark size=1.6pt, forget plot]
+  coordinates {(0.2324081,1.0659009)};
+\addplot[red!75!black, mark=*, only marks, mark size=1.6pt, forget plot]
+  coordinates {(0.2265409,1.2112178)};
+\end{axis}
+\end{tikzpicture}
+\caption{The degree-three constant-weight kernels of
+\Cref{prop:multiplicity-threshold}, each divided by its central value
+\(\widehat G^{(r)}_3(1/4)=\binom{3r-2}{r-1}2^{1-3r}\), on \(0\le q\le1/4\).
+Under this normalization \eqref{eq:r-central-slope} becomes the endpoint
+slope \(2r(3-r)\), so the kernel rises to its central maximum at \(r=2\),
+arrives tangentially at \(r=3\), and for \(r\ge4\) overshoots and returns
+downward to the center.  Since \(1/4-q=(p-1/2)^2\), the tangency at \(r=3\)
+is the quartically flat maximum at \(p=1/2\).  The marked interior maxima at
+\(r=4,5\) exceed the central values by \(6.59\%\) and \(21.12\%\).}
+\label{fig:multiplicity-threshold}
+\end{figure}
+
+\begin{proof}
+For general multiplicity \(r\), the reduction
+\eqref{eq:C-def}--\eqref{eq:G-weighted} runs with \(3\) replaced by \(r\)
+throughout, giving the constant-weight kernel
+\[
+ G^{(r)}_m(p)=p(1-p)\Pp\{\operatorname{Bin}(rm-2,p)\equiv r-1\pmod r\}.
+\]
+At the first degree with a nontrivial complementary pair, \(m=3\), only the
+residues corresponding to \(k=1,2\) occur, which gives the closed form for
+\(G^{(r)}_3\) asserted in the proposition.  Put \(p=1/2+x\) and \(q=p(1-p)=1/4-x^2\).  Expansion at the
+center gives
+\[
+ G^{(r)}_3\!\left(\frac12+x\right)
+ =\binom{3r-2}{r-1}
+  \left(2^{1-3r}+r(r-3)2^{2-3r}x^2+O(x^4)\right),
+\]
+which is equivalent to \eqref{eq:r-central-slope}.  Thus the center is a
+quadratic maximum for \(r=2\), while for every \(r\ge4\) it is a quadratic
+local minimum.  At the critical value \(r=3\) the quadratic term cancels, but
+\[
+ G^{(3)}_3(p)=21q^3(1-3q),
+ \qquad
+ \frac{\mathrm d}{\mathrm d q}G^{(3)}_3=63q^2(1-4q)>0
+ \quad(0<q<1/4),
+\]
+and
+\[
+ G^{(3)}_3\!\left(\frac12+x\right)
+ =\frac{21}{256}-\frac{63}{8}x^4+O(x^6).
+\]
+Hence the degree-three cubic center is a quartically flat maximum: the first
+local obstruction is exactly neutral at quadratic order, and \Cref{thm:kernel}
+supplies the global positivity that this local calculation alone cannot see.
+
+For the stated two-term sequence, direct multiplication gives
+\begin{align*}
+ &[x^3]\Bigl(
+ F_{f,r}(\mu+1;x)^2-F_{f,r}(\mu;x)F_{f,r}(\mu+2;x)\Bigr)\\
+ &\quad=
+ \frac{2(\mu+1)_r(\mu+1)_{2r}
+ -(\mu)_r(\mu+2)_{2r}
+ -(\mu)_{2r}(\mu+2)_r}
+ {(r-1)!(2r-1)!},
+\end{align*}
+Factoring out \((\mu+2)_{r-2}(\mu+1)_{2r-1}\) leaves
+\(r\bigl(4r-(r-3)\mu\bigr)\), giving \eqref{eq:r-degree-three}.  The extracted
+Pochhammer factors are positive for \(\mu\ge0\), so for \(r\ge4\) the sign
+changes exactly at \(\mu=4r/(r-3)\).  The repeated factor \(r-3\) in
+\eqref{eq:r-central-slope} and \eqref{eq:r-degree-three} reflects the same
+mechanism: as \(\mu\) grows, the beta laws in the fixed-sum representation
+concentrate near \(q=1/4\), so the finite-shift comparison increasingly probes
+the local central behavior of the kernel.  At \(r=4\) the threshold is
+\(\mu=16\), giving an exact counterpart to the numerical observation of
+\cite[Rem.~5]{KarpZhang2024LogConcavity}.
+
+Finally, for every integer \(N\ge1\),
+\[
+ \frac{\mathrm d^2}{\mathrm d\mu^2}\log(\mu)_N
+ =-\sum_{j=0}^{N-1}\frac{1}{(\mu+j)^2}<0
+ \qquad(\mu>0),
+\]
+so \(\mu\mapsto(\mu)_N\) is log-concave and its generalized Tur\'anian is
+nonnegative (with the boundary \(\mu=0\) immediate).  The degree-two
+coefficient is a nonnegative multiple of this Tur\'anian with \(N=r\).  If
+\(f\) has one-point support \(\{a\}\), its only active product degree is
+\(2a\), where the same argument applies with \(N=ra\).  Thus neither a lower
+degree nor a smaller positive support can furnish a counterexample.
+\end{proof}
+
+\begin{corollary}[Sharp multiplicity classification]\label{cor:multiplicity}
+For integers \(r\ge2\), the family \(F_{f,r}\) in \eqref{eq:general-r} is
+coefficientwise log-concave for every nonnegative log-concave sequence with no
+internal zeros if and only if
+\[
+ r\in\{2,3\}.
+\]
+\end{corollary}
+
+\begin{proof}
+The case \(r=2\) is \cite[Thm.~2]{KarpZhang2024LogConcavity}, and the case
+\(r=3\) is \Cref{thm:main}.  For every \(r\ge4\), the two-term sequence in
+\Cref{prop:multiplicity-threshold} satisfies all sequence hypotheses, while
+\eqref{eq:r-degree-three} is negative for
+\(\mu>4r/(r-3)\).
+\end{proof}
+
+\subsection{The first supercritical case}\label{subsec:first-supercritical-case}
+The Bernstein-basis positivity certificate of \Cref{lem:bernstein} can fail
+even when the kernel remains monotone.  In the analogue
+\((1+\xi)^{4m-1}J^{(4)}_m(\xi/(1+\xi))\), the coefficients at \(\xi^7\) and
+\(\xi^8\) are
+\begin{align*}
+ a_7&=\tfrac{8}{315}(m-2)(m-1)(2m-3)(2m-1)(4m-7)(4m-5)(4m-3),\\
+ a_8&=-\tfrac72a_7,
+\end{align*}
+and \(a_7>0\) precisely for \(m\ge3\), so the certificate fails there.
+Nevertheless, at \(m=4\), with
+\(z=(1-t)^2/t>0\),
+\[
+ J^{(4)}_4(t)
+ =52t^7(1-t)\bigl(7z^4+42z^3+42(z-1)^2+6\bigr)>0
+ \qquad(0<t<1).
+\]
+Thus failure of this Bernstein certificate is not equivalent to failure of kernel
+monotonicity.  The first supercritical multiplicity therefore retains positive
+structure beyond the universal theorem.
+
+
+
+\section{Consequences}\label{sec:consequences}
+
+\subsection{Hypergeometric specialization}\label{subsec:hypergeometric-specialization}
+
+For \(f_n\equiv1\), the triplication formula gives
+\[
+ F_f(\mu;x)
+ =3x\,\frac{\mathrm d}{\mathrm dx}\,
+ {}_3F_2\!\left(\tfrac{\mu}{3},\tfrac{\mu+1}{3},\tfrac{\mu+2}{3};\,
+ \tfrac13,\tfrac23;\,x\right).
+\]
+Hence \Cref{thm:main} yields coefficientwise generalized Tur\'an inequalities for
+this differentiated \({}_3F_2\) family, while general log-concave \((f_n)\) gives a
+coefficient-weighted extension.  Related coefficientwise inequalities for generalized
+hypergeometric functions under simultaneous parameter shifts are studied in
+\cite[Thm.~3]{KalmykovKarp2017LogConcavity}.
+
+
+\subsection{Strict pointwise log-concavity}\label{subsec:strict-pointwise-log-concavity}
+
+The exact support of \Cref{cor:strict} upgrades the pointwise Tur\'an inequality
+from nonnegativity to strictness.
 
 \begin{corollary}\label{cor:ordinary}
 Suppose \((f_n)\) is not identically zero, and let \(R\) be the radius of
 convergence of \(\sum_{n\ge1}f_nx^n\).  For every \(0<x<R\), the function
-\(\mu\mapsto F_f(\mu;x)\) is finite, continuous, and positive on \((0,\infty)\), and
-\(\mu\mapsto\log F_f(\mu;x)\) is concave there.
+\(\mu\mapsto F_f(\mu;x)\) is finite, continuous, and positive on \((0,\infty)\),
+and \(\mu\mapsto\log F_f(\mu;x)\) is strictly concave there.  More generally,
+for \(\mu\ge0\) and \(\alpha,\beta>0\),
+\[
+ F_f(\mu+\alpha;x)F_f(\mu+\beta;x)
+ >F_f(\mu;x)F_f(\mu+\alpha+\beta;x).
+\]
 \end{corollary}
 
 \begin{proof}
 Log-concavity with no internal zeros makes \(f_{n+1}/f_n\) nonincreasing on the
-support of \((f_n)\), so \(R>0\).  For each fixed \(\mu>0\), Stirling's formula gives
+positive support.  If that support is finite, then \(R=\infty\).  Otherwise it
+has the form \(\{a,a+1,\ldots\}\), and
+\[
+ f_n\le f_a\left(\frac{f_{a+1}}{f_a}\right)^{n-a}\qquad(n\ge a),
+\]
+so again \(R>0\).  For fixed \(\mu>0\),
 \[
  \frac{(\mu)_{3n}}{(3n-1)!}
  =\frac{\Gamma(3n+\mu)}{\Gamma(\mu)\Gamma(3n)}
- \sim\frac{(3n)^\mu}{\Gamma(\mu)}
- \qquad(n\to\infty).
+ \sim\frac{(3n)^\mu}{\Gamma(\mu)},
 \]
-Hence \(F_f(\mu;\cdot)\) has the same radius of convergence \(R\) as
-\(\sum_{n\ge1}f_nx^n\).  On every compact set of positive \(\mu\) and for
-\(0<x<R\), the series converges locally uniformly in \(\mu\), since its extra
-factor grows at most polynomially in \(n\); thus \(\mu\mapsto F_f(\mu;x)\) is
-continuous.  Since \((f_n)\) is not identically zero, its nonnegative
-coefficients give \(F_f(\mu;x)>0\) for \(\mu,x>0\).  By \Cref{thm:main},
+so \(F_f(\mu;\cdot)\) has radius \(R\).
+
+For local uniform convergence in \(\mu\), fix \(M>0\) and \(0<x<R\).  For
+\(0\le\mu\le M\),
 \[
- F_f(\mu+\alpha;x)F_f(\mu+\beta;x)
- \ge F_f(\mu;x)F_f(\mu+\alpha+\beta;x)
+ \frac{(\mu)_{3n}}{(3n-1)!}
+ =\mu\prod_{j=1}^{3n-1}\left(1+\frac{\mu}{j}\right)
+ \le M\exp\!\left(M\sum_{j=1}^{3n-1}\frac1j\right)
+ \le Me^M(3n)^M.
 \]
-for all nonnegative shifts.  Taking \(\alpha=\beta=h>0\) gives
-\(F_f(\mu+h;x)^2\ge F_f(\mu;x)F_f(\mu+2h;x)\),
-so \(\mu\mapsto\log F_f(\mu;x)\) is midpoint concave, and by continuity concave,
-on \((0,\infty)\).
+Choose \(y\) with \(x<y<R\).  Since \(n^M(x/y)^n\) is bounded, the summands of
+\(F_f(\mu;x)\) are uniformly dominated for \(0\le\mu\le M\) by a constant
+multiple of \(f_ny^n\).  The Weierstrass test gives local uniform convergence,
+hence continuity; positivity is immediate from the coefficients.
+
+Choose \(n_0\) with \(f_{n_0}>0\).  By \Cref{cor:strict}, the coefficient of
+\(x^{2n_0}\) in the generalized Tur\'anian is positive for
+\(\alpha,\beta>0\), while all coefficients are nonnegative by \Cref{thm:main}.
+Summing gives the strict inequality.  Taking \(\alpha=\beta=h>0\) yields strict
+midpoint concavity of \(\log F_f(\mu;x)\); continuity gives concavity, and equality
+at any interior convex combination would force affinity on an interval,
+contradicting strict midpoint concavity.
 \end{proof}
 
-\begin{remark}\label{rem:internal-zeros}
-The interval-support condition cannot be dropped.  Put \(f_1=f_4=1\) and
-\(f_n=0\) otherwise.  The two positive indices differ by \(3\), so
-\(f_{n-1}f_{n+1}=0\) at every index where the three terms are defined and
-\(f_n^2\ge f_{n-1}f_{n+1}\) holds throughout, strictly at \(n=4\).  The positive
-support \(\{1,4\}\) is not an interval.  A single zero between two positive terms
-violates the inequality at that zero, so a gap of two is the shortest the
-inequality admits.  At \(m=5\) the weights \(w_k=f_kf_{5-k}\) are
-\(w_1=w_4=1\) and \(w_2=w_3=0\), decreasing toward the center rather than
-increasing, and
+\subsection{Differential Tur\'an inequality}\label{subsec:differential-turan-inequality}
+
+\begin{corollary}
+\label{cor:differential}
+Under the hypotheses of \Cref{thm:main}, for every \(\mu\ge0\) and every
+\(m\ge2\),
 \[
- [x^5]\Tur_f(2;1,1;x)=-9360.
+ [x^m]\left[
+ \bigl(\partial_\mu F_f(\mu;x)\bigr)^2
+ -F_f(\mu;x)\,\partial_\mu^2F_f(\mu;x)
+ \right]>0
+ \quad\Longleftrightarrow\quad
+ m\in I+I,
 \]
-\end{remark}
+where \(I=\{n\ge1:f_n>0\}\).  In particular the differential Tur\'anian has
+nonnegative coefficients, with the same exact positive support as the
+finite-shift Tur\'anians of \Cref{cor:strict}.
+\end{corollary}
 
-\section{Concluding remarks}
+\begin{proof}
+Fix \(m\ge2\) and use the weights \(w_k=f_kf_{m-k}\) from
+\eqref{eq:w-from-f}.  If \(m\notin I+I\), all these weights vanish, so the
+degree-\(m\) coefficient is zero.  Assume \(m\in I+I\).  By
+\Cref{lem:central-products}, these weights satisfy \eqref{eq:w-monotone}, and
+they are not all zero.
 
-The proof of \Cref{thm:main} hinges on the special feature of the residue class
-modulo \(3\).  After the beta-binomial reduction, the entire conjecture is
-controlled by the monotonicity of
+First let \(\mu>0\).  For these weights
+\(C_{m,w}(u,v)=[x^m]F_f(u;x)F_f(v;x)\) by \Cref{rem:fixed-total}, so put
 \[
- p(1-p)\Pp\{\operatorname{Bin}(3m-2,p)\equiv2\pmod3\}.
+ \Phi_m(d)=C_{m,w}(\mu+d,\mu-d),
+ \qquad |d|<\mu.
 \]
-The projective transform \eqref{eq:P-def} converts its derivative into a
-polynomial whose Bernstein coefficients are nonnegative.  This positivity is
-not termwise obvious in the monomial basis; it appears only after the
-root-of-unity filter and its mod-\(6\) case split.  Log-concavity enters
-the proof of \Cref{thm:main} exactly once: it
-makes the symmetric weights \(w_k=f_kf_{m-k}\) nondecreasing as \(k\) approaches
-\(m/2\).
-
-For a general integer \(r\), the same beta-binomial reduction produces, in the
-constant-weight case,
+Differentiating the symmetric product at \(d=0\) gives
 \[
- p(1-p)\Pp\{\operatorname{Bin}(rm-2,p)\equiv r-1\pmod r\},
+ [x^m]\left[
+ (\partial_\mu F_f)^2-F_f\,\partial_\mu^2F_f
+ \right]
+ =-\frac12\Phi_m''(0).
 \]
-and in general its analogue weighted by the products \(f_kf_{m-k}\).
-The cubic proof suggests testing whether a suitable projective degree lift has
-a positive coefficient array.  The known failure at \(r=4\) shows that such
-positivity cannot persist without an additional restriction; locating the
-first coefficient obstruction in the lifted array may explain that failure.
+The fixed-sum beta representation \eqref{eq:fixed-sum} remains valid for
+\(|d|<\mu\), so
+\[
+ \Phi_m(d)=\kappa_{m,2\mu}\,
+ \E\,\widehat G_{m,w}(Q_d).
+\]
+Use the density \(g_d\) from the proof of \Cref{lem:beta-order}.  Its formula is
+even in \(d\) and has the form
+\[
+ g_d(q)=c(d)h(q)\cosh(d\ell(q)),
+\]
+with \(c(d)\) independent of \(q\).  Fix \(0<d_0<\mu\).  Uniformly for
+\(|d|\le d_0\), \(g_d\) and its first two \(d\)-derivatives are
+\(O\bigl(q^{\mu-1-d_0}\log^2(1/q)\bigr)\) as \(q\downarrow0\) and
+\(O\bigl((1-4q)^{-1/2}\bigr)\) as \(q\uparrow1/4\), since
+\(\ell(q)=\log(1/q)+O(q)\) at the first endpoint and
+\(\ell(q)=O(\sqrt{1-4q})\) at the second.  Both bounds are integrable, so we may
+differentiate twice under the integral at \(d=0\).  Using \(\int g_d=1\) gives
+\[
+ \left.\partial_d^2g_d(q)\right|_{d=0}
+ =g_0(q)\left(
+ \ell(q)^2-\E\,\ell(Q_0)^2
+ \right).
+\]
+Consequently
+\[
+ \Phi_m''(0)
+ =\kappa_{m,2\mu}\,
+ \operatorname{Cov}\!\left(
+ \widehat G_{m,w}(Q_0),\,\ell(Q_0)^2
+ \right).
+\]
+Hence \Cref{thm:kernel} makes \(\widehat G_{m,w}\) strictly increasing on
+\((0,1/4)\), whereas
+\(\ell(q)^2\) is strictly decreasing there.  If \(Q_0'\) is an independent copy
+of \(Q_0\), then
+\[
+ \begin{split}
+ &2\operatorname{Cov}\bigl(
+ \widehat G_{m,w}(Q_0),\ell(Q_0)^2
+ \bigr)\\
+ &\qquad=\E\bigl[
+ \bigl(\widehat G_{m,w}(Q_0)-\widehat G_{m,w}(Q_0')\bigr)
+ \bigl(\ell(Q_0)^2-\ell(Q_0')^2\bigr)
+ \bigr].
+ \end{split}
+\]
+The product is nonpositive and, since \(Q_0\) is nondegenerate, strictly negative
+with positive probability.  Hence \(\Phi_m''(0)<0\), proving strict positivity.
 
-\section*{Acknowledgements}
-During the preparation of this work, the author used OpenAI's ChatGPT (GPT-5.6 Sol) and Anthropic's Claude (Opus 5, Opus 4.8) to assist with manuscript drafting and the development of auxiliary verification code.
+Finally, at \(\mu=0\),
+\[
+ F_f(0;x)=0,\qquad
+ \partial_\mu F_f(0;x)=\sum_{n\ge1}f_nx^n,
+\]
+because
+\[
+ \left.\partial_\mu
+ \frac{(\mu)_{3n}}{(3n-1)!}\right|_{\mu=0}=1.
+\]
+Thus the differential Tur\'anian is
+\((\sum_{n\ge1}f_nx^n)^2\), whose positive coefficient support is exactly
+\(I+I\).
+\end{proof}
 
-\section*{Statements and declarations}
+\section{Concluding remarks}\label{sec:conclusion}
+
+The cubic case is the endpoint of universal coefficientwise log-concavity for the
+multiple-Pochhammer family.  Log-concavity of the input sequence is exactly central
+increase of its anti-diagonal products; the beta mixture turns balance of the
+parameters into stochastic centrality; and the cubic residue kernel preserves that
+order.  These three levels fit together without loss: beta
+concentration shows that the kernel is the exact fixed-degree obstruction.  At degree
+three the central slope changes sign through the factor \(3-r\), so the same
+mechanism also explains the sharp multiplicity threshold.
+
+Beyond that threshold, universal positivity fails, but failure of the Bernstein
+certificate does not force failure of kernel monotonicity.  \Cref{sec:threshold}
+shows this already for \(r=4\).  Two natural questions remain:
+does the constant-weight kernel at multiplicity four stay monotone in every degree,
+and which restricted cones of centrally weighted sequences continue to preserve
+monotonicity for multiplicities beyond three?  These questions separate the failure
+of a universal theorem from the finer positive structure that may survive in the
+supercritical regime.
+
+\section*{Declarations}
+{\footnotesize
 
 \noindent\textbf{Funding.} This research received no external funding.
 
@@ -789,26 +1328,17 @@ During the preparation of this work, the author used OpenAI's ChatGPT (GPT-5.6 S
 \noindent\textbf{Competing interests.} The author has no relevant interests to disclose.
 
 \smallskip
-\noindent\textbf{Data availability.} No datasets were generated or analysed.
+\noindent\textbf{Data availability.} No datasets were generated or analyzed.
 
 \smallskip
 \noindent\textbf{Computational verification.} The proofs do not depend on numerical computation.  Scripts used for verification are available at \url{https://github.com/johnnyshields/papers}.
 
+\smallskip
+\noindent\textbf{Generative AI use.} During the preparation of this work, the author used OpenAI's ChatGPT (GPT-5.6 Sol) and Anthropic's Claude (Opus 5, Opus 4.8) to assist with mathematical research, manuscript drafting, and the development of auxiliary verification code.  After using these tools, the author reviewed and edited as needed.  The author takes full responsibility for the content of the work.\par}
+
 \begin{thebibliography}{99}
 
-\bibitem{Baricz2008}
-\'A. Baricz,
-\emph{Tur\'an type inequalities for hypergeometric functions},
-Proc. Amer. Math. Soc. \textbf{136} (2008), no.~9, 3223--3229,
-DOI: \href{https://doi.org/10.1090/S0002-9939-08-09353-2}{10.1090/S0002-9939-08-09353-2}.
-
-\bibitem{BarnardGordyRichards2009}
-R.~W. Barnard, M.~B. Gordy, and K.~C. Richards,
-\emph{A note on Tur\'an type and mean inequalities for the Kummer function},
-J. Math. Anal. Appl. \textbf{349} (2009), no.~1, 259--263,
-DOI: \href{https://doi.org/10.1016/j.jmaa.2008.08.024}{10.1016/j.jmaa.2008.08.024}.
-
-\bibitem{BerenhautBergen2011}
+\bibitem{BerenhautBergen2011StochasticOrderings}
 K.~S. Berenhaut and L.~D. Bergen,
 \emph{Stochastic orderings, folded beta distributions and fairness in coin flips},
 Statist. Probab. Lett. \textbf{81} (2011), no.~6, 632--638,
@@ -826,37 +1356,51 @@ S.~I. Kalmykov and D.~B. Karp,
 J. Math. Anal. Appl. \textbf{406} (2013), no.~2, 400--418,
 DOI: \href{https://doi.org/10.1016/j.jmaa.2013.04.061}{10.1016/j.jmaa.2013.04.061}.
 
-\bibitem{KarpSitnik2010}
+\bibitem{KalmykovKarp2017LogConcavity}
+S.~I. Kalmykov and D.~B. Karp,
+\emph{Log-concavity and Tur\'an-type inequalities for the generalized hypergeometric function},
+Anal. Math. \textbf{43} (2017), no.~4, 567--580,
+DOI: \href{https://doi.org/10.1007/s10476-017-0503-z}{10.1007/s10476-017-0503-z}.
+
+\bibitem{KarpSitnik2010LogConvexity}
 D.~Karp and S.~M. Sitnik,
 \emph{Log-convexity and log-concavity of hypergeometric-like functions},
 J. Math. Anal. Appl. \textbf{364} (2010), no.~2, 384--394,
 DOI: \href{https://doi.org/10.1016/j.jmaa.2009.10.057}{10.1016/j.jmaa.2009.10.057}.
 
-\bibitem{KarpZhang2024}
+\bibitem{KarpZhang2024LogConcavity}
 D.~Karp and Y.~Zhang,
 \emph{Log-concavity and log-convexity of series containing multiple Pochhammer symbols},
 Fract. Calc. Appl. Anal. \textbf{27} (2024), no.~1, 458--486,
 DOI: \href{https://doi.org/10.1007/s13540-023-00238-0}{10.1007/s13540-023-00238-0}.
 
-\bibitem{MarshallOlkinArnold2011}
+
+\bibitem{LevitMandrescu2006LogConcavity}
+V.~E. Levit and E.~Mandrescu,
+\emph{Some operations preserving log-concavity of nonnegative functions},
+Math. Inequal. Appl. \textbf{9} (2006), no.~1, 63--73,
+DOI: \href{https://doi.org/10.7153/mia-09-07}{10.7153/mia-09-07}.
+
+\bibitem{MarshallOlkinArnold2011Majorization}
 A.~W. Marshall, I.~Olkin, and B.~C. Arnold,
 \emph{Inequalities: Theory of Majorization and Its Applications},
 2nd ed., Springer Series in Statistics, Springer, New York, 2011,
 DOI: \href{https://doi.org/10.1007/978-0-387-68276-1}{10.1007/978-0-387-68276-1}.
 
-\bibitem{NinhPham2025}
+\bibitem{NinhPham2025LogConcavity}
 A.~Ninh and M.~Pham,
 \emph{Logconcavity, twice-logconcavity and Tur\'an-type inequalities},
 Ann. Oper. Res. \textbf{354} (2025), no.~3, 1271--1283,
 DOI: \href{https://doi.org/10.1007/s10479-018-2923-y}{10.1007/s10479-018-2923-y}.
 
-\bibitem{PowersReznick2000}
+\bibitem{PowersReznick2000PositiveInterval}
 V.~Powers and B.~Reznick,
 \emph{Polynomials that are positive on an interval},
 Trans. Amer. Math. Soc. \textbf{352} (2000), no.~10, 4677--4692,
 DOI: \href{https://doi.org/10.1090/S0002-9947-00-02595-2}{10.1090/S0002-9947-00-02595-2}.
 
-\bibitem{ShakedShanthikumar2007}
+
+\bibitem{ShakedShanthikumar2007StochasticOrders}
 M.~Shaked and J.~G. Shanthikumar,
 \emph{Stochastic Orders},
 Springer Series in Statistics, Springer, New York, 2007,
