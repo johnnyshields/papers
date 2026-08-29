@@ -7,6 +7,7 @@ import ForgacsTran.BranchCurvature
 import ForgacsTran.PrincipalSimpleBranch
 import ForgacsTran.ConsequencesComposition.ClockSpacing
 import ForgacsTran.ViewingAngle
+import ForgacsTran.ComplexPart
 
 /-!
 # The principal amplitude in `C²` along the general branch
@@ -611,10 +612,8 @@ is where `W θ ≠ 0` is spent. -/
 theorem hasDerivAt_norm_comp {W : ℝ → ℂ} {W' : ℂ} {θ : ℝ}
     (hW : HasDerivAt W W' θ) (h0 : W θ ≠ 0) :
     HasDerivAt (fun s => ‖W s‖) ((W' * (starRingEnd ℂ) (W θ)).re / ‖W θ‖) θ := by
-  have hre : HasDerivAt (fun s => (W s).re) W'.re θ :=
-    Complex.reCLM.hasFDerivAt.comp_hasDerivAt θ hW
-  have him : HasDerivAt (fun s => (W s).im) W'.im θ :=
-    Complex.imCLM.hasFDerivAt.comp_hasDerivAt θ hW
+  have hre : HasDerivAt (fun s => (W s).re) W'.re θ := hW.re
+  have him : HasDerivAt (fun s => (W s).im) W'.im θ := hW.im
   have hns : HasDerivAt (fun s => (W s).re * (W s).re + (W s).im * (W s).im)
       (W'.re * (W θ).re + (W θ).re * W'.re + (W'.im * (W θ).im + (W θ).im * W'.im)) θ :=
     (hre.mul hre).add (him.mul him)
@@ -628,8 +627,7 @@ theorem hasDerivAt_norm_comp {W : ℝ → ℂ} {W' : ℂ} {θ : ℝ}
     Real.sqrt_pos.2 hpos
   rw [Complex.norm_def, Complex.normSq_apply]
   simp only [Complex.mul_re, Complex.conj_re, Complex.conj_im]
-  field_simp
-  ring
+  field
 
 /-- **`|d‖W‖/dθ| ≤ ‖W'‖`**, which is what the quotient rule needs and all it
 needs — the modulus can move no faster than the curve. -/

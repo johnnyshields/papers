@@ -35,7 +35,8 @@ have to be built, while the derivative identity is the product rule.
 * `hasDerivAt_sum_polarAngle` -- the summed branch's derivative, term by term, with each
   branch based wherever its block puts it.
 * `hasDerivAt_sum_polarAngle_of_factorization` -- the two composed, which is
-  `PhaseVariationBlocks.exists_varPhase_of_blocks_of_derivEq`'s `hsum`.
+  `PhaseVariationBlocks.exists_varPhase_of_blocks_of_derivEq`'s `hsum` **in the state where
+  the arc misses every zero of `B`**; see the Implementation notes.
 * `ftAmp_eq_fixed_mul_prod`, `ne_root_of_ftAmp_ne_zero` -- the factorization and the
   avoidance above, at the paper's own amplitude, so neither is assumed.
 
@@ -161,9 +162,17 @@ theorem hasDerivAt_sum_polarAngle {V γ dV dγ : ℝ → ℂ} {U : Set ℝ} {a b
         (ih (fun β hβ => hne β (Multiset.mem_cons_of_mem hβ))
           (fun β hβ => hcr β (Multiset.mem_cons_of_mem hβ)))
 
-/-- **The two composed.**  The summed branch has derivative `Im(W'/W)` -- which is what
-`PhaseVariationBlocks.exists_varPhase_of_blocks_of_derivEq` takes as `hsum`, and what
-identifies it with the branch built on `W` itself. -/
+/-- **The two composed.**  The summed branch has derivative `Im(W'/W)`, which is what
+identifies it with the branch built on `W` itself.
+
+**One interval, and that is the scope of this form.**  `[a,b]` has to carry every base
+point `cr β`, the parameter `θ`, and no zero of `B` at all, which is
+`PhaseVariationBlocks.sum_eVariationOn_branch_le`'s **first** state -- the arc missing
+every zero.  In its second state the arc meets `β` at `m`, the base point travels with the
+side, and an interval joining a block right of `m` to the base point on the left would have
+to cross `m`.  There the sum is differentiated term by term over
+`im_logDeriv_factorization` instead, one interval per zero and per block; see
+`BranchSupply.hasDerivAt_of_rootBranchState`. -/
 theorem hasDerivAt_sum_polarAngle_of_factorization {V γ dV dγ W dW : ℝ → ℂ} {U : Set ℝ}
     {a b θ c₀ : ℝ} {cr : ℂ → ℝ} (m : Multiset ℂ) (hU : IsOpen U) (hsub : Icc a b ⊆ U)
     (hVd : ∀ s ∈ U, HasDerivAt V (dV s) s) (hVc : ContinuousOn dV U)

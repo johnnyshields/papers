@@ -3,6 +3,7 @@ Copyright (c) 2026 Johnny Shields. All rights reserved.
 Released under the MIT license as described in the file LICENSE.txt.
 Authors: Johnny Shields
 -/
+import Shields.Analysis.Complex.TriangleEquality
 import Shields.LinearAlgebra.Matrix.TotallyNonneg.Compound
 
 /-!
@@ -141,29 +142,41 @@ theorem uniform_mem_stdSimplex [Nonempty ι] :
   exact ⟨fun _ => by positivity, by
     rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul, mul_inv_cancel₀ hnR.ne']⟩
 
-/-- `Ax` is strictly positive when `A` is and `x` is a simplex vector: some
-coordinate of `x` is positive, and it meets a positive entry of `A`. -/
-theorem mulVec_pos_of_stdSimplex {A : Matrix ι ι ℝ}
-    (hA : ∀ i j, 0 < A i j) {x : ι → ℝ} (hx : x ∈ stdSimplex ℝ ι) (i : ι) :
-    0 < (A *ᵥ x) i := by
-  obtain ⟨hnn, hsum⟩ := hx
-  obtain ⟨j, -, hj⟩ : ∃ j ∈ Finset.univ, 0 < x j := by
-    by_contra hc
-    push Not at hc
-    have : ∑ j, x j = 0 :=
-      Finset.sum_eq_zero fun j hj => le_antisymm (hc j hj) (hnn j)
-    rw [hsum] at this
-    exact one_ne_zero this
+omit [Fintype ι] in
+/-- A nonnegative vector that is not identically zero is positive somewhere. -/
+theorem exists_pos_of_nonneg_ne_zero {v : ι → ℝ} (hv : ∀ i, 0 ≤ v i) (hne : v ≠ 0) :
+    ∃ j, 0 < v j := by
+  obtain ⟨j, hj⟩ := Function.ne_iff.mp hne
+  exact ⟨j, (hv j).lt_of_ne' hj⟩
+
+/-- **A positive matrix sends a nonzero nonnegative vector to a strictly positive one.**
+The positive coordinate of `v` meets a positive entry of `A` in every row. -/
+theorem mulVec_pos_of_nonneg_ne_zero {A : Matrix ι ι ℝ} (hA : ∀ i j, 0 < A i j)
+    {v : ι → ℝ} (hv : ∀ i, 0 ≤ v i) (hne : v ≠ 0) (i : ι) : 0 < (A *ᵥ v) i := by
+  obtain ⟨j, hj⟩ := exists_pos_of_nonneg_ne_zero hv hne
   simp only [Matrix.mulVec, dotProduct]
-  exact Finset.sum_pos' (fun k _ => mul_nonneg (hA i k).le (hnn k))
+  exact Finset.sum_pos' (fun k _ => mul_nonneg (hA i k).le (hv k))
     ⟨j, Finset.mem_univ j, mul_pos (hA i j) hj⟩
 
+/-- A simplex vector is not zero: its coordinates sum to `1`. -/
+theorem ne_zero_of_mem_stdSimplex {x : ι → ℝ} (hx : x ∈ stdSimplex ℝ ι) : x ≠ 0 := by
+  intro h
+  simpa [h] using hx.2
+
+/-- `Ax` is strictly positive when `A` is and `x` is a simplex vector. -/
+theorem mulVec_pos_of_stdSimplex {A : Matrix ι ι ℝ}
+    (hA : ∀ i j, 0 < A i j) {x : ι → ℝ} (hx : x ∈ stdSimplex ℝ ι) (i : ι) :
+    0 < (A *ᵥ x) i :=
+  mulVec_pos_of_nonneg_ne_zero hA hx.1 (ne_zero_of_mem_stdSimplex hx) i
+
+omit [Fintype ι] in
 /-- On a nonempty finite index type a strictly positive family dominates a positive multiple of
 any other: the least of the ratios `f i / g i` is a scalar that works at every index. -/
-theorem exists_pos_forall_mul_le [Nonempty ι] {f g : ι → ℝ}
+theorem exists_pos_forall_mul_le [Finite ι] [Nonempty ι] {f g : ι → ℝ}
     (hf : ∀ i, 0 < f i) (hg : ∀ i, 0 < g i) :
     ∃ c > 0, ∀ i, c * g i ≤ f i := by
-  have hUne : (Finset.univ : Finset ι).Nonempty := ⟨Classical.arbitrary ι, Finset.mem_univ _⟩
+  have := Fintype.ofFinite ι
+  have hUne : (Finset.univ : Finset ι).Nonempty := Finset.univ_nonempty
   refine ⟨Finset.inf' Finset.univ hUne (fun i => f i / g i), ?_, ?_⟩
   · exact (Finset.lt_inf'_iff _).2 fun i _ => div_pos (hf i) (hg i)
   · intro i
@@ -172,66 +185,70 @@ theorem exists_pos_forall_mul_le [Nonempty ι] {f g : ι → ℝ}
     calc _ ≤ (f i / g i) * g i := mul_le_mul_of_nonneg_right hle (hg i).le
       _ = f i := div_mul_cancel₀ _ (hg i).ne'
 
-/-- **A greatest Collatz–Wielandt scalar is an eigenvalue.**  If `s·x ≤ Ax` on the simplex and no
-Collatz–Wielandt scalar of `A` exceeds `s`, then `Ax = s·x`.
+/-- **Renormalizing onto the simplex.**  A nonzero nonnegative vector has a positive multiple
+on the standard simplex, and the scaling carries a Collatz--Wielandt inequality `s·y ≤ Ay`
+along with it -- both sides are homogeneous of degree one in `y`. -/
+theorem exists_smul_mem_stdSimplex {A : Matrix ι ι ℝ} {s : ℝ} {y : ι → ℝ}
+    (hy : ∀ i, 0 ≤ y i) (hyne : y ≠ 0) (hle : ∀ i, s * y i ≤ (A *ᵥ y) i) :
+    ∃ x ∈ stdSimplex ℝ ι, ∀ i, s * x i ≤ (A *ᵥ x) i := by
+  obtain ⟨j, hj⟩ := exists_pos_of_nonneg_ne_zero hy hyne
+  have hsum : 0 < ∑ i, y i := Finset.sum_pos' (fun i _ => hy i) ⟨j, Finset.mem_univ j, hj⟩
+  have hcpos : 0 < (∑ i, y i)⁻¹ := inv_pos.mpr hsum
+  refine ⟨(∑ i, y i)⁻¹ • y, ⟨fun i => ?_, ?_⟩, fun i => ?_⟩
+  · simp only [Pi.smul_apply, smul_eq_mul]
+    exact mul_nonneg hcpos.le (hy i)
+  · simp only [Pi.smul_apply, smul_eq_mul, ← Finset.mul_sum]
+    exact inv_mul_cancel₀ hsum.ne'
+  · rw [Matrix.mulVec_smul]
+    simp only [Pi.smul_apply, smul_eq_mul]
+    calc s * ((∑ k, y k)⁻¹ * y i) = (∑ k, y k)⁻¹ * (s * y i) := by ring
+      _ ≤ (∑ k, y k)⁻¹ * (A *ᵥ y) i := mul_le_mul_of_nonneg_left (hle i) hcpos.le
 
-Were `Ax − s·x` nonzero it would be nonnegative and nonzero, so applying the positive `A` once
-more makes it strictly positive; `Ax` renormalized onto the simplex then admits the strictly
+/-- **A greatest Collatz–Wielandt scalar is an eigenvalue.**  If `s·w ≤ Aw` for a nonnegative
+nonzero `w` and no Collatz–Wielandt scalar of `A` exceeds `s`, then `Aw = s·w`.
+
+Were `Aw − s·w` nonzero it would be nonnegative and nonzero, so applying the positive `A` once
+more makes it strictly positive; `Aw` renormalized onto the simplex then admits the strictly
 larger scalar `s + ε`, where `ε` is the least of the ratios that positivity supplies. -/
-theorem mulVec_eq_smul_of_forall_cwSet_le [Nonempty ι] {A : Matrix ι ι ℝ}
-    (hA : ∀ i j, 0 < A i j) {s : ℝ} {x : ι → ℝ} (hs0 : 0 ≤ s)
-    (hx : x ∈ stdSimplex ℝ ι) (hxle : ∀ i, s * x i ≤ (A *ᵥ x) i)
+theorem mulVec_eq_smul_of_nonneg_of_forall_cwSet_le [Nonempty ι] {A : Matrix ι ι ℝ}
+    (hA : ∀ i j, 0 < A i j) {s : ℝ} {w : ι → ℝ} (hs0 : 0 ≤ s)
+    (hw : ∀ i, 0 ≤ w i) (hwne : w ≠ 0) (hwle : ∀ i, s * w i ≤ (A *ᵥ w) i)
     (hsup : ∀ t ∈ cwSet A (entrySum A), t ≤ s) :
-    A *ᵥ x = s • x := by
+    A *ᵥ w = s • w := by
   have hAnn : ∀ i j, 0 ≤ A i j := fun i j => (hA i j).le
-  have hxpos : ∀ i, 0 < (A *ᵥ x) i := fun i => mulVec_pos_of_stdSimplex hA hx i
+  have hwpos : ∀ i, 0 < (A *ᵥ w) i := mulVec_pos_of_nonneg_ne_zero hA hw hwne
   by_contra hne'
-  set v : ι → ℝ := A *ᵥ x - s • x with hv
-  have hvnn : ∀ i, 0 ≤ v i := fun i => sub_nonneg.mpr (hxle i)
-  obtain ⟨j, hj⟩ : ∃ j, 0 < v j := by
-    by_contra hc
-    push Not at hc
-    exact hne' (by
-      have hzero : v = 0 := funext fun i => le_antisymm (hc i) (hvnn i)
-      rw [hv] at hzero
-      exact sub_eq_zero.mp hzero)
-  have hAv : ∀ i, 0 < (A *ᵥ v) i := by
-    intro i
-    simp only [Matrix.mulVec, dotProduct]
-    exact Finset.sum_pos' (fun k _ => mul_nonneg (hAnn i k) (hvnn k))
-      ⟨j, Finset.mem_univ j, mul_pos (hA i j) hj⟩
-  set y : ι → ℝ := A *ᵥ x with hydef
+  set v : ι → ℝ := A *ᵥ w - s • w with hv
+  have hvnn : ∀ i, 0 ≤ v i := fun i => sub_nonneg.mpr (hwle i)
+  have hvne : v ≠ 0 := fun hc => hne' (sub_eq_zero.mp (hv ▸ hc))
+  have hAv : ∀ i, 0 < (A *ᵥ v) i := mulVec_pos_of_nonneg_ne_zero hA hvnn hvne
+  set y : ι → ℝ := A *ᵥ w with hydef
   have hy : A *ᵥ y - s • y = A *ᵥ v := by
     rw [hv, Matrix.mulVec_sub, Matrix.mulVec_smul]
-  have hypos : ∀ i, 0 < y i := hxpos
-  have hysum : 0 < ∑ i, y i :=
-    Finset.sum_pos (fun i _ => hypos i) ⟨Classical.arbitrary ι, Finset.mem_univ _⟩
-  set c : ℝ := (∑ i, y i)⁻¹ with hc
-  have hcpos : 0 < c := inv_pos.mpr hysum
-  set y' : ι → ℝ := c • y with hy'
-  have hy'mem : y' ∈ stdSimplex ℝ ι := by
-    refine ⟨fun i => ?_, ?_⟩
-    · simp only [hy', Pi.smul_apply, smul_eq_mul]
-      exact mul_nonneg hcpos.le (hypos i).le
-    · simp only [hy', Pi.smul_apply, smul_eq_mul, ← Finset.mul_sum, hc]
-      exact inv_mul_cancel₀ hysum.ne'
-  obtain ⟨eps, hepspos, heps⟩ := exists_pos_forall_mul_le hAv hypos
-  have hgain : ∀ i, (s + eps) * y' i ≤ (A *ᵥ y') i := by
+  obtain ⟨eps, hepspos, heps⟩ := exists_pos_forall_mul_le hAv hwpos
+  -- `y` admits the strictly larger scalar `s + eps`, so does its simplex representative
+  have hbase : ∀ i, (s + eps) * y i ≤ (A *ᵥ y) i := by
     intro i
     have hyi : (A *ᵥ y) i - s * y i = (A *ᵥ v) i := by
       have h := congrFun hy i
       simpa [Pi.sub_apply, Pi.smul_apply, smul_eq_mul] using h
     have hexp : (s + eps) * y i = s * y i + eps * y i := by ring
-    have hbase : (s + eps) * y i ≤ (A *ᵥ y) i := by
-      rw [hexp]; linarith [heps i]
-    rw [hy', Matrix.mulVec_smul]
-    simp only [Pi.smul_apply, smul_eq_mul]
-    calc (s + eps) * (c * y i) = c * ((s + eps) * y i) := by ring
-      _ ≤ c * (A *ᵥ y) i := mul_le_mul_of_nonneg_left hbase hcpos.le
+    rw [hexp]; linarith [heps i]
+  obtain ⟨y', hy'mem, hgain⟩ := exists_smul_mem_stdSimplex (fun i => (hwpos i).le)
+    (fun hc => (hwpos (Classical.arbitrary ι)).ne' (congrFun hc _)) hbase
   have hmem : (s + eps) ∈ cwSet A (entrySum A) :=
     ⟨(s + eps, y'), ⟨⟨by linarith, cw_le_entrySum hAnn hy'mem hgain⟩,
       hy'mem, hgain⟩, rfl⟩
   linarith [hsup _ hmem]
+
+/-- **A greatest Collatz–Wielandt scalar is an eigenvalue.**  If `s·x ≤ Ax` on the simplex and no
+Collatz–Wielandt scalar of `A` exceeds `s`, then `Ax = s·x`. -/
+theorem mulVec_eq_smul_of_forall_cwSet_le [Nonempty ι] {A : Matrix ι ι ℝ}
+    (hA : ∀ i j, 0 < A i j) {s : ℝ} {x : ι → ℝ} (hs0 : 0 ≤ s)
+    (hx : x ∈ stdSimplex ℝ ι) (hxle : ∀ i, s * x i ≤ (A *ᵥ x) i)
+    (hsup : ∀ t ∈ cwSet A (entrySum A), t ≤ s) :
+    A *ᵥ x = s • x :=
+  mulVec_eq_smul_of_nonneg_of_forall_cwSet_le hA hs0 hx.1 (ne_zero_of_mem_stdSimplex hx) hxle hsup
 
 
 /-! ### The Perron root -/
@@ -253,41 +270,28 @@ theorem exists_perron_eigenvector [Nonempty ι] (A : Matrix ι ι ℝ)
   -- The set of Collatz-Wielandt scalars is compact and nonempty.
   have hne : (cwSet A M).Nonempty := by
     refine ⟨0, ⟨(0, fun _ : ι => (Fintype.card ι : ℝ)⁻¹), ⟨?_, uniform_mem_stdSimplex, ?_⟩, rfl⟩⟩
-    · refine ⟨le_refl 0, ?_⟩
-      exact Finset.sum_nonneg fun i _ => Finset.sum_nonneg fun j _ => hAnn i j
-    · intro i
-      rw [zero_mul]
-      exact (mulVec_pos_of_stdSimplex hA (uniform_mem_stdSimplex) i).le
+    · exact ⟨le_refl 0, Finset.sum_nonneg fun i _ => Finset.sum_nonneg fun j _ => hAnn i j⟩
+    · exact fun i => by
+        rw [zero_mul]; exact (mulVec_pos_of_stdSimplex hA uniform_mem_stdSimplex i).le
   obtain ⟨⟨s, x⟩, ⟨hsIcc, hx, hxle⟩, hsup⟩ := (isCompact_cwSet A M).sSup_mem hne
   have hsup' : s = sSup (cwSet A M) := hsup
-  -- Rename the projections of the witness pair to their defeq components.
-  have hx : x ∈ stdSimplex ℝ ι := hx
-  have hxle : ∀ i, s * x i ≤ (A *ᵥ x) i := hxle
-  have hsIcc : s ∈ Set.Icc (0 : ℝ) M := hsIcc
+  -- Read the projections of the witness pair at their defeq components.
+  dsimp only at hsIcc hx hxle
   have hxpos : ∀ i, 0 < (A *ᵥ x) i := fun i => mulVec_pos_of_stdSimplex hA hx i
   -- The supremum is an eigenvalue: otherwise a strictly larger scalar qualifies.
   have heig : A *ᵥ x = s • x :=
     mulVec_eq_smul_of_forall_cwSet_le hA hsIcc.1 hx hxle
       (fun t ht => by rw [hsup']; exact le_csSup (isCompact_cwSet A M).bddAbove ht)
   -- Strict positivity of `x`, then of `s`, from `Ax = sx` and `Ax > 0`.
-  have hxi : ∀ i, 0 < x i := by
-    intro i
-    rcases (hx.1 i).lt_or_eq with h | h
-    · exact h
-    · exfalso
-      have hcon := hxpos i
-      rw [heig] at hcon
-      simp only [Pi.smul_apply, smul_eq_mul] at hcon
-      have hxz : x i = 0 := h.symm
-      rw [hxz, mul_zero] at hcon
-      exact lt_irrefl 0 hcon
+  have hxi : ∀ i, 0 < x i := fun i => (hx.1 i).lt_of_ne' fun h => by
+    have hcon := hxpos i
+    rw [heig, Pi.smul_apply, smul_eq_mul, h, mul_zero] at hcon
+    exact lt_irrefl 0 hcon
   have hspos : 0 < s := by
     have h0 := hxpos (Classical.arbitrary ι)
-    rw [heig] at h0
-    simp only [Pi.smul_apply, smul_eq_mul] at h0
+    rw [heig, Pi.smul_apply, smul_eq_mul] at h0
     nlinarith [hxi (Classical.arbitrary ι)]
-  have hpr : perronRoot A = s := by
-    rw [perronRoot, ← hM]; exact hsup'.symm
+  have hpr : perronRoot A = s := by rw [perronRoot, ← hM]; exact hsup'.symm
   exact ⟨by rw [hpr]; exact hspos, x, hxi, hx, by rw [hpr]; exact heig⟩
 
 /-! ### The Perron root is the spectral radius, and its eigenspace is a line
@@ -299,46 +303,50 @@ an admissible scalar.  Simplicity subtracts the right multiple of the positive
 eigenvector to create a zero coordinate, then observes that a positive matrix
 sends a nonzero nonnegative vector to a strictly positive one. -/
 
-/-- A positive matrix sends a nonzero nonnegative vector to a strictly positive
-one.  Used for both the eigenvector step above and simplicity below. -/
-theorem mulVec_pos_of_nonneg_ne_zero {A : Matrix ι ι ℝ} (hA : ∀ i j, 0 < A i j)
-    {v : ι → ℝ} (hv : ∀ i, 0 ≤ v i) (hne : v ≠ 0) (i : ι) : 0 < (A *ᵥ v) i := by
-  obtain ⟨j, hj⟩ : ∃ j, 0 < v j := by
-    by_contra hc
-    push Not at hc
-    exact hne (funext fun k => le_antisymm (hc k) (hv k))
-  simp only [Matrix.mulVec, dotProduct]
-  exact Finset.sum_pos' (fun k _ => mul_nonneg (hA i k).le (hv k))
-    ⟨j, Finset.mem_univ j, mul_pos (hA i j) hj⟩
-
 /-- Any admissible Collatz–Wielandt inequality bounds the Perron root from below:
 if `s·y ≤ Ay` for some nonzero nonnegative `y` and `s ≥ 0`, then `s ≤ perronRoot A`.
 The vector is renormalized onto the simplex, where the supremum is taken. -/
 theorem le_perronRoot_of_le [Nonempty ι] {A : Matrix ι ι ℝ} (hA : ∀ i j, 0 ≤ A i j)
     {s : ℝ} (hs : 0 ≤ s) {y : ι → ℝ} (hy : ∀ i, 0 ≤ y i) (hyne : y ≠ 0)
     (hle : ∀ i, s * y i ≤ (A *ᵥ y) i) : s ≤ perronRoot A := by
-  obtain ⟨j, hj⟩ : ∃ j, 0 < y j := by
-    by_contra hc
-    push Not at hc
-    exact hyne (funext fun k => le_antisymm (hc k) (hy k))
-  have hsum : 0 < ∑ i, y i :=
-    Finset.sum_pos' (fun i _ => hy i) ⟨j, Finset.mem_univ j, hj⟩
-  set c : ℝ := (∑ i, y i)⁻¹ with hc
-  have hcpos : 0 < c := inv_pos.mpr hsum
-  have hmem : (c • y) ∈ stdSimplex ℝ ι := by
-    refine ⟨fun i => ?_, ?_⟩
-    · simp only [Pi.smul_apply, smul_eq_mul]
-      exact mul_nonneg hcpos.le (hy i)
-    · simp only [Pi.smul_apply, smul_eq_mul, ← Finset.mul_sum, hc]
-      exact inv_mul_cancel₀ hsum.ne'
-  have hscaled : ∀ i, s * (c • y) i ≤ (A *ᵥ (c • y)) i := by
-    intro i
-    rw [Matrix.mulVec_smul]
-    simp only [Pi.smul_apply, smul_eq_mul]
-    calc s * (c * y i) = c * (s * y i) := by ring
-      _ ≤ c * (A *ᵥ y) i := mul_le_mul_of_nonneg_left (hle i) hcpos.le
+  obtain ⟨x, hmem, hscaled⟩ := exists_smul_mem_stdSimplex hy hyne hle
   exact le_csSup (isCompact_cwSet A (entrySum A)).bddAbove
-    ⟨(s, c • y), ⟨⟨hs, cw_le_entrySum hA hmem hscaled⟩, hmem, hscaled⟩, rfl⟩
+    ⟨(s, x), ⟨⟨hs, cw_le_entrySum hA hmem hscaled⟩, hmem, hscaled⟩, rfl⟩
+
+/-- The eigenvalue equation of the complexified matrix, read in coordinates. -/
+theorem mulVec_map_coord {A : Matrix ι ι ℝ} {lam : ℂ} {z : ι → ℂ}
+    (heig : (A.map (fun a : ℝ => (a : ℂ))) *ᵥ z = lam • z) (i : ι) :
+    lam * z i = ∑ j, (A i j : ℂ) * z j := by
+  have h := congrFun heig i
+  simp only [Matrix.mulVec, dotProduct, Matrix.map_apply, Pi.smul_apply,
+    smul_eq_mul] at h
+  exact h.symm
+
+/-- Against a nonnegative matrix the row sum of moduli is the matrix acting on the
+modulus vector. -/
+theorem sum_norm_mul_eq_mulVec_norm {A : Matrix ι ι ℝ} (hA : ∀ i j, 0 ≤ A i j)
+    (z : ι → ℂ) (i : ι) :
+    ∑ j, ‖(A i j : ℂ) * z j‖ = (A *ᵥ fun k => ‖z k‖) i := by
+  simp only [Matrix.mulVec, dotProduct, norm_mul, Complex.norm_real, Real.norm_eq_abs]
+  exact Finset.sum_congr rfl fun j _ => by rw [abs_of_nonneg (hA i j)]
+
+omit [Fintype ι] in
+/-- The modulus vector of a nonzero complex vector is nonzero. -/
+theorem norm_ne_zero_of_ne_zero {z : ι → ℂ} (hz : z ≠ 0) : (fun i => ‖z i‖) ≠ 0 := by
+  intro hc
+  exact hz (funext fun i => by simpa using congrFun hc i)
+
+/-- **The modulus inequality.**  For a nonnegative matrix and a complex eigenvector
+`Az = λz`, the modulus vector `|z|` is an admissible Collatz--Wielandt vector for `‖λ‖`:
+the triangle inequality in row `i` reads `‖λ‖·|z_i| ≤ (A|z|)_i`. -/
+theorem norm_smul_le_mulVec_norm {A : Matrix ι ι ℝ} (hA : ∀ i j, 0 ≤ A i j)
+    {lam : ℂ} {z : ι → ℂ}
+    (heig : (A.map (fun a : ℝ => (a : ℂ))) *ᵥ z = lam • z) (i : ι) :
+    ‖lam‖ * ‖z i‖ ≤ (A *ᵥ fun k => ‖z k‖) i :=
+  calc ‖lam‖ * ‖z i‖ = ‖lam * z i‖ := (norm_mul _ _).symm
+    _ = ‖∑ j, (A i j : ℂ) * z j‖ := by rw [mulVec_map_coord heig]
+    _ ≤ ∑ j, ‖(A i j : ℂ) * z j‖ := norm_sum_le _ _
+    _ = _ := sum_norm_mul_eq_mulVec_norm hA z i
 
 /-- **The Perron root is the spectral radius.**  Every complex eigenvalue of a
 positive real matrix has modulus at most `perronRoot A`.  By the triangle
@@ -347,28 +355,9 @@ itself a Collatz–Wielandt scalar. -/
 theorem norm_le_perronRoot [Nonempty ι] {A : Matrix ι ι ℝ} (hA : ∀ i j, 0 < A i j)
     {lam : ℂ} {z : ι → ℂ} (hz : z ≠ 0)
     (heig : (A.map (fun a : ℝ => (a : ℂ))) *ᵥ z = lam • z) :
-    ‖lam‖ ≤ perronRoot A := by
-  set y : ι → ℝ := fun i => ‖z i‖ with hy
-  have hynn : ∀ i, 0 ≤ y i := fun i => norm_nonneg _
-  have hyne : y ≠ 0 := by
-    intro hc
-    refine hz (funext fun i => ?_)
-    have := congrFun hc i
-    simpa [hy] using this
-  refine le_perronRoot_of_le (fun i j => (hA i j).le) (norm_nonneg _) hynn hyne ?_
-  intro i
-  have hcoord : lam * z i = ∑ j, (A i j : ℂ) * z j := by
-    have := congrFun heig i
-    simp only [Matrix.mulVec, dotProduct, Matrix.map_apply, Pi.smul_apply,
-      smul_eq_mul] at this
-    exact this.symm
-  calc ‖lam‖ * y i = ‖lam * z i‖ := by rw [hy, norm_mul]
-    _ = ‖∑ j, (A i j : ℂ) * z j‖ := by rw [hcoord]
-    _ ≤ ∑ j, ‖(A i j : ℂ) * z j‖ := norm_sum_le _ _
-    _ = (A *ᵥ y) i := by
-        simp only [Matrix.mulVec, dotProduct, norm_mul, Complex.norm_real,
-          Real.norm_eq_abs, hy]
-        exact Finset.sum_congr rfl fun j _ => by rw [abs_of_pos (hA i j)]
+    ‖lam‖ ≤ perronRoot A :=
+  le_perronRoot_of_le (fun i j => (hA i j).le) (norm_nonneg _) (fun _ => norm_nonneg _)
+    (norm_ne_zero_of_ne_zero hz) (norm_smul_le_mulVec_norm (fun i j => (hA i j).le) heig)
 
 /-- **The Perron eigenspace is one-dimensional.**  Any real eigenvector for the
 Perron root is a multiple of the positive one: subtract the largest multiple of
@@ -378,7 +367,7 @@ theorem perron_eigenvector_unique [Nonempty ι] {A : Matrix ι ι ℝ}
     (hA : ∀ i j, 0 < A i j) {x y : ι → ℝ} (hxpos : ∀ i, 0 < x i)
     (hy : A *ᵥ y = perronRoot A • y) (hxeig : A *ᵥ x = perronRoot A • x) :
     ∃ t : ℝ, y = t • x := by
-  have hUne : (Finset.univ : Finset ι).Nonempty := ⟨Classical.arbitrary ι, Finset.mem_univ _⟩
+  have hUne : (Finset.univ : Finset ι).Nonempty := Finset.univ_nonempty
   set t : ℝ := Finset.inf' Finset.univ hUne (fun i => y i / x i) with ht
   obtain ⟨j, -, hj⟩ := Finset.exists_mem_eq_inf' hUne (fun i => y i / x i)
   refine ⟨t, ?_⟩
@@ -386,7 +375,6 @@ theorem perron_eigenvector_unique [Nonempty ι] {A : Matrix ι ι ℝ}
   have hwnn : ∀ i, 0 ≤ w i := by
     intro i
     have hle : t ≤ y i / x i := Finset.inf'_le _ (Finset.mem_univ i)
-    have := (div_le_iff₀ (hxpos i)).mp (le_refl (y i / x i))
     simp only [hw, Pi.sub_apply, Pi.smul_apply, smul_eq_mul, sub_nonneg]
     calc t * x i ≤ (y i / x i) * x i := mul_le_mul_of_nonneg_right hle (hxpos i).le
       _ = y i := div_mul_cancel₀ _ (hxpos i).ne'
@@ -403,8 +391,7 @@ theorem perron_eigenvector_unique [Nonempty ι] {A : Matrix ι ι ℝ}
     rw [hweig] at hpos
     simp only [Pi.smul_apply, smul_eq_mul, hwj, mul_zero] at hpos
     exact lt_irrefl 0 hpos
-  have := sub_eq_zero.mp (by rw [← hw]; exact hwzero)
-  exact this
+  exact sub_eq_zero.mp (by rw [← hw]; exact hwzero)
 
 /-! ### Strict dominance
 
@@ -419,100 +406,48 @@ eigenvector with a single phase, and that phase cancels. -/
 /-- **At the Perron root the Collatz–Wielandt inequality is an equality.**  If
 `r·y ≤ Ay` with `y` nonnegative and nonzero and `r = perronRoot A`, then
 `Ay = r·y`: otherwise `A(Ay − ry)` is strictly positive and `Ay` admits a scalar
-above the supremum. -/
+above the supremum.  The root is the supremum of the Collatz--Wielandt scalars,
+so no scalar exceeds it and the maximality lemma applies at `s = r`. -/
 theorem mulVec_eq_perronRoot_smul [Nonempty ι] {A : Matrix ι ι ℝ} (hA : ∀ i j, 0 < A i j)
     {y : ι → ℝ} (hy : ∀ i, 0 ≤ y i) (hyne : y ≠ 0)
     (hle : ∀ i, perronRoot A * y i ≤ (A *ᵥ y) i) :
-    A *ᵥ y = perronRoot A • y := by
-  by_contra hne
-  have hrpos : 0 < perronRoot A := (exists_perron_eigenvector A hA).1
-  set v : ι → ℝ := A *ᵥ y - perronRoot A • y with hv
-  have hvnn : ∀ i, 0 ≤ v i := fun i => sub_nonneg.mpr (hle i)
-  have hvne : v ≠ 0 := fun hc => hne (sub_eq_zero.mp (by rw [← hv]; exact hc))
-  set z : ι → ℝ := A *ᵥ y with hz
-  have hzpos : ∀ i, 0 < z i := fun i => mulVec_pos_of_nonneg_ne_zero hA hy hyne i
-  have hzne : z ≠ 0 := fun hc =>
-    absurd (congrFun hc (Classical.arbitrary ι)) (hzpos _).ne'
-  have hAv : ∀ i, 0 < (A *ᵥ v) i := fun i =>
-    mulVec_pos_of_nonneg_ne_zero hA hvnn hvne i
-  have hAz : ∀ i, (A *ᵥ z) i - perronRoot A * z i = (A *ᵥ v) i := by
-    intro i
-    have : A *ᵥ z - perronRoot A • z = A *ᵥ v := by
-      rw [hv, hz, Matrix.mulVec_sub, Matrix.mulVec_smul]
-    have h := congrFun this i
-    simpa [Pi.sub_apply, Pi.smul_apply, smul_eq_mul] using h
-  have hUne : (Finset.univ : Finset ι).Nonempty := ⟨Classical.arbitrary ι, Finset.mem_univ _⟩
-  set eps : ℝ := Finset.inf' Finset.univ hUne (fun i => (A *ᵥ v) i / z i) with heps
-  have heps0 : 0 < eps :=
-    (Finset.lt_inf'_iff _).2 fun i _ => div_pos (hAv i) (hzpos i)
-  have hgain : ∀ i, (perronRoot A + eps) * z i ≤ (A *ᵥ z) i := by
-    intro i
-    have hle2 : eps ≤ (A *ᵥ v) i / z i := Finset.inf'_le _ (Finset.mem_univ i)
-    have hmul : eps * z i ≤ (A *ᵥ v) i := by
-      calc eps * z i ≤ ((A *ᵥ v) i / z i) * z i :=
-            mul_le_mul_of_nonneg_right hle2 (hzpos i).le
-        _ = (A *ᵥ v) i := div_mul_cancel₀ _ (hzpos i).ne'
-    have hexp : (perronRoot A + eps) * z i = perronRoot A * z i + eps * z i := by ring
-    rw [hexp]
-    linarith [hAz i]
-  have hcontr := le_perronRoot_of_le (fun i j => (hA i j).le)
-    (by linarith : (0 : ℝ) ≤ perronRoot A + eps) (fun i => (hzpos i).le) hzne hgain
-  linarith
+    A *ᵥ y = perronRoot A • y :=
+  mulVec_eq_smul_of_nonneg_of_forall_cwSet_le hA (exists_perron_eigenvector A hA).1.le hy hyne hle
+    fun _ ht => le_csSup (isCompact_cwSet A (entrySum A)).bddAbove ht
 
-/-- **Equality in the triangle inequality over `ℂ`.**  If the norm of a finite
-sum equals the sum of the norms and the sum is nonzero, then every term is a
-nonnegative real multiple of the total: `‖S‖ · u j = ‖u j‖ · S`.
+/-- **The modulus vector of a modulus-maximal eigenvector is a positive Perron eigenvector.**
+The triangle inequality makes `|z|` admissible at the Perron root, where the Collatz--Wielandt
+inequality is forced to be an equality; a positive matrix then makes `|z|` strictly positive. -/
+private theorem mulVec_norm_eq_perronRoot_smul [Nonempty ι] {A : Matrix ι ι ℝ}
+    (hA : ∀ i j, 0 < A i j) {lam : ℂ} {z : ι → ℂ} (hz : z ≠ 0)
+    (heig : (A.map (fun a : ℝ => (a : ℂ))) *ᵥ z = lam • z) (hnorm : ‖lam‖ = perronRoot A) :
+    A *ᵥ (fun i => ‖z i‖) = perronRoot A • (fun i => ‖z i‖) ∧ ∀ i, 0 < ‖z i‖ := by
+  have hynn : ∀ i, 0 ≤ ‖z i‖ := fun i => norm_nonneg _
+  have hyne : (fun i => ‖z i‖) ≠ 0 := norm_ne_zero_of_ne_zero hz
+  have hle : ∀ i, perronRoot A * ‖z i‖ ≤ (A *ᵥ fun i => ‖z i‖) i := by
+    rw [← hnorm]
+    exact norm_smul_le_mulVec_norm (fun i j => (hA i j).le) heig
+  have hyeig := mulVec_eq_perronRoot_smul hA hynn hyne hle
+  refine ⟨hyeig, fun i => ?_⟩
+  have h1 := mulVec_pos_of_nonneg_ne_zero hA hynn hyne i
+  rw [hyeig] at h1
+  simp only [Pi.smul_apply, smul_eq_mul] at h1
+  nlinarith [hynn i, (exists_perron_eigenvector A hA).1]
 
-Proved through real parts rather than `SameRay`: with `w j = conj S · u j`, the
-sum of the `w j` is the real number `‖S‖²`, each `Re (w j) ≤ ‖w j‖ = ‖S‖‖u j‖`,
-and the totals agree — so every inequality is an equality, forcing each `w j`
-real and nonnegative. -/
-theorem norm_smul_eq_of_norm_sum_eq {α : Type*} {s : Finset α} {u : α → ℂ}
-    (h : ‖∑ k ∈ s, u k‖ = ∑ k ∈ s, ‖u k‖) {j : α} (hj : j ∈ s) :
-    (‖∑ k ∈ s, u k‖ : ℂ) * u j = (‖u j‖ : ℂ) * (∑ k ∈ s, u k) := by
-  set S : ℂ := ∑ k ∈ s, u k with hS
-  rcases eq_or_ne S 0 with h0 | h0
-  · -- Every term vanishes, since the norms sum to zero.
-    have hz : ∀ k ∈ s, ‖u k‖ = 0 := by
-      have hsum : ∑ k ∈ s, ‖u k‖ = 0 := by rw [← h, h0, norm_zero]
-      exact fun k hk => le_antisymm
-        (hsum ▸ Finset.single_le_sum (fun i _ => norm_nonneg (u i)) hk) (norm_nonneg _)
-    rw [h0, norm_zero, hz j hj]
-    simp [norm_eq_zero.mp (hz j hj)]
-  · have hSn : (0 : ℝ) < ‖S‖ := norm_pos_iff.mpr h0
-    -- `∑ conj S * u k = ‖S‖²`, a real number.
-    have hconj : ∑ k ∈ s, (starRingEnd ℂ) S * u k = ((‖S‖ * ‖S‖ : ℝ) : ℂ) := by
-      rw [← Finset.mul_sum, ← hS, mul_comm, Complex.mul_conj,
-        Complex.norm_mul_self_eq_normSq]
-    -- Termwise `Re ≤ norm`, with equal totals.
-    have hre : ∀ k ∈ s, ((starRingEnd ℂ) S * u k).re ≤ ‖S‖ * ‖u k‖ := by
-      intro k _
-      have := Complex.re_le_norm ((starRingEnd ℂ) S * u k)
-      rwa [norm_mul, RCLike.norm_conj] at this
-    have htot : ∑ k ∈ s, ((starRingEnd ℂ) S * u k).re = ∑ k ∈ s, ‖S‖ * ‖u k‖ := by
-      rw [← Complex.re_sum, hconj, Complex.ofReal_re, ← Finset.mul_sum, ← h]
-    have heq := (Finset.sum_eq_sum_iff_of_le hre).1 htot j hj
-    -- A complex number whose real part equals its norm is that norm.
-    have hreal : (starRingEnd ℂ) S * u j = ((‖S‖ * ‖u j‖ : ℝ) : ℂ) := by
-      set w : ℂ := (starRingEnd ℂ) S * u j with hw
-      have hwn : w.re = ‖w‖ := by
-        rw [heq, hw, norm_mul, RCLike.norm_conj]
-      have him : w.im = 0 := by
-        have h1 : ‖w‖ * ‖w‖ = w.re * w.re + w.im * w.im := by
-          rw [Complex.norm_mul_self_eq_normSq, Complex.normSq_apply]
-        rw [← hwn] at h1
-        exact mul_self_eq_zero.mp (by linarith)
-      refine Complex.ext ?_ ?_
-      · rw [Complex.ofReal_re, ← heq]
-      · rw [him, Complex.ofReal_im]
-    -- Multiply through by `S` and cancel one factor of `‖S‖`.
-    have hmul : S * ((starRingEnd ℂ) S * u j) = S * ((‖S‖ * ‖u j‖ : ℝ) : ℂ) := by
-      rw [hreal]
-    rw [← mul_assoc, Complex.mul_conj, ← Complex.norm_mul_self_eq_normSq] at hmul
-    have hSne : (‖S‖ : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hSn.ne'
-    refine mul_left_cancel₀ hSne ?_
-    push_cast at hmul ⊢
-    linear_combination hmul
+/-- **The phases align.**  Where equality holds in the triangle inequality for the `i₀`-th row,
+every `z j` is its own modulus times one common complex direction, the row sum `S`. -/
+private theorem norm_row_sum_smul_eq [Nonempty ι] {A : Matrix ι ι ℝ} (hA : ∀ i j, 0 < A i j)
+    {z : ι → ℂ} {i₀ : ι}
+    (hEq : ‖∑ k, (A i₀ k : ℂ) * z k‖ = ∑ k, ‖(A i₀ k : ℂ) * z k‖) (j : ι) :
+    (‖∑ k, (A i₀ k : ℂ) * z k‖ : ℂ) * z j
+      = ((‖z j‖ : ℝ) : ℂ) * ∑ k, (A i₀ k : ℂ) * z k := by
+  have h := norm_smul_eq_of_norm_sum_eq hEq (Finset.mem_univ j)
+  rw [show ‖(A i₀ j : ℂ) * z j‖ = A i₀ j * ‖z j‖ from by
+    rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos (hA i₀ j)]] at h
+  refine mul_left_cancel₀ (Complex.ofReal_ne_zero.mpr (hA i₀ j).ne' :
+    ((A i₀ j : ℝ) : ℂ) ≠ 0) ?_
+  push_cast at h ⊢
+  linear_combination h
 
 /-- **Strict dominance.**  For a positive matrix the Perron root is the *only*
 eigenvalue of maximal modulus: if `‖λ‖ = perronRoot A` then `λ = perronRoot A`.
@@ -527,80 +462,28 @@ theorem eq_perronRoot_of_norm_eq [Nonempty ι] {A : Matrix ι ι ℝ} (hA : ∀ 
     lam = (perronRoot A : ℂ) := by
   set r := perronRoot A with hr
   set y : ι → ℝ := fun i => ‖z i‖ with hy
-  have hynn : ∀ i, 0 ≤ y i := fun i => norm_nonneg _
-  have hyne : y ≠ 0 := by
-    intro hc
-    exact hz (funext fun i => by
-      have := congrFun hc i; simpa [hy] using this)
-  -- Each coordinate identity, and the triangle bound it satisfies.
-  have hcoord : ∀ i, lam * z i = ∑ j, (A i j : ℂ) * z j := by
-    intro i
-    have := congrFun heig i
-    simp only [Matrix.mulVec, dotProduct, Matrix.map_apply, Pi.smul_apply,
-      smul_eq_mul] at this
-    exact this.symm
-  have hsumnorm : ∀ i, ∑ j, ‖(A i j : ℂ) * z j‖ = (A *ᵥ y) i := by
-    intro i
-    simp only [Matrix.mulVec, dotProduct, norm_mul, Complex.norm_real,
-      Real.norm_eq_abs, hy]
-    exact Finset.sum_congr rfl fun j _ => by rw [abs_of_pos (hA i j)]
-  have hle : ∀ i, r * y i ≤ (A *ᵥ y) i := by
-    intro i
-    calc r * y i = ‖lam * z i‖ := by rw [hy, norm_mul, hnorm]
-      _ = ‖∑ j, (A i j : ℂ) * z j‖ := by rw [hcoord i]
-      _ ≤ ∑ j, ‖(A i j : ℂ) * z j‖ := norm_sum_le _ _
-      _ = (A *ᵥ y) i := hsumnorm i
-  -- So the inequality is an equality, and `y` is strictly positive.
-  have hyeig : A *ᵥ y = r • y := mulVec_eq_perronRoot_smul hA hynn hyne hle
-  have hypos : ∀ i, 0 < y i := by
-    intro i
-    have h1 := mulVec_pos_of_nonneg_ne_zero hA hynn hyne i
-    rw [hyeig] at h1
-    simp only [Pi.smul_apply, smul_eq_mul] at h1
-    have hrpos : 0 < r := (exists_perron_eigenvector A hA).1
-    nlinarith [hynn i]
+  obtain ⟨hyeig, hypos⟩ := mulVec_norm_eq_perronRoot_smul hA hz heig hnorm
+  have hrpos : 0 < r := (exists_perron_eigenvector A hA).1
+  have hcoord : ∀ i, lam * z i = ∑ j, (A i j : ℂ) * z j := mulVec_map_coord heig
+  have hsumnorm : ∀ i, ∑ j, ‖(A i j : ℂ) * z j‖ = (A *ᵥ y) i :=
+    sum_norm_mul_eq_mulVec_norm (fun i j => (hA i j).le) z
   -- Equality in the triangle inequality at a fixed coordinate aligns the phases.
   set i₀ : ι := Classical.arbitrary ι with hi₀
-  have hEq : ‖∑ j, (A i₀ j : ℂ) * z j‖ = ∑ j, ‖(A i₀ j : ℂ) * z j‖ := by
-    rw [hsumnorm i₀, ← hcoord i₀, norm_mul, hnorm]
-    have := congrFun hyeig i₀
-    simp only [Pi.smul_apply, smul_eq_mul] at this
-    rw [hy]; exact this.symm
+  have hyeig₀ : (A *ᵥ y) i₀ = r * y i₀ := by
+    simpa [Pi.smul_apply, smul_eq_mul] using congrFun hyeig i₀
   set S : ℂ := ∑ j, (A i₀ j : ℂ) * z j with hSdef
-  have halign : ∀ j, (‖S‖ : ℂ) * ((A i₀ j : ℂ) * z j) = (‖(A i₀ j : ℂ) * z j‖ : ℂ) * S :=
-    fun j => norm_smul_eq_of_norm_sum_eq hEq (Finset.mem_univ j)
-  -- Hence `z = (S/‖S‖) · y`, and applying `A` gives `λ z = r z`.
-  have hSne : S ≠ 0 := by
-    rw [hSdef, ← hcoord i₀]
-    exact mul_ne_zero
-      (by rw [← norm_ne_zero_iff, hnorm]; exact ((exists_perron_eigenvector A hA).1).ne')
-      (by rw [← norm_ne_zero_iff]; exact (hypos i₀).ne')
-  have hSn : (0 : ℝ) < ‖S‖ := norm_pos_iff.mpr hSne
-  have hzform : ∀ j, (‖S‖ : ℂ) * z j = (y j : ℂ) * S := by
-    intro j
-    have h := halign j
-    have haj : ((A i₀ j : ℝ) : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr (hA i₀ j).ne'
-    have hnormsplit : ‖(A i₀ j : ℂ) * z j‖ = A i₀ j * y j := by
-      rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_pos (hA i₀ j), hy]
-    rw [hnormsplit] at h
-    refine mul_left_cancel₀ haj ?_
-    push_cast at h ⊢
-    linear_combination h
+  have hnormS : ‖S‖ = r * y i₀ := by rw [hSdef, ← hcoord i₀, norm_mul, hnorm]
+  have hSn : (0 : ℝ) < ‖S‖ := by rw [hnormS]; exact mul_pos hrpos (hypos i₀)
+  have hzform := norm_row_sum_smul_eq hA
+    (show ‖S‖ = ∑ j, ‖(A i₀ j : ℂ) * z j‖ by rw [hnormS, ← hyeig₀, hsumnorm i₀])
   -- `λ z = A z = r z` coordinatewise, then cancel a nonzero coordinate.
   have hfinal : lam * z i₀ = (r : ℂ) * z i₀ := by
-    have h1 : (‖S‖ : ℂ) * (lam * z i₀) = (‖S‖ : ℂ) * ((r : ℂ) * z i₀) := by
-      rw [hcoord i₀, ← hSdef]
-      have h2 : (‖S‖ : ℂ) * ((r : ℂ) * z i₀) = (r : ℂ) * ((‖S‖ : ℂ) * z i₀) := by ring
-      rw [h2, hzform i₀]
-      have h3 := congrFun hyeig i₀
-      simp only [Pi.smul_apply, smul_eq_mul] at h3
-      have h4 : ((A *ᵥ y) i₀ : ℂ) = ((r * y i₀ : ℝ) : ℂ) := by rw [h3]
-      have h5 : (‖S‖ : ℂ) = ((A *ᵥ y) i₀ : ℂ) := by
-        rw [hSdef, ← hcoord i₀, norm_mul, hnorm, h3]
-      rw [h5, h4]
-      push_cast
-      ring
-    exact mul_left_cancel₀ (Complex.ofReal_ne_zero.mpr hSn.ne') h1
+    refine mul_left_cancel₀ (Complex.ofReal_ne_zero.mpr hSn.ne') ?_
+    rw [hcoord i₀, ← hSdef,
+      show (‖S‖ : ℂ) * ((r : ℂ) * z i₀) = (r : ℂ) * ((‖S‖ : ℂ) * z i₀) from by ring,
+      hzform i₀, hnormS]
+    push_cast
+    ring
   have hz0 : z i₀ ≠ 0 := by rw [← norm_ne_zero_iff]; exact (hypos i₀).ne'
   exact mul_right_cancel₀ hz0 hfinal
 
@@ -613,18 +496,6 @@ needs, and what is still missing, is **simplicity and strict dominance** of the
 Perron root, plus the identification of the spectrum of `∧^r A` with the `r`-fold
 products of the eigenvalues of `A`. -/
 
-/-- A totally positive matrix at order `k`: every increasing-selection minor is
-strictly positive. -/
-def MinorsPos (k : ℕ) {n : ℕ} (A : Matrix (Fin n) (Fin n) ℝ) : Prop :=
-  ∀ f g : Fin k → Fin n, f ∈ increasingSelections k n → g ∈ increasingSelections k n →
-    0 < (A.submatrix f g).det
-
-/-- There is at least one increasing selection of `r` out of `n` when `r ≤ n`. -/
-theorem increasingSelections_nonempty {r n : ℕ} (h : r ≤ n) :
-    Nonempty (increasingSelections r n) :=
-  ⟨⟨fun i => ⟨(i : ℕ), lt_of_lt_of_le i.isLt h⟩,
-    mem_increasingSelections.mpr fun _ _ hab => hab⟩⟩
-
 /-- **The compound of a totally positive matrix has a Perron root.**  Its entries
 are the `r × r` minors, all strictly positive, so `exists_perron_eigenvector`
 applies verbatim.  This is the step of the reality argument that Perron–Frobenius
@@ -636,5 +507,20 @@ theorem exists_perron_compound {n r : ℕ} (hrn : r ≤ n) (A : Matrix (Fin n) (
       compound r A *ᵥ x = perronRoot (compound r A) • x :=
   haveI := increasingSelections_nonempty hrn
   exists_perron_eigenvector (compound r A) fun f g => hA f.1 g.1 f.2 g.2
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.norm_le_perronRoot' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms norm_le_perronRoot
+
+/-- info: 'Shields.perron_eigenvector_unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms perron_eigenvector_unique
+
+/-- info: 'Shields.eq_perronRoot_of_norm_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms eq_perronRoot_of_norm_eq
 
 end Shields

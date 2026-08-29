@@ -277,8 +277,7 @@ theorem hasDerivWithinAt_cubicThird_zero :
   have hval : ((0 : ℝ) * cubicTau 0 ^ 2 - 1 * ((2 : ℝ) * cubicTau 0 ^ 1 * (-(1 / Real.sqrt 3))))
       / (cubicTau 0 ^ 2) ^ 2 = 2 / Real.sqrt 3 := by
     rw [cubicTau_zero]
-    field_simp
-    ring
+    field
   rw [hval] at h
   exact h
 
@@ -304,8 +303,7 @@ theorem tendsto_one_sub_ftPrincipal_div :
     simpa using ne_of_gt (Set.mem_Ioi.1 hδ)
   have h0 : ftPrincipal cubicTau 0 = 1 := ftPrincipal_cubicTau_zero
   rw [slope, h0, vsub_eq_sub, sub_zero, Complex.real_smul, Complex.ofReal_inv]
-  field_simp
-  ring
+  field
 
 theorem ftPrincipal_cubicTau_zero' : ftPrincipal cubicTau 0 = 1 :=
   ftPrincipal_cubicTau_zero
@@ -380,8 +378,7 @@ theorem clusterAlpha_one_three_zero :
   rw [clusterAlpha, hom, sin_pi_div_three_nat]
   have hs0 : ((Real.sqrt 3 : ℝ) : ℂ) ≠ 0 := by simp
   push_cast
-  field_simp
-  ring
+  field
 
 /-! ### The four residue limits -/
 
@@ -525,14 +522,14 @@ theorem mem_cubicUpperPair_iff {δ : ℝ} (hδ : 0 < δ) (hδe : δ ≤ Real.pi 
 theorem cubicUpper_root {δ : ℝ} (hδ : 0 < δ) (hδe : δ ≤ Real.pi / 2) :
     ∀ a ∈ cubicUpperPair δ,
       (ftDen cubicQ 1 ((cubicZ (cubicTau (Real.pi - δ)) (Real.pi - δ) : ℝ) : ℂ)).eval a = 0 :=
-  fun a ha => (mem_cubicRootSet_iff (upperArc hδ hδe)).1
+  fun _a ha => (mem_cubicRootSet_iff (upperArc hδ hδe)).1
     ((mem_cubicUpperPair_iff hδ hδe).1 ha).1
 
 theorem cubicUpper_simple {δ : ℝ} (hδ : 0 < δ) (hδe : δ ≤ Real.pi / 2) :
     ∀ a ∈ cubicUpperPair δ,
       (derivative (ftDen cubicQ 1
         ((cubicZ (cubicTau (Real.pi - δ)) (Real.pi - δ) : ℝ) : ℂ))).eval a ≠ 0 :=
-  fun a ha => derivative_ftDen_cubicQ_ne_zero (upperArc hδ hδe)
+  fun _a ha => derivative_ftDen_cubicQ_ne_zero (upperArc hδ hδe)
     ((mem_cubicUpperPair_iff hδ hδe).1 ha).1
 
 theorem cubicUpper_norm_lt {δ : ℝ} (hδ : 0 < δ) (hδe : δ ≤ Real.pi / 2) :
@@ -550,7 +547,11 @@ theorem cubicUpper_norm_lt {δ : ℝ} (hδ : 0 < δ) (hδe : δ ≤ Real.pi / 2)
   · rw [hnp]; exact hτ1
   · rw [← hconj, RCLike.norm_conj, hnp]; exact hτ1
 
-theorem cubicUpper_card {δ : ℝ} (hδ : 0 < δ) (hδe : δ ≤ Real.pi / 2) :
+/-- The upper pair carries nothing beyond its two members.  The window binders are
+not consumed -- the conclusion is `Finset` bookkeeping and holds for every `δ` --
+and they are kept for the `hgcard₁` argument shape and for parity with
+`cubicUpper_norm_lt`. -/
+theorem cubicUpper_card {δ : ℝ} (_hδ : 0 < δ) (_hδe : δ ≤ Real.pi / 2) :
     (((cubicUpperPair δ).erase (ftPrincipal cubicTau (Real.pi - δ))).erase
       (((cubicTau (Real.pi - δ) : ℝ) : ℂ)
         * Complex.exp (-((Real.pi - δ : ℝ) : ℂ) * I))).card = 0 := by

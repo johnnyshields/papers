@@ -62,6 +62,12 @@ theorem norm_circleIntegralPow_le_of_nonneg (hρ : 0 ≤ ρ) {F : (Fin k → ℂ
   have h := norm_circleIntegralPow_le hF
   rwa [abs_of_nonneg hρ, ← mul_pow] at h
 
+/-- **A bound valid on the polycircle is nonnegative.**  The polycircle is never empty — the
+constant angle already sits on it — and it carries a norm. -/
+theorem nonneg_of_norm_le_on_polyCircle {ℓ : ℕ} {R M : ℝ} {F : (Fin ℓ → ℂ) → ℂ}
+    (hF : ∀ t ∈ polyCircle ℓ R, ‖F t‖ ≤ M) : 0 ≤ M :=
+  le_trans (norm_nonneg _) (hF _ (circleMap_mem_polyCircle ℓ R fun _ => 0))
+
 /-- On the polycircle of radius `R` every variable has modulus `R`, so a common
 integer power `∏_a t_a^m` has modulus `(R^m)^ℓ`. -/
 theorem norm_prod_zpow_of_mem_polyCircle {ℓ : ℕ} {R : ℝ} (hR : 0 < R) (m : ℤ)
@@ -84,9 +90,7 @@ theorem norm_circleIntegralPow_outer_le {ℓ : ℕ} {R s M : ℝ} (hs : 0 < s) (
       ≤ (2 * π * R) ^ ℓ * M
         * ((s ^ (-(n : ℤ) - (k : ℤ))) ^ ℓ * (s / R) ^ (ℓ * (n + k))) := by
   have hR : 0 < R := hs.trans hsR
-  have hMnn : 0 ≤ M := by
-    have hmem := circleMap_mem_polyCircle ℓ R (fun _ => 0)
-    exact le_trans (norm_nonneg _) (hF _ hmem)
+  have hMnn : 0 ≤ M := nonneg_of_norm_le_on_polyCircle hF
   have hpt : ∀ t ∈ polyCircle ℓ R,
       ‖F t * ∏ a, t a ^ (-(n : ℤ) - (k : ℤ))‖ ≤ M * (R ^ (-(n : ℤ) - (k : ℤ))) ^ ℓ := by
     intro t ht
@@ -133,9 +137,7 @@ theorem norm_circleIntegralPow_outer_div_le {ℓ : ℕ} (hℓ : 0 < ℓ) {R s M 
   have hR : 0 < R := hs.trans hsR
   have hq0 : 0 < s / R := div_pos hs hR
   have hq1 : s / R < 1 := (div_lt_one hR).mpr hsR
-  have hMnn : 0 ≤ M := by
-    have hmem := circleMap_mem_polyCircle ℓ R (fun _ => 0)
-    exact le_trans (norm_nonneg _) (hF _ hmem)
+  have hMnn : 0 ≤ M := nonneg_of_norm_le_on_polyCircle hF
   have hden : (0 : ℝ) < (s ^ (-(n : ℤ) - (k : ℤ))) ^ ℓ :=
     pow_pos (zpow_pos hs _) ℓ
   rw [div_le_iff₀ hden]
@@ -167,9 +169,7 @@ theorem tendsto_circleIntegralPow_outer {ℓ : ℕ} (hℓ : 0 < ℓ) {R s M : �
   have hR : 0 < R := hs.trans hsR
   have hq0 : 0 < s / R := div_pos hs hR
   have hq1 : s / R < 1 := (div_lt_one hR).mpr hsR
-  have hMnn : 0 ≤ M := by
-    have hmem := circleMap_mem_polyCircle ℓ R (fun _ => 0)
-    exact le_trans (norm_nonneg _) (hF 0 _ hmem)
+  have hMnn : 0 ≤ M := nonneg_of_norm_le_on_polyCircle (hF 0)
   have hmaj : Filter.Tendsto
       (fun n : ℕ => (2 * π * R) ^ ℓ * M * (s / R) ^ n) Filter.atTop (nhds 0) := by
     have := tendsto_pow_atTop_nhds_zero_of_lt_one hq0.le hq1
@@ -177,5 +177,20 @@ theorem tendsto_circleIntegralPow_outer {ℓ : ℕ} (hℓ : 0 < ℓ) {R s M : �
   refine squeeze_zero (fun n => ?_) (fun n => ?_) hmaj
   · positivity
   · exact norm_circleIntegralPow_outer_div_le hℓ hs hsR n k (hF n)
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.angleMeasure_univ' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms angleMeasure_univ
+
+/-- info: 'Shields.norm_circleIntegralPow_le_of_nonneg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms norm_circleIntegralPow_le_of_nonneg
+
+/-- info: 'Shields.tendsto_circleIntegralPow_outer' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms tendsto_circleIntegralPow_outer
 
 end Shields

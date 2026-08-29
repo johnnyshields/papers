@@ -3,7 +3,7 @@ Copyright (c) 2026 Johnny Shields. All rights reserved.
 Released under the MIT license as described in the file LICENSE.txt.
 Authors: Johnny Shields
 -/
-import Shields.Combinatorics.Young.LGVOddPaths
+import Shields.Combinatorics.Young.LGVOddResidue
 import Shields.Combinatorics.Young.LGVTableauTwo
 
 /-!
@@ -38,12 +38,12 @@ variable {R : Type*} [CommRing R]
 
 /-- **the super branching rule at two rows, with the even half discharged.**
 
-`LGVOdd.sum_nonMeeting_mixed_eq_superSkewSchur` carries `NonCrossingIsSkewSchur b β`; that is
-`LGVTableau.nonCrossingIsSkewSchur`, so it need not be assumed.  The hypothesis left here is
+`sum_nonMeeting_mixed_eq_superSkewSchur` carries `NonCrossingIsSkewSchur b β`; that is
+`nonCrossingIsSkewSchur`, so it need not be assumed.  The hypothesis left here is
 `NonMeetingIsSkewSchurTranspose a α`, the odd counterpart: non-meeting odd pairs carry
 `skewSchur lam.transpose nu.transpose a α`.  That is `LGVOddTableau`'s
 `nonMeetingIsSkewSchurTranspose`, so the fully discharged form is
-`LGVOddTableau.sum_nonMeeting_mixed_eq_superSkewSchur_uncond`; this statement is the
+`sum_nonMeeting_mixed_eq_superSkewSchur_uncond`; this statement is the
 intermediate one, with the even half gone and the odd half still open to a caller. -/
 theorem sum_nonMeeting_mixed_eq_superSkewSchur_of_odd {b a : ℕ} {β α : ℕ → R}
     (hE : NonMeetingIsSkewSchurTranspose a α)
@@ -56,12 +56,23 @@ theorem sum_nonMeeting_mixed_eq_superSkewSchur_of_odd {b a : ℕ} {β α : ℕ �
   sum_nonMeeting_mixed_eq_superSkewSchur (nonCrossingIsSkewSchur b β) hE lam mu hmu hrow
 
 /-- The purely even specialization needs no hypothesis at all: with no odd variables the
-mixed model is the even one, and `LGVTableau.skewJacobiTrudi_two` already gives the identity.
+mixed model is the even one, and `skewJacobiTrudi_two` already gives the identity.
 Recorded here so the `a = 0` corner of the super branching rule is not left looking
 conditional. -/
 theorem skewJacobiTrudi_two_even {b : ℕ} {β α : ℕ → R}
     (lam mu : YoungDiagram) (hmu : mu ≤ lam) (hrow : ∀ i, 2 ≤ i → lam.rowLen i = 0) :
     jacobiTrudiDet (fun m => superHom b 0 m β α) lam mu 2 = superSkewSchur lam mu b 0 β α :=
   skewJacobiTrudi_two lam mu hmu hrow
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.sum_nonMeeting_mixed_eq_superSkewSchur_of_odd' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms sum_nonMeeting_mixed_eq_superSkewSchur_of_odd
+
+/-- info: 'Shields.skewJacobiTrudi_two_even' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms skewJacobiTrudi_two_even
 
 end Shields

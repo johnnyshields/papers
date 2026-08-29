@@ -216,10 +216,21 @@ theorem tsum_ite_le_of_geometric {c : ℕ → ℝ} {R θ : ℝ} {k : ℕ}
   have hsplit : 2 * θ / (1 - θ) * (c k * R ^ k)
       = θ * (1 - θ)⁻¹ * (c k * R ^ k) + θ * (1 - θ)⁻¹ * (c k * R ^ k) := by
     have h1θ : 0 < 1 - θ := by linarith
-    field_simp; ring
+    field
   rw [hdecomp, hsplit, hhead, tsum_congr htail]
   exact add_le_add (sum_range_le_of_geometric_down hc hR hθ0 hθ1 hB)
     (tsum_le_of_geometric_up hR hθ0 hθ1 hsum hA)
 
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.zeroCount_eq_of_tsum_lt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms zeroCount_eq_of_tsum_lt
+
+/-- info: 'Shields.tsum_ite_le_of_geometric' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms tsum_ite_le_of_geometric
 
 end Shields

@@ -7,6 +7,7 @@ import Mathlib.Analysis.Calculus.LogDerivUniformlyOn
 import Mathlib.Analysis.Complex.LocallyUniformLimit
 import Mathlib.Analysis.Normed.Module.MultipliableUniformlyOn
 import Mathlib.Analysis.SpecialFunctions.Log.Summable
+import Shields.Order.Finset.StrictSeparation
 
 /-!
 # Canonical products of genus zero
@@ -30,6 +31,8 @@ the pinned revision and in flight.
 * `canonicalProduct_eq_zero_iff` — `canonicalProduct a z = 0 ↔ ∃ n, a n = z`.
 * `finite_setOf_mem_ball` — the zero set meets each ball finitely, so it is discrete.
 * `norm_canonicalProduct_le` — order at most one, finite type.
+* `tsum_log_norm_factor_add_le`, `sum_log_norm_factor_le` — the tail and the head of the sum of
+  logarithms, the two halves the bound below is assembled from.
 * `exists_bound_of_minimalType` — **minimal** exponential type: for every `ε > 0` there is an
   `M` with `‖F z‖ ≤ M exp(ε‖z‖)`.
 
@@ -78,6 +81,15 @@ theorem norm_neg_div_le {R : ℝ} {z : ℂ} (hz : z ∈ ball (0 : ℂ) R) (n : �
   rw [norm_neg, norm_div, div_eq_mul_inv]
   gcongr
 
+/-- The factors are summable in the shape the multipliability criteria consume. -/
+theorem summable_norm_neg_div (hsum : Summable fun n => ‖a n‖⁻¹) (z : ℂ) :
+    Summable fun n => ‖-(z / a n)‖ := by
+  have hre : (fun n => ‖-(z / a n)‖) = fun n => ‖z‖ * ‖a n‖⁻¹ := by
+    funext n
+    rw [norm_neg, norm_div, div_eq_mul_inv]
+  rw [hre]
+  exact hsum.mul_left ‖z‖
+
 /-- On every ball the product converges locally uniformly. -/
 theorem hasProdLocallyUniformlyOn_canonical (hsum : Summable fun n => ‖a n‖⁻¹) (R : ℝ) :
     HasProdLocallyUniformlyOn (fun n z => 1 + -(z / a n))
@@ -110,9 +122,7 @@ theorem differentiableOn_canonicalProduct_ball (hsum : Summable fun n => ‖a n�
 theorem differentiable_canonicalProduct (hsum : Summable fun n => ‖a n‖⁻¹) :
     Differentiable ℂ (canonicalProduct a) := by
   intro z
-  have hz : z ∈ ball (0 : ℂ) (‖z‖ + 1) := by
-    simp only [mem_ball, dist_zero_right]
-    linarith
+  have hz : z ∈ ball (0 : ℂ) (‖z‖ + 1) := mem_ball_zero_iff.mpr (lt_add_one ‖z‖)
   exact ((differentiableOn_canonicalProduct_ball hsum (‖z‖ + 1)) z hz).differentiableAt
     (isOpen_ball.mem_nhds hz)
 
@@ -127,19 +137,24 @@ theorem one_add_neg_div_eq_zero_iff (ha : ∀ n, a n ≠ 0) (z : ℂ) (n : ℕ) 
   rw [← one_sub_div_eq, sub_eq_zero, eq_comm, div_eq_one_iff_eq (ha n)]
   exact eq_comm
 
+/-- **Nonvanishing from the factors directly**, with no hypothesis on `a`.  A family with a zero
+entry — which is what removing a root produces — carries the factor `1` there, so it satisfies
+this hypothesis while falling outside the reach of `canonicalProduct_ne_zero` below. -/
+theorem canonicalProduct_ne_zero' (hsum : Summable fun n => ‖a n‖⁻¹) {z : ℂ}
+    (hfac : ∀ n, (1 : ℂ) - z / a n ≠ 0) : canonicalProduct a z ≠ 0 := by
+  have hfac' : ∀ n, 1 + -(z / a n) ≠ 0 := fun n => by
+    rw [← one_sub_div_eq]
+    exact hfac n
+  have h := tprod_one_add_ne_zero_of_summable (f := fun n => -(z / a n)) hfac'
+    (summable_norm_neg_div hsum z)
+  simpa only [canonicalProduct, ← one_sub_div_eq] using h
+
 /-- Off the range of `a` the canonical product does not vanish. -/
 theorem canonicalProduct_ne_zero (ha : ∀ n, a n ≠ 0) (hsum : Summable fun n => ‖a n‖⁻¹) {z : ℂ}
-    (hz : ∀ n, a n ≠ z) : canonicalProduct a z ≠ 0 := by
-  have hfac : ∀ n, 1 + -(z / a n) ≠ 0 := fun n =>
-    (one_add_neg_div_eq_zero_iff ha z n).not.mpr (hz n)
-  have hnorm : Summable fun n => ‖-(z / a n)‖ := by
-    have hre : (fun n => ‖-(z / a n)‖) = fun n => ‖z‖ * ‖a n‖⁻¹ := by
-      funext n
-      rw [norm_neg, norm_div, div_eq_mul_inv]
-    rw [hre]
-    exact hsum.mul_left ‖z‖
-  have h := tprod_one_add_ne_zero_of_summable (f := fun n => -(z / a n)) hfac hnorm
-  simpa only [canonicalProduct, ← one_sub_div_eq] using h
+    (hz : ∀ n, a n ≠ z) : canonicalProduct a z ≠ 0 :=
+  canonicalProduct_ne_zero' hsum fun n => by
+    rw [one_sub_div_eq]
+    exact (one_add_neg_div_eq_zero_iff ha z n).not.mpr (hz n)
 
 /-- On the range of `a` the canonical product vanishes.  The nonvanishing of `a n` is genuinely
 needed: at `a n = 0` the factor reads `1 - z/0 = 1`, and the conclusion is false. -/
@@ -163,15 +178,6 @@ The crude bound first: `‖F(z)‖ ≤ exp(‖z‖ ∑ ‖aₙ‖⁻¹)`, giving
 At a point of the zero set the logarithms are undefined and the bound is trivial, so that case
 is split off first. -/
 
-/-- The factors are summable in the shape the multipliability criteria consume. -/
-theorem summable_norm_neg_div (hsum : Summable fun n => ‖a n‖⁻¹) (z : ℂ) :
-    Summable fun n => ‖-(z / a n)‖ := by
-  have hre : (fun n => ‖-(z / a n)‖) = fun n => ‖z‖ * ‖a n‖⁻¹ := by
-    funext n
-    rw [norm_neg, norm_div, div_eq_mul_inv]
-  rw [hre]
-  exact hsum.mul_left ‖z‖
-
 /-- The product converges at each point. -/
 theorem multipliable_canonical (hsum : Summable fun n => ‖a n‖⁻¹) (z : ℂ) :
     Multipliable fun n => 1 - z / a n := by
@@ -179,19 +185,26 @@ theorem multipliable_canonical (hsum : Summable fun n => ‖a n‖⁻¹) (z : �
     (Summable.of_norm (summable_norm_neg_div hsum z))
   exact h.congr fun n => (one_sub_div_eq a z n).symm
 
-/-- `log‖1 - z/aₙ‖ ≤ ‖z‖‖aₙ‖⁻¹`, the pointwise form of the comparison. -/
-theorem log_norm_factor_le (z : ℂ) (n : ℕ) :
-    Real.log ‖1 - z / a n‖ ≤ ‖z‖ * ‖a n‖⁻¹ := by
+/-- **The factor's logarithm against the triangle-inequality bound.**  `‖1 - z/aₙ‖ ≤ 1 + ‖z‖‖aₙ‖⁻¹`
+carried through `Real.log`.  The bound on the right is at least `1`, which is what makes the
+inequality survive the zero factor, where the left side is `Real.log 0 = 0`; Mathlib's
+monotonicity of `Real.log` needs the left side positive and so does not apply there. -/
+theorem log_norm_factor_le_log_one_add (z : ℂ) (n : ℕ) :
+    Real.log ‖1 - z / a n‖ ≤ Real.log (1 + ‖z‖ * ‖a n‖⁻¹) := by
   have hb : ‖1 - z / a n‖ ≤ 1 + ‖z‖ * ‖a n‖⁻¹ := by
     calc ‖1 - z / a n‖ ≤ ‖(1 : ℂ)‖ + ‖z / a n‖ := norm_sub_le _ _
       _ = 1 + ‖z‖ * ‖a n‖⁻¹ := by rw [norm_one, norm_div, div_eq_mul_inv]
-  have hpos : (0 : ℝ) < 1 + ‖z‖ * ‖a n‖⁻¹ := by positivity
   rcases eq_or_lt_of_le (norm_nonneg (1 - z / a n)) with h0 | h0
   · rw [← h0, Real.log_zero]
-    positivity
-  · calc Real.log ‖1 - z / a n‖ ≤ Real.log (1 + ‖z‖ * ‖a n‖⁻¹) := Real.log_le_log h0 hb
-      _ ≤ (1 + ‖z‖ * ‖a n‖⁻¹) - 1 := Real.log_le_sub_one_of_pos hpos
-      _ = ‖z‖ * ‖a n‖⁻¹ := by ring
+    exact Real.log_nonneg (le_add_of_nonneg_right (by positivity))
+  · exact Real.log_le_log h0 hb
+
+/-- `log‖1 - z/aₙ‖ ≤ ‖z‖‖aₙ‖⁻¹`, the pointwise form of the comparison. -/
+theorem log_norm_factor_le (z : ℂ) (n : ℕ) :
+    Real.log ‖1 - z / a n‖ ≤ ‖z‖ * ‖a n‖⁻¹ := by
+  have hpos : (0 : ℝ) < 1 + ‖z‖ * ‖a n‖⁻¹ := by positivity
+  have h := Real.log_le_sub_one_of_pos hpos
+  linarith [log_norm_factor_le_log_one_add (a := a) z n]
 
 /-- The factors' logarithms are summable off the zero set. -/
 theorem summable_log_norm_factor (hsum : Summable fun n => ‖a n‖⁻¹) (z : ℂ) :
@@ -236,13 +249,8 @@ theorem norm_canonicalProduct_le (ha : ∀ n, a n ≠ 0) (hsum : Summable fun n 
     rw [canonicalProduct_eq_zero a (ha n) hn, norm_zero]
     positivity
   · have hz' : ∀ n, a n ≠ z := fun n hn => hz ⟨n, hn⟩
-    have hfac : ∀ n, (1 : ℂ) - z / a n ≠ 0 := fun n => by
-      rw [one_sub_div_eq]
-      exact (one_add_neg_div_eq_zero_iff ha z n).not.mpr (hz' n)
-    have hlogsum : Summable fun n => Real.log ‖1 - z / a n‖ := by
-      have h := Summable.summable_log_norm_one_add (f := fun n => -(z / a n))
-        (summable_norm_neg_div hsum z)
-      exact h.congr fun n => by rw [← one_sub_div_eq]
+    have hfac : ∀ n, (1 : ℂ) - z / a n ≠ 0 := one_sub_div_ne_zero_of_ne hz'
+    have hlogsum : Summable fun n => Real.log ‖1 - z / a n‖ := summable_log_norm_factor hsum z
     rw [canonicalProduct, (multipliable_canonical hsum z).norm_tprod,
       ← Real.rexp_tsum_eq_tprod (fun n => norm_pos_iff.mpr (hfac n)) hlogsum]
     rw [Real.exp_le_exp, ← tsum_mul_left]
@@ -254,18 +262,6 @@ Setting `a m := 0` turns the `m`-th factor into `1`, because `z / 0 = 0` in Lean
 with one root removed is again a canonical product, over `Function.update a m 0`.  That is what
 makes the zeros simple: `F = (1 - z/aₘ) · G` with `G` a canonical product not vanishing at
 `aₘ`, so `F'(aₘ) = -aₘ⁻¹ G(aₘ) ≠ 0`. -/
-
-/-- Nonvanishing from the factors directly, with no hypothesis on `a`.  This is the form the
-peeled family needs: it has a zero entry, so `canonicalProduct_ne_zero` does not apply to it,
-while the factor at that entry is `1` and the hypothesis below still holds. -/
-theorem canonicalProduct_ne_zero' (hsum : Summable fun n => ‖a n‖⁻¹) {z : ℂ}
-    (hfac : ∀ n, (1 : ℂ) - z / a n ≠ 0) : canonicalProduct a z ≠ 0 := by
-  have hfac' : ∀ n, 1 + -(z / a n) ≠ 0 := fun n => by
-    rw [← one_sub_div_eq]
-    exact hfac n
-  have h := tprod_one_add_ne_zero_of_summable (f := fun n => -(z / a n)) hfac'
-    (summable_norm_neg_div hsum z)
-  simpa only [canonicalProduct, ← one_sub_div_eq] using h
 
 /-- Removing one root leaves a canonical product: the `m`-th factor of the updated family is
 `1 - z/0 = 1`. -/
@@ -425,6 +421,43 @@ theorem log_one_add_le_scaled {u lam : ℝ} (hu : 0 ≤ u) (hlam : 0 < lam) :
   rw [Real.log_mul (ne_of_gt hlam) (by positivity)] at h
   linarith
 
+/-- **The tail of the sum of logarithms.**  Past an index where the tail of `∑‖aₙ‖⁻¹` is below
+`c`, the tail of `∑ log‖1 - z/aₙ‖` is below `c‖z‖` — the factorwise bound `log‖1 - z/aₙ‖ ≤
+‖z‖‖aₙ‖⁻¹` summed. -/
+theorem tsum_log_norm_factor_add_le (hsum : Summable fun n => ‖a n‖⁻¹) (z : ℂ) (N : ℕ) {c : ℝ}
+    (hN : ∑' n, ‖a (n + N)‖⁻¹ ≤ c) :
+    ∑' n, Real.log ‖1 - z / a (n + N)‖ ≤ c * ‖z‖ := by
+  have hsum' : Summable fun n => ‖z‖ * ‖a (n + N)‖⁻¹ :=
+    ((summable_nat_add_iff N).mpr hsum).mul_left ‖z‖
+  calc ∑' n, Real.log ‖1 - z / a (n + N)‖
+      ≤ ∑' n, ‖z‖ * ‖a (n + N)‖⁻¹ :=
+        ((summable_nat_add_iff N).mpr (summable_log_norm_factor hsum z)).tsum_le_tsum
+          (fun n => log_norm_factor_le z (n + N)) hsum'
+    _ = ‖z‖ * ∑' n, ‖a (n + N)‖⁻¹ := tsum_mul_left
+    _ ≤ ‖z‖ * c := mul_le_mul_of_nonneg_left hN (norm_nonneg z)
+    _ = c * ‖z‖ := mul_comm _ _
+
+/-- **The head of the sum of logarithms.**  Over finitely many indices whose `‖aₙ‖⁻¹` are bounded
+by `B`, each factor contributes at most the scaled `log x ≤ x - 1` at argument `λ(1 + B‖z‖)`, so
+the head is at most `N` times that.  The bound is logarithmic in `‖z‖` before the scaling and
+linear with an arbitrarily small slope after it, which is what `λ` is for. -/
+theorem sum_log_norm_factor_le (z : ℂ) {N : ℕ} {B lam : ℝ}
+    (hB : ∀ n ∈ Finset.range N, ‖a n‖⁻¹ ≤ B) (hB0 : 0 ≤ B) (hlam : 0 < lam) :
+    ∑ n ∈ Finset.range N, Real.log ‖1 - z / a n‖
+      ≤ (N : ℝ) * (lam * (1 + B * ‖z‖) - 1 - Real.log lam) := by
+  have hterm : ∀ n ∈ Finset.range N,
+      Real.log ‖1 - z / a n‖ ≤ lam * (1 + B * ‖z‖) - 1 - Real.log lam := by
+    intro n hn
+    have h1 : Real.log ‖1 - z / a n‖ ≤ Real.log (1 + B * ‖z‖) :=
+      (log_norm_factor_le_log_one_add z n).trans
+        (Real.log_le_log (by positivity) (by nlinarith [norm_nonneg z, hB n hn]))
+    exact h1.trans (log_one_add_le_scaled (by positivity) hlam)
+  calc ∑ n ∈ Finset.range N, Real.log ‖1 - z / a n‖
+      ≤ ∑ _n ∈ Finset.range N, (lam * (1 + B * ‖z‖) - 1 - Real.log lam) :=
+        Finset.sum_le_sum hterm
+    _ = (N : ℝ) * (lam * (1 + B * ‖z‖) - 1 - Real.log lam) := by
+        rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+
 /-- **The canonical product has minimal exponential type.** -/
 theorem exists_bound_of_minimalType (ha : ∀ n, a n ≠ 0) (hsum : Summable fun n => ‖a n‖⁻¹)
     {ε : ℝ} (hε : 0 < ε) :
@@ -436,10 +469,7 @@ theorem exists_bound_of_minimalType (ha : ∀ n, a n ≠ 0) (hsum : Summable fun
   set B : ℝ := ∑ n ∈ Finset.range N, ‖a n‖⁻¹ with hB
   have hB0 : 0 ≤ B := Finset.sum_nonneg fun n _ => by positivity
   set lam : ℝ := ε / (2 * ((N : ℝ) + 1) * (B + 1)) with hlamdef
-  have hlam : 0 < lam := by
-    rw [hlamdef]
-    have : (0 : ℝ) < 2 * ((N : ℝ) + 1) * (B + 1) := by positivity
-    positivity
+  have hlam : 0 < lam := by rw [hlamdef]; positivity
   set C : ℝ := (N : ℝ) * (lam * 1 - 1 - Real.log lam) with hC
   refine ⟨Real.exp C, Real.exp_pos _, fun z => ?_⟩
   by_cases hz : ∃ n, a n = z
@@ -447,62 +477,26 @@ theorem exists_bound_of_minimalType (ha : ∀ n, a n ≠ 0) (hsum : Summable fun
     rw [canonicalProduct_eq_zero a (ha n) hn, norm_zero]
     positivity
   · have hz' : ∀ n, a n ≠ z := fun n hn => hz ⟨n, hn⟩
-    have hfac : ∀ n, (1 : ℂ) - z / a n ≠ 0 := fun n => by
-      rw [one_sub_div_eq]
-      exact (one_add_neg_div_eq_zero_iff ha z n).not.mpr (hz' n)
-    have hlogsum : Summable fun n => Real.log ‖1 - z / a n‖ := by
-      have h := Summable.summable_log_norm_one_add (f := fun n => -(z / a n))
-        (summable_norm_neg_div hsum z)
-      exact h.congr fun n => by rw [← one_sub_div_eq]
+    have hfac : ∀ n, (1 : ℂ) - z / a n ≠ 0 := one_sub_div_ne_zero_of_ne hz'
+    have hlogsum : Summable fun n => Real.log ‖1 - z / a n‖ := summable_log_norm_factor hsum z
     -- the tail
-    have htail : ∑' n, Real.log ‖1 - z / a (n + N)‖ ≤ ε / 2 * ‖z‖ := by
-      have hsum' : Summable fun n => ‖z‖ * ‖a (n + N)‖⁻¹ :=
-        ((summable_nat_add_iff N).mpr hsum).mul_left ‖z‖
-      calc ∑' n, Real.log ‖1 - z / a (n + N)‖
-          ≤ ∑' n, ‖z‖ * ‖a (n + N)‖⁻¹ :=
-            ((summable_nat_add_iff N).mpr hlogsum).tsum_le_tsum
-              (fun n => log_norm_factor_le z (n + N)) hsum'
-        _ = ‖z‖ * ∑' n, ‖a (n + N)‖⁻¹ := tsum_mul_left
-        _ ≤ ‖z‖ * (ε / 2) := by
-            refine mul_le_mul_of_nonneg_left (le_of_lt ?_) (norm_nonneg z)
-            simpa using hN
-        _ = ε / 2 * ‖z‖ := by ring
-    -- the head
+    have htail : ∑' n, Real.log ‖1 - z / a (n + N)‖ ≤ ε / 2 * ‖z‖ :=
+      tsum_log_norm_factor_add_le hsum z N (by simpa using hN.le)
+    -- the head, with the `N λ B ≤ ε/2` absorption that fixes `λ`
     have hhead : ∑ n ∈ Finset.range N, Real.log ‖1 - z / a n‖ ≤ ε / 2 * ‖z‖ + C := by
-      have hterm : ∀ n ∈ Finset.range N,
-          Real.log ‖1 - z / a n‖ ≤ lam * (1 + B * ‖z‖) - 1 - Real.log lam := by
-        intro n hn
-        have hle : ‖a n‖⁻¹ ≤ B := Finset.single_le_sum
-          (f := fun m => ‖a m‖⁻¹) (fun m _ => by positivity) hn
-        have h1 : Real.log ‖1 - z / a n‖ ≤ Real.log (1 + B * ‖z‖) := by
-          have hb : ‖1 - z / a n‖ ≤ 1 + B * ‖z‖ := by
-            calc ‖1 - z / a n‖ ≤ ‖(1 : ℂ)‖ + ‖z / a n‖ := norm_sub_le _ _
-              _ = 1 + ‖z‖ * ‖a n‖⁻¹ := by rw [norm_one, norm_div, div_eq_mul_inv]
-              _ ≤ 1 + B * ‖z‖ := by nlinarith [norm_nonneg z]
-          rcases eq_or_lt_of_le (norm_nonneg (1 - z / a n)) with h0 | h0
-          · rw [← h0, Real.log_zero]
-            have : (0 : ℝ) < 1 + B * ‖z‖ := by positivity
-            simp only [Real.log_nonneg_iff this]
-            nlinarith [norm_nonneg z]
-          · exact Real.log_le_log h0 hb
-        exact h1.trans (log_one_add_le_scaled (by positivity) hlam)
-      calc ∑ n ∈ Finset.range N, Real.log ‖1 - z / a n‖
-          ≤ ∑ _n ∈ Finset.range N, (lam * (1 + B * ‖z‖) - 1 - Real.log lam) :=
-            Finset.sum_le_sum hterm
-        _ = (N : ℝ) * (lam * (1 + B * ‖z‖) - 1 - Real.log lam) := by
-            rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
-        _ ≤ ε / 2 * ‖z‖ + C := by
-            rw [hC]
-            have hkey : (N : ℝ) * (lam * (B * ‖z‖)) ≤ ε / 2 * ‖z‖ := by
-              have hz0 : (0 : ℝ) ≤ ‖z‖ := norm_nonneg z
-              have hlamid : lam * (((N : ℝ) + 1) * (B + 1)) = ε / 2 := by
-                rw [hlamdef]
-                field_simp
-              have hfrac : (N : ℝ) * (lam * B) ≤ ε / 2 := by
-                rw [← hlamid]
-                nlinarith [Nat.cast_nonneg (α := ℝ) N, hB0, hlam.le]
-              nlinarith
-            nlinarith [Nat.cast_nonneg (α := ℝ) N]
+      refine (sum_log_norm_factor_le z (fun n hn => Finset.single_le_sum
+        (f := fun m => ‖a m‖⁻¹) (fun m _ => by positivity) hn) hB0 hlam).trans ?_
+      rw [hC]
+      have hkey : (N : ℝ) * (lam * (B * ‖z‖)) ≤ ε / 2 * ‖z‖ := by
+        have hz0 : (0 : ℝ) ≤ ‖z‖ := norm_nonneg z
+        have hlamid : lam * (((N : ℝ) + 1) * (B + 1)) = ε / 2 := by
+          rw [hlamdef]
+          field_simp
+        have hfrac : (N : ℝ) * (lam * B) ≤ ε / 2 := by
+          rw [← hlamid]
+          nlinarith [Nat.cast_nonneg (α := ℝ) N, hB0, hlam.le]
+        nlinarith
+      nlinarith [Nat.cast_nonneg (α := ℝ) N]
     -- combine
     have hsplit : (∑ n ∈ Finset.range N, Real.log ‖1 - z / a n‖)
         + ∑' n, Real.log ‖1 - z / a (n + N)‖ = ∑' n, Real.log ‖1 - z / a n‖ :=
@@ -583,52 +577,6 @@ theorem exists_finset_lt_of_notMem (ha : ∀ n, a n ≠ 0) (hsum : Summable fun 
     have hge : r ≤ ‖a j‖ := not_lt.mp fun h => hj ((hTmem j).mpr h)
     exact lt_of_lt_of_le hlt hge
 
-/-- **An initial segment by modulus is unique at its size.**  Two finite sets of the same
-cardinality, each of whose members is strictly below every non-member, are equal.
-
-This is what identifies "the `k` smallest moduli" as a *definite* object rather than one choice
-among several: `exists_finset_lt_of_notMem` produces such a set, and this says there is at most one
-of any given size, so the produced set is *the* modulus-minimal packet.
-
-The proof is antisymmetry and needs no analysis: if the two sets differ, equal cardinality forces
-an `i` in the first but not the second and a `j` in the second but not the first, and the two
-separation hypotheses then give `f i < f j` and `f j < f i`.  Stated over any linear order, since
-nothing about `ℂ` or about norms enters.
-
-Note what it does *not* say.  Existence at cardinality **exactly** `k` is a separate matter and can
-fail: `exists_finset_lt_of_notMem` delivers `k ≤ S.card`, not equality, and when several indices
-share the boundary modulus no `k`-element set has the strict separation property at all — which is
-exactly the tie that a modulus gap at rank `k` excludes. -/
-theorem eq_of_forall_lt_of_card_eq {ι : Type*} {α : Type*} [LinearOrder α] {f : ι → α}
-    {S T : Finset ι} (hcard : S.card = T.card)
-    (hS : ∀ i ∈ S, ∀ j ∉ S, f i < f j) (hT : ∀ i ∈ T, ∀ j ∉ T, f i < f j) :
-    S = T := by
-  by_contra hne
-  -- Equal cardinality makes each set meet the other's complement.
-  have hST : ∃ i, i ∈ S ∧ i ∉ T := by
-    by_contra h
-    push Not at h
-    exact hne (Finset.eq_of_subset_of_card_le h hcard.ge)
-  have hTS : ∃ j, j ∈ T ∧ j ∉ S := by
-    by_contra h
-    push Not at h
-    exact hne (Finset.eq_of_subset_of_card_le h hcard.le).symm
-  obtain ⟨i, hiS, hiT⟩ := hST
-  obtain ⟨j, hjT, hjS⟩ := hTS
-  exact absurd (hS i hiS j hjS) (not_lt.mpr (hT j hjT i hiT).le)
-
-/-- **Strict separation cannot split a tie.**  If two indices carry the same value, no set with the
-separation property contains one and omits the other.
-
-This is the precise reason uniqueness is unconditional above while *existence at a prescribed
-cardinality* is not: when the boundary value is shared by several indices, every candidate set of
-that size must split the tie, and none of them can.  A modulus gap at rank `k` is exactly the
-hypothesis that excludes it. -/
-theorem not_forall_lt_of_eq {ι : Type*} {α : Type*} [LinearOrder α] {f : ι → α} {S : Finset ι}
-    {i j : ι} (hij : f i = f j) (hiS : i ∈ S) (hjS : j ∉ S) :
-    ¬ ∀ x ∈ S, ∀ y ∉ S, f x < f y :=
-  fun h => absurd (h i hiS j hjS) (by rw [hij]; exact lt_irrefl _)
-
 /-- **The modulus-minimal packet, as a definite object.**  Combining the two previous results: the
 selected initial segment is the unique set of its cardinality separating strictly by modulus, so
 "the zeros of smallest modulus" names one set and not a choice. -/
@@ -704,12 +652,8 @@ theorem multipliableLocallyUniformlyOn_canonical (hsum : Summable fun n => ‖a 
 theorem logDeriv_canonicalProduct (ha : ∀ n, a n ≠ 0) (hsum : Summable fun n => ‖a n‖⁻¹)
     {z : ℂ} (hz : ∀ n, a n ≠ z) :
     logDeriv (canonicalProduct a) z = -∑' n, (a n - z)⁻¹ := by
-  have hzmem : z ∈ ball (0 : ℂ) (‖z‖ + 1) := by
-    simp only [mem_ball, dist_zero_right]
-    linarith
-  have hfac : ∀ n, (1 : ℂ) - z / a n ≠ 0 := fun n hcon => by
-    rw [sub_eq_zero, eq_comm, div_eq_one_iff_eq (ha n)] at hcon
-    exact hz n hcon.symm
+  have hzmem : z ∈ ball (0 : ℂ) (‖z‖ + 1) := mem_ball_zero_iff.mpr (lt_add_one ‖z‖)
+  have hfac : ∀ n, (1 : ℂ) - z / a n ≠ 0 := one_sub_div_ne_zero_of_ne hz
   have hsummable : Summable fun n => logDeriv (fun w => 1 - w / a n) z := by
     refine (summable_inv_sub ha hsum z).neg.congr fun n => ?_
     rw [logDeriv_factor (ha n) (hz n)]
@@ -771,13 +715,5 @@ theorem exists_entire_canonicalProduct :
 /-- info: 'Shields.exists_bound_of_minimalType' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms exists_bound_of_minimalType
-
-/-- info: 'Shields.eq_of_forall_lt_of_card_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs in
-#print axioms eq_of_forall_lt_of_card_eq
-
-/-- info: 'Shields.not_forall_lt_of_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs in
-#print axioms not_forall_lt_of_eq
 
 end Shields

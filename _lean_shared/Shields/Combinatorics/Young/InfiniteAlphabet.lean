@@ -140,4 +140,11 @@ theorem tendsto_completeHom (hβ0 : ∀ i, 0 ≤ β i) (hβ : Summable β) (p : 
   refine pow_le_pow_left₀ (Finset.sum_nonneg fun i _ => hβ0 i) ?_ p
   exact Summable.sum_le_tsum _ (fun i _ => hβ0 i) hβ
 
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.tendsto_completeHom' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms tendsto_completeHom
+
 end Shields

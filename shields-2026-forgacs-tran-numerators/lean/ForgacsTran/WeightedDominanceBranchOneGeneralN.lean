@@ -4,6 +4,7 @@ Released under the MIT license as described in the file LICENSE.txt.
 Authors: Johnny Shields
 -/
 import ForgacsTran.EndpointUpperGeneralN
+import ForgacsTran.PencilIndex
 
 /-!
 # The `r = 1` upper retained set at every `n`
@@ -167,7 +168,14 @@ and degenerates in the limit: `∂_tD(t_+)` vanishes **linearly** as `δ → 0`,
 the pair collides at `-L` where the limiting pencil has its double root.  The
 closed-window form — at `δ = 0` — is FALSE.  It is the same collision that makes
 the principal amplitude diverge, so the simplicity clause and the amplitude floor
-cannot both be extended to the endpoint. -/
+cannot both be extended to the endpoint.
+
+**The lower endpoint's statement is this one again** —
+`RhoOneEndpointFactorization.eventually_lower_retained_rho_one`, at a free `r`, the
+critical point `t_a` for `x₁`, the angle `δ` for `π - δ`, and its own separating
+radius.  Neither names the shape, because the two modules are siblings with no shared
+home below `EndpointSeparation` — whose `simple_and_complete_of_count` both of them
+consume, and which is where a name for it would go. -/
 theorem eventually_upper_retained_one_of_two_le {n : ℕ} {a : Fin n → ℝ} {c x₁ : ℝ}
     (hn2 : 2 ≤ n) (ha : ∀ k, 0 < a k) (hc : 0 < c) {L : ℝ} (hL : 0 < L)
     (hE : (ftCriticalReal (ftRootPolyReal c a) 1).eval (-L) = 0)
@@ -194,7 +202,7 @@ theorem eventually_upper_retained_one_of_two_le {n : ℕ} {a : Fin n → ℝ} {c
           ((ftTauArc a 1 (n - 1) x₁ (π - δ) : ℝ) : ℂ) *
             Complex.exp (-((π - δ : ℝ) : ℂ) * I)} : Finset ℂ)) := by
   classical
-  have hcast : π / ((1 : ℕ) : ℝ) = π := by push_cast; rw [div_one]
+  have hcast : π / ((1 : ℕ) : ℝ) = π := pi_div_natCast_one
   have harc : ∀ᶠ δ in 𝓝[>] (0 : ℝ), π - δ ∈ Ioo 0 (π / ((1 : ℕ) : ℝ)) := by
     filter_upwards [Ioo_mem_nhdsGT pi_pos] with δ hδπ
     rw [hcast]

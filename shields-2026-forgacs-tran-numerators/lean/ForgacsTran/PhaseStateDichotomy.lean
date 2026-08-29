@@ -113,9 +113,14 @@ simple-zero hypothesis below is what excludes that, and supplying it at the
 pencil's own branch is where the remaining work is. -/
 
 /-- **A real function whose zeros are all simple has finitely many on a compact
-set.**  If the zero set were infinite it would accumulate somewhere in the compact,
-the limit point would itself be a zero by continuity, and its nonvanishing
-derivative would keep the other zeros away from it.
+set.**  `PhaseTangency.finite_of_isolated_zeros` is the general form — isolation as a
+hypothesis rather than derived from simplicity — and is what the tangency argument
+uses, because the tangency function has one zero that is *not* simple.  This one is
+kept because simplicity is the cheaper hypothesis wherever it holds.
+
+If the zero set were infinite it would accumulate somewhere in the compact, the
+limit point would itself be a zero by continuity, and its nonvanishing derivative
+would keep the other zeros away from it.
 
 Stated for an arbitrary differentiable `f`: no analyticity, and nothing about the
 branch or the pencil. -/

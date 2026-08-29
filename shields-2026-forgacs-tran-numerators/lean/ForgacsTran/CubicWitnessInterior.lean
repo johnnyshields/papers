@@ -99,15 +99,6 @@ theorem norm_ftPrincipal_cubicTau (θ : ℝ) : ‖ftPrincipal cubicTau θ‖ = c
   rw [ftPrincipal, norm_mul, Complex.norm_exp_ofReal_mul_I, mul_one, Complex.norm_real,
     Real.norm_eq_abs, abs_of_pos (cubicTau_pos θ)]
 
-/-- The conjugate of the principal branch is the form `hinterior` writes,
-`τ(θ)e^{-iθ}`. -/
-theorem conj_ftPrincipal (τ : ℝ → ℝ) (θ : ℝ) :
-    (starRingEnd ℂ) (ftPrincipal τ θ)
-      = ((τ θ : ℝ) : ℂ) * Complex.exp (-((θ : ℝ) : ℂ) * I) := by
-  rw [ftPrincipal, map_mul, Complex.conj_ofReal, ← Complex.exp_conj]
-  congr 2
-  simp
-
 theorem ftPrincipal_cubicTau_pi_div_two :
     ftPrincipal cubicTau (Real.pi / 2) = ((1 / Real.sqrt 3 : ℝ) : ℂ) * I := by
   rw [ftPrincipal, cubicTau_pi_div_two]
@@ -176,8 +167,7 @@ theorem hasDerivAt_cubicTauCF {θ : ℝ} (hcne : Real.cos ((Real.pi - θ) / 3) �
         - 1 * (2 * (-Real.sin ((Real.pi - θ) / 3) * (-1 / 3))))
         / (2 * Real.cos ((Real.pi - θ) / 3)) ^ 2
       = -Real.sin ((Real.pi - θ) / 3) / (6 * Real.cos ((Real.pi - θ) / 3) ^ 2) := by
-    field_simp
-    ring
+    field
   exact heq ▸ h3
 
 /-- The closed form's cosine is positive on the closed arc, endpoints included. -/
@@ -204,7 +194,8 @@ theorem exists_hasDerivAt_ftPrincipal_cubicTau {θ : ℝ} (hθ : θ ∈ Set.Ioo 
   · refine mul_ne_zero (Complex.exp_ne_zero _) ?_
     intro h
     have him := congrArg Complex.im h
-    simp [Complex.add_im, Complex.mul_im] at him
+    simp only [Complex.add_im, Complex.ofReal_im, Complex.mul_I_im,
+      Complex.ofReal_re, zero_add, Complex.zero_im] at him
     exact absurd him (cubicTau_pos θ).ne'
   · have hτ : HasDerivAt (fun t : ℝ => ((cubicTau t : ℝ) : ℂ)) ((d : ℂ)) θ :=
       (hasDerivAt_cubicTau hθ).ofReal_comp

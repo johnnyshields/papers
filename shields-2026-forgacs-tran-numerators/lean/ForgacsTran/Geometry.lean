@@ -65,9 +65,7 @@ the principal root and for a general cluster member. -/
 theorem eval_derivative_ftDen_of_isRoot {Q : Polynomial ℂ} {r : ℕ} (hr : 1 ≤ r)
     {z t : ℂ} (ht : t ≠ 0) (hroot : (ftDen Q r z).eval t = 0) :
     (derivative (ftDen Q r z)).eval t = (derivative Q).eval t - (r : ℂ) * Q.eval t / t := by
-  have hpow : t * t ^ (r - 1) = t ^ r := by
-    conv_rhs => rw [show r = 1 + (r - 1) by omega]
-    rw [pow_add, pow_one]
+  have hpow : t * t ^ (r - 1) = t ^ r := mul_pow_sub_one (by omega) t
   rw [ftDen_eval] at hroot
   have key : z * t ^ (r - 1) = -Q.eval t / t := by
     rw [eq_div_iff ht]
@@ -94,9 +92,8 @@ Everything the paper deduces from `eq:Dprime-identity` about the *order* of the
 derivative factor is therefore a statement about the single polynomial `E`. -/
 theorem ftCritical_ftDen (Q : Polynomial ℂ) {r : ℕ} (hr : 1 ≤ r) (z : ℂ) :
     ftCritical (ftDen Q r z) r = ftCritical Q r := by
-  have hpow : (X : Polynomial ℂ) * X ^ (r - 1) = X ^ r := by
-    conv_rhs => rw [show r = 1 + (r - 1) by omega]
-    rw [pow_add, pow_one]
+  have hpow : (X : Polynomial ℂ) * X ^ (r - 1) = X ^ r :=
+    mul_pow_sub_one (by omega) (X : Polynomial ℂ)
   have hd : derivative (ftDen Q r z) = derivative Q + C z * (C (r : ℂ) * X ^ (r - 1)) := by
     simp [ftDen, derivative_X_pow]
   have key : (X : Polynomial ℂ) * (C z * (C (r : ℂ) * X ^ (r - 1)))
@@ -1043,7 +1040,7 @@ for the other reason — the coefficient `r(r-1)` vanishes and
 `eval_derivative_two_eq_zero_of_three_le_rootMultiplicity` gives `Q''(t_e) = 0`.
 The split is forced by the truncating subtraction, not by any mathematics. -/
 theorem eval_derivative_two_relation_of_three_le_rootMultiplicity {Q : ℂ[X]} {r : ℕ}
-    (hr : 1 ≤ r) {z te : ℂ} (hte : te ≠ 0)
+    (hr : 1 ≤ r) {z te : ℂ} (_hte : te ≠ 0)
     (h : 3 ≤ (ftDen Q r z).rootMultiplicity te) :
     te ^ 2 * (derivative (derivative Q)).eval te = (r : ℂ) * ((r : ℂ) - 1) * Q.eval te := by
   rcases eq_or_lt_of_le hr with hr1 | hr2

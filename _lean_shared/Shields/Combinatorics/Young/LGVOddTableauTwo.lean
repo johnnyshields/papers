@@ -4,6 +4,8 @@ Released under the MIT license as described in the file LICENSE.txt.
 Authors: Johnny Shields
 -/
 import Shields.Combinatorics.Young.LGVOddBranching
+import Shields.Combinatorics.Young.LGVMixed
+import Shields.Combinatorics.Young.SkewCells
 
 /-!
 # The tableau bijection for the odd alphabet, at two columns
@@ -36,13 +38,20 @@ odd counterpart of `Shields.nonCrossingIsSkewSchur`, with the geometry swapped.
   non-intersecting pairs of mixed paths carry `superSkewSchur lam mu b a β α`.  Both tableau
   bijections the splice consumes are now theorems, so nothing between the mixed path model and the
   two-row branching identity is assumed.
+* `Shields.nonIntersectingIsSuperSkewSchur_two` -- the residue
+  `Shields.NonIntersectingIsSuperSkewSchur` of `Shields.Combinatorics.Young.LGVMixed`,
+  discharged at two rows.
+* `Shields.skewJacobiTrudi_two_rows` -- and consequently the skew Jacobi--Trudi identity itself at
+  two rows over the mixed alphabet, `det [d_{λ_u - μ_v - u + v}]_{2 × 2} = s_{λ/μ}(β | α)`, with
+  nothing assumed.
 
 ## Implementation notes
 
-The skew Jacobi--Trudi identity itself is untouched here.  What still stands between the branching
-identity and it is the cancellation for the *mixed* crossing predicate
-(`Shields.Combinatorics.Young.LGVMixed`) and, at more than two rows, the correspondence between
-non-intersecting `m`-families and tableaux
+At two rows the cancellation for the *mixed* crossing predicate
+(`Shields.Combinatorics.Young.LGVMixed`) is all that stands between the branching identity and the
+skew Jacobi--Trudi identity, which is why that last step is taken here rather than there: it is the
+two-row case, and it consumes the two-column bijection above.  Beyond two rows what is still needed
+is the correspondence between non-intersecting `m`-families and tableaux
 (`Shields.Combinatorics.Young.LGVOddTableau`).
 
 ## Tags
@@ -57,101 +66,21 @@ open Finset
 
 /-! ## Cells of a conjugate skew shape
 
-A cell of `λ' / ν'` is a cell of `λ / ν` with its coordinates exchanged, so it
-is pinned by the row lengths of the original pair.  When `λ` has no row beyond
-the second, the conjugate shape has no column beyond the second.
+`Shields.Combinatorics.Young.SkewCells` splits the cells of `λ' / ν'` by column at
+every `m`; here `m` is two.
 -/
 
 section Cells
 
 variable {lam nu : YoungDiagram}
 
-theorem mem_transpose_iff_lt_rowLen {mu : YoungDiagram} {i j : ℕ} :
-    (j, i) ∈ mu.transpose ↔ j < mu.rowLen i := by
-  rw [YoungDiagram.mem_transpose, Prod.swap_prod_mk, YoungDiagram.mem_iff_lt_rowLen]
-
-/-- A cell of the conjugate skew shape, read on the original: `(j, i)` is a cell
-of `λ' / ν'` exactly when abscissa `j` lies in row `i` of `λ / ν`. -/
-theorem mem_skewCells_transpose {i j : ℕ} :
-    (j, i) ∈ skewCells lam.transpose nu.transpose ↔ nu.rowLen i ≤ j ∧ j < lam.rowLen i := by
-  rw [mem_skewCells, mem_transpose_iff_lt_rowLen, mem_transpose_iff_lt_rowLen]
-  omega
-
 /-- With no row of `λ` beyond the second, every cell of `λ' / ν'` is in column
 `0` or column `1`. -/
 theorem lt_two_of_mem_skewCells_transpose (hrow : ∀ i, 2 ≤ i → lam.rowLen i = 0) {i j : ℕ}
-    (h : (j, i) ∈ skewCells lam.transpose nu.transpose) : i < 2 := by
-  by_contra hc
-  have h2 := (mem_skewCells_transpose.mp h).2
-  rw [hrow i (by omega)] at h2
-  omega
-
-/-- The `j`-th cell of column `i` of `λ' / ν'`, counted from the first one. -/
-theorem mem_skewCells_transpose_col (i : ℕ) {j : ℕ}
-    (hj : j < lam.rowLen i - nu.rowLen i) :
-    (nu.rowLen i + j, i) ∈ skewCells lam.transpose nu.transpose :=
-  mem_skewCells_transpose.mpr ⟨by omega, by omega⟩
+    (h : (j, i) ∈ skewCells lam.transpose nu.transpose) : i < 2 :=
+  lt_of_mem_skewCells_transpose (m := 2) hrow h
 
 end Cells
-
-/-! ## A column of a conjugate skew tableau is a word
-
-Column `i` of a bounded tableau of `λ' / ν'`, re-indexed from its first skew
-cell, is a one-column bounded tableau: the column condition of `SkewSSYT` is the
-column condition of `BoundedSSYT (rect m 1) a`, and the row condition is vacuous
-on a shape of one column.  This is what puts `Shields.ePathOfWord` at the
-disposal of a conjugate shape.
--/
-
-section ColWord
-
-variable {a : ℕ} {lam nu : YoungDiagram}
-
-/-- Entries increase strictly down a column of `λ' / ν'`. -/
-theorem eSkewCol_strict (T : BoundedSkewSSYT lam.transpose nu.transpose a) (i : ℕ)
-    {j₁ j₂ : ℕ} (hj : j₁ < j₂) (hj₂ : j₂ < lam.rowLen i - nu.rowLen i) :
-    T.1 (nu.rowLen i + j₁) i < T.1 (nu.rowLen i + j₂) i :=
-  T.1.col_strict (by omega) (mem_transpose_iff_lt_rowLen.mpr (by omega))
-    (fun hc => absurd (mem_transpose_iff_lt_rowLen.mp hc) (by omega))
-
-/-- Column `i` of a bounded tableau of `λ' / ν'` as a one-column word of length
-`λ_i - ν_i`. -/
-def eColWord (a : ℕ) (lam nu : YoungDiagram)
-    (T : BoundedSkewSSYT lam.transpose nu.transpose a) (i : ℕ) :
-    BoundedSSYT (rect (lam.rowLen i - nu.rowLen i) 1) a :=
-  ⟨{ entry := fun j i' =>
-       if i' = 0 ∧ j < lam.rowLen i - nu.rowLen i then T.1 (nu.rowLen i + j) i else 0
-     row_weak' := by
-       intro j i₁ i₂ hi hcell
-       exact absurd (mem_rect.mp hcell).2 (by omega)
-     col_strict' := by
-       intro j₁ j₂ i' hj hcell
-       obtain ⟨hj₂, hi'⟩ := mem_rect.mp hcell
-       rw [if_pos ⟨by omega, by omega⟩, if_pos ⟨by omega, hj₂⟩]
-       exact eSkewCol_strict T i hj hj₂
-     zeros' := by
-       intro j i' hcell
-       exact if_neg fun hc => hcell (mem_rect.mpr ⟨hc.2, by omega⟩) },
-   by
-     intro j i' hcell
-     obtain ⟨hj, hi'⟩ := mem_rect.mp hcell
-     change (if i' = 0 ∧ j < lam.rowLen i - nu.rowLen i then T.1 (nu.rowLen i + j) i else 0) < a
-     rw [if_pos ⟨by omega, hj⟩]
-     exact T.lt_of_mem_cells (mem_skewCells_transpose_col i hj)⟩
-
-theorem eColWord_apply (T : BoundedSkewSSYT lam.transpose nu.transpose a) (i : ℕ) {j : ℕ}
-    (hj : j < lam.rowLen i - nu.rowLen i) :
-    eColWord a lam nu T i j 0 = T.1 (nu.rowLen i + j) i := by
-  change (if (0 : ℕ) = 0 ∧ j < lam.rowLen i - nu.rowLen i then T.1 (nu.rowLen i + j) i else 0)
-      = T.1 (nu.rowLen i + j) i
-  rw [if_pos ⟨rfl, hj⟩]
-
-theorem eColWord_mono (T : BoundedSkewSSYT lam.transpose nu.transpose a) (i : ℕ) {j₁ j₂ : ℕ}
-    (hj : j₁ ≤ j₂) (hj₂ : j₂ < lam.rowLen i - nu.rowLen i) :
-    eColWord a lam nu T i j₁ 0 ≤ eColWord a lam nu T i j₂ 0 :=
-  boundedSSYT_col_mono _ hj hj₂
-
-end ColWord
 
 /-! ## The paths of a conjugate tableau
 
@@ -191,37 +120,19 @@ theorem ePathsOfSkew_snd_mem (hnu : nu ≤ lam)
 theorem lt_ePathsOfSkew_fst (T : BoundedSkewSSYT lam.transpose nu.transpose a) {i j : ℕ}
     (hj : j < lam.rowLen 0 - nu.rowLen 0) (hlt : T.1 (nu.rowLen 0 + j) 0 < i) :
     nu.rowLen 0 + 1 + j < (ePathsOfSkew a lam nu T).1 i := by
-  have hsub : Finset.range (j + 1)
-      ⊆ (Finset.range (lam.rowLen 0 - nu.rowLen 0)).filter
-          fun j' => eColWord a lam nu T 0 j' 0 < i := by
-    intro j' hj'
-    rw [Finset.mem_range] at hj'
-    refine Finset.mem_filter.mpr ⟨Finset.mem_range.mpr (by omega), ?_⟩
-    refine lt_of_le_of_lt (eColWord_mono T 0 (by omega : j' ≤ j) hj) ?_
-    rw [eColWord_apply T 0 hj]
-    exact hlt
-  have hcard := Finset.card_le_card hsub
-  rw [Finset.card_range] at hcard
-  change nu.rowLen 0 + 1 + j < nu.rowLen 0 + 1 + _
-  omega
+  refine lt_ePathOfWord (eColWord a lam nu T 0) hj ?_
+  rw [eColWord_apply T 0 hj]
+  exact hlt
 
 /-- A letter of column `1` at or above `i` stops the path of that column at its
 abscissa. -/
 theorem ePathsOfSkew_snd_le (T : BoundedSkewSSYT lam.transpose nu.transpose a) {i j : ℕ}
     (hle : i ≤ T.1 (nu.rowLen 1 + j) 1) : (ePathsOfSkew a lam nu T).2 i ≤ nu.rowLen 1 + j := by
-  have hsub : ((Finset.range (lam.rowLen 1 - nu.rowLen 1)).filter
-      fun j' => eColWord a lam nu T 1 j' 0 < i) ⊆ Finset.range j := by
-    intro j' hj'
-    rw [Finset.mem_filter, Finset.mem_range] at hj'
-    rw [Finset.mem_range]
-    by_contra hcon
-    have hmono := eColWord_mono T 1 (by omega : j ≤ j') hj'.1
-    rw [eColWord_apply T 1 (by omega : j < lam.rowLen 1 - nu.rowLen 1)] at hmono
-    omega
-  have hcard := Finset.card_le_card hsub
-  rw [Finset.card_range] at hcard
-  change nu.rowLen 1 + _ ≤ nu.rowLen 1 + j
-  omega
+  rcases lt_or_ge j (lam.rowLen 1 - nu.rowLen 1) with hj | hj
+  · refine ePathOfWord_le (eColWord a lam nu T 1) ?_
+    rw [eColWord_apply T 1 hj]
+    exact hle
+  · exact le_trans (wordProfile_le_length i) (by omega)
 
 /-- **The weak row condition is point disjointness.**  The two odd paths of a
 bounded tableau of `λ' / ν'` stay strictly ordered at every height.  Unlike the
@@ -411,32 +322,6 @@ section RoundTrips
 
 variable {a : ℕ} {lam nu : YoungDiagram}
 
-/-- Two one-column words agreeing on their cells trace the same odd path. -/
-theorem ePathOfWord_congr {m s : ℕ} (T T' : BoundedSSYT (rect m 1) a)
-    (h : ∀ j, j < m → T j 0 = T' j 0) : ePathOfWord a s m T = ePathOfWord a s m T' := by
-  funext i
-  have hset : ((Finset.range m).filter fun j => T j 0 < i)
-      = (Finset.range m).filter fun j => T' j 0 < i := by
-    ext j
-    rw [Finset.mem_filter, Finset.mem_filter]
-    constructor
-    · rintro ⟨hj, hlt⟩
-      exact ⟨hj, by rwa [← h j (Finset.mem_range.mp hj)]⟩
-    · rintro ⟨hj, hlt⟩
-      exact ⟨hj, by rwa [h j (Finset.mem_range.mp hj)]⟩
-  change s + ((Finset.range m).filter fun j => T j 0 < i).card
-      = s + ((Finset.range m).filter fun j => T' j 0 < i).card
-  rw [hset]
-
-/-- A one-column word whose letters are those of an odd path traces that path
-back. -/
-theorem ePathOfWord_eq_of_entry {s m : ℕ} {q : ℕ → ℕ} (hq : q ∈ ePaths a s (s + m))
-    (T : BoundedSSYT (rect m 1) a) (h : ∀ j, j < m → T j 0 = pathLetter a s q j) :
-    ePathOfWord a s m T = q := by
-  rw [← ePathOfWord_eWordOfPath hq]
-  exact ePathOfWord_congr T _ fun j hj => by
-    rw [h j hj, eWordOfPath_apply, if_pos ⟨rfl, hj⟩]
-
 /-- Paths to tableau and back. -/
 theorem ePathsOfSkew_eSkewOfPaths (hnu : nu ≤ lam) (hrow : ∀ i, 2 ≤ i → lam.rowLen i = 0)
     {x : (ℕ → ℕ) × (ℕ → ℕ)} (hq : x.1 ∈ ePaths a (nu.rowLen 0 + 1) (lam.rowLen 0 + 1))
@@ -505,30 +390,8 @@ theorem prod_skewCells_transpose_two_cols {M : Type*} [CommMonoid M]
     ∏ c ∈ skewCells lam.transpose nu.transpose, f c.1 c.2
       = (∏ j ∈ Finset.Ico (nu.rowLen 0) (lam.rowLen 0), f j 0)
         * ∏ j ∈ Finset.Ico (nu.rowLen 1) (lam.rowLen 1), f j 1 := by
-  have hsplit : skewCells lam.transpose nu.transpose
-      = (Finset.Ico (nu.rowLen 0) (lam.rowLen 0) ×ˢ ({0} : Finset ℕ))
-        ∪ (Finset.Ico (nu.rowLen 1) (lam.rowLen 1) ×ˢ ({1} : Finset ℕ)) := by
-    ext c
-    obtain ⟨j, i⟩ := c
-    rw [Finset.mem_union, Finset.mem_product, Finset.mem_product, Finset.mem_singleton,
-      Finset.mem_singleton, Finset.mem_Ico, Finset.mem_Ico]
-    constructor
-    · intro hc
-      obtain ⟨hj1, hj2⟩ := mem_skewCells_transpose.mp hc
-      have hi := lt_two_of_mem_skewCells_transpose hrow hc
-      interval_cases i
-      · exact Or.inl ⟨⟨hj1, hj2⟩, rfl⟩
-      · exact Or.inr ⟨⟨hj1, hj2⟩, rfl⟩
-    · rintro (⟨⟨h1, h2⟩, rfl⟩ | ⟨⟨h1, h2⟩, rfl⟩) <;>
-        exact mem_skewCells_transpose.mpr ⟨h1, h2⟩
-  have hdisj : Disjoint (Finset.Ico (nu.rowLen 0) (lam.rowLen 0) ×ˢ ({0} : Finset ℕ))
-      (Finset.Ico (nu.rowLen 1) (lam.rowLen 1) ×ˢ ({1} : Finset ℕ)) := by
-    rw [Finset.disjoint_left]
-    intro c hc1 hc2
-    rw [Finset.mem_product, Finset.mem_singleton] at hc1 hc2
-    exact absurd (hc1.2.symm.trans hc2.2) (by omega)
-  rw [hsplit, Finset.prod_union hdisj, Finset.prod_product', Finset.prod_product']
-  simp only [Finset.prod_singleton]
+  rw [prod_skewCells_transpose_cols (m := 2) hrow f, Finset.prod_range_succ,
+    Finset.prod_range_one]
 
 variable {R : Type*} [CommRing R]
 
@@ -602,7 +465,7 @@ one is `nonCrossingIsSkewSchur`, the odd one is `nonMeetingIsSkewSchurTranspose`
 — so the non-intersecting pairs of mixed paths carry the branching sum
 `superSkewSchur lam mu b a β α` with no hypothesis beyond the shape.
 
-This is `SkewJT.sum_nonMeeting_mixed_eq_superSkewSchur_of_odd` with its last
+This is `sum_nonMeeting_mixed_eq_superSkewSchur_of_odd` with its last
 hypothesis discharged. -/
 theorem sum_nonMeeting_mixed_eq_superSkewSchur_uncond {b a : ℕ} {β α : ℕ → R}
     (lam mu : YoungDiagram) (hmu : mu ≤ lam) (hrow : ∀ i, 2 ≤ i → lam.rowLen i = 0) :
@@ -613,6 +476,26 @@ theorem sum_nonMeeting_mixed_eq_superSkewSchur_uncond {b a : ℕ} {β α : ℕ �
       = superSkewSchur lam mu b a β α :=
   sum_nonMeeting_mixed_eq_superSkewSchur_of_odd (nonMeetingIsSkewSchurTranspose a α)
     lam mu hmu hrow
+
+/-- The residue at two rows is a theorem. -/
+theorem nonIntersectingIsSuperSkewSchur_two (b a : ℕ) (β α : ℕ → R) :
+    NonIntersectingIsSuperSkewSchur b a 2 β α := by
+  intro lam mu hmu hrow
+  rw [sum_nonMIntersecting_two, sum_nonMeeting_mixed_eq_superSkewSchur_uncond lam mu hmu hrow]
+
+/-- **The skew Jacobi--Trudi identity at two rows, over the mixed alphabet,
+unconditionally.**  For `λ` inside two rows,
+
+`det [d_{λ_u - μ_v - u + v}]_{2 × 2} = s_{λ/μ}(β | α)`,
+
+over any commutative ring, every `b`, `a`, `β`, `α` and every `μ ⊆ λ`.  The
+cancellation is `Shields.mixedJacobiTrudiDet_eq_sum_nonIntersecting` and the
+tableau side is `Shields.sum_nonMeeting_mixed_eq_superSkewSchur_uncond`. -/
+theorem skewJacobiTrudi_two_rows {b a : ℕ} (β α : ℕ → R) (lam mu : YoungDiagram)
+    (hmu : mu ≤ lam) (hrow : ∀ i, 2 ≤ i → lam.rowLen i = 0) :
+    jacobiTrudiDet (fun k => superHom b a k β α) lam mu 2 = superSkewSchur lam mu b a β α := by
+  rw [mixedJacobiTrudiDet_eq_sum_nonIntersecting, sum_nonMIntersecting_two,
+    sum_nonMeeting_mixed_eq_superSkewSchur_uncond lam mu hmu hrow]
 
 /-! ## Non-vacuity
 
@@ -636,5 +519,16 @@ theorem elemDet_two_column (a : ℕ) (α : ℕ → R) :
     transpose_rect, hbot, completeHom]
 
 end Identity
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.nonIntersectingIsSuperSkewSchur_two' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms nonIntersectingIsSuperSkewSchur_two
+
+/-- info: 'Shields.skewJacobiTrudi_two_rows' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms skewJacobiTrudi_two_rows
 
 end Shields

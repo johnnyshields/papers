@@ -5,6 +5,7 @@ Authors: Johnny Shields
 -/
 import ForgacsTran.FTBranchGap
 import ForgacsTran.FTBranchProp1
+import ForgacsTran.PencilIndex
 
 /-!
 # The rate of the spectral parameter along the branch
@@ -16,6 +17,9 @@ That is a statement about the branch, so it is proved here.
 
 ## Main statements
 
+* `sqrt_chordSq_le_of_abs_sub_le`, `sqrt_chordSq_le_of_le` — the two chord bounds
+  at a single radius, pointwise and with the constants explicit.  Neither mentions
+  the branch, and they are what the multiplicity split runs on.
 * `isBigO_ftTau_sub_min` — the crude first-order rate `τ(θ) - x₁ = O(θ)`,
   extracted from the slope limit.
 * `isBigO_ftChordProd_pow` — the chord product is `O(θ^ρ)`: the `ρ` chords at the
@@ -51,6 +55,63 @@ spectral parameter, rate, endpoint asymptotics
 namespace ForgacsTran
 
 open Real Set Filter Topology Asymptotics
+
+/-! ### The chord at a radius, pointwise
+
+The endpoint splits the chords into two kinds, and both bounds are facts about a
+single radius rather than about the branch: a chord to the repeated smallest zero
+collapses linearly, and a chord to any other zero stays bounded.  They are stated
+here without a branch in them, and `### The two chord limits` below states the
+same two facts as limits — one pair quantitative and pointwise, the other
+asymptotic, and the module needs both. -/
+
+/-- **A chord to the repeated smallest zero is `O(θ)`, with the constant
+explicit.**  For a radius `T` within `Aθ` of `x` and below `2x`, the chord from
+`x` to `Te^{iθ}` is at most `√(A² + 2x²)·θ`: `chordSq_eq_sub_sq_add` splits it
+into the radial displacement, which is `Aθ` by hypothesis, and the angular one,
+whose square is `2xT(1 - cos θ) ≤ 2x²θ²`.
+
+This is the pointwise form of `tendsto_sqrt_chordSq_div_of_slope`, whose rate
+`√(m² + x²)` is this constant at `A = |m|`. -/
+theorem sqrt_chordSq_le_of_abs_sub_le {x T A θ : ℝ} (hx : 0 < x) (hθ : 0 ≤ θ)
+    (hub : T ≤ 2 * x) (hA : |T - x| ≤ A * θ) :
+    Real.sqrt (x ^ 2 - 2 * x * T * Real.cos θ + T ^ 2)
+      ≤ Real.sqrt (A ^ 2 + 2 * x ^ 2) * θ := by
+  set A₁ : ℝ := Real.sqrt (A ^ 2 + 2 * x ^ 2) with hA₁
+  have hcos : 1 - Real.cos θ ≤ θ ^ 2 / 2 := one_sub_cos_le_sq_div_two θ
+  have hcnn : 0 ≤ 1 - Real.cos θ := by linarith [Real.cos_le_one θ]
+  have hsq : x ^ 2 - 2 * x * T * Real.cos θ + T ^ 2 ≤ (A₁ * θ) ^ 2 := by
+    have h1 : (x - T) ^ 2 ≤ A ^ 2 * θ ^ 2 := by
+      nlinarith [abs_nonneg (T - x), sq_abs (T - x)]
+    have h2 : 2 * x * T * (1 - Real.cos θ) ≤ 2 * x ^ 2 * θ ^ 2 := by
+      calc 2 * x * T * (1 - Real.cos θ)
+          ≤ 2 * x * (2 * x) * (θ ^ 2 / 2) := by
+            refine mul_le_mul ?_ hcos hcnn (by positivity)
+            exact mul_le_mul_of_nonneg_left hub (by linarith)
+        _ = 2 * x ^ 2 * θ ^ 2 := by ring
+    have hA₁sq : A₁ ^ 2 = A ^ 2 + 2 * x ^ 2 := Real.sq_sqrt (by positivity)
+    rw [chordSq_eq_sub_sq_add x T θ]
+    nlinarith
+  calc Real.sqrt (x ^ 2 - 2 * x * T * Real.cos θ + T ^ 2)
+      ≤ Real.sqrt ((A₁ * θ) ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = A₁ * θ := Real.sqrt_sq (by positivity)
+
+/-- **A chord to any other zero stays bounded.**  At a radius below `2x` the
+chord from a positive `a` is at most `a + 2x`, with no rate involved — the
+triangle inequality after clearing the square root.
+
+This is the pointwise form of `tendsto_sqrt_chordSq_of_le`, whose limit `a - x`
+is what this crude bound replaces where only boundedness is needed. -/
+theorem sqrt_chordSq_le_of_le {x T a θ : ℝ} (hx : 0 < x) (ha : 0 < a) (hT : 0 < T)
+    (hub : T ≤ 2 * x) :
+    Real.sqrt (a ^ 2 - 2 * a * T * Real.cos θ + T ^ 2) ≤ a + 2 * x := by
+  have hsq : a ^ 2 - 2 * a * T * Real.cos θ + T ^ 2 ≤ (a + 2 * x) ^ 2 := by
+    have hkT : a * T ≤ a * (2 * x) := mul_le_mul_of_nonneg_left hub ha.le
+    have hTT : T * T ≤ 2 * x * (2 * x) := mul_self_le_mul_self hT.le hub
+    nlinarith [Real.neg_one_le_cos θ, mul_pos ha hT]
+  calc Real.sqrt (a ^ 2 - 2 * a * T * Real.cos θ + T ^ 2)
+      ≤ Real.sqrt ((a + 2 * x) ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = a + 2 * x := Real.sqrt_sq (by linarith)
 
 /-- **The crude first-order rate.**  `τ(θ) - x₁ = O(θ)`, which is all the chord
 bound needs; the second-order form is `exists_bound_ftTau_sub_linear`. -/
@@ -112,40 +173,13 @@ theorem isBigO_ftChordProd_pow {n r ρ : ℕ} {a : Fin n → ℝ} {S : Finset (F
   -- the `ρ` chords at the repeated zero
   have hin : ∀ k ∈ S, Real.sqrt (a k ^ 2 - 2 * a k * T θ * Real.cos θ + T θ ^ 2) ≤ A₁ * θ := by
     intro k hk
-    have hak : a k = a i := (hS k).1 hk
-    have hrad : a k ^ 2 - 2 * a k * T θ * Real.cos θ + T θ ^ 2
-        = (a i - T θ) ^ 2 + 2 * a i * T θ * (1 - Real.cos θ) := by
-      rw [hak]; exact chordSq_eq_sub_sq_add (a i) (T θ) θ
-    have hsq : a k ^ 2 - 2 * a k * T θ * Real.cos θ + T θ ^ 2 ≤ (A₁ * θ) ^ 2 := by
-      have h1 : (a i - T θ) ^ 2 ≤ A ^ 2 * θ ^ 2 := by
-        have := hAθ
-        rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_pos hθ0] at this
-        nlinarith [abs_nonneg (T θ - a i), sq_abs (T θ - a i)]
-      have h2 : 2 * a i * T θ * (1 - Real.cos θ) ≤ 2 * a i ^ 2 * θ ^ 2 := by
-        have hcnn : 0 ≤ 1 - Real.cos θ := by linarith [Real.cos_le_one θ]
-        calc 2 * a i * T θ * (1 - Real.cos θ)
-            ≤ 2 * a i * (2 * a i) * (θ ^ 2 / 2) := by
-              refine mul_le_mul ?_ hcos hcnn (by positivity)
-              exact mul_le_mul_of_nonneg_left hub (by linarith)
-          _ = 2 * a i ^ 2 * θ ^ 2 := by ring
-      have hA₁sq : A₁ ^ 2 = A ^ 2 + 2 * a i ^ 2 :=
-        Real.sq_sqrt (by positivity)
-      rw [hrad]
-      nlinarith
-    calc Real.sqrt (a k ^ 2 - 2 * a k * T θ * Real.cos θ + T θ ^ 2)
-        ≤ Real.sqrt ((A₁ * θ) ^ 2) := Real.sqrt_le_sqrt hsq
-      _ = A₁ * θ := Real.sqrt_sq (by positivity)
+    rw [(hS k).1 hk]
+    refine sqrt_chordSq_le_of_abs_sub_le hai hθ0.le hub ?_
+    have := hAθ
+    rwa [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_pos hθ0] at this
   -- the remaining chords are bounded
   have hout : ∀ k ∈ Sᶜ, Real.sqrt (a k ^ 2 - 2 * a k * T θ * Real.cos θ + T θ ^ 2)
-      ≤ a k + 2 * a i := by
-    intro k _
-    have hsq : a k ^ 2 - 2 * a k * T θ * Real.cos θ + T θ ^ 2 ≤ (a k + 2 * a i) ^ 2 := by
-      have hkT : a k * T θ ≤ a k * (2 * a i) := mul_le_mul_of_nonneg_left hub (ha k).le
-      have hTT : T θ * T θ ≤ 2 * a i * (2 * a i) := mul_self_le_mul_self hTpos.le hub
-      nlinarith [Real.neg_one_le_cos θ, mul_pos (ha k) hTpos]
-    calc Real.sqrt (a k ^ 2 - 2 * a k * T θ * Real.cos θ + T θ ^ 2)
-        ≤ Real.sqrt ((a k + 2 * a i) ^ 2) := Real.sqrt_le_sqrt hsq
-      _ = a k + 2 * a i := Real.sqrt_sq (by linarith [ha k])
+      ≤ a k + 2 * a i := fun k _ => sqrt_chordSq_le_of_le hai (ha k) hTpos hub
   -- assemble
   have hsplit : ftChordProd a (T θ) θ
       = (∏ k ∈ S, Real.sqrt (a k ^ 2 - 2 * a k * T θ * Real.cos θ + T θ ^ 2))
@@ -321,7 +355,7 @@ theorem tendsto_sqrt_chordSq_div_of_slope {T : ℝ → ℝ} {x m : ℝ}
   have hθ0 : (0 : ℝ) < θ := hθ
   have hin2 : ((x - T θ) / θ) ^ 2 + 2 * x * T θ * ((1 - Real.cos θ) / θ ^ 2)
       = (x ^ 2 - 2 * x * T θ * Real.cos θ + T θ ^ 2) / θ ^ 2 := by
-    field_simp; ring
+    field
   rw [hin2, Real.sqrt_div (chordSq_nonneg x (T θ) θ), Real.sqrt_sq hθ0.le]
 
 /-- **A chord to a zero the limit point falls short of converges to the gap.**
@@ -432,7 +466,7 @@ theorem tendsto_ftBranchZ_div_pow {n r ρ : ℕ} {a : Fin n → ℝ} {S : Finset
   have hb : FTBranchAt a r (n - 1) θ :=
     ftBranchAt_of_arc_principal hn ha hr (Or.inl hn2) hθarc
   have hTpos : 0 < T θ := ftTau_pos hb
-  have hpar : Even (n + (n - 1) + 1) := ⟨n, by omega⟩
+  have hpar : Even (n + (n - 1) + 1) := even_add_pred_add_one (by omega)
   have h1 : (θ : ℝ) ^ ρ ≠ 0 := pow_ne_zero _ (ne_of_gt hθ0)
   have h2 : T θ ^ r ≠ 0 := pow_ne_zero _ (ne_of_gt hTpos)
   have hkey : c * (ftChordProd a (T θ) θ / θ ^ ρ) / T θ ^ r

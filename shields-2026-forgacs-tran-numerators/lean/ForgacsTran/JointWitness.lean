@@ -167,8 +167,7 @@ theorem one_sub_eta_rho {θ : ℝ} (hθ : θ ∈ Set.Ioo 0 (Real.pi / 3)) :
       Complex.exp_ofReal_mul_I_re, Complex.exp_ofReal_mul_I_im, Real.cos_neg,
       Real.sin_neg]
     set c := Real.cos (θ + Real.pi / 6) with hcd
-    field_simp [hc.ne']
-    ring
+    field [hc.ne']
 
 /-- The principal zero solves the `η` factor: `t₊(1 - ηρ) = 1`. -/
 theorem jointPrincipal_mul {θ : ℝ} (hθ : θ ∈ Set.Ioo 0 (Real.pi / 3)) :
@@ -454,7 +453,7 @@ theorem hasDerivAt_jointRatio {δ : ℝ} (h : Real.cos (δ + Real.pi / 3) ≠ 0)
     simp only [ne_eq, mul_eq_zero, not_or]; exact ⟨two_ne_zero, h⟩
   change HasDerivAt (fun x : ℝ => 1 / (2 * Real.cos (x + Real.pi / 3))) _ δ
   exact ((hasDerivAt_const δ (1 : ℝ)).div (h1.const_mul 2) hne2).congr_deriv (by
-    rw [jointRatioDeriv]; field_simp; ring)
+    rw [jointRatioDeriv]; field)
 
 theorem hasDerivAt_jointRatioDeriv {δ : ℝ} (h : Real.cos (δ + Real.pi / 3) ≠ 0) :
     HasDerivAt jointRatioDeriv (jointRatioDeriv2 δ) δ := by
@@ -1414,6 +1413,10 @@ theorem mul_sinc (x : ℝ) : x * Real.sinc x = Real.sin x := by
   · rw [h]; simp
   · field_simp
 
+/-- The collapse factor at the joint pencil's upper endpoint,
+`T(η) = (2/√3)·sinc(η)·e^{i(π/3 - η)}`, which puts the principal point in the
+form `γ(π/3 - η) = η·T(η)`.  `Real.sinc` carries the removable singularity, so
+`T` is continuous at `0`. -/
 noncomputable def jointT (η : ℝ) : ℂ :=
   ((2 / Real.sqrt 3 : ℝ) : ℂ) * ((Real.sinc η : ℝ) : ℂ)
     * Complex.exp (((Real.pi / 3 - η : ℝ) : ℂ) * Complex.I)
@@ -1429,9 +1432,9 @@ theorem continuousWithinAt_jointT : ContinuousWithinAt jointT (Set.Ici (0 : ℝ)
 theorem jointT_zero_ne : jointT 0 ≠ 0 := by
   have hs3 : (0 : ℝ) < Real.sqrt 3 := Real.sqrt_pos.mpr (by norm_num)
   rw [jointT, Real.sinc]
-  simp only [if_pos rfl]
+  rw [if_pos rfl]
   refine mul_ne_zero (mul_ne_zero ?_ ?_) (Complex.exp_ne_zero _)
-  · simpa using (by positivity : (0:ℝ) < 2 / Real.sqrt 3).ne'
+  · simp
   · norm_num
 
 /-- **`hγ`**: the principal point at the upper endpoint is `η·T(η)` exactly. -/

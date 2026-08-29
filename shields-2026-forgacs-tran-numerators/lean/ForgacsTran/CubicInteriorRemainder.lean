@@ -6,6 +6,7 @@ Authors: Johnny Shields
 import ForgacsTran.CubicClockSpacing
 import ForgacsTran.CubicWitnessComposition
 import ForgacsTran.QuotientDerivBound
+import ForgacsTran.ComplexPart
 
 /-!
 # The interior remainder at the cubic pencil
@@ -45,13 +46,13 @@ the third at `1/τ²`, by Vieta on a cubic whose roots multiply to `1`.  Since
 what lets `σ` be chosen once for a whole subarc rather than per angle.  On
 `‖t‖ = 1` the factorization then bounds `‖D‖` below by `(1-τ)²(1/τ²-1)` and hence
 `‖B/D‖` above, which is the last binder of
-`DominanceFT.interior_remainder_uniform`.  Moving the spectral parameter by `δ`
+`DominanceFTSupply.interior_remainder_uniform`.  Moving the spectral parameter by `δ`
 moves `D` by at most `δ` there, so half the floor survives half the floor's worth
 of motion — which is the neighborhood form
 `PoleExpansion.hasDerivAt_ftContourRem_comp` asks for.
 
 **Nothing is assumed.**  `cubic_local_strong_clock_closed` discharges every
-binder, the remainder's included.  `DominanceFT.ftCoeff_re_sub_principal_eq_contour_re`
+binder, the remainder's included.  `DominanceFTSupply.ftCoeff_re_sub_principal_eq_contour_re`
 puts the numerator on the contour, where `hasDerivAt_ftContourRem_comp`
 differentiates it; `hasDerivAt_cubicAmpNorm` differentiates the denominator
 `2‖W‖`; and `QuotientDerivBound.abs_div_deriv_le_of_scaled` folds the quotient
@@ -92,7 +93,7 @@ namespace ForgacsTran
 open Real Set
 
 /-- The conjugate member of the principal pair, in the `e^{-iθ}` spelling
-`DominanceFT.interior_remainder_uniform` writes it in. -/
+`DominanceFTSupply.interior_remainder_uniform` writes it in. -/
 noncomputable def cubicArcPoint (θ : ℝ) : ℂ :=
   ((cubicTau θ : ℝ) : ℂ) * Complex.exp (-((θ : ℝ) : ℂ) * Complex.I)
 
@@ -281,7 +282,7 @@ theorem norm_witB_eval_le {t : ℂ} (ht : ‖t‖ = 1) : ‖witB.eval t‖ ≤ 4
 compact subarc `[e, π-e]` the remainder of `eq:principal-decomposition` is
 `O(σ^M)` at the explicit `σ = τ(e) < 1`, with no analytic hypothesis.
 
-Every binder of `DominanceFT.interior_remainder_uniform` is discharged here.  The
+Every binder of `DominanceFTSupply.interior_remainder_uniform` is discharged here.  The
 separating radius is `R₀ = 1`: the principal pair has modulus `τ ≤ τ(e) < 1` and
 the third zero `1/τ² ≥ 1/τ(e)² > 1`, so one radius separates them at every angle
 of the subarc, which is what lets `σ` be chosen once. -/
@@ -311,6 +312,42 @@ theorem cubic_interior_remainder {e : ℝ} (he : 0 < e) (he2 : e < π / 2) :
   have hDge := cubic_denominator_floor he he2 ⟨h1, h2⟩ htn
   rw [norm_div, div_le_div_iff₀ (by linarith) hDlopos]
   nlinarith [norm_witB_eval_le htn, norm_nonneg (witB.eval t), hDlopos]
+
+/-- **`eq:interior-remainder` on the contour side.**  The bound of
+`cubic_interior_remainder` carried across `ftRemainder_eq_contour` to the quantity
+the `C⁰` and `C¹` estimates actually differentiate and divide, `τ^{M+1}E_M`.
+
+This is where `cubic_pole_data`'s five clauses are spent, and it is the only place
+they are needed on this route: past it the remainder is an ordinary normed
+quantity with a geometric bound and no pole structure left in it. -/
+theorem cubic_interior_remainder_norm {e : ℝ} (he : 0 < e) (he2 : e < π / 2)
+    {θ : ℝ} (harc : θ ∈ Ioo 0 π) (hθ : θ ∈ Icc e (π - e)) (M : ℕ) :
+    cubicTau θ ^ (M + 1)
+        * ‖ftContourRem cubicQ witB 1 1 M ((cubicZ (cubicTau θ) θ : ℝ) : ℂ)‖
+      ≤ cubicTau e * (4 / cubicDenFloor e) * cubicTau e ^ M := by
+  obtain ⟨hr, hs, hsm, hne, hpair⟩ := cubic_pole_data harc
+  have heq := ftRemainder_eq_contour (Q := cubicQ) (B := witB)
+    hasRealCoeffs_cubicQ hasRealCoeffs_witB le_rfl (by simp [cubicQ])
+    (z := fun θ' => cubicZ (cubicTau θ') θ') (τ := cubicTau)
+    (cubicTau_pos θ) one_pos (cubicTau_lt_one harc) hr hs hsm hne hpair M
+  have hb := cubic_interior_remainder he he2 M θ hθ
+  rwa [heq, abs_of_nonneg (mul_nonneg (pow_nonneg (cubicTau_pos θ).le _)
+    (norm_nonneg _))] at hb
+
+/-- **The same bound on the real part**, which is the shape both estimates consume:
+the numerator they divide by `2‖W‖` is `Re(τ^{M+1}E_M)`, not its modulus.
+
+The step is `|Re w| ≤ ‖w‖` and nothing else — the scalar `τ^{M+1}` is a positive
+real, so it passes through the norm unchanged. -/
+theorem abs_re_scaled_ftContourRem_le {e : ℝ} (he : 0 < e) (he2 : e < π / 2)
+    {θ : ℝ} (harc : θ ∈ Ioo 0 π) (hθ : θ ∈ Icc e (π - e)) (M : ℕ) :
+    |((((cubicTau θ : ℝ) : ℂ)) ^ (M + 1)
+        * ftContourRem cubicQ witB 1 1 M ((cubicZ (cubicTau θ) θ : ℝ) : ℂ)).re|
+      ≤ cubicTau e * (4 / cubicDenFloor e) * cubicTau e ^ M := by
+  refine le_trans (Complex.abs_re_le_norm _) ?_
+  rw [norm_mul, norm_pow, Complex.norm_real, Real.norm_eq_abs,
+    abs_of_pos (cubicTau_pos θ)]
+  exact cubic_interior_remainder_norm he he2 harc hθ M
 
 /-! ### `eq:principal-decomposition` at the cubic pencil, with its `C^0` bound
 
@@ -390,14 +427,6 @@ derivative carries the same `R^{-M}` as the value and no factor of `M` — the
 assembled here is the rest: the branch's own derivatives, the amplitude modulus,
 and the suprema the quotient rule needs. -/
 
-private theorem hasDerivAt_re' {f : ℝ → ℂ} {f' : ℂ} {θ : ℝ} (h : HasDerivAt f f' θ) :
-    HasDerivAt (fun s => (f s).re) f'.re θ :=
-  Complex.reCLM.hasFDerivAt.comp_hasDerivAt θ h
-
-private theorem hasDerivAt_im' {f : ℝ → ℂ} {f' : ℂ} {θ : ℝ} (h : HasDerivAt f f' θ) :
-    HasDerivAt (fun s => (f s).im) f'.im θ :=
-  Complex.imCLM.hasFDerivAt.comp_hasDerivAt θ h
-
 /-- A continuous function on a compact interval is bounded there, with a
 nonnegative bound so the empty case needs no separate treatment downstream. -/
 private theorem exists_sup_on {f : ℝ → ℝ} {a b : ℝ} (hf : ContinuousOn f (Icc a b)) :
@@ -476,8 +505,8 @@ theorem hasDerivAt_cubicAmpNorm {θ : ℝ} (hθ : θ ∈ cubicRetained) :
     HasDerivAt (fun s => ‖cubicAmp s‖) (cubicAmpNormDeriv θ) θ := by
   have hne := cubicAmp_ne_zero hθ
   have hW := hasDerivAt_cubicAmp hθ.1 hθ.2
-  have hre := hasDerivAt_re' hW
-  have him := hasDerivAt_im' hW
+  have hre := hW.re
+  have him := hW.im
   have hns : HasDerivAt
       (fun s => (cubicAmp s).re * (cubicAmp s).re + (cubicAmp s).im * (cubicAmp s).im)
       ((cubicAmpLogDeriv θ * cubicAmp θ).re * (cubicAmp θ).re
@@ -495,8 +524,7 @@ theorem hasDerivAt_cubicAmpNorm {θ : ℝ} (hθ : θ ∈ cubicRetained) :
       + (cubicAmp θ).im * (cubicAmp θ).im) := Real.sqrt_pos.2 hpos
   rw [cubicAmpNormDeriv, Complex.norm_def, Complex.normSq_apply]
   simp only [Complex.mul_re, Complex.mul_im, Complex.conj_re, Complex.conj_im]
-  field_simp
-  ring
+  field
 
 /-- `|d‖W‖/dθ| ≤ ‖W'‖`, which is what the quotient rule needs and all it needs. -/
 theorem abs_cubicAmpNormDeriv_le {θ : ℝ} (hθ : θ ∈ cubicRetained) :
@@ -545,7 +573,7 @@ theorem cubic_den_floor_nbhd {e : ℝ} (he : 0 < e) (he2 : e < π / 2)
 normalized error of `eq:principal-decomposition` is not merely `O(σ^M)` but `C¹`
 with derivative `O(Mσ^M)`, at the same explicit `σ = τ(e) < 1`.
 
-`DominanceFT.ftCoeff_re_sub_principal_eq_contour_re` puts the numerator on the
+`DominanceFTSupply.ftCoeff_re_sub_principal_eq_contour_re` puts the numerator on the
 contour, where `PoleExpansion.hasDerivAt_ftContourRem_comp` differentiates it;
 `hasDerivAt_cubicAmpNorm` differentiates the denominator `2‖W‖`; and
 `QuotientDerivBound.abs_div_deriv_le_of_scaled` folds the quotient rule's two
@@ -577,7 +605,6 @@ theorem cubic_interior_cos_error_C1 {e a b : ℝ} (he : 0 < e) (he2 : e < π / 2
   have harc : ∀ θ ∈ Icc a b, θ ∈ Ioo 0 π := fun θ hθ => (hsubR hθ).1
   have hCI : (0 : ℝ) ≤ cubicTau e * (4 / cubicDenFloor e) := by positivity
   have hQd0 : (0 : ℝ) ≤ 4 / (cubicDenFloor e / 2) ^ 2 := by positivity
-  have hrem := cubic_interior_remainder he he2
   obtain ⟨A, hA, hfloor⟩ :=
     exists_amplitude_floor_on_subarc (Q := cubicQ) (B := witB) (r := 1)
       (z := fun θ' => cubicZ (cubicTau θ') θ') (τ := cubicTau) (a := a) (b := b)
@@ -624,13 +651,8 @@ theorem cubic_interior_cos_error_C1 {e a b : ℝ} (he : 0 < e) (he2 : e < π / 2
     have hhalf : 1 / 2 ≤ cubicTau θ :=
       half_le_cubicTau ⟨(harc θ hθ).1.le, (harc θ hθ).2.le⟩
     -- the `C⁰` bound on the contour value
-    obtain ⟨hr, hs, hsm, hne, hpair⟩ := cubic_pole_data (harc θ hθ)
-    have heq := ftRemainder_eq_contour (Q := cubicQ) (B := witB)
-      hasRealCoeffs_cubicQ hasRealCoeffs_witB le_rfl (by simp [cubicQ])
-      (z := fun θ' => cubicZ (cubicTau θ') θ') (τ := cubicTau)
-      hτ0 one_pos (cubicTau_lt_one (harc θ hθ)) hr hs hsm hne hpair M
-    have hb := hrem M θ (hsube hθ)
-    rw [heq, abs_of_nonneg (mul_nonneg (pow_nonneg hτ0.le _) (norm_nonneg _))] at hb
+    have hb := cubic_interior_remainder_norm he he2 (harc θ hθ) (hsube hθ) M
+    have hre := abs_re_scaled_ftContourRem_le he he2 (harc θ hθ) (hsube hθ) M
     -- the contour derivative
     have hCB : ∀ t ∈ Metric.sphere (0 : ℂ) 1, ‖witB.eval t‖ ≤ 4 :=
       fun t ht => norm_witB_eval_le (by simpa using Metric.mem_sphere.1 ht)
@@ -649,18 +671,12 @@ theorem cubic_interior_cos_error_C1 {e a b : ℝ} (he : 0 < e) (he2 : e < π / 2
     have hpow := ((hasDerivAt_cubicTau (harc θ hθ)).ofReal_comp).pow (M + 1)
     have hD : HasDerivAt (fun s => 2 * ‖cubicAmp s‖) (2 * cubicAmpNormDeriv θ) θ :=
       (hasDerivAt_cubicAmpNorm (hsubR hθ)).const_mul 2
-    refine ⟨_, (hasDerivAt_re' (hpow.mul hCR)).div hD h2W.ne', ?_⟩
+    refine ⟨_, (hpow.mul hCR).re.div hD h2W.ne', ?_⟩
     -- the numerator's value bound, in the scaled shape
     have hNs : |((((cubicTau θ : ℝ) : ℂ)) ^ (M + 1)
         * ftContourRem cubicQ witB 1 1 M ((cubicZ (cubicTau θ) θ : ℝ) : ℂ)).re|
         ≤ ((M : ℝ) + 1) * cubicTau e ^ M * (cubicTau e * (4 / cubicDenFloor e)) := by
-      have hn : |((((cubicTau θ : ℝ) : ℂ)) ^ (M + 1)
-          * ftContourRem cubicQ witB 1 1 M ((cubicZ (cubicTau θ) θ : ℝ) : ℂ)).re|
-          ≤ cubicTau e * (4 / cubicDenFloor e) * cubicTau e ^ M := by
-        refine le_trans (Complex.abs_re_le_norm _) ?_
-        rw [norm_mul, norm_pow, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hτ0]
-        exact hb
-      refine le_trans hn ?_
+      refine le_trans hre ?_
       nlinarith [mul_nonneg (mul_nonneg (sub_nonneg.2 hM1) hσn) hCI]
     -- the numerator's derivative bound: `(M+1)` from the prefactor alone
     have hN's : |(((M + 1 : ℕ) : ℂ) * ((cubicTau θ : ℝ) : ℂ) ^ (M + 1 - 1)
@@ -766,21 +782,7 @@ theorem cubic_interior_cos_error_C1 {e a b : ℝ} (he : 0 < e) (he2 : e < π / 2
       have := hfloor θ hθ; rwa [ftPrincipalAmp_cubic_eq] at this
     have hWpos : 0 < ‖cubicAmp θ‖ := lt_of_lt_of_le hA hAle
     have h2W : (0 : ℝ) < 2 * ‖cubicAmp θ‖ := by linarith
-    obtain ⟨hr, hs, hsm, hne, hpair⟩ := cubic_pole_data (harc θ hθ)
-    have heq := ftRemainder_eq_contour (Q := cubicQ) (B := witB)
-      hasRealCoeffs_cubicQ hasRealCoeffs_witB le_rfl (by simp [cubicQ])
-      (z := fun θ' => cubicZ (cubicTau θ') θ') (τ := cubicTau)
-      (cubicTau_pos θ) one_pos (cubicTau_lt_one (harc θ hθ)) hr hs hsm hne hpair M
-    have hb := hrem M θ (hsube hθ)
-    rw [heq, abs_of_nonneg (mul_nonneg (pow_nonneg (cubicTau_pos θ).le _)
-      (norm_nonneg _))] at hb
-    have hnum : |((((cubicTau θ : ℝ) : ℂ)) ^ (M + 1)
-        * ftContourRem cubicQ witB 1 1 M ((cubicZ (cubicTau θ) θ : ℝ) : ℂ)).re|
-        ≤ cubicTau e * (4 / cubicDenFloor e) * cubicTau e ^ M := by
-      refine le_trans (Complex.abs_re_le_norm _) ?_
-      rw [norm_mul, norm_pow, Complex.norm_real, Real.norm_eq_abs,
-        abs_of_pos (cubicTau_pos θ)]
-      exact hb
+    have hnum := abs_re_scaled_ftContourRem_le he he2 (harc θ hθ) (hsube hθ) M
     have hC1' : cubicTau e * (4 / cubicDenFloor e) ≤ Cst * (2 * A) := by
       rw [div_le_iff₀ (by positivity : (0:ℝ) < 2 * A)] at hC1; exact hC1
     have hσn : (0:ℝ) ≤ cubicTau e ^ M := by positivity

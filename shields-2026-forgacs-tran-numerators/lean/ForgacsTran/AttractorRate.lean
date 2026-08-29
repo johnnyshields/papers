@@ -138,8 +138,7 @@ theorem eval_derivative_ftDen_panel_factor {t u v : ℂ} (ht : t ≠ 0)
       = -(1 / 8) * ((t - u) * (t - v)) := by
   have hexp : (t - u) * (t - v) = t ^ 2 - (u + v) * t + u * v := by ring
   rw [eval_derivative_ftDen_panel, hexp, hsum, hprod, panelZstar]
-  field_simp
-  ring
+  field
 
 /-! ### The multiplicity of the cancellation -/
 

@@ -37,6 +37,12 @@ python3 check_retained_block_bookkeeping.py
 python3 check_endpoint_branch_lipschitz.py
 python3 check_endpoint_cofactor_bound.py
 python3 check_endpoint_curvature_collar.py
+python3 check_arc_phase_bound.py
+python3 check_upper_endpoint_multiplicity.py
+python3 check_favard_root_states.py
+python3 check_cubic_branch_corner.py
+python3 check_rho_one_lower_endpoint.py
+python3 check_dominance_cell_coverage.py
 python3 check_angle_partial_tau_vanishes.py
 python3 check_upper_endpoint_cofactor_form.py
 python3 check_cubic_composition.py
@@ -46,6 +52,10 @@ python3 check_rho_one_hsep_scope.py
 python3 check_quotient_route_independently.py
 python3 check_divided_difference_c1.py
 python3 check_crossing_set_tangency.py
+python3 check_branch_convexity.py
+python3 check_curvature_reduction.py
+python3 check_fixed_factor_b_free.py
+python3 check_endpoint_amplitude_convention.py
 python3 verify_proof.py
 python3 verify_equidistribution.py
 python3 check_local_clock.py
@@ -68,6 +78,8 @@ python3 check_tau_one_sided_derivative.py
 python3 check_lower_collision_order_two.py
 python3 check_endpoint_conjugate_split.py
 python3 check_tau_second_derivative_limit.py
+python3 check_endpoint_tau2_limit.py
+python3 check_endpoint_tau2_simple.py
 python3 check_pencil_im_odd_expansion.py
 python3 check_clearance_general_n.py
 python3 check_lower_per_root_clearance.py
@@ -88,10 +100,12 @@ python3 check_hout_shrinking.py
 python3 check_simple_endpoint.py
 python3 check_simple_witness.py
 python3 check_recurrence_stdlib.py
+python3 check_necessity_witness.py
 python3 make_figure_pole_geom.py
 python3 consistency_figure_claims.py
 python3 make_figure_clock_collapse.py
 python3 consistency_clock_figure_claims.py
+python3 render_figures.py
 python3 check_ft_geometry_general_r.py
 python3 check_phase_variation_on_divisor.py
 python3 check_phase_variation_not_from_pointwise_bound.py
@@ -128,6 +142,10 @@ python3 check_upper_endpoint_general_n.py
 python3 check_lower_endpoint_not_simplex.py
 python3 check_lower_cluster_empty_rho_one.py
 python3 check_upper_residue_modulus.py
+python3 check_kappa_zero_positive.py
+python3 check_upper_endpoint_amplitude_mirror.py
+python3 check_r_one_upper_endpoint_regularity.py
+python3 check_upper_endpoint_branch_slope.py
 
 # Every script above exits nonzero on a failed assertion and `set -e` stops
 # the run there, so reaching this line means all of them passed.

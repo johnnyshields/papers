@@ -3,6 +3,11 @@ Copyright (c) 2026 Johnny Shields. All rights reserved.
 Released under the MIT license as described in the file LICENSE.txt.
 Authors: Johnny Shields
 -/
+import ForgacsTran.CompositionLinks
+import ForgacsTran.CompositionLinksRhoOne
+import ForgacsTran.EndpointArcObstruction
+import ForgacsTran.MainAdmissible
+import ForgacsTran.PencilIndex
 import ForgacsTran.ZeroCount
 import ForgacsTran.Reduction
 import ForgacsTran.EventualDegree
@@ -11,6 +16,7 @@ import ForgacsTran.SignAlternation
 import ForgacsTran.ClusterContour
 import ForgacsTran.LinearCase
 import ForgacsTran.Necessity
+import ForgacsTran.NecessityBivariate
 import ForgacsTran.Dominance
 import ForgacsTran.DominanceCellPartition
 import ForgacsTran.PhaseStateDichotomy
@@ -57,9 +63,19 @@ import ForgacsTran.CubicPhaseDerivative
 import ForgacsTran.CubicMain
 import ForgacsTran.SimpleEndpoint
 import ForgacsTran.SimpleWitness
+import ForgacsTran.FavardRootStates
+import ForgacsTran.CubicRootStates
+import ForgacsTran.LowerEndpointCorner
+import ForgacsTran.EndpointCriticalFactor
+import ForgacsTran.LowerEndpointSimpleZero
+import ForgacsTran.LowerEndpointTangent
+import ForgacsTran.PolarAngleBase
+import ForgacsTran.TangentVariationBound
+import ForgacsTran.AmplitudeAlong
 import ForgacsTran.UpperClusterWitness
 import ForgacsTran.JointWitness
 import ForgacsTran.QuadraticWitness
+import ForgacsTran.MainCompositionWitness
 import ForgacsTran.QuasiOrthogonalZeros
 import ForgacsTran.QuadraticDefect
 import ForgacsTran.Sharpness
@@ -88,6 +104,9 @@ import ForgacsTran.ClauseThreeReduction
 import ForgacsTran.ClauseThreeRayRemainder
 import ForgacsTran.ClauseThreeQuadraticRay
 import ForgacsTran.ClauseThreeDefect
+import ForgacsTran.ClauseThreeSupply
+import ForgacsTran.ClauseThreeChainObstruction
+import ForgacsTran.ClauseThreeAdmissible
 import ForgacsTran.FTBranchEndpoint
 import ForgacsTran.FTBranchFunction
 import ForgacsTran.FTBranchRegularity
@@ -115,9 +134,12 @@ import ForgacsTran.EndpointUpperOne
 import ForgacsTran.EndpointUpperOneBinders
 import ForgacsTran.InteriorBranchSeparation
 import ForgacsTran.WeightedDominanceBranch
+import ForgacsTran.DominanceBandAntitone
 import ForgacsTran.WeightedDominanceBranchOne
 import ForgacsTran.EndpointUpperPackage
+import ForgacsTran.EndpointUpperMultiplicity
 import ForgacsTran.EndpointCofactorBound
+import ForgacsTran.ArcPhaseBound
 import ForgacsTran.EndpointLowerRhoOne
 import ForgacsTran.PencilArcSymmetry
 import ForgacsTran.RhoOneEndpointFactorization
@@ -126,6 +148,8 @@ import ForgacsTran.LowerSeparationQuotient
 import ForgacsTran.AmplitudeBand
 import ForgacsTran.PhaseBranchSplit
 import ForgacsTran.PhaseVariationBlocks
+import ForgacsTran.BranchSupply
+import ForgacsTran.PhaseTangency
 import ForgacsTran.RhoOneDominanceComposition
 import ForgacsTran.QuotientDerivBound
 import ForgacsTran.InteriorSeparation
@@ -136,17 +160,59 @@ import ForgacsTran.CubicClockSpacing
 import ForgacsTran.PrincipalSimple
 import ForgacsTran.PrincipalSimpleBranch
 import ForgacsTran.BranchCurvature
+import ForgacsTran.BranchRadiusMonotone
+import ForgacsTran.BranchCircle
+import ForgacsTran.BranchTangentSum
+import ForgacsTran.BranchAngleDerivSum
 import ForgacsTran.BranchAmplitude
 import ForgacsTran.PhaseDerivativeBound
 import ForgacsTran.BranchInteriorC1
 import ForgacsTran.BranchStrongClock
 import ForgacsTran.BranchClockSpacing
+import ForgacsTran.BranchArcGeometry
+import ForgacsTran.BranchDivisorWitness
+import ForgacsTran.BranchRetainedNonempty
+import ForgacsTran.DominanceSupplyClosure
+import ForgacsTran.BranchSupplyWitness
+import ForgacsTran.CubicCollisionWitness
+import ForgacsTran.BranchSupplyCubicWitness
+import ForgacsTran.BranchSupplyGeometry
+import ForgacsTran.CubicPhaseSupplyComposition
+import ForgacsTran.TauArcAt
+import ForgacsTran.CubicPhaseSupplyClosed
+import ForgacsTran.RootStatesGeneral
+import ForgacsTran.PhaseSupplyCofactor
+import ForgacsTran.PhaseSupplyKappaZero
+import ForgacsTran.CollisionCollarLeft
+import ForgacsTran.UpperEndpointReduced
+import ForgacsTran.UpperEndpointRadius
+import ForgacsTran.UpperEndpointSlope
+import ForgacsTran.LowerEndpointReduced
+import ForgacsTran.LowerEndpointRates
+import ForgacsTran.LowerCollarSimple
+import ForgacsTran.PhaseSupplyRhoOne
+import ForgacsTran.UpperCollarOne
+import ForgacsTran.PhaseSupplyOne
+import ForgacsTran.PhaseSupplyLastCorner
+import ForgacsTran.PhaseSupplyLowerCollar
+import ForgacsTran.PhaseSupplyUpperRegion
+import ForgacsTran.PhaseSupplyRegionBounds
+import ForgacsTran.PhaseSupplyGeneral
+import ForgacsTran.PhaseSupplyRhoOneClosure
+import ForgacsTran.PhaseSupplyUniform
+import ForgacsTran.AmplitudeUpperEndpoint
+import ForgacsTran.QuadraticCell
 import ForgacsTran.AngularDiscrepancy
 import ForgacsTran.MainFT
 import ForgacsTran.AngularDiscrepancyFT
+import ForgacsTran.AngularDiscrepancyAdmissible
+import ForgacsTran.AngularSupplyAdmissible
 import ForgacsTran.AngularBlocks
 import ForgacsTran.FTGeometryCone
 import ForgacsTran.AxiomCheck
+import ForgacsTran.AngleChartForm
+import ForgacsTran.EndpointTauDeriv2
+import ForgacsTran.EndpointTauDeriv2Simple
 
 /-!
 # Fixed numerators over a Forgács--Tran denominator

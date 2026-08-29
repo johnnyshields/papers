@@ -146,4 +146,11 @@ theorem exists_nonneg_root_of_logConcave_rec {n : ℕ} {a : ℕ → ℝ} (hpos :
   obtain ⟨L, hL0, hL⟩ := exists_tendsto_ratio_of_logConcave hpos hlc
   exact ⟨L, hL0, pow_eq_sum_of_tendsto_ratio hpos hL hrec⟩
 
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.exists_nonneg_root_of_logConcave_rec' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_nonneg_root_of_logConcave_rec
+
 end Shields

@@ -24,7 +24,7 @@ that is **quadratic** in `deg B`, which destroys exactly the numerator-uniformit
 `thm:main` clause 3 exists to state.  `cor:linear-phase-variation` is not a
 per-component cap; `PhaseVariation.linear_phase_variation_components_regular`
 bounds the summed variation over an ordered family directly, and
-`ViewingAngle.eVariationOn_sum_le` is what makes the refinement to a finer family
+`Shields.eVariationOn_finsetSum_le` is what makes the refinement to a finer family
 cost nothing.
 
 ## Main statements

@@ -61,9 +61,7 @@ critical points of the fiber map. -/
 theorem hasDerivAt_ftRatio (P : Polynomial ℝ) {r : ℕ} (hr : 1 ≤ r) {t : ℝ} (ht : t ≠ 0) :
     HasDerivAt (fun s => P.eval s / s ^ r) ((ftCriticalReal P r).eval t / t ^ (r + 1)) t := by
   have hpow : t ^ r ≠ 0 := pow_ne_zero _ ht
-  have hsplit : t ^ r = t * t ^ (r - 1) := by
-    conv_lhs => rw [show r = 1 + (r - 1) by omega]
-    rw [pow_add, pow_one]
+  have hsplit : t ^ r = t * t ^ (r - 1) := (mul_pow_sub_one (by omega) t).symm
   have h := (P.hasDerivAt t).div (hasDerivAt_pow r t) hpow
   refine h.congr_deriv ?_
   have h1 : ((t : ℝ) ^ r) ^ 2 ≠ 0 := pow_ne_zero _ hpow
@@ -89,7 +87,12 @@ theorem exists_ftCriticalReal_root_between {P : Polynomial ℝ} {r : ℕ} (hr : 
   exact (div_eq_zero_iff.1 hξ0).resolve_right hp
 
 /-- The logarithmic derivative of `∏_k (τ_k - X)`, in cleared form.  Stated over a
-field, since the branch argument needs it over `ℂ` as well as over `ℝ`. -/
+field, since the branch argument needs it over `ℂ` as well as over `ℝ`.
+
+**A general fact about polynomials, filed where it was first needed.**  Nothing in
+it mentions the pencil, the branch or `r`; `FTBranchGap.eval_derivative_prod_sub_at_root`
+is its companion — the same product differentiated at a root of one of its factors,
+over a `CommRing` — and the two sit in different modules for the same reason. -/
 theorem eval_derivative_prod_sub {K ι : Type*} [Field K] (s : Finset ι)
     (a : ι → K) (t : K) (h : ∀ k ∈ s, a k - t ≠ 0) :
     (derivative (∏ k ∈ s, (C (a k) - X))).eval t

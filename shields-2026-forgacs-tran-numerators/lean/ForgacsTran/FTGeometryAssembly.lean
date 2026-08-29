@@ -10,6 +10,7 @@ import ForgacsTran.DominanceFT
 import ForgacsTran.FTBranchRegularity
 import ForgacsTran.QuadraticCase
 import ForgacsTran.FTBranchProp1
+import ForgacsTran.PencilIndex
 
 /-!
 # `thm:FT-geometry`, assembled
@@ -121,15 +122,6 @@ theorem norm_ftPrincipal_eq {τ : ℝ → ℝ} {θ : ℝ} (hτ : 0 < τ θ) : �
   rw [ftPrincipal, norm_mul, Complex.norm_exp_ofReal_mul_I, mul_one, Complex.norm_real,
     Real.norm_eq_abs, abs_of_pos hτ]
 
-/-- `eq:principal-pair` — the second member `t_-(θ) = τ(θ)e^{-iθ}` is the
-conjugate of the first, so it has the same modulus. -/
-theorem conj_ftPrincipal {τ : ℝ → ℝ} (θ : ℝ) :
-    (starRingEnd ℂ) (ftPrincipal τ θ)
-      = ((τ θ : ℝ) : ℂ) * Complex.exp (-((θ : ℝ) : ℂ) * Complex.I) := by
-  rw [ftPrincipal, map_mul, Complex.conj_ofReal, ← Complex.exp_conj, map_mul,
-    Complex.conj_ofReal, Complex.conj_I]
-  ring_nf
-
 /-- **The principal pair is a genuine pair.**  `t_+` has positive imaginary part on
 the open arc, so it is distinct from `t_-`.  This is the conjugate spelling, which
 is the one `thm:FT-geometry` and `ft_minModulus_at_branch` state the pair in. -/
@@ -223,6 +215,63 @@ theorem ft_geometry_image_Ioi {r : ℕ} (hr : 1 ≤ r) {a : ℝ} {z : ℝ → �
   haveI := nhdsWithin_Ioo_neBot_right (pi_div_pos hr)
   exact image_Ioo_eq_Ioi_of_tendsto_atTop hzcont hzmono hza hzb
 
+/-! ### The two clauses that do not depend on the endpoint convention
+
+`thm:FT-geometry` has three conclusions, and only the first — the image of the
+viewing arc — changes between the finite and unbounded conventions of
+`eq:ab-def`.  The other two are the same statement at every stage of the chain
+that discharges the theorem's hypotheses, so they are named once here.
+
+Naming is definitional: each `def` unfolds to the conjunction it replaces, so a
+consumer written against the spelled-out form still elaborates and the axiom
+footprint cannot move. -/
+
+/-- **`eq:principal-pair`.**  At every angle of the viewing arc the principal
+pair `t_±(θ)` are zeros of the denominator pencil at `z(θ)`, of common modulus
+`τ(θ)`.  `t_-` is written as the conjugate of `t_+`, which is the spelling
+`thm:FT-geometry` and `ft_minModulus_at_branch` state the pair in. -/
+def FTPrincipalPair (Q : Polynomial ℂ) (r : ℕ) (z τ : ℝ → ℝ) : Prop :=
+  ∀ θ ∈ Set.Ioo 0 (π / r),
+    (ftDen Q r ((z θ : ℝ) : ℂ)).eval (ftPrincipal τ θ) = 0
+      ∧ (ftDen Q r ((z θ : ℝ) : ℂ)).eval ((starRingEnd ℂ) (ftPrincipal τ θ)) = 0
+      ∧ ‖ftPrincipal τ θ‖ = τ θ
+      ∧ ‖(starRingEnd ℂ) (ftPrincipal τ θ)‖ = τ θ
+
+/-- **`thm:FT-geometry`'s disk clause.**  The principal pair exhaust the closed
+disk `|t| ≤ τ(θ)`: a zero of the pencil there is one of the two.  This is the
+strict pointwise gap of `Forgacs2017RationalDenominator` Props. 1--2 read as a
+statement about the disk, which is the form `subsec:contour-residues` uses. -/
+def FTPrincipalDisk (Q : Polynomial ℂ) (r : ℕ) (z τ : ℝ → ℝ) : Prop :=
+  ∀ θ ∈ Set.Ioo 0 (π / r), ∀ w : ℂ,
+    (ftDen Q r ((z θ : ℝ) : ℂ)).eval w = 0 → ‖w‖ ≤ τ θ →
+      w = ftPrincipal τ θ ∨ w = (starRingEnd ℂ) (ftPrincipal τ θ)
+
+/-- **`Forgacs2017RationalDenominator` Props. 1--2, the pointwise gap.**  At every
+angle of the viewing arc, a zero of the pencil other than the principal pair has
+modulus strictly above `τ(θ)`.
+
+`FTPrincipalDisk` is the same content stated over the closed disk;
+`ft_principal_pair_of_norm_le` is the one step between them, and both spellings
+are kept because `thm:FT-geometry` states the disk form while every producer
+proves the pointwise one. -/
+def FTMinModulusGap (Q : Polynomial ℂ) (r : ℕ) (z τ : ℝ → ℝ) : Prop :=
+  ∀ θ ∈ Set.Ioo (0 : ℝ) (π / r), ∀ w : ℂ,
+    (ftDen Q r ((z θ : ℝ) : ℂ)).eval w = 0 →
+      w ≠ ftPrincipal τ θ → w ≠ (starRingEnd ℂ) (ftPrincipal τ θ) → τ θ < ‖w‖
+
+/-- **The argument condition `FTMinModulusGap` reduces to.**  A zero of the pencil
+in the closed disk of radius `τ(θ)` has argument strictly inside the double cone
+`|arg t| < π/r`.
+
+This is the two paragraphs of `Forgacs2017RationalDenominator` Prop. 1 that place
+such a zero, and `PrincipalGap.ft_minModulus_at_branch` is what turns it into the
+gap.  At `r = 1` the cone is the whole plane cut along the reals, which is why
+`RealCritical` closes it there by excluding real zeros alone. -/
+def FTArgumentCone (Q : Polynomial ℂ) (r : ℕ) (z τ : ℝ → ℝ) : Prop :=
+  ∀ θ ∈ Set.Ioo (0 : ℝ) (π / r), ∀ w : ℂ,
+    (ftDen Q r ((z θ : ℝ) : ℂ)).eval w = 0 → ‖w‖ ≤ τ θ →
+      |Complex.arg w| ∈ Set.Ioo 0 (π / r)
+
 /-! ### The assembly -/
 
 /-- **`thm:FT-geometry`, in the finite upper-endpoint convention of
@@ -287,18 +336,9 @@ theorem ft_geometry {Q : Polynomial ℂ} (hQ : HasRealCoeffs Q) {r : ℕ} (hr : 
     (hzcont : ContinuousOn z (Set.Ioo 0 (π / r)))
     (hza : Filter.Tendsto z (nhdsWithin 0 (Set.Ioo 0 (π / r))) (nhds a))
     (hzb : Filter.Tendsto z (nhdsWithin (π / r) (Set.Ioo 0 (π / r))) (nhds b))
-    (hmin : ∀ θ ∈ Set.Ioo 0 (π / r), ∀ w : ℂ,
-      (ftDen Q r ((z θ : ℝ) : ℂ)).eval w = 0 →
-        w ≠ ftPrincipal τ θ → w ≠ (starRingEnd ℂ) (ftPrincipal τ θ) → τ θ < ‖w‖) :
+    (hmin : FTMinModulusGap Q r z τ) :
     z '' Set.Ioo 0 (π / r) = Set.Ioo a b
-      ∧ (∀ θ ∈ Set.Ioo 0 (π / r),
-          (ftDen Q r ((z θ : ℝ) : ℂ)).eval (ftPrincipal τ θ) = 0
-            ∧ (ftDen Q r ((z θ : ℝ) : ℂ)).eval ((starRingEnd ℂ) (ftPrincipal τ θ)) = 0
-            ∧ ‖ftPrincipal τ θ‖ = τ θ
-            ∧ ‖(starRingEnd ℂ) (ftPrincipal τ θ)‖ = τ θ)
-      ∧ (∀ θ ∈ Set.Ioo 0 (π / r), ∀ w : ℂ,
-          (ftDen Q r ((z θ : ℝ) : ℂ)).eval w = 0 → ‖w‖ ≤ τ θ →
-            w = ftPrincipal τ θ ∨ w = (starRingEnd ℂ) (ftPrincipal τ θ)) := by
+      ∧ FTPrincipalPair Q r z τ ∧ FTPrincipalDisk Q r z τ := by
   refine ⟨ft_geometry_image_Ioo hr hzcont hzmono hza hzb, fun θ hθ => ?_,
     fun θ hθ w hw hnorm => ft_principal_pair_of_norm_le (hmin θ hθ) hw hnorm⟩
   exact ⟨hbranch θ hθ, ftPrincipal_conj_eval_eq_zero hQ (hbranch θ hθ),
@@ -320,18 +360,9 @@ theorem ft_geometry_unbounded {Q : Polynomial ℂ} (hQ : HasRealCoeffs Q) {r : �
     (hzcont : ContinuousOn z (Set.Ioo 0 (π / r)))
     (hza : Filter.Tendsto z (nhdsWithin 0 (Set.Ioo 0 (π / r))) (nhds a))
     (hzb : Filter.Tendsto z (nhdsWithin (π / r) (Set.Ioo 0 (π / r))) Filter.atTop)
-    (hmin : ∀ θ ∈ Set.Ioo 0 (π / r), ∀ w : ℂ,
-      (ftDen Q r ((z θ : ℝ) : ℂ)).eval w = 0 →
-        w ≠ ftPrincipal τ θ → w ≠ (starRingEnd ℂ) (ftPrincipal τ θ) → τ θ < ‖w‖) :
+    (hmin : FTMinModulusGap Q r z τ) :
     z '' Set.Ioo 0 (π / r) = Set.Ioi a
-      ∧ (∀ θ ∈ Set.Ioo 0 (π / r),
-          (ftDen Q r ((z θ : ℝ) : ℂ)).eval (ftPrincipal τ θ) = 0
-            ∧ (ftDen Q r ((z θ : ℝ) : ℂ)).eval ((starRingEnd ℂ) (ftPrincipal τ θ)) = 0
-            ∧ ‖ftPrincipal τ θ‖ = τ θ
-            ∧ ‖(starRingEnd ℂ) (ftPrincipal τ θ)‖ = τ θ)
-      ∧ (∀ θ ∈ Set.Ioo 0 (π / r), ∀ w : ℂ,
-          (ftDen Q r ((z θ : ℝ) : ℂ)).eval w = 0 → ‖w‖ ≤ τ θ →
-            w = ftPrincipal τ θ ∨ w = (starRingEnd ℂ) (ftPrincipal τ θ)) := by
+      ∧ FTPrincipalPair Q r z τ ∧ FTPrincipalDisk Q r z τ := by
   refine ⟨ft_geometry_image_Ioi hr hzcont hzmono hza hzb, fun θ hθ => ?_,
     fun θ hθ w hw hnorm => ft_principal_pair_of_norm_le (hmin θ hθ) hw hnorm⟩
   exact ⟨hbranch θ hθ, ftPrincipal_conj_eval_eq_zero hQ (hbranch θ hθ),
@@ -353,9 +384,7 @@ theorem ft_geometry_compact_separation {Q : Polynomial ℂ} {r : ℕ} {z τ : �
     (hroot : ∀ θ ∈ K, ∀ i ∈ J, (ftDen Q r ((z θ : ℝ) : ℂ)).eval (t i θ) = 0)
     (hnp : ∀ θ ∈ K, ∀ i ∈ J, t i θ ≠ ftPrincipal τ θ)
     (hnp' : ∀ θ ∈ K, ∀ i ∈ J, t i θ ≠ (starRingEnd ℂ) (ftPrincipal τ θ))
-    (hmin : ∀ θ ∈ Set.Ioo 0 (π / r), ∀ w : ℂ,
-      (ftDen Q r ((z θ : ℝ) : ℂ)).eval w = 0 →
-        w ≠ ftPrincipal τ θ → w ≠ (starRingEnd ℂ) (ftPrincipal τ θ) → τ θ < ‖w‖) :
+    (hmin : FTMinModulusGap Q r z τ) :
     ∃ ratio > (1 : ℝ), ∀ θ ∈ K, ∀ i ∈ J, ratio * τ θ ≤ ‖t i θ‖ :=
   ft_compact_uniform_separation hK ht hτcont (fun θ hθ => hτpos θ (hKsub hθ))
     fun θ hθ i hi =>
@@ -529,15 +558,13 @@ theorem ft_geometry_hypotheses_satisfiable {q0 q1 q2 : ℝ} (hq0 : 0 < q0) (hq2 
       ContinuousOn z (Set.Ioo 0 (π / r)) ∧
       Filter.Tendsto z (nhdsWithin 0 (Set.Ioo 0 (π / r))) (nhds a) ∧
       Filter.Tendsto z (nhdsWithin (π / r) (Set.Ioo 0 (π / r))) (nhds b) ∧
-      (∀ θ ∈ Set.Ioo 0 (π / r), ∀ w : ℂ,
-        (ftDen Q r ((z θ : ℝ) : ℂ)).eval w = 0 →
-          w ≠ ftPrincipal τ θ → w ≠ (starRingEnd ℂ) (ftPrincipal τ θ) → τ θ < ‖w‖) := by
+      (FTMinModulusGap Q r z τ) := by
   set s : ℝ := Real.sqrt (q0 * q2) with hs
   have hs0 : 0 < s := Real.sqrt_pos.mpr (by positivity)
   set τc : ℝ := Real.sqrt (q0 / q2) with hτc
   have hτ0 : 0 < τc := Real.sqrt_pos.mpr (by positivity)
   set zf : ℝ → ℝ := fun θ => -q1 - 2 * s * Real.cos θ with hzf
-  have hπr : π / ((1 : ℕ) : ℝ) = π := by norm_num
+  have hπr : π / ((1 : ℕ) : ℝ) = π := pi_div_natCast_one
   have hzcont : Continuous zf := by rw [hzf]; fun_prop
   refine ⟨quadPoly q0 q1 q2, 1, zf, fun _ => τc, -q1 - 2 * s, -q1 + 2 * s,
     hasRealCoeffs_quadPoly q0 q1 q2, le_rfl, by linarith, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
@@ -554,8 +581,8 @@ theorem ft_geometry_hypotheses_satisfiable {q0 q1 q2 : ℝ} (hq0 : 0 < q0) (hq2 
     rw [hπr]
     simpa [hzf] using hzcont.tendsto π
   -- the minimum-modulus hypothesis: a degree-two pencil has no third zero
-  · rw [hπr]
-    intro θ hθ w hw hne hne'
+  · intro θ hθ w hw hne hne'
+    rw [hπr] at hθ
     exfalso
     classical
     set P : Polynomial ℂ := ftDen (quadPoly q0 q1 q2) 1 ((zf θ : ℝ) : ℂ) with hP

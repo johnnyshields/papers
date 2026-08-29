@@ -6,6 +6,7 @@ Authors: Johnny Shields
 import ForgacsTran.FTBranchProp1
 import ForgacsTran.FTBranchCritical
 import ForgacsTran.FTBranchPencil
+import ForgacsTran.ComplexPart
 
 /-!
 # `z(θ)` is strictly monotone
@@ -166,9 +167,8 @@ theorem hasDerivAt_ftZFun {n r l : ℕ} {a : Fin n → ℝ} (c : ℝ) (hn : 0 < 
       ((r : ℂ) * (ftBranchPoint a r l θ₀) ^ (r - 1) * ftBranchPointDeriv a r l θ₀) θ₀ :=
     (hasDerivAt_pow r (ftBranchPoint a r l θ₀)).comp θ₀ hW
   refine (hnum.div hden (pow_ne_zero _ hne)).congr_deriv ?_
-  have hsplit : ∀ x : ℂ, x ^ r = x * x ^ (r - 1) := fun x => by
-    conv_lhs => rw [show r = 1 + (r - 1) by omega]
-    rw [pow_add, pow_one]
+  have hsplit : ∀ x : ℂ, x ^ r = x * x ^ (r - 1) :=
+    fun x => (mul_pow_sub_one (by omega) x).symm
   have hsucc : (ftBranchPoint a r l θ₀) ^ (r + 1)
       = (ftBranchPoint a r l θ₀) ^ r * ftBranchPoint a r l θ₀ := pow_succ _ r
   have h1 : ((ftBranchPoint a r l θ₀) ^ r) ^ 2 ≠ 0 := pow_ne_zero _ (pow_ne_zero _ hne)
@@ -178,14 +178,6 @@ theorem hasDerivAt_ftZFun {n r l : ℕ} {a : Fin n → ℝ} (c : ℝ) (hn : 0 < 
   ring
 
 /-! ### The sign of the derivative -/
-
-private theorem ftHasDerivAt_re {f : ℝ → ℂ} {f' : ℂ} {x : ℝ} (h : HasDerivAt f f' x) :
-    HasDerivAt (fun t => (f t).re) f'.re x :=
-  Complex.reCLM.hasFDerivAt.comp_hasDerivAt x h
-
-private theorem ftHasDerivAt_im {f : ℝ → ℂ} {f' : ℂ} {x : ℝ} (h : HasDerivAt f f' x) :
-    HasDerivAt (fun t => (f t).im) f'.im x :=
-  Complex.imCLM.hasFDerivAt.comp_hasDerivAt x h
 
 theorem ftBranchZ_pos {n r l : ℕ} {a : Fin n → ℝ} {c : ℝ} (ha : ∀ k, 0 < a k) (hc : 0 < c)
     (hpar : Even (n + l + 1)) {θ : ℝ} (hθ : θ ∈ Ioo 0 π) (h : FTBranchAt a r l θ) :
@@ -247,10 +239,10 @@ theorem hasDerivAt_ftBranchZ {n r l : ℕ} {a : Fin n → ℝ} {c : ℝ} (hn : 0
   have him : (-((ftBranchZ a c r l θ₀ : ℝ) : ℂ) * ftSigma a r (ftBranchPoint a r l θ₀)
       * (((ftTauDeriv a r l θ₀ : ℝ) : ℂ) - ((ftTau a r l θ₀ : ℝ) : ℂ) * Complex.I)
       / ((ftTau a r l θ₀ : ℝ) : ℂ)).im = 0 := by
-    have h1 := ftHasDerivAt_im hDr
+    have h1 := hDr.im
     simp only [Complex.ofReal_im] at h1
     exact ((hasDerivAt_const θ₀ (0 : ℝ)).unique h1).symm
-  have hre := ftHasDerivAt_re hDr
+  have hre := hDr.re
   simp only [Complex.ofReal_re] at hre
   refine hre.congr_deriv ?_
   -- the algebra of `Eq. (23)`

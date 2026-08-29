@@ -6,6 +6,8 @@ Authors: Johnny Shields
 import ForgacsTran.FTBranchEndpoint
 import ForgacsTran.FTBranchUpper
 import ForgacsTran.FTGeometryBranch
+import ForgacsTran.PencilIndex
+import ForgacsTran.UpperEndpointReduced
 
 /-!
 # The upper-endpoint limit of the branch radius, at `r = 1`
@@ -104,7 +106,7 @@ theorem pi_sub_ftAngle_eq_arctan {a τ θ : ℝ} (ha : 0 < a) (hτ : 0 < τ)
   set y : ℝ := (a / τ - cos θ) / sin θ with hy
   have hypos : 0 < y := div_pos hd hs
   have hX : cos θ / sin θ - a / (τ * sin θ) = -y := by
-    rw [hy]; field_simp; ring
+    rw [hy]; field
   have hangle : ftAngle a τ θ = π / 2 + arctan y := by
     rw [ftAngle, ftArccot, hX, arctan_neg]; ring
   have hinv : y⁻¹ = sin θ / (a / τ - cos θ) := by
@@ -122,8 +124,7 @@ theorem sum_arctan_deficit_eq {n : ℕ} {a : Fin n → ℝ} (hn : 0 < n) (ha : �
   have hdef : ∑ k, arctan (sin θ / (a k / ftTau a 1 (n - 1) θ - cos θ))
       = ∑ k, (π - ftAngle (a k) (ftTau a 1 (n - 1) θ) θ) :=
     Finset.sum_congr rfl fun k _ => (pi_sub_ftAngle_eq_arctan (ha k) hτ hθ).symm
-  have hn1 : ((n - 1 : ℕ) : ℝ) = (n : ℝ) - 1 := by
-    rw [Nat.cast_sub (by omega), Nat.cast_one]
+  have hn1 : ((n - 1 : ℕ) : ℝ) = (n : ℝ) - 1 := cast_pred_eq_sub_one (by omega)
   rw [hdef, Finset.sum_sub_distrib, Finset.sum_const, Finset.card_univ, Fintype.card_fin,
     nsmul_eq_mul]
   rw [ftAngleSum] at hsum
@@ -249,10 +250,6 @@ At `θ = π` the arc point is `-τ`, which is real, so `ftPencilIm` vanishes the
 whatever the radius.  Rolle on `[θ, π]` then delivers an interior zero of the
 `θ`-derivative, and that derivative at `π` is `E(-τ)`. -/
 
-theorem eval_map_ofReal (P : Polynomial ℝ) (t : ℝ) :
-    (P.map (algebraMap ℝ ℂ)).eval ((t : ℝ) : ℂ) = ((P.eval t : ℝ) : ℂ) := by
-  rw [eval_map, ← aeval_def, aeval_ofReal]
-
 @[simp] theorem ftArcPoint_pi (τ : ℝ) : ftArcPoint τ π = ((-τ : ℝ) : ℂ) := by
   have h : Complex.exp (-(π : ℂ) * Complex.I) = -1 := by
     rw [show -(π : ℂ) * Complex.I = -((π : ℂ) * Complex.I) by ring, Complex.exp_neg,
@@ -262,16 +259,11 @@ theorem eval_map_ofReal (P : Polynomial ℝ) (t : ℝ) :
   push_cast
   ring
 
-/-- **At `θ = π` the pencil's imaginary part vanishes identically.**  The arc
-point is `-τ`, real, so `e^{iπ}P(-τ)` is real for every radius.  This is what
-Rolle needs at the right end of `[θ, π]`. -/
-@[simp] theorem ftPencilIm_pi (P : Polynomial ℝ) (τ : ℝ) : ftPencilIm P 1 τ π = 0 := by
-  have hexp : Complex.exp (((((1 : ℕ) : ℝ) * π : ℝ)) * Complex.I) = -1 := by
-    push_cast
-    rw [one_mul, Complex.exp_pi_mul_I]
-  rw [ftPencilIm, ftArcPoint_pi, eval_map_ofReal, hexp,
-    show (-1 : ℂ) * ((P.eval (-τ) : ℝ) : ℂ) = ((-(P.eval (-τ)) : ℝ) : ℂ) by push_cast; ring]
-  exact Complex.ofReal_im _
+/-! **At `θ = π` the pencil's imaginary part vanishes identically.**  The arc point is
+`-τ`, real, so `e^{iπ}P(-τ)` is real for every radius, which is what Rolle needs at the
+right end of `[θ, π]`.  That is `UpperEndpointReduced.ftPencilIm_pi`, the `φ = 0` case of
+the factorization `ftPencilIm_pi_add`, and it was also proved directly here: the two
+statements were identical and both `@[simp]`, which no build reports. -/
 
 /-- **At `θ = π` the `θ`-derivative is the critical polynomial at `-τ`.**  The
 counterpart of `ftPencilImDeriv_zero`, which reads `-E(τ)` at the lower end. -/
@@ -379,7 +371,7 @@ The argument is `exists_tendsto_ftTau_nhdsGT_zero_of_two_le`'s, with
 `ftTau_le_two_mul_of_lt_pi` in place of `ftTau_le_div_cos`: the radius stays in a
 compact interval, every cluster point reflects to a zero of `E`, that zero set is
 finite, and a continuous function cannot cluster at two values without clustering
-at every value between. 
+at every value between.
 **Differs from the paper's route.**  The paper takes the upper endpoint from the
 critical polynomial: `t_b` is *defined* as the negative critical point of `g`,
 and `b = g(t_b)` follows.  Here the limit is produced first, from the angle count
@@ -538,7 +530,7 @@ theorem exists_tendsto_ftBranchZ_arc_end_pi {n : ℕ} {a : Fin n → ℝ} {c : �
     (ha : ∀ k, 0 < a k) (hc : 0 < c) :
     ∃ b : ℝ, Filter.Tendsto (ftBranchZ a c 1 (n - 1))
       (𝓝[Ioo 0 (π / ((1 : ℕ) : ℝ))] (π / ((1 : ℕ) : ℝ))) (𝓝 b) := by
-  have hcast : π / ((1 : ℕ) : ℝ) = π := by push_cast; rw [div_one]
+  have hcast : π / ((1 : ℕ) : ℝ) = π := pi_div_natCast_one
   obtain ⟨L, hL, hτ, -⟩ := exists_tendsto_ftTau_nhdsLT_pi hn2 ha hc
   refine ⟨-(ftRootPolyReal c a).eval (-L) / (-L) ^ 1, ?_⟩
   rw [hcast]

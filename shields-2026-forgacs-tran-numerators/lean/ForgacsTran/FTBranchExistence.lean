@@ -4,6 +4,7 @@ Released under the MIT license as described in the file LICENSE.txt.
 Authors: Johnny Shields
 -/
 import ForgacsTran.FTBranchAngle
+import ForgacsTran.PencilIndex
 
 /-!
 # Existence and uniqueness of the Forgács–Tran branch
@@ -129,8 +130,7 @@ theorem ftAngleSum_range_of_eq_sub_one {n r : ℕ} (hn : 0 < n) (hr : 1 ≤ r)
   have hr0 : (0 : ℝ) < r := by exact_mod_cast hr
   have hr1 : (1 : ℝ) ≤ r := by exact_mod_cast hr
   have hpi := pi_pos
-  have hn1 : ((n - 1 : ℕ) : ℝ) = (n : ℝ) - 1 := by
-    rw [Nat.cast_sub hn, Nat.cast_one]
+  have hn1 : ((n - 1 : ℕ) : ℝ) = (n : ℝ) - 1 := cast_pred_eq_sub_one hn
   rw [hn1]
   rcases Nat.lt_or_ge n 2 with hn2 | hn2
   · -- `n = 1`, so the sum condition reads `θ < rθ` and needs `r ≥ 2`

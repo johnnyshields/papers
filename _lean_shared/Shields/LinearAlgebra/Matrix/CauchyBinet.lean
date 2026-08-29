@@ -17,6 +17,8 @@ Two determinant expansions over the `k`-element column selections of a rectangul
 
 ## Main results
 
+* `Shields.increasingSelections_nonempty`: the increasing selections of `r` out of `n` are
+  nonempty when `r ≤ n`.
 * `Shields.det_mul_eq_sum_increasing`: **Cauchy--Binet**, `det (A * B) = ∑_S det A_{•,S} * det
   B_{S,•}`, the sum over strictly monotone `S : Fin k → Fin n`.
 * `Shields.det_gram_eq_sum_increasing`: the **Andréief** (Gram--Heine) expansion of the `k × k`
@@ -65,6 +67,12 @@ def increasingSelections (k n : ℕ) : Finset (Fin k → Fin n) :=
 @[simp] theorem mem_increasingSelections {k n : ℕ} {f : Fin k → Fin n} :
     f ∈ increasingSelections k n ↔ StrictMono f := by
   simp [increasingSelections]
+
+/-- There is at least one increasing selection of `r` out of `n` when `r ≤ n`. -/
+theorem increasingSelections_nonempty {r n : ℕ} (h : r ≤ n) :
+    Nonempty (increasingSelections r n) :=
+  ⟨⟨fun i => ⟨(i : ℕ), lt_of_lt_of_le i.isLt h⟩,
+    mem_increasingSelections.mpr fun _ _ hab => hab⟩⟩
 
 /-- The injective maps `Fin k → Fin n`, i.e. the `k`-element subsets of `Fin n`
 listed in every order. -/
@@ -125,15 +133,27 @@ Every injective `g : Fin k → Fin n` factors uniquely as `f ∘ τ` with `f`
 strictly monotone and `τ` a permutation of `Fin k`; the factorization is
 supplied by `Tuple.sort`. -/
 
+/-- Composing with a permutation and then undoing it. -/
+private theorem comp_perm_comp_inv (u : Fin k → Fin n) (σ : Equiv.Perm (Fin k)) :
+    (u ∘ ⇑σ) ∘ ⇑σ⁻¹ = u := by
+  rw [Function.comp_assoc, ← Equiv.Perm.coe_mul, mul_inv_cancel, Equiv.Perm.coe_one,
+    Function.comp_id]
+
+/-- The sorting permutation of `f ∘ τ`, for `f` strictly monotone, is `τ⁻¹`: undoing `τ` is what
+puts `f ∘ τ` back in increasing order, and an injective tuple has only one such permutation. -/
+private theorem sort_comp_perm {f : Fin k → Fin n} (hf : StrictMono f) (τ : Equiv.Perm (Fin k)) :
+    Tuple.sort (f ∘ ⇑τ) = τ⁻¹ := by
+  have h1 : (f ∘ ⇑τ) ∘ ⇑(Tuple.sort (f ∘ ⇑τ)) = f := by
+    rw [Tuple.comp_perm_comp_sort_eq_comp_sort,
+      Tuple.sort_eq_refl_iff_monotone.mpr hf.monotone, Equiv.coe_refl, Function.comp_id]
+  exact Equiv.ext fun a => (hf.injective.comp τ.injective)
+    (congrFun (h1.trans (comp_perm_comp_inv f τ).symm) a)
+
 /-- Reindexing an injective selection as (increasing selection, permutation). -/
 private theorem sum_injective_eq_sum_increasing_perm (Φ : (Fin k → Fin n) → R) :
     (∑ g ∈ injectiveSelections k n, Φ g)
       = ∑ p ∈ (increasingSelections k n) ×ˢ (Finset.univ : Finset (Equiv.Perm (Fin k))),
           Φ (p.1 ∘ ⇑p.2) := by
-  have hcancel : ∀ (u : Fin k → Fin n) (σ : Equiv.Perm (Fin k)), (u ∘ ⇑σ) ∘ ⇑σ⁻¹ = u := by
-    intro u σ
-    rw [Function.comp_assoc, ← Equiv.Perm.coe_mul, mul_inv_cancel, Equiv.Perm.coe_one,
-      Function.comp_id]
   -- `Tuple.sort g` is the permutation of `Fin k` that puts `g` in increasing order.
   refine Finset.sum_nbij'
     (fun g => (g ∘ ⇑(Tuple.sort g), (Tuple.sort g)⁻¹))
@@ -150,21 +170,12 @@ private theorem sum_injective_eq_sum_increasing_perm (Φ : (Fin k → Fin n) →
     rw [mem_injectiveSelections]
     exact hp.1.injective.comp τ.injective
   · intro g _
-    exact hcancel g (Tuple.sort g)
+    exact comp_perm_comp_inv g (Tuple.sort g)
   · rintro ⟨f, τ⟩ hp
     rw [Finset.mem_product, mem_increasingSelections] at hp
-    have hf : StrictMono f := hp.1
-    -- `f ∘ τ` sorts back to `f`, so its sorting permutation is `τ⁻¹`.
-    have h1 : (f ∘ ⇑τ) ∘ ⇑(Tuple.sort (f ∘ ⇑τ)) = f := by
-      rw [Tuple.comp_perm_comp_sort_eq_comp_sort,
-        Tuple.sort_eq_refl_iff_monotone.mpr hf.monotone, Equiv.coe_refl, Function.comp_id]
-    have h2 : (f ∘ ⇑τ) ∘ ⇑τ⁻¹ = f := hcancel f τ
-    have hinj : Function.Injective (f ∘ ⇑τ) := hf.injective.comp τ.injective
-    have hsort : Tuple.sort (f ∘ ⇑τ) = τ⁻¹ :=
-      Equiv.ext fun a => hinj (congrFun (h1.trans h2.symm) a)
-    rw [hsort, h2, inv_inv]
+    rw [sort_comp_perm hp.1 τ, comp_perm_comp_inv f τ, inv_inv]
   · intro g _
-    rw [hcancel g (Tuple.sort g)]
+    rw [comp_perm_comp_inv g (Tuple.sort g)]
 
 /-- Collapsing the permutation sum at a fixed increasing selection produces the
 pair of complementary minors. -/
@@ -278,6 +289,33 @@ private theorem sum_eq_factorial_mul_sum_increasing (Ψ : (Fin k → Fin n) → 
     _ = (Nat.factorial k : R) * ∑ f ∈ increasingSelections k n, Ψ f :=
         (Finset.mul_sum _ _ _).symm
 
+/-- A repeated index gives both minors a repeated column, so a non-injective selection
+contributes nothing. -/
+private theorem det_mul_det_eq_zero_of_not_injective (F G : Fin k → Fin n → R)
+    {g : Fin k → Fin n} (hg : ¬ Function.Injective g) :
+    (Matrix.of fun (i a : Fin k) => F i (g a)).det
+      * (Matrix.of fun (j a : Fin k) => G j (g a)).det = 0 := by
+  obtain ⟨a, b, hab, hne⟩ := Function.not_injective_iff.mp hg
+  rw [Matrix.det_zero_of_column_eq hne fun i => by simp only [Matrix.of_apply, hab], zero_mul]
+
+/-- Precomposing the selection with a permutation of the index leaves the product of the two
+minors alone: each determinant picks up the sign of the permutation, and the two signs cancel. -/
+private theorem det_mul_det_comp_perm (F G : Fin k → Fin n → R) (f : Fin k → Fin n)
+    (τ : Equiv.Perm (Fin k)) :
+    (Matrix.of fun (i a : Fin k) => F i ((f ∘ ⇑τ) a)).det
+        * (Matrix.of fun (j a : Fin k) => G j ((f ∘ ⇑τ) a)).det
+      = (Matrix.of fun (i a : Fin k) => F i (f a)).det
+        * (Matrix.of fun (j a : Fin k) => G j (f a)).det := by
+  rw [show (Matrix.of fun (i a : Fin k) => F i ((f ∘ ⇑τ) a))
+        = (Matrix.of fun (i a : Fin k) => F i (f a)).submatrix id ⇑τ from
+      Matrix.ext fun _ _ => rfl,
+    show (Matrix.of fun (j a : Fin k) => G j ((f ∘ ⇑τ) a))
+        = (Matrix.of fun (j a : Fin k) => G j (f a)).submatrix id ⇑τ from
+      Matrix.ext fun _ _ => rfl,
+    Matrix.det_permute', Matrix.det_permute', mul_mul_mul_comm]
+  simp only [← Int.cast_mul, ← Units.val_mul, Int.units_mul_self, Units.val_one,
+    Int.cast_one, one_mul]
+
 /-- **Symmetrized Andréief.**  Summing the sampled determinant product over
 *all* index tuples, rather than the increasing
 ones, multiplies the Gram determinant by `k!` — the division-free form of the
@@ -286,32 +324,22 @@ theorem factorial_mul_det_gram (F G : Fin k → Fin n → R) :
     (Nat.factorial k : R) * (Matrix.of fun i j => ∑ x : Fin n, F i x * G j x).det
       = ∑ g : Fin k → Fin n,
           (Matrix.of fun i a => F i (g a)).det * (Matrix.of fun j a => G j (g a)).det := by
-  have hvanish : ∀ g : Fin k → Fin n, ¬ Function.Injective g →
-      (Matrix.of fun (i a : Fin k) => F i (g a)).det
-        * (Matrix.of fun (j a : Fin k) => G j (g a)).det = 0 := by
-    intro g hg
-    obtain ⟨a, b, hab, hne⟩ := Function.not_injective_iff.mp hg
-    have hzero : (Matrix.of fun (i c : Fin k) => F i (g c)).det = 0 :=
-      Matrix.det_zero_of_column_eq hne fun i => by simp only [Matrix.of_apply, hab]
-    rw [hzero, zero_mul]
-  have hinv : ∀ (f : Fin k → Fin n) (τ : Equiv.Perm (Fin k)),
-      (Matrix.of fun (i a : Fin k) => F i ((f ∘ ⇑τ) a)).det
-          * (Matrix.of fun (j a : Fin k) => G j ((f ∘ ⇑τ) a)).det
-        = (Matrix.of fun (i a : Fin k) => F i (f a)).det
-          * (Matrix.of fun (j a : Fin k) => G j (f a)).det := by
-    intro f τ
-    have e1 : (Matrix.of fun (i a : Fin k) => F i ((f ∘ ⇑τ) a))
-        = (Matrix.of fun (i a : Fin k) => F i (f a)).submatrix id ⇑τ :=
-      Matrix.ext fun _ _ => rfl
-    have e2 : (Matrix.of fun (j a : Fin k) => G j ((f ∘ ⇑τ) a))
-        = (Matrix.of fun (j a : Fin k) => G j (f a)).submatrix id ⇑τ :=
-      Matrix.ext fun _ _ => rfl
-    rw [e1, e2, Matrix.det_permute', Matrix.det_permute', mul_mul_mul_comm]
-    simp only [← Int.cast_mul, ← Units.val_mul, Int.units_mul_self, Units.val_one,
-      Int.cast_one, one_mul]
   rw [det_gram_eq_sum_increasing F G,
     ← sum_eq_factorial_mul_sum_increasing
       (fun g => (Matrix.of fun i a => F i (g a)).det
-        * (Matrix.of fun j a => G j (g a)).det) hvanish hinv]
+        * (Matrix.of fun j a => G j (g a)).det)
+      (fun _ hg => det_mul_det_eq_zero_of_not_injective F G hg)
+      (det_mul_det_comp_perm F G)]
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.increasingSelections_nonempty' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms increasingSelections_nonempty
+
+/-- info: 'Shields.factorial_mul_det_gram' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms factorial_mul_det_gram
 
 end Shields

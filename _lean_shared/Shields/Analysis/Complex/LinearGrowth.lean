@@ -14,18 +14,27 @@ Borel--Carathéodory bounds `‖g‖` on a ball by the supremum of `Re g` on a l
 balls whose radius grows with the point, it turns a *one-sided* bound on `Re g` into a two-sided
 bound on `‖g‖` of the same order, and Liouville reads that as a degree bound.
 
-* `Shields.norm_le_of_re_le_linear` --- the globalized inequality.  `Re g z ≤ A‖z‖ + B` on the
-  whole plane gives `‖g z‖ ≤ 4A‖z‖ + 2A + 2B`, from the single choice of radius `R = 2‖z‖ + 1`.
-* `Shields.isBounded_range_dslope_zero` --- what the majorant is for: a linear bound on `‖g‖`
-  with `g 0 = 0` makes the difference quotient at the origin bounded on the whole plane.
-* `Shields.eq_deriv_mul_of_re_le` --- the conclusion.  An entire `g` with `g 0 = 0` and a linear
-  majorant on its real part is `z ↦ g'(0) * z`, by Liouville on that quotient.
-
 Mathlib carries the local statement (`Complex.borelCaratheodory_zero`) and Liouville
 (`Differentiable.apply_eq_apply_of_bounded`), but neither the globalization nor the linearity
 corollary.
 
 Sorry-free.
+
+## Main results
+
+* `Shields.norm_le_of_re_le_linear` --- the globalized inequality.  `Re g z ≤ A‖z‖ + B` on the
+  whole plane gives `‖g z‖ ≤ 4A‖z‖ + 2A + 2B`, from the single choice of radius `R = 2‖z‖ + 1`.
+* `Shields.differentiable_dslope`, `Shields.dslope_zero_apply` --- the difference quotient of an
+  entire function at a point is entire, and equals `g w / w` at every `w ≠ 0` once `g 0 = 0`.
+  Mathlib's removable-singularity statement is local; this is its global form.
+* `Shields.isBounded_range_dslope_zero` --- what the majorant is for: a linear bound on `‖g‖`
+  with `g 0 = 0` makes the difference quotient at the origin bounded on the whole plane.
+* `Shields.eq_deriv_mul_of_re_le` --- the conclusion.  An entire `g` with `g 0 = 0` and a linear
+  majorant on its real part is `z ↦ g'(0) * z`, by Liouville on that quotient.
+
+## Tags
+
+Borel--Carathéodory, Liouville, entire function, linear growth, difference quotient
 -/
 
 open Complex Metric Set
@@ -117,5 +126,12 @@ theorem eq_deriv_mul_of_re_le (hg : Differentiable ℂ g) (hg0 : g 0 = 0) {A B :
   · rw [dslope_zero_apply hg0 hz] at hconst
     field_simp at hconst
     linear_combination hconst
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.eq_deriv_mul_of_re_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms eq_deriv_mul_of_re_le
 
 end Shields

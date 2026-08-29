@@ -8,6 +8,7 @@ import ForgacsTran.FTGeometryAssembly
 import ForgacsTran.FTMinModulus.UpperEndpoint
 import ForgacsTran.FTBranchZMono
 import ForgacsTran.FTBranchLemma5
+import ForgacsTran.PencilIndex
 
 /-!
 # `thm:FT-geometry` at the constructed branch
@@ -88,9 +89,7 @@ theorem ft_branch_supplies {n r : ℕ} {a : Fin n → ℝ} {c : ℝ} (hn : 0 < n
       ∧ (∀ θ ∈ Ioo 0 (π / r), 0 < ftTau a r (n - 1) θ)
       ∧ StrictMonoOn (ftBranchZ a c r (n - 1)) (Ioo 0 (π / r))
       ∧ ContinuousOn (ftBranchZ a c r (n - 1)) (Ioo 0 (π / r)) := by
-  have hpar : Even (n + (n - 1) + 1) := by
-    have hEq : n + (n - 1) + 1 = 2 * n := by omega
-    rw [hEq]; exact even_two_mul n
+  have hpar : Even (n + (n - 1) + 1) := even_add_pred_add_one hn
   have hb : ∀ θ ∈ Ioo 0 (π / r), FTBranchAt a r (n - 1) θ := fun θ hθ =>
     ftBranchAt_of_arc_principal hn ha hr hnr hθ
   obtain ⟨hroot, hpos⟩ := ft_branch_root_and_pos c hn ha hr hnr
@@ -108,26 +107,11 @@ theorem ft_geometry_at_branch {n r : ℕ} {a : Fin n → ℝ} {c : ℝ}
     (hn2 : 2 ≤ n) (ha : ∀ k, 0 < a k) (hc : 0 < c) (hr : 1 ≤ r) {b : ℝ}
     (hzb : Filter.Tendsto (ftBranchZ a c r (n - 1))
       (nhdsWithin (π / r) (Ioo 0 (π / r))) (nhds b))
-    (hmin : ∀ θ ∈ Ioo 0 (π / r), ∀ w : ℂ,
-      (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)).eval w = 0 →
-        w ≠ ftPrincipal (ftTau a r (n - 1)) θ →
-        w ≠ (starRingEnd ℂ) (ftPrincipal (ftTau a r (n - 1)) θ) →
-        ftTau a r (n - 1) θ < ‖w‖) :
+    (hmin : FTMinModulusGap (ftRootPoly c a) r (ftBranchZ a c r (n - 1)) (ftTau a r (n - 1))) :
     ∃ za : ℝ,
       ftBranchZ a c r (n - 1) '' Ioo 0 (π / r) = Ioo za b
-        ∧ (∀ θ ∈ Ioo 0 (π / r),
-            (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)).eval
-                (ftPrincipal (ftTau a r (n - 1)) θ) = 0
-              ∧ (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)).eval
-                  ((starRingEnd ℂ) (ftPrincipal (ftTau a r (n - 1)) θ)) = 0
-              ∧ ‖ftPrincipal (ftTau a r (n - 1)) θ‖ = ftTau a r (n - 1) θ
-              ∧ ‖(starRingEnd ℂ) (ftPrincipal (ftTau a r (n - 1)) θ)‖
-                  = ftTau a r (n - 1) θ)
-        ∧ (∀ θ ∈ Ioo 0 (π / r), ∀ w : ℂ,
-            (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)).eval w = 0 →
-              ‖w‖ ≤ ftTau a r (n - 1) θ →
-                w = ftPrincipal (ftTau a r (n - 1)) θ
-                  ∨ w = (starRingEnd ℂ) (ftPrincipal (ftTau a r (n - 1)) θ)) := by
+        ∧ FTPrincipalPair (ftRootPoly c a) r (ftBranchZ a c r (n - 1)) (ftTau a r (n - 1))
+        ∧ FTPrincipalDisk (ftRootPoly c a) r (ftBranchZ a c r (n - 1)) (ftTau a r (n - 1)) := by
   obtain ⟨hroot, hpos, hmono, hcont⟩ :=
     ft_branch_supplies (a := a) (c := c) (by omega) ha hc hr (Or.inl hn2)
   obtain ⟨za, hza⟩ := exists_tendsto_ftBranchZ_arc_zero c hn2 ha hr hc
@@ -142,26 +126,11 @@ theorem ft_geometry_at_branch_unbounded {n r : ℕ} {a : Fin n → ℝ} {c : ℝ
     (hn2 : 2 ≤ n) (ha : ∀ k, 0 < a k) (hc : 0 < c) (hr : 1 ≤ r)
     (hzb : Filter.Tendsto (ftBranchZ a c r (n - 1))
       (nhdsWithin (π / r) (Ioo 0 (π / r))) Filter.atTop)
-    (hmin : ∀ θ ∈ Ioo 0 (π / r), ∀ w : ℂ,
-      (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)).eval w = 0 →
-        w ≠ ftPrincipal (ftTau a r (n - 1)) θ →
-        w ≠ (starRingEnd ℂ) (ftPrincipal (ftTau a r (n - 1)) θ) →
-        ftTau a r (n - 1) θ < ‖w‖) :
+    (hmin : FTMinModulusGap (ftRootPoly c a) r (ftBranchZ a c r (n - 1)) (ftTau a r (n - 1))) :
     ∃ za : ℝ,
       ftBranchZ a c r (n - 1) '' Ioo 0 (π / r) = Ioi za
-        ∧ (∀ θ ∈ Ioo 0 (π / r),
-            (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)).eval
-                (ftPrincipal (ftTau a r (n - 1)) θ) = 0
-              ∧ (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)).eval
-                  ((starRingEnd ℂ) (ftPrincipal (ftTau a r (n - 1)) θ)) = 0
-              ∧ ‖ftPrincipal (ftTau a r (n - 1)) θ‖ = ftTau a r (n - 1) θ
-              ∧ ‖(starRingEnd ℂ) (ftPrincipal (ftTau a r (n - 1)) θ)‖
-                  = ftTau a r (n - 1) θ)
-        ∧ (∀ θ ∈ Ioo 0 (π / r), ∀ w : ℂ,
-            (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)).eval w = 0 →
-              ‖w‖ ≤ ftTau a r (n - 1) θ →
-                w = ftPrincipal (ftTau a r (n - 1)) θ
-                  ∨ w = (starRingEnd ℂ) (ftPrincipal (ftTau a r (n - 1)) θ)) := by
+        ∧ FTPrincipalPair (ftRootPoly c a) r (ftBranchZ a c r (n - 1)) (ftTau a r (n - 1))
+        ∧ FTPrincipalDisk (ftRootPoly c a) r (ftBranchZ a c r (n - 1)) (ftTau a r (n - 1)) := by
   obtain ⟨hroot, hpos, hmono, hcont⟩ :=
     ft_branch_supplies (a := a) (c := c) (by omega) ha hc hr (Or.inl hn2)
   obtain ⟨za, hza⟩ := exists_tendsto_ftBranchZ_arc_zero c hn2 ha hr hc

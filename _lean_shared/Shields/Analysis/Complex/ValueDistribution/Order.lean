@@ -87,4 +87,15 @@ theorem isBigO_rpow_of_order_lt {f : ℂ → ℂ} {p : NNReal} (h : order f < p)
     exact_mod_cast this
   exact hqmem.trans (isBigO_rpow_rpow hqp)
 
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.order_le_of_isBigO' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms order_le_of_isBigO
+
+/-- info: 'Shields.isBigO_rpow_of_order_lt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms isBigO_rpow_of_order_lt
+
 end Shields

@@ -4,7 +4,7 @@ Released under the MIT license as described in the file LICENSE.txt.
 Authors: Johnny Shields
 -/
 import Shields.Combinatorics.Young.LGVInvolution
-import Shields.Combinatorics.Young.LGVOddTableauTwo
+import Shields.Combinatorics.Young.LGVOddResidue
 
 /-!
 # The cancellation for the mixed crossing predicate
@@ -20,7 +20,9 @@ one involution across the two.
   the interval `[q i, q (i+1)]` below `b`, the single point `q i` from `b` on.  `Shields.MMeetsAt`
   is a shared point at one height and `Shields.MMeets` a shared point at some height `≤ b + a`;
   `Shields.mMeets_iff_mixedMeets` identifies the latter with `Shields.MixedMeets`, so the two
-  readings of the predicate agree.  Height `b` belongs to the odd half in both.
+  readings of the predicate agree.  Height `b` belongs to the odd half in both.  These sit in
+  `Shields.Combinatorics.Young.LGVOddResidue`, which the fibering there needs them for; what this
+  module adds is `Shields.mMeets_of_lt`, that a pair with transposed endpoints has to meet.
 * **One splice.**  `Shields.spliceAt` serves both geometries.  The odd cut is at the meeting index
   and the even cut one above it, but at an odd meeting height the two profiles already agree
   there, so the two cuts are the *same function*
@@ -38,9 +40,6 @@ one involution across the two.
   collapses to the families with no shared lattice point, at arbitrary endpoints and every `m`,
   with no hypotheses.  `Shields.mixedJacobiTrudiDet_eq_sum_nonIntersecting` is the determinant
   form.
-* `Shields.skewJacobiTrudi_two_rows` -- at two rows everything else is a theorem, so for `λ`
-  inside two rows, `det [d_{λ_u - μ_v - u + v}]_{2 × 2} = s_{λ/μ}(β | α)` over any commutative
-  ring, every `b`, `a`, `β`, `α` and every `μ ⊆ λ`, with nothing assumed.
 
 ## Implementation notes
 
@@ -51,7 +50,8 @@ Beyond two rows the residue is no longer the cancellation but the tableau side,
 `Shields.NonIntersectingIsSuperSkewSchur` -- that the non-intersecting mixed families of `m` paths
 carry the branching sum.  It is proved here at `m ≤ 2` and carried as a hypothesis of
 `Shields.skewJacobiTrudi_of_nonIntersecting` beyond that;
-`Shields.Combinatorics.Young.LGVOddTableau` discharges it at every `m`.
+`Shields.Combinatorics.Young.LGVOddTableau` discharges it at every `m` and
+`Shields.Combinatorics.Young.LGVOddTableauTwo` at two.
 
 ## Tags
 
@@ -63,103 +63,14 @@ namespace Shields
 
 open Finset
 
-/-! ## One occupancy for the two geometries
+/-! ## When a pair of mixed paths has no choice but to meet
 
-A mixed path occupies an interval at an even height and a point at an odd one.
-`MOcc` is that set of abscissae and `MMeetsAt` is two paths sharing one of them;
-the two disjuncts are cut apart by the height alone, so no configuration is
-counted twice and height `b` is odd.
+`LGVOddResidue.MMeets` reads a shared lattice point one height at a time: an interval at an even
+height, a point at an odd one.  What the involution needs on top of it is that a pair whose
+sources and sinks are oppositely ordered always shares one.
 -/
 
 section Geometry
-
-/-- The abscissae the mixed path `q` occupies at height `i`: the interval it
-sweeps, `[q i, q (i+1)]`, below height `b`, and the single point `q i` from
-height `b` on. -/
-def MOcc (b : ℕ) (q : ℕ → ℕ) (i x : ℕ) : Prop :=
-  (i < b ∧ q i ≤ x ∧ x ≤ q (i + 1)) ∨ (b ≤ i ∧ x = q i)
-
-/-- Two mixed paths share a lattice point at height `i`: their swept intervals
-meet below height `b`, their points coincide from height `b` on. -/
-def MMeetsAt (b : ℕ) (q r : ℕ → ℕ) (i : ℕ) : Prop :=
-  (i < b ∧ q i ≤ r (i + 1) ∧ r i ≤ q (i + 1)) ∨ (b ≤ i ∧ q i = r i)
-
-instance (b : ℕ) (q r : ℕ → ℕ) (i : ℕ) : Decidable (MMeetsAt b q r i) := by
-  unfold MMeetsAt; infer_instance
-
-variable {b : ℕ} {q r : ℕ → ℕ} {i x : ℕ}
-
-theorem mMeetsAt_comm (h : MMeetsAt b q r i) : MMeetsAt b r q i := by
-  rcases h with ⟨h1, h2, h3⟩ | ⟨h1, h2⟩
-  · exact Or.inl ⟨h1, h3, h2⟩
-  · exact Or.inr ⟨h1, h2.symm⟩
-
-/-- A meeting joins the two profiles: the splice at a meeting height is
-monotone because of this. -/
-theorem mMeetsAt_cross (hr : Monotone r) (h : MMeetsAt b q r i) : q i ≤ r (i + 1) := by
-  rcases h with ⟨-, h2, -⟩ | ⟨-, h2⟩
-  · exact h2
-  · rw [h2]; exact hr (by omega)
-
-/-- Two paths meeting at a height share an abscissa there. -/
-theorem mOcc_of_mMeetsAt (hq : Monotone q) (hr : Monotone r) (h : MMeetsAt b q r i) :
-    MOcc b q i (max (q i) (r i)) ∧ MOcc b r i (max (q i) (r i)) := by
-  have hq' := hq (show i ≤ i + 1 by omega)
-  have hr' := hr (show i ≤ i + 1 by omega)
-  rcases h with ⟨h1, h2, h3⟩ | ⟨h1, h2⟩
-  · exact ⟨Or.inl ⟨h1, le_max_left _ _, by omega⟩, Or.inl ⟨h1, le_max_right _ _, by omega⟩⟩
-  · exact ⟨Or.inr ⟨h1, by omega⟩, Or.inr ⟨h1, by omega⟩⟩
-
-/-- Two paths sharing an abscissa at a height meet there. -/
-theorem mMeetsAt_of_mOcc (h1 : MOcc b q i x) (h2 : MOcc b r i x) : MMeetsAt b q r i := by
-  rcases h1 with ⟨ha, hb1, hb2⟩ | ⟨ha, hb1⟩ <;> rcases h2 with ⟨hc, hd1, hd2⟩ | ⟨hc, hd1⟩
-  · exact Or.inl ⟨ha, by omega, by omega⟩
-  · omega
-  · omega
-  · exact Or.inr ⟨ha, by omega⟩
-
-/-- The meeting condition reads only the two profiles at the height and the one
-above it. -/
-theorem mMeetsAt_congr {q' r' : ℕ → ℕ} (h1 : q i = q' i) (h2 : q (i + 1) = q' (i + 1))
-    (h3 : r i = r' i) (h4 : r (i + 1) = r' (i + 1)) :
-    MMeetsAt b q r i ↔ MMeetsAt b q' r' i := by
-  rw [MMeetsAt, MMeetsAt, h1, h2, h3, h4]
-
-/-- The heights at which the two mixed paths share a lattice point. -/
-def mMeetSet (b a : ℕ) (q r : ℕ → ℕ) : Finset ℕ :=
-  (Finset.range (b + a + 1)).filter fun i => MMeetsAt b q r i
-
-/-- Two mixed paths intersect: they share a lattice point at some height. -/
-def MMeets (b a : ℕ) (q r : ℕ → ℕ) : Prop := (mMeetSet b a q r).Nonempty
-
-instance (b a : ℕ) (q r : ℕ → ℕ) : Decidable (MMeets b a q r) :=
-  inferInstanceAs (Decidable (mMeetSet b a q r).Nonempty)
-
-variable {a : ℕ}
-
-theorem mem_mMeetSet : i ∈ mMeetSet b a q r ↔ i ≤ b + a ∧ MMeetsAt b q r i := by
-  rw [mMeetSet, Finset.mem_filter, Finset.mem_range, Nat.lt_succ_iff]
-
-/-- **The two readings of the predicate agree.**  Sharing a point at some height
-`≤ b + a` is `LGVOdd.MixedMeets`: interval disjointness below height `b`, point
-disjointness from height `b` on. -/
-theorem mMeets_iff_mixedMeets (b a : ℕ) (q r : ℕ → ℕ) :
-    MMeets b a q r ↔ MixedMeets b a q r := by
-  constructor
-  · rintro ⟨i, hi⟩
-    rw [mem_mMeetSet] at hi
-    obtain ⟨hib, hmeet⟩ := hi
-    rcases hmeet with ⟨h1, h2, h3⟩ | ⟨h1, h2⟩
-    · exact Or.inl ⟨i, mem_crossSet.mpr ⟨h1, h2, h3⟩⟩
-    · refine Or.inr ⟨i - b, mem_eMeetSet.mpr ⟨by omega, ?_⟩⟩
-      change q (b + (i - b)) = r (b + (i - b))
-      rw [show b + (i - b) = i by omega]
-      exact h2
-  · rintro (⟨i, hi⟩ | ⟨k, hk⟩)
-    · obtain ⟨h1, h2, h3⟩ := mem_crossSet.mp hi
-      exact ⟨i, mem_mMeetSet.mpr ⟨by omega, Or.inl ⟨h1, h2, h3⟩⟩⟩
-    · obtain ⟨h1, h2⟩ := mem_eMeetSet.mp hk
-      exact ⟨b + k, mem_mMeetSet.mpr ⟨by omega, Or.inr ⟨by omega, h2⟩⟩⟩
 
 /-- **The transposed term is entirely meeting.**  Two mixed paths whose sources
 and sinks are oppositely ordered share a lattice point.  The difference of the
@@ -170,23 +81,14 @@ theorem mMeets_of_lt {b a s₁ e₁ s₂ e₂ : ℕ} {q r : ℕ → ℕ} (hq : q
     (hr : r ∈ mixedPaths b a s₂ e₂) (hs : s₂ < s₁) (he : e₁ < e₂) : MMeets b a q r := by
   obtain ⟨hq', hqs⟩ := mem_mixedPaths.mp hq
   obtain ⟨hr', hrs⟩ := mem_mixedPaths.mp hr
-  have hex : ∃ k, q k ≤ r k := by
-    refine ⟨b + a, ?_⟩
-    rw [hPaths_top hq' le_rfl, hPaths_top hr' le_rfl]
+  obtain ⟨j, hmin, hle⟩ := Nat.exists_not_and_succ_of_not_zero_of_exists
+    (p := fun k => q k ≤ r k)
+    (by rw [hPaths_zero hq', hPaths_zero hr']; omega)
+    ⟨b + a, by rw [hPaths_top hq' le_rfl, hPaths_top hr' le_rfl]; omega⟩
+  have hjt : j < b + a := by
+    by_contra hc
+    rw [hPaths_top hq' (by omega), hPaths_top hr' (by omega)] at hmin
     omega
-  have hspec : q (Nat.find hex) ≤ r (Nat.find hex) := Nat.find_spec hex
-  have hktop : Nat.find hex ≤ b + a := by
-    refine Nat.find_le ?_
-    rw [hPaths_top hq' le_rfl, hPaths_top hr' le_rfl]
-    omega
-  have hk0 : Nat.find hex ≠ 0 := by
-    intro h0
-    rw [h0, hPaths_zero hq', hPaths_zero hr'] at hspec
-    omega
-  set j := Nat.find hex - 1 with hj
-  have hsucc : j + 1 = Nat.find hex := by omega
-  have hmin : ¬ q j ≤ r j := Nat.find_min hex (by omega)
-  have hle : q (j + 1) ≤ r (j + 1) := by rw [hsucc]; exact hspec
   rcases lt_or_ge j b with hjb | hjb
   · refine ⟨j, mem_mMeetSet.mpr ⟨by omega, Or.inl ⟨hjb, ?_, ?_⟩⟩⟩
     · exact le_trans (hPaths_mono hq' (by omega : j ≤ j + 1)) hle
@@ -199,7 +101,7 @@ end Geometry
 
 /-! ## The splice, in both geometries at once
 
-`LGV.spliceAt` cuts above the index and `LGVOdd.eSpliceAt` at it; at a meeting
+`spliceAt` cuts above the index and `eSpliceAt` at it; at a meeting
 point of the odd geometry the two profiles agree there, so the two cuts are the
 same function and one splice serves both halves.  What has to be reproved is
 membership: the spliced profile is a mixed path, unit steps included.
@@ -239,26 +141,13 @@ theorem mSplice_mem {s₁ e₁ s₂ e₂ : ℕ} (hq : q ∈ mixedPaths b a s₁ 
   refine mem_mixedPaths.mpr ⟨mem_hPaths.mpr ⟨?_, ?_, ?_⟩, ?_⟩
   · rw [spliceAt_of_le _ _ (Nat.zero_le i)]
     exact hPaths_zero hq'
-  · intro k₁ k₂ h
-    rcases le_or_gt k₂ i with h₂ | h₂
-    · rw [spliceAt_of_le _ _ (by omega), spliceAt_of_le _ _ h₂]
-      exact hPaths_mono hq' h
-    · rcases le_or_gt k₁ i with h₁ | h₁
-      · rw [spliceAt_of_le _ _ h₁, spliceAt_of_gt _ _ h₂]
-        exact le_trans (le_trans (hPaths_mono hq' h₁) hjoin) (hPaths_mono hr' (by omega))
-      · rw [spliceAt_of_gt _ _ h₁, spliceAt_of_gt _ _ h₂]
-        exact hPaths_mono hr' h
+  · exact monotone_spliceAt (hPaths_mono hq') (hPaths_mono hr') hjoin
   · intro k hk
     rcases lt_or_ge i k with hik | hik
     · rw [spliceAt_of_gt _ _ hik]
       exact hPaths_top hr' hk
     · have hki : k = i := by omega
-      have hib : b ≤ i := by omega
-      have heq : q i = r i := by
-        rcases hm with ⟨h1, -, -⟩ | ⟨-, h2⟩
-        · omega
-        · exact h2
-      rw [hki, spliceAt_of_le _ _ le_rfl, heq]
+      rw [hki, spliceAt_of_le _ _ le_rfl, eq_of_mMeetsAt (by omega) hm]
       exact hPaths_top hr' (by omega)
   · intro k hkb hka
     rcases le_or_gt (k + 1) i with h₁ | h₁
@@ -268,12 +157,8 @@ theorem mSplice_mem {s₁ e₁ s₂ e₂ : ℕ} (hq : q ∈ mixedPaths b a s₁ 
       · rw [spliceAt_of_gt _ _ (by omega : i < k + 1), spliceAt_of_gt _ _ h₂]
         exact mixedPaths_step hr hkb hka
       · have hki : k = i := by omega
-        have heq : q i = r i := by
-          rcases hm with ⟨h3, -, -⟩ | ⟨-, h4⟩
-          · omega
-          · exact h4
         rw [spliceAt_of_gt _ _ (by omega : i < k + 1), spliceAt_of_le _ _ (by omega : k ≤ i),
-          hki, heq]
+          hki, eq_of_mMeetsAt (by omega) hm]
         exact mixedPaths_step hr (by omega) (by omega)
 
 end Splice
@@ -318,110 +203,96 @@ section Family
 
 variable {m : ℕ}
 
-/-- Two paths of the family share a lattice point. -/
-def MIntersects (b a : ℕ) (F : Fin m → ℕ → ℕ) : Prop :=
-  ∃ u v : Fin m, u < v ∧ MMeets b a (F u) (F v)
-
-instance (b a : ℕ) (F : Fin m → ℕ → ℕ) : Decidable (MIntersects b a F) := by
-  unfold MIntersects; infer_instance
-
 /-- The heights at which some pair of the family shares a lattice point. -/
-def mCrossHeights (b a : ℕ) (F : Fin m → ℕ → ℕ) : Set ℕ :=
-  {i | ∃ u v : Fin m, u < v ∧ i ∈ mMeetSet b a (F u) (F v)}
+def mCrossHeights (b a : ℕ) (F : Fin m → ℕ → ℕ) : Set ℕ := selHeights (mMeetSet b a) F
 
 /-- The least height at which two paths of the family meet. -/
-noncomputable def mFamHeight (b a : ℕ) (F : Fin m → ℕ → ℕ) : ℕ := sInf (mCrossHeights b a F)
+noncomputable def mFamHeight (b a : ℕ) (F : Fin m → ℕ → ℕ) : ℕ := selHeight (mMeetSet b a) F
 
 /-- The paths that meet a later path at the least crossing height. -/
 def mCrossIndices (b a : ℕ) (F : Fin m → ℕ → ℕ) : Set ℕ :=
-  {n | ∃ u : Fin m, (u : ℕ) = n ∧ ∃ v : Fin m, u < v ∧
-    ∃ x, MOcc b (F u) (mFamHeight b a F) x ∧ MOcc b (F v) (mFamHeight b a F) x}
+  selIndices (MOcc b) (mMeetSet b a) F
 
 /-- The least path index meeting a later path at the least crossing height. -/
-noncomputable def mFamIndex (b a : ℕ) (F : Fin m → ℕ → ℕ) : ℕ := sInf (mCrossIndices b a F)
+noncomputable def mFamIndex (b a : ℕ) (F : Fin m → ℕ → ℕ) : ℕ :=
+  selIndex (MOcc b) (mMeetSet b a) F
 
 /-- The abscissae the selected path shares with a later one at the selected
 height. -/
 def mCrossAbscissae (b a : ℕ) (F : Fin m → ℕ → ℕ) : Set ℕ :=
-  {x | ∃ u : Fin m, (u : ℕ) = mFamIndex b a F ∧ MOcc b (F u) (mFamHeight b a F) x ∧
-    ∃ v : Fin m, u < v ∧ MOcc b (F v) (mFamHeight b a F) x}
+  selAbscissae (MOcc b) (mMeetSet b a) F
 
 /-- The least such abscissa. -/
-noncomputable def mFamAbscissa (b a : ℕ) (F : Fin m → ℕ → ℕ) : ℕ := sInf (mCrossAbscissae b a F)
+noncomputable def mFamAbscissa (b a : ℕ) (F : Fin m → ℕ → ℕ) : ℕ :=
+  selAbscissa (MOcc b) (mMeetSet b a) F
 
 /-- The later paths through the selected lattice point. -/
 def mCrossPartners (b a : ℕ) (F : Fin m → ℕ → ℕ) : Set ℕ :=
-  {n | ∃ v : Fin m, (v : ℕ) = n ∧ mFamIndex b a F < n ∧
-    MOcc b (F v) (mFamHeight b a F) (mFamAbscissa b a F)}
+  selPartners (MOcc b) (mMeetSet b a) F
 
 /-- The least such later path. -/
-noncomputable def mFamPartner (b a : ℕ) (F : Fin m → ℕ → ℕ) : ℕ := sInf (mCrossPartners b a F)
+noncomputable def mFamPartner (b a : ℕ) (F : Fin m → ℕ → ℕ) : ℕ :=
+  selPartner (MOcc b) (mMeetSet b a) F
 
 variable {b a : ℕ} {F : Fin m → ℕ → ℕ}
 
-theorem mCrossHeights_nonempty (h : MIntersects b a F) : (mCrossHeights b a F).Nonempty := by
-  obtain ⟨u, v, huv, i, hi⟩ := h
-  exact ⟨i, u, v, huv, hi⟩
+/-- Two paths meeting at a height share the later of their two arrivals, which is all the
+selection asks of the mixed geometry. -/
+theorem sharesAbscissa_mMeetSet (b a : ℕ) : SharesAbscissa (MOcc b) (mMeetSet b a) :=
+  fun _ _ hq hr _ hmem => ⟨_, mOcc_of_mMeetsAt hq hr (mem_mMeetSet.mp hmem).2⟩
+
+theorem mCrossHeights_nonempty (h : MIntersects b a F) : (mCrossHeights b a F).Nonempty :=
+  selHeights_nonempty h
 
 theorem mFamHeight_mem (h : MIntersects b a F) : mFamHeight b a F ∈ mCrossHeights b a F :=
-  Nat.sInf_mem (mCrossHeights_nonempty h)
+  selHeight_mem h
 
 theorem mFamHeight_le {i : ℕ} (hi : i ∈ mCrossHeights b a F) : mFamHeight b a F ≤ i :=
-  Nat.sInf_le hi
+  selHeight_le hi
 
 theorem mFamHeight_le_top (h : MIntersects b a F) : mFamHeight b a F ≤ b + a := by
   obtain ⟨u, v, -, hmem⟩ := mFamHeight_mem h
   exact (mem_mMeetSet.mp hmem).1
 
 theorem mCrossIndices_nonempty (hF : ∀ w, Monotone (F w)) (h : MIntersects b a F) :
-    (mCrossIndices b a F).Nonempty := by
-  obtain ⟨u, v, huv, hmem⟩ := mFamHeight_mem h
-  obtain ⟨h1, h2⟩ := mOcc_of_mMeetsAt (hF u) (hF v) (mem_mMeetSet.mp hmem).2
-  exact ⟨u, u, rfl, v, huv, _, h1, h2⟩
+    (mCrossIndices b a F).Nonempty :=
+  selIndices_nonempty (sharesAbscissa_mMeetSet b a) hF h
 
 theorem mFamIndex_mem (hF : ∀ w, Monotone (F w)) (h : MIntersects b a F) :
     mFamIndex b a F ∈ mCrossIndices b a F :=
-  Nat.sInf_mem (mCrossIndices_nonempty hF h)
+  selIndex_mem (sharesAbscissa_mMeetSet b a) hF h
 
-theorem mFamIndex_le {n : ℕ} (hn : n ∈ mCrossIndices b a F) : mFamIndex b a F ≤ n := Nat.sInf_le hn
+theorem mFamIndex_le {n : ℕ} (hn : n ∈ mCrossIndices b a F) : mFamIndex b a F ≤ n := selIndex_le hn
 
 theorem mCrossAbscissae_nonempty (hF : ∀ w, Monotone (F w)) (h : MIntersects b a F) :
-    (mCrossAbscissae b a F).Nonempty := by
-  obtain ⟨u, hu, v, huv, x, h1, h2⟩ := mFamIndex_mem hF h
-  exact ⟨x, u, hu, h1, v, huv, h2⟩
+    (mCrossAbscissae b a F).Nonempty :=
+  selAbscissae_nonempty (sharesAbscissa_mMeetSet b a) hF h
 
 theorem mFamAbscissa_mem (hF : ∀ w, Monotone (F w)) (h : MIntersects b a F) :
     mFamAbscissa b a F ∈ mCrossAbscissae b a F :=
-  Nat.sInf_mem (mCrossAbscissae_nonempty hF h)
+  selAbscissa_mem (sharesAbscissa_mMeetSet b a) hF h
 
 theorem mFamAbscissa_le {x : ℕ} (hx : x ∈ mCrossAbscissae b a F) : mFamAbscissa b a F ≤ x :=
-  Nat.sInf_le hx
+  selAbscissa_le hx
 
 theorem mCrossPartners_nonempty (hF : ∀ w, Monotone (F w)) (h : MIntersects b a F) :
-    (mCrossPartners b a F).Nonempty := by
-  obtain ⟨u, hu, h1, v, huv, h2⟩ := mFamAbscissa_mem hF h
-  refine ⟨v, v, rfl, ?_, h2⟩
-  rw [← hu]
-  exact huv
+    (mCrossPartners b a F).Nonempty :=
+  selPartners_nonempty (sharesAbscissa_mMeetSet b a) hF h
 
 theorem mFamPartner_mem (hF : ∀ w, Monotone (F w)) (h : MIntersects b a F) :
     mFamPartner b a F ∈ mCrossPartners b a F :=
-  Nat.sInf_mem (mCrossPartners_nonempty hF h)
+  selPartner_mem (sharesAbscissa_mMeetSet b a) hF h
 
 theorem mFamPartner_le {n : ℕ} (hn : n ∈ mCrossPartners b a F) : mFamPartner b a F ≤ n :=
-  Nat.sInf_le hn
+  selPartner_le hn
 
 /-- **The selected lattice point.**  The two selected paths, the selected height
 and the selected abscissa, packaged as the swap consumes them. -/
 theorem select_mSpec (hF : ∀ w, Monotone (F w)) (h : MIntersects b a F) :
     ∃ u v : Fin m, (u : ℕ) = mFamIndex b a F ∧ (v : ℕ) = mFamPartner b a F ∧ u < v ∧
       MOcc b (F u) (mFamHeight b a F) (mFamAbscissa b a F) ∧
-      MOcc b (F v) (mFamHeight b a F) (mFamAbscissa b a F) := by
-  obtain ⟨u, hu, hsu, -⟩ := mFamAbscissa_mem hF h
-  obtain ⟨v, hv, hlt, hsv⟩ := mFamPartner_mem hF h
-  refine ⟨u, v, hu, hv, ?_, hsu, hsv⟩
-  rw [Fin.lt_def, hu, hv]
-  exact hlt
+      MOcc b (F v) (mFamHeight b a F) (mFamAbscissa b a F) :=
+  selSpec (sharesAbscissa_mMeetSet b a) hF h
 
 end Family
 
@@ -534,110 +405,19 @@ theorem select_mLgvFam (hF : ∀ w, Monotone (F w)) (h : MIntersects b a F) :
       mFamPartner b a (mLgvFam b a F) = mFamPartner b a F := by
   obtain ⟨u, v, hu, hv, huv, hsu, hsv⟩ := select_mSpec hF h
   have hne : u ≠ v := ne_of_lt huv
-  have hib : mFamHeight b a F ≤ b + a := mFamHeight_le_top h
   have hmeet : MMeetsAt b (F u) (F v) (mFamHeight b a F) := mMeetsAt_of_mOcc hsu hsv
+  obtain ⟨hGu, hGv⟩ := mOcc_famSplice_self hne hsu hsv
   have hGdef : mLgvFam b a F = famSplice (mFamHeight b a F) (u : ℕ) (v : ℕ) F := by
     rw [mLgvFam, hu, hv]
   rw [hGdef]
-  set G := famSplice (mFamHeight b a F) (u : ℕ) (v : ℕ) F with hG
-  have hGother : ∀ w : Fin m, w ≠ u → w ≠ v → G w = F w := by
-    intro w h1 h2; rw [hG, famSplice_other h1 h2]
-  have hGlow : ∀ (w w' : Fin m) (k : ℕ), k < mFamHeight b a F →
-      (k ∈ mMeetSet b a (G w) (G w') ↔ k ∈ mMeetSet b a (F w) (F w')) := by
-    intro w w' k hk; rw [hG, mem_mMeetSet_famSplice_of_lt hk]
-  have hGor : ∀ (w : Fin m) (y : ℕ), (w = u ∨ w = v) →
-      MOcc b (G w) (mFamHeight b a F) y →
-      (MOcc b (F u) (mFamHeight b a F) y ∨ MOcc b (F v) (mFamHeight b a F) y) := by
-    intro w y hw hs
-    rw [hG] at hs
-    exact mOcc_or_of_mOcc_famSplice hne hsu hsv hw hs
-  have hGdown : ∀ (w : Fin m) (y : ℕ), (w = u ∨ w = v) → y < mFamAbscissa b a F →
-      MOcc b (G w) (mFamHeight b a F) y → MOcc b (F w) (mFamHeight b a F) y := by
-    intro w y hw hy hs
-    rw [hG] at hs
-    exact mOcc_of_mOcc_famSplice_lt hne hsu hsv hy hw hs
-  have hGmono : ∀ w, Monotone (G w) := by
-    rw [hG]
-    exact monotone_famSplice hF (mMeetsAt_cross (hF v) hmeet)
-      (mMeetsAt_cross (hF u) (mMeetsAt_comm hmeet))
-  have hGu : MOcc b (G u) (mFamHeight b a F) (mFamAbscissa b a F) := by
-    rw [hG]; exact (mOcc_famSplice_self hne hsu hsv).1
-  have hGv : MOcc b (G v) (mFamHeight b a F) (mFamAbscissa b a F) := by
-    rw [hG]; exact (mOcc_famSplice_self hne hsu hsv).2
-  clear_value G
-  clear hG hGdef
-  have hGmeet : mFamHeight b a F ∈ mMeetSet b a (G u) (G v) :=
-    mem_mMeetSet.mpr ⟨hib, mMeetsAt_of_mOcc hGu hGv⟩
-  have hGint : MIntersects b a G := ⟨u, v, huv, _, hGmeet⟩
-  -- (1) the height
-  have h1 : mFamHeight b a G = mFamHeight b a F := by
-    refine le_antisymm (mFamHeight_le ⟨u, v, huv, hGmeet⟩) ?_
-    by_contra hcon
-    obtain ⟨w, w', hww', hmem⟩ := mFamHeight_mem hGint
-    rw [hGlow w w' _ (by omega)] at hmem
-    have := mFamHeight_le (b := b) (a := a) (F := F) ⟨w, w', hww', hmem⟩
-    omega
-  -- (2) the path index
-  have h2 : mFamIndex b a G = (u : ℕ) := by
-    refine le_antisymm (mFamIndex_le ⟨u, rfl, v, huv, mFamAbscissa b a F, by rw [h1]; exact hGu,
-      by rw [h1]; exact hGv⟩) ?_
-    obtain ⟨w, hw, w', hww', y, hy1, hy2⟩ := mFamIndex_mem hGmono hGint
-    rw [h1] at hy1 hy2
-    by_contra hcon
-    have hwu : w < u := by rw [Fin.lt_def, hw]; omega
-    have hFw : MOcc b (F w) (mFamHeight b a F) y := by
-      rwa [hGother w (ne_of_lt hwu) (ne_of_lt (lt_trans hwu huv))] at hy1
-    have hpair : ∃ w'' : Fin m, w < w'' ∧ MOcc b (F w'') (mFamHeight b a F) y := by
-      by_cases hc : w' = u ∨ w' = v
-      · rcases hGor w' y hc hy2 with hs | hs
-        · exact ⟨u, hwu, hs⟩
-        · exact ⟨v, lt_trans hwu huv, hs⟩
-      · rw [not_or] at hc
-        exact ⟨w', hww', by rwa [hGother w' hc.1 hc.2] at hy2⟩
-    obtain ⟨w'', hlt, hs⟩ := hpair
-    have hle := mFamIndex_le (b := b) (a := a) (F := F) ⟨w, rfl, w'', hlt, y, hFw, hs⟩
-    rw [← hu] at hle
-    rw [Fin.lt_def] at hwu
-    omega
-  -- (3) the abscissa
-  have h3 : mFamAbscissa b a G = mFamAbscissa b a F := by
-    refine le_antisymm (mFamAbscissa_le ⟨u, by rw [h2], by rw [h1]; exact hGu, v, huv,
-      by rw [h1]; exact hGv⟩) ?_
-    obtain ⟨w, hw, hy1, w', hww', hy2⟩ := mFamAbscissa_mem hGmono hGint
-    rw [h2] at hw
-    rw [(Fin.val_eq_val w u).mp hw] at hy1 hww'
-    rw [h1] at hy1 hy2
-    by_contra hcon
-    have hlt : mFamAbscissa b a G < mFamAbscissa b a F := by omega
-    have hFu : MOcc b (F u) (mFamHeight b a F) (mFamAbscissa b a G) :=
-      hGdown u _ (Or.inl rfl) hlt hy1
-    have hpair : ∃ w'' : Fin m, u < w'' ∧
-        MOcc b (F w'') (mFamHeight b a F) (mFamAbscissa b a G) := by
-      by_cases hc : w' = v
-      · refine ⟨v, huv, ?_⟩
-        rw [hc] at hy2
-        exact hGdown v _ (Or.inr rfl) hlt hy2
-      · exact ⟨w', hww', by rwa [hGother w' (ne_of_gt hww') hc] at hy2⟩
-    obtain ⟨w'', hlt2, hs⟩ := hpair
-    exact absurd (mFamAbscissa_le (b := b) (a := a) (F := F) ⟨u, hu, hFu, w'', hlt2, hs⟩) hcon
-  -- (4) the partner
-  have h4 : mFamPartner b a G = (v : ℕ) := by
-    refine le_antisymm (mFamPartner_le ⟨v, rfl, by rw [h2, ← Fin.lt_def]; exact huv,
-      by rw [h1, h3]; exact hGv⟩) ?_
-    obtain ⟨w, hw, hlt, hs⟩ := mFamPartner_mem hGmono hGint
-    rw [h1, h3] at hs
-    rw [h2] at hlt
-    by_contra hcon
-    have hwv : w ≠ v := by intro hc; rw [hc] at hw; omega
-    have hwu : w ≠ u := by intro hc; rw [hc] at hw; omega
-    rw [hGother w hwu hwv] at hs
-    have hlt' : mFamIndex b a F < (w : ℕ) := by rw [← hu, hw]; exact hlt
-    have hle := mFamPartner_le (b := b) (a := a) (F := F) ⟨w, rfl, hlt', hs⟩
-    rw [← hv] at hle
-    omega
-  exact ⟨hGint, h1, by rw [h2, hu], h3, by rw [h4, hv]⟩
+  exact select_eq (sharesAbscissa_mMeetSet b a) hu hv huv
+    (monotone_famSplice hF (mMeetsAt_cross (hF v) hmeet)
+      (mMeetsAt_cross (hF u) (mMeetsAt_comm hmeet)))
+    (fun _ h1 h2 => famSplice_other h1 h2) (fun _ _ _ hk => mem_mMeetSet_famSplice_of_lt hk)
+    (fun _ _ hw hs => mOcc_or_of_mOcc_famSplice hne hsu hsv hw hs)
+    (fun _ _ hw hy hs => mOcc_of_mOcc_famSplice_lt hne hsu hsv hy hw hs) hGu hGv
+    (mem_mMeetSet.mpr ⟨mFamHeight_le_top h, mMeetsAt_of_mOcc hGu hGv⟩)
 
-/-- **The swap is an involution on the intersecting families.** -/
 theorem mLgvFam_mLgvFam (hF : ∀ w, Monotone (F w)) (h : MIntersects b a F) :
     mLgvFam b a (mLgvFam b a F) = F := by
   obtain ⟨-, h1, h2, -, h4⟩ := select_mLgvFam hF h
@@ -774,7 +554,7 @@ theorem prod_mixedWeight_mLgvFam (β α : ℕ → R)
 /-- **The cancellation for the mixed crossing predicate.**  The signed sum over
 all mixed families is the signed sum over the families whose paths share no
 lattice point — for any endpoints and any number of paths, with the even and the
-odd geometry both present.  This is `LGVInvolution.sum_famWeight_eq_sum_nonIntersecting`
+odd geometry both present.  This is `sum_famWeight_eq_sum_nonIntersecting`
 across the two. -/
 theorem sum_mFamWeight_eq_sum_nonIntersecting (b a : ℕ) {m : ℕ} (β α : ℕ → R)
     (S C : Fin m → ℕ) :
@@ -913,88 +693,13 @@ theorem mixedJacobiTrudiDet_eq_sum_nonIntersecting (β α : ℕ → R) (lam mu :
 
 end Determinant
 
-/-! ## Two rows
-
-At two paths there is one pair to test, so a non-intersecting family is a pair
-of mixed paths that do not meet, and `LGVOddTableau.sum_nonMeeting_mixed_eq_superSkewSchur_uncond`
-identifies their total weight with the branching sum the super branching rule.
--/
-
-section TwoRows
-
-variable {R : Type*} [CommRing R] {b a : ℕ}
-
-/-- At two paths the family intersects exactly when its two paths meet. -/
-theorem mIntersects_two {F : Fin 2 → ℕ → ℕ} :
-    MIntersects b a F ↔ MMeets b a (F 0) (F 1) := by
-  constructor
-  · rintro ⟨u, v, huv, h⟩
-    have h1 := u.isLt
-    have h2 := v.isLt
-    rw [Fin.lt_def] at huv
-    have hu : u = 0 := by
-      rw [Fin.ext_iff]
-      change (u : ℕ) = 0
-      omega
-    have hv : v = 1 := by
-      rw [Fin.ext_iff]
-      change (v : ℕ) = 1
-      omega
-    rwa [hu, hv] at h
-  · exact fun h => ⟨0, 1, by decide, h⟩
-
-/-- The two-path families, read as pairs. -/
-theorem sum_nonMIntersecting_two (β α : ℕ → R) (lam mu : YoungDiagram) :
-    ∑ F ∈ (Fintype.piFinset fun w : Fin 2 =>
-          mixedPaths b a (jtSource mu 2 w) (jtSink lam 2 w)).filter
-            fun F => ¬ MIntersects b a F,
-        ∏ w, mixedWeight b a β α (F w)
-      = ∑ x ∈ (mixedPaths b a (mu.rowLen 0 + 1) (lam.rowLen 0 + 1) ×ˢ
-              mixedPaths b a (mu.rowLen 1) (lam.rowLen 1)).filter
-                fun x => ¬ MixedMeets b a x.1 x.2,
-          mixedWeight b a β α x.1 * mixedWeight b a β α x.2 := by
-  refine Finset.sum_nbij' (fun F => (F 0, F 1)) (fun x => ![x.1, x.2]) (fun F hF => ?_)
-    (fun x hx => ?_) (fun F hF => ?_) (fun x hx => ?_) (fun F hF => ?_)
-  · rw [Finset.mem_filter, Fintype.mem_piFinset] at hF
-    obtain ⟨hmem, hint⟩ := hF
-    rw [mIntersects_two, mMeets_iff_mixedMeets] at hint
-    exact Finset.mem_filter.mpr ⟨Finset.mem_product.mpr ⟨hmem 0, hmem 1⟩, hint⟩
-  · rw [Finset.mem_filter, Finset.mem_product] at hx
-    obtain ⟨⟨h1, h2⟩, hint⟩ := hx
-    refine Finset.mem_filter.mpr ⟨Fintype.mem_piFinset.mpr fun w => ?_, ?_⟩
-    · match w with
-      | 0 => exact h1
-      | 1 => exact h2
-    · rw [mIntersects_two, mMeets_iff_mixedMeets]
-      exact hint
-  · funext w
-    match w with
-    | 0 => rfl
-    | 1 => rfl
-  · exact Prod.ext rfl rfl
-  · rw [Fin.prod_univ_two]
-
-/-- **the skew Jacobi--Trudi identity at two rows, with the odd alphabet, unconditionally.**
-For `λ` inside two rows,
-
-`det [d_{λ_u - μ_v - u + v}]_{2 × 2} = s_{λ/μ}(β | α)`,
-
-over any commutative ring, every `b`, `a`, `β`, `α` and every `μ ⊆ λ`.  The
-cancellation is `mixedJacobiTrudiDet_eq_sum_nonIntersecting` and the tableau
-side is `LGVOddTableau.sum_nonMeeting_mixed_eq_superSkewSchur_uncond`. -/
-theorem skewJacobiTrudi_two_rows (β α : ℕ → R) (lam mu : YoungDiagram) (hmu : mu ≤ lam)
-    (hrow : ∀ i, 2 ≤ i → lam.rowLen i = 0) :
-    jacobiTrudiDet (fun k => superHom b a k β α) lam mu 2 = superSkewSchur lam mu b a β α := by
-  rw [mixedJacobiTrudiDet_eq_sum_nonIntersecting, sum_nonMIntersecting_two,
-    sum_nonMeeting_mixed_eq_superSkewSchur_uncond lam mu hmu hrow]
-
-end TwoRows
-
 /-! ## What `SkewJacobiTrudi` still needs
 
 The cancellation holds at every `m`; the residue is the tableau side.  It is
 stated here as a predicate so that it sits in the type of anything that consumes
-it, proved at `m ≤ 2`, and carried as a hypothesis beyond.
+it, proved here at `m ≤ 1`, and carried as a hypothesis beyond.  At two rows it is a
+theorem as well, in `Shields.Combinatorics.Young.LGVOddTableauTwo`, which is where the
+two-column bijection it consumes is proved.
 -/
 
 section Residue
@@ -1004,14 +709,13 @@ variable {R : Type*} [CommRing R]
 /-- **The residue at `m` rows.**  That the non-intersecting families of `m`
 mixed paths carry the branching sum of the super branching rule.
 
-At `a = 0` this is `LGVTableauM.sum_nonIntersecting_eq_skewSchur`, and at two
-rows it is `LGVOddTableau.sum_nonMeeting_mixed_eq_superSkewSchur_uncond`.  In
-general it needs three things, each of which is proved at two rows only: the
-height-`b` splice of a family at `m` paths, `LGVOdd.sum_nonMeeting_mixed_split`;
-the odd tableau bijection at `m` columns,
-`LGVOddTableau.nonMeetingIsSkewSchurTranspose`; and the dictionary carrying the
-`m` abscissae at height `b` to the intermediate shapes `μ ⊆ ν ⊆ λ`, which
-`LGVOdd.twoRow` and `LGVOdd.eq_twoRow` supply for two. -/
+At `a = 0` this is `sum_nonIntersecting_eq_skewSchur`, and at two
+rows it is `sum_nonMeeting_mixed_eq_superSkewSchur_uncond`.
+`sum_nonIntersecting_mixed_eq_superSkewSchur` fibers the families over their
+abscissae at height `b` -- the splice at `m` paths and the dictionary carrying those abscissae
+to the intermediate shapes `μ ⊆ ν ⊆ λ` are there -- and asks in return for the two tableau
+bijections at `m`; the odd one, `sum_nonEIntersecting_eq_skewSchurTranspose`, is
+what stands between them. -/
 def NonIntersectingIsSuperSkewSchur (b a m : ℕ) (β α : ℕ → R) : Prop :=
   ∀ lam mu : YoungDiagram, mu ≤ lam → (∀ i, m ≤ i → lam.rowLen i = 0) →
     ∑ F ∈ (Fintype.piFinset fun w : Fin m =>
@@ -1019,12 +723,6 @@ def NonIntersectingIsSuperSkewSchur (b a m : ℕ) (β α : ℕ → R) : Prop :=
             fun F => ¬ MIntersects b a F,
         ∏ w, mixedWeight b a β α (F w)
       = superSkewSchur lam mu b a β α
-
-/-- The residue at two rows is a theorem. -/
-theorem nonIntersectingIsSuperSkewSchur_two (b a : ℕ) (β α : ℕ → R) :
-    NonIntersectingIsSuperSkewSchur b a 2 β α := by
-  intro lam mu hmu hrow
-  rw [sum_nonMIntersecting_two, sum_nonMeeting_mixed_eq_superSkewSchur_uncond lam mu hmu hrow]
 
 /-- The residue at one row or none is a theorem: the determinant is already
 the super branching rule there. -/
@@ -1094,5 +792,12 @@ end Instance
 section AxiomGuards
 
 end AxiomGuards
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.mixedJacobiTrudiDet_eq_sum_nonIntersecting' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms mixedJacobiTrudiDet_eq_sum_nonIntersecting
 
 end Shields

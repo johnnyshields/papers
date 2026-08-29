@@ -13,7 +13,7 @@ import ForgacsTran.FTGeometryCone
 /-!
 # The compact interior, discharged at the constructed branch
 
-`DominanceFT.interior_data_of_geometry` is the `Θ`-free half of
+`DominanceFTSupply.interior_data_of_geometry` is the `Θ`-free half of
 `thm:weighted-dominance`'s interior hypothesis: `eq:interior-remainder` and the
 amplitude floor of `lem:amplitude-divisor` on one compact subinterval.  It takes
 fifteen statements about a branch.  At the branch the paper constructs, fourteen
@@ -196,9 +196,11 @@ be built here and the uniformity is taken as data.
 The amplitude divisor is constructed rather than assumed, and comes with its
 `eq:amplitude-zero-count` bound.
 
-**Containment.**  `hpair` and `hτR` relate `τ` and the denominator's zeros; the
-conclusion relates `ftRemainder` and `ftPrincipalAmp`, and no hypothesis mentions
-either. -/
+**Containment.**  `hpair` and `hτR` relate `τ` and the denominator's zeros.  The
+conclusion carries one clause bounding `ftRemainder` from above and one bounding
+`ftPrincipalAmp` from below, and no hypothesis mentions either — `hpair` names
+`ftPrincipal`, the branch point, not the amplitude `ftPrincipalAmp` built from
+it. -/
 theorem ft_interior_data_at_branch {n r : ℕ} {a : Fin n → ℝ} {c : ℝ} {B : Polynomial ℂ}
     {τ : ℝ → ℝ}
     (hn : 0 < n) (ha : ∀ k, 0 < a k) (hc : 0 < c) (hr : 1 ≤ r) (hnr : 2 ≤ n ∨ 2 ≤ r)
@@ -434,6 +436,29 @@ theorem ft_interior_data_at_branch_nonvacuous {a : Fin 2 → ℝ} {c : ℝ} {B :
     (Or.inl le_rfl) hB hB0 (fun _ _ => rfl) hlo harc hR₀ hτR hpair
 
 
+/-- **`interior_data_of_geometry`'s conclusion, as one named statement.**  The
+two bounds `thm:weighted-dominance`'s interior group needs on a compact
+subinterval `[lo, hi]` of the viewing arc: `eq:interior-remainder`, a geometric
+bound on the contour remainder uniform in `M`, and the amplitude floor of
+`lem:amplitude-divisor`, which is bounded below by a fixed multiple of the
+distances to the divisor `S` — whose members are angles where `B` genuinely
+vanishes at the principal point, and which lies inside the subinterval.
+
+Every theorem that produces this data states it identically, at the branch and at
+its arc extension alike, so it is named once.  The definition unfolds to the
+conjunction it replaces, so a consumer written against the spelled-out form still
+elaborates and the axiom footprint cannot move. -/
+def FTInteriorData (Q B : Polynomial ℂ) (r : ℕ) (z τ : ℝ → ℝ) (lo hi : ℝ) : Prop :=
+  ∃ (CI σI AI : ℝ) (S : Finset ℝ),
+    0 < σI ∧ σI < 1 ∧ 0 < AI ∧
+    (∀ (M : ℕ) (θ : ℝ), lo ≤ θ → θ ≤ hi →
+      |ftRemainder Q B r z τ M θ| ≤ CI * σI ^ M) ∧
+    (∀ θ : ℝ, lo ≤ θ → θ ≤ hi →
+      AI * ∏ θj ∈ S, |θ - θj| ^ (B.rootMultiplicity (ftPrincipal τ θj))
+        ≤ ftPrincipalAmp Q B r z τ θ) ∧
+    (∀ θj ∈ S, 1 ≤ B.rootMultiplicity (ftPrincipal τ θj)) ∧
+    (∀ θj ∈ S, θj ∈ Set.Icc lo hi)
+
 /-! ### The interior supply on a compact subinterval, with no separating radius assumed
 
 `ft_interior_data_at_branch` still carries the uniform separation radius.  It need
@@ -460,8 +485,10 @@ class.
 At `r = 1` with `3 ≤ n` the last hypothesis is discharged too, by
 `FTGeometryClosure.ft_geometry_at_branch_pi`, so the supply is then unconditional.
 
-**Containment.**  No hypothesis mentions `ftRemainder` or `ftPrincipalAmp`; the
-conclusion relates them. -/
+**Containment.**  No hypothesis mentions `ftRemainder` or `ftPrincipalAmp`;
+`hmin` names `ftPrincipal`, the branch point, not the amplitude built from it.
+The conclusion is `FTInteriorData`, which bounds `ftRemainder` from above and
+`ftPrincipalAmp` from below in separate clauses. -/
 theorem exists_interior_data_on_subinterval {n r : ℕ} {a : Fin n → ℝ} {c : ℝ}
     {B : Polynomial ℂ} {τ : ℝ → ℝ}
     (hn : 0 < n) (ha : ∀ k, 0 < a k) (hc : 0 < c) (hr : 1 ≤ r) (hnr : 2 ≤ n ∨ 2 ≤ r)
@@ -473,16 +500,7 @@ theorem exists_interior_data_on_subinterval {n r : ℕ} {a : Fin n → ℝ} {c :
       (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)).eval w = 0 →
       w ≠ ftPrincipal τ θ →
       w ≠ ((τ θ : ℝ) : ℂ) * Complex.exp (-((θ : ℝ) : ℂ) * Complex.I) → τ θ < ‖w‖) :
-    ∃ (CI σI AI : ℝ) (S : Finset ℝ),
-      0 < σI ∧ σI < 1 ∧ 0 < AI ∧
-      (∀ (M : ℕ) (θ : ℝ), lo ≤ θ → θ ≤ hi →
-        |ftRemainder (ftRootPoly c a) B r (ftBranchZ a c r (n - 1)) τ M θ|
-          ≤ CI * σI ^ M) ∧
-      (∀ θ : ℝ, lo ≤ θ → θ ≤ hi →
-        AI * ∏ θj ∈ S, |θ - θj| ^ (B.rootMultiplicity (ftPrincipal τ θj))
-          ≤ ftPrincipalAmp (ftRootPoly c a) B r (ftBranchZ a c r (n - 1)) τ θ) ∧
-      (∀ θj ∈ S, 1 ≤ B.rootMultiplicity (ftPrincipal τ θj)) ∧
-      (∀ θj ∈ S, θj ∈ Set.Icc lo hi) := by
+    FTInteriorData (ftRootPoly c a) B r (ftBranchZ a c r (n - 1)) τ lo hi := by
   classical
   set Q : Polynomial ℂ := ftRootPoly c a with hQdef
   set z : ℝ → ℝ := ftBranchZ a c r (n - 1) with hzdef
@@ -635,16 +653,7 @@ theorem exists_interior_data_on_subinterval_pi {n : ℕ} {a : Fin n → ℝ} {c 
     (hagree : ∀ θ ∈ Set.Ioo (0 : ℝ) (π / ((1 : ℕ) : ℝ)), τ θ = ftTau a 1 (n - 1) θ)
     {lo hi : ℝ} (hlohi : lo ≤ hi)
     (harc : Set.Icc lo hi ⊆ Set.Ioo (0 : ℝ) (π / ((1 : ℕ) : ℝ))) :
-    ∃ (CI σI AI : ℝ) (S : Finset ℝ),
-      0 < σI ∧ σI < 1 ∧ 0 < AI ∧
-      (∀ (M : ℕ) (θ : ℝ), lo ≤ θ → θ ≤ hi →
-        |ftRemainder (ftRootPoly c a) B 1 (ftBranchZ a c 1 (n - 1)) τ M θ|
-          ≤ CI * σI ^ M) ∧
-      (∀ θ : ℝ, lo ≤ θ → θ ≤ hi →
-        AI * ∏ θj ∈ S, |θ - θj| ^ (B.rootMultiplicity (ftPrincipal τ θj))
-          ≤ ftPrincipalAmp (ftRootPoly c a) B 1 (ftBranchZ a c 1 (n - 1)) τ θ) ∧
-      (∀ θj ∈ S, 1 ≤ B.rootMultiplicity (ftPrincipal τ θj)) ∧
-      (∀ θj ∈ S, θj ∈ Set.Icc lo hi) := by
+    FTInteriorData (ftRootPoly c a) B 1 (ftBranchZ a c 1 (n - 1)) τ lo hi := by
   obtain ⟨za, b, -, -, hdisk⟩ := ft_geometry_at_branch_pi hn3 ha hc
   refine exists_interior_data_on_subinterval (by omega) ha hc le_rfl (Or.inl (by omega))
     hB hB0 hagree hlohi harc ?_
@@ -677,16 +686,7 @@ theorem exists_interior_data_on_subinterval_two_le {n r : ℕ} {a : Fin n → �
     (hagree : ∀ θ ∈ Set.Ioo (0 : ℝ) (π / r), τ θ = ftTau a r (n - 1) θ)
     {lo hi : ℝ} (hlohi : lo ≤ hi)
     (harc : Set.Icc lo hi ⊆ Set.Ioo (0 : ℝ) (π / r)) :
-    ∃ (CI σI AI : ℝ) (S : Finset ℝ),
-      0 < σI ∧ σI < 1 ∧ 0 < AI ∧
-      (∀ (M : ℕ) (θ : ℝ), lo ≤ θ → θ ≤ hi →
-        |ftRemainder (ftRootPoly c a) B r (ftBranchZ a c r (n - 1)) τ M θ|
-          ≤ CI * σI ^ M) ∧
-      (∀ θ : ℝ, lo ≤ θ → θ ≤ hi →
-        AI * ∏ θj ∈ S, |θ - θj| ^ (B.rootMultiplicity (ftPrincipal τ θj))
-          ≤ ftPrincipalAmp (ftRootPoly c a) B r (ftBranchZ a c r (n - 1)) τ θ) ∧
-      (∀ θj ∈ S, 1 ≤ B.rootMultiplicity (ftPrincipal τ θj)) ∧
-      (∀ θj ∈ S, θj ∈ Set.Icc lo hi) := by
+    FTInteriorData (ftRootPoly c a) B r (ftBranchZ a c r (n - 1)) τ lo hi := by
   refine exists_interior_data_on_subinterval (by omega) ha hc (by omega) (Or.inl hn2)
     hB hB0 hagree hlohi harc ?_
   intro θ hθ w hzero hwp hwm

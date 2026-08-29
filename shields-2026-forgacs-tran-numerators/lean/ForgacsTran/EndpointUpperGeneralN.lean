@@ -3,6 +3,7 @@ Copyright (c) 2026 Johnny Shields. All rights reserved.
 Released under the MIT license as described in the file LICENSE.txt.
 Authors: Johnny Shields
 -/
+import ForgacsTran.PencilIndex
 import ForgacsTran.EndpointUpperOneBinders
 
 /-!
@@ -444,9 +445,7 @@ theorem norm_weighted_ge {N : ℕ} {a : ℕ → ℝ} (ha : ∀ l, 0 ≤ a l)
       rcases Nat.eq_zero_or_pos l with rfl | hl
       · norm_num
       · rw [if_neg (by omega)]
-        have : ((l - 1 : ℕ) : ℝ) = (l : ℝ) - 1 := by
-          have : (1 : ℕ) ≤ l := hl
-          push_cast [Nat.cast_sub this]; ring
+        have : ((l - 1 : ℕ) : ℝ) = (l : ℝ) - 1 := cast_pred_eq_sub_one hl
         rw [this]; ring
     rw [Finset.sum_congr rfl hpt, Finset.sum_add_distrib]
     have hA : ∑ l ∈ R, a l * ((l : ℝ) - 1) = 0 := by
@@ -977,8 +976,7 @@ theorem two_mul_lt_norm_of_root_endpoint_pi {n : ℕ} {a : Fin n → ℝ} {c : �
       have hne2 : (a k : ℂ) + ((L : ℝ) : ℂ) ≠ 0 := hane k
       rw [hσdef]
       push_cast
-      field_simp
-      ring
+      field
     rw [Finset.prod_congr rfl (fun k _ => hterm k), Finset.prod_div_distrib, hσdef]
     have hprodne : (∏ k, ((a k : ℂ) + ((L : ℝ) : ℂ))) ≠ 0 :=
       Finset.prod_ne_zero_iff.2 fun k _ => hane k

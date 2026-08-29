@@ -75,4 +75,11 @@ theorem minorsNonneg_rootProd (ys : List R) (hy : ∀ y ∈ ys, 0 ≤ y) (k n : 
   obtain ⟨y, hy', rfl⟩ := List.mem_map.mp hM
   exact minorsNonneg_rootFactor (hy y hy') k n
 
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.minorsNonneg_rootProd' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms minorsNonneg_rootProd
+
 end Shields

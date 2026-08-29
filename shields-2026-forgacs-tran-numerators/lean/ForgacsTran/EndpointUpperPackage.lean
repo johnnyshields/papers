@@ -139,8 +139,7 @@ theorem hasDerivWithinAt_ftPrincipal_ftTauArc_upper {n r : ℕ} {a : Fin n → �
   rw [ftPrincipal_ftTauArc_arc_end, ftPrincipal,
     ftTauArc_agree a r (n - 1) x₁ hmem0 hmem]
   push_cast
-  field_simp
-  ring
+  field
 
 /-! ### One radius for both endpoints
 
@@ -603,7 +602,7 @@ theorem exists_root_near_scaled_root {Q : Polynomial ℂ} {r : ℕ} (hr : 1 ≤ 
   obtain ⟨u, hu⟩ : ∃ u : ℂ, u ^ r = -Q.eval 0 / z :=
     IsAlgClosed.exists_pow_nat_eq (-Q.eval 0 / z) (n := r) (by omega)
   have huroot : z * u ^ r + Q.eval 0 = 0 := by
-    rw [hu]; field_simp; ring
+    rw [hu]; field
   have hu0 : u ≠ 0 := (model_root_simple hr hQ0 hz huroot).1
   have hun : (0 : ℝ) < ‖u‖ := norm_pos_iff.2 hu0
   have h1z : z * tp ^ r = -Q.eval tp := by rw [ftDen_eval] at htp; linear_combination htp
@@ -665,10 +664,8 @@ theorem exists_root_near_scaled_root {Q : Polynomial ℂ} {r : ℕ} (hr : 1 ≤ 
     have hb1 : ‖w - clusterDir r j * tp‖ ≤ 5 * (K * A) * ‖u‖ := by
       rw [hid, norm_mul, norm_clusterDir hr, one_mul, norm_sub_rev]
       exact hsep
-    have hb2 : ‖t - clusterDir r j * tp‖ ≤ ‖t - w‖ + ‖w - clusterDir r j * tp‖ := by
-      calc ‖t - clusterDir r j * tp‖ = ‖(t - w) + (w - clusterDir r j * tp)‖ := by
-            congr 1; ring
-        _ ≤ _ := norm_add_le _ _
+    have hb2 : ‖t - clusterDir r j * tp‖ ≤ ‖t - w‖ + ‖w - clusterDir r j * tp‖ :=
+      norm_sub_le_norm_sub_add_norm_sub _ _ _
     have hsum : ‖t - clusterDir r j * tp‖ ≤ (κ + 5 * (K * A)) * ‖u‖ := by
       have : (κ + 5 * (K * A)) * ‖u‖ = κ * ‖u‖ + 5 * (K * A) * ‖u‖ := by ring
       rw [this]; linarith [hb1, hb2, htw]
@@ -683,9 +680,7 @@ theorem exists_root_near_scaled_root {Q : Polynomial ℂ} {r : ℕ} (hr : 1 ≤ 
       calc 3 * ε' / 8 * (8 / 7 * ‖tp‖) = 3 * ε' / 7 * ‖tp‖ := by ring
         _ ≤ ε * ‖tp‖ := this
     linarith [hsum, hmul, hu8, hfin]
-  · have hb4 : ‖t‖ ≤ ‖t - w‖ + ‖w‖ := by
-      calc ‖t‖ = ‖(t - w) + w‖ := by congr 1; ring
-        _ ≤ _ := norm_add_le _ _
+  · have hb4 : ‖t‖ ≤ ‖t - w‖ + ‖w‖ := norm_le_norm_sub_add t w
     rw [hwn] at hb4
     linarith [htw, hb4, hκu, hcomp]
 
@@ -774,8 +769,8 @@ theorem upper_enumeration_bijective {r : ℕ} {S : Finset ℂ} {G : ℕ → ℂ}
     rw [← hij] at h2
     have hkey : ‖clusterDir r i * tp - clusterDir r j * tp‖ ≤ 2 * ε * ‖tp‖ := by
       calc ‖clusterDir r i * tp - clusterDir r j * tp‖
-          = ‖(clusterDir r i * tp - G i) + (G i - clusterDir r j * tp)‖ := by congr 1; ring
-        _ ≤ ‖clusterDir r i * tp - G i‖ + ‖G i - clusterDir r j * tp‖ := norm_add_le _ _
+          ≤ ‖clusterDir r i * tp - G i‖ + ‖G i - clusterDir r j * tp‖ :=
+            norm_sub_le_norm_sub_add_norm_sub _ _ _
         _ ≤ ε * ‖tp‖ + ε * ‖tp‖ := by
             rw [norm_sub_rev (clusterDir r i * tp) (G i)]
             exact add_le_add h1 h2
@@ -822,8 +817,8 @@ theorem upper_conj_index {r : ℕ} (hr : 2 ≤ r) {S : Finset ℂ} {G : ℕ → 
     rw [hjt] at h1
     have hkey : ‖clusterDir r j * tp - clusterDir r (r - 1) * tp‖ ≤ (ε + ε') * ‖tp‖ := by
       calc ‖clusterDir r j * tp - clusterDir r (r - 1) * tp‖
-          = ‖(clusterDir r j * tp - cj) + (cj - clusterDir r (r - 1) * tp)‖ := by congr 1; ring
-        _ ≤ ‖clusterDir r j * tp - cj‖ + ‖cj - clusterDir r (r - 1) * tp‖ := norm_add_le _ _
+          ≤ ‖clusterDir r j * tp - cj‖ + ‖cj - clusterDir r (r - 1) * tp‖ :=
+            norm_sub_le_norm_sub_add_norm_sub _ _ _
         _ ≤ ε * ‖tp‖ + ε' * ‖tp‖ := by
             rw [norm_sub_rev (clusterDir r j * tp) cj]
             exact add_le_add h1 hcj
@@ -940,8 +935,7 @@ theorem norm_conj_ftPrincipal_sub_clusterDir {r : ℕ} (hr : 1 ≤ r) {τ : ℝ 
       congr 1
       rw [hθ]
       push_cast
-      field_simp
-      ring
+      field
     calc ((T : ℝ) : ℂ) * Complex.exp (-((θ : ℝ) : ℂ) * I)
           - Complex.exp (-(2 * (Real.pi : ℂ) * Complex.I / (r : ℂ)))
             * (((T : ℝ) : ℂ) * (((θ : ℝ) : ℂ) * I).exp)

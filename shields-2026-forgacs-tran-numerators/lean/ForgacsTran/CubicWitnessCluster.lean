@@ -317,8 +317,7 @@ theorem cubicThird_div_cubicTau {δ : ℝ} (hδ : δ ∈ Set.Icc 0 Real.pi) :
       exact Real.cos_le_cos_of_nonneg_of_le_pi hw.1 (by linarith [Real.pi_pos]) hw.2
     linarith
   rw [cubicThird, cubicTau_closed_form hδ, cubicClusterRatio]
-  field_simp
-  ring
+  field
 
 /-- **`hexp₀` at the witness, in the binder's own shape.**  The complex norm
 reduces to the real absolute value because every quantity is real here: the

@@ -40,8 +40,12 @@ form.
   family is numerator-uniform.
 * `clauseThree_exceptionalRoots` — the same, over the conclusion
   `clauseThree_of_ftGeometry` actually reaches, so the two compose without a seam.
-* `exceptionalRoots_numeratorUniform_witness` — the hypotheses instantiated, so the statement
-  is not vacuous.
+* `clauseThree_exceptionalRoots_of_ne_zero`, `clauseThree_exceptionalRoots_of_ftGeometry` —
+  the two with `NumeratorUniform` **derived rather than assumed** and no side condition left:
+  the second takes the branch geometry and returns the exceptional bound, so no binder
+  anywhere in it mentions the uniformity class.
+* `exceptionalRoots_numeratorUniform_witness`, `clauseThree_exceptionalRoots_witness` — the
+  hypotheses of each instantiated, so neither statement is vacuous.
 
 ## Implementation notes
 
@@ -219,5 +223,147 @@ theorem exceptionalRoots_numeratorUniform_of_ne_zero
   exact ⟨max m₁ m₂, fun m hm =>
     hm₁ m (le_trans (le_max_left _ _) hm) (hm₂ m (le_trans (le_max_right _ _) hm))⟩
 
+
+/-! ### The uniformity derived rather than assumed
+
+`exceptionalRoots_numeratorUniform_of_ne_zero` takes `NumeratorUniform` as a binder, which is
+the right shape for the counting argument and the wrong shape for a coverage claim: read
+alone it says the numerator-uniformity is posited.  It is not.  For the family clause 3
+actually produces, `ClauseThree.numeratorUniform_defect` proves it with **no hypotheses at
+all** — the passage from `⌈C_0 + C_1K⌉` to `⌈C_0⌉ + ⌈C_1⌉K` is arithmetic — and
+`ClauseThreeComposition.clauseThree_of_ftGeometry` carries it out of the branch geometry as
+one conjunct of its conclusion.  The two below compose those, so the uniformity is a step of
+the proof rather than an input. -/
+
+/-- **Paper `thm:main` clause 3, with the uniformity derived and no side condition.**  `hcl`
+is `clauseThree_of_ftGeometry`'s conclusion type verbatim, so whatever discharges the branch
+geometry discharges this; `hne` is clause 2(i), which `eventual_coeffPoly_ne_zero` supplies.
+
+What separates this from `exceptionalRoots_numeratorUniform_of_ne_zero` is that
+`NumeratorUniform` is no longer a binder: it arrives inside `hcl`, where
+`ClauseThree.numeratorUniform_defect` proved it unconditionally.
+
+**Containment.**  The conclusion bounds `exceptionalRoots`.  No binder mentions
+`exceptionalRoots`; `hcl`'s second conjunct speaks of roots *inside* `Complex.ofReal '' T` and
+says nothing about the complement, `hdeg` is about `natDegree`, and `hne` about
+nonvanishing. -/
+theorem clauseThree_exceptionalRoots_of_ne_zero
+    {Q : Polynomial ℝ} {r : ℕ}
+    {Pof : Polynomial (Polynomial ℝ) → ℕ → Polynomial ℝ} {T : Set ℝ}
+    {hwin κ₀ κ₁ : ℝ}
+    (hdeg : ∀ N m, ((Pof N m).map (algebraMap ℝ ℂ)).natDegree ≤ m / r)
+    (hne : ∀ N, ∃ m₀ : ℕ, ∀ m, m₀ ≤ m → (Pof N m).map (algebraMap ℝ ℂ) ≠ 0)
+    (hcl : NumeratorUniform Q r
+        (fun N => ⌈defectC₀ hwin κ₀
+          + defectC₁ κ₁ * ((laurentWeight Q r N).natDegree : ℝ)⌉₊)
+      ∧ ∀ N, ∃ M₀ : ℕ, ∀ M, M₀ ≤ M → 1 ≤ M → ∃ Z : Finset ℂ,
+          M / r - ⌈defectC₀ hwin κ₀
+            + defectC₁ κ₁ * ((laurentWeight Q r N).natDegree : ℝ)⌉₊ ≤ Z.card ∧
+          (∀ w ∈ Z, ((Pof N M).map (algebraMap ℝ ℂ)).IsRoot w) ∧
+          (∀ w ∈ Z, w ∈ Complex.ofReal '' T)) :
+    ∃ C₀ C₁ : ℕ, ∀ N : Polynomial (Polynomial ℝ), ∃ m₀ : ℕ, ∀ m, m₀ ≤ m →
+      (exceptionalRoots ((Pof N m).map (algebraMap ℝ ℂ)) (Complex.ofReal '' T)).card
+        ≤ C₀ + C₁ * (laurentWeight Q r N).natDegree := by
+  obtain ⟨huni, hsup⟩ := hcl
+  refine exceptionalRoots_numeratorUniform_of_ne_zero huni hdeg hne (fun N => ?_)
+  obtain ⟨M₀, hM₀⟩ := hsup N
+  exact ⟨max M₀ 1, fun m hm =>
+    hM₀ m (le_trans (le_max_left _ _) hm) (le_trans (le_max_right _ _) hm)⟩
+
+/-- **Paper `thm:main` clause 3, over the branch geometry alone.**  The whole clause in one
+statement: `clauseThree_of_ftGeometry` derives the numerator-uniform defect family from
+`eq:dominance-bound` on the retained range and `FTChainGeom` at every large index, and this
+turns the interior count into the exceptional bound with clause 2(i) discharged.
+
+**No binder mentions `NumeratorUniform`**, and none mentions an exceptional count.  The
+constants `C_0`, `C_1` are still bound before `∀ N` and the onset after it, which is the whole
+of what separates clause 3 from clause 2; `hwin`, `κ₀`, `κ₁`, `z`, `τ`, `r`, `T` and `bb`
+stand outside the quantifier over numerators, and `B_N`, `P_{N,m}`, `ψ_{N,m}`, the window
+width and the deleted windows stand inside.
+
+**Containment.**  The conclusion bounds `exceptionalRoots` of `(Pof N m).map`.  `hB` and `hP`
+identify `B_N` and `P_{N,m}` without saying anything about their zeros, `hdom` compares two
+norms, `hdeg` is about `natDegree` and `hne` about nonvanishing.  No hypothesis mentions
+`exceptionalRoots` or a `Finset ℂ`; `hgeom` is `FTChainGeom`, which unfolds to a statement
+about the branch, the chain and the weight, and the one count in it is the number `n ≤ K + 1`
+of components. -/
+theorem clauseThree_exceptionalRoots_of_ftGeometry
+    (Q : Polynomial ℝ) (r : ℕ) (hr : 1 ≤ r)
+    {QC : Polynomial ℂ} {z τ : ℝ → ℝ} {T : Set ℝ} {hwin κ₀ κ₁ bb : ℝ}
+    (hh : 0 ≤ hwin) (hκ₀ : 0 ≤ κ₀) (hκ₁ : 0 ≤ κ₁) (hTconn : T.OrdConnected)
+    {Bof : Polynomial (Polynomial ℝ) → Polynomial ℂ}
+    {Pof : Polynomial (Polynomial ℝ) → ℕ → Polynomial ℝ}
+    {ψof : Polynomial (Polynomial ℝ) → ℕ → ℝ → ℝ}
+    {widof : Polynomial (Polynomial ℝ) → ℕ → ℝ}
+    {Θ : Polynomial (Polynomial ℝ) → ℕ → Set ℝ}
+    (hB : ∀ N, Bof N = (laurentWeight Q r N).map (algebraMap ℝ ℂ))
+    (hP : ∀ N M, (Pof N M).map (algebraMap ℝ ℂ) = ftCoeffPoly QC (Bof N) r M)
+    (hdom : ∀ N, ∃ h > (0 : ℝ), ∃ M₀ : ℕ, ∀ M : ℕ, M₀ ≤ M → ∀ θ : ℝ,
+      h / M ≤ θ → θ ≤ bb - h / M → θ ∉ Θ N M →
+        ftRemainder QC (Bof N) r z τ M θ ≤ ftPrincipalAmp QC (Bof N) r z τ θ / 2)
+    (hgeom : ∀ (N : Polynomial (Polynomial ℝ)) (h : ℝ), 0 < h → ∀ Mz : ℕ,
+      ∃ M₀ : ℕ, Mz ≤ M₀ ∧ ∀ M, M₀ ≤ M → 1 ≤ M →
+        FTChainGeom QC (Bof N) r z τ (ψof N M) M (Bof N).natDegree
+          hwin (widof N M) κ₀ κ₁ h bb (Θ N) T)
+    (hdeg : ∀ N m, ((Pof N m).map (algebraMap ℝ ℂ)).natDegree ≤ m / r)
+    (hne : ∀ N, ∃ m₀ : ℕ, ∀ m, m₀ ≤ m → (Pof N m).map (algebraMap ℝ ℂ) ≠ 0) :
+    ∃ C₀ C₁ : ℕ, ∀ N : Polynomial (Polynomial ℝ), ∃ m₀ : ℕ, ∀ m, m₀ ≤ m →
+      (exceptionalRoots ((Pof N m).map (algebraMap ℝ ℂ)) (Complex.ofReal '' T)).card
+        ≤ C₀ + C₁ * (laurentWeight Q r N).natDegree :=
+  clauseThree_exceptionalRoots_of_ne_zero hdeg hne
+    (clauseThree_of_ftGeometry Q r hr hh hκ₀ hκ₁ hTconn hB hP hdom hgeom)
+
+/-- **The two composed, instantiated.**  `clauseThree_exceptionalRoots_of_ne_zero` fixes the
+defect family to the one `clauseThree` builds, which is a narrower hypothesis than the bare
+`NumeratorUniform` of `exceptionalRoots_numeratorUniform_witness`, so it earns its own
+witness.  The family is `ClauseThreeWitness`'s Favard sequence at weight `t^k` with
+`k = deg B_N`, taken at `h = 1`, `κ_0 = 0` and `κ_1 = π`, where the defect comes out as
+`⌈5/π + 2 + 3k⌉ = 4 + 3k`.
+
+**Honest reading.**  This certifies that the hypothesis list is consistent and the conclusion
+non-trivial — `ClauseThreeWitness.witness_clauseThree_uniform_unbounded` shows the interior
+count grows without bound along the family.  It is not a model of the paper's situation:
+`Pof N` is the Favard sequence at a shifted index rather than the coefficient sequence of
+`N`, and nothing ties the two. -/
+theorem clauseThree_exceptionalRoots_witness (Q : Polynomial ℝ) :
+    ∃ C₀ C₁ : ℕ, ∀ N : Polynomial (Polynomial ℝ), ∃ m₀ : ℕ, ∀ m, m₀ ≤ m →
+      (exceptionalRoots
+          ((witPpow ((laurentWeight Q 1 N).natDegree) m).map (algebraMap ℝ ℂ))
+          (ftInterval 1 7)).card
+        ≤ C₀ + C₁ * (laurentWeight Q 1 N).natDegree := by
+  have hπ : (0 : ℝ) < Real.pi := Real.pi_pos
+  have hπ4 : Real.pi < 4 := Real.pi_lt_four
+  -- the defect the constants `h = 1`, `κ₀ = 0`, `κ₁ = Real.pi` produce is at least the `4 + 3k`
+  -- of `witness_clauseThree_uniform`, so its `ℕ` subtraction is the weaker one
+  have hge : ∀ k : ℕ, 4 + 3 * k ≤ ⌈defectC₀ 1 0 + defectC₁ Real.pi * ((k : ℕ) : ℝ)⌉₊ := by
+    intro k
+    have hval : defectC₀ 1 0 + defectC₁ Real.pi * ((k : ℕ) : ℝ)
+        = 5 / Real.pi + 2 + 3 * (k : ℝ) := by
+      rw [defectC₀, defectC₁]
+      field_simp
+      ring
+    have h5 : (1 : ℝ) < 5 / Real.pi := by rw [lt_div_iff₀ hπ]; linarith
+    have hlt : ((3 + 3 * k : ℕ) : ℝ) < defectC₀ 1 0 + defectC₁ Real.pi * ((k : ℕ) : ℝ) := by
+      rw [hval]; push_cast; linarith
+    have := Nat.lt_ceil.2 hlt
+    omega
+  refine clauseThree_exceptionalRoots_of_ne_zero (Q := Q) (r := 1)
+    (Pof := fun N m => witPpow ((laurentWeight Q 1 N).natDegree) m)
+    (T := Set.Ioo 1 7) (hwin := 1) (κ₀ := 0) (κ₁ := Real.pi)
+    (fun N m => ?_) (fun N => ?_)
+    ⟨numeratorUniform_defect Q 1 1 0 Real.pi, fun N => ?_⟩
+  · rw [witPpow_natDegree, Nat.div_one]
+    exact Nat.sub_le _ _
+  · refine ⟨(laurentWeight Q 1 N).natDegree + 1, fun m hm h => ?_⟩
+    have hd := witPpow_natDegree ((laurentWeight Q 1 N).natDegree) m
+    rw [h, Polynomial.natDegree_zero] at hd
+    omega
+  · refine ⟨(laurentWeight Q 1 N).natDegree, fun M hM hM1 => ?_⟩
+    obtain ⟨Z, hcard, hroot, hmem⟩ :=
+      witness_clauseThree_uniform (k := (laurentWeight Q 1 N).natDegree) (M := M) hM hM1
+    refine ⟨Z, ?_, hroot, hmem⟩
+    have hgk := hge ((laurentWeight Q 1 N).natDegree)
+    rw [Nat.div_one]
+    omega
 
 end ForgacsTran

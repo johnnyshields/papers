@@ -106,6 +106,14 @@ theorem ae_im_ne (c : ℝ) : ∀ᵐ z : ℂ, z.im ≠ c := by
   rw [ae_iff]
   simpa using volume_im_eq c
 
+/-- **Off the real axis the kernel is continuous in its real parameter.**  The evaluation point
+never meets the line the parameter runs along, so the logarithm is taken at a nonzero argument
+throughout. -/
+theorem continuous_logKernel_ofReal {z : ℂ} (hz : z.im ≠ 0) :
+    Continuous fun p : ℝ => Real.log ‖z - (p : ℂ)‖ := by
+  refine ((continuous_const.sub Complex.continuous_ofReal).norm).log fun p h => hz ?_
+  simpa using congrArg Complex.im (sub_eq_zero.mp (norm_eq_zero.mp h))
+
 /-! ## Integrability of the kernel -/
 
 theorem measurable_logKernel_left (p : ℂ) : Measurable fun z : ℂ => Real.log ‖z - p‖ :=
@@ -153,13 +161,18 @@ theorem exists_norm_le {Q : Set ℂ} (hQ : Bornology.IsBounded Q) :
   obtain ⟨C₀, hC₀⟩ := isBounded_iff_forall_norm_le.mp hQ
   exact ⟨max C₀ 0, le_max_right _ _, fun z hz => (hC₀ z hz).trans (le_max_left _ _)⟩
 
+/-- A region of radius `A` sits inside the square box of half-side `A`, which is where the
+dominating function is integrable. -/
+theorem subset_reProdIm_of_norm_le {Q : Set ℂ} {A : ℝ} (hA : ∀ z ∈ Q, ‖z‖ ≤ A) :
+    Q ⊆ Complex.reProdIm (Icc (-A) A) (Icc (-A) A) := fun z hz =>
+  ⟨abs_le.mp ((Complex.abs_re_le_norm z).trans (hA z hz)),
+    abs_le.mp ((Complex.abs_im_le_norm z).trans (hA z hz))⟩
+
 /-- The dominating function is integrable on every bounded plane region. -/
 theorem integrableOn_dominating_of_isBounded {Q : Set ℂ} (hQ : Bornology.IsBounded Q) (c C : ℝ) :
     IntegrableOn (fun z : ℂ => |Real.log (z.im - c)| + C) Q volume := by
   obtain ⟨A, hA0, hA⟩ := exists_norm_le hQ
-  refine (integrableOn_dominating c C hA0).mono_set fun z hz => ?_
-  exact ⟨abs_le.mp ((Complex.abs_re_le_norm z).trans (hA z hz)),
-    abs_le.mp ((Complex.abs_im_le_norm z).trans (hA z hz))⟩
+  exact (integrableOn_dominating c C hA0).mono_set (subset_reProdIm_of_norm_le hA)
 
 theorem integrableOn_logIm_add {Q : Set ℂ} (hQ : Bornology.IsBounded Q) (C : ℝ) :
     IntegrableOn (fun z : ℂ => |Real.log z.im| + C) Q volume := by
@@ -170,10 +183,7 @@ plane, `z ↦ log ‖z - p‖` is integrable on `Q`: the map `p ↦ log ‖· - 
 theorem integrableOn_log_norm_sub (p : ℂ) {Q : Set ℂ} (hQ : Bornology.IsBounded Q) :
     IntegrableOn (fun z : ℂ => Real.log ‖z - p‖) Q volume := by
   obtain ⟨A, hA0, hA⟩ := exists_norm_le hQ
-  have hQS : Q ⊆ Complex.reProdIm (Icc (-A) A) (Icc (-A) A) := fun z hz =>
-    ⟨abs_le.mp ((Complex.abs_re_le_norm z).trans (hA z hz)),
-      abs_le.mp ((Complex.abs_im_le_norm z).trans (hA z hz))⟩
-  refine IntegrableOn.mono_set ?_ hQS
+  refine IntegrableOn.mono_set ?_ (subset_reProdIm_of_norm_le hA)
   set R : ℝ := 2 * A + ‖p‖ + 1 with hR
   refine Integrable.mono' (integrableOn_dominating p.im |Real.log R| hA0)
     (measurable_logKernel_left p).aestronglyMeasurable ?_
@@ -191,6 +201,35 @@ theorem integrableOn_log_norm_sub (p : ℂ) {Q : Set ℂ} (hQ : Bornology.IsBoun
   simpa [Real.norm_eq_abs] using abs_log_norm_sub_le hzR hzim
 
 /-! ## Continuity of the kernel in the parameter -/
+
+/-- **One dominating function for every nearby real parameter.**  Off the real axis, and for `z`
+of norm at most `A`, the difference `log ‖z - p‖ - log ‖z - p₀‖` is bounded by
+`2(|log z.im| + |log (A + |p₀| + 1)|)` for every real `p` within `1` of `p₀`.
+
+The bound sees `z` only through its imaginary part and does not see `p` at all, which is what
+lets dominated convergence run with no uniform-integrability input.  A real parameter is what
+makes this possible: `p.im = 0`, so moving `p` does not move the slice the bound is read on. -/
+theorem abs_log_norm_sub_ofReal_sub_le {z : ℂ} (hzim : z.im ≠ 0) {A : ℝ} (hzA : ‖z‖ ≤ A)
+    {p₀ p : ℝ} (hp : |p - p₀| < 1) :
+    |Real.log ‖z - (p : ℂ)‖ - Real.log ‖z - (p₀ : ℂ)‖|
+      ≤ 2 * (|Real.log z.im| + |Real.log (A + |p₀| + 1)|) := by
+  set R : ℝ := A + |p₀| + 1 with hR
+  have hbnd : ∀ s : ℝ, |s| ≤ |p₀| + 1 →
+      |Real.log ‖z - (s : ℂ)‖| ≤ |Real.log z.im| + |Real.log R| := by
+    intro s hs
+    have hzs : ‖z - (s : ℂ)‖ ≤ R := by
+      calc ‖z - (s : ℂ)‖ ≤ ‖z‖ + ‖(s : ℂ)‖ := norm_sub_le _ _
+        _ ≤ R := by
+            have hsn : ‖(s : ℂ)‖ = |s| := by simp
+            rw [hsn, hR]; linarith
+    have him : z.im ≠ ((s : ℂ)).im := by simpa using hzim
+    simpa using abs_log_norm_sub_le hzs him
+  have h1 := hbnd p (by linarith [abs_sub_abs_le_abs_sub p p₀])
+  have h2 := hbnd p₀ (by linarith [abs_nonneg p₀])
+  calc |Real.log ‖z - (p : ℂ)‖ - Real.log ‖z - (p₀ : ℂ)‖|
+      ≤ |Real.log ‖z - (p : ℂ)‖| + |Real.log ‖z - (p₀ : ℂ)‖| := abs_sub _ _
+    _ ≤ 2 * (|Real.log z.im| + |Real.log R|) := by linarith
+
 
 /-- The kernel is continuous in the parameter, measured by the `L¹(Q)` distance.  Both the
 convergence and the dominating function come from the slice bound: `|log ‖z - p‖|` is bounded by
@@ -217,40 +256,15 @@ theorem tendsto_integral_abs_log_norm_sub {Q : Set ℂ} (hQ : IsCompact Q) (p₀
   · simpa using key
   · filter_upwards [Metric.ball_mem_nhds p₀ (zero_lt_one (α := ℝ))] with p hp
     have hpp : |p - p₀| < 1 := by simpa [Real.dist_eq] using hp
-    have hpabs : |p| ≤ |p₀| + 1 := by
-      have := abs_sub_abs_le_abs_sub p p₀
-      linarith [le_of_lt hpp]
     filter_upwards [hmemQ, haeim] with z hzQ hzim
-    have hbnd : ∀ s : ℝ, |s| ≤ |p₀| + 1 →
-        |Real.log ‖z - (s : ℂ)‖| ≤ |Real.log z.im| + |Real.log R| := by
-      intro s hs
-      have hzs : ‖z - (s : ℂ)‖ ≤ R := by
-        calc ‖z - (s : ℂ)‖ ≤ ‖z‖ + ‖(s : ℂ)‖ := norm_sub_le _ _
-          _ ≤ R := by
-              have : ‖(s : ℂ)‖ = |s| := by simp
-              rw [this, hR]; linarith [hA z hzQ]
-      have him : z.im ≠ ((s : ℂ)).im := by simpa using hzim
-      simpa using abs_log_norm_sub_le hzs him
-    have h1 := hbnd p hpabs
-    have h2 := hbnd p₀ (by linarith [abs_nonneg p₀])
-    have := abs_sub (Real.log ‖z - (p : ℂ)‖) (Real.log ‖z - (p₀ : ℂ)‖)
-    simp only [Real.norm_eq_abs, abs_abs]
-    calc |Real.log ‖z - (p : ℂ)‖ - Real.log ‖z - (p₀ : ℂ)‖|
-        ≤ |Real.log ‖z - (p : ℂ)‖| + |Real.log ‖z - (p₀ : ℂ)‖| := abs_sub _ _
-      _ ≤ 2 * (|Real.log z.im| + |Real.log R|) := by linarith
+    simpa [Real.norm_eq_abs, abs_abs, hR] using
+      abs_log_norm_sub_ofReal_sub_le hzim (hA z hzQ) hpp
   · exact (integrableOn_logIm_add hQ.isBounded |Real.log R|).const_mul 2
   · filter_upwards [haeim] with z hzim
-    have hne : ∀ s : ℝ, ‖z - (s : ℂ)‖ ≠ 0 := by
-      intro s h
-      exact hzim (by simpa using congrArg Complex.im (sub_eq_zero.mp (norm_eq_zero.mp h)))
-    have hc0 : Continuous fun s : ℝ => ‖z - (s : ℂ)‖ :=
-      (continuous_const.sub Complex.continuous_ofReal).norm
-    have hc : ContinuousAt (fun s : ℝ => Real.log ‖z - (s : ℂ)‖) p₀ :=
-      hc0.continuousAt.log (hne p₀)
-    have hc2 : ContinuousAt
+    have hc : ContinuousAt
         (fun s : ℝ => |Real.log ‖z - (s : ℂ)‖ - Real.log ‖z - (p₀ : ℂ)‖|) p₀ :=
-      (hc.sub continuousAt_const).abs
-    simpa [ContinuousAt] using hc2
+      (((continuous_logKernel_ofReal hzim).continuousAt).sub continuousAt_const).abs
+    simpa [ContinuousAt] using hc
 
 /-- The kernel at parameter `p`, viewed in the Bochner space `L¹(Q)`. -/
 noncomputable def logKernelL1 {Q : Set ℂ} (hQ : IsCompact Q) (p : ℝ) :
@@ -314,13 +328,8 @@ theorem abs_logPotential_le {ν : Measure ℝ} [IsProbabilityMeasure ν]
     (hν : ν (Icc (0 : ℝ) 1)ᶜ = 0) {z : ℂ} (hz : z.im ≠ 0) {R : ℝ}
     (hR : ∀ p ∈ Icc (0 : ℝ) 1, ‖z - (p : ℂ)‖ ≤ R) :
     |logPotential ν z| ≤ |Real.log z.im| + |Real.log R| := by
-  have hne : ∀ p : ℝ, ‖z - (p : ℂ)‖ ≠ 0 := by
-    intro p h
-    exact hz (by simpa using congrArg Complex.im (sub_eq_zero.mp (norm_eq_zero.mp h)))
-  have hg : Continuous fun p : ℝ => Real.log ‖z - (p : ℂ)‖ :=
-    ((continuous_const.sub Complex.continuous_ofReal).norm).log hne
   have hint : Integrable (fun p : ℝ => Real.log ‖z - (p : ℂ)‖) ν :=
-    integrable_of_measure_compl_eq_zero hν hg
+    integrable_of_measure_compl_eq_zero hν (continuous_logKernel_ofReal hz)
   have hbound := abs_integral_sub_integral_le (a := 0) (b := 1) hν hint
     (integrable_zero ℝ ℝ ν) (C := |Real.log z.im| + |Real.log R|) fun p hp => by
       simpa using abs_log_norm_sub_le (hR p hp) (by simpa using hz)
@@ -349,12 +358,7 @@ theorem tendsto_logPotential_of_tendsto {ι : Type*} {L : Filter ι}
     (hμ : (μ : Measure ℝ) (Icc (0 : ℝ) 1)ᶜ = 0) (hlim : Tendsto μs L (𝓝 μ))
     {z : ℂ} (hz : z.im ≠ 0) :
     Tendsto (fun i => logPotential (μs i) z) L (𝓝 (logPotential μ z)) := by
-  have hne : ∀ p : ℝ, ‖z - (p : ℂ)‖ ≠ 0 := by
-    intro p h
-    exact hz (by simpa using congrArg Complex.im (sub_eq_zero.mp (norm_eq_zero.mp h)))
-  have hg : Continuous fun p : ℝ => Real.log ‖z - (p : ℂ)‖ :=
-    ((continuous_const.sub Complex.continuous_ofReal).norm).log hne
-  exact tendsto_integral_of_tendsto zero_le_one hμs hμ hlim hg
+  exact tendsto_integral_of_tendsto zero_le_one hμs hμ hlim (continuous_logKernel_ofReal hz)
 
 /-- **The pointwise statement off the carrying segment.**  `tendsto_logPotential_of_tendsto`
 asks for `z` off the *real axis*, which is more than the kernel needs: what makes
@@ -426,5 +430,16 @@ theorem tendsto_integral_abs_logPotential_sub {ι : Type*} {L : Filter ι}
   · filter_upwards [haeim] with z hzim
     simpa [Real.dist_eq] using
       tendsto_iff_dist_tendsto_zero.mp (tendsto_logPotential_of_tendsto hμs hμ hlim hzim)
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.logPotential' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms logPotential
+
+/-- info: 'Shields.logKernelL1' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms logKernelL1
 
 end Shields

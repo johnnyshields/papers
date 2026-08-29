@@ -85,6 +85,15 @@ noncomputable def clusterOmega (ρ j : ℕ) : ℂ := Complex.exp (clusterAngle �
 noncomputable def clusterAlpha (x₁ : ℝ) (ρ j : ℕ) : ℂ :=
   -(x₁ : ℂ) * clusterOmega ρ j / (Real.sin (Real.pi / ρ) : ℂ)
 
+/-- **The value at `ρ = 1` is the division convention's junk `0`, not a limit.**
+`sin(π/1) = 0`, so `clusterAlpha` divides by zero and Lean returns `0` — it is not
+a limiting case of `-x₁ω_j/sin(π/ρ)`, and it is why the binder `2 ≤ ρ` on every
+consumer is not relaxable.  The endpoint collision at `ρ = 1` has multiplicity
+`k = 2` rather than `1`, with `γ_e = i·t_e ≠ 0`; `clusterAlpha` agrees with the
+collision datum only from `ρ = 2` on. -/
+@[simp] theorem clusterAlpha_one_eq_zero (x₁ : ℝ) (j : ℕ) : clusterAlpha x₁ 1 j = 0 := by
+  simp [clusterAlpha]
+
 /-- **`ω_1 = \overline{ω_0}`.**  The two angles are `±π/ρ`, so the manuscript's
 indices `0` and `1` are the principal pair — the upper branch and its conjugate —
 at every multiplicity.  That is why the retained cluster is indexed by

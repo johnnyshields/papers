@@ -133,7 +133,7 @@ at `r = 3` and `idx₁ i = 2`.
 `clusterOmega_three_two` is what pins the index: the principal directions
 `j = 1, 3` are nonreal, and landing on one would leave `hexp₁` true with the
 linear term wrong. -/
-theorem upperCluster_hexp {e₁ : ℝ} (he₁ : 0 < e₁) (i : Fin 1)
+theorem upperCluster_hexp {e₁ : ℝ} (he₁ : 0 < e₁) (_i : Fin 1)
     {δ : ℝ} (hδ : 0 < δ) (hδe : δ ≤ e₁) :
     |upperClusterRatio δ
         - (1 + ((Real.cos (Real.pi / (3 : ℕ)) - (clusterOmega 3 2).re)
@@ -154,10 +154,16 @@ theorem upperCluster_hexp {e₁ : ℝ} (he₁ : 0 < e₁) (i : Fin 1)
 with the constant produced.
 
 The set-theoretic binders are not here: `upperWitness_cluster_block` carries
-`hginj₁`, `hgmem₁` and `hgcard₁` alongside `hexp₁` on one window. -/
+`hginj₁`, `hgmem₁` and `hgcard₁` alongside `hexp₁` on one window.
+
+The `Fin 1` binder is `hexp₁`'s own shape at `n₁ = 1` rather than a spare: the
+consumer quantifies over `Fin n₁` and indexes the direction by `idx₁ i`.  This
+pencil has one nonprincipal member and its direction is `clusterOmega 3 2`
+outright, so the body does not mention the index while the clause still has to be
+the indexed family. -/
 theorem upperWitness_expansion_block :
     ∃ e₁ Cexp₁ : ℝ, 0 < e₁ ∧ 0 ≤ Cexp₁ ∧
-      (∀ i : Fin 1, ∀ δ : ℝ, 0 < δ → δ ≤ e₁ →
+      (∀ _i : Fin 1, ∀ δ : ℝ, 0 < δ → δ ≤ e₁ →
         |upperClusterRatio δ
             - (1 + ((Real.cos (Real.pi / (3 : ℕ)) - (clusterOmega 3 2).re)
                 / Real.sin (Real.pi / (3 : ℕ))) * δ)| ≤ Cexp₁ * δ ^ 2) := by
@@ -300,8 +306,7 @@ theorem upperThird_div_upperTau {θ : ℝ} (hθ : θ ∈ Set.Ioo 0 (Real.pi / 3)
   have hc : (0 : ℝ) < Real.cos θ := lt_trans (by norm_num) hh
   have hne : 4 * Real.cos θ ^ 2 - 1 ≠ 0 := by nlinarith
   rw [upperThird, upperTau_eq hθ]
-  field_simp
-  ring
+  field
 
 /-- `‖g₁/τ‖ = 2cos θ`, which is `upperClusterRatio` at `θ = π/3 - δ`.  This is
 where the modulus in `hexp₁`'s shape does its work: the third zero is negative,
@@ -444,8 +449,7 @@ theorem upperThird_eq_neg_sum {θ : ℝ} (hθ : θ ∈ Set.Ioo 0 (Real.pi / 3)) 
     upperThird θ = -(2 * upperTau θ * Real.cos θ) := by
   have hc : (0 : ℝ) < Real.cos θ := lt_trans (by norm_num) (cos_gt_half hθ)
   rw [upperThird, upperTau_eq hθ]
-  field_simp
-  ring
+  field
 
 /-- Vieta's product relation in the form the factorization consumes. -/
 theorem upperZ_mul_prod {θ : ℝ} (hθ : θ ∈ Set.Ioo 0 (Real.pi / 3)) :
@@ -614,14 +618,16 @@ theorem upperDen_deriv_ne_zero {θ : ℝ} (hθ : θ ∈ Set.Ioo 0 (Real.pi / 3))
     have := congrArg Complex.im h
     rw [upperPrincipal, show ((θ : ℝ) : ℂ) = (((1 : ℝ) * θ : ℝ) : ℂ) by norm_num] at this
     rw [hpair 1 (Or.inl rfl)] at this
-    simp at this
+    simp only [one_mul, zero_im, mul_eq_zero, OfNat.ofNat_ne_zero, false_or, ne_eq,
+      not_false_eq_true, pow_eq_zero_iff] at this
     rcases this with (h' | h') | h' <;> linarith
   · intro h
     have := congrArg Complex.im h
     rw [conj_upperPrincipal,
       show -((θ : ℝ) : ℂ) = ((((-1 : ℝ)) * θ : ℝ) : ℂ) by push_cast; ring] at this
     rw [hpair (-1) (Or.inr rfl)] at this
-    simp at this
+    simp only [neg_mul, one_mul, zero_im, neg_eq_zero, mul_eq_zero, OfNat.ofNat_ne_zero,
+      false_or, ne_eq, not_false_eq_true, pow_eq_zero_iff] at this
     rcases this with (h' | h') | h' <;> linarith
   · -- the third zero is real: `3z t₃² = 6cos θ/τ > 1`
     have h6 : upperTau θ < 6 * Real.cos θ := by
@@ -631,8 +637,7 @@ theorem upperDen_deriv_ne_zero {θ : ℝ} (hθ : θ ∈ Set.Ioo 0 (Real.pi / 3))
       rw [upperThird_eq_neg_sum hθ]; ring
     have hid : 3 * upperZ θ * upperThird θ ^ 2 = 6 * Real.cos θ / upperTau θ := by
       rw [hsq, upperZ]
-      field_simp
-      ring
+      field
     have hgt : 1 < 3 * upperZ θ * upperThird θ ^ 2 := by
       rw [hid, lt_div_iff₀ hτ]
       linarith

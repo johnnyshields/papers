@@ -4,6 +4,7 @@ Released under the MIT license as described in the file LICENSE.txt.
 Authors: Johnny Shields
 -/
 import Shields.Analysis.Complex.GreenAnnulus
+import Shields.Analysis.SpecialFunctions.PolarCoordAnnulus
 import Mathlib.Analysis.SpecialFunctions.Log.NegMulLog
 import Mathlib.MeasureTheory.Integral.Prod
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Periodic
@@ -42,6 +43,8 @@ What is left is `2π M(ε) → 2π φ(a)`, which is the delta.
 * `tendsto_log_mul_circleFlux` — **the inner boundary term vanishes**.
 * `tendsto_circleAverage_nhdsGT` — the inner average converges to the center value.
 * `riesz_delta_polar` — **the delta**, in the polar form `green_annulus_log` delivers.
+* `integral_annulus_polar` — the annulus integral in polar form.
+* `riesz_delta` — **the delta**, as an area integral.
 
 ## Tags
 
@@ -165,22 +168,6 @@ theorem riesz_delta_polar (hφ : ContDiff ℝ 2 φ) (a : ℂ) {S : ℝ}
   have hB := tendsto_circleAverage_nhdsGT hφ a
   simpa using hA.neg.add (hB.const_mul (2 * π))
 
-/-! ### The polar chart -/
-
-theorem polarCoord_symm_eq_circleMap (r θ : ℝ) :
-    Complex.polarCoord.symm (r, θ) = circleMap 0 r θ := by
-  simp [circleMap, Complex.exp_mul_I]
-
-theorem add_polarCoord_symm_eq_circleMap (a : ℂ) (r θ : ℝ) :
-    a + Complex.polarCoord.symm (r, θ) = circleMap a r θ := by
-  rw [polarCoord_symm_eq_circleMap, circleMap_eq_circleDir, circleMap_eq_circleDir]
-  simp
-
-theorem continuous_polarCoord_symm_complex :
-    Continuous fun p : ℝ × ℝ => Complex.polarCoord.symm p := by
-  simp only [Complex.polarCoord_symm_apply]
-  fun_prop
-
 /-! ### The change of variables -/
 
 /-- **The area integral over an annulus, in polar form.**  Mathlib's polar change of variables
@@ -190,65 +177,12 @@ theorem integral_annulus_polar {g : ℂ → ℝ} {a : ℂ} (hg : ContinuousOn g 
     {ε R : ℝ} (hε : 0 < ε) (hεR : ε ≤ R) :
     (∫ z in {z : ℂ | ε < ‖z - a‖ ∧ ‖z - a‖ < R}, g z)
       = ∫ s in ε..R, s * ∫ θ in (0 : ℝ)..(2 * π), g (circleMap a s θ) := by
-  set A : Set ℂ := {z : ℂ | ε < ‖z - a‖ ∧ ‖z - a‖ < R} with hAdef
-  set A₀ : Set ℂ := {z : ℂ | ε < ‖z‖ ∧ ‖z‖ < R} with hA₀def
-  have hAopen : IsOpen A := by
-    refine IsOpen.and ?_ ?_
-    · exact isOpen_lt continuous_const (continuous_id.sub continuous_const).norm
-    · exact isOpen_lt (continuous_id.sub continuous_const).norm continuous_const
-  have hA₀open : IsOpen A₀ := by
-    refine IsOpen.and ?_ ?_
-    · exact isOpen_lt continuous_const continuous_norm
-    · exact isOpen_lt continuous_norm continuous_const
-  have hA := hAopen.measurableSet
-  have hA₀ := hA₀open.measurableSet
-  have hmem : ∀ z : ℂ, a + z ∈ A ↔ z ∈ A₀ := by
-    intro z
-    simp [hAdef, hA₀def]
-  -- Center the annulus.
-  have step1 : (∫ z in A, g z) = ∫ z in A₀, g (a + z) := by
-    rw [← integral_indicator hA, ← integral_indicator hA₀,
-      ← integral_add_left_eq_self (fun z => A.indicator g z) a]
-    refine integral_congr_ae (Filter.Eventually.of_forall fun z => ?_)
-    change A.indicator g (a + z) = A₀.indicator (fun w => g (a + w)) z
-    by_cases hz : z ∈ A₀
-    · rw [Set.indicator_of_mem hz, Set.indicator_of_mem ((hmem z).mpr hz)]
-    · rw [Set.indicator_of_notMem hz, Set.indicator_of_notMem (fun hc => hz ((hmem z).mp hc))]
-  -- Change to polar coordinates; the radius cut factors as a product set.
-  have hsub : Set.Ioo ε R ⊆ Set.Ioi (0 : ℝ) := fun s hs => lt_trans hε hs.1
-  have hcong : ∀ p ∈ (Set.Ioi (0 : ℝ)) ×ˢ (Set.Ioo (-π) π),
-      p.1 • (A₀.indicator fun z => g (a + z)) (Complex.polarCoord.symm p)
-        = ((Set.Ioo ε R) ×ˢ (Set.univ : Set ℝ)).indicator
-            (fun q : ℝ × ℝ => q.1 • g (a + Complex.polarCoord.symm q)) p := by
-    rintro ⟨r, θ⟩ ⟨hr, hθ⟩
-    have hnorm : ‖Complex.polarCoord.symm ((r, θ) : ℝ × ℝ)‖ = r := by
-      rw [Complex.norm_polarCoord_symm]
-      exact abs_of_pos hr
-    by_cases hcut : ε < r ∧ r < R
-    · rw [Set.indicator_of_mem (show Complex.polarCoord.symm ((r, θ) : ℝ × ℝ) ∈ A₀ by
-        rw [hA₀def, Set.mem_ofPred_eq, hnorm]; exact hcut),
-        Set.indicator_of_mem (show ((r, θ) : ℝ × ℝ) ∈ (Set.Ioo ε R) ×ˢ (Set.univ : Set ℝ) from
-          ⟨hcut, Set.mem_univ _⟩)]
-    · rw [Set.indicator_of_notMem (show Complex.polarCoord.symm ((r, θ) : ℝ × ℝ) ∉ A₀ by
-        rw [hA₀def, Set.mem_ofPred_eq, hnorm]; exact hcut),
-        Set.indicator_of_notMem (show ((r, θ) : ℝ × ℝ) ∉ (Set.Ioo ε R) ×ˢ (Set.univ : Set ℝ) from
-          fun hc => hcut hc.1), smul_zero]
-  have step2 : (∫ z in A₀, g (a + z))
-      = ∫ p in (Set.Ioo ε R) ×ˢ (Set.Ioo (-π) π),
-          p.1 • g (a + Complex.polarCoord.symm p) := by
-    rw [← integral_indicator hA₀,
-      ← Complex.integral_comp_polarCoord_symm (A₀.indicator fun z => g (a + z)), polarCoord_target,
-      setIntegral_congr_fun (measurableSet_Ioi.prod measurableSet_Ioo) hcong,
-      setIntegral_indicator (measurableSet_Ioo.prod MeasurableSet.univ), Set.prod_inter_prod,
-      Set.inter_eq_self_of_subset_right hsub, Set.inter_univ]
-  -- Fubini.
   have hmaps : Set.MapsTo (fun p : ℝ × ℝ => a + Complex.polarCoord.symm p)
       ((Set.Icc ε R) ×ˢ (Set.Icc (-π) π)) {z : ℂ | z ≠ a} := by
     rintro ⟨r, θ⟩ ⟨hr, -⟩
     have hr0 : 0 < r := lt_of_lt_of_le hε hr.1
-    have hn : ‖Complex.polarCoord.symm ((r, θ) : ℝ × ℝ)‖ = r := by
-      rw [Complex.norm_polarCoord_symm]
-      exact abs_of_pos hr0
+    have hn : ‖Complex.polarCoord.symm ((r, θ) : ℝ × ℝ)‖ = r :=
+      norm_polarCoord_symm_of_pos hr0 θ
     refine fun hc => absurd hn ?_
     rw [show Complex.polarCoord.symm ((r, θ) : ℝ × ℝ) = 0 from by linear_combination hc]
     rw [norm_zero]
@@ -262,42 +196,18 @@ theorem integral_annulus_polar {g : ℂ → ℝ} {a : ℂ} (hg : ContinuousOn g 
     rw [← Measure.volume_eq_prod]
     exact (hcontF.integrableOn_compact (isCompact_Icc.prod isCompact_Icc)).mono_set
       (Set.prod_mono Set.Ioo_subset_Icc_self Set.Ioo_subset_Icc_self)
-  have step3 : (∫ p in (Set.Ioo ε R) ×ˢ (Set.Ioo (-π) π),
+  have hfubini : (∫ p in (Set.Ioo ε R) ×ˢ (Set.Ioo (-π) π),
         p.1 • g (a + Complex.polarCoord.symm p))
       = ∫ r in Set.Ioo ε R, ∫ θ in Set.Ioo (-π) π,
           r • g (a + Complex.polarCoord.symm ((r, θ) : ℝ × ℝ)) := by
     rw [Measure.volume_eq_prod]
     exact setIntegral_prod _ hint
-  -- The angular range, moved by periodicity.
-  have hπ : (0 : ℝ) < π := Real.pi_pos
-  have step4 : ∀ r : ℝ, (∫ θ in Set.Ioo (-π) π,
-        g (a + Complex.polarCoord.symm ((r, θ) : ℝ × ℝ)))
-      = ∫ θ in (0 : ℝ)..(2 * π), g (circleMap a r θ) := by
-    intro r
-    have hper : Function.Periodic (fun θ : ℝ => g (circleMap a r θ)) (2 * π) := by
-      intro θ
-      change g (circleMap a r (θ + 2 * π)) = g (circleMap a r θ)
-      rw [circleMap_eq_circleDir, circleMap_eq_circleDir,
-        show θ + 2 * π = 2 * π + θ from by ring, circleDir_periodic]
-    have h1 : (∫ θ in Set.Ioo (-π) π,
-          g (a + Complex.polarCoord.symm ((r, θ) : ℝ × ℝ)))
-        = ∫ θ in (-π)..π, g (circleMap a r θ) := by
-      rw [intervalIntegral.integral_of_le (by linarith : (-π : ℝ) ≤ π),
-        integral_Ioc_eq_integral_Ioo]
-      exact setIntegral_congr_fun measurableSet_Ioo
-        fun θ _ => by rw [add_polarCoord_symm_eq_circleMap]
-    have h3 := hper.intervalIntegral_add_eq (-π) 0
-    rw [show -π + 2 * π = π from by ring, zero_add] at h3
-    rw [h1]
-    exact h3
-  -- Assemble.
-  rw [step1, step2, step3]
   have hinner : ∀ r : ℝ, (∫ θ in Set.Ioo (-π) π,
         r • g (a + Complex.polarCoord.symm ((r, θ) : ℝ × ℝ)))
-      = r * ∫ θ in (0 : ℝ)..(2 * π), g (circleMap a r θ) := by
-    intro r
-    rw [integral_smul, step4 r, smul_eq_mul]
-  rw [setIntegral_congr_fun measurableSet_Ioo fun r _ => hinner r,
+      = r * ∫ θ in (0 : ℝ)..(2 * π), g (circleMap a r θ) := fun r => by
+    rw [integral_smul, integral_Ioo_polarCoord_symm_eq_circleMap, smul_eq_mul]
+  rw [setIntegral_annulus_polarCoord_symm g a hε, hfubini,
+    setIntegral_congr_fun measurableSet_Ioo fun r _ => hinner r,
     intervalIntegral.integral_of_le hεR, integral_Ioc_eq_integral_Ioo]
 
 /-! ### The delta as an area integral -/
@@ -339,5 +249,12 @@ theorem riesz_delta {φ : ℂ → ℝ} (hφ : ContDiff ℝ 2 φ) (a : ℂ) {S : 
       intervalIntegral.integral_const_mul]
     ring
   exact Tendsto.congr' hev (riesz_delta_polar hφ a hsupp hS hR)
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.riesz_delta' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms riesz_delta
 
 end Shields

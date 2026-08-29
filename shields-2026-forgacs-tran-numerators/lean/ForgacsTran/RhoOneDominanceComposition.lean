@@ -22,7 +22,7 @@ dichotomy `eq:ab-def` draws.
 **Both retained clusters are empty here.**  `n₀ = ρ - 2 = 0` and `n₁ = r - 2 = 0`
 in `ℕ`, so every binder quantified over either family is met by `Fin.elim0`, and
 the five conditioned on `0 < n₀` — `hρ`, `hcB₀`, `hcQ₀`, `hBp₀`, `hEp₀` — are
-vacuous.  The `clusterAlpha` degeneracy `SimpleEndpoint.clusterAlpha_one_eq_zero`
+vacuous.  The `clusterAlpha` degeneracy `Cluster.clusterAlpha_one_eq_zero`
 records, and the contradiction `hEp_false_of_rho_one` derives, are both about the
 unconditioned forms and cannot be reached from here.
 
@@ -58,8 +58,38 @@ could have played that part.
 
 ## Main statements
 
-* `ft_weighted_dominance_rho_one` — `thm:weighted-dominance` at `ρ = 1`, `r = 1`,
-  with the interior supply of `subsec:proof` in data form as its only antecedent.
+Five dominance theorems here state the same bound, and their statements are long
+enough that the differences do not show on a read.  They differ in exactly three
+places — which `r`, whether the interior supply is assumed or produced, and how the
+band is quantified:
+
+* `ft_weighted_dominance_rho_one` — `r = 1`; interior supply an antecedent, in data
+  form; one produced `ε`.
+* `ft_weighted_dominance_rho_one_of_le` — the same, restated so the caller picks any
+  `ε ≤ ε₀`, by antitonicity.
+* `ft_weighted_dominance_rho_one_unconditional` — `r = 1`; interior supply
+  **produced**; the deleted windows written out rather than quantified.
+* `ft_weighted_dominance_rho_one_two_le` — `2 ≤ r`; interior supply an antecedent, in
+  data form; one produced `ε`.
+* `ft_weighted_dominance_rho_one_two_le_unconditional` — `2 ≤ r`; interior supply
+  **produced**; the deleted windows written out.
+
+The two `_unconditional` forms are the ones with nothing left to supply, and they are
+what a caller wants; the other three exist because the interior supply is where this
+corner's remaining work sat while it was being closed, and a form that takes it as an
+antecedent is what let the rest be checked against its consumer meanwhile.
+
+The two non-dominance statements are witnesses:
+`ft_weighted_dominance_rho_one_hypotheses_nonvacuous` and
+`..._two_le_hypotheses_nonvacuous`, the second exercising both sides of the `r = 2`
+boundary where `Fin (r - 2)` becomes `Fin 0`.
+
+**The interior supply's clause list is not named here, and should be.**  It is written
+out inline at three of the five, which is what makes them hard to tell apart.
+`DominanceBandAntitone.ftInteriorData` is that predicate, minted for exactly this
+purpose — but it is defined downstream of this module, so it cannot be called from
+here.  Its home is `DominanceFT`, beside the `ftRemainder` and `ftPrincipalAmp` it is
+about and upstream of every corner that inlines it.
 
 ## References
 
@@ -91,7 +121,6 @@ theorem ft_weighted_dominance_rho_one {n : ℕ} {a : Fin n → ℝ} {c : ℝ}
     {i : Fin n} (hmin : ∀ k, a i ≤ a k) (hsimple : ∀ k, k ≠ i → a k ≠ a i) :
     ∃ ta > (0 : ℝ), ∃ L > (0 : ℝ),
       ∀ B : Polynomial ℂ, HasRealCoeffs B → B.eval 0 ≠ 0 →
-        B.rootMultiplicity ((-L : ℝ) : ℂ) ≤ 1 →
         ∃ ε > (0 : ℝ), ∀ Θ : ℕ → Set ℝ,
           (∃ (CI σI AI : ℝ) (Sd : Finset ℝ) (νd : ℝ → ℕ),
             0 < σI ∧ σI < 1 ∧ 0 < AI ∧ (∀ θj ∈ Sd, 1 ≤ νd θj) ∧
@@ -124,7 +153,7 @@ theorem ft_weighted_dominance_rho_one {n : ℕ} {a : Fin n → ℝ} {c : ℝ}
   have hQ0 : (ftRootPoly c a).eval 0 ≠ 0 := eval_ftRootPoly_zero_ne_zero hc.ne' ha
   have hQre : HasRealCoeffs (ftRootPoly c a) := hasRealCoeffs_ftRootPoly c a
   have hπ : (0 : ℝ) < π := Real.pi_pos
-  have hcast : π / ((1 : ℕ) : ℝ) = π := by push_cast; rw [div_one]
+  have hcast : π / ((1 : ℕ) : ℝ) = π := pi_div_natCast_one
   -- the lower endpoint
   obtain ⟨ta, hlow, hup, hlim, hE, hγd⟩ :=
     rho_one_hgd (r := 1) hn2 ha hc le_rfl hmin hsimple
@@ -168,11 +197,11 @@ theorem ft_weighted_dominance_rho_one {n : ℕ} {a : Fin n → ℝ} {c : ℝ}
     · exact absurd ht (by have := hRsep t hzero hteq; linarith)
   -- the upper endpoint block, at the same radius parameter
   obtain ⟨L, hL, sfun₁, hblk⟩ := exists_upper_endpoint_block_one (x₁ := ta) hn2 ha hc
-  refine ⟨ta, hta, L, hL, fun B hB hB0 hm => ?_⟩
+  refine ⟨ta, hta, L, hL, fun B hB hB0 => ?_⟩
   have hB0' : B ≠ 0 := fun h0 => hB0 (by rw [h0]; simp)
   obtain ⟨C₀, hC₀, ec₀, hec₀, hcbd₀⟩ :=
     exists_contour_bound_of_tendsto (B := B) hzC hR0 hlimsphere
-  obtain ⟨C₁, A₁, hC₁, hA₁, e₁, he₁, he₁π, hupblk⟩ := hblk B hB0' hm
+  obtain ⟨C₁, A₁, hC₁, hA₁, e₁, he₁, he₁π, hupblk⟩ := hblk B hB0'
   -- the two spectral parameters agree off the endpoint
   have hZ : ∀ θ : ℝ, 0 < θ →
       ftBranchZLowerAt a c 1 (n - 1) aEnd θ = ftBranchZ a c 1 (n - 1) θ :=
@@ -224,7 +253,7 @@ theorem ft_weighted_dominance_rho_one {n : ℕ} {a : Fin n → ℝ} {c : ℝ}
       (te₀ := ((ta : ℝ) : ℂ)) (γe₀ := ((ta : ℝ) : ℂ) * I)
       (R₀ := R₀) (τmax₀ := (ta + R₀) / 2) (σ₀ := (ta + R₀) / 2 / R₀)
       (e₀ := min e₀ ec₀) (C₀ := C₀)
-      (p₁ := 0) (A₁ := A₁) (L₁ := fun i => i.elim0)
+      (p₁ := B.rootMultiplicity ((-L : ℝ) : ℂ) - 1) (A₁ := A₁) (L₁ := fun i => i.elim0)
       (R₁ := 2 * L) (τmax₁ := 3 * L / 2) (σ₁ := 3 / 4) (e₁ := e₁) (C₁ := C₁)
       (c₀ := 0) (c₁ := 0)
       hQre hB hB0' (le_refl 1) hQ0 hta (fun h => absurd h (lt_irrefl 0))
@@ -301,7 +330,6 @@ theorem ft_weighted_dominance_rho_one_of_le {n : ℕ} {a : Fin n → ℝ} {c : �
     {i : Fin n} (hmin : ∀ k, a i ≤ a k) (hsimple : ∀ k, k ≠ i → a k ≠ a i) :
     ∃ ta > (0 : ℝ), ∃ L > (0 : ℝ),
       ∀ B : Polynomial ℂ, HasRealCoeffs B → B.eval 0 ≠ 0 →
-        B.rootMultiplicity ((-L : ℝ) : ℂ) ≤ 1 →
         ∃ ε₀ > (0 : ℝ), ∀ ε : ℝ, 0 < ε → ε ≤ ε₀ → ∀ Θ : ℕ → Set ℝ,
           (∃ (CI σI AI : ℝ) (Sd : Finset ℝ) (νd : ℝ → ℕ),
             0 < σI ∧ σI < 1 ∧ 0 < AI ∧ (∀ θj ∈ Sd, 1 ≤ νd θj) ∧
@@ -330,8 +358,8 @@ theorem ft_weighted_dominance_rho_one_of_le {n : ℕ} {a : Fin n → ℝ} {c : �
                   (ftTauArc a 1 (n - 1) ta) θ / 2 := by
   obtain ⟨ta, hta, L, hL, H⟩ :=
     ft_weighted_dominance_rho_one hn3 ha hc hmin hsimple
-  refine ⟨ta, hta, L, hL, fun B hB hB0 hm => ?_⟩
-  obtain ⟨ε₀, hε₀, H₀⟩ := H B hB hB0 hm
+  refine ⟨ta, hta, L, hL, fun B hB hB0 => ?_⟩
+  obtain ⟨ε₀, hε₀, H₀⟩ := H B hB hB0
   refine ⟨ε₀, hε₀, fun ε hε hle Θ hdata => ?_⟩
   obtain ⟨CI, σI, AI, Sd, νd, hσ0, hσ1, hA, hν, hrem, hfloor, hwin⟩ := hdata
   -- restrict the supply from the larger window to the one this corner named
@@ -341,7 +369,7 @@ theorem ft_weighted_dominance_rho_one_of_le {n : ℕ} {a : Fin n → ℝ} {c : �
 
 /-- **The admissible class is inhabited, and the first-gap antecedent is
 reachable.**  At `a = (1,2,3)` with `c = 1` the smallest zero is simple, so the
-`ρ = 1` hypotheses hold, and `B = 1` meets the numerator conditions at every `L`.
+`ρ = 1` hypotheses hold, and `B = 1` meets `B(0) ≠ 0`.
 
 The corner takes no separation hypothesis any more, so what this rules out is the
 admissible class being empty.  It is kept because the class is what a later edit
@@ -350,16 +378,13 @@ theorem ft_weighted_dominance_rho_one_hypotheses_nonvacuous :
     ∃ (n : ℕ) (a : Fin n → ℝ) (c : ℝ) (i : Fin n),
       3 ≤ n ∧ (∀ k, 0 < a k) ∧ 0 < c ∧ (∀ k, a i ≤ a k)
         ∧ (∀ k, k ≠ i → a k ≠ a i)
-        ∧ HasRealCoeffs (1 : Polynomial ℂ) ∧ (1 : Polynomial ℂ).eval 0 ≠ 0
-        ∧ ∀ L : ℝ, (1 : Polynomial ℂ).rootMultiplicity ((-L : ℝ) : ℂ) ≤ 1 := by
+        ∧ HasRealCoeffs (1 : Polynomial ℂ) ∧ (1 : Polynomial ℂ).eval 0 ≠ 0 := by
   classical
   refine ⟨3, ![1, 2, 3], 1, 0, by norm_num, ?_, by norm_num, ?_, ?_,
-    hasRealCoeffs_one, by norm_num, fun L => ?_⟩
+    hasRealCoeffs_one, by norm_num⟩
   · intro k; fin_cases k <;> norm_num
   · intro k; fin_cases k <;> norm_num
   · intro k hk; fin_cases k <;> simp_all
-  · rw [Polynomial.rootMultiplicity_eq_zero (by simp [Polynomial.IsRoot])]
-    exact Nat.zero_le 1
 
 /-- **The `ρ = 1` corner with nothing assumed.**  The interior supply is produced
 from `InteriorBranchSeparation.ft_interior_data_on_arc_one`, whose separation is
@@ -381,7 +406,6 @@ theorem ft_weighted_dominance_rho_one_unconditional {n : ℕ} {a : Fin n → ℝ
     {i : Fin n} (hmin : ∀ k, a i ≤ a k) (hsimple : ∀ k, k ≠ i → a k ≠ a i) :
     ∃ ta > (0 : ℝ), ∃ L > (0 : ℝ),
       ∀ B : Polynomial ℂ, HasRealCoeffs B → B.eval 0 ≠ 0 →
-        B.rootMultiplicity ((-L : ℝ) : ℂ) ≤ 1 →
         ∃ (S : Finset ℝ) (σ : ℝ), 0 < σ ∧ σ < 1
         ∧ (∀ θj ∈ S, 1 ≤ B.rootMultiplicity (ftPrincipal (ftTauArc a 1 (n - 1) ta) θj))
         ∧ (∀ θj ∈ S, θj ∈ Set.Ioo (0 : ℝ) π)
@@ -403,11 +427,11 @@ theorem ft_weighted_dominance_rho_one_unconditional {n : ℕ} {a : Fin n → ℝ
                   (-((ftRootPolyReal c a).eval ta) / ta ^ 1))
                 (ftTauArc a 1 (n - 1) ta) θ / 2 := by
   classical
-  have hcast : π / ((1 : ℕ) : ℝ) = π := by push_cast; rw [div_one]
+  have hcast : π / ((1 : ℕ) : ℝ) = π := pi_div_natCast_one
   obtain ⟨ta, hta, L, hL, H0⟩ := ft_weighted_dominance_rho_one hn3 ha hc hmin hsimple
-  refine ⟨ta, hta, L, hL, fun B hB hB0 hm => ?_⟩
+  refine ⟨ta, hta, L, hL, fun B hB hB0 => ?_⟩
   have hB0' : B ≠ 0 := fun h0 => hB0 (by rw [h0]; simp)
-  obtain ⟨ε, hε, H⟩ := H0 B hB hB0 hm
+  obtain ⟨ε, hε, H⟩ := H0 B hB hB0
   -- the two extensions agree off the endpoint, which is all the interior sees
   have hZ : ∀ θ : ℝ, 0 < θ →
       ftBranchZLowerAt a c 1 (n - 1)

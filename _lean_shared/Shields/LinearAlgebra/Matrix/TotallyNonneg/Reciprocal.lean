@@ -174,4 +174,11 @@ theorem altSeq_nonneg {a b : ℕ → ℝ} (ha : a 0 = 1)
 
 end Real
 
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.altSeq_nonneg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms altSeq_nonneg
+
 end Shields

@@ -10,6 +10,23 @@ import ForgacsTran.PhaseStateDichotomy
 import ForgacsTran.Reduction
 import ForgacsTran.LinearCase
 import ForgacsTran.Necessity
+import ForgacsTran.PhaseSupplyLastCorner
+import ForgacsTran.PhaseSupplyRhoOneClosure
+import ForgacsTran.PhaseSupplyUniform
+import ForgacsTran.ClauseThreeSupply
+import ForgacsTran.ClauseThreeChainObstruction
+import ForgacsTran.ClauseThreeAdmissible
+import ForgacsTran.AngularDiscrepancyAdmissible
+import ForgacsTran.AngularSupplyAdmissible
+import ForgacsTran.PhaseSupplyRhoOne
+import ForgacsTran.PhaseSupplyOne
+import ForgacsTran.MainCompositionWitness
+import ForgacsTran.PhaseSupplyKappaZero
+import ForgacsTran.PhaseSupplyCofactor
+import ForgacsTran.PhaseSupplyUpperRegion
+import ForgacsTran.PhaseSupplyRegionBounds
+import ForgacsTran.PhaseSupplyLowerCollar
+import ForgacsTran.NecessityBivariate
 import ForgacsTran.SignAlternation
 import ForgacsTran.ClusterContour
 import ForgacsTran.EventualDegree
@@ -95,10 +112,20 @@ import ForgacsTran.CubicMain
 import ForgacsTran.SimpleEndpoint
 import ForgacsTran.CubicEquidistribution
 import ForgacsTran.SimpleWitness
+import ForgacsTran.FavardRootStates
+import ForgacsTran.CubicRootStates
+import ForgacsTran.LowerEndpointCorner
+import ForgacsTran.EndpointCriticalFactor
+import ForgacsTran.LowerEndpointSimpleZero
+import ForgacsTran.LowerEndpointTangent
+import ForgacsTran.PolarAngleBase
+import ForgacsTran.TangentVariationBound
+import ForgacsTran.AmplitudeAlong
 import ForgacsTran.FTGeometryBoundary
 import ForgacsTran.EndpointBranch
 import ForgacsTran.EndpointPackage
 import ForgacsTran.PhaseSupplyProducer
+import ForgacsTran.PhaseTangency
 import ForgacsTran.EndpointSeparation
 import ForgacsTran.EndpointUpperBinders
 import ForgacsTran.EndpointLowerChart
@@ -107,6 +134,7 @@ import ForgacsTran.EndpointCollision
 import ForgacsTran.EndpointUpperGeneralN
 import ForgacsTran.WeightedDominanceBranchOne
 import ForgacsTran.EndpointCofactorBound
+import ForgacsTran.ArcPhaseBound
 import ForgacsTran.EndpointLowerRhoOne
 import ForgacsTran.PencilArcSymmetry
 import ForgacsTran.RhoOneEndpointFactorization
@@ -120,13 +148,34 @@ import ForgacsTran.EndpointUpperOne
 import ForgacsTran.EndpointUpperOneBinders
 import ForgacsTran.InteriorBranchSeparation
 import ForgacsTran.WeightedDominanceBranch
+import ForgacsTran.DominanceBandAntitone
 import ForgacsTran.EndpointUpperPackage
+import ForgacsTran.EndpointUpperMultiplicity
 import ForgacsTran.BranchCurvature
+import ForgacsTran.BranchRadiusMonotone
+import ForgacsTran.BranchCircle
+import ForgacsTran.BranchTangentSum
+import ForgacsTran.BranchAngleDerivSum
 import ForgacsTran.BranchAmplitude
 import ForgacsTran.PhaseDerivativeBound
 import ForgacsTran.BranchInteriorC1
 import ForgacsTran.BranchStrongClock
 import ForgacsTran.BranchClockSpacing
+import ForgacsTran.BranchArcGeometry
+import ForgacsTran.BranchDivisorWitness
+import ForgacsTran.BranchRetainedNonempty
+import ForgacsTran.DominanceSupplyClosure
+import ForgacsTran.BranchSupplyWitness
+import ForgacsTran.BranchSupplyCubicWitness
+import ForgacsTran.BranchSupplyGeometry
+import ForgacsTran.CubicCollisionWitness
+import ForgacsTran.CubicPhaseSupplyComposition
+import ForgacsTran.TauArcAt
+import ForgacsTran.CubicPhaseSupplyClosed
+import ForgacsTran.RootStatesGeneral
+import ForgacsTran.PhaseSupplyGeneral
+import ForgacsTran.AmplitudeUpperEndpoint
+import ForgacsTran.QuadraticCell
 import ForgacsTran.AngularDiscrepancy
 import ForgacsTran.MainFT
 import ForgacsTran.AngularDiscrepancyFT
@@ -140,6 +189,13 @@ import ForgacsTran.CubicClockSpacing
 import ForgacsTran.PrincipalSimple
 import ForgacsTran.PrincipalSimpleBranch
 import ForgacsTran.FTGeometryCone
+import ForgacsTran.BranchSupply
+import ForgacsTran.AngleChartForm
+import ForgacsTran.EndpointTauDeriv2
+import ForgacsTran.EndpointTauDeriv2Simple
+import ForgacsTran.EndpointArcObstruction
+import ForgacsTran.CompositionLinks
+import ForgacsTran.MainAdmissible
 
 /-!
 # Axiom regression guard
@@ -330,6 +386,71 @@ open ForgacsTran
 /-- info: 'ForgacsTran.dvd_exceptional_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms dvd_exceptional_le
+
+-- The link that lets the witness family and the transfer lemma meet: a common
+-- factor scales the convolution, so `R | P_m` follows from the initial data.
+
+/-- info: 'ForgacsTran.denomConv_const_mul' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms denomConv_const_mul
+
+/-- info: 'ForgacsTran.dvd_of_denomConv_const' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms dvd_of_denomConv_const
+
+/-- info: 'ForgacsTran.exceptional_unbounded_of_denomConv' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exceptional_unbounded_of_denomConv
+
+-- The real-to-complex passage: a real zero off `(0,inf)` survives with its
+-- multiplicity as a complex zero off `posRay`, which is the count `main_bound`
+-- bounds.  Strict wherever `P` has a non-real zero, so it is not an equality.
+
+/-- info: 'ForgacsTran.algebraMap_mem_posRay_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms algebraMap_mem_posRay_iff
+
+/-- info: 'ForgacsTran.card_exceptionalRoots_le_map' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms card_exceptionalRoots_le_map
+
+-- The denominator quantified over the paper's own admissible pencil, and the
+-- guard that keeps the negation from being vacuous: `P_0 != 0` is derived, not
+-- assumed, so the `P_m != 0` side condition is met rather than merely stated.
+
+/-- info: 'ForgacsTran.isUnit_ftDenom_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms isUnit_ftDenom_zero
+
+/-- info: 'ForgacsTran.ne_zero_of_denomConv_const' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ne_zero_of_denomConv_const
+
+/-- info: 'ForgacsTran.le_card_exceptionalRoots_negRootPoly' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms le_card_exceptionalRoots_negRootPoly
+
+/-- info: 'ForgacsTran.exceptional_unbounded_ftDenom' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exceptional_unbounded_ftDenom
+
+-- The negation itself, in its four forms.
+
+/-- info: 'ForgacsTran.not_exists_uniform_exceptional_bound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms not_exists_uniform_exceptional_bound
+
+/-- info: 'ForgacsTran.not_exists_uniform_exceptional_bound_complex' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms not_exists_uniform_exceptional_bound_complex
+
+/-- info: 'ForgacsTran.not_exists_uniform_exceptional_bound_linear' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms not_exists_uniform_exceptional_bound_linear
+
+/-- info: 'ForgacsTran.not_exists_uniform_exceptional_bound_bivariate' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms not_exists_uniform_exceptional_bound_bivariate
 
 -- Analytic bundle: consistency witness (Bridge).
 /-- info: 'ForgacsTran.ftInputsWitness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -4076,6 +4197,10 @@ them is the one piece of Case 3 still outstanding -- so nothing else pins them. 
 #guard_msgs in
 #print axioms main_bound_interval_of_supply
 
+/-- info: 'ForgacsTran.interior_distinct_count_of_supply' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms interior_distinct_count_of_supply
+
 /-- info: 'ForgacsTran.exists_clusterDir_of_pow' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms exists_clusterDir_of_pow
@@ -4092,9 +4217,9 @@ them is the one piece of Case 3 still outstanding -- so nothing else pins them. 
 #guard_msgs in
 #print axioms hasDerivAt_ftBranchAmpNorm
 
-/-- info: 'ForgacsTran.add_le_scaled'' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'ForgacsTran.add_le_mul_add_of_one_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
-#print axioms add_le_scaled'
+#print axioms add_le_mul_add_of_one_le
 
 /-- info: 'ForgacsTran.exists_ftBranchZDeriv_bound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
@@ -4120,13 +4245,13 @@ them is the one piece of Case 3 still outstanding -- so nothing else pins them. 
 #guard_msgs in
 #print axioms ft_pole_data
 
-/-- info: 'ForgacsTran.norm_cast_pow_real_mul'' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'ForgacsTran.norm_natCast_mul_ofReal_pow_mul_ofReal_mul' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
-#print axioms norm_cast_pow_real_mul'
+#print axioms norm_natCast_mul_ofReal_pow_mul_ofReal_mul
 
-/-- info: 'ForgacsTran.norm_pow_real_mul_smul'' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'ForgacsTran.norm_ofReal_pow_mul_smul' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
-#print axioms norm_pow_real_mul_smul'
+#print axioms norm_ofReal_pow_mul_smul
 
 /-- info: 'ForgacsTran.pow_mul_le_of_floor' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
@@ -5208,3 +5333,1847 @@ them is the one piece of Case 3 still outstanding -- so nothing else pins them. 
 /-- info: 'ForgacsTran.finite_zeros_witness_nonempty' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms finite_zeros_witness_nonempty
+
+/-- info: 'ForgacsTran.ft_branch_geometry_arc' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_branch_geometry_arc
+
+/-- info: 'ForgacsTran.ft_branch_conj_simple_arc' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_branch_conj_simple_arc
+
+/-- info: 'ForgacsTran.ft_branch_geometry_band' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_branch_geometry_band
+
+/-- info: 'ForgacsTran.exists_band_at_branch' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_band_at_branch
+
+/-- info: 'ForgacsTran.ftAmp_eq_zero_at_branch_of_one_le_mult' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftAmp_eq_zero_at_branch_of_one_le_mult
+
+/-- info: 'ForgacsTran.mem_ftAmplitudeDivisor_at_branch' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms mem_ftAmplitudeDivisor_at_branch
+
+/-- info: 'ForgacsTran.ft_branch_geometry_arc_nonvacuous' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_branch_geometry_arc_nonvacuous
+
+/-- info: 'ForgacsTran.abs_im_logDeriv_le_of_local_factorization' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms abs_im_logDeriv_le_of_local_factorization
+
+/-- info: 'ForgacsTran.exists_phase_family_of_regions' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_phase_family_of_regions
+
+/-- info: 'ForgacsTran.exists_bound_im_logDeriv_centeredCofactor' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_bound_im_logDeriv_centeredCofactor
+
+/-- info: 'ForgacsTran.exists_bound_im_logDeriv_ftAmp_interior' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_bound_im_logDeriv_ftAmp_interior
+
+/-- info: 'ForgacsTran.hasRealCoeffs_branchWitnessB' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms hasRealCoeffs_branchWitnessB
+
+/-- info: 'ForgacsTran.branchWitnessB_eval' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms branchWitnessB_eval
+
+/-- info: 'ForgacsTran.branchWitnessB_eval_branch' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms branchWitnessB_eval_branch
+
+/-- info: 'ForgacsTran.branchWitnessB_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms branchWitnessB_ne_zero
+
+/-- info: 'ForgacsTran.branchWitnessB_eval_zero_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms branchWitnessB_eval_zero_ne_zero
+
+/-- info: 'ForgacsTran.one_le_rootMultiplicity_branchWitnessB' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms one_le_rootMultiplicity_branchWitnessB
+
+/-- info: 'ForgacsTran.exists_nonempty_ftAmplitudeDivisor_at_branch' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_nonempty_ftAmplitudeDivisor_at_branch
+
+/-- info: 'ForgacsTran.cubicArc_mem' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms cubicArc_mem
+
+/-- info: 'ForgacsTran.ftTauArc_eq_cubicTau' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftTauArc_eq_cubicTau
+
+/-- info: 'ForgacsTran.ftPrincipal_ftTauArc_eq_cubic' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftPrincipal_ftTauArc_eq_cubic
+
+/-- info: 'ForgacsTran.cubic_mem_ftAmplitudeDivisor' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms cubic_mem_ftAmplitudeDivisor
+
+/-- info: 'ForgacsTran.exists_bound_im_logDeriv_ftAmp_endpoint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_bound_im_logDeriv_ftAmp_endpoint
+
+/-- info: 'ForgacsTran.exists_bound_im_logDeriv_ftAmp_interiorRegion' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_bound_im_logDeriv_ftAmp_interiorRegion
+
+/-- info: 'ForgacsTran.forall_Icc_of_Ioc_of_eq_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms forall_Icc_of_Ioc_of_eq_zero
+
+/-- info: 'ForgacsTran.forall_Icc_of_Ico_of_eq_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms forall_Icc_of_Ico_of_eq_zero
+
+/-- info: 'ForgacsTran.exists_bound_im_logDeriv_ftAmp_interior_witness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_bound_im_logDeriv_ftAmp_interior_witness
+
+/-- info: 'ForgacsTran.wedge_ne_zero_of_wedge_eq_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms wedge_ne_zero_of_wedge_eq_zero
+
+/-- info: 'ForgacsTran.hasDerivAt_tangency' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms hasDerivAt_tangency
+
+/-- info: 'ForgacsTran.tangency_ne_zero_nhdsNE_of_meet' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms tangency_ne_zero_nhdsNE_of_meet
+
+/-- info: 'ForgacsTran.finite_of_isolated_zeros' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms finite_of_isolated_zeros
+
+/-- info: 'ForgacsTran.finite_tangency_zeros' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms finite_tangency_zeros
+
+/-- info: 'ForgacsTran.tangency_eq_zero_of_polarAngle_sub' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms tangency_eq_zero_of_polarAngle_sub
+
+/-- info: 'ForgacsTran.sum_eVariationOn_of_curvature' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms sum_eVariationOn_of_curvature
+
+/-- info: 'ForgacsTran.wedge_ftGammaDeriv2_ftGammaDeriv' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms wedge_ftGammaDeriv2_ftGammaDeriv
+
+/-- info: 'ForgacsTran.not_finite_tangency_zeros_of_line' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms not_finite_tangency_zeros_of_line
+
+/-- info: 'ForgacsTran.mem_of_ftPrincipalAmp_eq_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms mem_of_ftPrincipalAmp_eq_zero
+
+/-- info: 'ForgacsTran.mem_of_dominance_interior_data' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms mem_of_dominance_interior_data
+
+/-- info: 'ForgacsTran.exists_nonempty_retainedSet_of_branch_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_nonempty_retainedSet_of_branch_zero
+
+/-- info: 'ForgacsTran.quadArc_mem' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms quadArc_mem
+
+/-- info: 'ForgacsTran.quad_ha' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms quad_ha
+
+/-- info: 'ForgacsTran.quadB_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms quadB_ne_zero
+
+/-- info: 'ForgacsTran.hasRealCoeffs_quadB' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms hasRealCoeffs_quadB
+
+/-- info: 'ForgacsTran.quad_nonempty_retainedSet' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms quad_nonempty_retainedSet
+
+/-- info: 'ForgacsTran.retainedSet_eq_empty_of_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms retainedSet_eq_empty_of_one
+
+/-- info: 'ForgacsTran.hasRealCoeffs_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms hasRealCoeffs_one
+
+/-- info: 'ForgacsTran.quad_retainedSet_empty_at_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms quad_retainedSet_empty_at_one
+
+/-- info: 'ForgacsTran.retainedSet_eq_ftAmplitudeDivisor' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms retainedSet_eq_ftAmplitudeDivisor
+
+/-- info: 'ForgacsTran.finite_tangency_zeros_witness_nonempty' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms finite_tangency_zeros_witness_nonempty
+
+/-- info: 'ForgacsTran.forall_Ico_of_reflected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms forall_Ico_of_reflected
+
+/-- info: 'ForgacsTran.exists_phase_family_of_regions_of_open' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_phase_family_of_regions_of_open
+
+/-- info: 'ForgacsTran.exists_bound_im_logDeriv_ftAmp_endpoint_witness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_bound_im_logDeriv_ftAmp_endpoint_witness
+
+/-- info: 'ForgacsTran.exists_bound_im_logDeriv_ftAmp_origin' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_bound_im_logDeriv_ftAmp_origin
+
+/-- info: 'ForgacsTran.ftRootPoly_eq_normalized' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftRootPoly_eq_normalized
+
+/-- info: 'ForgacsTran.ftRootPoly_coeff_zero_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftRootPoly_coeff_zero_ne_zero
+
+/-- info: 'ForgacsTran.ftRootPoly_coeff_one_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftRootPoly_coeff_one_ne_zero
+
+/-- info: 'ForgacsTran.exists_dominance_bundle_at_branch' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_dominance_bundle_at_branch
+
+/-- info: 'ForgacsTran.exists_ftPhaseSupply_at_branch_of_branchSupply' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_ftPhaseSupply_at_branch_of_branchSupply
+
+/-- info: 'ForgacsTran.ftInteriorData_antitone' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftInteriorData_antitone
+
+/-- info: 'ForgacsTran.ft_weighted_dominance_band_antitone' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_weighted_dominance_band_antitone
+
+/-- info: 'ForgacsTran.ft_weighted_dominance_at_any_band' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_weighted_dominance_at_any_band
+
+/--
+info: 'ForgacsTran.exists_bound_im_logDeriv_ftAmp_interiorRegion_of_deriv2' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+-/
+#guard_msgs in
+#print axioms exists_bound_im_logDeriv_ftAmp_interiorRegion_of_deriv2
+
+/-- info: 'ForgacsTran.im_logDeriv_eq_of_polar_branch' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms im_logDeriv_eq_of_polar_branch
+
+/-- info: 'ForgacsTran.exists_ftBranchSupply' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_ftBranchSupply
+
+/-- info: 'ForgacsTran.exists_ftBranchSupply_of_rootStates' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_ftBranchSupply_of_rootStates
+
+/-- info: 'ForgacsTran.sin_add_sin_sub_sin_add' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms sin_add_sin_sub_sin_add
+
+/-- info: 'ForgacsTran.sin_add_le_sin_add_sin' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms sin_add_le_sin_add_sin
+
+/-- info: 'ForgacsTran.sum_sin_nonneg_of_sum_eq_two_pi' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms sum_sin_nonneg_of_sum_eq_two_pi
+
+/-- info: 'ForgacsTran.sum_sin_shift_ge' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms sum_sin_shift_ge
+
+/-- info: 'ForgacsTran.ftAngleSumDerivAngle_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftAngleSumDerivAngle_le
+
+/-- info: 'ForgacsTran.ftTauDeriv_nonpos' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftTauDeriv_nonpos
+
+/-- info: 'ForgacsTran.antitoneOn_ftTau' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms antitoneOn_ftTau
+
+/-- info: 'ForgacsTran.ft_weighted_dominance_rho_one_two_le_at_any_band' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms ft_weighted_dominance_rho_one_two_le_at_any_band
+
+/-- info: 'ForgacsTran.ft_interior_data_on_band_two_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_interior_data_on_band_two_le
+
+/-- info: 'ForgacsTran.dominance_bundle_of_corner' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms dominance_bundle_of_corner
+
+/-- info: 'ForgacsTran.exists_dominance_bundle_at_branch_rho_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_dominance_bundle_at_branch_rho_one
+
+/--
+info: 'ForgacsTran.ftPrincipalAmp_floor_of_endpoint_pi_any_multiplicity' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+-/
+#guard_msgs in
+#print axioms ftPrincipalAmp_floor_of_endpoint_pi_any_multiplicity
+
+/-- info: 'ForgacsTran.ft_weighted_dominance_one_admits_double_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_weighted_dominance_one_admits_double_zero
+
+/-- info: 'ForgacsTran.hasDerivAt_ftFixedAngle' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms hasDerivAt_ftFixedAngle
+
+/-- info: 'ForgacsTran.exists_varPhase_of_nondegenerate_blocks' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_varPhase_of_nondegenerate_blocks
+
+/-- info: 'ForgacsTran.kappaZero_bundle_witness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms kappaZero_bundle_witness
+
+/-- info: 'ForgacsTran.exists_uniform_ftBranchSupply' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_uniform_ftBranchSupply
+
+/-- info: 'ForgacsTran.interior_of_endpoint_vanishing' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms interior_of_endpoint_vanishing
+
+/-- info: 'ForgacsTran.exists_phase_family_of_regions_of_interior' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_phase_family_of_regions_of_interior
+
+/-- info: 'ForgacsTran.logDeriv_ftCriticalAlong_split' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms logDeriv_ftCriticalAlong_split
+
+/-- info: 'ForgacsTran.exists_bound_ftCriticalReduced_ratio' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_bound_ftCriticalReduced_ratio
+
+/-- info: 'ForgacsTran.abs_ftTauDeriv_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms abs_ftTauDeriv_le
+
+/-- info: 'ForgacsTran.norm_ftGammaDeriv_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms norm_ftGammaDeriv_le
+
+/--
+info: 'ForgacsTran.exists_bound_im_logDeriv_ftCofactorAlong_at_collision' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+-/
+#guard_msgs in
+#print axioms exists_bound_im_logDeriv_ftCofactorAlong_at_collision
+
+/-- info: 'ForgacsTran.fav_branch_C2' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms fav_branch_C2
+
+/-- info: 'ForgacsTran.fav_hW0' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms fav_hW0
+
+/-- info: 'ForgacsTran.fav_hWL' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms fav_hWL
+
+/-- info: 'ForgacsTran.fav_roots_meet' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms fav_roots_meet
+
+/--
+info: 'ForgacsTran.exists_phase_family_hasDerivAt_of_regions_of_open' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+-/
+#guard_msgs in
+#print axioms exists_phase_family_hasDerivAt_of_regions_of_open
+
+/-- info: 'ForgacsTran.ft_interior_data_on_band_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_interior_data_on_band_one
+
+/-- info: 'ForgacsTran.ft_weighted_dominance_one_at_any_band' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_weighted_dominance_one_at_any_band
+
+/-- info: 'ForgacsTran.ft_weighted_dominance_rho_one_at_any_band' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_weighted_dominance_rho_one_at_any_band
+
+/-- info: 'ForgacsTran.exists_dominance_bundle_at_branch_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_dominance_bundle_at_branch_one
+
+/-- info: 'ForgacsTran.exists_dominance_bundle_at_branch_rho_one_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_dominance_bundle_at_branch_rho_one_one
+
+/-- info: 'ForgacsTran.im_logDeriv_ftPrincipal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms im_logDeriv_ftPrincipal
+
+/-- info: 'ForgacsTran.exists_bound_im_logDeriv_ftCofactor_endpoint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_bound_im_logDeriv_ftCofactor_endpoint
+
+/-- info: 'ForgacsTran.exists_bound_im_logDeriv_ftCofactorAlong_upper' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_bound_im_logDeriv_ftCofactorAlong_upper
+
+/-- info: 'ForgacsTran.exists_bound_im_logDeriv_ftCofactorAlong_lower' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_bound_im_logDeriv_ftCofactorAlong_lower
+
+/-- info: 'ForgacsTran.abs_im_logDeriv_ftCofactorAlong_le_of_bounds' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms abs_im_logDeriv_ftCofactorAlong_le_of_bounds
+
+/-- info: 'ForgacsTran.exists_kappaZero_of_cover' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_kappaZero_of_cover
+
+/-- info: 'ForgacsTran.ftAngleSum_sqrt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftAngleSum_sqrt
+
+/-- info: 'ForgacsTran.ftTau_eq_sqrt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftTau_eq_sqrt
+
+/-- info: 'ForgacsTran.ftTauDeriv_eq_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftTauDeriv_eq_zero
+
+/-- info: 'ForgacsTran.ftTauDeriv2_eq_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftTauDeriv2_eq_zero
+
+/-- info: 'ForgacsTran.wedge_ftGammaDeriv2_ftGammaDeriv_quadratic' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms wedge_ftGammaDeriv2_ftGammaDeriv_quadratic
+
+/-- info: 'ForgacsTran.wedge_ne_zero_quadratic' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms wedge_ne_zero_quadratic
+
+/-- info: 'ForgacsTran.exists_ftPhaseSupply_at_branch_one_of_branchSupply' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms exists_ftPhaseSupply_at_branch_one_of_branchSupply
+
+/-- info: 'ForgacsTran.exists_ftPhaseSupply_at_branch_rho_one_of_branchSupply' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms exists_ftPhaseSupply_at_branch_rho_one_of_branchSupply
+
+/-- info: 'ForgacsTran.exists_ftPhaseSupply_at_branch_rho_one_one_of_branchSupply' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms exists_ftPhaseSupply_at_branch_rho_one_one_of_branchSupply
+
+/-- info: 'ForgacsTran.ftCritical_witQ' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftCritical_witQ
+
+/-- info: 'ForgacsTran.ftCriticalAlong_witQ' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftCriticalAlong_witQ
+
+/-- info: 'ForgacsTran.ftCriticalAlong_witQ_factor' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftCriticalAlong_witQ_factor
+
+/-- info: 'ForgacsTran.ftCriticalAlong_witQ_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftCriticalAlong_witQ_ne_zero
+
+/-- info: 'ForgacsTran.ftPrincipal_witTau_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftPrincipal_witTau_ne_zero
+
+/-- info: 'ForgacsTran.ftCollisionOrder_witQ_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftCollisionOrder_witQ_zero
+
+/-- info: 'ForgacsTran.ftCollisionOrder_witQ_pi' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftCollisionOrder_witQ_pi
+
+/-- info: 'ForgacsTran.fav_rootStates' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms fav_rootStates
+
+/-- info: 'ForgacsTran.not_rootBranchState_I_of_degenerate' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms not_rootBranchState_I_of_degenerate
+
+/-- info: 'ForgacsTran.mem_favB_roots_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms mem_favB_roots_iff
+
+/-- info: 'ForgacsTran.fav_curvature' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms fav_curvature
+
+/-- info: 'ForgacsTran.ftCritical_cubicQ' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftCritical_cubicQ
+
+/-- info: 'ForgacsTran.ftCritical_cubicQ_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftCritical_cubicQ_ne_zero
+
+/-- info: 'ForgacsTran.eval_ftCritical_cubicQ_eq_zero_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms eval_ftCritical_cubicQ_eq_zero_iff
+
+/-- info: 'ForgacsTran.ftCollisionOrder_cubic_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftCollisionOrder_cubic_zero
+
+/-- info: 'ForgacsTran.ftCriticalAlong_cubic_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftCriticalAlong_cubic_ne_zero
+
+/-- info: 'ForgacsTran.ftPrincipal_cubicTau_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftPrincipal_cubicTau_ne_zero
+
+/-- info: 'ForgacsTran.cubic_curvature_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms cubic_curvature_eq
+
+/-- info: 'ForgacsTran.cubic_curvature_pos' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms cubic_curvature_pos
+
+/-- info: 'ForgacsTran.cubicTau_not_constant' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms cubicTau_not_constant
+
+/-- info: 'ForgacsTran.cubicPencil_collar_witness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms cubicPencil_collar_witness
+
+/-- info: 'ForgacsTran.hasDerivWithinAt_cubicGammaDeriv_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms hasDerivWithinAt_cubicGammaDeriv_zero
+
+/-- info: 'ForgacsTran.exists_cubicLip' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_cubicLip
+
+/-- info: 'ForgacsTran.cubicPencil_ha' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms cubicPencil_ha
+
+/-- info: 'ForgacsTran.cubicPencil_hmin' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms cubicPencil_hmin
+
+/-- info: 'ForgacsTran.cubicPencil_hcard' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms cubicPencil_hcard
+
+/-- info: 'ForgacsTran.cubic_ftPhaseSupply_of_branchSupply' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms cubic_ftPhaseSupply_of_branchSupply
+
+/-- info: 'ForgacsTran.cubic_ftPhaseSupply_pencil_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms cubic_ftPhaseSupply_pencil_eq
+
+/-- info: 'Shields.tan_add_sub' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Shields.tan_add_sub
+
+/-- info: 'Shields.tan_add_lt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Shields.tan_add_lt
+
+/-- info: 'Shields.tan_add_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Shields.tan_add_le
+
+/-- info: 'Shields.sum_tan_le_tan_sum' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Shields.sum_tan_le_tan_sum
+
+/-- info: 'Shields.tan_nat_mul_ge' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Shields.tan_nat_mul_ge
+
+/-- info: 'Shields.tan_nat_mul_gt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Shields.tan_nat_mul_gt
+
+/-- info: 'ForgacsTran.tan_sum_viewing' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms tan_sum_viewing
+
+/-- info: 'ForgacsTran.tan_sum_viewing_witness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms tan_sum_viewing_witness
+
+/-- info: 'ForgacsTran.ftTauArc_eq_cubicTau_of_mem' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftTauArc_eq_cubicTau_of_mem
+
+/-- info: 'ForgacsTran.ftTauArc_eq_cubicTau_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftTauArc_eq_cubicTau_zero
+
+/-- info: 'ForgacsTran.half_le_ftTauArc_cubic' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms half_le_ftTauArc_cubic
+
+/-- info: 'ForgacsTran.ftTauArc_ne_cubicTau_pi' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftTauArc_ne_cubicTau_pi
+
+/-- info: 'ForgacsTran.not_continuousAt_ftTauArc_cubic_pi' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms not_continuousAt_ftTauArc_cubic_pi
+
+/-- info: 'ForgacsTran.ftTauArc_eq_ftTauArcAt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftTauArc_eq_ftTauArcAt
+
+/-- info: 'ForgacsTran.ftTauArcAt_eq_lower' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftTauArcAt_eq_lower
+
+/-- info: 'ForgacsTran.ftTauArcAt_agree' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftTauArcAt_agree
+
+/-- info: 'ForgacsTran.ftTauArcAt_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftTauArcAt_zero
+
+/-- info: 'ForgacsTran.ftTauArcAt_arc_end' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftTauArcAt_arc_end
+
+/-- info: 'ForgacsTran.ftTauArcAt_eq_cubicTau' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftTauArcAt_eq_cubicTau
+
+/-- info: 'ForgacsTran.cubicTauDeriv_pi' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms cubicTauDeriv_pi
+
+/-- info: 'ForgacsTran.cubicTauDeriv_zero_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms cubicTauDeriv_zero_ne_zero
+
+/-- info: 'ForgacsTran.ftAngleSum_quadRadiusTwo' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftAngleSum_quadRadiusTwo
+
+/-- info: 'ForgacsTran.ftTau_eq_quadRadiusTwo' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftTau_eq_quadRadiusTwo
+
+/-- info: 'ForgacsTran.ftTauDeriv_quadRadiusTwo' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftTauDeriv_quadRadiusTwo
+
+/-- info: 'ForgacsTran.ftTauDeriv2_quadRadiusTwo' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftTauDeriv2_quadRadiusTwo
+
+/-- info: 'ForgacsTran.wedge_ftGammaDeriv2_ftGammaDeriv_quadTwo' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms wedge_ftGammaDeriv2_ftGammaDeriv_quadTwo
+
+/-- info: 'ForgacsTran.wedge_ne_zero_quadTwo' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms wedge_ne_zero_quadTwo
+
+/-- info: 'ForgacsTran.cubic_rootBranchState' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms cubic_rootBranchState
+
+/-- info: 'ForgacsTran.not_hasDerivAt_ftPrincipal_cubicTau_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms not_hasDerivAt_ftPrincipal_cubicTau_zero
+
+/-- info: 'ForgacsTran.not_differentiableAt_ftTauArcAt_cubic_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms not_differentiableAt_ftTauArcAt_cubic_zero
+
+/--
+info: 'ForgacsTran.not_exists_hasDerivAt_ftPrincipal_ftTauArcAt_cubic_zero' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+-/
+#guard_msgs in
+#print axioms not_exists_hasDerivAt_ftPrincipal_ftTauArcAt_cubic_zero
+
+/-- info: 'ForgacsTran.not_hasDerivAt_ftTauArc_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms not_hasDerivAt_ftTauArc_zero
+
+/-- info: 'ForgacsTran.eVariationOn_polarAngle_base' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms eVariationOn_polarAngle_base
+
+/-- info: 'ForgacsTran.abs_sub_polarAngle_base' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms abs_sub_polarAngle_base
+
+/-- info: 'ForgacsTran.at_most_one_big' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms at_most_one_big
+
+/-- info: 'ForgacsTran.tan_sum_neg_of_big' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms tan_sum_neg_of_big
+
+/-- info: 'ForgacsTran.sum_sq_cot_nonpos' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms sum_sq_cot_nonpos
+
+/-- info: 'ForgacsTran.sum_sq_cot_lt_of_branch' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms sum_sq_cot_lt_of_branch
+
+/-- info: 'ForgacsTran.eVariationOn_polarAngle_base_of_meet' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms eVariationOn_polarAngle_base_of_meet
+
+/-- info: 'ForgacsTran.exists_lipschitz_of_continuousOn_deriv2' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_lipschitz_of_continuousOn_deriv2
+
+/-- info: 'ForgacsTran.cubicArcPencil_collar_witness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms cubicArcPencil_collar_witness
+
+/-- info: 'ForgacsTran.hasDerivAt_ftBranchAngle'' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms hasDerivAt_ftBranchAngle'
+
+/-- info: 'ForgacsTran.sum_ftBranchAngleDeriv' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms sum_ftBranchAngleDeriv
+
+/-- info: 'ForgacsTran.eVariationOn_polarAngle_tangent_le_of_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms eVariationOn_polarAngle_tangent_le_of_le
+
+/-- info: 'ForgacsTran.cubic_rootStates' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms cubic_rootStates
+
+/-- info: 'ForgacsTran.cubic_hKvar' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms cubic_hKvar
+
+/-- info: 'ForgacsTran.hasDerivAt_ftInvIm' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms hasDerivAt_ftInvIm
+
+/-- info: 'ForgacsTran.hasDerivAt_ftInvImDeriv' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms hasDerivAt_ftInvImDeriv
+
+/-- info: 'ForgacsTran.ftInvIm_deriv2_add_two_cot' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftInvIm_deriv2_add_two_cot
+
+/-- info: 'ForgacsTran.cot_ftBranchAngle' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms cot_ftBranchAngle
+
+/-- info: 'ForgacsTran.ftBranchAngleDeriv_chart' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftBranchAngleDeriv_chart
+
+/-- info: 'ForgacsTran.cubicArcPencil_upper_collar_witness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms cubicArcPencil_upper_collar_witness
+
+/-- info: 'ForgacsTran.cubicArc_exists_kappaZero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms cubicArc_exists_kappaZero
+
+/-- info: 'ForgacsTran.cubic_region_bounds' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms cubic_region_bounds
+
+/-- info: 'ForgacsTran.cubicAmp_ne_zero_of_ne_pi_div_two' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms cubicAmp_ne_zero_of_ne_pi_div_two
+
+/-- info: 'ForgacsTran.hasDerivAt_cubicAmp'' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms hasDerivAt_cubicAmp'
+
+/-- info: 'ForgacsTran.cubic_geometry_group' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms cubic_geometry_group
+
+/-- info: 'ForgacsTran.cubic_amplitude_group' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms cubic_amplitude_group
+
+/-- info: 'ForgacsTran.ftGammaDeriv_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftGammaDeriv_ne_zero
+
+/-- info: 'ForgacsTran.ft_geometry_group' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_geometry_group
+
+/-- info: 'ForgacsTran.ftAngleSinSqWeighted_pos' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftAngleSinSqWeighted_pos
+
+/-- info: 'ForgacsTran.hasDerivAt_ftAngleSinSq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms hasDerivAt_ftAngleSinSq
+
+/-- info: 'ForgacsTran.hasDerivAt_ftAngleSinSqWeighted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms hasDerivAt_ftAngleSinSqWeighted
+
+/-- info: 'ForgacsTran.branch_chart_sum' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms branch_chart_sum
+
+/-- info: 'ForgacsTran.branch_chart_second' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms branch_chart_second
+
+/-- info: 'ForgacsTran.ftCurvature_pos' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftCurvature_pos
+
+/-- info: 'ForgacsTran.wedge_ftGammaDeriv2_ftGammaDeriv_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms wedge_ftGammaDeriv2_ftGammaDeriv_ne_zero
+
+/-- info: 'ForgacsTran.sum_sq_cot_lt_of_right_angle' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms sum_sq_cot_lt_of_right_angle
+
+/-- info: 'ForgacsTran.sum_sq_cot_lt_of_branch_of_pos' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms sum_sq_cot_lt_of_branch_of_pos
+
+/-- info: 'ForgacsTran.cubic_branchSupply' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms cubic_branchSupply
+
+/-- info: 'ForgacsTran.ftTauArc_pi_ne_cubicArcTau_pi' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftTauArc_pi_ne_cubicArcTau_pi
+
+/-- info: 'ForgacsTran.sum_eVariationOn_ftBranch' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms sum_eVariationOn_ftBranch
+
+/-- info: 'ForgacsTran.ftTauDeriv_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftTauDeriv_zero
+
+/-- info: 'ForgacsTran.hasDerivWithinAt_ftTauArcAt_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms hasDerivWithinAt_ftTauArcAt_zero
+
+/-- info: 'ForgacsTran.hasDerivWithinAt_ftPrincipal_ftTauArcAt_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms hasDerivWithinAt_ftPrincipal_ftTauArcAt_zero
+
+/-- info: 'ForgacsTran.exists_phaseState_of_curvature' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_phaseState_of_curvature
+
+/-- info: 'ForgacsTran.exists_rootBranchState_ftBranch' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_rootBranchState_ftBranch
+
+/-- info: 'ForgacsTran.ftTauDeriv2_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftTauDeriv2_zero
+
+/-- info: 'ForgacsTran.exists_lipschitz_of_bound_of_continuousWithinAt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_lipschitz_of_bound_of_continuousWithinAt
+
+/-- info: 'ForgacsTran.ftTauArc_eq_ftTauArcAt_of_lt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftTauArc_eq_ftTauArcAt_of_lt
+
+/-- info: 'ForgacsTran.ftTauArc_eq_cubicArcTau_of_lt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftTauArc_eq_cubicArcTau_of_lt
+
+/-- info: 'ForgacsTran.cubicArcZ_eq_ftBranchZLower' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms cubicArcZ_eq_ftBranchZLower
+
+/-- info: 'ForgacsTran.ftAmplitudeDivisor_congr' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftAmplitudeDivisor_congr
+
+/-- info: 'ForgacsTran.cubic_ftPhaseSupply_at_arcTau' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms cubic_ftPhaseSupply_at_arcTau
+
+/-- info: 'ForgacsTran.cubic_ftPhaseSupply' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms cubic_ftPhaseSupply
+
+/-- info: 'ForgacsTran.hasDerivAt_ftAmpAlong' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms hasDerivAt_ftAmpAlong
+
+/-- info: 'ForgacsTran.continuousOn_ftAmpAlongDeriv' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms continuousOn_ftAmpAlongDeriv
+
+/-- info: 'ForgacsTran.ftAmpAlong_eq_zero_of_collision' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftAmpAlong_eq_zero_of_collision
+
+/-- info: 'ForgacsTran.eVariationOn_polarAngle_tangent_ftBranch' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms eVariationOn_polarAngle_tangent_ftBranch
+
+/-- info: 'ForgacsTran.cubicTauDeriv2_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms cubicTauDeriv2_zero
+
+/-- info: 'ForgacsTran.cubic_collar_reduced_requirements' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms cubic_collar_reduced_requirements
+
+/-- info: 'ForgacsTran.region_bounds_of_halves' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms region_bounds_of_halves
+
+/-- info: 'ForgacsTran.exists_bound_im_chord_at_meet' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_bound_im_chord_at_meet
+
+/-- info: 'ForgacsTran.exists_bound_im_chord_of_miss' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_bound_im_chord_of_miss
+
+/-- info: 'ForgacsTran.logLift_congr' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms logLift_congr
+
+/-- info: 'ForgacsTran.polarAngle_congr' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms polarAngle_congr
+
+/-- info: 'ForgacsTran.rootBranchState_congr' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms rootBranchState_congr
+
+/-- info: 'ForgacsTran.ft_rootStates_general' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_rootStates_general
+
+/-- info: 'ForgacsTran.tendsto_ftGammaDeriv_of_tendsto' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms tendsto_ftGammaDeriv_of_tendsto
+
+/--
+info: 'ForgacsTran.exists_lipschitz_ftGammaDerivAt_of_tendsto_ftTauDeriv2' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+-/
+#guard_msgs in
+#print axioms exists_lipschitz_ftGammaDerivAt_of_tendsto_ftTauDeriv2
+
+/-- info: 'ForgacsTran.exists_bound_im_chord_at_collision' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_bound_im_chord_at_collision
+
+/-- info: 'ForgacsTran.ftTauDeriv2_lt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftTauDeriv2_lt
+
+/-- info: 'ForgacsTran.ftTauDeriv2_gt_of_curvature_lt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftTauDeriv2_gt_of_curvature_lt
+
+/-- info: 'ForgacsTran.ft_branchSupply_general' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_branchSupply_general
+
+/-- info: 'ForgacsTran.ft_ftPhaseSupply_general' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_ftPhaseSupply_general
+
+/-- info: 'ForgacsTran.gammaDerivValue_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms gammaDerivValue_ne_zero
+
+/-- info: 'ForgacsTran.tendsto_ftTauArcAt_nhdsGT_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms tendsto_ftTauArcAt_nhdsGT_zero
+
+/-- info: 'ForgacsTran.continuousWithinAt_ftTauArcAt_Ici_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms continuousWithinAt_ftTauArcAt_Ici_zero
+
+/-- info: 'ForgacsTran.not_continuousWithinAt_ftTauArcAt_Ici_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms not_continuousWithinAt_ftTauArcAt_Ici_zero
+
+/-- info: 'ForgacsTran.exists_lower_endpoint_of_simple' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_lower_endpoint_of_simple
+
+/-- info: 'ForgacsTran.lower_endpoint_ne_root_of_simple' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms lower_endpoint_ne_root_of_simple
+
+/-- info: 'ForgacsTran.ftPrincipal_lower_endpoint_ne_root' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftPrincipal_lower_endpoint_ne_root
+
+/-- info: 'ForgacsTran.not_continuousWithinAt_ftTauArcAt_min_of_simple' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms not_continuousWithinAt_ftTauArcAt_min_of_simple
+
+/-- info: 'ForgacsTran.endpointSlope_rho_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms endpointSlope_rho_one
+
+/-- info: 'ForgacsTran.eval_zero_divByMonic_X' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms eval_zero_divByMonic_X
+
+/-- info: 'ForgacsTran.ftAmp_origin_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftAmp_origin_ne_zero
+
+/-- info: 'ForgacsTran.hWL_false_of_two_le_r' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms hWL_false_of_two_le_r
+
+/-- info: 'Shields.eVariationOn_le_of_forall_Icc' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Shields.eVariationOn_le_of_forall_Icc
+
+/-- info: 'ForgacsTran.ft_hKvar' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_hKvar
+
+/-- info: 'ForgacsTran.ft_curvature_group' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_curvature_group
+
+/-- info: 'ForgacsTran.ftDen_coeff_one_of_two_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftDen_coeff_one_of_two_le
+
+/-- info: 'ForgacsTran.hasDerivAt_ftFiber' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms hasDerivAt_ftFiber
+
+/-- info: 'ForgacsTran.iteratedDeriv_two_ftFiber' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms iteratedDeriv_two_ftFiber
+
+/-- info: 'ForgacsTran.eval_ftRootPolyReal_neg_of_first_gap' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms eval_ftRootPolyReal_neg_of_first_gap
+
+/-- info: 'ForgacsTran.exists_morse_endpoint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_morse_endpoint
+
+/-- info: 'ForgacsTran.re_eq_zero_of_sq_ofReal_neg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms re_eq_zero_of_sq_ofReal_neg
+
+/-- info: 'ForgacsTran.isLittleO_re_ftBranchPoint_sub' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms isLittleO_re_ftBranchPoint_sub
+
+/-- info: 'ForgacsTran.endpointTangent_ne_zero_of_simple' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms endpointTangent_ne_zero_of_simple
+
+/-- info: 'ForgacsTran.exists_endpoint_tangent_of_simple' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_endpoint_tangent_of_simple
+
+/-- info: 'ForgacsTran.continuousWithinAt_of_ftPrincipal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms continuousWithinAt_of_ftPrincipal
+
+/--
+info: 'ForgacsTran.hasDerivWithinAt_ftPrincipal_ftTauArcAt_zero_of_simple' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+-/
+#guard_msgs in
+#print axioms hasDerivWithinAt_ftPrincipal_ftTauArcAt_zero_of_simple
+
+/--
+info: 'ForgacsTran.not_exists_hasDerivWithinAt_ftPrincipal_min_of_simple' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+-/
+#guard_msgs in
+#print axioms not_exists_hasDerivWithinAt_ftPrincipal_min_of_simple
+
+/--
+info: 'ForgacsTran.ftChordSq_pos' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms ftChordSq_pos
+
+/--
+info: 'ForgacsTran.exists_ftAngle_chart' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms exists_ftAngle_chart
+
+/--
+info: 'ForgacsTran.ftAngleDerivTau_chart' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms ftAngleDerivTau_chart
+
+/--
+info: 'ForgacsTran.ftAngleDerivAngle_chart' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms ftAngleDerivAngle_chart
+
+/--
+info: 'ForgacsTran.ftAngleDeriv2Tau_chart' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms ftAngleDeriv2Tau_chart
+
+/--
+info: 'ForgacsTran.ftAngleDeriv2AngleTau_chart' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms ftAngleDeriv2AngleTau_chart
+
+/--
+info: 'ForgacsTran.ftAngleDeriv2TauAngle_chart' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms ftAngleDeriv2TauAngle_chart
+
+/--
+info: 'ForgacsTran.ftAngleDeriv2Angle_chart' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms ftAngleDeriv2Angle_chart
+
+/-- info: 'ForgacsTran.exists_ftCritical_factor_at_critical' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_ftCritical_factor_at_critical
+
+/--
+info: 'ForgacsTran.tendsto_ftTau_endpoint' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms tendsto_ftTau_endpoint
+
+/--
+info: 'ForgacsTran.tendsto_ftClusterAngle' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms tendsto_ftClusterAngle
+
+/--
+info: 'ForgacsTran.hasDerivAt_ftClusterAngle' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms hasDerivAt_ftClusterAngle
+
+/--
+info: 'ForgacsTran.hasDerivAt_ftClusterAngleDeriv' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms hasDerivAt_ftClusterAngleDeriv
+
+/--
+info: 'ForgacsTran.hasDerivAt_ftFarSumTau' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms hasDerivAt_ftFarSumTau
+
+/--
+info: 'ForgacsTran.hasDerivAt_ftFarSumAngle' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms hasDerivAt_ftFarSumAngle
+
+/--
+info: 'ForgacsTran.ftBranchSplit' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms ftBranchSplit
+
+/--
+info: 'ForgacsTran.ftClusterEqOne' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms ftClusterEqOne
+
+/--
+info: 'ForgacsTran.ftBranchEqTwo' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms ftBranchEqTwo
+
+/--
+info: 'ForgacsTran.ftClusterEqTwo' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms ftClusterEqTwo
+
+/--
+info: 'ForgacsTran.exists_tendsto_ftFarSumTau' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms exists_tendsto_ftFarSumTau
+
+/--
+info: 'ForgacsTran.exists_tendsto_ftFarSumAngle' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms exists_tendsto_ftFarSumAngle
+
+/--
+info: 'ForgacsTran.exists_tendsto_ftFarSumTauDeriv' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms exists_tendsto_ftFarSumTauDeriv
+
+/--
+info: 'ForgacsTran.exists_tendsto_ftFarSumAngleDeriv' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms exists_tendsto_ftFarSumAngleDeriv
+
+/--
+info: 'ForgacsTran.tendsto_ftEndpointDet' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms tendsto_ftEndpointDet
+
+/--
+info: 'ForgacsTran.ftEndpointDet_limit_ne' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms ftEndpointDet_limit_ne
+
+/--
+info: 'ForgacsTran.exists_tendsto_ftTauDeriv2' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms exists_tendsto_ftTauDeriv2
+
+/--
+info: 'ForgacsTran.exists_lipschitz_ftGammaDerivAt_of_repeated_min' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms exists_lipschitz_ftGammaDerivAt_of_repeated_min
+
+/-- info: 'ForgacsTran.exists_tendsto_ftTauDeriv2_witness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_tendsto_ftTauDeriv2_witness
+
+/-- info: 'ForgacsTran.ftCofactorAlongDeriv' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftCofactorAlongDeriv
+
+/-- info: 'ForgacsTran.hasDerivAt_ftCofactorAlong' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms hasDerivAt_ftCofactorAlong
+
+/-- info: 'ForgacsTran.continuousOn_ftCofactorAlongDeriv' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms continuousOn_ftCofactorAlongDeriv
+
+/-- info: 'ForgacsTran.tendsto_ftTau_slope_zero_of_simple' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms tendsto_ftTau_slope_zero_of_simple
+
+/-- info: 'ForgacsTran.ftChordSq_endpoint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftChordSq_endpoint
+
+/-- info: 'ForgacsTran.sum_div_sub_eq_of_ftCriticalReal_eval' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms sum_div_sub_eq_of_ftCriticalReal_eval
+
+/-- info: 'ForgacsTran.tendsto_ftTau_cos_slope_of_simple' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms tendsto_ftTau_cos_slope_of_simple
+
+/-- info: 'ForgacsTran.tendsto_ftAngleSumDerivTau_slope_of_simple' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms tendsto_ftAngleSumDerivTau_slope_of_simple
+
+/--
+info: 'ForgacsTran.tendsto_ftAngleSumDerivAngle_sub_slope_of_simple' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+-/
+#guard_msgs in
+#print axioms tendsto_ftAngleSumDerivAngle_sub_slope_of_simple
+
+/-- info: 'ForgacsTran.tendsto_ftTauDeriv_zero_of_simple' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms tendsto_ftTauDeriv_zero_of_simple
+
+/-- info: 'ForgacsTran.exists_morse_imaginary_arc' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_morse_imaginary_arc
+
+/-- info: 'ForgacsTran.quad_dominance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms quad_dominance
+
+/-- info: 'ForgacsTran.quad_dominance_on_arc' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms quad_dominance_on_arc
+
+/-- info: 'ForgacsTran.quad_collisionOrder_lower' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms quad_collisionOrder_lower
+
+-- `subsec:proof` -- the branch half of the phase supply, closed at the general
+-- pencil.  Every hypothesis below is the admissible class plus `B(0) != 0`: no
+-- variation bound, no derivative bound and no supply is assumed anywhere.
+
+/-- info: 'ForgacsTran.ft_branchSupply_general_closed' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_branchSupply_general_closed
+
+/-- info: 'ForgacsTran.ft_ftPhaseSupply_general' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_ftPhaseSupply_general
+
+-- The four groups the closed form is assembled from.
+
+/-- info: 'ForgacsTran.ft_kappaZero_general' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_kappaZero_general
+
+/-- info: 'ForgacsTran.ft_branchSupply_general' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_branchSupply_general
+
+/-- info: 'ForgacsTran.ft_cofactor_group' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_cofactor_group
+
+/-- info: 'ForgacsTran.ft_amplitude_group' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_amplitude_group
+
+/-- info: 'ForgacsTran.ft_branch_state_arc' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_branch_state_arc
+
+-- `eq:phase-derivative-bound` on the three regions of the arc, and the two
+-- endpoint collars kappa-zero reduces to.
+
+/-- info: 'ForgacsTran.ft_region_lower' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_region_lower
+
+/-- info: 'ForgacsTran.ft_region_mid' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_region_mid
+
+/-- info: 'ForgacsTran.ft_region_upper' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_region_upper
+
+/-- info: 'ForgacsTran.ft_upper_region' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_upper_region
+
+/-- info: 'ForgacsTran.ft_lower_collar' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_lower_collar
+
+/-- info: 'ForgacsTran.ft_kappaZero_mid' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_kappaZero_mid
+
+/-- info: 'ForgacsTran.ft_kappaZero_of_collars' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_kappaZero_of_collars
+
+/-- info: 'ForgacsTran.ft_endpoint_branch_data' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_endpoint_branch_data
+
+-- `subsec:proof` clause 3, with the numerator-uniformity class DERIVED rather than
+-- posited: no binder in `clauseThree_exceptionalRoots_of_ftGeometry` mentions
+-- `NumeratorUniform`.
+
+/-- info: 'ForgacsTran.clauseThree_exceptionalRoots_of_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms clauseThree_exceptionalRoots_of_ne_zero
+
+/-- info: 'ForgacsTran.clauseThree_exceptionalRoots_of_ftGeometry' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms clauseThree_exceptionalRoots_of_ftGeometry
+
+/-- info: 'ForgacsTran.clauseThree_exceptionalRoots_witness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms clauseThree_exceptionalRoots_witness
+
+-- `FTRetainedComponent` is inhabited.  Eleven of its twelve clauses are shared with
+-- `MainClauses.FTBranchData`, which is separately inhabited, so the surface reading is
+-- that the two stand or fall together; the twelfth clause -- the component inside
+-- `eq:retained-range` -- is what makes them independent, and is why this witness is
+-- not redundant with `QuadraticWitness.witness_ftBranchData`.
+
+/-- info: 'ForgacsTran.witness_ftRetainedComponent' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms witness_ftRetainedComponent
+
+/-- info: 'ForgacsTran.witness_ftDominance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms witness_ftDominance
+
+/-- info: 'ForgacsTran.witness_main_of_ftDominance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms witness_main_of_ftDominance
+
+-- The branch half of the phase supply at the OTHER three corners.  With
+-- `ft_branchSupply_general_closed` above, `FTBranchSupply` is now produced from the
+-- admissible class alone at every `(r, rho)` the paper admits: `r >= 2`/`rho >= 2`,
+-- `r = 1`, a simple smallest zero, and both at once.  No supply is assumed anywhere.
+
+/-- info: 'ForgacsTran.ft_branchSupply_general_closed_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_branchSupply_general_closed_one
+
+/-- info: 'ForgacsTran.ft_ftPhaseSupply_general_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_ftPhaseSupply_general_one
+
+/-- info: 'ForgacsTran.ft_branchSupply_general_closed_rho_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_branchSupply_general_closed_rho_one
+
+/-- info: 'ForgacsTran.ft_branchSupply_general_closed_rho_one_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_branchSupply_general_closed_rho_one_one
+
+/-- info: 'ForgacsTran.ft_kappaZero_general_rho_one_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_kappaZero_general_rho_one_one
+
+/-- info: 'ForgacsTran.exists_simple_lower_endpoint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_simple_lower_endpoint
+
+-- `EndpointArcObstruction`
+/-- info: 'ForgacsTran.not_forall_ftTauArc_pos' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms not_forall_ftTauArc_pos
+
+/-- info: 'ForgacsTran.not_ftBranchAt_arc_end' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms not_ftBranchAt_arc_end
+
+/-- info: 'ForgacsTran.ftTau_arc_end_eq_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftTau_arc_end_eq_one
+
+/-- info: 'ForgacsTran.ftBranchZ_arc_end_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftBranchZ_arc_end_eq
+
+/-- info: 'ForgacsTran.ftBranchZ_arc_end_pos' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftBranchZ_arc_end_pos
+
+/-- info: 'ForgacsTran.not_ftBranchZLower_strictMonoOn_Icc' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms not_ftBranchZLower_strictMonoOn_Icc
+
+/-- info: 'ForgacsTran.ftBranchZLower_strictMonoOn_Ico' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftBranchZLower_strictMonoOn_Ico
+
+/-- info: 'ForgacsTran.ftBranchZLower_strictMonoOn_Ico_principal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftBranchZLower_strictMonoOn_Ico_principal
+
+-- `CompositionLinks`: the bridging statements between the phase supply's producer
+-- and the headline bound -- the reduced weight's two conditions, and `z` and `tau`
+-- on the viewing arc.  The last two record that the CLOSED arc is unavailable.
+
+/-- info: 'ForgacsTran.HasRealCoeffs.neg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms HasRealCoeffs.neg
+
+/-- info: 'ForgacsTran.HasRealCoeffs.pow' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms HasRealCoeffs.pow
+
+/-- info: 'ForgacsTran.hasRealCoeffs_clearedRestrict' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms hasRealCoeffs_clearedRestrict
+
+/-- info: 'ForgacsTran.hasRealCoeffs_laurentWeight' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms hasRealCoeffs_laurentWeight
+
+/-- info: 'ForgacsTran.eval_laurentWeight_zero_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms eval_laurentWeight_zero_ne_zero
+
+/-- info: 'ForgacsTran.ftBranchZLower_pos' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftBranchZLower_pos
+
+/-- info: 'ForgacsTran.strictMonoOn_ftBranchZLower_Ioo' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms strictMonoOn_ftBranchZLower_Ioo
+
+/-- info: 'ForgacsTran.continuousOn_ftBranchZLower_Ioo' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms continuousOn_ftBranchZLower_Ioo
+
+/-- info: 'ForgacsTran.ftTauArc_pos' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftTauArc_pos
+
+/-- info: 'ForgacsTran.tendsto_ftBranchZLower_nhdsGT_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms tendsto_ftBranchZLower_nhdsGT_zero
+
+/-- info: 'ForgacsTran.continuousOn_ftBranchZLower_Ico' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms continuousOn_ftBranchZLower_Ico
+
+/-- info: 'ForgacsTran.not_continuousOn_ftBranchZLower_Icc' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms not_continuousOn_ftBranchZLower_Icc
+
+/-- info: 'ForgacsTran.not_strictMonoOn_ftBranchZLower_Icc' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms not_strictMonoOn_ftBranchZLower_Icc
+
+-- `MainAdmissible`: the three clauses of `thm:main` run from the admissible class
+-- alone.  No hypothesis of these carries a phase supply, a branch supply or an
+-- `FTInputs` -- the producers are called, which `_scripts/check_composition_producers.py`
+-- checks against the elaborated proof terms rather than against a table.
+
+/-- info: 'ForgacsTran.ftPhaseSupply_laurentWeight_general' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftPhaseSupply_laurentWeight_general
+
+/-- info: 'ForgacsTran.ftPhaseSupply_laurentWeight_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftPhaseSupply_laurentWeight_one
+
+/-- info: 'ForgacsTran.main_bound_admissible' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms main_bound_admissible
+
+/-- info: 'ForgacsTran.main_bound_interval_admissible' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms main_bound_interval_admissible
+
+/-- info: 'ForgacsTran.interior_distinct_count_admissible' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms interior_distinct_count_admissible
+
+/-- info: 'ForgacsTran.main_bound_admissible_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms main_bound_admissible_one
+
+-- `PhaseSupplyRhoOneClosure`: the two `rho = 1` corners of the phase supply, from the
+-- admissible class alone.  The seam is `ftBranchSupply_congr`, which is why neither of
+-- these carries a relation between the branch's endpoint and the dominance chain's.
+
+/-- info: 'ForgacsTran.ftBranchSupply_congr' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftBranchSupply_congr
+
+/-- info: 'ForgacsTran.ftWindow_congr' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftWindow_congr
+
+/-- info: 'ForgacsTran.ft_ftPhaseSupply_general_rho_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_ftPhaseSupply_general_rho_one
+
+/-- info: 'ForgacsTran.ft_ftPhaseSupply_general_rho_one_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_ftPhaseSupply_general_rho_one_one
+
+-- `MainAdmissible`, the two corners at a SIMPLE smallest zero, which complete the
+-- manuscript's 2x2 grid.  The endpoint is produced by the pencil, so clause 1 -- whose
+-- conclusion names only the positive ray -- does not mention it, while the interval form
+-- binds it in the conclusion rather than in a hypothesis.
+
+/-- info: 'ForgacsTran.ftPhaseSupply_laurentWeight_rho_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftPhaseSupply_laurentWeight_rho_one
+
+/-- info: 'ForgacsTran.main_bound_admissible_rho_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms main_bound_admissible_rho_one
+
+/-- info: 'ForgacsTran.main_bound_interval_admissible_rho_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms main_bound_interval_admissible_rho_one
+
+/-- info: 'ForgacsTran.main_bound_admissible_rho_one_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms main_bound_admissible_rho_one_one
+
+-- `MainAdmissible`, the cells of the corner-by-clause grid the four clause-1 theorems
+-- above leave open: clause 2 and clause 2(iii) at `r = 1`, and clause 2(iii) at a simple
+-- smallest zero.  Every one of these carries the pencil's data and nothing analytic.
+
+/-- info: 'ForgacsTran.main_bound_interval_admissible_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms main_bound_interval_admissible_one
+
+/-- info: 'ForgacsTran.interior_distinct_count_admissible_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms interior_distinct_count_admissible_one
+
+/-- info: 'ForgacsTran.interior_distinct_count_admissible_rho_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms interior_distinct_count_admissible_rho_one
+
+/-- info: 'ForgacsTran.ftPhaseSupply_laurentWeight_rho_one_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftPhaseSupply_laurentWeight_rho_one_one
+
+/-- info: 'ForgacsTran.main_bound_interval_admissible_rho_one_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms main_bound_interval_admissible_rho_one_one
+
+/-- info: 'ForgacsTran.interior_distinct_count_admissible_rho_one_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms interior_distinct_count_admissible_rho_one_one
+
+-- `PhaseSupplyUniform`, the four corners with the collar and the two variation constants
+-- bound ahead of the weight.  This is the binder order `thm:main` clause 3 asserts, and it
+-- is what makes the constants of `ClauseThreeAdmissible` unable to see the numerator.
+
+/-- info: 'ForgacsTran.ft_ftPhaseSupply_uniform' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_ftPhaseSupply_uniform
+
+/-- info: 'ForgacsTran.ft_ftPhaseSupply_uniform_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_ftPhaseSupply_uniform_one
+
+/-- info: 'ForgacsTran.ft_ftPhaseSupply_uniform_rho_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_ftPhaseSupply_uniform_rho_one
+
+/-- info: 'ForgacsTran.ft_ftPhaseSupply_uniform_rho_one_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_ftPhaseSupply_uniform_rho_one_one
+
+-- `ClauseThreeSupply`, the seam from the supply the branch producers conclude in to the
+-- count `eq:angular-distinct-lower` states.
+
+/-- info: 'ForgacsTran.exists_interiorZeros_of_ftPhaseSupply' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_interiorZeros_of_ftPhaseSupply
+
+/-- info: 'ForgacsTran.ceil_affine_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ceil_affine_le
+
+/-- info: 'ForgacsTran.ftRootPolyReal_coeff_zero_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftRootPolyReal_coeff_zero_ne_zero
+
+/-- info: 'ForgacsTran.admissible_map_laurentWeight' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms admissible_map_laurentWeight
+
+/-- info: 'ForgacsTran.clauseThree_of_ftPhaseSupply' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms clauseThree_of_ftPhaseSupply
+
+/-- info: 'ForgacsTran.clauseThree_exceptionalRoots_of_ftPhaseSupply' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms clauseThree_exceptionalRoots_of_ftPhaseSupply
+
+/-- info: 'ForgacsTran.clauseThree_exceptionalRoots_of_ftPhaseSupply_of_admissible' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms clauseThree_exceptionalRoots_of_ftPhaseSupply_of_admissible
+
+-- `ClauseThreeAdmissible`, `thm:main` clause 3 at all four corners with nothing assumed.
+
+/-- info: 'ForgacsTran.clauseThree_admissible' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms clauseThree_admissible
+
+/-- info: 'ForgacsTran.clauseThree_admissible_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms clauseThree_admissible_one
+
+/-- info: 'ForgacsTran.clauseThree_admissible_rho_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms clauseThree_admissible_rho_one
+
+/-- info: 'ForgacsTran.clauseThree_admissible_rho_one_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms clauseThree_admissible_rho_one_one
+
+-- `ClauseThreeAdmissible`, the same four corners at the REAL numerator, where the
+-- uniformity is `PhaseVariation.NumeratorUniform` itself.
+
+/-- info: 'ForgacsTran.clauseThree_of_ftPhaseSupply_of_admissible' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms clauseThree_of_ftPhaseSupply_of_admissible
+
+/-- info: 'ForgacsTran.clauseThree_numUniform_admissible' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms clauseThree_numUniform_admissible
+
+/-- info: 'ForgacsTran.clauseThree_numUniform_admissible_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms clauseThree_numUniform_admissible_one
+
+/-- info: 'ForgacsTran.clauseThree_numUniform_admissible_rho_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms clauseThree_numUniform_admissible_rho_one
+
+/-- info: 'ForgacsTran.clauseThree_numUniform_admissible_rho_one_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms clauseThree_numUniform_admissible_rho_one_one
+
+-- `ClauseThreeChainObstruction`, why `ClauseThreeComposition.FTChainGeom` has no producer:
+-- its order-connected `A` carries the amplitude nonvanishing across the deleted windows.
+
+/-- info: 'ForgacsTran.ftChainGeom_span' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftChainGeom_span
+
+/-- info: 'ForgacsTran.not_ftChainGeom_of_amp_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms not_ftChainGeom_of_amp_zero
+
+/-- info: 'ForgacsTran.exists_weight_not_ftChainGeom' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_weight_not_ftChainGeom
+
+-- `AngularDiscrepancyAdmissible`, `prop:angular-discrepancy` at the pencil: the window-
+-- uniform half of the proposition, which the interior count of `ClauseThreeAdmissible`
+-- gives only at the whole arc.
+
+/-- info: 'ForgacsTran.ftAngularDiscrepancy_admissible' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftAngularDiscrepancy_admissible
+
+/-- info: 'ForgacsTran.ftAngularDiscrepancy_admissible_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftAngularDiscrepancy_admissible_one
+
+/-- info: 'ForgacsTran.ftAngularDiscrepancy_admissible_rho_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftAngularDiscrepancy_admissible_rho_one
+
+/-- info: 'ForgacsTran.ftAngularDiscrepancy_admissible_rho_one_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ftAngularDiscrepancy_admissible_rho_one_one
+
+-- `AngularSupplyAdmissible`: `prop:equidistribution` and `cor:angular-rigidity`
+-- composed onto the four producers of `FTAngularDiscrepancy`, so that neither carries
+-- an analytic hypothesis.
+
+/-- info: 'ForgacsTran.ft_equidistribution_admissible' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_equidistribution_admissible
+
+/-- info: 'ForgacsTran.ft_equidistribution_admissible_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_equidistribution_admissible_one
+
+/-- info: 'ForgacsTran.ft_equidistribution_admissible_rho_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_equidistribution_admissible_rho_one
+
+/-- info: 'ForgacsTran.ft_equidistribution_admissible_rho_one_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_equidistribution_admissible_rho_one_one
+
+/-- info: 'ForgacsTran.ft_angular_clock_admissible' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_angular_clock_admissible
+
+/-- info: 'ForgacsTran.ft_angular_clock_admissible_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_angular_clock_admissible_one
+
+/-- info: 'ForgacsTran.ft_angular_clock_admissible_rho_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_angular_clock_admissible_rho_one
+
+/-- info: 'ForgacsTran.ft_angular_clock_admissible_rho_one_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ft_angular_clock_admissible_rho_one_one

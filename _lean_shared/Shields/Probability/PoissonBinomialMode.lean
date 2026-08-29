@@ -7,6 +7,7 @@ import Mathlib.Algebra.Order.BigOperators.Ring.Finset
 import Mathlib.Algebra.Polynomial.Derivative
 import Mathlib.Data.Real.Basic
 import Mathlib.Tactic.FieldSimp
+import Mathlib.Tactic.LinearCombination
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Positivity
 import Mathlib.Tactic.Ring
@@ -61,6 +62,11 @@ mirror `p_i \mapsto 1-p_i`, which reverses the mass function, gives the step to 
   with a two-point law; `Shields.pbPmf_isPF2` is the consequence for the Poisson binomial.
 * `Shields.nonneg_of_tie` — the sign of the leave-one-out difference.
 * `Shields.tie_mean_bounds` — the tie inequality, `k \le \sum_ip_i \le k+1`.
+* `Shields.IsPF2.le_of_succ_le`, `Shields.IsPF2.le_of_neighbors_le` — a nonnegative `IsPF2`
+  sequence peaks wherever it does not rise, which is what spreads Darroch's two single steps to
+  every index; the two-sided form is the one-sided one read twice, through `Shields.IsPF2.reflect`.
+* `Shields.pbPmf_tilt`, `Shields.pbPmf_tilt_tie` — the tilted mass function, and the tilt that
+  makes a tie at a prescribed place.
 * `Shields.pbPmf`, `Shields.pbPmf_rec`, `Shields.pbPmf_countUp`, `Shields.pbPmf_countDown` — the
   mass function and the three structural facts.
 * `Shields.pbPmf_le_of_mean_eq` — **Darroch's theorem**.
@@ -121,39 +127,20 @@ theorem nonneg_of_tie (hp0 : ∀ i ∈ s, 0 ≤ p i) (hp1 : ∀ i ∈ s, p i ≤
   have hid : (1 - p i) * (b i k - b i (k + 1)) = p i * (b i k - b i (k - 1)) := by
     have h1 := hrec i hi k
     have h2 := hrec i hi (k + 1)
-    have h3 : k + 1 - 1 = k := by simp
-    rw [h3] at h2
+    rw [show k + 1 - 1 = k by ring] at h2
     rw [h1, h2] at htie
     linarith
   rcases eq_or_lt_of_le hp0i with hz | hzpos
   · rw [← hz]; simp
   rcases eq_or_lt_of_le hp1i with ho | holt
-  · -- `p i = 1`: the recursion collapses and the difference is exactly `a (k+1) - a k = 0`
-    rw [ho]
-    have h1 := hrec i hi k
-    have h2 := hrec i hi (k + 1)
-    have h3 : k + 1 - 1 = k := by simp
-    rw [h3] at h2
-    rw [ho] at h1 h2
-    simp only [sub_self, zero_mul, zero_add, one_mul] at h1 h2
-    rw [h1, h2] at htie
-    simp only [one_mul]
-    linarith
+  · -- `p i = 1`: the left side of the tie identity is zero
+    rw [← hid, ho]; simp
   · -- `0 < p i < 1`: log-concavity of `b i` forbids a strict local minimum
     by_contra hcon
     rw [not_le] at hcon
     have hq : 0 < 1 - p i := by linarith
-    have hD : b i k - b i (k - 1) < 0 := by
-      rcases le_or_gt 0 (b i k - b i (k - 1)) with h | h
-      · exact absurd (mul_nonneg hp0i h) (not_le.2 hcon)
-      · exact h
-    have hE : b i k - b i (k + 1) < 0 := by
-      have h1 : (1 - p i) * (b i k - b i (k + 1)) < 0 := by
-        rw [hid]
-        exact mul_neg_of_pos_of_neg hzpos hD
-      rcases le_or_gt 0 (b i k - b i (k + 1)) with h | h
-      · exact absurd (mul_nonneg hq.le h) (not_le.2 h1)
-      · exact h
+    have hD : b i k - b i (k - 1) < 0 := by nlinarith
+    have hE : b i k - b i (k + 1) < 0 := by nlinarith
     exact not_lt_of_logConcave (fun n => hbnn i hi n) (hlc i hi k) ⟨by linarith, by linarith⟩
 
 /-- **The upward half of the tie inequality**: `\sum_ip_i \le k+1`. -/
@@ -237,6 +224,55 @@ def IsPF2 (f : ℤ → ℝ) : Prop := ∀ i j : ℤ, i ≤ j → f (i - 1) * f (
 theorem IsPF2.logConcave {f : ℤ → ℝ} (hf : IsPF2 f) (j : ℤ) :
     f (j - 1) * f (j + 1) ≤ f j * f j := hf j j le_rfl
 
+/-- `IsPF2` survives reflecting the index, since reflection reverses the order on both pairs. -/
+theorem IsPF2.reflect {f : ℤ → ℝ} (hf : IsPF2 f) (c : ℤ) : IsPF2 (fun n => f (c - n)) := by
+  intro i j hij
+  have h := hf (c - j) (c - i) (by omega)
+  rw [show c - j - 1 = c - (j + 1) by ring, show c - i + 1 = c - (i - 1) by ring] at h
+  simpa [mul_comm] using h
+
+/-- **One side of the peak.**  A nonnegative `IsPF2` sequence that does not rise at `m` never
+exceeds `f m` to the right of `m`: `IsPF2` compares the pair straddling `m` and `j` against `f m`
+and `f j` themselves, so the single step at `m` bounds the step at every `j` beyond it. -/
+theorem IsPF2.le_of_succ_le {f : ℤ → ℝ} (hf : IsPF2 f) (hnn : ∀ n, 0 ≤ f n) {m : ℤ}
+    (hpos : 0 < f m) (hsucc : f (m + 1) ≤ f m) : ∀ j : ℤ, m ≤ j → f j ≤ f m := by
+  have hstep : ∀ n : ℕ, f (m + (n : ℤ) + 1) ≤ f (m + (n : ℤ)) := by
+    intro n
+    rcases Nat.eq_zero_or_pos n with rfl | hn
+    · simpa using hsucc
+    · have hpf := hf (m + 1) (m + (n : ℤ)) (by omega)
+      rw [show m + 1 - 1 = m by ring] at hpf
+      have hchain : f m * f (m + (n : ℤ) + 1) ≤ f m * f (m + (n : ℤ)) := by
+        linarith [hpf, mul_le_mul_of_nonneg_right hsucc (hnn (m + (n : ℤ)))]
+      exact le_of_mul_le_mul_left hchain hpos
+  have hright : ∀ n : ℕ, f (m + (n : ℤ)) ≤ f m := by
+    intro n
+    induction n with
+    | zero => simp
+    | succ k ihk =>
+        rw [show ((k + 1 : ℕ) : ℤ) = (k : ℤ) + 1 by push_cast; ring, ← add_assoc]
+        exact le_trans (hstep k) ihk
+  intro j hj
+  obtain ⟨n, hn⟩ : ∃ n : ℕ, j = m + (n : ℤ) := ⟨(j - m).toNat, by omega⟩
+  rw [hn]
+  exact hright n
+
+/-- **A nonnegative `IsPF2` sequence peaks wherever it does not rise.**  If `f m > 0` and `f`
+increases at neither neighbor of `m`, then `m` is a global maximum: to the right this is
+`IsPF2.le_of_succ_le`, and to the left it is the same statement for the reflected sequence. -/
+theorem IsPF2.le_of_neighbors_le {f : ℤ → ℝ} (hf : IsPF2 f) (hnn : ∀ n, 0 ≤ f n) {m : ℤ}
+    (hpos : 0 < f m) (hsucc : f (m + 1) ≤ f m) (hpred : f (m - 1) ≤ f m) :
+    ∀ j : ℤ, f j ≤ f m := by
+  intro j
+  rcases le_or_gt m j with hj | hj
+  · exact hf.le_of_succ_le hnn hpos hsucc j hj
+  have hgpos : (0 : ℝ) < f (2 * m - m) := by rw [show 2 * m - m = m by ring]; exact hpos
+  have hgsucc : f (2 * m - (m + 1)) ≤ f (2 * m - m) := by
+    rw [show 2 * m - (m + 1) = m - 1 by ring, show 2 * m - m = m by ring]; exact hpred
+  have hrefl := (hf.reflect (2 * m)).le_of_succ_le (m := m) (fun n => hnn (2 * m - n))
+    hgpos hgsucc (2 * m - j) (by omega)
+  rwa [show 2 * m - (2 * m - j) = j by ring, show 2 * m - m = m by ring] at hrefl
+
 /-- The point mass at `0` is `IsPF2`. -/
 theorem isPF2_deltaZero : IsPF2 (fun j : ℤ => if j = 0 then (1 : ℝ) else 0) := by
   intro i j hij
@@ -301,6 +337,15 @@ theorem pbPmf_eq_coeff (s : Finset ι) (p : ι → ℝ) {j : ℤ} (hj : 0 ≤ j)
     pbPmf s p j = (pbPoly s p).coeff j.toNat := by
   simp [pbPmf, hj]
 
+/-- The mass function depends only on the parameters at the indices of `s`. -/
+theorem pbPmf_congr {p q : ι → ℝ} {s : Finset ι} (h : ∀ i ∈ s, p i = q i) (j : ℤ) :
+    pbPmf s p j = pbPmf s q j := by
+  have hpoly : pbPoly s p = pbPoly s q :=
+    Finset.prod_congr rfl fun i hi => by rw [h i hi]
+  rcases lt_or_ge j 0 with hj | hj
+  · rw [pbPmf_of_neg _ _ hj, pbPmf_of_neg _ _ hj]
+  · rw [pbPmf_eq_coeff _ _ hj, pbPmf_eq_coeff _ _ hj, hpoly]
+
 theorem pbPoly_empty (p : ι → ℝ) : pbPoly (∅ : Finset ι) p = 1 := by
   simp [pbPoly]
 
@@ -312,6 +357,14 @@ theorem pbPmf_empty (p : ι → ℝ) (j : ℤ) :
     by_cases h : j = 0
     · simp [h]
     · rw [if_neg h, if_neg (by omega : ¬ j.toNat = 0)]
+
+/-- **The generating polynomial of a disjoint union.**  Two independent Bernoulli families
+side by side have the product of their generating polynomials, which is the polynomial form of
+convolving their mass functions. -/
+theorem pbPoly_disjSum {κ : Type*} (s : Finset ι) (t : Finset κ) (p : ι → ℝ) (q : κ → ℝ) :
+    pbPoly (s.disjSum t) (Sum.elim p q) = pbPoly s p * pbPoly t q := by
+  rw [pbPoly, pbPoly, pbPoly, Finset.prod_disjSum]
+  simp
 
 variable [DecidableEq ι]
 
@@ -340,9 +393,11 @@ theorem pbPmf_rec {s : Finset ι} {i : ι} (hi : i ∈ s) (p : ι → ℝ) (j : 
       pbPoly_erase hi p, add_mul, Polynomial.coeff_add, Polynomial.coeff_C_mul, mul_assoc,
       Polynomial.coeff_C_mul, Polynomial.coeff_X_mul]
 
+omit [DecidableEq ι] in
 /-- Nonnegativity. -/
 theorem pbPmf_nonneg {p : ι → ℝ} (hp0 : ∀ i, 0 ≤ p i) (hp1 : ∀ i, p i ≤ 1) (s : Finset ι) :
     ∀ j : ℤ, 0 ≤ pbPmf s p j := by
+  classical
   induction s using Finset.induction_on with
   | empty =>
       intro j
@@ -359,9 +414,11 @@ theorem pbPmf_nonneg {p : ι → ℝ} (hp0 : ∀ i, 0 ≤ p i) (hp1 : ∀ i, p i
       have hb := ih (j - 1)
       nlinarith
 
+omit [DecidableEq ι] in
 /-- **`IsPF2` for the Poisson binomial**, hence log-concavity of its mass function. -/
 theorem pbPmf_isPF2 {p : ι → ℝ} (hp0 : ∀ i, 0 ≤ p i) (hp1 : ∀ i, p i ≤ 1) (s : Finset ι) :
     IsPF2 (pbPmf s p) := by
+  classical
   induction s using Finset.induction_on with
   | empty =>
       have h : pbPmf (∅ : Finset ι) p = fun j : ℤ => if j = 0 then (1 : ℝ) else 0 :=
@@ -387,8 +444,7 @@ theorem pbPmf_countUp (p : ι → ℝ) (s : Finset ι) (j : ℤ) :
     rw [pbPoly, Polynomial.derivative_prod_finset]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [Polynomial.derivative_add, Polynomial.derivative_C, Polynomial.derivative_C_mul,
-      Polynomial.derivative_X, zero_add, mul_one, pbPoly]
-    ring
+      Polynomial.derivative_X, zero_add, mul_one, pbPoly]; ring
   rcases lt_trichotomy j (-1) with hj | hj | hj
   · rw [pbPmf_of_neg _ _ (by omega : j + 1 < 0)]
     rw [Finset.sum_congr rfl fun i _ => by rw [pbPmf_of_neg _ _ (by omega : j < 0)]]
@@ -407,9 +463,7 @@ theorem pbPmf_countUp (p : ι → ℝ) (s : Finset ι) (j : ℤ) :
       Polynomial.coeff_C_mul] at hcoeff
     rw [pbPmf_eq_coeff _ _ h1, hn1]
     rw [Finset.sum_congr rfl fun i _ => by rw [pbPmf_eq_coeff _ _ h0, hn0]]
-    rw [← hcoeff]
-    push_cast
-    ring
+    rw [← hcoeff]; push_cast; ring
 
 /-- **The downward double-counting identity**, from the upward one and the recursion. -/
 theorem pbPmf_countDown {p : ι → ℝ} (s : Finset ι) (k : ℤ) :
@@ -426,13 +480,15 @@ theorem pbPmf_countDown {p : ι → ℝ} (s : Finset ι) (k : ℤ) :
   rw [hsplit, Finset.sum_sub_distrib, Finset.sum_const, nsmul_eq_mul, ← hup]
   ring
 
+omit [DecidableEq ι] in
 /-- **The tie inequality for the Poisson binomial.**  A tie `a_k = a_{k+1} > 0` puts the mean
 `\sum_ip_i` in `[k,k+1]`. -/
 theorem pbPmf_tie_mean_bounds {p : ι → ℝ} (hp0 : ∀ i, 0 ≤ p i) (hp1 : ∀ i, p i ≤ 1)
     {s : Finset ι} {k : ℤ} (htie : pbPmf s p k = pbPmf s p (k + 1))
     (hpos : 0 < pbPmf s p k) :
-    (k : ℝ) ≤ ∑ i ∈ s, p i ∧ ∑ i ∈ s, p i ≤ (k : ℝ) + 1 :=
-  tie_mean_bounds (b := fun i => pbPmf (s.erase i) p)
+    (k : ℝ) ≤ ∑ i ∈ s, p i ∧ ∑ i ∈ s, p i ≤ (k : ℝ) + 1 := by
+  classical
+  exact tie_mean_bounds (b := fun i => pbPmf (s.erase i) p)
     (fun i _ => hp0 i) (fun i _ => hp1 i)
     (fun _i _ j => pbPmf_nonneg hp0 hp1 _ j)
     (fun _i hi j => pbPmf_rec hi p j)
@@ -492,21 +548,18 @@ theorem pbPoly_eval_pos {p : ι → ℝ} {t : ℝ} (ht : 0 < t) (hp0 : ∀ i, 0 
   have := pbDenom_pos ht (hp0 i) (hp1 i)
   simpa using this
 
-variable [DecidableEq ι]
-
 /-- **The tilted mass function.**  `a'_j = a_jt^j/f(t)`, so the tilted law is the original weighted
 by `t^j` and renormalized — which is what makes a tie constructible at any prescribed ratio. -/
 theorem pbPmf_tilt {p : ι → ℝ} {t : ℝ} (ht : 0 < t) (hp0 : ∀ i, 0 ≤ p i) (hp1 : ∀ i, p i ≤ 1)
     (s : Finset ι) : ∀ j : ℤ,
     pbPmf s (pbTilt p t) j * (pbPoly s p).eval t = pbPmf s p j * t ^ j := by
+  classical
   have htne : t ≠ 0 := ne_of_gt ht
   induction s using Finset.induction_on with
   | empty =>
       intro j
       rw [pbPoly_empty, Polynomial.eval_one, mul_one, pbPmf_empty, pbPmf_empty]
-      by_cases h : j = 0
-      · simp [h]
-      · simp [h]
+      by_cases h : j = 0 <;> simp [h]
   | insert i u hiu ih =>
       intro j
       have hi : i ∈ insert i u := Finset.mem_insert_self i u
@@ -514,34 +567,38 @@ theorem pbPmf_tilt {p : ι → ℝ} {t : ℝ} (ht : 0 < t) (hp0 : ∀ i, 0 ≤ p
       have hq : pbTilt p t i * (1 - p i + p i * t) = p i * t := by
         rw [pbTilt, div_mul_cancel₀ _ (ne_of_gt (pbDenom_pos ht (hp0 i) (hp1 i)))]
       have hq' : (1 - pbTilt p t i) * (1 - p i + p i * t) = 1 - p i := by
-        have := hq
-        ring_nf
-        ring_nf at this
-        linarith [this]
+        rw [sub_mul, one_mul, hq]; ring
       have heval : (pbPoly (insert i u) p).eval t
           = (1 - p i + p i * t) * (pbPoly u p).eval t := by
-        rw [pbPoly_erase hi p, herase, Polynomial.eval_mul]
-        simp
-      rw [pbPmf_rec (i := i) hi (pbTilt p t) j, pbPmf_rec (i := i) hi p j, herase, heval]
-      have h1 := ih j
-      have h2 := ih (j - 1)
+        rw [pbPoly_erase hi p, herase, Polynomial.eval_mul]; simp
       have hz : t ^ (j - 1) * t = t ^ j := by
         rw [zpow_sub_one₀ htne, mul_assoc, inv_mul_cancel₀ htne, mul_one]
-      calc ((1 - pbTilt p t i) * pbPmf u (pbTilt p t) j
-              + pbTilt p t i * pbPmf u (pbTilt p t) (j - 1))
-            * ((1 - p i + p i * t) * (pbPoly u p).eval t)
-          = (1 - pbTilt p t i) * (1 - p i + p i * t)
-              * (pbPmf u (pbTilt p t) j * (pbPoly u p).eval t)
-            + pbTilt p t i * (1 - p i + p i * t)
-              * (pbPmf u (pbTilt p t) (j - 1) * (pbPoly u p).eval t) := by ring
-        _ = (1 - p i) * (pbPmf u p j * t ^ j) + p i * t * (pbPmf u p (j - 1) * t ^ (j - 1)) := by
-              rw [hq, hq', h1, h2]
-        _ = ((1 - p i) * pbPmf u p j + p i * pbPmf u p (j - 1)) * t ^ j := by
-              rw [← hz]; ring
+      rw [pbPmf_rec (i := i) hi (pbTilt p t) j, pbPmf_rec (i := i) hi p j, herase, heval]
+      -- the two recursions differ by the tilt factors `hq`, `hq'` and the weights `t^j`
+      linear_combination (pbPmf u (pbTilt p t) j * (pbPoly u p).eval t) * hq'
+        + (pbPmf u (pbTilt p t) (j - 1) * (pbPoly u p).eval t) * hq
+        + (1 - p i) * ih j + p i * t * ih (j - 1) + p i * pbPmf u p (j - 1) * hz
+
+/-- **A tilt by the ratio of two consecutive masses ties them.**  This is what makes a tie
+constructible at a prescribed place: `pbPmf_tilt` weights `a_j` by `t^j`, so weighting by
+`t = a_M/a_{M+1}` scales `a_{M+1}` down to `a_M` exactly, and the common normalizer cancels. -/
+theorem pbPmf_tilt_tie {p : ι → ℝ} (hp0 : ∀ i, 0 ≤ p i) (hp1 : ∀ i, p i ≤ 1) {s : Finset ι}
+    {M : ℤ} (hpos : 0 < pbPmf s p M) (hposS : 0 < pbPmf s p (M + 1)) :
+    pbPmf s (pbTilt p (pbPmf s p M / pbPmf s p (M + 1))) M
+      = pbPmf s (pbTilt p (pbPmf s p M / pbPmf s p (M + 1))) (M + 1) := by
+  set t : ℝ := pbPmf s p M / pbPmf s p (M + 1) with hT
+  have ht : 0 < t := div_pos hpos hposS
+  have hf : 0 < (pbPoly s p).eval t := pbPoly_eval_pos ht hp0 hp1 s
+  have hkey : pbPmf s p (M + 1) * t ^ (M + 1) = pbPmf s p M * t ^ M := by
+    rw [zpow_add_one₀ (ne_of_gt ht), hT]
+    field_simp
+  refine mul_right_cancel₀ (ne_of_gt hf) ?_
+  rw [pbPmf_tilt ht hp0 hp1 s M, pbPmf_tilt ht hp0 hp1 s (M + 1), hkey]
 
 /-- **Reflection.**  Replacing every `p_i` by `1-p_i` reverses the mass function. -/
 theorem pbPmf_reflect {p : ι → ℝ} (s : Finset ι) : ∀ j : ℤ,
     pbPmf s (fun i => 1 - p i) j = pbPmf s p ((s.card : ℤ) - j) := by
+  classical
   induction s using Finset.induction_on with
   | empty =>
       intro j
@@ -571,68 +628,33 @@ forces the tilt to be the identity, which forces `t = 1`. -/
 theorem pbPmf_succ_le {p : ι → ℝ} (hp0 : ∀ i, 0 ≤ p i) (hp1 : ∀ i, p i ≤ 1)
     {s : Finset ι} {M : ℤ} (hmean : ∑ i ∈ s, p i = (M : ℝ)) (hpos : 0 < pbPmf s p M) :
     pbPmf s p (M + 1) ≤ pbPmf s p M := by
-  by_contra hcon
-  rw [not_le] at hcon
+  by_contra! hcon
   have hposS : 0 < pbPmf s p (M + 1) := lt_trans hpos hcon
   set t : ℝ := pbPmf s p M / pbPmf s p (M + 1) with hT
   have ht : 0 < t := div_pos hpos hposS
-  have ht1 : t < 1 := by
-    rw [hT, div_lt_one hposS]
-    exact hcon
+  have ht1 : t < 1 := by rw [hT, div_lt_one hposS]; exact hcon
   set q : ι → ℝ := pbTilt p t with hQ
-  have hq0 : ∀ i, 0 ≤ q i := fun i => pbTilt_nonneg ht hp0 hp1 i
-  have hq1 : ∀ i, q i ≤ 1 := fun i => pbTilt_le_one ht hp0 hp1 i
   have hf : 0 < (pbPoly s p).eval t := pbPoly_eval_pos ht hp0 hp1 s
   have hAM := pbPmf_tilt ht hp0 hp1 s M
   have hAM1 := pbPmf_tilt ht hp0 hp1 s (M + 1)
-  -- the tilted law ties at `(M, M+1)`
-  have htie : pbPmf s q M = pbPmf s q (M + 1) := by
-    have hz : t ^ (M + 1) = t ^ M * t := by rw [zpow_add_one₀ (ne_of_gt ht)]
-    have hkey : pbPmf s p (M + 1) * t ^ (M + 1) = pbPmf s p M * t ^ M := by
-      rw [hz, hT]
-      field_simp
-    have h1 : pbPmf s q M * (pbPoly s p).eval t
-        = pbPmf s q (M + 1) * (pbPoly s p).eval t := by
-      rw [hAM, hAM1, hkey]
-    exact mul_right_cancel₀ (ne_of_gt hf) h1
   have hqpos : 0 < pbPmf s q M := by
-    have hzp : 0 < t ^ M := zpow_pos ht M
-    have hprod : 0 < pbPmf s q M * (pbPoly s p).eval t := by
-      rw [hAM]; exact mul_pos hpos hzp
-    by_contra hnp
-    rw [not_lt] at hnp
-    have hnn := mul_nonneg (neg_nonneg.2 hnp) hf.le
-    nlinarith [hprod, hnn]
+    refine pos_of_mul_pos_left (b := (pbPoly s p).eval t) ?_ hf.le
+    rw [hAM]; exact mul_pos hpos (zpow_pos ht M)
   -- the tie inequality, against the pointwise bound
-  have hlow := (pbPmf_tie_mean_bounds hq0 hq1 htie hqpos).1
+  have hlow := (pbPmf_tie_mean_bounds (fun i => pbTilt_nonneg ht hp0 hp1 i)
+    (fun i => pbTilt_le_one ht hp0 hp1 i) (pbPmf_tilt_tie hp0 hp1 hpos hposS) hqpos).1
   have hptw : ∀ i ∈ s, q i ≤ p i := fun i _ => pbTilt_le ht ht1.le hp0 hp1 i
   have hsum : ∑ i ∈ s, q i ≤ ∑ i ∈ s, p i := Finset.sum_le_sum hptw
   have heqsum : ∑ i ∈ s, q i = ∑ i ∈ s, p i := by
-    rw [hmean] at hsum ⊢
-    exact le_antisymm hsum hlow
-  have heqi : ∀ i ∈ s, q i = p i :=
-    (Finset.sum_eq_sum_iff_of_le hptw).1 heqsum
+    rw [hmean] at hsum ⊢; exact le_antisymm hsum hlow
   -- so the tilt is the identity on `s`, and then `t = 1`
-  have hpoly : pbPoly s q = pbPoly s p := by
-    rw [pbPoly, pbPoly]
-    exact Finset.prod_congr rfl fun i hi => by rw [heqi i hi]
-  have hpmf : ∀ j : ℤ, pbPmf s q j = pbPmf s p j := by
-    intro j
-    rcases lt_or_ge j 0 with hj | hj
-    · rw [pbPmf_of_neg _ _ hj, pbPmf_of_neg _ _ hj]
-    · rw [pbPmf_eq_coeff _ _ hj, pbPmf_eq_coeff _ _ hj, hpoly]
-  rw [hpmf M] at hAM
-  rw [hpmf (M + 1)] at hAM1
-  have hfM : (pbPoly s p).eval t = t ^ M := mul_left_cancel₀ (ne_of_gt hpos) hAM
+  have hpmf := pbPmf_congr ((Finset.sum_eq_sum_iff_of_le hptw).1 heqsum)
+  rw [hpmf M] at hAM; rw [hpmf (M + 1)] at hAM1
   have hone : t = 1 := by
-    rw [hfM, zpow_add_one₀ (ne_of_gt ht)] at hAM1
-    have hzp : (0 : ℝ) < t ^ M := zpow_pos ht M
-    have hc : 0 < pbPmf s p (M + 1) * t ^ M := mul_pos hposS hzp
-    have hrw : pbPmf s p (M + 1) * (t ^ M * t) = (pbPmf s p (M + 1) * t ^ M) * t := by ring
-    rw [hrw] at hAM1
-    have h1 : (pbPmf s p (M + 1) * t ^ M) * 1 = (pbPmf s p (M + 1) * t ^ M) * t := by
-      rw [mul_one]; exact hAM1
-    exact (mul_left_cancel₀ (ne_of_gt hc) h1).symm
+    have hM : (pbPoly s p).eval t = t ^ M := mul_left_cancel₀ (ne_of_gt hpos) hAM
+    have hM1 : (pbPoly s p).eval t = t ^ (M + 1) := mul_left_cancel₀ (ne_of_gt hposS) hAM1
+    refine (mul_left_cancel₀ (ne_of_gt (zpow_pos ht M)) ?_).symm
+    rw [mul_one, ← zpow_add_one₀ (ne_of_gt ht) M, ← hM]; exact hM1
   exact absurd hone (by linarith)
 
 /-- **Darroch's theorem.**  When the mean `\sum_ip_i` is an integer `M`, the mass function of
@@ -640,8 +662,6 @@ theorem pbPmf_succ_le {p : ι → ℝ} (hp0 : ∀ i, 0 ≤ p i) (hp1 : ∀ i, p 
 theorem pbPmf_le_of_mean_eq {p : ι → ℝ} (hp0 : ∀ i, 0 ≤ p i) (hp1 : ∀ i, p i ≤ 1)
     {s : Finset ι} {M : ℤ} (hmean : ∑ i ∈ s, p i = (M : ℝ)) (hpos : 0 < pbPmf s p M) :
     ∀ j : ℤ, pbPmf s p j ≤ pbPmf s p M := by
-  have hpf2 := pbPmf_isPF2 hp0 hp1 s
-  have hnn := pbPmf_nonneg hp0 hp1 s
   have hup : pbPmf s p (M + 1) ≤ pbPmf s p M := pbPmf_succ_le hp0 hp1 hmean hpos
   -- the reflected instance gives the step to the left
   have hdown : pbPmf s p (M - 1) ≤ pbPmf s p M := by
@@ -664,56 +684,15 @@ theorem pbPmf_le_of_mean_eq {p : ι → ℝ} (hp0 : ∀ i, 0 ≤ p i) (hp1 : ∀
     have e2 : (s.card : ℤ) - ((s.card : ℤ) - M) = M := by ring
     rw [e1, e2] at h
     exact h
-  -- and log-concavity spreads both steps
-  have hstepR : ∀ n : ℕ, pbPmf s p (M + (n : ℤ) + 1) ≤ pbPmf s p (M + (n : ℤ)) := by
-    intro n
-    rcases Nat.eq_zero_or_pos n with rfl | hn
-    · simpa using hup
-    · have hpf := hpf2 (M + 1) (M + (n : ℤ)) (by omega)
-      rw [show M + 1 - 1 = M by ring] at hpf
-      have hj := hnn (M + (n : ℤ))
-      have hchain : pbPmf s p M * pbPmf s p (M + (n : ℤ) + 1)
-          ≤ pbPmf s p M * pbPmf s p (M + (n : ℤ)) := by
-        have h2 := mul_le_mul_of_nonneg_right hup hj
-        linarith [hpf, h2]
-      exact le_of_mul_le_mul_left hchain hpos
-  have hright : ∀ n : ℕ, pbPmf s p (M + (n : ℤ)) ≤ pbPmf s p M := by
-    intro n
-    induction n with
-    | zero => simp
-    | succ m ihm =>
-        have hc : ((m + 1 : ℕ) : ℤ) = (m : ℤ) + 1 := by push_cast; ring
-        rw [hc, ← add_assoc]
-        exact le_trans (hstepR m) ihm
-  have hstepL : ∀ n : ℕ, pbPmf s p (M - (n : ℤ) - 1) ≤ pbPmf s p (M - (n : ℤ)) := by
-    intro n
-    rcases Nat.eq_zero_or_pos n with rfl | hn
-    · simpa using hdown
-    · have hpf := hpf2 (M - (n : ℤ)) (M - 1) (by omega)
-      rw [show M - 1 + 1 = M by ring] at hpf
-      have hj := hnn (M - (n : ℤ))
-      have hchain : pbPmf s p (M - (n : ℤ) - 1) * pbPmf s p M
-          ≤ pbPmf s p (M - (n : ℤ)) * pbPmf s p M := by
-        have h2 := mul_le_mul_of_nonneg_left hdown hj
-        linarith [hpf, h2]
-      exact le_of_mul_le_mul_right hchain hpos
-  have hleft : ∀ n : ℕ, pbPmf s p (M - (n : ℤ)) ≤ pbPmf s p M := by
-    intro n
-    induction n with
-    | zero => simp
-    | succ m ihm =>
-        have hc : ((m + 1 : ℕ) : ℤ) = (m : ℤ) + 1 := by push_cast; ring
-        rw [hc, ← sub_sub]
-        exact le_trans (hstepL m) ihm
-  intro j
-  rcases le_or_gt M j with hj | hj
-  · obtain ⟨n, hn⟩ : ∃ n : ℕ, j = M + (n : ℤ) := ⟨(j - M).toNat, by omega⟩
-    rw [hn]
-    exact hright n
-  · obtain ⟨n, hn⟩ : ∃ n : ℕ, j = M - (n : ℤ) := ⟨(M - j).toNat, by omega⟩
-    rw [hn]
-    exact hleft n
+  exact (pbPmf_isPF2 hp0 hp1 s).le_of_neighbors_le (pbPmf_nonneg hp0 hp1 s) hpos hup hdown
 
 end tilting
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.pbPmf_le_of_mean_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms pbPmf_le_of_mean_eq
 
 end Shields

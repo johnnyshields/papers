@@ -36,24 +36,18 @@ strictly monotone, Fin, tuple, insertNth, succAbove, dispersion
 
 namespace Shields
 
-private theorem le_val_of_strictMono {r : ℕ} {s : Fin r → ℕ} (hs : StrictMono s) :
-    ∀ (n : ℕ) (h : n < r), n ≤ s ⟨n, h⟩ := by
-  intro n
-  induction n with
-  | zero => intro _; exact Nat.zero_le _
-  | succ m ih =>
-      intro h
-      have hm : m < r := by omega
-      have h1 := hs (show (⟨m, hm⟩ : Fin r) < ⟨m + 1, h⟩ from by simp)
-      have h2 := ih hm
-      omega
-
 /-- A strictly monotone selection dominates its own index. -/
 theorem val_le_of_strictMono {r : ℕ} {ρ : Fin r → ℕ} (hρ : StrictMono ρ) (i : Fin r) :
     (i : ℕ) ≤ ρ i := by
-  have := le_val_of_strictMono hρ (i : ℕ) i.isLt
-  simp only [Fin.eta] at this
-  exact this
+  obtain ⟨n, hn⟩ := i
+  induction n with
+  | zero => exact Nat.zero_le _
+  | succ m ih =>
+      have hm : m < r := by omega
+      have hstep : ρ ⟨m, hm⟩ < ρ ⟨m + 1, hn⟩ := hρ (by simp [Fin.lt_def])
+      have hprev : m ≤ ρ ⟨m, hm⟩ := ih hm
+      change m + 1 ≤ ρ ⟨m + 1, hn⟩
+      omega
 
 /-- A strictly monotone family with a gap is a strictly monotone family one
 longer with an interior entry deleted. -/
@@ -61,36 +55,17 @@ theorem exists_insert_of_gap {m : ℕ} (ρ : Fin (m + 1) → ℕ) (hρ : StrictM
     (j : Fin m) (hgap : ρ j.castSucc + 1 < ρ j.succ) :
     ∃ r : Fin (m + 2) → ℕ, StrictMono r
       ∧ r ∘ (j.castSucc.succ).succAbove = ρ := by
-  set i : Fin (m + 2) := j.castSucc.succ with hi
-  refine ⟨i.insertNth (ρ j.castSucc + 1) ρ, ?_, ?_⟩
-  · intro a b hab
-    rcases eq_or_ne a i with rfl | ha
-    · obtain ⟨k, rfl⟩ := Fin.exists_succAbove_eq (Ne.symm (ne_of_lt hab))
-      rw [Fin.insertNth_apply_same, Fin.insertNth_apply_succAbove]
-      have hk : j.castSucc < k := by
-        have := (Fin.lt_succAbove_iff_le_castSucc i k).mp hab
-        rw [hi, Fin.le_def, Fin.val_succ, Fin.val_castSucc, Fin.val_castSucc] at this
-        rw [Fin.lt_def, Fin.val_castSucc]; omega
-      have : ρ j.succ ≤ ρ k := hρ.monotone (by
-        rw [Fin.le_def, Fin.val_succ]
-        rw [Fin.lt_def, Fin.val_castSucc] at hk
-        omega)
+  refine ⟨(j.castSucc.succ).insertNth (ρ j.castSucc + 1) ρ, ?_, ?_⟩
+  · rw [Fin.strictMono_insertNth_iff]
+    refine ⟨hρ, fun k hk => ?_, fun k hk => ?_⟩
+    · -- below the insertion point `k ≤ j.castSucc`, so `ρ k ≤ ρ j.castSucc`
+      refine lt_of_le_of_lt (hρ.monotone (a := k) (b := j.castSucc) ?_) (Nat.lt_succ_self _)
+      simp only [Fin.lt_def, Fin.le_def, Fin.val_succ, Fin.val_castSucc] at hk ⊢
       omega
-    · obtain ⟨k, rfl⟩ := Fin.exists_succAbove_eq ha
-      rcases eq_or_ne b i with rfl | hb
-      · rw [Fin.insertNth_apply_same, Fin.insertNth_apply_succAbove]
-        have hk : k ≤ j.castSucc := by
-          by_contra hcon
-          rw [not_le] at hcon
-          exact absurd hab (not_lt.mpr ((Fin.lt_succAbove_iff_le_castSucc i k).mpr (by
-            rw [hi, Fin.le_def, Fin.val_succ, Fin.val_castSucc, Fin.val_castSucc]
-            rw [Fin.lt_def, Fin.val_castSucc] at hcon
-            omega)).le)
-        have : ρ k ≤ ρ j.castSucc := hρ.monotone hk
-        omega
-      · obtain ⟨k', rfl⟩ := Fin.exists_succAbove_eq hb
-        rw [Fin.insertNth_apply_succAbove, Fin.insertNth_apply_succAbove]
-        exact hρ (Fin.succAbove_lt_succAbove_iff.mp hab)
+    · -- above it `j.succ ≤ k`, and the gap separates `ρ j.castSucc + 1` from `ρ j.succ`
+      refine hgap.trans_le (hρ.monotone (a := j.succ) (b := k) ?_)
+      simp only [Fin.le_def, Fin.val_succ, Fin.val_castSucc] at hk ⊢
+      omega
   · funext k
     simp [Fin.insertNth_apply_succAbove]
 
@@ -110,5 +85,20 @@ theorem eq_consecutive_of_no_gap {m : ℕ} (ρ : Fin (m + 1) → ℕ) (hρ : Str
         simpa [Fin.val_castSucc] using ih
       rw [Fin.val_succ]
       omega
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.val_le_of_strictMono' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms val_le_of_strictMono
+
+/-- info: 'Shields.exists_insert_of_gap' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_insert_of_gap
+
+/-- info: 'Shields.eq_consecutive_of_no_gap' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
+#print axioms eq_consecutive_of_no_gap
 
 end Shields

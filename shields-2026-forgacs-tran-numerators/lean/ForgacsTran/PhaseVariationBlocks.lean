@@ -76,9 +76,9 @@ open Set Real
 
 /-- A `Fin k` family of sets read as an `ℕ`-indexed one, empty past `k`.
 
-The variation machinery is written over a `Finset ℕ` -- `ViewingAngle.eVariationOn_sum_le`
-inducts on the maximum -- and `AngularDiscrepancyFT.FTPhaseSupply` indexes its blocks by
-`Fin k`.  This is the whole of the conversion, and it is a definition rather than a step
+The variation machinery is written over a `Finset ℕ` and
+`AngularDiscrepancyFT.FTPhaseSupply` indexes its blocks by `Fin k`.  This is the whole
+of the conversion, and it is a definition rather than a step
 inside one proof because every per-root bound a caller brings from `ViewingAngle` needs the
 same conversion. -/
 noncomputable def finExt {k : ℕ} (J : Fin k → Set ℝ) : ℕ → Set ℝ :=
@@ -110,10 +110,10 @@ theorem sum_eVariationOn_finExtFun {k : ℕ} (ψ : Fin k → ℝ → ℝ) (J : F
   exact Finset.sum_congr rfl fun i _ => by rw [finExt_coe, finExtFun_coe]
 
 /-- **`linear_phase_variation_components` over `Fin k`.**  The supply indexes its blocks
-by `Fin k`; the variation machinery is written over a `Finset ℕ`, because
-`ViewingAngle.eVariationOn_sum_le` inducts on the maximum.  Extending the block family
-by the empty set past `k` moves one statement to the other with no mathematical content
-in between. -/
+by `Fin k` and the variation machinery is written over a `Finset ℕ`.  Extending the block
+family by the empty set past `k` moves one statement to the other with no mathematical
+content in between.  Subadditivity itself imposes nothing here:
+`Shields.eVariationOn_finsetSum_le` is stated over an arbitrary index type. -/
 theorem linear_phase_variation_components_fin {k : ℕ} {ψ₀ : ℝ → ℝ} {J : Fin k → Set ℝ}
     {ψ : ℂ → Fin k → ℝ → ℝ} {κ₀ Kγ : ℝ} {B : Polynomial ℂ} {s : Set ℝ}
     (hκ₀ : 0 ≤ κ₀) (hKγ : 0 ≤ Kγ)

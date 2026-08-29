@@ -187,4 +187,19 @@ theorem norm_cexp_sub_cexp_le {z₁ z₂ : ℂ} (h₁ : ‖z₁‖ ≤ Real.log 
       _ ≤ Real.exp (Real.log (6 / 5)) := Real.exp_le_exp.2 hre
       _ = 6 / 5 := Real.exp_log (by norm_num)
 
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.norm_cexp_sub_one_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms norm_cexp_sub_one_le
+
+/-- info: 'Shields.norm_clog_one_sub_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms norm_clog_one_sub_le
+
+/-- info: 'Shields.norm_cexp_sub_cexp_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms norm_cexp_sub_cexp_le
+
 end Shields

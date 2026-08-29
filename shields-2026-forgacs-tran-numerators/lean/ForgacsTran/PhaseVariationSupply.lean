@@ -70,7 +70,8 @@ theorem eVariationOn_polarAngle_le (hab : a ≤ b) (hU : IsOpen U) (hsub : Icc a
   have hid : eVariationOn (id : ℝ → ℝ) (Icc a b) ≤ ENNReal.ofReal (b - a) := by
     have hmono : MonotoneOn (id : ℝ → ℝ) (Icc a b) := fun _ _ _ _ h => h
     have h := hmono.eVariationOn_eq (a := a) (b := b) (left_mem_Icc.2 hab) (right_mem_Icc.2 hab)
-    simpa using h.le
+    rw [Set.inter_self] at h
+    exact h.le
   have hcomp := hlip.comp_eVariationOn_le (g := (id : ℝ → ℝ)) (s := Icc a b)
     (Set.mapsTo_id _)
   rw [Function.comp_id] at hcomp

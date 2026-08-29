@@ -278,12 +278,12 @@ theorem pickDeriv_ofReal (γ : ℝ) (α : Fin a → ℝ) (β : Fin b → ℝ) (t
   congr 1
   · congr 1
     refine Finset.sum_congr rfl fun i _ => ?_
-    have hr : (1 : ℂ) - (α i : ℂ) * (t : ℂ) = ((1 - α i * t : ℝ) : ℂ) := by push_cast; ring
+    have hr : (1 : ℂ) - (α i : ℂ) * (t : ℂ) = ((1 - α i * t : ℝ) : ℂ) := by norm_cast
     rw [hr, key (α i) (1 - α i * t) rfl]
     push_cast
     ring
   · refine Finset.sum_congr rfl fun j _ => ?_
-    have hr : (1 : ℂ) + (β j : ℂ) * (t : ℂ) = ((1 + β j * t : ℝ) : ℂ) := by push_cast; ring
+    have hr : (1 : ℂ) + (β j : ℂ) * (t : ℂ) = ((1 + β j * t : ℝ) : ℂ) := by norm_cast
     rw [hr, key (β j) (1 + β j * t) rfl]
     push_cast
     ring
@@ -534,7 +534,7 @@ theorem levelFn_ne_zero_of_denomC_eq_zero (hα : ∀ i, 0 < α i) (hβ : ∀ j, 
     have hpos : (0 : ℝ) < 1 + α i / β j := by
       have := div_pos (hα i) (hβ j); linarith
     have hcast : (1 : ℂ) - (α i : ℂ) * z = ((1 + α i / β j : ℝ) : ℂ) := by
-      rw [hz]; push_cast; field_simp; ring
+      rw [hz]; push_cast; field
     rw [hcast]
     exact Complex.ofReal_ne_zero.mpr hpos.ne'
   rw [levelFn, hC, mul_zero, sub_zero]
@@ -704,7 +704,6 @@ theorem numerSq_mul_denomSq_lt (hγ : 0 ≤ γ) (hα : ∀ i, 0 < α i) (hβ : �
   have hQXpos : 0 < denomSq β r x := Finset.prod_pos fun j _ => hQx j
   have hQYpos : 0 < denomSq β r y := Finset.prod_pos fun j _ => hQy j
   have hNXpos : 0 < numerSq γ α r x := mul_pos (Real.exp_pos _) hPXpos
-  have hNYpos : 0 < numerSq γ α r y := mul_pos (Real.exp_pos _) hPYpos
   -- termwise monotonicity, strict in each individual factor
   have hPle : PY ≤ PX :=
     Finset.prod_le_prod (fun i _ => (hNy i).le) fun i _ => by nlinarith [hα i]
@@ -717,37 +716,36 @@ theorem numerSq_mul_denomSq_lt (hγ : 0 ≤ γ) (hα : ∀ i, 0 < α i) (hβ : �
   -- `hnd` upgrades one of the two inequalities to a strict one
   have key : numerSq γ α r y < numerSq γ α r x ∨ denomSq β r x < denomSq β r y := by
     rcases hnd with hg | ha | hb
-    · refine Or.inl ?_
-      have hexp : Real.exp (-(2 * γ * y)) < Real.exp (-(2 * γ * x)) :=
-        Real.exp_lt_exp.2 (by nlinarith)
-      calc numerSq γ α r y = Real.exp (-(2 * γ * y)) * PY := rfl
-        _ < Real.exp (-(2 * γ * x)) * PY := by exact mul_lt_mul_of_pos_right hexp hPYpos
-        _ ≤ Real.exp (-(2 * γ * x)) * PX := by
-            exact mul_le_mul_of_nonneg_left hPle (Real.exp_pos _).le
-        _ = numerSq γ α r x := rfl
-    · refine Or.inl ?_
-      have hne : (Finset.univ : Finset (Fin a)).Nonempty :=
-        Finset.univ_nonempty_iff.2 (Fin.pos_iff_nonempty.1 (Nat.pos_of_ne_zero ha))
-      have hPlt : PY < PX :=
-        Finset.prod_lt_prod_of_nonempty (fun i _ => hNy i) (fun i _ => by nlinarith [hα i]) hne
-      calc numerSq γ α r y = Real.exp (-(2 * γ * y)) * PY := rfl
-        _ ≤ Real.exp (-(2 * γ * x)) * PY := by
-            exact mul_le_mul_of_nonneg_right hexple hPYpos.le
-        _ < Real.exp (-(2 * γ * x)) * PX := by
-            exact mul_lt_mul_of_pos_left hPlt (Real.exp_pos _)
-        _ = numerSq γ α r x := rfl
-    · refine Or.inr ?_
-      have hne : (Finset.univ : Finset (Fin b)).Nonempty :=
-        Finset.univ_nonempty_iff.2 (Fin.pos_iff_nonempty.1 (Nat.pos_of_ne_zero hb))
-      exact Finset.prod_lt_prod_of_nonempty (fun j _ => hQx j)
-        (fun j _ => by nlinarith [hβ j]) hne
+    · exact Or.inl ((mul_lt_mul_of_pos_right (Real.exp_lt_exp.2 (by nlinarith)) hPYpos).trans_le
+        (mul_le_mul_of_nonneg_left hPle (Real.exp_pos _).le))
+    · have hPlt : PY < PX := Finset.prod_lt_prod_of_nonempty (fun i _ => hNy i)
+        (fun i _ => by nlinarith [hα i])
+        (Finset.univ_nonempty_iff.2 (Fin.pos_iff_nonempty.1 (Nat.pos_of_ne_zero ha)))
+      exact Or.inl ((mul_le_mul_of_nonneg_right hexple hPYpos.le).trans_lt
+        (mul_lt_mul_of_pos_left hPlt (Real.exp_pos _)))
+    · exact Or.inr (Finset.prod_lt_prod_of_nonempty (fun j _ => hQx j)
+        (fun j _ => by nlinarith [hβ j])
+        (Finset.univ_nonempty_iff.2 (Fin.pos_iff_nonempty.1 (Nat.pos_of_ne_zero hb))))
   rcases key with h | h
-  · calc numerSq γ α r y * denomSq β r x
-        < numerSq γ α r x * denomSq β r x := mul_lt_mul_of_pos_right h hQXpos
-      _ ≤ numerSq γ α r x * denomSq β r y := mul_le_mul_of_nonneg_left hQle hNXpos.le
-  · calc numerSq γ α r y * denomSq β r x
-        ≤ numerSq γ α r x * denomSq β r x := mul_le_mul_of_nonneg_right hNle hQXpos.le
-      _ < numerSq γ α r x * denomSq β r y := mul_lt_mul_of_pos_left h hNXpos
+  · exact (mul_lt_mul_of_pos_right h hQXpos).trans_le
+      (mul_le_mul_of_nonneg_left hQle hNXpos.le)
+  · exact (mul_le_mul_of_nonneg_right hNle hQXpos.le).trans_lt
+      (mul_lt_mul_of_pos_left h hNXpos)
+
+/-- **Equal modulus and equal real part leave the imaginary part up to sign.**  Two points of the
+same circle with the same real part are equal or conjugate, which is what turns the strict
+monotonicity of the profiles in `Re z` into rigidity. -/
+theorem im_eq_or_eq_neg_of_norm_eq_of_re_eq {w t : ℂ} (hn : ‖w‖ = ‖t‖) (hre : w.re = t.re) :
+    w.im = t.im ∨ w.im = -t.im := by
+  have hsq : w.im ^ 2 = t.im ^ 2 := by
+    have hw := Complex.sq_norm w
+    have ht := Complex.sq_norm t
+    rw [Complex.normSq_apply] at hw ht
+    rw [hn, hre] at hw
+    nlinarith [hw, ht]
+  rcases mul_eq_zero.1 (show (w.im - t.im) * (w.im + t.im) = 0 by nlinarith [hsq]) with h | h
+  · exact Or.inl (by linarith)
+  · exact Or.inr (by linarith)
 
 /-- **Circular rigidity.**  Two points of one circle at which `|f|` takes the same value,
 finite and nonzero at one of them, are equal or conjugate.  The hypothesis is the *modulus*
@@ -768,19 +766,13 @@ theorem circular_rigidity (hγ : 0 ≤ γ) (hα : ∀ i, 0 < α i) (hβ : ∀ j,
   have hfacA : ∀ (z : ℂ), numerA γ α z ≠ 0 →
       ∀ i, 0 < 1 - 2 * α i * z.re + α i ^ 2 * ‖z‖ ^ 2 := by
     intro z hz i
-    have hne : (1 : ℂ) - (α i : ℂ) * z ≠ 0 := by
-      intro h
-      refine hz ?_
-      rw [numerA]
-      refine mul_eq_zero_of_right _ (Finset.prod_eq_zero (Finset.mem_univ i) h)
+    have hne := one_sub_ne_zero_of_numerA hz i
     rw [← sq_norm_one_sub]
     positivity
   have hfacC : ∀ (z : ℂ), denomC β z ≠ 0 →
       ∀ j, 0 < 1 + 2 * β j * z.re + β j ^ 2 * ‖z‖ ^ 2 := by
     intro z hz j
-    have hne : (1 : ℂ) + (β j : ℂ) * z ≠ 0 := by
-      intro h
-      exact hz (Finset.prod_eq_zero (Finset.mem_univ j) h)
+    have hne := one_add_ne_zero_of_denomC hz j
     rw [← sq_norm_one_add]
     positivity
   -- the cross relation, squared, is an equality of the two profiles
@@ -806,21 +798,11 @@ theorem circular_rigidity (hγ : 0 ≤ γ) (hα : ∀ i, 0 < α i) (hβ : ∀ j,
     · exact absurd hprof (ne_of_lt (numerSq_mul_denomSq_lt hγ hα hβ hnd hgt
         hAt' hAw' hCt' hCw'))
   -- equal modulus and equal real part leave the imaginary part up to sign
-  have him : w.im = t.im ∨ w.im = -t.im := by
-    have hw : ‖w‖ ^ 2 = w.re ^ 2 + w.im ^ 2 := by
-      rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply]; ring
-    have ht : ‖t‖ ^ 2 = t.re ^ 2 + t.im ^ 2 := by
-      rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply]; ring
-    rw [hnorm, ht, hre] at hw
-    have hfac : (w.im - t.im) * (w.im + t.im) = 0 := by nlinarith
-    rcases mul_eq_zero.1 hfac with h | h
-    · exact Or.inl (by linarith)
-    · exact Or.inr (by linarith)
+  have him := im_eq_or_eq_neg_of_norm_eq_of_re_eq hnorm hre
   rcases him with h | h
   · exact Or.inl (Complex.ext hre h)
-  · refine Or.inr (Complex.ext ?_ ?_)
-    · rw [Complex.conj_re]; exact hre
-    · rw [Complex.conj_im]; exact h
+  · exact Or.inr (Complex.ext (by rw [Complex.conj_re]; exact hre)
+      (by rw [Complex.conj_im]; exact h))
 
 /-- **A real critical point is alone on its circle at the critical level**, unconditionally:
 `eq_of_levelFn_eq_zero_of_norm_eq` with its rigidity hypothesis discharged by
@@ -832,5 +814,24 @@ theorem eq_of_levelFn_eq_zero_of_norm_eq_of_pos (hγ : 0 ≤ γ) (hα : ∀ i, 0
     (hlev : levelFn γ α β (symbolF γ α β (t : ℂ)) w = 0) :
     w = (t : ℂ) :=
   eq_of_levelFn_eq_zero_of_norm_eq (circular_rigidity hγ hα hβ hnd) hC hA hw hCw hlev
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.pick_rigidity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms pick_rigidity
+
+/-- info: 'Shields.circular_rigidity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms circular_rigidity
+
+/-- info: 'Shields.levelFn_order_two' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms levelFn_order_two
+
+/-- info: 'Shields.eq_of_levelFn_eq_zero_of_norm_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms eq_of_levelFn_eq_zero_of_norm_eq
 
 end Shields

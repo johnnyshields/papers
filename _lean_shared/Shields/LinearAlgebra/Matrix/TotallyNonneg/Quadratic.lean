@@ -26,6 +26,8 @@ many steps drive `u_k` below zero.
 
 ## Main results
 
+* `Shields.casoratian_of_rec`: the Casoratian `c_{k+1}^2 - c_{k+2} c_k` of that recurrence
+  equals `q^{k+1}`.
 * `Shields.discrim_nonneg_of_rec`: a sequence with `c_0 = 1`, `c_1 = p`,
   `c_{k+2} = p c_{k+1} - q c_k` and every term nonnegative has `4q \le p^2`.
 * `Shields.minorsNonneg_quadCoeff_iff`: the Toeplitz matrices of `1 + p t + q t^2` have all
@@ -83,17 +85,6 @@ theorem quadCoeff_zero_eq_zero (y : R) {m : ℕ} (hm : 2 ≤ m) : quadCoeff y 0 
   · exact quadCoeff_eq_zero _ _ h
 
 /-! ### The quadratic as a product of two root factors -/
-
-theorem rootProdCoeff_nil : rootProdCoeff ([] : List R) = fun m => if m = 0 then (1 : R) else 0 :=
-  rfl
-
-theorem convCoeff_delta_right (a : ℕ → R) :
-    convCoeff a (fun m => if m = 0 then (1 : R) else 0) = a := by
-  funext m
-  rw [convCoeff, Finset.sum_eq_single_of_mem 0 (Finset.mem_range.mpr (Nat.succ_pos m))]
-  · simp
-  · intro j _ hj
-    simp [hj]
 
 theorem rootProdCoeff_cons (y : R) (ys : List R) :
     rootProdCoeff (y :: ys) = convCoeff (quadCoeff y 0) (rootProdCoeff ys) := by
@@ -168,7 +159,71 @@ theorem altSeq_quadInvCoeff_add_two (p q : R) (k : ℕ) :
   rw [altSeq_apply, altSeq_apply, altSeq_apply, quadInvCoeff_add_two, pow_succ, pow_succ]
   ring
 
+/-- **The Casoratian of a Chebyshev-type recurrence.**  For `c_{k+2} = p c_{k+1} - q c_k`
+normalized by `c_0 = 1` and `c_1 = p`, the second-order Casoratian `c_{k+1}^2 - c_{k+2} c_k` is
+`q^{k+1}`.  It is the two-term Wronskian of the recurrence and is what forces the terms to stay
+away from zero when `q` is positive. -/
+theorem casoratian_of_rec {p q : R} {c : ℕ → R} (h0 : c 0 = 1) (h1 : c 1 = p)
+    (hrec : ∀ k, c (k + 2) = p * c (k + 1) - q * c k) (k : ℕ) :
+    c (k + 1) ^ 2 - c (k + 2) * c k = q ^ (k + 1) := by
+  induction k with
+  | zero =>
+      change c 1 ^ 2 - c 2 * c 0 = q ^ 1
+      rw [hrec 0, h0, h1]; ring
+  | succ k ih =>
+      change c (k + 2) ^ 2 - c (k + 3) * c (k + 1) = q ^ (k + 2)
+      linear_combination (-(c (k + 1))) * hrec (k + 1) + c (k + 2) * hrec k + q * ih
+
 section Real
+
+/-- A nonnegative Chebyshev-type sequence with `q > 0` has no zero term: a vanishing `c_{j+1}`
+makes the Casoratian `c_{j+1}^2 - c_{j+2} c_j` nonpositive, while it equals `q^{j+1} > 0`. -/
+theorem pos_of_rec_of_nonneg {p q : ℝ} {c : ℕ → ℝ} (h0 : c 0 = 1) (h1 : c 1 = p)
+    (hrec : ∀ k, c (k + 2) = p * c (k + 1) - q * c k) (hc : ∀ k, 0 ≤ c k) (hq : 0 < q) :
+    ∀ k, 0 < c k := by
+  intro k
+  match k with
+  | 0 => rw [h0]; norm_num
+  | (j + 1) =>
+      rcases lt_or_eq_of_le (hc (j + 1)) with h | h
+      · exact h
+      · exfalso
+        have hcj := casoratian_of_rec h0 h1 hrec j
+        rw [← h] at hcj
+        nlinarith [mul_nonneg (hc (j + 2)) (hc j), pow_pos hq (j + 1)]
+
+
+/-- The ratio form of the recursion: dividing `c_{k+2} = p c_{k+1} - q c_k` by `c_{k+1}`. -/
+private theorem ratio_rec {p q : ℝ} {c : ℕ → ℝ}
+    (hrec : ∀ k, c (k + 2) = p * c (k + 1) - q * c k) (hpos : ∀ k, 0 < c k) (k : ℕ) :
+    c (k + 2) / c (k + 1) = p - q / (c (k + 1) / c k) := by
+  have hk : c k ≠ 0 := ne_of_gt (hpos k)
+  have hk1 : c (k + 1) ≠ 0 := ne_of_gt (hpos (k + 1))
+  rw [hrec k, div_div_eq_mul_div]
+  field_simp
+
+/-- **One step of the ratio recursion drops the ratio by a fixed amount.**  With a negative
+discriminant, completing the square gives `u² - pu + q ≥ q - p²/4 > 0`, and dividing that by
+`u ≤ p` rather than by `u` only decreases it. -/
+private theorem sub_ratio_step_le {p q u : ℝ} (hp : 0 < p) (hu : 0 < u) (hup : u ≤ p)
+    (hcon : p ^ 2 < 4 * q) : (q - p ^ 2 / 4) / p ≤ u - (p - q / u) := by
+  have hu0 : u ≠ 0 := ne_of_gt hu
+  have he : u - (p - q / u) = (u ^ 2 - p * u + q) / u := by field
+  rw [he, div_le_div_iff₀ hp hu]
+  nlinarith [mul_nonneg hp.le (sq_nonneg (u - p / 2)),
+    mul_nonneg (sub_nonneg.mpr hup) (show (0 : ℝ) ≤ q - p ^ 2 / 4 by linarith)]
+
+/-- Iterating a fixed drop: a sequence starting at or below `p` and falling by at least `s` at
+every step from which it is still at or below `p` has fallen by `k s` after `k` steps. -/
+private theorem le_sub_of_drop {p s : ℝ} {u : ℕ → ℝ} (hs : 0 < s) (hu0 : u 0 ≤ p)
+    (hdrop : ∀ k, u k ≤ p → s ≤ u k - u (k + 1)) (k : ℕ) : u k ≤ p - (k : ℝ) * s := by
+  induction k with
+  | zero => simpa using hu0
+  | succ k ih =>
+      have hk : (0 : ℝ) ≤ (k : ℝ) * s := mul_nonneg (Nat.cast_nonneg k) hs.le
+      have := hdrop k (by linarith)
+      push_cast
+      linarith
 
 /-- A Chebyshev-type sequence with nonnegative terms has a nonnegative discriminant.  The ratios
 `u_k = c_{k+1}/c_k` drop by at least the fixed amount `(q - p^2/4)/p` at every step, so a negative
@@ -179,71 +234,16 @@ theorem discrim_nonneg_of_rec {p q : ℝ} {c : ℕ → ℝ} (h0 : c 0 = 1) (h1 :
   by_contra hcon
   rw [not_le] at hcon
   have hq : 0 < q := by nlinarith [sq_nonneg p]
-  -- The Casoratian of the recurrence.
-  have hcas : ∀ k, c (k + 1) ^ 2 - c (k + 2) * c k = q ^ (k + 1) := by
-    intro k
-    induction k with
-    | zero =>
-        have e : c 2 = p * c 1 - q * c 0 := hrec 0
-        change c 1 ^ 2 - c 2 * c 0 = q ^ 1
-        rw [e, h0, h1]; ring
-    | succ k ih =>
-        have e1 : c (k + 3) = p * c (k + 2) - q * c (k + 1) := hrec (k + 1)
-        have e2 : c (k + 2) = p * c (k + 1) - q * c k := hrec k
-        change c (k + 2) ^ 2 - c (k + 3) * c (k + 1) = q ^ (k + 2)
-        linear_combination (-(c (k + 1))) * e1 + c (k + 2) * e2 + q * ih
-  -- No term vanishes: a zero term makes the Casoratian nonpositive.
-  have hpos : ∀ k, 0 < c k := by
-    intro k
-    match k with
-    | 0 => rw [h0]; norm_num
-    | (j + 1) =>
-        rcases lt_or_eq_of_le (hc (j + 1)) with h | h
-        · exact h
-        · exfalso
-          have hcj := hcas j
-          rw [← h] at hcj
-          nlinarith [mul_nonneg (hc (j + 2)) (hc j), pow_pos hq (j + 1)]
+  have hpos : ∀ k, 0 < c k := pos_of_rec_of_nonneg h0 h1 hrec hc hq
   have hp : 0 < p := by have := hpos 1; rwa [h1] at this
-  set s : ℝ := (q - p ^ 2 / 4) / p with hs_def
-  have hspos : 0 < s := div_pos (by linarith) hp
+  have hspos : 0 < (q - p ^ 2 / 4) / p := div_pos (by linarith) hp
   have hupos : ∀ k, 0 < c (k + 1) / c k := fun k => div_pos (hpos (k + 1)) (hpos k)
-  have hurec : ∀ k, c (k + 2) / c (k + 1) = p - q / (c (k + 1) / c k) := by
-    intro k
-    have hk : c k ≠ 0 := ne_of_gt (hpos k)
-    have hk1 : c (k + 1) ≠ 0 := ne_of_gt (hpos (k + 1))
-    rw [hrec k, div_div_eq_mul_div]
-    field_simp
-  have hdrop : ∀ k, c (k + 1) / c k ≤ p → s ≤ c (k + 1) / c k - c (k + 2) / c (k + 1) := by
-    intro k hk
-    have h1' : 0 < c (k + 1) / c k := hupos k
-    have hk : c k ≠ 0 := ne_of_gt (hpos k)
-    have hk1 : c (k + 1) ≠ 0 := ne_of_gt (hpos (k + 1))
-    have hkey : q - p ^ 2 / 4
-        ≤ (c (k + 1) / c k - c (k + 2) / c (k + 1)) * (c (k + 1) / c k) := by
-      rw [hurec k]
-      have he : (c (k + 1) / c k - (p - q / (c (k + 1) / c k))) * (c (k + 1) / c k)
-          = (c (k + 1) / c k) ^ 2 - p * (c (k + 1) / c k) + q := by
-        field
-      rw [he]
-      nlinarith [sq_nonneg (c (k + 1) / c k - p / 2)]
-    have hd : 0 ≤ c (k + 1) / c k - c (k + 2) / c (k + 1) := by nlinarith
-    have h2 : q - p ^ 2 / 4 ≤ (c (k + 1) / c k - c (k + 2) / c (k + 1)) * p := by nlinarith
-    rw [hs_def, div_le_iff₀ hp]
-    exact h2
-  have hbound : ∀ k : ℕ, c (k + 1) / c k ≤ p - k * s := by
-    intro k
-    induction k with
-    | zero => rw [h0, h1]; norm_num
-    | succ k ih =>
-        have hle : c (k + 1) / c k ≤ p := by
-          have : (0 : ℝ) ≤ (k : ℝ) * s := mul_nonneg (Nat.cast_nonneg k) (le_of_lt hspos)
-          linarith
-        have := hdrop k hle
-        push_cast
-        change c (k + 2) / c (k + 1) ≤ p - ((k : ℝ) + 1) * s
-        nlinarith
-  obtain ⟨N, hN⟩ := exists_nat_gt (p / s)
+  have hbound := le_sub_of_drop (p := p) (u := fun k => c (k + 1) / c k) hspos
+    (by rw [h0, h1]; simp)
+    (fun k hk => by
+      rw [ratio_rec hrec hpos k]
+      exact sub_ratio_step_le hp (hupos k) hk (by linarith))
+  obtain ⟨N, hN⟩ := exists_nat_gt (p / ((q - p ^ 2 / 4) / p))
   rw [div_lt_iff₀ hspos] at hN
   have := hbound N
   have := hupos N
@@ -272,10 +272,7 @@ theorem minorsNonneg_quadCoeff_iff {p q : ℝ} :
     set d : ℝ := Real.sqrt (p ^ 2 - 4 * q) with hd_def
     have hdnn : 0 ≤ d := Real.sqrt_nonneg _
     have hdsq : d ^ 2 = p ^ 2 - 4 * q := Real.sq_sqrt (by linarith)
-    have hdp : d ≤ p := by
-      rw [hd_def]
-      calc Real.sqrt (p ^ 2 - 4 * q) ≤ Real.sqrt (p ^ 2) := Real.sqrt_le_sqrt (by linarith)
-        _ = p := Real.sqrt_sq hp
+    have hdp : d ≤ p := by nlinarith [hdsq, hdnn, hp, hq]
     refine ⟨(p + d) / 2, (p - d) / 2, by linarith, by linarith, ?_⟩
     rw [rootProdCoeff_pair]
     congr 1
@@ -283,14 +280,15 @@ theorem minorsNonneg_quadCoeff_iff {p q : ℝ} :
     · nlinarith
   · rintro ⟨y₁, y₂, hy₁, hy₂, hpq⟩ n r
     rw [hpq]
-    exact minorsNonneg_rootProd [y₁, y₂] (by
-      intro y hy
-      rcases List.mem_cons.mp hy with h | h
-      · exact h ▸ hy₁
-      · rcases List.mem_cons.mp h with h | h
-        · exact h ▸ hy₂
-        · exact absurd h (List.not_mem_nil)) r n
+    exact minorsNonneg_rootProd [y₁, y₂] (by simp [hy₁, hy₂]) r n
 
 end Real
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.minorsNonneg_quadCoeff_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms minorsNonneg_quadCoeff_iff
 
 end Shields

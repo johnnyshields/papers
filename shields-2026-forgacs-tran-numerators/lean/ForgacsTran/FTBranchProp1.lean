@@ -4,6 +4,7 @@ Released under the MIT license as described in the file LICENSE.txt.
 Authors: Johnny Shields
 -/
 import ForgacsTran.FTBranchRegularity
+import ForgacsTran.PencilIndex
 
 /-!
 # The closing step of Forgács–Tran Proposition 1
@@ -187,9 +188,7 @@ theorem ftProp1_closing {n r l : ℕ} {a : Fin n → ℝ} {c : ℝ} (hn : 0 < n)
   have hwarc : w ∈ Ioo 0 (π / r) := huIcc hw
   have hwπ : w ∈ Ioo 0 π := ftArc_subset hr hwarc
   -- both sides of their display are the chord product at the *same* radius `τ`
-  have hparp : Even (n + (n - 1) + 1) := by
-    have hEq : n + (n - 1) + 1 = 2 * n := by omega
-    rw [hEq]; exact even_two_mul n
+  have hparp : Even (n + (n - 1) + 1) := even_add_pred_add_one (by omega)
   have hZw : ftBranchZ a c r l w = c * ftChordProd a τ w / τ ^ r :=
     ftBranchZ_eq_chordProd ha hpar hwπ (hbl w hwarc) hwτ
   have hZθ : ftBranchZ a c r (n - 1) θ = c * ftChordProd a τ θ / τ ^ r :=

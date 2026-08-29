@@ -50,29 +50,6 @@ open Matrix
 
 variable {R : Type*} [CommRing R] {m : ℕ}
 
-/-! ### The adjugate as a cofactor -/
-
-/-- **The adjugate entry is the signed deleted minor.**
-`adjugate A i j = (-1)^{i+j} · det(A with row j and column i removed)`.
-
-Expanding `det (A.updateRow j (Pi.single i 1))` along row `j` leaves a single
-term, since the replaced row is a standard basis vector; and deleting row `j`
-undoes the replacement, because `j.succAbove` never hits `j`. -/
-theorem adjugate_eq_cofactor (A : Matrix (Fin m.succ) (Fin m.succ) R)
-    (i j : Fin m.succ) :
-    Matrix.adjugate A i j
-      = (-1) ^ ((j : ℕ) + (i : ℕ))
-        * (A.submatrix j.succAbove i.succAbove).det := by
-  rw [Matrix.adjugate_apply, Matrix.det_succ_row _ j, Finset.sum_eq_single i]
-  · congr 1
-    · simp [Matrix.updateRow_self]
-    · congr 1
-      ext a b
-      simp [Matrix.submatrix_apply]
-  · intro l _ hl
-    rw [Matrix.updateRow_self, Pi.single_eq_of_ne hl, mul_zero, zero_mul]
-  · intro h; exact absurd (Finset.mem_univ i) h
-
 /-! ### The auxiliary matrix
 
 Jacobi's identity runs through an auxiliary matrix whose columns `0` and `last`
@@ -297,7 +274,7 @@ The interior of `cornerCleared A` is the interior of `A`, because
 /-- Deleting row and column `0` — the top-left corner minor. -/
 theorem adjugate_corner_zero_zero (A : Matrix (Fin (m + 2)) (Fin (m + 2)) R) :
     adjugate A 0 0 = (A.submatrix Fin.succ Fin.succ).det := by
-  rw [adjugate_eq_cofactor A 0 0]
+  rw [Matrix.adjugate_fin_succ_eq_det_submatrix A 0 0]
   simp
 
 /-- Deleting the last row and the last column — the bottom-right corner minor.
@@ -305,8 +282,8 @@ The sign `(-1)^{2(m + 1)}` is `1`. -/
 theorem adjugate_corner_last_last (A : Matrix (Fin (m + 2)) (Fin (m + 2)) R) :
     adjugate A (Fin.last (m + 1)) (Fin.last (m + 1))
       = (A.submatrix Fin.castSucc Fin.castSucc).det := by
-  rw [adjugate_eq_cofactor A (Fin.last (m + 1)) (Fin.last (m + 1)), Fin.succAbove_last,
-    Fin.val_last, Even.neg_one_pow ⟨m + 1, rfl⟩, one_mul]
+  rw [Matrix.adjugate_fin_succ_eq_det_submatrix A (Fin.last (m + 1)) (Fin.last (m + 1)),
+    Fin.succAbove_last, Fin.val_last, Even.neg_one_pow ⟨m + 1, rfl⟩, one_mul]
 
 /-- The two off-diagonal corners each carry the sign `(-1)^{m + 1}`, so their product
 is the plain product of the two anti-diagonal minors: deleting row `0` with column
@@ -317,8 +294,9 @@ theorem adjugate_corner_offdiag_mul (A : Matrix (Fin (m + 2)) (Fin (m + 2)) R) :
         * (A.submatrix Fin.castSucc Fin.succ).det := by
   have hsq : (-1 : R) ^ (m + 1) * (-1 : R) ^ (m + 1) = 1 := by
     rw [← pow_add]; exact Even.neg_one_pow ⟨m + 1, rfl⟩
-  rw [adjugate_eq_cofactor A 0 (Fin.last (m + 1)),
-    adjugate_eq_cofactor A (Fin.last (m + 1)) 0, Fin.succAbove_last, Fin.succAbove_zero,
+  rw [Matrix.adjugate_fin_succ_eq_det_submatrix A 0 (Fin.last (m + 1)),
+    Matrix.adjugate_fin_succ_eq_det_submatrix A (Fin.last (m + 1)) 0, Fin.succAbove_last,
+    Fin.succAbove_zero,
     Fin.val_last, Fin.val_zero, add_zero, zero_add, mul_mul_mul_comm, hsq, one_mul]
   exact mul_comm _ _
 
@@ -370,13 +348,13 @@ theorem desnanot_jacobi_of_det_ne_zero {R : Type*} [CommRing R] [IsDomain R] {m 
 
 /-- A ring homomorphism carries a determinant to the determinant of the mapped
 matrix. -/
-theorem map_det_map {S₁ S₂ : Type*} [CommRing S₁] [CommRing S₂] {n : ℕ}
+private theorem map_det_map {S₁ S₂ : Type*} [CommRing S₁] [CommRing S₂] {n : ℕ}
     (f : S₁ →+* S₂) (M : Matrix (Fin n) (Fin n) S₁) : f M.det = (M.map f).det := by
   rw [RingHom.map_det]; rfl
 
 /-- A ring homomorphism carries the determinant of a submatrix to the determinant
 of the corresponding submatrix of the mapped matrix. -/
-theorem map_submatrix_det {S₁ S₂ : Type*} [CommRing S₁] [CommRing S₂] {n p : ℕ}
+private theorem map_submatrix_det {S₁ S₂ : Type*} [CommRing S₁] [CommRing S₂] {n p : ℕ}
     (f : S₁ →+* S₂) (M : Matrix (Fin n) (Fin n) S₁) (e₁ e₂ : Fin p → Fin n) :
     f (M.submatrix e₁ e₂).det = ((M.map f).submatrix e₁ e₂).det := by
   rw [RingHom.map_det]; rfl
@@ -437,5 +415,12 @@ theorem desnanot_jacobi_adjugate (A : Matrix (Fin (m + 2)) (Fin (m + 2)) R) :
   rw [adjugate_corner_zero_zero, adjugate_corner_last_last, adjugate_corner_offdiag_mul,
     cornerCleared_interior]
   exact (desnanot_jacobi A).symm
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.desnanot_jacobi_adjugate' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms desnanot_jacobi_adjugate
 
 end Shields

@@ -73,6 +73,23 @@ theorem strictMono_highIdx (hN : k + m = N) : StrictMono (highIdx hN (k := k)) :
   have hab' : (a : ℕ) < (b : ℕ) := hab
   exact Fin.mk_lt_mk.mpr (by omega)
 
+/-- The low block is the image of `lowIdx`, so a sum over the indices below `k` re-indexes to a
+sum over `Fin k`. -/
+theorem sum_filter_lt_eq_sum_lowIdx (hN : k + m = N) {α : Type*} [AddCommMonoid α]
+    (F : Fin N → α) :
+    ∑ i ∈ univ.filter fun i : Fin N => (i : ℕ) < k, F i = ∑ a : Fin k, F (lowIdx hN a) := by
+  have hset : (univ.filter fun i : Fin N => (i : ℕ) < k) = univ.image (lowIdx hN (m := m)) := by
+    ext i
+    simp only [mem_filter, mem_univ, true_and, Finset.mem_image]
+    exact ⟨fun h => ⟨⟨i, h⟩, Fin.ext rfl⟩, by rintro ⟨a, rfl⟩; exact a.isLt⟩
+  rw [hset, Finset.sum_image fun a _ b _ hab => (strictMono_lowIdx hN).injective hab]
+
+/-- The high block of a block-monotone permutation is an increasing selection: `highIdx` lands
+at or above `k`, where the permutation is strictly increasing. -/
+theorem strictMono_comp_highIdx (hN : k + m = N) {τ : Equiv.Perm (Fin N)} (hτ : BlockMono k τ) :
+    StrictMono fun b : Fin m => τ (highIdx hN b) :=
+  fun a _ hab => hτ.upper _ _ (strictMono_highIdx hN hab) (le_highIdx hN a)
+
 /-- The canonical splitting `Fin k ⊕ Fin m ≃ Fin N`. -/
 def splitEquiv (hN : k + m = N) : Fin k ⊕ Fin m ≃ Fin N :=
   finSumFinEquiv.trans (finCongr hN)
@@ -163,21 +180,10 @@ theorem jacobi_minor (hN : k + m = N) (A C : Matrix (Fin N) (Fin N) R) (hAC : A 
     rfl
   rw [hconv, det_submatrix_perm A σ ρ] at hkey
   -- the low block is exactly the index set the sign formula sums over
-  have hset : (univ.filter fun i : Fin N => (i : ℕ) < k)
-      = univ.image (lowIdx hN (m := m)) := by
-    ext i
-    simp only [mem_filter, mem_univ, true_and, Finset.mem_image]
-    constructor
-    · intro h
-      exact ⟨⟨i, h⟩, Fin.ext rfl⟩
-    · rintro ⟨a, rfl⟩
-      exact a.isLt
   have hsum : ∀ τ : Equiv.Perm (Fin N),
       (∑ i ∈ univ.filter fun i : Fin N => (i : ℕ) < k, ((τ i : ℕ) + (i : ℕ)))
-        = ∑ a : Fin k, ((τ (lowIdx hN a) : ℕ) + (a : ℕ)) := by
-    intro τ
-    rw [hset, Finset.sum_image (fun a _ b _ hab => (strictMono_lowIdx hN).injective hab)]
-    rfl
+        = ∑ a : Fin k, ((τ (lowIdx hN a) : ℕ) + (a : ℕ)) := fun τ =>
+    sum_filter_lt_eq_sum_lowIdx hN fun i => (τ i : ℕ) + (i : ℕ)
   have hsgn : ((Equiv.Perm.sign σ : ℤ) : R) * ((Equiv.Perm.sign ρ : ℤ) : R)
       = (-1 : R) ^ (∑ a : Fin k, ((ρ (lowIdx hN a) : ℕ) + (σ (lowIdx hN a) : ℕ))) := by
     rw [hρ.sign, hσ.sign, hsum ρ, hsum σ]
@@ -282,18 +288,21 @@ theorem minorsNonneg_sigmaConj_inv {n : ℕ} {A : Matrix (Fin n) (Fin n) ℝ}
   have hσg' : ∀ a : Fin r, σ (lowIdx hN a) = g a := hσg
   simp only [hρf', hσg'] at hkey
   -- the high block is an increasing selection, so its minor is nonnegative
-  have hmonoρ' : StrictMono (fun b : Fin (n - r) => ρ (highIdx hN b)) := fun a b hab =>
-    hρ.upper _ _ (strictMono_highIdx hN hab) (le_highIdx hN a)
-  have hmonoσ' : StrictMono (fun b : Fin (n - r) => σ (highIdx hN b)) := fun a b hab =>
-    hσ.upper _ _ (strictMono_highIdx hN hab) (le_highIdx hN a)
   have hrhs : 0 ≤ (A.submatrix (fun b : Fin (n - r) => σ (highIdx hN b))
       (fun b : Fin (n - r) => ρ (highIdx hN b))).det :=
-    hA (n - r) _ _ (mem_increasingSelections.mpr hmonoσ')
-      (mem_increasingSelections.mpr hmonoρ')
+    hA (n - r) _ _ (mem_increasingSelections.mpr (strictMono_comp_highIdx hN hσ))
+      (mem_increasingSelections.mpr (strictMono_comp_highIdx hN hρ))
   rw [← hkey] at hrhs
   rw [det_submatrix_sigmaConj]
   by_contra hneg
   push Not at hneg
   nlinarith [hrhs, hneg, hdet]
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.minorsNonneg_sigmaConj_inv' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms minorsNonneg_sigmaConj_inv
 
 end Shields

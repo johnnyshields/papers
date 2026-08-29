@@ -5,6 +5,7 @@ Authors: Johnny Shields
 -/
 import ForgacsTran.FTBranchEndpoint
 import ForgacsTran.Amplitude
+import ForgacsTran.ComplexPart
 
 /-!
 # The arc pencil's conjugate symmetry in the angle
@@ -169,10 +170,6 @@ noncomputable def ftPencilImDeriv2 (P : Polynomial ℝ) (r : ℕ) (τ θ : ℝ) 
       - ftArcPoint τ θ
         * (derivative (ftCritical (P.map (algebraMap ℝ ℂ)) r)).eval (ftArcPoint τ θ))).im
 
-private theorem hasDerivAt_im {f : ℝ → ℂ} {f' : ℂ} {x : ℝ} (h : HasDerivAt f f' x) :
-    HasDerivAt (fun t => (f t).im) f'.im x :=
-  Complex.imCLM.hasFDerivAt.comp_hasDerivAt x h
-
 theorem hasDerivAt_ftPencilImDeriv (P : Polynomial ℝ) (r : ℕ) (τ θ : ℝ) :
     HasDerivAt (fun s => ftPencilImDeriv P r τ s) (ftPencilImDeriv2 P r τ θ) θ := by
   have hexp : HasDerivAt (fun s : ℝ => Complex.exp ((((r : ℝ) * s : ℝ)) * Complex.I))
@@ -190,7 +187,7 @@ theorem hasDerivAt_ftPencilImDeriv (P : Polynomial ℝ) (r : ℕ) (τ θ : ℝ) 
         * (-Complex.I * ftArcPoint τ θ)) θ :=
     ((ftCritical (P.map (algebraMap ℝ ℂ)) r).hasDerivAt (ftArcPoint τ θ)).comp θ
       (hasDerivAt_ftArcPoint_theta τ θ)
-  refine (hasDerivAt_im (he.mul hp)).congr_deriv ?_
+  refine (he.mul hp).im.congr_deriv ?_
   rw [ftPencilImDeriv2]
   congr 1
   have hI : Complex.I * Complex.I = -1 := Complex.I_mul_I
@@ -296,7 +293,7 @@ Forgács–Tran branch is `EndpointCollision.sum_div_sq_pos` together with
 **Nothing here knows about `ρ`, and the criterion is right where `ρ` is already
 known.**  At a zero of multiplicity `ρ ≥ 2` one has `E'(x_1) = x_1Q''(x_1)`, so
 among those the derivative is nonzero exactly at `ρ = 2`; and
-`EndpointPackage.tendsto_ftTau_blowup` gives the slope there independently as
+`EndpointBranch.tendsto_ftTau_blowup` gives the slope there independently as
 `-x_1\cot(π/ρ)`, which vanishes exactly at `ρ = 2`.  The two routes therefore call
 the slope zero on the same set, by different arguments.  `ρ = 3` is the negative
 control: `Q''(x_1) = 0`, the hypothesis fails, and the approach really is linear

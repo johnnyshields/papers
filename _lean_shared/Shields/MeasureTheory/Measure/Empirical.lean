@@ -151,4 +151,31 @@ theorem support_subset_of_tendsto {ι : Type*} {L : Filter ι} [L.NeBot]
   rw [measure_compl hF.measurableSet (measure_ne_top _ _), measure_univ,
     measure_eq_one_of_tendsto hlim hF hone, tsub_self]
 
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.isProbabilityMeasure_empirical' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms isProbabilityMeasure_empirical
+
+/-- info: 'Shields.map_empirical' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms map_empirical
+
+/-- info: 'Shields.empirical_comp_perm' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms empirical_comp_perm
+
+/-- info: 'Shields.support_empirical_subset' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms support_empirical_subset
+
+/-- info: 'Shields.logPotential_empirical' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms logPotential_empirical
+
+/-- info: 'Shields.support_subset_of_tendsto' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms support_subset_of_tendsto
+
 end Shields

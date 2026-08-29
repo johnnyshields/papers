@@ -14,7 +14,8 @@ import ForgacsTran.AttractorPole
 `thm:weighted-dominance` carries a radius `R_0` around which the retained cluster
 is read: every retained zero lies strictly inside it, every zero of the pencil
 inside it is retained, and `B/D` is bounded on it.  Those are the `haR₀`,
-`huniq₀` and `hCbd₀` binders of `DominanceFT.weighted_dominance_of_branch_any_multiplicity_at`,
+`huniq₀` and `hCbd₀` binders of
+`DominanceFTBranch.weighted_dominance_of_branch_any_multiplicity_at`,
 and none of them is available until a radius has been named.
 
 The radius is fixed by the spectrum of `Q` alone.  With `Q = c∏(a_k - X)`, every
@@ -81,9 +82,22 @@ or not at all, and the pencil's degree jumps from `n` to `r` once `r > n` — th
 `r - n` zeros that enter from infinity as `z → 0` leave the disk rather than
 threaten it, and the estimate below says so with no case split.
 
-**Containment.**  The conclusions relate `ftDen (ftRootPoly c a) r z` and the
-sphere of radius `ftSepRadius`; no hypothesis mentions both, since every
-hypothesis is about the spectrum `a` and the scalar `c` alone.
+**Containment.**  The separating results — `norm_eval_ftDen_ge`,
+`eval_ftDen_ne_zero_on_sphere`, `exists_endpoint_contour_bound` and
+`card_rootsIn_ftDen` — bound or count `ftDen (ftRootPoly c a) r z` on the sphere
+of radius `ftSepRadius` from hypotheses constraining only the spectrum `a`, the
+scalar `c`, the window `z` lies in and the modulus of the point.
+
+Three statements below do carry a binder naming the pencil and the radius
+together, and each is a step rather than a result.  `eval_eq_zero_of_mem_diskRoots`
+and `norm_lt_of_mem_diskRoots` read `t ∈ diskRoots (ftDen (ftRootPoly c a) r z)
+(ftSepRadius a x₁)`, membership in a `Finset` this module *defines* as the zeros
+in the disk: the first is that definition's projection, while the second is not,
+since turning `‖t‖ ≤ R_0` into `‖t‖ < R_0` is exactly
+`eval_ftDen_ne_zero_on_sphere`.  `simple_and_complete_of_card` takes a candidate
+set `T` of zeros strictly inside the circle and returns their simplicity and
+completeness, which come from the Rouché count `card_rootsIn_ftDen` rather than
+from `T`.
 
 Sorry-free.
 

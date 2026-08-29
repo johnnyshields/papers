@@ -168,4 +168,15 @@ theorem circleIntegral_mul_zpow_eq_zero_of_neg {F : ℂ → ℂ} {R : ℝ} (hR :
     exact (hF.differentiableAt (Metric.closedBall_mem_nhds_of_mem hz.1)).mul
       (differentiableAt_id.pow j)
 
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.taylorCoeff_eq_coeff_of_mul_eq_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms taylorCoeff_eq_coeff_of_mul_eq_one
+
+/-- info: 'Shields.taylorCoeff_eq_circleIntegral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms taylorCoeff_eq_circleIntegral
+
 end Shields

@@ -30,7 +30,7 @@ than hypotheses.  `cubic_local_strong_clock` supplies them.
 **Nothing is left.**  `CubicInteriorRemainder.cubic_local_strong_clock_closed`
 discharges every binder of this theorem, the remainder's included: the value side
 from the contour bound, the derivative side from
-`DominanceFT.ftCoeff_re_sub_principal_eq_contour_re` differentiated through
+`DominanceFTSupply.ftCoeff_re_sub_principal_eq_contour_re` differentiated through
 `PoleExpansion.hasDerivAt_ftContourRem_comp`.  This theorem is the shape with the
 remainder still a binder, kept because it is the one the general branch will be
 instantiated at.
@@ -138,8 +138,7 @@ theorem hasDerivAt_cubicTauDeriv {θ : ℝ} (hθ : θ ∈ Icc 0 π) :
   refine hq.congr_deriv ?_
   simp only [Pi.neg_apply, Pi.pow_apply]
   rw [cubicTauDeriv2]
-  field_simp
-  ring
+  field
 
 theorem continuousAt_cubicTauDeriv2 {θ : ℝ} (hθ : θ ∈ Icc 0 π) :
     ContinuousAt cubicTauDeriv2 θ := by
@@ -207,8 +206,7 @@ theorem hasDerivAt_cubicAmpCofactor {θ : ℝ} (hθ : θ ∈ cubicRetained) :
     ((hg.const_mul (2 : ℂ)).add_const 1) h2
   refine (((hb1.add hb2).add hb3).sub hb4).congr_deriv ?_
   simp only [Pi.sub_apply, Pi.pow_apply]
-  field_simp
-  ring
+  field
 
 theorem hasDerivAt_cubicAmpLogDeriv {θ : ℝ} (hθ : θ ∈ cubicRetained) :
     HasDerivAt cubicAmpLogDeriv (cubicAmpLogDeriv2 θ) θ := by
@@ -252,7 +250,8 @@ theorem cubicGammaDeriv_ne_zero (θ : ℝ) : cubicGammaDeriv θ ≠ 0 := by
   refine mul_ne_zero (Complex.exp_ne_zero _) ?_
   intro h
   have him := congrArg Complex.im h
-  simp [Complex.add_im, Complex.mul_im] at him
+  simp only [Complex.add_im, Complex.ofReal_im, Complex.mul_I_im,
+    Complex.ofReal_re, zero_add, Complex.zero_im] at him
   exact absurd him (cubicTau_pos θ).ne'
 
 /-- **The arc's `C²` regularity with `γ' ≠ 0`, in the binder shape

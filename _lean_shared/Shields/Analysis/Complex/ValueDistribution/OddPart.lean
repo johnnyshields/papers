@@ -32,6 +32,8 @@ either that their exponent of convergence is below `3`, or the summability at a 
 * `Shields.oddPart_eq_of_summable` — its exponent-two case.
 * `Shields.im_eq_zero_of_hasSum_real` — a power series with real coefficients is real on the real
   axis.
+* `Shields.hasSum_evenPart`, `Shields.evenPart_coeff_nonneg` — the even part's coefficients, and
+  their nonnegativity.
 * `Shields.divisor_negOne_eq_divisor_evenPart` — the `(-1)`-points of `exp (g z - g (-z))` are
   the zeros of the even part `z ↦ exp (g z) + exp (g (-z))`.
 * `Shields.oddPart_eq_of_hasSum_of_summable_rpow` — the two combined, so that a real coefficient
@@ -115,13 +117,11 @@ theorem oddPart_eq_of_expConvergence_lt_three (hg : Differentiable ℂ g) (hg0 :
     im_eq_zero_of_exp_im_eq_zero hg.continuous hg0 hreal
   have hGreal : ∀ x : ℝ, (G (x : ℂ)).im = 0 := by
     intro x
-    have hneg : ((-x : ℝ) : ℂ) = -(x : ℂ) := by push_cast; ring
+    have hneg : ((-x : ℝ) : ℂ) = -(x : ℂ) := Complex.ofReal_neg x
     simp only [hGdef, Complex.sub_im, hgreal x, ← hneg, hgreal (-x), sub_zero]
   have hGim : (deriv G 0).im = 0 := deriv_im_eq_zero hGdiff hGreal
-  have hcast : ((deriv G 0).re : ℂ) = deriv G 0 := by
-    conv_rhs => rw [← Complex.re_add_im (deriv G 0)]
-    rw [hGim]
-    simp
+  have hcast : ((deriv G 0).re : ℂ) = deriv G 0 :=
+    Complex.conj_eq_iff_re.1 (Complex.conj_eq_iff_im.2 hGim)
   refine ⟨(deriv G 0).re / 2, fun z ↦ ?_⟩
   have hz := hlin z
   rw [show g z - g (-z) = G z from rfl, hz]
@@ -247,6 +247,31 @@ theorem oddPart_eq_of_hasSum_of_summable {d : ℕ → ℝ} (hg : Differentiable 
   exact hsum
 
 
+/-- **The even part of a power series carries the even half of its coefficients.**  If `exp ∘ g` is
+the sum of `d n z ^ n`, then `z ↦ exp (g z) + exp (g (-z))` is the sum of
+`(1 + (-1) ^ n) d n z ^ n`, which is `2 d n` at even `n` and `0` at odd `n`. -/
+theorem hasSum_evenPart {d : ℕ → ℝ}
+    (hd : ∀ z : ℂ, HasSum (fun n ↦ (d n : ℂ) * z ^ n) (Complex.exp (g z))) (z : ℂ) :
+    HasSum (fun n ↦ (((1 + (-1 : ℝ) ^ n) * d n : ℝ) : ℂ) * z ^ n)
+      (Complex.exp (g z) + Complex.exp (g (-z))) := by
+  have h := (hd z).add (hd (-z))
+  have hfun : (fun n ↦ (d n : ℂ) * z ^ n + (d n : ℂ) * (-z) ^ n)
+      = fun n ↦ (((1 + (-1 : ℝ) ^ n) * d n : ℝ) : ℂ) * z ^ n := by
+    funext n
+    push_cast
+    rw [neg_pow]
+    ring
+  rwa [hfun] at h
+
+/-- The even part's coefficients are nonnegative as soon as the original's are. -/
+theorem evenPart_coeff_nonneg {d : ℕ → ℝ} (hdnn : ∀ n, 0 ≤ d n) (n : ℕ) :
+    0 ≤ (1 + (-1 : ℝ) ^ n) * d n := by
+  rcases Nat.even_or_odd n with hn | hn
+  · rw [hn.neg_one_pow]
+    nlinarith [hdnn n]
+  · rw [hn.neg_one_pow]
+    simp
+
 /-- **The odd part is linear as soon as the even part grows slower than `r ^ 3` on the positive
 axis.**
 
@@ -267,25 +292,6 @@ theorem oddPart_eq_of_hasSum_of_growth {d : ℕ → ℝ} {σ : ℝ} (hσ : 0 ≤
   have hF0 : (fun z : ℂ ↦ Complex.exp (g z) + Complex.exp (g (-z))) 0 ≠ 0 := by
     simp only [neg_zero, hg0, Complex.exp_zero]
     norm_num
-  -- the even part's coefficients are `(1 + (-1) ^ n) * d n`, hence nonnegative
-  have henn : ∀ n : ℕ, 0 ≤ (1 + (-1 : ℝ) ^ n) * d n := by
-    intro n
-    rcases Nat.even_or_odd n with hn | hn
-    · rw [hn.neg_one_pow]
-      nlinarith [hdnn n]
-    · rw [hn.neg_one_pow]
-      simp
-  have hesum : ∀ z : ℂ, HasSum (fun n ↦ (((1 + (-1 : ℝ) ^ n) * d n : ℝ) : ℂ) * z ^ n)
-      ((fun z : ℂ ↦ Complex.exp (g z) + Complex.exp (g (-z))) z) := by
-    intro z
-    have h := (hd z).add (hd (-z))
-    have hfun : (fun n ↦ (d n : ℂ) * z ^ n + (d n : ℂ) * (-z) ^ n)
-        = fun n ↦ (((1 + (-1 : ℝ) ^ n) * d n : ℝ) : ℂ) * z ^ n := by
-      funext n
-      push_cast
-      rw [neg_pow]
-      ring
-    rwa [hfun] at h
   -- an exponent strictly between `σ` and `3`
   have hσ3' : σ < (σ + 3) / 2 := by linarith
   have hp3 : (((⟨(σ + 3) / 2, by positivity⟩ : NNReal) : ℝ)) < 3 := by
@@ -295,6 +301,25 @@ theorem oddPart_eq_of_hasSum_of_growth {d : ℕ → ℝ} {σ : ℝ} (hσ : 0 ≤
   exact summable_rpow_divisor_of_growth
     (F := fun z : ℂ ↦ Complex.exp (g z) + Complex.exp (g (-z)))
     (a := fun n ↦ (1 + (-1 : ℝ) ^ n) * d n) (p := (σ + 3) / 2)
-    (hg.cexp.add hgneg.cexp) hF0 henn hesum hσ hσ3' hgrowth
+    (hg.cexp.add hgneg.cexp) hF0 (evenPart_coeff_nonneg hdnn) (hasSum_evenPart hd) hσ hσ3' hgrowth
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.oddPart_eq_of_expConvergence_le_two' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms oddPart_eq_of_expConvergence_le_two
+
+/-- info: 'Shields.oddPart_eq_of_summable' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms oddPart_eq_of_summable
+
+/-- info: 'Shields.oddPart_eq_of_hasSum_of_summable' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms oddPart_eq_of_hasSum_of_summable
+
+/-- info: 'Shields.oddPart_eq_of_hasSum_of_growth' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms oddPart_eq_of_hasSum_of_growth
 
 end Shields

@@ -17,7 +17,7 @@ interval, and calls the two halves `hsp` and `hsm`.  This module states it there
 Two grades of statement, and the difference is which data is assumed:
 
 * the `_of_root` forms take arbitrary `τ, z : ℝ → ℝ` and the root property as a
-  hypothesis, which is exactly what `DominanceFT.interior_remainder_uniform` and
+  hypothesis, which is exactly what `DominanceFTSupply.interior_remainder_uniform` and
   `EndpointDominance.interior_remainder_bound` already carry beside `hsp`;
 * `ft_principal_simple_at_branch` takes the branch's own `ftTau` and `ftBranchZ`,
   where `FTGeometryAssembly.ft_branch_root_and_pos` discharges both the root
@@ -64,6 +64,13 @@ namespace ForgacsTran
 
 open Real Set Polynomial Complex
 
+/-! ### The point forms
+
+`PrincipalSimple.eval_derivative_ftDen_ftRootPoly_ne_zero` is the theorem; everything
+in this section is that one fact re-bound.  The three below carry it to the two named
+points of `eq:principal-pair` and to the `starRingEnd` spelling
+`FTGeometryAssembly` writes `t_-` in. -/
+
 /-- **`hsp` at one angle.**  `t_+(θ) = τ(θ)e^{iθ}` sits in the open upper half
 plane whenever `τ(θ) > 0` and `0 < θ < π`, so a zero there is simple. -/
 theorem ftPrincipal_simple_of_root {n : ℕ} (hn : 0 < n) {a : Fin n → ℝ} {c : ℝ}
@@ -96,6 +103,12 @@ theorem ftPrincipal_conj_simple_of_root {n : ℕ} (hn : 0 < n) {a : Fin n → �
   rw [conj_ftPrincipal] at hroot ⊢
   exact ftArcPoint_simple_of_root hn ha hc hr hτ hθ hroot
 
+/-! ### The same, quantified over a parameter interval
+
+Pure re-binding: `interior_remainder_uniform` and `EndpointDominance.interior_remainder_bound`
+carry `hsp` and `hsm` under `∀ θ, lo ≤ θ → θ ≤ hi`, so the point forms are wrapped rather
+than reproved.  No hypothesis is added and none is dropped. -/
+
 /-- **`hsp`, in `interior_remainder_uniform`'s binder shape.** -/
 theorem ftPrincipal_simple_uniform {n : ℕ} (hn : 0 < n) {a : Fin n → ℝ} {c : ℝ}
     (ha : ∀ k, 0 < a k) (hc : c ≠ 0) {r : ℕ} (hr : 1 ≤ r) {z τ : ℝ → ℝ} {lo hi : ℝ}
@@ -122,6 +135,8 @@ theorem ftArcPoint_simple_uniform {n : ℕ} (hn : 0 < n) {a : Fin n → ℝ} {c 
   fun θ h1 h2 => ftArcPoint_simple_of_root hn ha hc hr (hτ θ h1 h2) (harc θ h1 h2)
     (hroot θ h1 h2)
 
+/-! ### At the constructed branch -/
+
 /-- **`eq:principal-simple` at the constructed branch, unconditionally.**  Both
 members of the principal pair are simple zeros of `Q + z(θ)t^r` at every angle of
 the viewing arc, for every `r ≥ 1`, with no hypothesis beyond the admissible
@@ -141,6 +156,13 @@ theorem ft_principal_simple_at_branch {n r : ℕ} {a : Fin n → ℝ} {c : ℝ} 
   refine ⟨ftPrincipal_simple_of_root hn ha hc hr hτ hθπ hrp,
     ftPrincipal_conj_simple_of_root hn ha hc hr hτ hθπ ?_⟩
   exact ftPrincipal_conj_eval_eq_zero (hasRealCoeffs_ftRootPoly c a) hrp
+
+/-! ### Why the admissible class excludes `n = r = 1`
+
+Not about simplicity of a zero: this is the solvability of the branch equation, and it
+belongs with `FTBranchAngle.lt_ftAngle`, the single fact it consumes.  It sits here
+because `ft_principal_simple_at_branch` above is where the `2 ≤ n ∨ 2 ≤ r` binder is
+first met, and moving it is a rename across the tree rather than a local edit. -/
 
 /-- **`2 ≤ n ∨ 2 ≤ r` is forced, and by the branch rather than by the cone.**  At
 `n = r = 1` the branch equation reads `θ_1 = θ`, which contradicts clause (i) of

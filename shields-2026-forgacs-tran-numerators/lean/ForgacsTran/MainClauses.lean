@@ -222,7 +222,7 @@ theorem exists_interiorZeros_cheb {k : ℕ} (hk : 1 ≤ k) :
 
 /-! ### Meeting the dominance instantiation
 
-`DominanceFT.weighted_dominance_ftCoeffPoly` concludes `ftRemainder ≤ ftPrincipalAmp / 2` on
+`DominanceFTSupply.weighted_dominance_ftCoeffPoly` concludes `ftRemainder ≤ ftPrincipalAmp / 2` on
 the retained range of `eq:retained-range` off the amplitude windows `Θ M`.  `DominanceSupply`
 asks for the same content in the shape the phase count consumes.  The translation moves no
 fact: the decomposition is `eq:principal-decomposition` with `t_+^{M+1} = τ^{M+1}e^{i(M+1)θ}`
@@ -311,7 +311,7 @@ theorem dominanceSupply_of_ftDominance
 `thm:main`, all three clauses, over the Forgács--Tran branch and nothing else.  The analytic
 inputs are named and separate: the branch of `thm:FT-geometry` (the reparametrization `z`, the
 modulus `τ`, and an argument branch `ψ` of the amplitude) and `thm:weighted-dominance` in the
-form `DominanceFT.weighted_dominance_ftCoeffPoly` concludes it.  The phase count, the interior
+form `DominanceFTSupply.weighted_dominance_ftCoeffPoly` concludes it.  The phase count, the interior
 zero set and both `exceptionalRoots` bounds are derived. -/
 
 /-- The branch data on one retained component of `eq:Omega-M`, at one index: what

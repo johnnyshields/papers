@@ -3,115 +3,63 @@ Copyright (c) 2026 Johnny Shields. All rights reserved.
 Released under the MIT license as described in the file LICENSE.txt.
 Authors: Johnny Shields
 -/
-import Shields.Combinatorics.Young.LGVTableauTwo
+import Shields.Combinatorics.Young.SkewCells
 import Shields.Combinatorics.Young.LGVInvolution
+
+/-!
+# Lindström--Gessel--Viennot at every number of rows: families of paths and skew tableaux
+
+`Shields.Combinatorics.Young.LGVInvolution` collapses the signed sum over families of
+lattice paths onto the non-intersecting families.  This file supplies the other half of the
+argument: a non-intersecting family of `m` paths *is* a bounded semistandard tableau of the
+skew shape, and the two carry the same weight.
+
+Both directions are explicit.  A tableau sends row `i` to the path that reads that row as a
+word, offset by `m - 1 - i` so that the rows are separated; a family sends the cell `(i, j)`
+to the letter row `i`'s path writes at abscissa `j + (m - 1 - i)`.  Rows increase weakly
+because letters do, and columns increase strictly because consecutive paths never meet.  The
+two constructions are mutually inverse, and the product over the skew cells splits into rows
+that are exactly the path weights, so the skew Jacobi--Trudi identity over the even alphabet
+follows at every commutative ring, every shape pair and every `m`.
+
+## Main definitions
+
+* `Shields.rowSource`, `Shields.rowPath`, `Shields.famOfSkew`: the family of paths a
+  bounded skew tableau traces, indexed by source.
+* `Shields.skewEntryM`, `Shields.skewOfFam`: the tableau a non-intersecting family reads.
+
+## Main results
+
+* `Shields.not_intersects_famOfSkew`: the family of a tableau is non-intersecting.
+* `Shields.famOfSkew_skewOfFam` and `Shields.skewOfFam_famOfSkew`: the two round trips.
+* `Shields.prod_pathWeight_eq_prod_skewCells`: the weight of a family is the weight of the
+  tableau it carries.
+* `Shields.sum_nonIntersecting_eq_skewSchur`: **the correspondence at `m` rows.**  The
+  non-intersecting families from the sources of `μ` to the sinks of `λ` carry the total
+  weight of the semistandard tableaux of `λ / μ`.
+* `Shields.jacobiTrudiDet_eq_skewSchur` and `Shields.skewJacobiTrudi_even`: skew
+  Jacobi--Trudi over the even alphabet, and the same statement as the predicate
+  `Shields.SkewJacobiTrudi` at no odd variables.
+* `Shields.toeplitzMinor_eq_superSkewSchur_even`: the Toeplitz-minor form of it.
+* `Shields.jacobiTrudiDet_three_column`: the smallest instance that needs the selection of a
+  crossing among three paths rather than two.
+
+## Tags
+
+Lindström--Gessel--Viennot, lattice path, semistandard tableau, skew Schur function,
+Jacobi--Trudi
+-/
 
 namespace Shields
 
 open Finset
-
-/-! ## The rows of a skew shape inside `m` rows
-
-`LGVTableau` splits a two-row skew shape into its two rows by case analysis on
-the row index.  At `m` rows the same split is a `biUnion` over `range m`, and
-the row bound comes from `λ` having no row beyond the `m`-th.
--/
-
-section Shapes
-
-variable {lam mu : YoungDiagram} {m : ℕ}
-
-/-- With no row beyond the `m`-th, every skew cell is in a row below `m`. -/
-theorem lt_of_mem_skewCells (hrow : ∀ i, m ≤ i → lam.rowLen i = 0) {i j : ℕ}
-    (h : (i, j) ∈ skewCells lam mu) : i < m := by
-  by_contra hc
-  have h2 := (mem_skewCells_row_of_mem h).2
-  rw [hrow i (by omega)] at h2
-  omega
-
-/-- The skew cells are the disjoint union of the row segments `Ico μ_i λ_i`. -/
-theorem skewCells_eq_biUnion (hrow : ∀ i, m ≤ i → lam.rowLen i = 0) :
-    skewCells lam mu = (Finset.range m).biUnion fun i =>
-      ({i} : Finset ℕ) ×ˢ Finset.Ico (mu.rowLen i) (lam.rowLen i) := by
-  ext c
-  obtain ⟨i, j⟩ := c
-  simp only [Finset.mem_biUnion, Finset.mem_range, Finset.mem_product, Finset.mem_singleton,
-    Finset.mem_Ico]
-  constructor
-  · intro hc
-    obtain ⟨h1, h2⟩ := mem_skewCells_row_of_mem hc
-    exact ⟨i, lt_of_mem_skewCells hrow hc, rfl, h1, h2⟩
-  · rintro ⟨i', -, hi, h1, h2⟩
-    subst hi
-    exact mem_skewCells.mpr ⟨YoungDiagram.mem_iff_lt_rowLen.mpr h2,
-      fun hc => absurd (YoungDiagram.mem_iff_lt_rowLen.mp hc) (by omega)⟩
-
-/-- A product over the skew cells splits into its rows.  This is
-`prod_skewCells_two_rows` at every `m`. -/
-theorem prod_skewCells_rows {M : Type*} [CommMonoid M]
-    (hrow : ∀ i, m ≤ i → lam.rowLen i = 0) (f : ℕ → ℕ → M) :
-    ∏ c ∈ skewCells lam mu, f c.1 c.2
-      = ∏ i ∈ Finset.range m, ∏ j ∈ Finset.Ico (mu.rowLen i) (lam.rowLen i), f i j := by
-  rw [skewCells_eq_biUnion hrow, Finset.prod_biUnion]
-  · exact Finset.prod_congr rfl fun i _ => by
-      rw [Finset.prod_product', Finset.prod_singleton]
-  · intro i₁ _ i₂ _ hne
-    simp only [Function.onFun]
-    rw [Finset.disjoint_left]
-    intro c hc₁ hc₂
-    rw [Finset.mem_product, Finset.mem_singleton] at hc₁ hc₂
-    exact hne (hc₁.1.symm.trans hc₂.1)
-
-end Shapes
-
-/-! ## Where a word puts its profile
-
-Two bounds on `pathOfWord`, one on each side.  Both say that the counting set of
-a weakly increasing word is an initial segment; `LGVTableau` proves them inline
-for its two rows, and both directions of the separation consume them.
--/
-
-section Word
-
-variable {b : ℕ}
-
-/-- A letter below `i` puts its abscissa behind the profile at height `i`. -/
-theorem lt_pathOfWord {s len : ℕ} (W : BoundedSSYT (rect 1 len) b) {i jj : ℕ}
-    (hjj : jj < len) (h : W 0 jj < i) : s + jj < pathOfWord b s len W i := by
-  have hsub : Finset.range (jj + 1) ⊆ (Finset.range len).filter fun j => W 0 j < i := by
-    intro j hj
-    rw [Finset.mem_range] at hj
-    exact Finset.mem_filter.mpr ⟨Finset.mem_range.mpr (by omega),
-      lt_of_le_of_lt (boundedSSYT_row_mono W (by omega : j ≤ jj) hjj) h⟩
-  have hcard := Finset.card_le_card hsub
-  rw [Finset.card_range] at hcard
-  have hval : pathOfWord b s len W i = s + ((Finset.range len).filter fun j => W 0 j < i).card :=
-    rfl
-  omega
-
-/-- A letter at or above `i` stops the profile at its abscissa. -/
-theorem pathOfWord_le {s len : ℕ} (W : BoundedSSYT (rect 1 len) b) {i jj : ℕ}
-    (h : i ≤ W 0 jj) : pathOfWord b s len W i ≤ s + jj := by
-  have hsub : ((Finset.range len).filter fun j => W 0 j < i) ⊆ Finset.range jj := by
-    intro j hj
-    rw [Finset.mem_filter, Finset.mem_range] at hj
-    rw [Finset.mem_range]
-    by_contra hcon
-    exact absurd (boundedSSYT_row_mono W (by omega : jj ≤ j) hj.1) (by omega)
-  have hcard := Finset.card_le_card hsub
-  rw [Finset.card_range] at hcard
-  have hval : pathOfWord b s len W i = s + ((Finset.range len).filter fun j => W 0 j < i).card :=
-    rfl
-  omega
-
-end Word
 
 /-! ## The paths of a tableau at `m` rows
 
 Row `i` runs through `Shields.pathOfWord` from the source `jtSource` names,
 `μ_i + (m-1-i)`.  The family is indexed by source, so `famOfSkew` is a
 `Fin m`-indexed family with exactly the endpoints
-`LGVInvolution.jacobiTrudiDet_eq_sum_nonIntersecting` sums over.
+`jacobiTrudiDet_eq_sum_nonIntersecting` sums over.
 -/
 
 section Rows
@@ -124,6 +72,12 @@ def rowSource (mu : YoungDiagram) (m i : ℕ) : ℕ := mu.rowLen i + (m - 1 - i)
 theorem rowSource_val (mu : YoungDiagram) (m : ℕ) (u : Fin m) :
     rowSource mu m u = jtSource mu m u := rfl
 
+/-- Advancing from the source of row `i` by the length of a segment of that row
+lands at the abscissa the segment ends on, offset by `m - 1 - i`. -/
+theorem rowSource_add_sub (mu : YoungDiagram) (m : ℕ) {i j : ℕ} (h : mu.rowLen i ≤ j) :
+    rowSource mu m i + (j - mu.rowLen i) = j + (m - 1 - i) := by
+  rw [rowSource]; omega
+
 /-- The path row `i` of a bounded skew tableau traces. -/
 noncomputable def rowPath (hmu : mu ≤ lam) (m : ℕ) (T : BoundedSkewSSYT lam mu b) (i : ℕ) :
     ℕ → ℕ :=
@@ -131,10 +85,8 @@ noncomputable def rowPath (hmu : mu ≤ lam) (m : ℕ) (T : BoundedSkewSSYT lam 
 
 theorem rowPath_mem (hmu : mu ≤ lam) (m : ℕ) (T : BoundedSkewSSYT lam mu b) (i : ℕ) :
     rowPath hmu m T i ∈ hPaths b (rowSource mu m i) (lam.rowLen i + (m - 1 - i)) := by
-  have h := rowLen_mono hmu i
   have hmem := pathOfWord_mem b (rowSource mu m i) (lam.rowLen i - mu.rowLen i) (rowWord hmu T i)
-  rwa [show rowSource mu m i + (lam.rowLen i - mu.rowLen i) = lam.rowLen i + (m - 1 - i) by
-    rw [rowSource]; omega] at hmem
+  rwa [rowSource_add_sub mu m (rowLen_mono hmu i)] at hmem
 
 /-- A letter of row `i` below `k` puts its abscissa behind that row's path at
 height `k`. -/
@@ -145,9 +97,7 @@ theorem lt_rowPath_of_entry (hmu : mu ≤ lam) (T : BoundedSkewSSYT lam mu b) {i
   have hstep := lt_pathOfWord (s := rowSource mu m i) (rowWord hmu T i) hjj (by
     rw [rowWord_apply hmu T i hjj, show mu.rowLen i + (j - mu.rowLen i) = j by omega]
     exact h)
-  rw [show rowSource mu m i + (j - mu.rowLen i) = j + (m - 1 - i) by
-    rw [rowSource]; omega] at hstep
-  exact hstep
+  rwa [rowSource_add_sub mu m hj] at hstep
 
 /-- A letter of row `i` at or above `k` stops that row's path at its abscissa. -/
 theorem rowPath_le_of_entry (hmu : mu ≤ lam) (T : BoundedSkewSSYT lam mu b) {i j k : ℕ}
@@ -157,9 +107,7 @@ theorem rowPath_le_of_entry (hmu : mu ≤ lam) (T : BoundedSkewSSYT lam mu b) {i
   have hstep := pathOfWord_le (s := rowSource mu m i) (i := k) (rowWord hmu T i) (by
     rw [rowWord_apply hmu T i hjj, show mu.rowLen i + (j - mu.rowLen i) = j by omega]
     exact h)
-  rw [show rowSource mu m i + (j - mu.rowLen i) = j + (m - 1 - i) by
-    rw [rowSource]; omega] at hstep
-  exact hstep
+  rwa [rowSource_add_sub mu m hj] at hstep
 
 /-- The family of paths a bounded skew tableau traces, indexed by source. -/
 noncomputable def famOfSkew (hmu : mu ≤ lam) (m : ℕ) (T : BoundedSkewSSYT lam mu b) :
@@ -181,8 +129,6 @@ theorem lt_rowPath_succ (hmu : mu ≤ lam) (T : BoundedSkewSSYT lam mu b) {k u :
     rowPath hmu m T (u + 1) (k + 1) < rowPath hmu m T u k := by
   have hmurow : mu.rowLen (u + 1) ≤ mu.rowLen u := mu.rowLen_anti u (u + 1) (by omega)
   have hlamrow : lam.rowLen (u + 1) ≤ lam.rowLen u := lam.rowLen_anti u (u + 1) (by omega)
-  have h0 : mu.rowLen u ≤ lam.rowLen u := rowLen_mono hmu u
-  have h1 : mu.rowLen (u + 1) ≤ lam.rowLen (u + 1) := rowLen_mono hmu (u + 1)
   have hoff : m - 1 - u = (m - 1 - (u + 1)) + 1 := by omega
   have hq := hPaths_le (rowPath_mem hmu m T u) k
   have hr := hPaths_le (rowPath_mem hmu m T (u + 1)) (k + 1)
@@ -272,7 +218,7 @@ theorem skewEntryM_of_notMem {F : Fin m → ℕ → ℕ} {i j : ℕ}
 theorem famPath_mem {F : Fin m → ℕ → ℕ}
     (hF : ∀ w : Fin m, F w ∈ hPaths b (jtSource mu m w) (jtSink lam m w)) {i : ℕ} (hi : i < m) :
     famPath F i ∈ hPaths b (rowSource mu m i) (lam.rowLen i + (m - 1 - i)) := by
-  rw [famPath, dif_pos hi]
+  rw [famPath_of_lt F hi]
   exact hF ⟨i, hi⟩
 
 /-- **The column of the reading increases strictly at consecutive rows.**  The
@@ -288,8 +234,8 @@ theorem skewEntryM_col_step (hrow : ∀ i, m ≤ i → lam.rowLen i = 0) {F : Fi
   have hi0 : i < m := by omega
   have hq := famPath_mem hF hi0
   have hr := famPath_mem hF hi1
-  have hfp0 : famPath F i = F ⟨i, hi0⟩ := by rw [famPath, dif_pos hi0]
-  have hfp1 : famPath F (i + 1) = F ⟨i + 1, hi1⟩ := by rw [famPath, dif_pos hi1]
+  have hfp0 := famPath_of_lt F hi0
+  have hfp1 := famPath_of_lt F hi1
   have hnc : ¬ Crosses b (famPath F i) (famPath F (i + 1)) := by
     rw [hfp0, hfp1]
     exact fun hcr => hnI ⟨⟨i, hi0⟩, ⟨i + 1, hi1⟩, Fin.mk_lt_mk.mpr (by omega), hcr⟩
@@ -388,8 +334,7 @@ theorem famOfSkew_skewOfFam (hmu : mu ≤ lam) (hrow : ∀ i, m ≤ i → lam.ro
   have hmem : famPath F (u : ℕ) ∈ hPaths b (rowSource mu m (u : ℕ))
       (rowSource mu m (u : ℕ) + (lam.rowLen (u : ℕ) - mu.rowLen (u : ℕ))) := by
     have hx := famPath_mem hF hu
-    rwa [show rowSource mu m (u : ℕ) + (lam.rowLen (u : ℕ) - mu.rowLen (u : ℕ))
-      = lam.rowLen (u : ℕ) + (m - 1 - (u : ℕ)) by rw [rowSource]; omega]
+    rwa [rowSource_add_sub mu m hlen]
   change rowPath hmu m (skewOfFam hrow hF hnI) (u : ℕ) = F u
   rw [← famPath_val F u]
   refine pathOfWord_eq_of_entry hmem _ fun j hj => ?_
@@ -407,9 +352,8 @@ theorem skewOfFam_famOfSkew (hmu : mu ≤ lam) (hrow : ∀ i, m ≤ i → lam.ro
   · have hi := lt_of_mem_skewCells hrow hcell
     obtain ⟨hj, hj'⟩ := mem_skewCells_row_of_mem hcell
     have hlen : mu.rowLen i ≤ lam.rowLen i := rowLen_mono hmu i
-    have hfp : famPath (famOfSkew hmu m T) i = rowPath hmu m T i := by
-      rw [famPath, dif_pos hi]
-      rfl
+    have hfp : famPath (famOfSkew hmu m T) i = rowPath hmu m T i :=
+      famPath_of_lt _ hi
     rw [skewEntryM_of_mem hcell, hfp, rowPath,
       pathLetter_pathOfWord _ (show j - mu.rowLen i < lam.rowLen i - mu.rowLen i by omega),
       rowWord_apply hmu T i (by omega), show mu.rowLen i + (j - mu.rowLen i) = j by omega]
@@ -435,19 +379,15 @@ theorem prod_pathWeight_eq_prod_skewCells (hmu : mu ≤ lam)
     (hF : ∀ w : Fin m, F w ∈ hPaths b (jtSource mu m w) (jtSink lam m w)) :
     ∏ w, pathWeight b β (F w)
       = ∏ c ∈ skewCells lam mu, β (skewEntryM b m lam mu F c.1 c.2) := by
-  have hL : ∏ w : Fin m, pathWeight b β (F w)
-      = ∏ i ∈ Finset.range m, pathWeight b β (famPath F i) := by
-    rw [← Fin.prod_univ_eq_prod_range (fun i => pathWeight b β (famPath F i)) m]
-    exact Finset.prod_congr rfl fun w _ => by rw [famPath_val]
-  rw [hL, prod_skewCells_rows hrow fun i j => β (skewEntryM b m lam mu F i j)]
+  rw [prod_univ_eq_prod_range_famPath F (pathWeight b β),
+    prod_skewCells_rows hrow fun i j => β (skewEntryM b m lam mu F i j)]
   refine Finset.prod_congr rfl fun i hi => ?_
   have him := Finset.mem_range.mp hi
   have hlen : mu.rowLen i ≤ lam.rowLen i := rowLen_mono hmu i
   have hmem : famPath F i ∈ hPaths b (rowSource mu m i)
       (rowSource mu m i + (lam.rowLen i - mu.rowLen i)) := by
     have hx := famPath_mem hF him
-    rwa [show rowSource mu m i + (lam.rowLen i - mu.rowLen i) = lam.rowLen i + (m - 1 - i) by
-      rw [rowSource]; omega]
+    rwa [rowSource_add_sub mu m hlen]
   rw [pathWeight_eq_prod_letters hmem β, Finset.prod_Ico_eq_prod_range]
   refine Finset.prod_congr rfl fun j hj => ?_
   rw [skewEntryM_of_mem (mem_skewCells_row hmu i (Finset.mem_range.mp hj)),
@@ -459,7 +399,7 @@ end Weight
 
 The two constructions are mutually inverse and weight-preserving, so the
 non-intersecting families and the tableaux of `λ/μ` have the same generating
-function.  With `LGVInvolution.jacobiTrudiDet_eq_sum_nonIntersecting` this is over the even
+function.  With `jacobiTrudiDet_eq_sum_nonIntersecting` this is over the even
 alphabet at every shape and every `m`.
 -/
 
@@ -472,7 +412,7 @@ rows, the non-intersecting families of `m` paths from the sources of `μ` to the
 sinks of `λ` carry the total weight of the semistandard tableaux of `λ / μ`.
 
 This is `LGV.NonCrossingIsSkewSchur` at every `m`; the two-row case is
-`LGVTableau.nonCrossingIsSkewSchur` (see `nonCrossingIsSkewSchur_of_two`). -/
+`nonCrossingIsSkewSchur` (see `nonCrossingIsSkewSchur_of_two`). -/
 theorem sum_nonIntersecting_eq_skewSchur (b m : ℕ) (β : ℕ → R) (lam mu : YoungDiagram)
     (hmu : mu ≤ lam) (hrow : ∀ i, m ≤ i → lam.rowLen i = 0) :
     ∑ F ∈ (Fintype.piFinset fun w : Fin m =>
@@ -557,5 +497,16 @@ theorem jacobiTrudiDet_three_column (β : ℕ → R) :
     Finset.prod_range_one]
 
 end Instance
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.famOfSkew' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms famOfSkew
+
+/-- info: 'Shields.skewOfFam' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms skewOfFam
 
 end Shields

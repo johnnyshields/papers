@@ -56,15 +56,20 @@ weight: a threshold produced inside the statement sits under the weight's binder
 and the resulting `M₀` is no longer the paper's `M_0(Q,r,B)` against a
 `B`-independent `h`.  Here `h` is a parameter, constrained only by the two
 cluster hypotheses `hcl₀` and `hcl₁`, whose statements mention no weight data —
-they are `WeightedDominance.exists_cluster_threshold`'s conclusion at the two
+they are `Dominance.exists_cluster_threshold`'s conclusion at the two
 endpoint gap rates.
 
 `weighted_dominance` is this with `h` produced from those two, and is what
 consumers written against the bundled form keep using.
 
-**Containment.**  No hypothesis mentions both `Rrem` and `Θ` together with the
-cluster data: `hcl₀`, `hcl₁` are about sums over `Fin n₀`, `Fin n₁` at abstract
-amplitudes and gaps, and the regional supplies are about `Rrem` alone. -/
+**Containment.**  The conclusion bounds `Rrem` by `Wamp` on the retained range
+off `Θ`, and no hypothesis names both: `hsplit₀`, `hsplit₁` and `hbdI` bound
+`Rrem` against the cluster sums and the contour rates, while `hamp₀`, `hamp₁`,
+`hCW₀`, `hCW₁` and `hampI` bound the amplitude data from below and never mention
+`Rrem`.  `hbdI` and `hampI` do each name the deleted windows `Θ`, one on either
+side of the comparison, and `hcl₀`, `hcl₁` are about sums over `Fin n₀`, `Fin n₁`
+at abstract amplitudes and gaps.  The two sides are put together in
+`exists_dominance_threshold_of_threshold`, where the three regions are stitched. -/
 theorem weighted_dominance_of_threshold {n₀ n₁ : ℕ} {p₀ p₁ : ℕ}
     {b ε h : ℝ} {Θ : ℕ → Set ℝ} {Rrem : ℕ → ℝ → ℝ} {Wamp : ℝ → ℝ}
     {A₀ c₀ C₀ σ₀ : ℝ} {Wf₀ ζ₀ : ℝ → Fin n₀ → ℝ}

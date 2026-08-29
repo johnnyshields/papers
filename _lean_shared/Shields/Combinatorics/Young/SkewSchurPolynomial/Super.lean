@@ -184,9 +184,11 @@ end SuperSkewSSYT
 letter `b ≤ k`. -/
 def superWeight (b : ℕ) (β α : ℕ → R) (k : ℕ) : R := if k < b then β k else α (k - b)
 
+omit [CommSemiring R] in
 @[simp] theorem superWeight_of_lt {b k : ℕ} (β α : ℕ → R) (h : k < b) :
     superWeight b β α k = β k := if_pos h
 
+omit [CommSemiring R] in
 @[simp] theorem superWeight_of_le {b k : ℕ} (β α : ℕ → R) (h : b ≤ k) :
     superWeight b β α k = α (k - b) := if_neg (Nat.not_lt.mpr h)
 
@@ -294,18 +296,12 @@ def evenTab (T : SuperSkewSSYT lam mu b a) : BoundedSkewSSYT T.evenPart mu b :=
   ⟨{ entry := fun i j => if (i, j) ∈ skewCells T.evenPart mu then T i j else 0
      row_weak' := by
        intro i j₁ j₂ hj hnu hmu
-       have h₂ : (i, j₂) ∈ skewCells T.evenPart mu := mem_skewCells.mpr ⟨hnu, fun hc =>
-         hmu (mu.up_left_mem le_rfl hj.le hc)⟩
-       have h₁ : (i, j₁) ∈ skewCells T.evenPart mu :=
-         mem_skewCells.mpr ⟨T.evenPart.up_left_mem le_rfl hj.le hnu, hmu⟩
+       obtain ⟨h₁, h₂⟩ := mem_skewCells_of_row hj hnu hmu
        rw [if_pos h₁, if_pos h₂]
        exact T.row_weak hj (mem_lam_of_mem_even h₂) hmu
      col_strict' := by
        intro i₁ i₂ j hi hnu hmu
-       have h₂ : (i₂, j) ∈ skewCells T.evenPart mu := mem_skewCells.mpr ⟨hnu, fun hc =>
-         hmu (mu.up_left_mem hi.le le_rfl hc)⟩
-       have h₁ : (i₁, j) ∈ skewCells T.evenPart mu :=
-         mem_skewCells.mpr ⟨T.evenPart.up_left_mem hi.le le_rfl hnu, hmu⟩
+       obtain ⟨h₁, h₂⟩ := mem_skewCells_of_col hi hnu hmu
        rw [if_pos h₁, if_pos h₂]
        exact T.col_strict_even hi (mem_lam_of_mem_even h₂) hmu (lt_of_mem_evenPart h₁)
      zeros' := by intro i j h; rw [if_neg h] }, by
@@ -349,7 +345,7 @@ def oddTab (T : SuperSkewSSYT lam mu b a) :
            omega
          · have : T r c < b := lt_of_mem_evenPart (mem_skewCells.mpr ⟨hnu, hmu⟩)
            omega
-       · have : T r c = 0 := T.zeros fun hcc => hlam (mem_skewCells.mp hcc).1
+       · have : T r c = 0 := T.zeros (notMem_skewCells_of_notMem hlam)
          omega }, by
     intro c r hcell
     change T r c - b < a
@@ -421,13 +417,13 @@ def ofParts {nu : YoungDiagram} (hmn : mu ≤ nu) (hnl : nu ≤ lam)
         rw [if_pos he₂]
         exact E.1.row_weak hj hn₂ hmu
       · have ho₂ : (i, j₂) ∈ skewCells lam nu := mem_skewCells.mpr ⟨hlam, hn₂⟩
-        rw [if_neg (fun hc => hn₂ (mem_skewCells.mp hc).1), if_pos ho₂]
+        rw [if_neg (notMem_skewCells_of_notMem hn₂), if_pos ho₂]
         exact le_trans (E.lt_of_mem_cells he₁).le (Nat.le_add_left _ _)
     · have hn₂ : (i, j₂) ∉ nu := fun hc => hn₁ (nu.up_left_mem le_rfl hj.le hc)
       have ho₁ : (i, j₁) ∈ skewCells lam nu := mem_skewCells.mpr ⟨h₁lam, hn₁⟩
       have ho₂ : (i, j₂) ∈ skewCells lam nu := mem_skewCells.mpr ⟨hlam, hn₂⟩
-      rw [if_neg (fun hc => hn₁ (mem_skewCells.mp hc).1), if_pos ho₁,
-        if_neg (fun hc => hn₂ (mem_skewCells.mp hc).1), if_pos ho₂]
+      rw [if_neg (notMem_skewCells_of_notMem hn₁), if_pos ho₁,
+        if_neg (notMem_skewCells_of_notMem hn₂), if_pos ho₂]
       have := O.1.col_strict hj (by
         rw [YoungDiagram.mem_transpose, Prod.swap_prod_mk]; exact hlam) (by
         rw [YoungDiagram.mem_transpose, Prod.swap_prod_mk]; exact hn₁)
@@ -444,13 +440,13 @@ def ofParts {nu : YoungDiagram} (hmn : mu ≤ nu) (hnl : nu ≤ lam)
         rw [if_pos he₂]
         exact (E.1.col_strict hi hn₂ hmu).le
       · have ho₂ : (i₂, j) ∈ skewCells lam nu := mem_skewCells.mpr ⟨hlam, hn₂⟩
-        rw [if_neg (fun hc => hn₂ (mem_skewCells.mp hc).1), if_pos ho₂]
+        rw [if_neg (notMem_skewCells_of_notMem hn₂), if_pos ho₂]
         exact le_trans (E.lt_of_mem_cells he₁).le (Nat.le_add_left _ _)
     · have hn₂ : (i₂, j) ∉ nu := fun hc => hn₁ (nu.up_left_mem hi.le le_rfl hc)
       have ho₁ : (i₁, j) ∈ skewCells lam nu := mem_skewCells.mpr ⟨h₁lam, hn₁⟩
       have ho₂ : (i₂, j) ∈ skewCells lam nu := mem_skewCells.mpr ⟨hlam, hn₂⟩
-      rw [if_neg (fun hc => hn₁ (mem_skewCells.mp hc).1), if_pos ho₁,
-        if_neg (fun hc => hn₂ (mem_skewCells.mp hc).1), if_pos ho₂]
+      rw [if_neg (notMem_skewCells_of_notMem hn₁), if_pos ho₁,
+        if_neg (notMem_skewCells_of_notMem hn₂), if_pos ho₂]
       have := O.1.row_weak hi (by
         rw [YoungDiagram.mem_transpose, Prod.swap_prod_mk]; exact hlam) (by
         rw [YoungDiagram.mem_transpose, Prod.swap_prod_mk]; exact hn₁)
@@ -461,7 +457,7 @@ def ofParts {nu : YoungDiagram} (hmn : mu ≤ nu) (hnl : nu ≤ lam)
     have hn₁ : (i₁, j) ∈ nu := by
       by_contra hn
       have ho₁ : (i₁, j) ∈ skewCells lam nu := mem_skewCells.mpr ⟨h₁lam, hn⟩
-      rw [if_neg (fun hc => hn (mem_skewCells.mp hc).1), if_pos ho₁] at hb
+      rw [if_neg (notMem_skewCells_of_notMem hn), if_pos ho₁] at hb
       omega
     have he₁ : (i₁, j) ∈ skewCells nu mu := mem_skewCells.mpr ⟨hn₁, hmu⟩
     rw [if_pos he₁]
@@ -470,7 +466,7 @@ def ofParts {nu : YoungDiagram} (hmn : mu ≤ nu) (hnl : nu ≤ lam)
         ⟨hn₂, fun hc => hmu (mu.up_left_mem hi.le le_rfl hc)⟩)]
       exact E.1.col_strict hi hn₂ hmu
     · have ho₂ : (i₂, j) ∈ skewCells lam nu := mem_skewCells.mpr ⟨hlam, hn₂⟩
-      rw [if_neg (fun hc => hn₂ (mem_skewCells.mp hc).1), if_pos ho₂]
+      rw [if_neg (notMem_skewCells_of_notMem hn₂), if_pos ho₂]
       have hE : E i₁ j < b := E.lt_of_mem_cells he₁
       omega
   row_strict_odd' := by
@@ -484,8 +480,8 @@ def ofParts {nu : YoungDiagram} (hmn : mu ≤ nu) (hnl : nu ≤ lam)
     have hn₂ : (i, j₂) ∉ nu := fun hc => hn₁ (nu.up_left_mem le_rfl hj.le hc)
     have ho₁ : (i, j₁) ∈ skewCells lam nu := mem_skewCells.mpr ⟨h₁lam, hn₁⟩
     have ho₂ : (i, j₂) ∈ skewCells lam nu := mem_skewCells.mpr ⟨hlam, hn₂⟩
-    rw [if_neg (fun hc => hn₁ (mem_skewCells.mp hc).1), if_pos ho₁,
-      if_neg (fun hc => hn₂ (mem_skewCells.mp hc).1), if_pos ho₂]
+    rw [if_neg (notMem_skewCells_of_notMem hn₁), if_pos ho₁,
+      if_neg (notMem_skewCells_of_notMem hn₂), if_pos ho₂]
     have hO : O j₁ i < O j₂ i := O.1.col_strict hj (by
       rw [YoungDiagram.mem_transpose, Prod.swap_prod_mk]; exact hlam) (by
       rw [YoungDiagram.mem_transpose, Prod.swap_prod_mk]; exact hn₁)
@@ -524,7 +520,7 @@ theorem evenPart_ofParts {nu : YoungDiagram} (hmn : mu ≤ nu) (hnl : nu ≤ lam
       · exact hn
       · exfalso
         have ho : (i, j) ∈ skewCells lam nu := mem_skewCells.mpr ⟨(mem_skewCells.mp hc).1, hn⟩
-        rw [ofParts_apply, if_neg (fun hcc => hn (mem_skewCells.mp hcc).1), if_pos ho] at hlt
+        rw [ofParts_apply, if_neg (notMem_skewCells_of_notMem hn), if_pos ho] at hlt
         omega
   · intro hn
     by_cases hm : (i, j) ∈ mu
@@ -573,7 +569,7 @@ theorem oddTab_ofParts_apply {nu : YoungDiagram} (hmn : mu ≤ nu) (hnl : nu ≤
     (ofParts hmn hnl E O).oddTab c r = O c r := by
   change (ofParts hmn hnl E O) r c - b = O c r
   by_cases ho : (r, c) ∈ skewCells lam nu
-  · rw [ofParts_apply, if_neg (fun hc => (mem_skewCells.mp ho).2 (mem_skewCells.mp hc).1),
+  · rw [ofParts_apply, if_neg (notMem_skewCells_of_notMem (mem_skewCells.mp ho).2),
       if_pos ho]
     omega
   · have hz : O c r = 0 := O.1.zeros (by
@@ -660,25 +656,8 @@ theorem superSkewSchur_eq_branching (lam mu : YoungDiagram) (b a : ℕ) (β α :
       SuperSkewSSYT.evenPart_ofParts hmn hnl p.1 p.2⟩
   · -- assembling the two halves of `T` returns `T`
     have hT' := (Finset.mem_filter.mp hT).2
-    refine SuperSkewSSYT.ext fun i j => ?_
-    rw [SuperSkewSSYT.ofParts_apply, SuperSkewSSYT.evenTabAt_apply,
-      SuperSkewSSYT.oddTabAt_apply]
     subst hT'
-    by_cases he : (i, j) ∈ skewCells T.evenPart mu
-    · rw [if_pos he]
-      change (if (i, j) ∈ skewCells T.evenPart mu then T i j else 0) = T i j
-      rw [if_pos he]
-    · rw [if_neg he]
-      by_cases ho : (i, j) ∈ skewCells lam T.evenPart
-      · rw [if_pos ho]
-        change T i j - b + b = T i j
-        have := SuperSkewSSYT.le_of_mem_odd ho
-        omega
-      · rw [if_neg ho]
-        exact (T.zeros fun hc => by
-          rcases (mem_skewCells_split T.mu_le_evenPart (T.evenPart_le hmu)).mp hc with h | h
-          · exact he h
-          · exact ho h).symm
+    exact SuperSkewSSYT.ofParts_evenTab_oddTab T hmu
   · -- taking the two halves of an assembled tableau returns them
     refine Prod.ext (BoundedSkewSSYT.ext fun i j => ?_) (BoundedSkewSSYT.ext fun c r => ?_)
     · rw [SuperSkewSSYT.evenTabAt_apply, SuperSkewSSYT.evenTab_ofParts_apply]
@@ -693,17 +672,10 @@ theorem superSkewSchur_eq_branching (lam mu : YoungDiagram) (b a : ℕ) (β α :
         SuperSkewSSYT.evenTab_apply, if_pos (by subst hT'; exact hc)]
     have h2 : ∏ c ∈ skewCells lam nu, superWeight b β α (T c.1 c.2)
         = ∏ c ∈ skewCells lam.transpose nu.transpose, α (T.oddTabAt hT' c.1 c.2) := by
-      refine Finset.prod_nbij' Prod.swap Prod.swap ?_ ?_ (fun x _ => Prod.swap_swap x)
-        (fun x _ => Prod.swap_swap x) (fun c hc => ?_)
-      · intro c hc
-        simp only [mem_skewCells, YoungDiagram.mem_transpose] at hc ⊢
-        exact hc
-      · intro c hc
-        simp only [mem_skewCells, YoungDiagram.mem_transpose] at hc ⊢
-        exact hc
-      · have hle : b ≤ T c.1 c.2 := by subst hT'; exact SuperSkewSSYT.le_of_mem_odd hc
-        rw [superWeight_of_le _ _ hle, SuperSkewSSYT.oddTabAt_apply,
-          SuperSkewSSYT.oddTab_apply, Prod.fst_swap, Prod.snd_swap]
+      rw [prod_skewCells_transpose lam nu fun i j => α (T.oddTabAt hT' i j)]
+      refine Finset.prod_congr rfl fun c hc => ?_
+      have hle : b ≤ T c.1 c.2 := by subst hT'; exact SuperSkewSSYT.le_of_mem_odd hc
+      rw [superWeight_of_le _ _ hle, SuperSkewSSYT.oddTabAt_apply, SuperSkewSSYT.oddTab_apply]
     rw [skewCells_eq_union hmn hnl, Finset.prod_union skewCells_disjoint, h1, h2]
 
 /-- At `a = 0` only `nu = lam` survives, and the branching sum is the one-alphabet
@@ -767,7 +739,7 @@ theorem noBigRect_iff_rowLen {lam mu : YoungDiagram} {a b : ℕ} :
     by_contra hlt
     have hc : (i + b, mu.rowLen i + a) ∈ lam :=
       YoungDiagram.mem_iff_lt_rowLen.mpr (by omega)
-    exact absurd (YoungDiagram.mem_iff_lt_rowLen.mp (h i (mu.rowLen i) hc)) (lt_irrefl _)
+    exact YoungDiagram.notMem_iff_le_rowLen.mpr le_rfl (h i (mu.rowLen i) hc)
   · intro h i j hc
     have h1 : j + a < lam.rowLen (i + b) := YoungDiagram.mem_iff_lt_rowLen.mp hc
     have h2 := h i
@@ -786,24 +758,21 @@ theorem superSkewSchur_eq_zero_of_block {lam mu : YoungDiagram} {a b i j : ℕ}
   by_cases hnu : (i + b, j) ∈ nu
   · -- column `j` of `nu / mu` is at least `b+1` tall
     have h1 : i + b < nu.colLen j := YoungDiagram.mem_iff_lt_colLen.mp hnu
-    have h2 : mu.colLen j ≤ i := by
-      by_contra hcon
-      exact hmu (YoungDiagram.mem_iff_lt_colLen.mpr (by omega))
+    have h2 : mu.colLen j ≤ i := YoungDiagram.notMem_iff_le_colLen.mp hmu
     have : b < skewColLen nu mu j := by simp only [skewColLen]; omega
     rw [skewSchur_eq_zero_of_lt_skewColLen β this, zero_mul]
   · -- row `i + b` of `lam / nu` is at least `a+1` long
     have h1 : j + a < lam.rowLen (i + b) := YoungDiagram.mem_iff_lt_rowLen.mp hlam
-    have h2 : nu.rowLen (i + b) ≤ j := by
-      by_contra hcon
-      exact hnu (YoungDiagram.mem_iff_lt_rowLen.mpr (by omega))
+    have h2 : nu.rowLen (i + b) ≤ j := YoungDiagram.notMem_iff_le_rowLen.mp hnu
     have : a < skewColLen lam.transpose nu.transpose (i + b) := by
       rw [skewColLen_transpose]
       simp only [skewRowLen]
       omega
     rw [skewSchur_eq_zero_of_lt_skewColLen α this, mul_zero]
 
-/-- The intermediate shape `ν_u = max(μ_u, λ_u - a)`, realized as a
-lattice operation.  Its row lengths are `max (mu.rowLen i) (lam.rowLen i - a)`. -/
+/-- The intermediate shape the positivity half of the criterion evaluates at,
+`μ ⊔ dropCols lam a`, lies between `μ` and `λ`, so it is a term of the branching
+sum. -/
 theorem le_sup_dropCols {lam mu : YoungDiagram} {a : ℕ} (hmu : mu ≤ lam) :
     mu ≤ mu ⊔ dropCols lam a ∧ mu ⊔ dropCols lam a ≤ lam :=
   ⟨le_sup_left, sup_le hmu (dropCols_le lam a)⟩
@@ -819,8 +788,7 @@ theorem skewColLen_sup_dropCols_le {lam mu : YoungDiagram} {a b : ℕ}
   set c := mu.colLen j with hc
   have hmem : (c + b, j) ∈ mu ⊔ dropCols lam a :=
     YoungDiagram.mem_iff_lt_colLen.mpr (by omega)
-  have hcnot : (c, j) ∉ mu := fun hx =>
-    absurd (YoungDiagram.mem_iff_lt_colLen.mp hx) (by omega)
+  have hcnot : (c, j) ∉ mu := YoungDiagram.notMem_iff_le_colLen.mpr le_rfl
   rcases YoungDiagram.mem_sup.mp hmem with hin | hin
   · exact hcnot (mu.up_left_mem (Nat.le_add_right c b) le_rfl hin)
   · exact hcnot (h c j (mem_dropCols.mp hin))
@@ -836,7 +804,7 @@ theorem skewRowLen_sup_dropCols_le (lam mu : YoungDiagram) (a i : ℕ) :
   have hlam : (i, w + a) ∈ lam := YoungDiagram.mem_iff_lt_rowLen.mpr (by omega)
   have hin : (i, w) ∈ mu ⊔ dropCols lam a :=
     YoungDiagram.mem_sup.mpr (Or.inr (mem_dropCols.mpr hlam))
-  exact absurd (YoungDiagram.mem_iff_lt_rowLen.mp hin) (by omega)
+  exact YoungDiagram.notMem_iff_le_rowLen.mpr le_rfl hin
 
 /-- **The positivity half of the hook criterion.** -/
 theorem superSkewSchur_pos {lam mu : YoungDiagram} {a b : ℕ} {β α : ℕ → ℝ}
@@ -869,10 +837,6 @@ theorem superSkewSchur_pos_iff_rowLen {lam mu : YoungDiagram} {a b : ℕ} {β α
     0 < superSkewSchur lam mu b a β α ↔
       ∀ i : ℕ, lam.rowLen (i + b) ≤ mu.rowLen i + a := by
   rw [superSkewSchur_pos_iff hmu hβ hα, noBigRect_iff_rowLen]
-
-theorem rowLen_bot (i : ℕ) : (⊥ : YoungDiagram).rowLen i = 0 := by
-  by_contra hne
-  exact YoungDiagram.notMem_bot (i, 0) (YoungDiagram.mem_iff_lt_rowLen.mpr (by omega))
 
 /-- **The straight-shape case.**  At `mu = ⊥` the criterion is `λ_{b+1} ≤ a`: the
 shape fits inside the hook with `b` rows of unbounded length and `a` unbounded

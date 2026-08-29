@@ -111,12 +111,10 @@ theorem hasDerivAt_angularDeriv (hu : ContDiff ℝ 2 u) (c : ℂ) (r θ : ℝ) :
 theorem continuous_angularDeriv2 (hu : ContDiff ℝ 2 u) (c : ℂ) (r : ℝ) :
     Continuous (angularDeriv2 u c r) := by
   have hpt : Continuous fun θ : ℝ => circleMap c r θ := continuous_circleMap c r
-  have hdir : Continuous fun θ : ℝ => ((r : ℂ) * (circleDir θ * Complex.I)) := by
-    refine continuous_const.mul (Continuous.mul ?_ continuous_const)
-    exact Complex.continuous_exp.comp (Complex.continuous_ofReal.mul continuous_const)
-  have hrad : Continuous fun θ : ℝ => (-((r : ℂ) * circleDir θ)) := by
-    refine (continuous_const.mul ?_).neg
-    exact Complex.continuous_exp.comp (Complex.continuous_ofReal.mul continuous_const)
+  have hdir : Continuous fun θ : ℝ => ((r : ℂ) * (circleDir θ * Complex.I)) :=
+    continuous_const.mul (continuous_circleDir.mul continuous_const)
+  have hrad : Continuous fun θ : ℝ => (-((r : ℂ) * circleDir θ)) :=
+    (continuous_const.mul continuous_circleDir).neg
   refine Continuous.add ?_ ?_
   · exact ((contDiff_two_continuous_fderiv2 hu).comp hpt).clm_apply hdir |>.clm_apply hdir
   · exact ((contDiff_two_continuous_fderiv hu).comp hpt).clm_apply hrad
@@ -160,8 +158,7 @@ theorem integral_radial_eq_angular (hu : ContDiff ℝ 2 u) (c : ℂ) (r : ℝ) :
         (circleDir θ * Complex.I)) MeasureTheory.volume 0 (2 * π) := by
     refine Continuous.intervalIntegrable ?_ _ _
     have hdir : Continuous fun θ : ℝ => (circleDir θ * Complex.I) :=
-      (Complex.continuous_exp.comp (Complex.continuous_ofReal.mul continuous_const)).mul
-        continuous_const
+      continuous_circleDir.mul continuous_const
     exact continuous_const.mul
       ((((contDiff_two_continuous_fderiv2 hu).comp (continuous_circleMap c r)).clm_apply
         hdir).clm_apply hdir)
@@ -169,18 +166,13 @@ theorem integral_radial_eq_angular (hu : ContDiff ℝ 2 u) (c : ℂ) (r : ℝ) :
       (fun θ : ℝ => fderiv ℝ u (circleMap c r θ) (circleDir θ) * r)
       MeasureTheory.volume 0 (2 * π) := by
     refine Continuous.intervalIntegrable ?_ _ _
-    have hdir : Continuous fun θ : ℝ => circleDir θ :=
-      Complex.continuous_exp.comp (Complex.continuous_ofReal.mul continuous_const)
     exact (((contDiff_two_continuous_fderiv hu).comp
-      (continuous_circleMap c r)).clm_apply hdir).mul continuous_const
+      (continuous_circleMap c r)).clm_apply continuous_circleDir).mul continuous_const
   rw [intervalIntegral.integral_sub hint1 hint2, sub_eq_zero,
     intervalIntegral.integral_const_mul] at hzero
   exact hzero.symm
 
 /-! ### Differentiating the circle average in the radius -/
-
-theorem continuous_circleDir : Continuous circleDir :=
-  Complex.continuous_exp.comp (Complex.continuous_ofReal.mul continuous_const)
 
 theorem norm_circleMap_sub_center (c : ℂ) (x θ : ℝ) : ‖circleMap c x θ - c‖ = |x| := by
   rw [circleMap_eq_circleDir]
@@ -262,6 +254,27 @@ of the circle average. -/
 noncomputable def circleFlux (u : ℂ → ℝ) (c : ℂ) (r : ℝ) : ℝ :=
   r * ∫ θ in (0 : ℝ)..(2 * π), fderiv ℝ u (circleMap c r θ) (circleDir θ)
 
+/-- **The Laplacian's circle integral splits along the rotated basis.**  `{e^{iθ}, ie^{iθ}}` is
+orthonormal at every angle, so the Laplacian is the sum of the two second differentials
+pointwise, and both are continuous along the circle. -/
+theorem integral_laplacian_eq_add (hu : ContDiff ℝ 2 u) (c : ℂ) (r : ℝ) :
+    (∫ θ in (0 : ℝ)..(2 * π), Δ u (circleMap c r θ))
+      = (∫ θ in (0 : ℝ)..(2 * π),
+          fderiv ℝ (fderiv ℝ u) (circleMap c r θ) (circleDir θ) (circleDir θ))
+        + ∫ θ in (0 : ℝ)..(2 * π),
+            fderiv ℝ (fderiv ℝ u) (circleMap c r θ) (circleDir θ * Complex.I)
+              (circleDir θ * Complex.I) := by
+  rw [← intervalIntegral.integral_add]
+  · exact intervalIntegral.integral_congr fun θ _ => laplacian_apply_rotated u θ _
+  · refine Continuous.intervalIntegrable ?_ _ _
+    exact (((contDiff_two_continuous_fderiv2 hu).comp
+      (continuous_circleMap c r)).clm_apply continuous_circleDir).clm_apply continuous_circleDir
+  · refine Continuous.intervalIntegrable ?_ _ _
+    have hdir : Continuous fun θ : ℝ => circleDir θ * Complex.I :=
+      continuous_circleDir.mul continuous_const
+    exact (((contDiff_two_continuous_fderiv2 hu).comp
+      (continuous_circleMap c r)).clm_apply hdir).clm_apply hdir
+
 /-- **The flux differentiates to the Laplacian's circle integral.**  The product rule contributes
 the radial average plus `r` times the second radial average; the first is `r` times the angular
 average by `integral_radial_eq_angular`, and the two second differentials add to the Laplacian. -/
@@ -284,28 +297,11 @@ theorem hasDerivAt_circleFlux (hu : ContDiff ℝ 2 u) (c : ℂ) {r : ℝ} (hr : 
     refine mul_right_cancel₀ hr ?_
     rw [h]
     ring
-  -- The two second differentials add to the Laplacian, pointwise inside the integral.
-  have hlap : (∫ θ in (0 : ℝ)..(2 * π), Δ u (circleMap c r θ))
-      = (∫ θ in (0 : ℝ)..(2 * π),
-          fderiv ℝ (fderiv ℝ u) (circleMap c r θ) (circleDir θ) (circleDir θ))
-        + ∫ θ in (0 : ℝ)..(2 * π),
-            fderiv ℝ (fderiv ℝ u) (circleMap c r θ) (circleDir θ * Complex.I)
-              (circleDir θ * Complex.I) := by
-    rw [← intervalIntegral.integral_add]
-    · exact intervalIntegral.integral_congr fun θ _ => laplacian_apply_rotated u θ _
-    · refine Continuous.intervalIntegrable ?_ _ _
-      exact (((contDiff_two_continuous_fderiv2 hu).comp
-        (continuous_circleMap c r)).clm_apply continuous_circleDir).clm_apply continuous_circleDir
-    · refine Continuous.intervalIntegrable ?_ _ _
-      have hdir : Continuous fun θ : ℝ => circleDir θ * Complex.I :=
-        continuous_circleDir.mul continuous_const
-      exact (((contDiff_two_continuous_fderiv2 hu).comp
-        (continuous_circleMap c r)).clm_apply hdir).clm_apply hdir
   have heq : (∫ θ in (0 : ℝ)..(2 * π), fderiv ℝ u (circleMap c r θ) (circleDir θ))
       + r * (∫ θ in (0 : ℝ)..(2 * π),
           fderiv ℝ (fderiv ℝ u) (circleMap c r θ) (circleDir θ) (circleDir θ))
       = r * ∫ θ in (0 : ℝ)..(2 * π), Δ u (circleMap c r θ) := by
-    rw [hang, hlap]
+    rw [hang, integral_laplacian_eq_add hu c r]
     ring
   rw [← heq]
   exact hprod
@@ -322,17 +318,11 @@ theorem continuous_laplacian (hu : ContDiff ℝ 2 u) : Continuous (Δ u) := by
       (((contDiff_two_continuous_fderiv2 hu).clm_apply continuous_const).clm_apply
         continuous_const)
 
-theorem continuous_circleMap_uncurry (c : ℂ) :
-    Continuous fun p : ℝ × ℝ => circleMap c p.1 p.2 := by
-  simp only [circleMap_eq_circleDir]
-  exact continuous_const.add ((Complex.continuous_ofReal.comp continuous_fst).mul
-    (continuous_circleDir.comp continuous_snd))
-
 theorem continuous_laplacianIntegral (hu : ContDiff ℝ 2 u) (c : ℂ) :
     Continuous fun s : ℝ => ∫ θ in (0 : ℝ)..(2 * π), Δ u (circleMap c s θ) := by
   refine intervalIntegral.continuous_parametric_intervalIntegral_of_continuous'
     (f := fun s θ => Δ u (circleMap c s θ)) ?_ 0 (2 * π)
-  exact (continuous_laplacian hu).comp (continuous_circleMap_uncurry c)
+  exact (continuous_laplacian hu).comp Real.circleMap.continuous
 
 /-- **Green's identity on an annulus.**  The integral of the Laplacian over the annulus
 `ε ≤ ‖z-c‖ ≤ R`, taken in polar form, is the net outward flux through its two boundary circles.
@@ -371,7 +361,7 @@ theorem continuous_radialIntegral (hu : ContDiff ℝ 2 u) (c : ℂ) :
       fderiv ℝ u (circleMap c s θ) (circleDir θ) := by
   refine intervalIntegral.continuous_parametric_intervalIntegral_of_continuous'
     (f := fun s θ => fderiv ℝ u (circleMap c s θ) (circleDir θ)) ?_ 0 (2 * π)
-  exact ((contDiff_two_continuous_fderiv hu).comp (continuous_circleMap_uncurry c)).clm_apply
+  exact ((contDiff_two_continuous_fderiv hu).comp Real.circleMap.continuous).clm_apply
     (continuous_circleDir.comp continuous_snd)
 
 /-- The flux divided by the radius is `2π` times the circle average's derivative. -/
@@ -380,6 +370,24 @@ theorem radialIntegral_eq (hu : ContDiff ℝ 2 u) (c : ℂ) (r : ℝ) :
       = 2 * π * deriv (fun s : ℝ => circleAverage u c s) r := by
   rw [(hasDerivAt_circleAverage hu c r).deriv, smul_eq_mul]
   field_simp
+
+/-- **The circle average's total change over a radius interval.**  Its derivative is the radial
+average, which is continuous in the radius, so the fundamental theorem of calculus applies with no
+hypothesis on the interval — the circle average is differentiable at every radius, the origin
+included. -/
+theorem integral_deriv_circleAverage (hu : ContDiff ℝ 2 u) (c : ℂ) (ε R : ℝ) :
+    (∫ s in ε..R, deriv (fun t : ℝ => circleAverage u c t) s)
+      = circleAverage u c R - circleAverage u c ε := by
+  have hderiv : (deriv fun t : ℝ => circleAverage u c t)
+      = fun s : ℝ => (2 * π)⁻¹ * ∫ θ in (0 : ℝ)..(2 * π),
+          fderiv ℝ u (circleMap c s θ) (circleDir θ) := by
+    funext s
+    rw [(hasDerivAt_circleAverage hu c s).deriv, smul_eq_mul]
+  refine intervalIntegral.integral_eq_sub_of_hasDerivAt (fun s _ => ?_) ?_
+  · rw [(hasDerivAt_circleAverage hu c s).deriv]
+    exact hasDerivAt_circleAverage hu c s
+  · rw [hderiv]
+    exact (continuous_const.mul (continuous_radialIntegral hu c)).intervalIntegrable _ _
 
 /-- **Green's identity on an annulus, tested against `log r`.**  This is the shape the Riesz
 identity consumes: integrating the Laplacian against the logarithmic kernel over an annulus leaves
@@ -417,18 +425,6 @@ theorem green_annulus_log (hu : ContDiff ℝ 2 u) (c : ℂ) {ε R : ℝ} (hε : 
         (continuousOn_inv₀.mono fun s hs => ne_of_gt (hpos s hs)))
       ((continuous_id.mul (continuous_laplacianIntegral hu c)).intervalIntegrable _ _)
   -- The remaining integral is the circle average's total change.
-  have hderiv : (deriv fun t : ℝ => circleAverage u c t)
-      = fun s : ℝ => (2 * π)⁻¹ * ∫ θ in (0 : ℝ)..(2 * π),
-          fderiv ℝ u (circleMap c s θ) (circleDir θ) := by
-    funext s
-    rw [(hasDerivAt_circleAverage hu c s).deriv, smul_eq_mul]
-  have hftc : (∫ s in ε..R, deriv (fun t : ℝ => circleAverage u c t) s)
-      = circleAverage u c R - circleAverage u c ε := by
-    refine intervalIntegral.integral_eq_sub_of_hasDerivAt (fun s _ => ?_) ?_
-    · rw [(hasDerivAt_circleAverage hu c s).deriv]
-      exact hasDerivAt_circleAverage hu c s
-    · rw [hderiv]
-      exact (continuous_const.mul (continuous_radialIntegral hu c)).intervalIntegrable _ _
   have hpt : ∀ s ∈ Set.uIcc ε R,
       s⁻¹ * circleFlux u c s = 2 * π * deriv (fun t : ℝ => circleAverage u c t) s := by
     intro s hs
@@ -436,7 +432,23 @@ theorem green_annulus_log (hu : ContDiff ℝ 2 u) (c : ℂ) {ε R : ℝ} (hε : 
       inv_mul_cancel₀ (ne_of_gt (hpos s hs)), one_mul]
   have hrest : (∫ s in ε..R, s⁻¹ * circleFlux u c s)
       = 2 * π * (circleAverage u c R - circleAverage u c ε) := by
-    rw [intervalIntegral.integral_congr hpt, intervalIntegral.integral_const_mul, hftc]
+    rw [intervalIntegral.integral_congr hpt, intervalIntegral.integral_const_mul,
+      integral_deriv_circleAverage hu c ε R]
   rw [hparts, hrest]
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.green_annulus' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms green_annulus
+
+/-- info: 'Shields.circleFlux_eq_deriv_circleAverage' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms circleFlux_eq_deriv_circleAverage
+
+/-- info: 'Shields.green_annulus_log' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms green_annulus_log
 
 end Shields

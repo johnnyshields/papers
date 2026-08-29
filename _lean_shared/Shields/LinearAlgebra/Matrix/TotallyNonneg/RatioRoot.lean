@@ -93,4 +93,15 @@ theorem logConcave_altSeq {a b : ℕ → ℝ} (ha : a 0 = 1)
   logConcave_of_minorsNonneg
     (fun n => minorsNonneg_toeplitzLower_altSeq ha hab (hA n) 2) k
 
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.exists_nonneg_root_of_minorsNonneg_rec' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_nonneg_root_of_minorsNonneg_rec
+
+/-- info: 'Shields.logConcave_altSeq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms logConcave_altSeq
+
 end Shields

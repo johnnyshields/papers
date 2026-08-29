@@ -121,4 +121,15 @@ theorem det_submatrix_border {n : ℕ} {A : Matrix ℕ ℕ R} {c : ℕ}
   funext a b
   simp [Fin.snoc_castSucc]
 
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.det_submatrix_snoc_succAbove' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms det_submatrix_snoc_succAbove
+
+/-- info: 'Shields.det_submatrix_border' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms det_submatrix_border
+
 end Shields

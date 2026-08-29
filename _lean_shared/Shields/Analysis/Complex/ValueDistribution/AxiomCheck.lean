@@ -33,10 +33,6 @@ namespace Shields
 #guard_msgs in
 #print axioms expConvergence_le
 
-/-- info: 'Shields.log_le_rpow_div' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs in
-#print axioms log_le_rpow_div
-
 /-- info: 'Shields.logCounting_le_const_mul_rpow' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms logCounting_le_const_mul_rpow
@@ -60,6 +56,10 @@ namespace Shields
 /-- info: 'Shields.posLog_le_mul_add_posLog_inv' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms posLog_le_mul_add_posLog_inv
+
+/-- info: 'Shields.exists_characteristic_le_const_mul_rpow' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_characteristic_le_const_mul_rpow
 
 /-- info: 'Shields.characteristic_isBigO_rpow_of_summable' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
@@ -88,6 +88,10 @@ namespace Shields
 /-- info: 'Shields.poissonKernel_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms poissonKernel_le
+
+/-- info: 'Shields.poissonKernel_mul_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms poissonKernel_mul_le
 
 /-- info: 'Shields.re_le_circleAverage_posPart' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in

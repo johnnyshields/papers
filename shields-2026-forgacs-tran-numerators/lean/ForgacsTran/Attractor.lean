@@ -124,8 +124,7 @@ theorem panelNum_two (t : ℂ) : panelNum t 2 = 7 := by
 theorem panelNum_panelZstar {t : ℂ} (ht : t ≠ 0) :
     64 * t ^ 2 * panelNum t (panelZstar t) = panelB64 t := by
   simp only [panelNum, panelZstar, panelB64]
-  field_simp
-  ring
+  field
 
 /-- **Paper `cor:panel-B-attractor` — the resultant identity.**  Solving
 `N(t,z) = 0` for `t` and substituting in the denominator clears to the sextic. -/
@@ -133,8 +132,7 @@ theorem panelDen_at_numerator_root {z : ℂ} (hz : z ≠ 2) :
     panelDen z ((z ^ 2 + z + 1) / (z - 2)) = -panelResultant z / (8 * (z - 2) ^ 3) := by
   have hz2 : z - 2 ≠ 0 := sub_ne_zero.mpr hz
   simp only [panelDen, panelResultant]
-  field_simp
-  ring
+  field
 
 /-- Paper `cor:panel-B-attractor` — the denominator has real coefficients. -/
 theorem panelDen_conj (z t : ℂ) : panelDen (conj z) (conj t) = conj (panelDen z t) := by
@@ -354,8 +352,7 @@ the restriction is what closes that gap.  The Laurent exponent is
 theorem panelB64_eq_restriction {t : ℂ} (ht : t ≠ 0) :
     panelB64 t = 64 * t ^ 2 * panelNum t (panelZstar t) := by
   rw [panelB64, panelNum, panelZstar]
-  field_simp
-  ring
+  field
 
 /-- **The sextic's zeros are the amplitude zeros.**  Off the origin, `B` vanishes
 exactly where the bivariate numerator does on the fiber — so `panelB_attractor`'s

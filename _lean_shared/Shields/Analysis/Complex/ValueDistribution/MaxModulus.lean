@@ -3,7 +3,7 @@ Copyright (c) 2026 Johnny Shields. All rights reserved.
 Released under the MIT license as described in the file LICENSE.txt.
 Authors: Johnny Shields
 -/
-import Mathlib.Analysis.Complex.Poisson
+import Mathlib.Analysis.Complex.Harmonic.Poisson
 import Shields.Analysis.Complex.ValueDistribution.Order
 
 /-!
@@ -20,7 +20,8 @@ Taking `R = 2S` and `r = S` gives the factor `3` in the last result.
 
 ## Main results
 
-* `Shields.poissonKernel_le` — the kernel bound on the circle.
+* `Shields.poissonKernel_le` and `Shields.poissonKernel_mul_le` — the kernel bound on the
+  circle, and the form the circle average consumes.
 * `Shields.re_le_circleAverage_posPart` — the Poisson bound on the real part.
 * `Shields.proximity_exp_eq_circleAverage` — `m(r, e^g)` is the circle average of `(\Re g)⁺`.
 * `Shields.re_le_characteristic` — `\Re g ≤ 3 T(2S, e^g)` on the ball of radius `S`.
@@ -48,25 +49,25 @@ theorem poissonKernel_nonneg {R : ℝ} {w z : ℂ} (hw : ‖w‖ ≤ R) (hz : �
 `(R + r)/(R - r)` on the circle `‖z‖ = R`. -/
 theorem poissonKernel_le {r R : ℝ} (hrR : r < R) {w z : ℂ} (hw : ‖w‖ ≤ r) (hz : ‖z‖ = R) :
     poissonKernel 0 w z ≤ (R + r) / (R - r) := by
-  have hr0 : 0 ≤ r := (norm_nonneg w).trans hw
   have hwR : ‖w‖ < R := lt_of_le_of_lt hw hrR
-  have hdpos : 0 < R - ‖w‖ := by linarith
-  have hden : R - ‖w‖ ≤ ‖z - w‖ := by
-    have h := norm_sub_norm_le z w
-    rwa [hz] at h
-  have hzw : (0 : ℝ) < ‖z - w‖ := lt_of_lt_of_le hdpos hden
-  rw [poissonKernel_def]
-  simp only [sub_zero, hz]
-  have h₁ : (R ^ 2 - ‖w‖ ^ 2) / ‖z - w‖ ^ 2 ≤ (R ^ 2 - ‖w‖ ^ 2) / (R - ‖w‖) ^ 2 := by
-    apply div_le_div_of_nonneg_left (by nlinarith [norm_nonneg w]) (by positivity)
-    exact pow_le_pow_left₀ hdpos.le hden 2
-  have h₂ : (R ^ 2 - ‖w‖ ^ 2) / (R - ‖w‖) ^ 2 = (R + ‖w‖) / (R - ‖w‖) := by
-    rw [eq_div_iff hdpos.ne']
-    field
-  have h₃ : (R + ‖w‖) / (R - ‖w‖) ≤ (R + r) / (R - r) := by
-    rw [div_le_div_iff₀ hdpos (by linarith)]
+  have hker := re_herglotzRieszKernel_le (c := 0) (w := w)
+    (mem_sphere_zero_iff_norm.2 hz) (mem_ball_zero_iff.2 hwR)
+  simp only [sub_zero] at hker
+  have hmono : (R + ‖w‖) / (R - ‖w‖) ≤ (R + r) / (R - r) := by
+    rw [div_le_div_iff₀ (by linarith) (by linarith)]
     nlinarith [norm_nonneg w]
-  linarith [h₁, h₂ ▸ h₁]
+  rw [poissonKernel_eq_re_herglotzRieszKernel]
+  simpa [herglotzRieszKernel] using hker.trans hmono
+
+/-- **The kernel bound in the form the circle average consumes.**  The kernel's sign replaces the
+value by its positive part, and the kernel's size then comes out of the product. -/
+theorem poissonKernel_mul_le {r R : ℝ} (hrR : r < R) {w z : ℂ} (hw : ‖w‖ ≤ r) (hz : ‖z‖ = R)
+    (x : ℝ) : poissonKernel 0 w z * x ≤ (R + r) / (R - r) * max 0 x :=
+  calc poissonKernel 0 w z * x ≤ poissonKernel 0 w z * max 0 x :=
+        mul_le_mul_of_nonneg_left (le_max_right _ _)
+          (poissonKernel_nonneg (hw.trans hrR.le) hz)
+    _ ≤ (R + r) / (R - r) * max 0 x :=
+        mul_le_mul_of_nonneg_right (poissonKernel_le hrR hw hz) (le_max_left _ _)
 
 /-! ### The Poisson bound on the real part -/
 
@@ -82,18 +83,14 @@ theorem re_le_circleAverage_posPart (hg : Differentiable ℂ g) {r R : ℝ} (hrR
   have hRpos : 0 < R := lt_of_le_of_lt hr0 hrR
   have hRabs : |R| = R := abs_of_pos hRpos
   have hwball : w ∈ ball (0 : ℂ) R := mem_ball_zero_iff.2 (lt_of_le_of_lt hw hrR)
-  have hdc : DiffContOnCl ℂ g (ball 0 R) := ⟨hg.differentiableOn, hg.continuous.continuousOn⟩
   -- the kernel is continuous on the circle
   have hker : ContinuousOn (poissonKernel 0 w) (sphere (0 : ℂ) |R|) := by
     rw [poissonKernel_eq_re_herglotzRieszKernel]
     exact Complex.continuous_re.comp_continuousOn (continuousOn_herglotzRieszKernel_sphere hwball)
-  have hCI : CircleIntegrable (poissonKernel 0 w • g) 0 R :=
-    ContinuousOn.circleIntegrable' (hker.smul hg.continuous.continuousOn)
-  -- the Poisson formula, read on real parts
-  have hpoisson : circleAverage (fun z ↦ poissonKernel 0 w z * (g z).re) 0 R = (g w).re := by
-    have h := Complex.reCLM.circleAverage_comp_comm (c := 0) (R := R) hCI
-    rw [hdc.circleAverage_poissonKernel_smul hwball] at h
-    simpa [Function.comp_def, Complex.smul_re] using h
+  -- the Poisson formula for the harmonic function `\Re g`
+  have hpoisson : circleAverage (fun z ↦ poissonKernel 0 w z * (g z).re) 0 R = (g w).re :=
+    InnerProductSpace.HarmonicOnNhd.circleAverage_poissonKernel_smul
+      (f := fun z ↦ (g z).re) (fun x _ ↦ (hg.analyticAt x).harmonicAt_re) hwball
   -- the integrand is dominated by the constant multiple of the positive part
   have hCI₁ : CircleIntegrable (fun z ↦ poissonKernel 0 w z * (g z).re) 0 R :=
     ContinuousOn.circleIntegrable'
@@ -104,17 +101,8 @@ theorem re_le_circleAverage_posPart (hg : Differentiable ℂ g) {r R : ℝ} (hrR
       (continuousOn_const.mul
         ((continuous_const.max (Complex.continuous_re.comp hg.continuous)).continuousOn))
   have hmono : ∀ z ∈ sphere (0 : ℂ) |R|, poissonKernel 0 w z * (g z).re
-      ≤ (R + r) / (R - r) * max 0 (g z).re := by
-    intro z hz
-    rw [mem_sphere_zero_iff_norm, hRabs] at hz
-    have hK₀ : 0 ≤ poissonKernel 0 w z :=
-      poissonKernel_nonneg (hw.trans hrR.le) hz
-    have hK : poissonKernel 0 w z ≤ (R + r) / (R - r) := poissonKernel_le hrR hw hz
-    have hmax : (g z).re ≤ max 0 (g z).re := le_max_right _ _
-    have hmax₀ : (0 : ℝ) ≤ max 0 (g z).re := le_max_left _ _
-    calc poissonKernel 0 w z * (g z).re ≤ poissonKernel 0 w z * max 0 (g z).re :=
-          mul_le_mul_of_nonneg_left hmax hK₀
-      _ ≤ (R + r) / (R - r) * max 0 (g z).re := mul_le_mul_of_nonneg_right hK hmax₀
+      ≤ (R + r) / (R - r) * max 0 (g z).re := fun z hz ↦
+    poissonKernel_mul_le hrR hw (by rwa [mem_sphere_zero_iff_norm, hRabs] at hz) _
   have hle := circleAverage_mono hCI₁ hCI₂ hmono
   rw [hpoisson] at hle
   have hconst : circleAverage (fun z ↦ ((R + r) / (R - r)) • max 0 (g z).re) 0 R
@@ -160,5 +148,12 @@ theorem re_le_characteristic (hg : Differentiable ℂ g) {S : ℝ} (hS : 0 < S) 
   have hcoef : (2 * S + S) / (2 * S - S) = 3 := by
     field
   rwa [hcoef] at h
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.re_le_characteristic' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms re_le_characteristic
 
 end Shields

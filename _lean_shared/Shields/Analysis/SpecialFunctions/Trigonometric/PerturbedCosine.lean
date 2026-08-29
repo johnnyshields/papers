@@ -41,7 +41,9 @@ than `1` cannot remove.
 
 ## Main results
 
-* `Shields.ClockData.abs_clockDeriv_ge`: the derivative estimate, with explicit constants.
+* `Shields.ClockData.abs_clockDeriv_ge`: the derivative estimate, with explicit constants, and
+  `Shields.ClockData.clockDeriv_ne_zero_of_abs_cos_le`: its consequence that the derivative does
+  not vanish where the cosine is small, which is what both conclusions below run through.
 * `Shields.ClockData.eventually_zeros_simple`: **simplicity** of every zero, for large `n`.
 * `Shields.ClockData.exists_zero_of_cell`: **a zero in each cell**.
 * `Shields.ClockData.eventually_injOn_of_abs_cos_le`: **at most one zero** where the cosine is
@@ -74,6 +76,14 @@ cosine, perturbation, zeros, simple zeros, clock behavior, spacing, Rolle
 open Filter Set Topology
 
 namespace Shields
+
+/-- A small cosine forces a sine bounded away from zero. -/
+theorem abs_sin_ge_of_abs_cos_le {y : ℝ} (h : |Real.cos y| ≤ 1 / 2) : 1 / 2 ≤ |Real.sin y| := by
+  by_contra hcon
+  rw [not_le] at hcon
+  have hpy := Real.sin_sq_add_cos_sq y
+  nlinarith [sq_abs (Real.sin y), sq_abs (Real.cos y), abs_nonneg (Real.sin y),
+    abs_nonneg (Real.cos y)]
 
 /-- The hypotheses for a perturbed cosine `cos(nϑ + δ) + Eₙ` with a fast, monotone phase. -/
 structure ClockData (a b : ℝ) where
@@ -144,14 +154,6 @@ theorem psi_deriv_le (n : ℕ) {x : ℝ} (hx : x ∈ Set.Icc a b) :
   have h2 : D.δ' x ≤ D.K := (abs_le.mp (D.hδ'le x hx)).2
   linarith
 
-/-- A small cosine forces a sine bounded away from zero. -/
-theorem abs_sin_ge_of_abs_cos_le {y : ℝ} (h : |Real.cos y| ≤ 1 / 2) : 1 / 2 ≤ |Real.sin y| := by
-  by_contra hcon
-  rw [not_le] at hcon
-  have hpy := Real.sin_sq_add_cos_sq y
-  nlinarith [sq_abs (Real.sin y), sq_abs (Real.cos y), abs_nonneg (Real.sin y),
-    abs_nonneg (Real.cos y)]
-
 /-- **The derivative estimate.**  Where the sine is bounded away from zero, so is the derivative —
 by the phase's own growth, less the perturbation. -/
 theorem abs_clockDeriv_ge (n : ℕ) {x : ℝ} (hx : x ∈ Set.Icc a b)
@@ -183,6 +185,19 @@ theorem abs_cos_le_of_zero {n : ℕ} {x : ℝ} (hx : x ∈ Set.Icc a b) (hzero :
   rw [hcos, abs_neg]
   exact D.hEle n x hx
 
+/-- **The derivative does not vanish where the cosine is small.**  This is what the estimate is
+for: once `Cqⁿ ≤ 1/2` and `K + 3 ≤ nc`, the lower bound on `|Gₙ'|` is at least `1`, so `Gₙ'` is
+nonzero throughout the stretch.  Simplicity of the zeros and uniqueness on a cell are both this
+statement, applied at the two thresholds below. -/
+theorem clockDeriv_ne_zero_of_abs_cos_le {n : ℕ} {x : ℝ} (hx : x ∈ Set.Icc a b)
+    (hcos : |Real.cos (D.psi n x)| ≤ 1 / 2)
+    (hsmall : D.C * D.q ^ n ≤ 1 / 2) (hlarge : D.K + 3 ≤ (n : ℝ) * D.c) :
+    D.clockDeriv n x ≠ 0 := by
+  intro hd
+  have hge := D.abs_clockDeriv_ge n hx (abs_sin_ge_of_abs_cos_le hcos) (by linarith)
+  rw [hd, abs_zero] at hge
+  linarith
+
 /-! ### The eventual thresholds -/
 
 private theorem eventually_small : ∀ᶠ n : ℕ in atTop, D.C * D.q ^ n ≤ 1 / 2 := by
@@ -201,11 +216,8 @@ private theorem eventually_large : ∀ᶠ n : ℕ in atTop, D.K + 3 ≤ (n : ℝ
 threshold depending only on `c`, `K`, `C` and `q`. -/
 theorem eventually_zeros_simple :
     ∀ᶠ n in atTop, ∀ x ∈ Set.Icc a b, D.clockFn n x = 0 → D.clockDeriv n x ≠ 0 := by
-  filter_upwards [D.eventually_small, D.eventually_large] with n hn1 hn2 x hx hzero hd
-  have hcos : |Real.cos (D.psi n x)| ≤ 1 / 2 := (D.abs_cos_le_of_zero hx hzero).trans hn1
-  have hge := D.abs_clockDeriv_ge n hx (abs_sin_ge_of_abs_cos_le hcos) (by linarith)
-  rw [hd, abs_zero] at hge
-  linarith
+  filter_upwards [D.eventually_small, D.eventually_large] with n hn1 hn2 x hx hzero
+  exact D.clockDeriv_ne_zero_of_abs_cos_le hx ((D.abs_cos_le_of_zero hx hzero).trans hn1) hn1 hn2
 
 /-! ### A zero in each cell -/
 
@@ -225,27 +237,18 @@ theorem exists_zero_of_cell {n : ℕ} {x₀ x₁ : ℝ} (hlt : x₀ < x₁)
     have hcast : ((j : ℝ) - 1) * Real.pi = ((j - 1 : ℤ) : ℝ) * Real.pi := by push_cast; ring
     rw [h₁, hcast, Real.cos_int_mul_pi, zpow_sub₀ (by norm_num : (-1 : ℝ) ≠ 0), zpow_one,
       div_neg, div_one]
-  have hb₀ := abs_le.mp ((D.hEle n x₀ hx₀).trans hsmall.le)
-  have hb₁ := abs_le.mp ((D.hEle n x₁ hx₁).trans hsmall.le)
   have e₀ : D.clockFn n x₀ = (-1 : ℝ) ^ j + D.E n x₀ := by rw [clockFn, hc₀]
   have e₁ : D.clockFn n x₁ = -((-1 : ℝ) ^ j) + D.E n x₁ := by rw [clockFn, hc₁]
   have hb₀' : |D.E n x₀| < 1 := lt_of_le_of_lt (D.hEle n x₀ hx₀) hsmall
   have hb₁' : |D.E n x₁| < 1 := lt_of_le_of_lt (D.hEle n x₁ hx₁) hsmall
-  have hb₀'' := abs_lt.mp hb₀'
-  have hb₁'' := abs_lt.mp hb₁'
+  -- the two parities are mirror images: `j` even puts the sign change downward, `j` odd upward
   rcases Int.even_or_odd j with hj | hj
-  · have hp : ((-1 : ℝ)) ^ j = 1 := hj.neg_one_zpow
-    have hpos : 0 < D.clockFn n x₀ := by rw [e₀, hp]; linarith [hb₀''.1]
-    have hneg : D.clockFn n x₁ < 0 := by rw [e₁, hp]; linarith [hb₁''.2]
-    obtain ⟨x, hx, hfx⟩ := intermediate_value_Ioo' hlt.le hcont
-      (Set.mem_Ioo.mpr ⟨hneg, hpos⟩)
-    exact ⟨x, hx, hfx⟩
-  · have hp : ((-1 : ℝ)) ^ j = -1 := hj.neg_one_zpow
-    have hneg : D.clockFn n x₀ < 0 := by rw [e₀, hp]; linarith [hb₀''.2]
-    have hpos : 0 < D.clockFn n x₁ := by rw [e₁, hp]; linarith [hb₁''.1]
-    obtain ⟨x, hx, hfx⟩ := intermediate_value_Ioo hlt.le hcont
-      (Set.mem_Ioo.mpr ⟨hneg, hpos⟩)
-    exact ⟨x, hx, hfx⟩
+  · exact intermediate_value_Ioo' hlt.le hcont (Set.mem_Ioo.mpr
+      ⟨by rw [e₁, hj.neg_one_zpow]; linarith [(abs_lt.mp hb₁').2],
+        by rw [e₀, hj.neg_one_zpow]; linarith [(abs_lt.mp hb₀').1]⟩)
+  · exact intermediate_value_Ioo hlt.le hcont (Set.mem_Ioo.mpr
+      ⟨by rw [e₀, hj.neg_one_zpow]; linarith [(abs_lt.mp hb₀').2],
+        by rw [e₁, hj.neg_one_zpow]; linarith [(abs_lt.mp hb₁').1]⟩)
 
 /-! ### At most one zero where the cosine stays small -/
 
@@ -256,12 +259,8 @@ theorem eventually_injOn_of_abs_cos_le :
       (∀ x ∈ Set.Icc u w, |Real.cos (D.psi n x)| ≤ 1 / 2) →
       Set.InjOn (D.clockFn n) (Set.Icc u w) := by
   filter_upwards [D.eventually_small, D.eventually_large] with n hn1 hn2 u w hsub hcos
-  have hderiv : ∀ z ∈ Set.Icc u w, D.clockDeriv n z ≠ 0 := by
-    intro z hz hd
-    have hge := D.abs_clockDeriv_ge n (hsub hz)
-      (abs_sin_ge_of_abs_cos_le (hcos z hz)) (by linarith)
-    rw [hd, abs_zero] at hge
-    linarith
+  have hderiv : ∀ z ∈ Set.Icc u w, D.clockDeriv n z ≠ 0 := fun z hz =>
+    D.clockDeriv_ne_zero_of_abs_cos_le (hsub hz) (hcos z hz) hn1 hn2
   have hdiff : ∀ z ∈ Set.Icc a b, HasDerivAt (D.clockFn n) (D.clockDeriv n z) z :=
     fun z hz => D.hasDerivAt_clockFn n hz
   intro x hx y hy hxy
@@ -338,5 +337,16 @@ noncomputable def pureClock (a b : ℝ) : ClockData a b where
 @[simp] theorem pureClock_clockFn (a b : ℝ) (n : ℕ) (x : ℝ) :
     (pureClock a b).clockFn n x = Real.cos ((n : ℝ) * x) := by
   simp [ClockData.clockFn, ClockData.psi, pureClock]
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.ClockData.clockFn' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ClockData.clockFn
+
+/-- info: 'Shields.ClockData.clockDeriv' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ClockData.clockDeriv
 
 end Shields

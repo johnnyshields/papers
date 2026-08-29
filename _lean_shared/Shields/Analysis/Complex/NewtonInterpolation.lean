@@ -57,33 +57,24 @@ theorem exists_newton_form {U : Set ℂ} (hU : IsOpen U) (a : ℕ → ℂ) (ha :
           + (∏ i ∈ Finset.range k, (z - a i)) * q z := by
   intro k
   induction k with
-  | zero =>
-    intro f hf
-    exact ⟨fun _ => 0, f, hf, fun z => by simp⟩
+  | zero => intro f hf; exact ⟨fun _ => 0, f, hf, fun z => by simp⟩
   | succ k ih =>
-    intro f hf
-    obtain ⟨d, q, hq, hrep⟩ := ih hf
+    intro f hf; obtain ⟨d, q, hq, hrep⟩ := ih hf
     -- peel the last node off the remainder
-    have hdq : AnalyticOnNhd ℂ (dslope q (a k)) U := by
-      have := (Complex.differentiableOn_dslope (hU.mem_nhds (ha k))).mpr hq.differentiableOn
-      exact this.analyticOnNhd hU
+    have hdq := ((Complex.differentiableOn_dslope (hU.mem_nhds (ha k))).mpr
+      hq.differentiableOn).analyticOnNhd hU
     refine ⟨Function.update d k (q (a k)), dslope q (a k), hdq, fun z => ?_⟩
     have hsplit : q z = q (a k) + (z - a k) * dslope q (a k) z := by
-      have h := sub_smul_dslope q (a k) z
-      rw [smul_eq_mul] at h
-      linear_combination -h
+      rw [← smul_eq_mul, sub_smul_dslope]; ring
     have hsum : ∑ j ∈ Finset.range (k + 1),
           Function.update d k (q (a k)) j * ∏ i ∈ Finset.range j, (z - a i)
         = (∑ j ∈ Finset.range k, d j * ∏ i ∈ Finset.range j, (z - a i))
           + q (a k) * ∏ i ∈ Finset.range k, (z - a i) := by
       rw [Finset.sum_range_succ, Function.update_self]
       congr 1
-      refine Finset.sum_congr rfl fun j hj => ?_
-      rw [Function.update_of_ne (Finset.mem_range.mp hj).ne]
-    have hprod : ∏ i ∈ Finset.range (k + 1), (z - a i)
-        = (∏ i ∈ Finset.range k, (z - a i)) * (z - a k) := Finset.prod_range_succ _ _
-    rw [hsum, hprod, hrep z, hsplit]
-    ring
+      exact Finset.sum_congr rfl fun j hj => by
+        rw [Function.update_of_ne (Finset.mem_range.1 hj).ne]
+    rw [hsum, Finset.prod_range_succ, hrep z, hsplit]; ring
 
 /-- **The principal-part decomposition at a cluster.**  Dividing the Newton form by the node
 product writes `f/∏(z - a_i)` as a sum of proper rational terms — the `j`-th carrying the
@@ -114,5 +105,12 @@ theorem exists_newton_form_div {U : Set ℂ} (hU : IsOpen U) (a : ℕ → ℂ) (
     have hj0 : (∏ i ∈ Finset.range j, (z - a i)) ≠ 0 := hne j hjk
     field_simp
   · field_simp
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.exists_newton_form_div' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_newton_form_div
 
 end Shields

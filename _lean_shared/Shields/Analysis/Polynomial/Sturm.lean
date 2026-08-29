@@ -5,6 +5,7 @@ Authors: Johnny Shields
 -/
 import Mathlib.Algebra.Polynomial.Roots
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
+import Mathlib.Order.Interval.Set.Monotone
 import Mathlib.Topology.Algebra.Polynomial
 import Mathlib.Topology.Order.IntermediateValue
 
@@ -62,11 +63,8 @@ closed interval they span. -/
 theorem exists_root_of_eval_mul_nonpos (P : Polynomial ℝ) {a b : ℝ}
     (hsign : P.eval a * P.eval b ≤ 0) : ∃ c ∈ Set.uIcc a b, P.eval c = 0 := by
   have hcont : ContinuousOn (fun x : ℝ => P.eval x) (Set.uIcc a b) := P.continuousOn
-  have h0 : (0 : ℝ) ∈ Set.uIcc (P.eval a) (P.eval b) := by
-    rcases lt_trichotomy (P.eval a) 0 with h1 | h1 | h1
-    · exact Set.mem_uIcc.mpr (Or.inl ⟨h1.le, by nlinarith⟩)
-    · rw [← h1]; exact Set.left_mem_uIcc
-    · exact Set.mem_uIcc.mpr (Or.inr ⟨by nlinarith, h1.le⟩)
+  have h0 : (0 : ℝ) ∈ Set.uIcc (P.eval a) (P.eval b) :=
+    Set.mem_uIcc.mpr ((mul_nonpos_iff.mp hsign).elim (fun h => Or.inr ⟨h.2, h.1⟩) Or.inl)
   obtain ⟨c, hc, hc0⟩ := intermediate_value_uIcc hcont h0
   exact ⟨c, hc, hc0⟩
 
@@ -95,6 +93,23 @@ theorem eval_mul_pos_of_no_root (P : Polynomial ℝ) {a b : ℝ}
   · obtain ⟨c, hc, hc0⟩ := exists_root_of_eval_mul_nonpos P hle
     exact absurd hc0 (hno c hc)
   · exact hlt
+
+/-- **A polynomial of degree at most `n` carrying `n` distinct roots has no others, and every one
+of them is simple.**  Listing the roots as an injective family `z : Fin n → R` identifies `P.roots`
+with that family, so the count, the exhaustiveness and the multiplicities all read off it. -/
+theorem roots_eq_map_of_injective_of_natDegree_le {R : Type*} [CommRing R] [IsDomain R]
+    {P : Polynomial R} (hP : P ≠ 0) {n : ℕ} {z : Fin n → R} (hz : Function.Injective z)
+    (hroot : ∀ j, P.eval (z j) = 0) (hdeg : P.natDegree ≤ n) :
+    P.roots = Multiset.map z Finset.univ.val := by
+  classical
+  have hcard : (Finset.image z Finset.univ).card = n := by
+    rw [Finset.card_image_of_injective _ hz, Finset.card_univ, Fintype.card_fin]
+  have himg : (Finset.image z Finset.univ).val = Multiset.map z Finset.univ.val := by
+    rw [Finset.image_val, Multiset.dedup_eq_self.mpr (Multiset.Nodup.map hz Finset.univ.nodup)]
+  rw [← himg]
+  exact Polynomial.roots_eq_of_natDegree_le_card_of_ne_zero
+    (fun t ht => by obtain ⟨j, -, rfl⟩ := Finset.mem_image.mp ht; exact hroot j)
+    (hdeg.trans hcard.ge) hP
 
 /-- A **Sturm family** on `(u,v)`: degrees increasing by one, alternating signs at the left
 endpoint, positive at the right, and the interior sign relation `toda` — at a zero of the `m`-th
@@ -180,47 +195,26 @@ theorem exists_sturmWalls {m : ℕ} {x : Fin m → ℝ} (hx : IsSturmRoots Q u v
     ∃ w : ℕ → ℝ, w 0 = u ∧ (∀ (j : ℕ) (hj : j < m), w (j + 1) = x ⟨j, hj⟩) ∧ w (m + 1) = v ∧
       (∀ j : ℕ, j ≤ m → w j < w (j + 1)) ∧ (∀ a b : ℕ, a < b → b ≤ m + 1 → w a < w b) := by
   obtain ⟨w, hw0, hwsucc, hwtop⟩ :
-      ∃ w : ℕ → ℝ, w 0 = u ∧ (∀ (j : ℕ) (hj : j < m), w (j + 1) = x ⟨j, hj⟩) ∧ w (m + 1) = v := by
-    refine ⟨fun j => if j = 0 then u else if hj : j - 1 < m then x ⟨j - 1, hj⟩ else v, ?_, ?_, ?_⟩
-    · simp
-    · intro j hj
-      dsimp only
-      rw [if_neg (Nat.succ_ne_zero j)]
-      simp only [Nat.add_sub_cancel]
-      rw [dif_pos hj]
-    · dsimp only
-      rw [if_neg (Nat.succ_ne_zero m)]
-      simp only [Nat.add_sub_cancel]
-      rw [dif_neg (lt_irrefl m)]
+      ∃ w : ℕ → ℝ, w 0 = u ∧ (∀ (j : ℕ) (hj : j < m), w (j + 1) = x ⟨j, hj⟩) ∧ w (m + 1) = v :=
+    ⟨fun j => if j = 0 then u else if hj : j - 1 < m then x ⟨j - 1, hj⟩ else v, by simp,
+      fun j hj => by simp [hj], by simp⟩
   have hwlt : ∀ j : ℕ, j ≤ m → w j < w (j + 1) := by
     intro j hj
-    by_cases hj0 : j = 0
-    · subst hj0
+    match j, hj with
+    | 0, _ =>
       rw [hw0]
-      by_cases hm : 0 < m
-      · rw [hwsucc 0 hm]
-        exact (hx.mem ⟨0, hm⟩).1
-      · have hm0 : m = 0 := by omega
-        subst hm0
-        rw [hwtop]
-        exact h.lt
-    · obtain ⟨i, rfl⟩ : ∃ i, j = i + 1 := ⟨j - 1, by omega⟩
+      rcases Nat.eq_zero_or_pos m with rfl | hm
+      · rw [hwtop]; exact h.lt
+      · rw [hwsucc 0 hm]; exact (hx.mem ⟨0, hm⟩).1
+    | (i + 1), hj =>
       have him : i < m := by omega
       rw [hwsucc i him]
       by_cases hi1 : i + 1 < m
-      · rw [hwsucc (i + 1) hi1]
-        exact hx.mono (Fin.mk_lt_mk.mpr (Nat.lt_succ_self i))
-      · rw [show i + 1 + 1 = m + 1 by omega, hwtop]
-        exact (hx.mem ⟨i, him⟩).2
-  refine ⟨w, hw0, hwsucc, hwtop, hwlt, ?_⟩
-  intro a b
-  induction b with
-  | zero => intro hab; omega
-  | succ b ih =>
-    intro hab hb
-    rcases lt_or_eq_of_le (Nat.lt_succ_iff.mp hab) with h1 | h1
-    · exact (ih h1 (by omega)).trans (hwlt b (by omega))
-    · subst h1; exact hwlt a (by omega)
+      · rw [hwsucc (i + 1) hi1]; exact hx.mono (Fin.mk_lt_mk.mpr (Nat.lt_succ_self i))
+      · rw [show i + 1 + 1 = m + 1 by omega, hwtop]; exact (hx.mem ⟨i, him⟩).2
+  exact ⟨w, hw0, hwsucc, hwtop, hwlt, fun a b hab hb =>
+    strictMonoOn_Iic_of_lt_succ (n := m + 1) (fun j hj => hwlt j (Nat.lt_succ_iff.mp hj))
+      ((hab.trans_le hb).le) hb hab⟩
 
 /-- **`Q (m+1)` alternates in sign along the walls**: its sign at the `j`-th wall is
 `(-1)^{m+1-j}`.
@@ -252,6 +246,48 @@ theorem sturmWalls_sign {m : ℕ} {x : Fin m → ℝ} (hx : IsSturmRoots Q u v m
   rw [hwsucc i him, show m + 1 - (i + 1) = (m - 1 - i) + 1 by omega, pow_succ]
   rcases neg_one_pow_eq_or ℝ (m - 1 - i) with ha | ha <;> rw [ha] at hprev ⊢ <;> nlinarith
 
+/-- **A zero of `Q (m+1)` in every gap.**  Consecutive walls carry opposite signs of `Q (m+1)`,
+because their exponents differ by one, so the intermediate value theorem puts a zero strictly
+inside each of the `m + 1` intervals the walls cut out. -/
+theorem exists_root_mem_gap {m : ℕ} {w : ℕ → ℝ} (hwlt : ∀ j : ℕ, j ≤ m → w j < w (j + 1))
+    (hwsign : ∀ j : ℕ, j ≤ m + 1 → 0 < (-1 : ℝ) ^ (m + 1 - j) * (Q (m + 1)).eval (w j))
+    (j : Fin (m + 1)) :
+    ∃ c : ℝ, w j.val < c ∧ c < w (j.val + 1) ∧ (Q (m + 1)).eval c = 0 := by
+  have hjm : j.val ≤ m := Nat.lt_succ_iff.mp j.isLt
+  have hs1 := hwsign j.val (by omega)
+  have hs2 := hwsign (j.val + 1) (by omega)
+  rw [show m + 1 - j.val = (m - j.val) + 1 by omega, pow_succ] at hs1
+  rw [show m + 1 - (j.val + 1) = m - j.val by omega] at hs2
+  have hneg : (Q (m + 1)).eval (w j.val) * (Q (m + 1)).eval (w (j.val + 1)) < 0 := by
+    rcases neg_one_pow_eq_or ℝ (m - j.val) with ha | ha <;> rw [ha] at hs1 hs2 <;> nlinarith
+  obtain ⟨c, hc, hc0⟩ := exists_root_mem_Ioo_of_eval_mul_neg _ (hwlt j.val hjm).le hneg
+  exact ⟨c, hc.1, hc.2, hc0⟩
+
+/-- **The sign of `Q (m+1)` is the same throughout a gap as at the wall bounding it.**
+
+Every zero of `Q (m+1)` is one of the `z i`, and each of those lies strictly on one side of both
+`w j` and any point `t` of the `j`-th gap -- below both when `i < j`, above both when `j \le i`.  So
+no zero separates `w j` from `t`, and the sign at the wall carries across. -/
+theorem sturmGap_sign {m : ℕ} {w : ℕ → ℝ} {z : Fin (m + 1) → ℝ}
+    (hwmono : ∀ a b : ℕ, a ≤ b → b ≤ m + 1 → w a ≤ w b)
+    (hzlo : ∀ i : Fin (m + 1), w i.val < z i) (hzhi : ∀ i : Fin (m + 1), z i < w (i.val + 1))
+    (hexhaust : ∀ t : ℝ, (Q (m + 1)).eval t = 0 → ∃ i, t = z i)
+    (hwsign : ∀ j : ℕ, j ≤ m + 1 → 0 < (-1 : ℝ) ^ (m + 1 - j) * (Q (m + 1)).eval (w j))
+    {j : ℕ} (hj : j ≤ m + 1) {t : ℝ} (hlo : ∀ i : Fin (m + 1), i.val < j → z i < t)
+    (hhi : ∀ i : Fin (m + 1), j ≤ i.val → t < z i) :
+    0 < (-1 : ℝ) ^ (m + 1 - j) * (Q (m + 1)).eval t := by
+  have hanchor := hwsign j hj
+  have hsame : 0 < (Q (m + 1)).eval (w j) * (Q (m + 1)).eval t := by
+    refine eval_mul_pos_of_no_root _ fun c hc hc0 => ?_
+    obtain ⟨i, rfl⟩ := hexhaust c hc0
+    rw [Set.mem_uIcc] at hc
+    rcases lt_or_ge i.val j with hij | hij
+    · rcases hc with ⟨ha, -⟩ | ⟨hb, -⟩ <;>
+        linarith [(hzhi i).trans_le (hwmono _ _ (Nat.succ_le_of_lt hij) hj), hlo i hij]
+    · rcases hc with ⟨-, ha⟩ | ⟨-, hb⟩ <;>
+        linarith [(hwmono j i.val hij i.isLt.le).trans_lt (hzlo i), hhi i hij]
+  rcases neg_one_pow_eq_or ℝ (m + 1 - j) with ha | ha <;> rw [ha] at hanchor ⊢ <;> nlinarith
+
 /-- **The induction step.**  The previous member alternates on the zeros of `Q m`; the interior
 sign relation transfers that alternation to `Q (m+1)`; the intermediate value theorem then puts
 one zero of `Q (m+1)` in each of the `m + 1` intervals cut out by `u`, the zeros of `Q m`, and
@@ -261,116 +297,34 @@ theorem IsSturmRoots.step {m : ℕ} {x : Fin m → ℝ} (hx : IsSturmRoots Q u v
     (h : IsSturmFamily Q u v) :
     ∃ z : Fin (m + 1) → ℝ, IsSturmRoots Q u v (m + 1) z ∧
       ∀ i : Fin m, z i.castSucc < x i ∧ x i < z i.succ := by
-  obtain ⟨w, hw0, hwsucc, hwtop, hwlt, hwmono⟩ := exists_sturmWalls hx h
+  obtain ⟨w, hw0, hwsucc, hwtop, hwlt, hwstrict⟩ := exists_sturmWalls hx h
   have hwroot : ∀ i : Fin m, w (i.val + 1) = x i := fun i => hwsucc i.val i.isLt
-  have hwmono' : ∀ a b : ℕ, a ≤ b → b ≤ m + 1 → w a ≤ w b := by
-    intro a b hab hb
-    rcases eq_or_lt_of_le hab with rfl | hlt
-    · exact le_rfl
-    · exact (hwmono a b hlt hb).le
-  have hwsign : ∀ j : ℕ, j ≤ m + 1 → 0 < (-1 : ℝ) ^ (m + 1 - j) * (Q (m + 1)).eval (w j) :=
-    fun j hj => sturmWalls_sign hx h hw0 hwsucc hwtop hj
+  have hwmono : ∀ a b : ℕ, a ≤ b → b ≤ m + 1 → w a ≤ w b := fun a b hab hb =>
+    (eq_or_lt_of_le hab).elim (fun heq => (congrArg w heq).le) fun hlt => (hwstrict a b hlt hb).le
+  have hwsign := fun (j : ℕ) (hj : j ≤ m + 1) => sturmWalls_sign hx h hw0 hwsucc hwtop hj
   -- One zero of `Q (m+1)` in each of the `m + 1` gaps.
-  have hzex : ∀ j : Fin (m + 1), ∃ c : ℝ,
-      w j.val < c ∧ c < w (j.val + 1) ∧ (Q (m + 1)).eval c = 0 := by
-    intro j
-    have hjm : j.val ≤ m := Nat.lt_succ_iff.mp j.isLt
-    have hs1 := hwsign j.val (by omega)
-    have hs2 := hwsign (j.val + 1) (by omega)
-    rw [show m + 1 - j.val = (m - j.val) + 1 by omega, pow_succ] at hs1
-    rw [show m + 1 - (j.val + 1) = m - j.val by omega] at hs2
-    have hneg : (Q (m + 1)).eval (w j.val) * (Q (m + 1)).eval (w (j.val + 1)) < 0 := by
-      rcases neg_one_pow_eq_or ℝ (m - j.val) with ha | ha <;> rw [ha] at hs1 hs2 <;> nlinarith
-    obtain ⟨c, hc, hc0⟩ :=
-      exists_root_mem_Ioo_of_eval_mul_neg _ (hwlt j.val hjm).le hneg
-    exact ⟨c, hc.1, hc.2, hc0⟩
-  choose z hzlo hzhi hzroot using hzex
-  have hzmono : StrictMono z := by
-    intro a b hab
-    have hab' : a.val < b.val := hab
-    have h3 : w (a.val + 1) ≤ w b.val := hwmono' _ _ (by omega) (by omega)
-    have h1 := hzhi a
-    have h2 := hzlo b
-    linarith
-  have hzmem : ∀ j : Fin (m + 1), z j ∈ Set.Ioo u v := by
-    intro j
-    have hjm : j.val ≤ m := Nat.lt_succ_iff.mp j.isLt
-    refine ⟨?_, ?_⟩
-    · calc u = w 0 := hw0.symm
-        _ ≤ w j.val := hwmono' 0 j.val (Nat.zero_le _) (by omega)
-        _ < z j := hzlo j
-    · calc z j < w (j.val + 1) := hzhi j
-        _ ≤ w (m + 1) := hwmono' _ _ (by omega) le_rfl
-        _ = v := hwtop
+  choose z hzlo hzhi hzroot using exists_root_mem_gap hwlt hwsign
+  have hzmono : StrictMono z := fun a b hab =>
+    ((hzhi a).trans_le (hwmono _ _ hab b.isLt.le)).trans (hzlo b)
+  have hzmem : ∀ j : Fin (m + 1), z j ∈ Set.Ioo u v := fun j =>
+    ⟨hw0 ▸ (hwmono 0 j.val (Nat.zero_le _) j.isLt.le).trans_lt (hzlo j),
+      hwtop ▸ (hzhi j).trans_le (hwmono _ _ j.isLt le_rfl)⟩
   -- The `m + 1` zeros found exhaust `Q (m+1)`, whose degree is `m + 1`.
-  have hPne : Q (m + 1) ≠ 0 := h.ne_zero (m + 1)
-  set S : Finset ℝ := Finset.image z Finset.univ with hSdef
-  have hmemS : ∀ j, z j ∈ S := fun j => Finset.mem_image_of_mem z (Finset.mem_univ j)
-  have hScard : S.card = m + 1 := by
-    rw [hSdef, Finset.card_image_of_injective _ hzmono.injective, Finset.card_univ,
-      Fintype.card_fin]
-  have hseq : (Q (m + 1)).roots = S.val :=
-    Polynomial.roots_eq_of_natDegree_le_card_of_ne_zero
-      (fun t ht => by obtain ⟨j, -, rfl⟩ := Finset.mem_image.mp ht; exact hzroot j)
-      (by rw [h.degree (m + 1), hScard]) hPne
-  have hexhaust : ∀ t : ℝ, (Q (m + 1)).eval t = 0 → ∃ j, t = z j := by
-    intro t ht
-    have hmem : t ∈ S := by
-      rw [← Finset.mem_val, ← hseq]
-      exact Polynomial.mem_roots'.mpr ⟨hPne, ht⟩
-    obtain ⟨j, -, hj⟩ := Finset.mem_image.mp hmem
-    exact ⟨j, hj.symm⟩
-  have hsimple : ∀ j, (Q (m + 1)).rootMultiplicity (z j) = 1 := fun j => by
-    rw [← Polynomial.count_roots, hseq]
-    exact Multiset.count_eq_one_of_mem S.nodup (hmemS j)
-  -- The gap signs at level `m + 1`, anchored at the wall inside the gap.
-  have hgap : ∀ j' : ℕ, j' ≤ m + 1 → ∀ t : ℝ, t ∈ Set.Ioo u v →
-      (∀ i : Fin (m + 1), i.val < j' → z i < t) → (∀ i : Fin (m + 1), j' ≤ i.val → t < z i) →
-      0 < (-1 : ℝ) ^ (m + 1 - j') * (Q (m + 1)).eval t := by
-    intro j' hj' t _ hlo hhi
-    have hanchor := hwsign j' hj'
-    have hsame : 0 < (Q (m + 1)).eval (w j') * (Q (m + 1)).eval t := by
-      refine eval_mul_pos_of_no_root _ ?_
-      intro c hc hc0
-      obtain ⟨i, rfl⟩ := hexhaust c hc0
-      have him : i.val ≤ m := Nat.lt_succ_iff.mp i.isLt
-      rcases Set.mem_uIcc.mp hc with ⟨h1, h2⟩ | ⟨h1, h2⟩
-      · rcases lt_or_ge i.val j' with hij | hij
-        · have hlt : z i < w j' :=
-            lt_of_lt_of_le (hzhi i) (hwmono' (i.val + 1) j' (by omega) hj')
-          linarith
-        · have := hhi i hij
-          linarith
-      · rcases lt_or_ge i.val j' with hij | hij
-        · have := hlo i hij
-          linarith
-        · have hlt : w j' < z i :=
-            lt_of_le_of_lt (hwmono' j' i.val hij (by omega)) (hzlo i)
-          linarith
-    rcases neg_one_pow_eq_or ℝ (m + 1 - j') with ha | ha <;> rw [ha] at hanchor ⊢ <;> nlinarith
-  -- The alternation of `Q m` on the new zeros is exactly the gap sign at level `m`.
-  have hprevNew : ∀ j : Fin (m + 1),
-      0 < (-1 : ℝ) ^ (m + 1 - 1 - j.val) * (Q (m + 1 - 1)).eval (z j) := by
-    intro j
-    have hjm : j.val ≤ m := Nat.lt_succ_iff.mp j.isLt
-    simp only [Nat.add_sub_cancel]
-    refine hx.gapSign j.val hjm (z j) (hzmem j) ?_ ?_
-    · intro i hi
-      rw [← hwroot i]
-      calc w (i.val + 1) ≤ w j.val := hwmono' _ _ (by omega) (by omega)
-        _ < z j := hzlo j
-    · intro i hi
-      rw [← hwroot i]
-      calc z j < w (j.val + 1) := hzhi j
-        _ ≤ w (i.val + 1) := hwmono' _ _ (by omega) (by omega)
-  refine ⟨z, ⟨hzmono, hzmem, hzroot, hexhaust, hsimple, ?_, hgap, hprevNew⟩, ?_⟩
-  · rw [hseq]; exact hScard
-  · intro i
-    refine ⟨?_, ?_⟩
-    · rw [← hwroot i]
-      exact hzhi i.castSucc
-    · rw [← hwroot i]
-      exact hzlo i.succ
+  have hseq := roots_eq_map_of_injective_of_natDegree_le (h.ne_zero (m + 1)) hzmono.injective
+    hzroot (le_of_eq (h.degree (m + 1)))
+  have hexhaust : ∀ t : ℝ, (Q (m + 1)).eval t = 0 → ∃ j, t = z j := fun t ht =>
+    (Multiset.mem_map.mp (hseq ▸ Polynomial.mem_roots'.mpr ⟨h.ne_zero (m + 1), ht⟩)).imp
+      fun j hj => hj.2.symm
+  refine ⟨z, ⟨hzmono, hzmem, hzroot, hexhaust, fun j => ?_, ?_, ?_, ?_⟩, ?_⟩
+  · rw [← Polynomial.count_roots, hseq, Multiset.count_map_eq_count' _ _ hzmono.injective]; simp
+  · rw [hseq, Multiset.card_map]; simp
+  · exact fun j hj t _ hlo hhi => sturmGap_sign hwmono hzlo hzhi hexhaust hwsign hj hlo hhi
+  · -- The alternation of `Q m` on the new zeros is the gap sign one level down.
+    intro j; simp only [Nat.add_sub_cancel]
+    refine hx.gapSign j.val j.is_le (z j) (hzmem j) (fun i hi => ?_) fun i hi => ?_
+    · rw [← hwroot i]; exact (hwmono _ _ hi j.isLt.le).trans_lt (hzlo j)
+    · rw [← hwroot i]; exact (hzhi j).trans_le (hwmono _ _ (by omega) (by have := i.isLt; omega))
+  · exact fun i => ⟨hwroot i ▸ hzhi i.castSucc, hwroot i ▸ hzlo i.succ⟩
 
 /-- **Every member carries a full set of simple interior zeros**, as many as its degree. -/
 theorem exists_isSturmRoots (h : IsSturmFamily Q u v) (m : ℕ) :
@@ -398,5 +352,16 @@ theorem IsSturmFamily.card_roots (h : IsSturmFamily Q u v) (m : ℕ) :
     Multiset.card (Q m).roots = m := by
   obtain ⟨x, hx⟩ := exists_isSturmRoots h m
   exact hx.card
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.exists_strict_interlacing' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_strict_interlacing
+
+/-- info: 'Shields.IsSturmFamily.card_roots' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms IsSturmFamily.card_roots
 
 end Shields

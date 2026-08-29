@@ -1,8 +1,9 @@
 /-
 Copyright (c) 2026 Johnny Shields. All rights reserved.
-Released under Apache 2.0 license as described in the file LICENSE.
+Released under the MIT license as described in the file LICENSE.txt.
 Authors: Johnny Shields
 -/
+import Shields.Algebra.BigOperators.Finset
 import Shields.Analysis.Analytic.EntirePowerSeries
 import Shields.Analysis.Complex.ArgumentPrinciple.Analytic
 import Shields.Analysis.Complex.ArgumentPrinciple.Polynomial
@@ -39,6 +40,7 @@ import Shields.Analysis.SpecialFunctions.Complex.Sinc
 import Shields.Analysis.SpecialFunctions.Gamma.RatioAsymptotics
 import Shields.Analysis.SpecialFunctions.Log.Bounds
 import Shields.Analysis.SpecialFunctions.Trigonometric.PerturbedCosine
+import Shields.Analysis.SpecialFunctions.PolarCoordAnnulus
 import Shields.Analysis.Complex.CircleIntegralLevel
 import Shields.Analysis.Complex.LaguerrePolya
 import Shields.Analysis.Complex.RealRootedPolynomial
@@ -62,14 +64,17 @@ import Shields.Analysis.Complex.DominantCoeff
 import Shields.Analysis.Complex.EntirePick
 import Shields.Analysis.Complex.ExponentialEstimates
 import Shields.Combinatorics.Young.SchurPolynomial
+import Shields.Combinatorics.Young.SkewCells
 import Shields.Combinatorics.Young.SkewSchurPolynomial
 import Shields.Combinatorics.Young.JacobiTrudi
 import Shields.Combinatorics.Young.LGVMixed
 import Shields.Combinatorics.Young.LGVOddBranching
 import Shields.Combinatorics.Young.LGVOddPaths
+import Shields.Combinatorics.Young.LGVOddResidue
 import Shields.Combinatorics.Young.LGVOddTableau
 import Shields.Combinatorics.Young.LGVOddTableauTwo
 import Shields.Combinatorics.Young.LGVPaths
+import Shields.Combinatorics.Young.LGVSelection
 import Shields.Combinatorics.Young.LGVInvolution
 import Shields.Combinatorics.Young.LGVTableauTwo
 import Shields.Combinatorics.Young.LGVTableau
@@ -94,6 +99,7 @@ import Shields.LinearAlgebra.Matrix.TotallyNonneg.Quadratic
 import Shields.LinearAlgebra.Matrix.TotallyNonneg.Reciprocal
 import Shields.LinearAlgebra.Matrix.TotallyNonneg.RatioRoot
 import Shields.LinearAlgebra.Matrix.Determinant.SnocBorder
+import Shields.Order.Finset.StrictSeparation
 import Shields.Order.Monotone.Fin
 import Shields.LinearAlgebra.Matrix.TotallyNonneg.TriangularCriterion
 import Shields.LinearAlgebra.Matrix.TotallyNonneg.Spectrum
@@ -105,3 +111,13 @@ import Shields.MeasureTheory.Integral.CircleAndreiefBounds
 import Shields.RingTheory.PowerSeries.LagrangeInversion
 import Shields.RingTheory.Symmetric.NewtonMultiset
 import Shields.Topology.CompactDirected
+import Shields.Topology.EMetricSpace.BoundedVariationAlgebra
+import Shields.Topology.EMetricSpace.BoundedVariationRestrict
+import Shields.Analysis.BoundedVariation.DerivBound
+import Shields.Analysis.SpecialFunctions.Trigonometric.TangentSuperadditive
+import Shields.Analysis.SpecialFunctions.Trigonometric.InscribedPolygon
+import Shields.Analysis.Complex.DenseNonReal
+import Shields.Analysis.SpecialFunctions.Trigonometric.MultipleAngleBound
+import Shields.Analysis.SpecificLimits.ConstDivBound
+import Shields.LinearAlgebra.Matrix.Charpoly.Basic
+import Shields.Order.Monotone.TopSelection

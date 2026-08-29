@@ -5,6 +5,9 @@ Authors: Johnny Shields
 -/
 import Mathlib.Analysis.Complex.CauchyIntegral
 import Mathlib.Analysis.Normed.Group.Tannery
+import Shields.Analysis.Complex.DenseNonReal
+import Shields.Analysis.SpecialFunctions.Trigonometric.MultipleAngleBound
+import Shields.Analysis.SpecificLimits.ConstDivBound
 
 /-!
 # An entire function with a sign-definite imaginary part is affine
@@ -36,7 +39,6 @@ radius forces them out.
 
 ## Main statements
 
-* `Shields.abs_sin_natCast_mul_le`: `|sin (nθ)| ≤ n |sin θ|`.
 * `Shields.eq_affine_of_neg_le_im_mul_im`: the theorem, in the form used by a *meromorphic* Pick
   function with finitely many real poles.  Subtracting the principal parts of such a function
   leaves an entire `E` whose sign condition is only violated by a bounded defect `κ`, because
@@ -60,34 +62,6 @@ open Real Set Filter Topology intervalIntegral
 
 namespace Shields
 
-/-! ### The sine comparison -/
-
-/-- `|sin (nθ)| ≤ n |sin θ|`: the elementary inequality that compares a higher harmonic with the
-first one against a nonnegative density. -/
-theorem abs_sin_natCast_mul_le (n : ℕ) (θ : ℝ) :
-    |Real.sin (n * θ)| ≤ n * |Real.sin θ| := by
-  induction n with
-  | zero => simp
-  | succ m ih =>
-      have hstep : ((m : ℝ) + 1) * θ = (m : ℝ) * θ + θ := by ring
-      have hcalc : |Real.sin ((m : ℝ) * θ + θ)| ≤ |Real.sin ((m : ℝ) * θ)| + |Real.sin θ| := by
-        rw [Real.sin_add]
-        calc |Real.sin ((m : ℝ) * θ) * Real.cos θ + Real.cos ((m : ℝ) * θ) * Real.sin θ|
-            ≤ |Real.sin ((m : ℝ) * θ) * Real.cos θ| + |Real.cos ((m : ℝ) * θ) * Real.sin θ| :=
-              abs_add_le _ _
-          _ = |Real.sin ((m : ℝ) * θ)| * |Real.cos θ|
-                + |Real.cos ((m : ℝ) * θ)| * |Real.sin θ| := by rw [abs_mul, abs_mul]
-          _ ≤ |Real.sin ((m : ℝ) * θ)| * 1 + 1 * |Real.sin θ| := by
-              gcongr
-              · exact Real.abs_cos_le_one θ
-              · exact Real.abs_cos_le_one _
-          _ = |Real.sin ((m : ℝ) * θ)| + |Real.sin θ| := by ring
-      push_cast
-      rw [hstep]
-      refine hcalc.trans ?_
-      have : |Real.sin ((m : ℝ) * θ)| ≤ (m : ℝ) * |Real.sin θ| := by exact_mod_cast ih
-      linarith
-
 /-! ### Fourier coefficients on a circle -/
 
 section Fourier
@@ -95,30 +69,24 @@ section Fourier
 variable {f : ℂ → ℂ}
 
 open Complex in
-/-- `Complex.im` passes through an interval integral. -/
-private theorem im_intervalIntegral {a b : ℝ} {g : ℝ → ℂ}
-    (hg : IntervalIntegrable g MeasureTheory.volume a b) :
-    (∫ θ in a..b, g θ).im = ∫ θ in a..b, (g θ).im := by
-  simpa using (Complex.imCLM.intervalIntegral_comp_comm hg).symm
-
-open Complex in
-private theorem circleMap_eq (ρ : ℝ) (θ : ℝ) :
-    circleMap 0 ρ θ = (ρ : ℂ) * Complex.exp ((θ : ℂ) * I) := by
-  simp [circleMap]
-
-open Complex in
 private theorem circleMap_pow (ρ : ℝ) (k : ℕ) (θ : ℝ) :
     (circleMap 0 ρ θ) ^ k = (ρ : ℂ) ^ k * Complex.exp ((k : ℂ) * (θ : ℂ) * I) := by
-  rw [circleMap_eq, mul_pow, ← Complex.exp_nat_mul]
+  rw [circleMap_zero, mul_pow, ← Complex.exp_nat_mul]
   congr 2
   ring
 
-open Complex in
 open Complex in
 /-- Continuity of the integrands below. -/
 private theorem continuous_circle (hf : Differentiable ℂ f) (ρ : ℝ) :
     Continuous fun θ : ℝ => f (circleMap 0 ρ θ) :=
   hf.continuous.comp (continuous_circleMap 0 ρ)
+
+open Complex in
+/-- Continuity of the sine transform's integrand. -/
+private theorem continuous_sin_mul_circle (hf : Differentiable ℂ f) (a ρ : ℝ) :
+    Continuous fun θ : ℝ => (Real.sin (a * θ) : ℂ) * f (circleMap 0 ρ θ) :=
+  (Complex.continuous_ofReal.comp (Real.continuous_sin.comp (by fun_prop))).mul
+    (continuous_circle hf ρ)
 
 open Complex in
 /-- **Positive frequencies vanish**: Cauchy's theorem applied to `z ↦ zᵐ f z`. -/
@@ -205,7 +173,6 @@ private theorem integral_exp_neg_mul (hf : Differentiable ℂ f) (n : ℕ) {ρ :
   field_simp
 
 open Complex in
-open Complex in
 /-- **The sine transform of `f` on the circle of radius `ρ`.**  Subtracting the vanishing positive
 frequency from the coefficient-carrying negative one. -/
 private theorem sineIntegral (hf : Differentiable ℂ f) (m : ℕ) {ρ : ℝ} (hρ : 0 < ρ) :
@@ -217,16 +184,13 @@ private theorem sineIntegral (hf : Differentiable ℂ f) (m : ℕ) {ρ : ℝ} (h
   have hcast : ((m : ℂ) + 1) = ((m + 1 : ℕ) : ℂ) := by push_cast; ring
   rw [hcast] at hB
   have hcont : Continuous fun θ : ℝ => f (circleMap 0 ρ θ) := continuous_circle hf ρ
-  have hi1 : IntervalIntegrable (fun θ : ℝ => (I / 2) *
-      (Complex.exp (-(((m + 1 : ℕ) : ℂ) * (θ : ℂ)) * I) * f (circleMap 0 ρ θ)))
-      MeasureTheory.volume 0 (2 * π) := by
-    apply Continuous.intervalIntegrable
-    exact continuous_const.mul (((Complex.continuous_exp.comp (by fun_prop))).mul hcont)
-  have hi2 : IntervalIntegrable (fun θ : ℝ => (I / 2) *
-      (Complex.exp (((m + 1 : ℕ) : ℂ) * (θ : ℂ) * I) * f (circleMap 0 ρ θ)))
-      MeasureTheory.volume 0 (2 * π) := by
-    apply Continuous.intervalIntegrable
-    exact continuous_const.mul (((Complex.continuous_exp.comp (by fun_prop))).mul hcont)
+  have hi : ∀ e : ℝ → ℂ, Continuous e → IntervalIntegrable
+      (fun θ : ℝ => (I / 2) * (e θ * f (circleMap 0 ρ θ))) MeasureTheory.volume 0 (2 * π) :=
+    fun _ he => (continuous_const.mul (he.mul hcont)).intervalIntegrable _ _
+  have hi1 := hi (fun θ => Complex.exp (-(((m + 1 : ℕ) : ℂ) * (θ : ℂ)) * I))
+    (Complex.continuous_exp.comp (by fun_prop))
+  have hi2 := hi (fun θ => Complex.exp (((m + 1 : ℕ) : ℂ) * (θ : ℂ) * I))
+    (Complex.continuous_exp.comp (by fun_prop))
   have hpt : ∀ θ : ℝ, (Real.sin (((m + 1 : ℕ) : ℝ) * θ) : ℂ) * f (circleMap 0 ρ θ)
       = (I / 2) * (Complex.exp (-(((m + 1 : ℕ) : ℂ) * (θ : ℂ)) * I) * f (circleMap 0 ρ θ))
         - (I / 2) * (Complex.exp (((m + 1 : ℕ) : ℂ) * (θ : ℂ) * I) * f (circleMap 0 ρ θ)) := by
@@ -263,37 +227,25 @@ private theorem coeff_im_eq_zero (hf : Differentiable ℂ f)
   let G : ℝ → ℂ := fun t => (Real.sin (((m + 1 : ℕ) : ℝ) * t) : ℂ) * f (circleMap 0 1 t)
   have hGdef : ∀ t, G t
       = (Real.sin (((m + 1 : ℕ) : ℝ) * t) : ℂ) * f (circleMap 0 1 t) := fun _ => rfl
-  have hcontG : Continuous G := by
-    refine Continuous.mul ?_ (continuous_circle hf 1)
-    exact Complex.continuous_ofReal.comp (Real.continuous_sin.comp (by fun_prop))
-  have hcm : ∀ θ : ℝ, (starRingEnd ℂ) (circleMap 0 1 θ) = circleMap 0 1 (-θ) := by
-    intro θ
-    rw [circleMap_eq, circleMap_eq, map_mul, Complex.conj_ofReal, ← Complex.exp_conj]
+  have hcontG : Continuous G := continuous_sin_mul_circle hf (((m + 1 : ℕ) : ℝ)) 1
+  have hcm : ∀ θ : ℝ, (starRingEnd ℂ) (circleMap 0 1 θ) = circleMap 0 1 (-θ) := fun θ => by
+    rw [circleMap_zero, circleMap_zero, map_mul, Complex.conj_ofReal, ← Complex.exp_conj]
     congr 2
     rw [map_mul, Complex.conj_ofReal, Complex.conj_I]
-    push_cast
-    ring
-  have hper : ∀ θ : ℝ, circleMap 0 1 (2 * π - θ) = circleMap 0 1 (-θ) := by
-    intro θ
-    rw [show 2 * π - θ = -θ + 2 * π by ring]
-    exact periodic_circleMap 0 1 (-θ)
+    push_cast; ring
+  have hper : ∀ θ : ℝ, circleMap 0 1 (2 * π - θ) = circleMap 0 1 (-θ) := fun θ => by
+    rw [show 2 * π - θ = -θ + 2 * π by ring]; exact periodic_circleMap 0 1 (-θ)
   have hsin : ∀ θ : ℝ, Real.sin (((m + 1 : ℕ) : ℝ) * (2 * π - θ))
-      = -Real.sin (((m + 1 : ℕ) : ℝ) * θ) := by
-    intro θ
+      = -Real.sin (((m + 1 : ℕ) : ℝ) * θ) := fun θ => by
     rw [show ((m + 1 : ℕ) : ℝ) * (2 * π - θ)
         = -(((m + 1 : ℕ) : ℝ) * θ) + (m + 1 : ℕ) * (2 * π) by push_cast; ring,
       Real.sin_add_nat_mul_two_pi, Real.sin_neg]
-  have hrefl : ∀ θ : ℝ, (starRingEnd ℂ) (G θ) = -G (2 * π - θ) := by
-    intro θ
+  have hrefl : ∀ θ : ℝ, (starRingEnd ℂ) (G θ) = -G (2 * π - θ) := fun θ => by
     have hL : (starRingEnd ℂ) (G θ)
         = (Real.sin (((m + 1 : ℕ) : ℝ) * θ) : ℂ) * f (circleMap 0 1 (-θ)) := by
       rw [hGdef, map_mul, Complex.conj_ofReal, ← hconj (circleMap 0 1 θ), hcm]
-    have hR : -G (2 * π - θ)
-        = (Real.sin (((m + 1 : ℕ) : ℝ) * θ) : ℂ) * f (circleMap 0 1 (-θ)) := by
-      rw [hGdef, hsin, hper]
-      push_cast
-      ring
-    rw [hL, hR]
+    rw [hL, hGdef, hsin, hper]
+    push_cast; ring
   have hconjS : (starRingEnd ℂ) (∫ θ in (0 : ℝ)..(2 * π), G θ)
       = -(∫ θ in (0 : ℝ)..(2 * π), G θ) := by
     rw [← intervalIntegral.intervalIntegral_conj,
@@ -325,12 +277,12 @@ private theorem sineIntegral_im (hf : Differentiable ℂ f) (m : ℕ) {ρ : ℝ}
       = π * ρ ^ (m + 1) * ((cauchyPowerSeries f 0 1).coeff (m + 1)).re := by
   have hS := sineIntegral hf m hρ
   have hcont : Continuous fun θ : ℝ =>
-      (Real.sin (((m + 1 : ℕ) : ℝ) * θ) : ℂ) * f (circleMap 0 ρ θ) := by
-    refine Continuous.mul ?_ (continuous_circle hf ρ)
-    exact Complex.continuous_ofReal.comp (Real.continuous_sin.comp (by fun_prop))
-  have hIm := im_intervalIntegral (hcont.intervalIntegrable 0 (2 * π))
+      (Real.sin (((m + 1 : ℕ) : ℝ) * θ) : ℂ) * f (circleMap 0 ρ θ) :=
+    continuous_sin_mul_circle hf (((m + 1 : ℕ) : ℝ)) ρ
+  have hIm := (intervalIntegral_im (μ := MeasureTheory.volume)
+    (hcont.intervalIntegrable 0 (2 * π))).symm
   rw [hS] at hIm
-  simp only [Complex.im_ofReal_mul] at hIm
+  simp only [RCLike.im_eq_complex_im, Complex.im_ofReal_mul] at hIm
   rw [← hIm]
   have him0 : ((ρ : ℂ) ^ (m + 1)).im = 0 := by
     rw [← Complex.ofReal_pow]; exact Complex.ofReal_im _
@@ -339,6 +291,13 @@ private theorem sineIntegral_im (hf : Differentiable ℂ f) (m : ℕ) {ρ : ℝ}
   simp [Complex.mul_im, Complex.mul_re, him0, hre0]
 
 /-- Integrability of every integrand below. -/
+private theorem sineIntegral_im_one (hf : Differentiable ℂ f) {ρ : ℝ} (hρ : 0 < ρ) :
+    (∫ θ in (0 : ℝ)..(2 * π), Real.sin θ * (f (circleMap 0 ρ θ)).im)
+      = π * ρ * ((cauchyPowerSeries f 0 1).coeff 1).re := by
+  have h := sineIntegral_im hf 0 hρ
+  norm_num at h
+  exact h
+
 private theorem intervalIntegrable_sinMul (hf : Differentiable ℂ f) (r ρ : ℝ) :
     IntervalIntegrable (fun θ : ℝ => Real.sin (r * θ) * (f (circleMap 0 ρ θ)).im)
       MeasureTheory.volume 0 (2 * π) := by
@@ -353,10 +312,10 @@ private theorem neg_le_sin_mul_im {A B : ℝ}
     {ρ : ℝ} (hρ : 0 < ρ) (θ : ℝ) :
     -((A + B * ρ ^ 2) / ρ) ≤ Real.sin θ * (f (circleMap 0 ρ θ)).im := by
   have him : (circleMap 0 ρ θ).im = ρ * Real.sin θ := by
-    rw [circleMap_eq]
+    rw [circleMap_zero]
     simp [Complex.mul_im, Complex.exp_ofReal_mul_I_im, Complex.exp_ofReal_mul_I_re]
   have hnorm : ‖circleMap 0 ρ θ‖ = ρ := by
-    rw [circleMap_eq]
+    rw [circleMap_zero]
     simp [abs_of_pos hρ]
   have h := hsign (circleMap 0 ρ θ)
   rw [him, hnorm] at h
@@ -375,10 +334,9 @@ private theorem coeff_re_estimate (hf : Differentiable ℂ f) {κ ρ : ℝ} (hρ
           + 2 * κ * (2 * π)) := by
   have h2pi : (0 : ℝ) ≤ 2 * π := by positivity
   have hI1 := intervalIntegrable_sinMul hf (((m + 1 : ℕ) : ℝ)) ρ
-  have hIsin := intervalIntegrable_sinMul hf 1 ρ
   have hIsin' : IntervalIntegrable
       (fun θ : ℝ => Real.sin θ * (f (circleMap 0 ρ θ)).im) MeasureTheory.volume 0 (2 * π) := by
-    simpa only [one_mul] using hIsin
+    simpa only [one_mul] using intervalIntegrable_sinMul hf 1 ρ
   have hI3 : IntervalIntegrable
       (fun θ : ℝ => ((m + 1 : ℕ) : ℝ) * (Real.sin θ * (f (circleMap 0 ρ θ)).im + 2 * κ))
       MeasureTheory.volume 0 (2 * π) :=
@@ -404,11 +362,7 @@ private theorem coeff_re_estimate (hf : Differentiable ℂ f) {κ ρ : ℝ} (hρ
   have habs := intervalIntegral.abs_integral_le_integral_abs (μ := MeasureTheory.volume)
     (f := fun θ : ℝ => Real.sin (((m + 1 : ℕ) : ℝ) * θ) * (f (circleMap 0 ρ θ)).im) h2pi
   have hJn := sineIntegral_im hf m hρ
-  have hJ1 : (∫ θ in (0 : ℝ)..(2 * π), Real.sin θ * (f (circleMap 0 ρ θ)).im)
-      = π * ρ * ((cauchyPowerSeries f 0 1).coeff 1).re := by
-    have h := sineIntegral_im hf 0 hρ
-    norm_num at h
-    exact h
+  have hJ1 := sineIntegral_im_one hf hρ
   have hRHS : (∫ θ in (0 : ℝ)..(2 * π),
         ((m + 1 : ℕ) : ℝ) * (Real.sin θ * (f (circleMap 0 ρ θ)).im + 2 * κ))
       = ((m + 1 : ℕ) : ℝ) * (π * ρ * ((cauchyPowerSeries f 0 1).coeff 1).re
@@ -433,11 +387,7 @@ private theorem coeff_one_re_ge (hf : Differentiable ℂ f) {κ ρ : ℝ} (hρ :
     (hlow : ∀ θ : ℝ, -κ ≤ Real.sin θ * (f (circleMap 0 ρ θ)).im) :
     -(2 * κ / ρ) ≤ ((cauchyPowerSeries f 0 1).coeff 1).re := by
   have hπ : (0 : ℝ) < π := Real.pi_pos
-  have hJ1 : (∫ θ in (0 : ℝ)..(2 * π), Real.sin θ * (f (circleMap 0 ρ θ)).im)
-      = π * ρ * ((cauchyPowerSeries f 0 1).coeff 1).re := by
-    have h := sineIntegral_im hf 0 hρ
-    norm_num at h
-    exact h
+  have hJ1 := sineIntegral_im_one hf hρ
   have hlowint : (∫ _θ in (0 : ℝ)..(2 * π), -κ)
       ≤ ∫ θ in (0 : ℝ)..(2 * π), Real.sin θ * (f (circleMap 0 ρ θ)).im := by
     refine intervalIntegral.integral_mono_on (by positivity) intervalIntegrable_const ?_ ?_
@@ -453,21 +403,6 @@ private theorem coeff_one_re_ge (hf : Differentiable ℂ f) {κ ρ : ℝ} (hρ :
       _ = π * (ρ * ((cauchyPowerSeries f 0 1).coeff 1).re) := by ring
   rw [show -(2 * κ / ρ) = (-(2 * κ)) / ρ by ring, div_le_iff₀ hρ]
   linarith [h2]
-
-/-- A nonnegative quantity dominated by `C/ρ` for every large `ρ` is zero. -/
-private theorem eq_zero_of_abs_le_const_div {x C : ℝ} (h : ∀ ρ : ℝ, 1 ≤ ρ → |x| ≤ C / ρ) :
-    x = 0 := by
-  have hlim : Filter.Tendsto (fun ρ : ℝ => C / ρ) Filter.atTop (nhds 0) :=
-    Filter.Tendsto.div_atTop tendsto_const_nhds Filter.tendsto_id
-  have h0 : |x| ≤ 0 := ge_of_tendsto hlim (Filter.eventually_atTop.2 ⟨1, fun ρ hρ => h ρ hρ⟩)
-  exact abs_eq_zero.1 (le_antisymm h0 (abs_nonneg x))
-
-/-- A quantity bounded below by `-(C/ρ)` for every large `ρ` is nonnegative. -/
-private theorem nonneg_of_neg_const_div_le {x C : ℝ} (h : ∀ ρ : ℝ, 1 ≤ ρ → -(C / ρ) ≤ x) :
-    0 ≤ x := by
-  have hlim : Filter.Tendsto (fun ρ : ℝ => -(C / ρ)) Filter.atTop (nhds 0) := by
-    simpa using (Filter.Tendsto.div_atTop (tendsto_const_nhds (x := C)) Filter.tendsto_id).neg
-  exact le_of_tendsto hlim (Filter.eventually_atTop.2 ⟨1, fun ρ hρ => h ρ hρ⟩)
 
 end Fourier
 
@@ -495,8 +430,6 @@ private theorem coeff_eq_zero_of_two_le {f : ℂ → ℂ} (hf : Differentiable �
     have hρ : (0 : ℝ) < ρ := lt_of_lt_of_le one_pos hρ1
     have hκ : 0 ≤ (A + B * ρ ^ 2) / ρ := by positivity
     have hest := coeff_re_estimate hf hρ hκ (neg_le_sin_mul_im hsign hρ) m
-    have hN : (0 : ℝ) ≤ ((m + 1 : ℕ) : ℝ) := Nat.cast_nonneg _
-    have habs : (0 : ℝ) ≤ |((cauchyPowerSeries f 0 1).coeff (m + 1)).re| := abs_nonneg _
     have hpow : ρ ^ 2 ≤ ρ ^ (m + 1) := pow_le_pow_right₀ hρ1 (by omega)
     have hslack : (A + B * ρ ^ 2) / ρ ≤ (A + B) * ρ := by
       rw [div_le_iff₀ hρ]
@@ -505,42 +438,25 @@ private theorem coeff_eq_zero_of_two_le {f : ℂ → ℂ} (hf : Differentiable �
       nlinarith [h2]
     have step1 : π * ρ ^ 2 * |((cauchyPowerSeries f 0 1).coeff (m + 1)).re|
         ≤ π * ρ ^ (m + 1) * |((cauchyPowerSeries f 0 1).coeff (m + 1)).re| := by
-      have hpx : (0 : ℝ) ≤ π * |((cauchyPowerSeries f 0 1).coeff (m + 1)).re| := by positivity
-      nlinarith [hpow, hpx]
+      gcongr
     have step2 : ((m + 1 : ℕ) : ℝ) * (π * ρ * ((cauchyPowerSeries f 0 1).coeff 1).re
           + 2 * ((A + B * ρ ^ 2) / ρ) * (2 * π))
         ≤ π * ρ * (((m + 1 : ℕ) : ℝ)
             * (|((cauchyPowerSeries f 0 1).coeff 1).re| + 4 * A + 4 * B)) := by
-      have t1 : ((m + 1 : ℕ) : ℝ) * (π * ρ * ((cauchyPowerSeries f 0 1).coeff 1).re)
-          ≤ ((m + 1 : ℕ) : ℝ) * (π * ρ * |((cauchyPowerSeries f 0 1).coeff 1).re|) :=
-        mul_le_mul_of_nonneg_left
-          (mul_le_mul_of_nonneg_left (le_abs_self _) (by positivity)) hN
+      have t1 : ((m + 1 : ℕ) : ℝ) * (π * ρ) * ((cauchyPowerSeries f 0 1).coeff 1).re
+          ≤ ((m + 1 : ℕ) : ℝ) * (π * ρ) * |((cauchyPowerSeries f 0 1).coeff 1).re| :=
+        mul_le_mul_of_nonneg_left (le_abs_self _) (by positivity)
       have t2 : ((m + 1 : ℕ) : ℝ) * (4 * π) * ((A + B * ρ ^ 2) / ρ)
           ≤ ((m + 1 : ℕ) : ℝ) * (4 * π) * ((A + B) * ρ) :=
         mul_le_mul_of_nonneg_left hslack (by positivity)
-      have e1 : ((m + 1 : ℕ) : ℝ) * (π * ρ * ((cauchyPowerSeries f 0 1).coeff 1).re
-            + 2 * ((A + B * ρ ^ 2) / ρ) * (2 * π))
-          = ((m + 1 : ℕ) : ℝ) * (π * ρ * ((cauchyPowerSeries f 0 1).coeff 1).re)
-            + ((m + 1 : ℕ) : ℝ) * (4 * π) * ((A + B * ρ ^ 2) / ρ) := by ring
-      have e2 : π * ρ * (((m + 1 : ℕ) : ℝ)
-            * (|((cauchyPowerSeries f 0 1).coeff 1).re| + 4 * A + 4 * B))
-          = ((m + 1 : ℕ) : ℝ) * (π * ρ * |((cauchyPowerSeries f 0 1).coeff 1).re|)
-            + ((m + 1 : ℕ) : ℝ) * (4 * π) * ((A + B) * ρ) := by ring
-      rw [e1, e2]
-      exact add_le_add t1 t2
+      linarith [t1, t2]
     have hchain : π * ρ ^ 2 * |((cauchyPowerSeries f 0 1).coeff (m + 1)).re|
         ≤ π * ρ * (((m + 1 : ℕ) : ℝ)
             * (|((cauchyPowerSeries f 0 1).coeff 1).re| + 4 * A + 4 * B)) :=
       le_trans (le_trans step1 hest) step2
     rw [le_div_iff₀ hρ]
-    have hpr : (0 : ℝ) < π * ρ := by positivity
-    refine le_of_mul_le_mul_left ?_ hpr
-    calc (π * ρ) * (|((cauchyPowerSeries f 0 1).coeff (m + 1)).re| * ρ)
-        = π * ρ ^ 2 * |((cauchyPowerSeries f 0 1).coeff (m + 1)).re| := by ring
-      _ ≤ π * ρ * (((m + 1 : ℕ) : ℝ)
-            * (|((cauchyPowerSeries f 0 1).coeff 1).re| + 4 * A + 4 * B)) := hchain
-      _ = (π * ρ) * (((m + 1 : ℕ) : ℝ)
-            * (|((cauchyPowerSeries f 0 1).coeff 1).re| + 4 * A + 4 * B)) := by ring
+    refine le_of_mul_le_mul_left ?_ (by positivity : (0 : ℝ) < π * ρ)
+    linarith [hchain]
   exact Complex.ext hre (coeff_im_eq_zero hf hconj m)
 
 private theorem eq_ofReal_of_im_eq_zero' {z : ℂ} (h : z.im = 0) : z = (z.re : ℂ) :=
@@ -656,25 +572,21 @@ theorem eq_affine_of_im_nonneg {f : ℂ → ℂ} (hf : Differentiable ℂ f)
 
 section Meromorphic
 
-/-- The non-real points are dense in the plane. -/
-private theorem dense_im_ne_zero : Dense {z : ℂ | z.im ≠ 0} := by
-  rw [Metric.dense_iff]
-  intro z r hr
-  refine ⟨z + ((if 0 ≤ z.im then r / 2 else -(r / 2) : ℝ) : ℂ) * Complex.I, ?_, ?_⟩
-  · have habs : |(if 0 ≤ z.im then r / 2 else -(r / 2) : ℝ)| = r / 2 := by
-      split_ifs
-      · exact abs_of_pos (by linarith)
-      · rw [abs_neg]; exact abs_of_pos (by linarith)
-    rw [Metric.mem_ball, dist_eq_norm,
-      show z + ((if 0 ≤ z.im then r / 2 else -(r / 2) : ℝ) : ℂ) * Complex.I - z
-        = ((if 0 ≤ z.im then r / 2 else -(r / 2) : ℝ) : ℂ) * Complex.I by ring]
-    simp only [norm_mul, Complex.norm_I, mul_one, Complex.norm_real, Real.norm_eq_abs, habs]
-    linarith
-  · simp only [Set.mem_ofPred_eq, Complex.add_im, Complex.mul_im, Complex.ofReal_re,
-      Complex.I_im, Complex.ofReal_im, Complex.I_re, mul_one, mul_zero, add_zero]
-    split_ifs with h
-    · exact ne_of_gt (by linarith)
-    · exact ne_of_lt (by have := not_le.mp h; linarith)
+/-- A real point is never a non-real one, so a real pole is no obstruction off the axis. -/
+private theorem ofReal_ne_of_im_ne_zero {z : ℂ} (hz : z.im ≠ 0) (lam : ℝ) : (lam : ℂ) ≠ z :=
+  fun h => hz (by rw [← h]; simp)
+
+/-- **Real symmetry extends from the non-real points.**  A continuous `E` agreeing with its own
+reflection off the real axis agrees with it everywhere, because the non-real points are dense.
+
+This is what lets the pole representation, which says nothing at a pole, still pin `E` on the
+axis: the representation is available exactly where `z.im ≠ 0`, and `dense_im_ne_zero` carries
+the conclusion the rest of the way. -/
+private theorem conj_symm_of_im_ne_zero {E : ℂ → ℂ} (hE : Continuous E)
+    (h : ∀ u : ℂ, u.im ≠ 0 → E ((starRingEnd ℂ) u) = (starRingEnd ℂ) (E u)) (u : ℂ) :
+    E ((starRingEnd ℂ) u) = (starRingEnd ℂ) (E u) :=
+  congrFun (Continuous.ext_on dense_im_ne_zero (hE.comp Complex.continuous_conj)
+    (Complex.continuous_conj.comp hE) fun w hw => h w hw) u
 
 /-! ### An infinite pole family -/
 
@@ -721,6 +633,77 @@ theorem im_regularized_mul_im_le {c lam : ℝ} (hc : 0 ≤ c) (hlam : lam ≠ 0)
       div_mul_eq_mul_div, div_le_div_iff₀ hpos hlam2]
     nlinarith [mul_le_mul_of_nonneg_left hkey hc]
 
+/-- The imaginary part of a single principal part at a **real** pole.  The unregularized
+counterpart of `im_regularized`; the two differ by the real constant `c/lam`, which contributes
+nothing here. -/
+theorem im_principalPart (c lam : ℝ) (z : ℂ) :
+    ((c : ℂ) / ((lam : ℂ) - z)).im = c * (z.im / Complex.normSq ((lam : ℂ) - z)) := by
+  rw [div_eq_mul_inv, Complex.im_ofReal_mul, Complex.inv_im]
+  simp only [Complex.sub_im, Complex.ofReal_im, zero_sub, neg_neg]
+
+/-- **The bounded pole defect.**  A real pole contributes at most `c` to `Im · Im`, uniformly in
+`z`, because `lam` real forces `|lam - z| ≥ |Im z|`.
+
+This is what lets a *finite* pole family be handled without the Herglotz--Nevanlinna
+representation: the entire part is never shown to be a Pick function, only to be one up to
+`Σ cᵢ`, which is all `eq_affine_of_neg_le_im_mul_im` asks for.  An infinite family has no such
+uniform bound and pays the quadratic price of `im_regularized_mul_im_le` instead. -/
+theorem im_principalPart_mul_im_le {c lam : ℝ} (hc : 0 ≤ c) (z : ℂ) :
+    ((c : ℂ) / ((lam : ℂ) - z)).im * z.im ≤ c := by
+  rw [im_principalPart]
+  rcases eq_or_lt_of_le (Complex.normSq_nonneg ((lam : ℂ) - z)) with h0 | hpos
+  · rw [← h0, div_zero, mul_zero, zero_mul]
+    exact hc
+  · have hns : z.im ^ 2 ≤ Complex.normSq ((lam : ℂ) - z) := by
+      have him := Complex.im_sq_le_normSq ((lam : ℂ) - z)
+      simp only [Complex.sub_im, Complex.ofReal_im, zero_sub] at him
+      nlinarith [him]
+    rw [show c * (z.im / Complex.normSq ((lam : ℂ) - z)) * z.im
+        = c * (z.im ^ 2 / Complex.normSq ((lam : ℂ) - z)) by ring]
+    exact mul_le_of_le_one_right hc ((div_le_one hpos).2 hns)
+
+
+/-- **A Pick function that is real on the axis has `Im R(z) · Im z ≥ 0` off it.**  Above the axis
+this is the half-plane hypothesis itself.  Below it, the hypothesis says nothing directly, and the
+reflection `R(conj z) = conj (R z)` is what carries it down: `Im R` changes sign with `Im z`, so
+the product does not.
+
+This is the whole use either representation theorem makes of the half-plane bound in the lower
+half-plane, and it is where reality on the axis is spent. -/
+theorem im_mul_im_nonneg_of_pick {R : ℂ → ℂ} {z : ℂ}
+    (hpick : ∀ w : ℂ, 0 < w.im → 0 ≤ (R w).im)
+    (hconj : R ((starRingEnd ℂ) z) = (starRingEnd ℂ) (R z)) (hz : z.im ≠ 0) :
+    0 ≤ (R z).im * z.im := by
+  rcases lt_or_gt_of_ne hz with hneg | hpos
+  · have hzc : 0 < ((starRingEnd ℂ) z).im := by simpa using hneg
+    have h1 := hpick _ hzc
+    rw [hconj] at h1
+    simp only [Complex.conj_im] at h1
+    nlinarith [h1, hneg]
+  · exact mul_nonneg (hpick z hpos) hpos.le
+
+/-- **The entire part carries the sign condition up to the defect that was removed.**  If `R` is
+Pick on the upper half-plane and real on the axis, and the removed part `R - E` contributes at
+most `d` to `Im · Im z`, then `Im E · Im z ≥ -d`.  On the real axis the product is `0` and the
+bound is free, which is the one point `im_mul_im_nonneg_of_pick` does not reach; off the axis the
+two facts subtract.
+
+This is all either representation theorem below asks of its pole part, and the `d` a pole family
+costs is what separates them: a constant `Σ cᵢ` for finitely many poles, a quadratic `C‖z‖²` for a
+summable infinite family. -/
+theorem neg_le_im_mul_im_of_pick {R E : ℂ → ℂ} {d : ℝ} {z : ℂ}
+    (hpick : ∀ w : ℂ, 0 < w.im → 0 ≤ (R w).im)
+    (hconj : z.im ≠ 0 → R ((starRingEnd ℂ) z) = (starRingEnd ℂ) (R z)) (hd : 0 ≤ d)
+    (hdefect : z.im ≠ 0 → (R z - E z).im * z.im ≤ d) :
+    -d ≤ (E z).im * z.im := by
+  rcases eq_or_ne z.im 0 with hz | hz
+  · rw [hz, mul_zero]
+    linarith
+  · have hR0 : 0 ≤ (R z).im * z.im := im_mul_im_nonneg_of_pick hpick (hconj hz) hz
+    have hEz : (E z).im * z.im = (R z).im * z.im - (R z - E z).im * z.im := by
+      rw [Complex.sub_im]; ring
+    rw [hEz]
+    linarith [hdefect hz]
 
 open Complex in
 /-- **The entire part of a meromorphic Pick function with a summable real pole family is affine**,
@@ -745,9 +728,8 @@ theorem eq_affine_entirePart_of_pick {ι : Type*} {R E : ℂ → ℂ} {c lam : �
       R ((starRingEnd ℂ) u) = (starRingEnd ℂ) (R u))
     (hpick : ∀ z : ℂ, 0 < z.im → 0 ≤ (R z).im) :
     ∃ γ b : ℝ, ∀ u : ℂ, E u = γ * u + b := by
-  have hpole : ∀ {z : ℂ}, z.im ≠ 0 → ∀ i, (lam i : ℂ) ≠ z := by
-    intro z hz i h
-    exact hz (by rw [← h]; simp)
+  have hpole : ∀ {z : ℂ}, z.im ≠ 0 → ∀ i, (lam i : ℂ) ≠ z :=
+    fun hz i => ofReal_ne_of_im_ne_zero hz (lam i)
   have hC0 : 0 ≤ C := hC.nonneg fun i => div_nonneg (hc i) (sq_nonneg _)
   have hfam : ∀ (u : ℂ) (i : ι),
       (starRingEnd ℂ) ((c i : ℂ) * (1 / ((lam i : ℂ) - u) - 1 / (lam i : ℂ)))
@@ -755,53 +737,27 @@ theorem eq_affine_entirePart_of_pick {ι : Type*} {R E : ℂ → ℂ} {c lam : �
     intro u i
     simp only [map_mul, map_sub, map_div₀, map_one, Complex.conj_ofReal]
   -- the entire part is real on the axis, by density
-  have hconjE : ∀ u : ℂ, E ((starRingEnd ℂ) u) = (starRingEnd ℂ) (E u) := by
-    have hEqOn : Set.EqOn (fun u : ℂ => E ((starRingEnd ℂ) u))
-        (fun u : ℂ => (starRingEnd ℂ) (E u)) {z : ℂ | z.im ≠ 0} := by
-      intro u hu
-      have hu' : u.im ≠ 0 := hu
-      have huc : ((starRingEnd ℂ) u).im ≠ 0 := by simpa using hu'
-      have h1 := hsplit u (hpole hu')
-      have h2 := hsplit ((starRingEnd ℂ) u) (hpole huc)
+  have hconjE : ∀ u : ℂ, E ((starRingEnd ℂ) u) = (starRingEnd ℂ) (E u) :=
+    conj_symm_of_im_ne_zero hE.continuous fun u hu => by
+      have huc : ((starRingEnd ℂ) u).im ≠ 0 := by simpa using hu
       have h1' : HasSum
           (fun i => (c i : ℂ) * (1 / ((lam i : ℂ) - (starRingEnd ℂ) u) - 1 / (lam i : ℂ)))
           ((starRingEnd ℂ) (R u - E u)) := by
-        have h := h1.star
-        simpa only [RCLike.star_def, hfam u] using h
-      have huq := h2.unique h1'
-      have h3 := hconjR u (hpole hu')
-      simp only
-      rw [map_sub, h3] at huq
+        simpa only [RCLike.star_def, hfam u] using (hsplit u (hpole hu)).star
+      have huq := (hsplit ((starRingEnd ℂ) u) (hpole huc)).unique h1'
+      rw [map_sub, hconjR u (hpole hu)] at huq
       linear_combination -huq
-    exact fun u => congrFun (Continuous.ext_on dense_im_ne_zero
-      (hE.continuous.comp Complex.continuous_conj)
-      (Complex.continuous_conj.comp hE.continuous) hEqOn) u
   -- the sign condition, now with quadratic slack
-  have hsign : ∀ z : ℂ, -(0 + C * ‖z‖ ^ 2) ≤ (E z).im * z.im := by
-    intro z
-    rcases eq_or_ne z.im 0 with hz | hz
-    · rw [hz, mul_zero]
-      have hnn : 0 ≤ C * ‖z‖ ^ 2 := by positivity
-      linarith
-    · have hsp := hsplit z (hpole hz)
-      have him : HasSum
-          (fun i => ((c i : ℂ) * (1 / ((lam i : ℂ) - z) - 1 / (lam i : ℂ))).im * z.im)
-          ((R z - E z).im * z.im) := (Complex.hasSum_im hsp).mul_right _
-      have hbound : HasSum (fun i => c i / lam i ^ 2 * ‖z‖ ^ 2) (C * ‖z‖ ^ 2) := hC.mul_right _
-      have hsum_le : (R z - E z).im * z.im ≤ C * ‖z‖ ^ 2 :=
-        hasSum_le (fun i => im_regularized_mul_im_le (hc i) (hlam i) z) him hbound
-      have hR0 : 0 ≤ (R z).im * z.im := by
-        rcases lt_or_gt_of_ne hz with hneg | hpos
-        · have hzc : 0 < ((starRingEnd ℂ) z).im := by simpa using hneg
-          have h1 := hpick _ hzc
-          rw [hconjR z (hpole hz)] at h1
-          simp only [Complex.conj_im] at h1
-          nlinarith [h1, hneg]
-        · exact mul_nonneg (hpick z hpos) hpos.le
-      have hEz : (E z).im * z.im = (R z).im * z.im - (R z - E z).im * z.im := by
-        rw [Complex.sub_im]; ring
-      rw [hEz]
-      linarith
+  have hsign : ∀ z : ℂ, -(0 + C * ‖z‖ ^ 2) ≤ (E z).im * z.im := fun z =>
+    neg_le_im_mul_im_of_pick hpick (fun hz => hconjR z (hpole hz))
+      (by have := mul_nonneg hC0 (sq_nonneg ‖z‖); linarith) fun hz => by
+        have him : HasSum
+            (fun i => ((c i : ℂ) * (1 / ((lam i : ℂ) - z) - 1 / (lam i : ℂ))).im * z.im)
+            ((R z - E z).im * z.im) := (Complex.hasSum_im (hsplit z (hpole hz))).mul_right _
+        have hbound : HasSum (fun i => c i / lam i ^ 2 * ‖z‖ ^ 2) (C * ‖z‖ ^ 2) := hC.mul_right _
+        have hsum_le : (R z - E z).im * z.im ≤ C * ‖z‖ ^ 2 :=
+          hasSum_le (fun i => im_regularized_mul_im_le (hc i) (hlam i) z) him hbound
+        linarith
   obtain ⟨gam, b, haff⟩ :=
     eq_affine_of_neg_quadratic_le_im_mul_im hE hconjE le_rfl hC0 hsign
   exact ⟨gam, b, haff⟩
@@ -811,10 +767,41 @@ the quadratic hypothesis with `A = 0`, `B = 1` -- with slope `-1`.  So
 `eq_affine_of_neg_quadratic_le_im_mul_im` cannot be strengthened to give `0 ≤ γ`, and
 `nonneg_slope_of_pick` is doing real work rather than repackaging it. -/
 theorem neg_slope_witness (z : ℂ) : -(0 + 1 * ‖z‖ ^ 2) ≤ (-z).im * z.im := by
-  have h : ‖z‖ ^ 2 = z.re ^ 2 + z.im ^ 2 := by
-    rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply]; ring
-  simp only [Complex.neg_im, zero_add, one_mul, h]
-  nlinarith [sq_nonneg z.re, sq_nonneg z.im]
+  simp only [Complex.neg_im, zero_add, one_mul]
+  nlinarith [Complex.im_sq_le_normSq z, Complex.sq_norm z]
+
+/-- The pole sum `S(t) = Σ cᵢ/(λᵢ² + t²)` converges, being dominated termwise by its value on
+the axis. -/
+private theorem summable_poleSum {ι : Type*} {c lam : ι → ℝ} {C : ℝ} (hc : ∀ i, 0 ≤ c i)
+    (hlam : ∀ i, lam i ≠ 0) (hC : HasSum (fun i => c i / lam i ^ 2) C) (t : ℝ) :
+    Summable fun i => c i / (lam i ^ 2 + t ^ 2) :=
+  Summable.of_nonneg_of_le
+    (fun i => div_nonneg (hc i) (by nlinarith [sq_nonneg t, sq_nonneg (lam i), hlam i]))
+    (fun i => div_le_div_of_nonneg_left (hc i) (sq_pos_of_ne_zero (hlam i))
+      (by nlinarith [sq_nonneg t]))
+    hC.summable
+
+/-- **The pole sum vanishes at infinity.**  `S(t) = Σ cᵢ/(λᵢ² + t²) → 0` as `t → ∞`: each term
+tends to `0` and is dominated uniformly in `t` by the summable `cᵢ/λᵢ²`, which is Tannery's
+theorem. -/
+private theorem tendsto_tsum_poleSum {ι : Type*} {c lam : ι → ℝ} {C : ℝ} (hc : ∀ i, 0 ≤ c i)
+    (hlam : ∀ i, lam i ≠ 0) (hC : HasSum (fun i => c i / lam i ^ 2) C) :
+    Filter.Tendsto (fun t : ℝ => ∑' i, c i / (lam i ^ 2 + t ^ 2)) Filter.atTop (nhds 0) := by
+  have h := tendsto_tsum_of_dominated_convergence (𝓕 := Filter.atTop)
+    (f := fun (t : ℝ) (i : ι) => c i / (lam i ^ 2 + t ^ 2)) (g := fun _ : ι => (0 : ℝ))
+    (bound := fun i => c i / lam i ^ 2) hC.summable ?_ ?_
+  · simpa using h
+  · intro i
+    have hdiv : Filter.Tendsto (fun t : ℝ => lam i ^ 2 + t ^ 2) Filter.atTop Filter.atTop := by
+      simpa using Filter.tendsto_atTop_add_const_left Filter.atTop (lam i ^ 2)
+        (tendsto_pow_atTop two_ne_zero)
+    simpa [div_eq_mul_inv] using hdiv.inv_tendsto_atTop.const_mul (c i)
+  · filter_upwards with t i
+    rw [Real.norm_eq_abs,
+      abs_of_nonneg (div_nonneg (hc i)
+        (by nlinarith [sq_nonneg t, sq_nonneg (lam i), hlam i]))]
+    exact div_le_div_of_nonneg_left (hc i) (sq_pos_of_ne_zero (hlam i))
+      (by nlinarith [sq_nonneg t])
 
 open Complex in
 /-- **The slope is nonnegative.**  With a finite pole family the constant defect already delivers
@@ -832,41 +819,16 @@ theorem nonneg_slope_of_pick {ι : Type*} {R E : ℂ → ℂ} {c lam : ι → �
     (hpick : ∀ z : ℂ, 0 < z.im → 0 ≤ (R z).im)
     (haff : ∀ u : ℂ, E u = (γ : ℂ) * u + (b : ℂ)) :
     0 ≤ γ := by
-  have hlam2 : ∀ i, (0 : ℝ) < lam i ^ 2 := fun i => sq_pos_of_ne_zero (hlam i)
-  have hden : ∀ (t : ℝ) (i : ι), (0 : ℝ) < lam i ^ 2 + t ^ 2 := fun t i => by
-    nlinarith [sq_nonneg t, hlam2 i]
-  have hterm_le : ∀ (t : ℝ) (i : ι), c i / (lam i ^ 2 + t ^ 2) ≤ c i / lam i ^ 2 := fun t i =>
-    div_le_div_of_nonneg_left (hc i) (hlam2 i) (by nlinarith [sq_nonneg t])
-  have hterm_nonneg : ∀ (t : ℝ) (i : ι), 0 ≤ c i / (lam i ^ 2 + t ^ 2) := fun t i =>
-    div_nonneg (hc i) (hden t i).le
-  have hsummable : ∀ t : ℝ, Summable fun i => c i / (lam i ^ 2 + t ^ 2) := fun t =>
-    Summable.of_nonneg_of_le (hterm_nonneg t) (hterm_le t) hC.summable
-  -- `S(t) → 0` by Tannery
-  have hlim : Filter.Tendsto (fun t : ℝ => ∑' i, c i / (lam i ^ 2 + t ^ 2))
-      Filter.atTop (nhds 0) := by
-    have h := tendsto_tsum_of_dominated_convergence (𝓕 := Filter.atTop)
-      (f := fun (t : ℝ) (i : ι) => c i / (lam i ^ 2 + t ^ 2)) (g := fun _ : ι => (0 : ℝ))
-      (bound := fun i => c i / lam i ^ 2) hC.summable ?_ ?_
-    · simpa using h
-    · intro i
-      have h1 : Filter.Tendsto (fun t : ℝ => lam i ^ 2 + t ^ 2) Filter.atTop Filter.atTop := by
-        simpa using Filter.tendsto_atTop_add_const_left Filter.atTop (lam i ^ 2)
-          (tendsto_pow_atTop (two_ne_zero))
-      have h2 := h1.inv_tendsto_atTop.const_mul (c i)
-      simpa [div_eq_mul_inv] using h2
-    · filter_upwards with t i
-      rw [Real.norm_eq_abs, abs_of_nonneg (hterm_nonneg t i)]
-      exact hterm_le t i
+  have hlim := tendsto_tsum_poleSum hc hlam hC
   -- the identity on the imaginary axis
   have hkey : ∀ t : ℝ, 0 < t → -(∑' i, c i / (lam i ^ 2 + t ^ 2)) ≤ γ := by
     intro t ht
     have hzim : ((t : ℂ) * Complex.I).im = t := by simp
     have hns : ∀ i : ι, Complex.normSq ((lam i : ℂ) - (t : ℂ) * Complex.I)
-        = lam i ^ 2 + t ^ 2 := by
-      intro i
-      simp only [Complex.normSq_apply, Complex.sub_re, Complex.sub_im, Complex.ofReal_re,
-        Complex.ofReal_im, Complex.mul_re, Complex.mul_im, Complex.I_re, Complex.I_im,
-        mul_zero, mul_one, sub_zero, zero_sub, add_zero]
+        = lam i ^ 2 + t ^ 2 := fun i => by
+      rw [show ((lam i : ℂ) - (t : ℂ) * Complex.I)
+            = (lam i : ℂ) + ((-t : ℝ) : ℂ) * Complex.I by push_cast; ring,
+        Complex.normSq_add_mul_I]
       ring
     have hpoles : ∀ i, (lam i : ℂ) ≠ (t : ℂ) * Complex.I := by
       intro i h
@@ -883,7 +845,7 @@ theorem nonneg_slope_of_pick {ι : Type*} {R E : ℂ → ℂ} {c lam : ι → �
         ((R ((t : ℂ) * Complex.I) - E ((t : ℂ) * Complex.I)).im) := by
       have h := Complex.hasSum_im (hsplit ((t : ℂ) * Complex.I) hpoles)
       simpa only [hterm] using h
-    have huq := him2.unique ((hsummable t).hasSum.mul_left t)
+    have huq := him2.unique ((summable_poleSum hc hlam hC t).hasSum.mul_left t)
     have hEim : (E ((t : ℂ) * Complex.I)).im = γ * t := by
       rw [haff]; simp
     have hRim : (R ((t : ℂ) * Complex.I)).im
@@ -892,11 +854,8 @@ theorem nonneg_slope_of_pick {ι : Type*} {R E : ℂ → ℂ} {c lam : ι → �
       linarith [huq]
     have hge := hpick ((t : ℂ) * Complex.I) (by rw [hzim]; exact ht)
     rw [hRim] at hge
-    have h1 : 0 ≤ t * (γ + ∑' i, c i / (lam i ^ 2 + t ^ 2)) := by linarith [hge]
-    have h2 : 0 ≤ γ + ∑' i, c i / (lam i ^ 2 + t ^ 2) := by
-      by_contra hcon
-      push Not at hcon
-      nlinarith [h1, ht, hcon]
+    have h2 : 0 ≤ γ + ∑' i, c i / (lam i ^ 2 + t ^ 2) :=
+      le_of_mul_le_mul_left (by linarith [hge]) ht
     linarith [h2]
   have hfinal : -γ ≤ 0 := ge_of_tendsto hlim (Filter.eventually_atTop.2 ⟨1, fun t ht => by
     have h := hkey t (lt_of_lt_of_le one_pos ht)
@@ -958,9 +917,8 @@ theorem eq_affine_add_principalParts_of_pick {ι : Type*} [Fintype ι] {R E : �
     ∃ γ : ℝ, 0 ≤ γ ∧ ∃ b : ℝ, ∀ u : ℂ, (∀ i, (lam i : ℂ) ≠ u) →
       R u = (γ : ℂ) * u + (b : ℂ) + ∑ i, (c i : ℂ) / ((lam i : ℂ) - u) := by
   -- a real point is a pole only of a real argument
-  have hpole : ∀ {z : ℂ}, z.im ≠ 0 → ∀ i, (lam i : ℂ) ≠ z := by
-    intro z hz i h
-    exact hz (by rw [← h]; simp)
+  have hpole : ∀ {z : ℂ}, z.im ≠ 0 → ∀ i, (lam i : ℂ) ≠ z :=
+    fun hz i => ofReal_ne_of_im_ne_zero hz (lam i)
   have hpp : ∀ w : ℂ, ∑ i, (c i : ℂ) / ((lam i : ℂ) - (starRingEnd ℂ) w)
       = (starRingEnd ℂ) (∑ i, (c i : ℂ) / ((lam i : ℂ) - w)) := by
     intro w
@@ -968,67 +926,32 @@ theorem eq_affine_add_principalParts_of_pick {ι : Type*} [Fintype ι] {R E : �
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [map_div₀, Complex.conj_ofReal, map_sub, Complex.conj_ofReal]
   -- the entire part is real on the axis, by density
-  have hconjE : ∀ u : ℂ, E ((starRingEnd ℂ) u) = (starRingEnd ℂ) (E u) := by
-    have hEqOn : Set.EqOn (fun u : ℂ => E ((starRingEnd ℂ) u))
-        (fun u : ℂ => (starRingEnd ℂ) (E u)) {z : ℂ | z.im ≠ 0} := by
-      intro u hu
-      have hu' : u.im ≠ 0 := hu
-      have huc : ((starRingEnd ℂ) u).im ≠ 0 := by simpa using hu'
-      have h1 := hsplit u (hpole hu')
-      have h2 := hsplit ((starRingEnd ℂ) u) (hpole huc)
-      have h3 := hconjR u (hpole hu')
-      simp only
+  have hconjE : ∀ u : ℂ, E ((starRingEnd ℂ) u) = (starRingEnd ℂ) (E u) :=
+    conj_symm_of_im_ne_zero hE.continuous fun u hu => by
+      have huc : ((starRingEnd ℂ) u).im ≠ 0 := by simpa using hu
       rw [show E ((starRingEnd ℂ) u)
           = R ((starRingEnd ℂ) u) - ∑ i, (c i : ℂ) / ((lam i : ℂ) - (starRingEnd ℂ) u) by
-        rw [h2]; ring, h3, hpp u, h1, map_add]
+        rw [hsplit ((starRingEnd ℂ) u) (hpole huc)]; ring,
+        hconjR u (hpole hu), hpp u, hsplit u (hpole hu), map_add]
       ring
-    exact fun u => congrFun (Continuous.ext_on dense_im_ne_zero
-      (hE.continuous.comp Complex.continuous_conj)
-      (Complex.continuous_conj.comp hE.continuous) hEqOn) u
   -- the sign condition, with the bounded defect
   have hκ0 : 0 ≤ ∑ i, c i := Finset.sum_nonneg fun i _ => hc i
-  have hsign : ∀ z : ℂ, -(∑ i, c i) ≤ (E z).im * z.im := by
-    intro z
-    rcases eq_or_ne z.im 0 with hz | hz
-    · rw [hz, mul_zero]; linarith
-    · have hsp := hsplit z (hpole hz)
-      have hz2 : 0 < z.im ^ 2 := by positivity
-      have hR0 : 0 ≤ (R z).im * z.im := by
-        rcases lt_or_gt_of_ne hz with hneg | hpos
-        · have hzc : 0 < ((starRingEnd ℂ) z).im := by simpa using hneg
-          have h1 := hpick _ hzc
-          rw [hconjR z (hpole hz)] at h1
-          simp only [Complex.conj_im] at h1
-          nlinarith [h1, hneg]
-        · exact mul_nonneg (hpick z hpos) hpos.le
-      have hterm : ∀ i : ι, ((c i : ℂ) / ((lam i : ℂ) - z)).im * z.im
-          = c i * (z.im ^ 2 / Complex.normSq ((lam i : ℂ) - z)) := by
-        intro i
-        rw [div_eq_mul_inv, Complex.im_ofReal_mul, Complex.inv_im]
-        simp only [Complex.sub_im, Complex.ofReal_im, zero_sub, neg_neg]
-        ring
-      have hle : ∀ i : ι, ((c i : ℂ) / ((lam i : ℂ) - z)).im * z.im ≤ c i := by
-        intro i
-        rw [hterm i]
-        have hns : z.im ^ 2 ≤ Complex.normSq ((lam i : ℂ) - z) := by
-          rw [Complex.normSq_apply]
-          simp only [Complex.sub_im, Complex.ofReal_im, zero_sub]
-          nlinarith [sq_nonneg (((lam i : ℂ) - z).re)]
-        have hnpos : 0 < Complex.normSq ((lam i : ℂ) - z) := lt_of_lt_of_le hz2 hns
-        have hone : z.im ^ 2 / Complex.normSq ((lam i : ℂ) - z) ≤ 1 :=
-          (div_le_one hnpos).2 hns
-        nlinarith [hc i, hone, hz2, hnpos]
-      have hsum_le : (∑ i, (c i : ℂ) / ((lam i : ℂ) - z)).im * z.im ≤ ∑ i, c i := by
-        rw [Complex.im_sum, Finset.sum_mul]
-        exact Finset.sum_le_sum fun i _ => hle i
-      have hEz : (E z).im * z.im
-          = (R z).im * z.im - (∑ i, (c i : ℂ) / ((lam i : ℂ) - z)).im * z.im := by
-        rw [hsp, Complex.add_im]; ring
-      rw [hEz]
-      linarith
+  have hsign : ∀ z : ℂ, -(∑ i, c i) ≤ (E z).im * z.im := fun z =>
+    neg_le_im_mul_im_of_pick hpick (fun hz => hconjR z (hpole hz)) hκ0 fun hz => by
+      have hRE : R z - E z = ∑ i, (c i : ℂ) / ((lam i : ℂ) - z) := by
+        rw [hsplit z (hpole hz)]; ring
+      rw [hRE, Complex.im_sum, Finset.sum_mul]
+      exact Finset.sum_le_sum fun i _ => im_principalPart_mul_im_le (hc i) z
   obtain ⟨gam, b, hgam, haff⟩ := eq_affine_of_neg_le_im_mul_im hE hconjE hsign
   exact ⟨gam, hgam, b, fun u hu => by rw [hsplit u hu, haff u]⟩
 
 end Meromorphic
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.eq_affine_of_im_nonneg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms eq_affine_of_im_nonneg
 
 end Shields

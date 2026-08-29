@@ -101,17 +101,8 @@ theorem ft_interior_data_of_minModulus {n r : ℕ} {a : Fin n → ℝ} {c x₁ :
         w ≠ ftPrincipal (ftTau a r (n - 1)) θ →
         w ≠ (starRingEnd ℂ) (ftPrincipal (ftTau a r (n - 1)) θ) →
         ftTau a r (n - 1) θ < ‖w‖) :
-    ∃ (CI σI AI : ℝ) (S : Finset ℝ), 0 < σI ∧ σI < 1 ∧ 0 < AI ∧
-      (∀ (M : ℕ) (θ : ℝ), ε ≤ θ → θ ≤ Real.pi / r - ε →
-        |ftRemainder (ftRootPoly c a) B r (ftBranchZLower a c r (n - 1))
-          (ftTauArc a r (n - 1) x₁) M θ| ≤ CI * σI ^ M) ∧
-      (∀ θ : ℝ, ε ≤ θ → θ ≤ Real.pi / r - ε →
-        AI * ∏ θj ∈ S, |θ - θj|
-            ^ (B.rootMultiplicity (ftPrincipal (ftTauArc a r (n - 1) x₁) θj))
-          ≤ ftPrincipalAmp (ftRootPoly c a) B r (ftBranchZLower a c r (n - 1))
-            (ftTauArc a r (n - 1) x₁) θ) ∧
-      (∀ θj ∈ S, 1 ≤ B.rootMultiplicity (ftPrincipal (ftTauArc a r (n - 1) x₁) θj)) ∧
-      (∀ θj ∈ S, θj ∈ Set.Icc ε (Real.pi / r - ε)) := by
+    FTInteriorData (ftRootPoly c a) B r (ftBranchZLower a c r (n - 1))
+      (ftTauArc a r (n - 1) x₁) ε (Real.pi / r - ε) := by
   have hn : 0 < n := by omega
   have hr1 : 1 ≤ r := hr
   have hrR : (0 : ℝ) < r := by exact_mod_cast (by omega : 0 < r)
@@ -147,17 +138,8 @@ theorem ft_interior_data_on_arc_two_le {n r : ℕ} {a : Fin n → ℝ} {c x₁ :
     {B : Polynomial ℂ} (hn2 : 2 ≤ n) (ha : ∀ k, 0 < a k) (hc : 0 < c) (hr : 2 ≤ r)
     (hB : HasRealCoeffs B) (hB0 : B ≠ 0) {ε : ℝ} (hε : 0 < ε)
     (hεb : ε ≤ Real.pi / r - ε) :
-    ∃ (CI σI AI : ℝ) (S : Finset ℝ), 0 < σI ∧ σI < 1 ∧ 0 < AI ∧
-      (∀ (M : ℕ) (θ : ℝ), ε ≤ θ → θ ≤ Real.pi / r - ε →
-        |ftRemainder (ftRootPoly c a) B r (ftBranchZLower a c r (n - 1))
-          (ftTauArc a r (n - 1) x₁) M θ| ≤ CI * σI ^ M) ∧
-      (∀ θ : ℝ, ε ≤ θ → θ ≤ Real.pi / r - ε →
-        AI * ∏ θj ∈ S, |θ - θj|
-            ^ (B.rootMultiplicity (ftPrincipal (ftTauArc a r (n - 1) x₁) θj))
-          ≤ ftPrincipalAmp (ftRootPoly c a) B r (ftBranchZLower a c r (n - 1))
-            (ftTauArc a r (n - 1) x₁) θ) ∧
-      (∀ θj ∈ S, 1 ≤ B.rootMultiplicity (ftPrincipal (ftTauArc a r (n - 1) x₁) θj)) ∧
-      (∀ θj ∈ S, θj ∈ Set.Icc ε (Real.pi / r - ε)) :=
+    FTInteriorData (ftRootPoly c a) B r (ftBranchZLower a c r (n - 1))
+      (ftTauArc a r (n - 1) x₁) ε (Real.pi / r - ε) :=
   ft_interior_data_of_minModulus (x₁ := x₁) hn2 ha hc (by omega) hB hB0 hε hεb
     (ft_minModulus_at_branch_two_le hn2 ha hc hr)
 
@@ -174,17 +156,8 @@ theorem ft_interior_data_on_arc_one {n : ℕ} {a : Fin n → ℝ} {c x₁ : ℝ}
     {B : Polynomial ℂ} (hn3 : 3 ≤ n) (ha : ∀ k, 0 < a k) (hc : 0 < c)
     (hB : HasRealCoeffs B) (hB0 : B ≠ 0) {ε : ℝ} (hε : 0 < ε)
     (hεb : ε ≤ Real.pi / ((1 : ℕ) : ℝ) - ε) :
-    ∃ (CI σI AI : ℝ) (S : Finset ℝ), 0 < σI ∧ σI < 1 ∧ 0 < AI ∧
-      (∀ (M : ℕ) (θ : ℝ), ε ≤ θ → θ ≤ Real.pi / ((1 : ℕ) : ℝ) - ε →
-        |ftRemainder (ftRootPoly c a) B 1 (ftBranchZLower a c 1 (n - 1))
-          (ftTauArc a 1 (n - 1) x₁) M θ| ≤ CI * σI ^ M) ∧
-      (∀ θ : ℝ, ε ≤ θ → θ ≤ Real.pi / ((1 : ℕ) : ℝ) - ε →
-        AI * ∏ θj ∈ S, |θ - θj|
-            ^ (B.rootMultiplicity (ftPrincipal (ftTauArc a 1 (n - 1) x₁) θj))
-          ≤ ftPrincipalAmp (ftRootPoly c a) B 1 (ftBranchZLower a c 1 (n - 1))
-            (ftTauArc a 1 (n - 1) x₁) θ) ∧
-      (∀ θj ∈ S, 1 ≤ B.rootMultiplicity (ftPrincipal (ftTauArc a 1 (n - 1) x₁) θj)) ∧
-      (∀ θj ∈ S, θj ∈ Set.Icc ε (Real.pi / ((1 : ℕ) : ℝ) - ε)) :=
+    FTInteriorData (ftRootPoly c a) B 1 (ftBranchZLower a c 1 (n - 1))
+      (ftTauArc a 1 (n - 1) x₁) ε (Real.pi / ((1 : ℕ) : ℝ) - ε) :=
   ft_interior_data_of_minModulus (x₁ := x₁) (by omega) ha hc (le_refl 1) hB hB0 hε hεb
     (ft_minModulus_at_branch_pi hn3 ha hc)
 
@@ -203,7 +176,7 @@ upper endpoint retains the principal pair at `r = 1` and the `r`-root cluster at
 `WeightedDominanceBranchOne.ft_weighted_dominance_one_unconditional` is the
 `ρ > 1`, `r = 1` one at `n = 3`.  Neither is the other with a hypothesis
 relaxed, which is why each needed its own upper block:
-`SimpleEndpoint.clusterAlpha_one_eq_zero` and `hEp_false_of_rho_one` show the
+`Cluster.clusterAlpha_one_eq_zero` and `hEp_false_of_rho_one` show the
 lower endpoint's slope datum degenerates and one of its binders goes false at
 `ρ = 1`, and at `r = 1` the upper endpoint is finite rather than at the origin, so
 the amplitude floor takes the other of the two routes `eq:ab-def` distinguishes.
@@ -258,16 +231,8 @@ theorem ft_weighted_dominance_unconditional {n r ρ : ℕ} {a : Fin n → ℝ} {
   -- the interior data at that `ε`, produced rather than assumed; the window may be
   -- empty, and then every interior clause is vacuous and the divisor is too
   obtain ⟨CI, σI, AI, S, hσ0, hσ1, hA, hrem, hfloor, hν, hSband⟩ :
-      ∃ (CI σI AI : ℝ) (S : Finset ℝ), 0 < σI ∧ σI < 1 ∧ 0 < AI ∧
-        (∀ (M : ℕ) (θ : ℝ), ε ≤ θ → θ ≤ Real.pi / r - ε →
-          |ftRemainder (ftRootPoly c a) B r (ftBranchZLower a c r (n - 1))
-            (ftTauArc a r (n - 1) x₁) M θ| ≤ CI * σI ^ M) ∧
-        (∀ θ : ℝ, ε ≤ θ → θ ≤ Real.pi / r - ε →
-          AI * ∏ θj ∈ S, |θ - θj| ^ (B.rootMultiplicity (ftPrincipal (ftTauArc a r (n - 1) x₁) θj))
-            ≤ ftPrincipalAmp (ftRootPoly c a) B r (ftBranchZLower a c r (n - 1))
-              (ftTauArc a r (n - 1) x₁) θ) ∧
-        (∀ θj ∈ S, 1 ≤ B.rootMultiplicity (ftPrincipal (ftTauArc a r (n - 1) x₁) θj)) ∧
-        (∀ θj ∈ S, θj ∈ Set.Icc ε (Real.pi / r - ε)) := by
+      FTInteriorData (ftRootPoly c a) B r (ftBranchZLower a c r (n - 1))
+        (ftTauArc a r (n - 1) x₁) ε (Real.pi / r - ε) := by
     by_cases hεb : ε ≤ Real.pi / r - ε
     · exact ft_interior_data_on_arc_two_le hn2 ha hc hr hB hB0' hε hεb
     · exact ⟨1, 1 / 2, 1, ∅, by norm_num, by norm_num, by norm_num,
@@ -290,7 +255,7 @@ theorem ft_weighted_dominance_unconditional {n r ρ : ℕ} {a : Fin n → ℝ} {
     -- has length `2exp(-κM/ν_j)`, the largest multiplicity gives the slowest decay,
     -- and there are `|S|` of them
     rcases S.eq_empty_or_nonempty with rfl | hSne
-    · exact ⟨1, one_pos, 1, one_pos, fun M => by simp; positivity⟩
+    · exact ⟨1, one_pos, 1, one_pos, fun M => by simp only [Finset.sum_empty]; positivity⟩
     have hcard0 : 0 < (S.card : ℝ) := by
       exact_mod_cast Finset.card_pos.2 hSne
     have hlog : 0 < -Real.log σI := by

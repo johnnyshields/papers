@@ -45,9 +45,16 @@ the constant in `tvDist_bernConv_poisPMF_le` therefore reads `2\sum_ip_i^2` rath
 
 ## Main results
 
-* `Shields.tvDist_bernConv_poisPMF_le` — Le Cam's inequality.
-* `Shields.tvDist_binomialConv_poisPMF_le` — its binomial specialization, `2\lambda^2/N`, which is
-  what a Poisson factor replaced by binomials of the same mean costs.
+* `Shields.tvDist_bernPMF_poisPMF_le` — the one-variable estimate `2t^2`, which is the whole
+  content; `Shields.tvDist_pbNat_poisPMF_le` is **Le Cam's inequality**, `2\sum_ip_i^2`, obtained
+  from it by the convolution bound `Shields.tvDist_dconv_le`.
+* `Shields.exists_pbNat_tvDist_poisPMF_le` — the Poisson limit theorem in total variation: at `N`
+  trials the cost is `2\lambda^2/N`, so a Poisson factor is replaced by binomials of the same mean
+  at arbitrarily small cost.
+* `Shields.mode_of_dconv_pbNat` — Darroch's theorem for a convolution of two Poisson binomials,
+  which is what the replacement is fed to.
+* `Shields.mode_of_dconv_pbNat_poisPMF`, `Shields.mode_of_approx_bernPoisson` — the mode placement
+  that replacement buys, for a finite Bernoulli family and for an approximable one.
 -/
 
 namespace Shields
@@ -67,8 +74,13 @@ theorem IsPMF.summable (hp : IsPMF p) : Summable p := hp.hasSum.summable
 
 theorem IsPMF.tsum_eq (hp : IsPMF p) : ∑' n, p n = 1 := hp.hasSum.tsum_eq
 
-theorem IsPMF.summable_norm (hp : IsPMF p) : Summable fun n => ‖p n‖ := by
-  simpa only [Real.norm_eq_abs, abs_of_nonneg (hp.nonneg _)] using hp.summable
+/-- A summable nonnegative real family is absolutely summable, its norm being itself. -/
+theorem summable_norm_of_nonneg (hp0 : ∀ n, 0 ≤ p n) (hp : Summable p) :
+    Summable fun n => ‖p n‖ := by
+  simpa only [Real.norm_eq_abs, abs_of_nonneg (hp0 _)] using hp
+
+theorem IsPMF.summable_norm (hp : IsPMF p) : Summable fun n => ‖p n‖ :=
+  summable_norm_of_nonneg hp.nonneg hp.summable
 
 /-- The unnormalized total-variation distance, `\sum_k|p_k-q_k|`. -/
 noncomputable def tvDist (p q : ℕ → ℝ) : ℝ := ∑' k, |p k - q k|
@@ -108,12 +120,22 @@ noncomputable def dconv (p q : ℕ → ℝ) (n : ℕ) : ℝ :=
 theorem dconv_nonneg (hp : ∀ n, 0 ≤ p n) (hq : ∀ n, 0 ≤ q n) (n : ℕ) : 0 ≤ dconv p q n :=
   Finset.sum_nonneg fun _ _ => mul_nonneg (hp _) (hq _)
 
+/-- A convolution is positive at `n` as soon as the first factor is positive at `0` and the second
+at `n`: that single term already sits below the sum. -/
+theorem dconv_pos (hp : ∀ n, 0 ≤ p n) (hq : ∀ n, 0 ≤ q n) (hp0 : 0 < p 0) {n : ℕ}
+    (hqn : 0 < q n) : 0 < dconv p q n := by
+  rw [dconv]
+  refine lt_of_lt_of_le ?_ (Finset.single_le_sum (f := fun k => p k * q (n - k))
+    (fun k _ => mul_nonneg (hp k) (hq _)) (Finset.mem_range.2 (Nat.succ_pos n)))
+  rw [Nat.sub_zero]
+  exact mul_pos hp0 hqn
+
 theorem dconv_comm (p q : ℕ → ℝ) : dconv p q = dconv q p := by
   funext n
   simp only [dconv]
   rw [← Finset.sum_range_reflect (fun k => p k * q (n - k)) (n + 1)]
   refine Finset.sum_congr rfl fun k hk => ?_
-  have hkn : k ≤ n := Nat.lt_succ_iff.1 (Finset.mem_range.1 hk)
+  have hkn : k ≤ n := Finset.mem_range_succ_iff.1 hk
   rw [show n + 1 - 1 - k = n - k from by omega, show n - (n - k) = k from by omega]
   ring
 
@@ -135,11 +157,8 @@ theorem dconv_assoc (p q r : ℕ → ℝ) : dconv (dconv p q) r = dconv p (dconv
 product sum. -/
 theorem hasSum_dconv {a b : ℝ} (hp0 : ∀ n, 0 ≤ p n) (hq0 : ∀ n, 0 ≤ q n)
     (hp : HasSum p a) (hq : HasSum q b) : HasSum (dconv p q) (a * b) := by
-  have hpn : Summable fun n => ‖p n‖ := by
-    simpa only [Real.norm_eq_abs, abs_of_nonneg (hp0 _)] using hp.summable
-  have hqn : Summable fun n => ‖q n‖ := by
-    simpa only [Real.norm_eq_abs, abs_of_nonneg (hq0 _)] using hq.summable
-  have h := hasSum_sum_range_mul_of_summable_norm hpn hqn
+  have h := hasSum_sum_range_mul_of_summable_norm (summable_norm_of_nonneg hp0 hp.summable)
+    (summable_norm_of_nonneg hq0 hq.summable)
   rw [hp.tsum_eq, hq.tsum_eq] at h
   exact h
 
@@ -172,15 +191,19 @@ theorem tvDist_dconv_le (hp : IsPMF p) (hq : IsPMF q) (hr : IsPMF r) :
         hsl.tsum_le_tsum hle hmaj.summable
     _ = tvDist p q := hmaj.tsum_eq
 
+/-- The same contraction on the other side, the convolution factor now fixed on the left. -/
+theorem tvDist_dconv_le' (hp : IsPMF p) (hq : IsPMF q) (hr : IsPMF r) :
+    tvDist (dconv r p) (dconv r q) ≤ tvDist p q := by
+  rw [dconv_comm r p, dconv_comm r q]
+  exact tvDist_dconv_le hp hq hr
+
 /-- Convolution is a contraction in both arguments at once. -/
 theorem tvDist_dconv_le₂ (hp : IsPMF p) (hq : IsPMF q) (hr : IsPMF r) (hs : IsPMF s) :
     tvDist (dconv p r) (dconv q s) ≤ tvDist p q + tvDist r s := by
   refine (tvDist_triangle (q := dconv q r) ((hp.dconv hr).summable_sub (hq.dconv hr))
     ((hq.dconv hr).summable_sub (hq.dconv hs))).trans ?_
   have h₁ : tvDist (dconv p r) (dconv q r) ≤ tvDist p q := tvDist_dconv_le hp hq hr
-  have h₂ : tvDist (dconv q r) (dconv q s) ≤ tvDist r s := by
-    rw [dconv_comm q r, dconv_comm q s]
-    exact tvDist_dconv_le hr hs hq
+  have h₂ : tvDist (dconv q r) (dconv q s) ≤ tvDist r s := tvDist_dconv_le' hr hs hq
   linarith
 
 /-! ### The three mass functions -/
@@ -205,6 +228,12 @@ theorem bernPMF_of_two_le {t : ℝ} {n : ℕ} (hn : 2 ≤ n) : bernPMF t n = 0 :
   have h1 : n ≠ 1 := by omega
   simp [bernPMF, h0, h1]
 
+/-- Off `\{0,1\}` the Bernoulli mass vanishes.  This is `Shields.bernPMF_of_two_le` in the form
+every sum over the support consumes it. -/
+theorem bernPMF_of_notMem_zero_one {t : ℝ} {n : ℕ} (hn : n ∉ ({0, 1} : Finset ℕ)) :
+    bernPMF t n = 0 :=
+  bernPMF_of_two_le (by simp only [Finset.mem_insert, Finset.mem_singleton, not_or] at hn; omega)
+
 theorem isPMF_bernPMF {t : ℝ} (h0 : 0 ≤ t) (h1 : t ≤ 1) : IsPMF (bernPMF t) where
   nonneg n := by
     match n with
@@ -212,11 +241,7 @@ theorem isPMF_bernPMF {t : ℝ} (h0 : 0 ≤ t) (h1 : t ≤ 1) : IsPMF (bernPMF t
     | 1 => simpa using h0
     | (m + 2) => simp [bernPMF_of_two_le (show 2 ≤ m + 2 by omega)]
   hasSum := by
-    have h : ∀ n ∉ ({0, 1} : Finset ℕ), bernPMF t n = 0 := by
-      intro n hn
-      simp only [Finset.mem_insert, Finset.mem_singleton, not_or] at hn
-      exact bernPMF_of_two_le (by omega)
-    simpa using hasSum_sum_of_ne_finset_zero h
+    simpa using hasSum_sum_of_ne_finset_zero fun n hn => bernPMF_of_notMem_zero_one (t := t) hn
 
 /-- The Poisson mass function with mean `t`. -/
 noncomputable def poisPMF (t : ℝ) (n : ℕ) : ℝ := Real.exp (-t) * t ^ n / n !
@@ -256,18 +281,11 @@ theorem dconv_poisPMF (a b : ℝ) : dconv (poisPMF a) (poisPMF b) = poisPMF (a +
       = (a + b) ^ n / n ! := by
     rw [add_pow, Finset.sum_div]
     refine Finset.sum_congr rfl fun k hk => ?_
-    have hkn : k ≤ n := Nat.lt_succ_iff.1 (Finset.mem_range.1 hk)
-    have hfac : ((k)! : ℝ) * ((n - k)! : ℝ) * (n.choose k : ℝ) = ((n)! : ℝ) := by
-      have h := Nat.choose_mul_factorial_mul_factorial hkn
-      have h' : ((n.choose k * k ! * (n - k)! : ℕ) : ℝ) = ((n ! : ℕ) : ℝ) := by exact_mod_cast h
-      push_cast at h'
-      linarith
-    have hrec : (1 : ℝ) / ((k ! : ℝ) * ((n - k)! : ℝ)) = (n.choose k : ℝ) / (n ! : ℝ) := by
-      rw [div_eq_div_iff (by positivity) (by positivity), ← hfac]; ring
-    calc a ^ k / k ! * (b ^ (n - k) / (n - k)!)
-        = a ^ k * b ^ (n - k) * (1 / ((k ! : ℝ) * ((n - k)! : ℝ))) := by ring
-      _ = a ^ k * b ^ (n - k) * ((n.choose k : ℝ) / (n ! : ℝ)) := by rw [hrec]
-      _ = a ^ k * b ^ (n - k) * (n.choose k : ℝ) / (n ! : ℝ) := by ring
+    rw [Nat.cast_choose ℝ (Finset.mem_range_succ_iff.1 hk)]
+    have h1 : ((k)! : ℝ) ≠ 0 := Nat.cast_ne_zero.2 k.factorial_ne_zero
+    have h2 : ((n - k)! : ℝ) ≠ 0 := Nat.cast_ne_zero.2 (n - k).factorial_ne_zero
+    have h3 : ((n)! : ℝ) ≠ 0 := Nat.cast_ne_zero.2 n.factorial_ne_zero
+    field_simp
   calc dconv (poisPMF a) (poisPMF b) n
       = Real.exp (-(a + b)) * ∑ k ∈ Finset.range (n + 1),
           a ^ k / k ! * (b ^ (n - k) / (n - k)!) := by
@@ -283,47 +301,33 @@ theorem dconv_poisPMF (a b : ℝ) : dconv (poisPMF a) (poisPMF b) = poisPMF (a +
 theorem tvDist_bernPMF_poisPMF {t : ℝ} (h0 : 0 ≤ t) :
     tvDist (bernPMF t) (poisPMF t) = 2 * t * (1 - Real.exp (-t)) := by
   have hexp : Real.exp (-t) ≤ 1 := Real.exp_le_one_iff.2 (by linarith)
-  have hlin : 1 - t ≤ Real.exp (-t) := by
-    have := Real.add_one_le_exp (-t); linarith
+  have hlin : 1 - t ≤ Real.exp (-t) := by linarith [Real.add_one_le_exp (-t)]
   set f : ℕ → ℝ := fun k => |bernPMF t k - poisPMF t k| with hf
   set c : ℕ → ℝ := fun k => f k - poisPMF t k with hc
-  have hf0 : f 0 = Real.exp (-t) - (1 - t) := by
-    rw [hf]
+  have hc0 : c 0 = t - 1 := by
+    rw [hc, hf]
     simp only [bernPMF_zero, poisPMF_zero_apply]
-    rw [abs_of_nonpos (by linarith)]
-    ring
-  have hf1 : f 1 = t - t * Real.exp (-t) := by
-    rw [hf]
-    simp only [bernPMF_one, poisPMF_one_apply]
-    rw [abs_of_nonneg (by nlinarith)]
-  have hc0 : c 0 = t - 1 := by rw [hc]; simp only [hf0, poisPMF_zero_apply]; ring
+    rw [abs_of_nonpos (by linarith)]; ring
   have hc1 : c 1 = t - 2 * (t * Real.exp (-t)) := by
-    rw [hc]; simp only [hf1, poisPMF_one_apply]; ring
+    rw [hc, hf]
+    simp only [bernPMF_one, poisPMF_one_apply]
+    rw [abs_of_nonneg (by nlinarith)]; ring
   have hcz : ∀ n ∉ ({0, 1} : Finset ℕ), c n = 0 := by
     intro n hn
-    simp only [Finset.mem_insert, Finset.mem_singleton, not_or] at hn
-    have hn2 : 2 ≤ n := by omega
     have hfn : f n = poisPMF t n := by
-      rw [hf]
-      simp only [bernPMF_of_two_le hn2, zero_sub, abs_neg]
+      rw [hf]; simp only [bernPMF_of_notMem_zero_one hn, zero_sub, abs_neg]
       exact abs_of_nonneg (poisPMF_nonneg h0 n)
     simp [hc, hfn]
-  have hcs : HasSum c (c 0 + c 1) := by
-    have h : HasSum c (∑ b ∈ ({0, 1} : Finset ℕ), c b) := hasSum_sum_of_ne_finset_zero hcz
-    simpa using h
+  have hcs : HasSum c (c 0 + c 1) := by simpa using hasSum_sum_of_ne_finset_zero hcz
   have hfs : HasSum f (1 + (c 0 + c 1)) := by
     have heq : ∀ n, f n = poisPMF t n + c n := fun n => by rw [hc]; ring
-    have h := (hasSum_poisPMF t).add hcs
-    exact (funext heq : f = _) ▸ h
-  have hval : tvDist (bernPMF t) (poisPMF t) = 1 + (c 0 + c 1) := hfs.tsum_eq
-  rw [hval, hc0, hc1]; ring
+    simpa only [← heq] using (hasSum_poisPMF t).add hcs
+  rw [show tvDist (bernPMF t) (poisPMF t) = 1 + (c 0 + c 1) from hfs.tsum_eq, hc0, hc1]; ring
 
 theorem tvDist_bernPMF_poisPMF_le {t : ℝ} (h0 : 0 ≤ t) :
     tvDist (bernPMF t) (poisPMF t) ≤ 2 * t ^ 2 := by
   rw [tvDist_bernPMF_poisPMF h0]
-  have hlin : 1 - t ≤ Real.exp (-t) := by
-    have := Real.add_one_le_exp (-t); linarith
-  nlinarith
+  nlinarith [Real.add_one_le_exp (-t)]
 
 variable {ι κ : Type*}
 
@@ -372,10 +376,8 @@ theorem dconv_bernPMF_succ (t : ℝ) (q : ℕ → ℝ) (n : ℕ) :
   have hsub : ({0, 1} : Finset ℕ) ⊆ Finset.range (n + 2) := by
     simp [Finset.insert_subset_iff]
   have hz : ∀ x ∈ Finset.range (n + 2), x ∉ ({0, 1} : Finset ℕ) →
-      bernPMF t x * q (n + 1 - x) = 0 := by
-    intro x _ hx
-    simp only [Finset.mem_insert, Finset.mem_singleton, not_or] at hx
-    rw [bernPMF_of_two_le (by omega), zero_mul]
+      bernPMF t x * q (n + 1 - x) = 0 := fun x _ hx => by
+    rw [bernPMF_of_notMem_zero_one hx, zero_mul]
   rw [dconv, ← Finset.sum_subset hsub hz]
   simp
 
@@ -389,7 +391,7 @@ theorem pbNat_insert [DecidableEq ι] {s : Finset ι} {i : ι} (hi : i ∉ s) (p
     rw [dconv_bernPMF_zero, pbNat, hrec, pbPmf_of_neg _ _ (by norm_num : ((0 : ℕ) : ℤ) - 1 < 0)]
     simp [pbNat]
   | (m + 1) =>
-    have he : ((m + 1 : ℕ) : ℤ) - 1 = (m : ℤ) := by push_cast; ring
+    have he : ((m + 1 : ℕ) : ℤ) - 1 = (m : ℤ) := by omega
     rw [dconv_bernPMF_succ, pbNat, hrec, he]
     rfl
 
@@ -444,10 +446,38 @@ theorem tvDist_pbNat_poisPMF_le {p : ι → ℝ} (hp0 : ∀ i, 0 ≤ p i) (hp1 :
 
 /-! ### The Poisson binomial mode, unconditionally -/
 
-theorem pbPoly_disjSum (s : Finset ι) (t : Finset κ) (p : ι → ℝ) (q : κ → ℝ) :
-    pbPoly (s.disjSum t) (Sum.elim p q) = pbPoly s p * pbPoly t q := by
-  rw [pbPoly, pbPoly, pbPoly, Finset.prod_disjSum]
-  simp
+/-- **The Poisson limit theorem in total variation.**  A Poisson law of mean `lam` is approximated
+to within any prescribed `\varepsilon` by a Poisson binomial of the *same* mean: run `N` trials of
+probability `lam/N`, whose Le Cam cost `2lam^2/N` is driven to zero by the choice of `N`.  The trial
+count can be taken past any prescribed `M`, which is what lets the approximant carry a prescribed
+mode; and the parameters are strictly interior, which is what makes its mass at `M` positive. -/
+theorem exists_pbNat_tvDist_poisPMF_le {lam : ℝ} (hlam : 0 < lam) {ε : ℝ} (hε : 0 < ε) (M : ℕ) :
+    ∃ (N : ℕ) (q : Fin N → ℝ), M ≤ N ∧ (∀ i, 0 < q i) ∧ (∀ i, q i < 1) ∧
+      ∑ i : Fin N, q i = lam ∧
+      tvDist (poisPMF lam) (pbNat (Finset.univ : Finset (Fin N)) q) ≤ ε := by
+  obtain ⟨N, hNgt⟩ := exists_nat_gt (max (max (M : ℝ) 1) (max lam (2 * lam ^ 2 / ε)))
+  have hNM : (M : ℝ) < N := lt_of_le_of_lt ((le_max_left _ _).trans (le_max_left _ _)) hNgt
+  have hN1 : (1 : ℝ) < N := lt_of_le_of_lt ((le_max_right _ _).trans (le_max_left _ _)) hNgt
+  have hNlam : lam < N := lt_of_le_of_lt ((le_max_left _ _).trans (le_max_right _ _)) hNgt
+  have hNeps : 2 * lam ^ 2 / ε < N :=
+    lt_of_le_of_lt ((le_max_right _ _).trans (le_max_right _ _)) hNgt
+  have hNpos : (0 : ℝ) < N := by linarith
+  set t : ℝ := lam / N with ht
+  have ht0 : 0 < t := by rw [ht]; positivity
+  have ht1 : t < 1 := by rw [ht, div_lt_one hNpos]; exact hNlam
+  have hsum : ∑ _i : Fin N, t = lam := by
+    simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul, ht]; field_simp
+  have hsq : (2 : ℝ) * ∑ _i : Fin N, t ^ 2 = 2 * lam ^ 2 / N := by
+    simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul, ht]; field_simp
+  refine ⟨N, fun _ => t, by exact_mod_cast hNM.le, fun _ => ht0, fun _ => ht1, hsum, ?_⟩
+  have hlecam := tvDist_pbNat_poisPMF_le (p := fun _ : Fin N => t)
+    (fun _ => ht0.le) (fun _ => ht1.le) (Finset.univ : Finset (Fin N))
+  rw [hsum, hsq] at hlecam
+  have hfin : 2 * lam ^ 2 / N ≤ ε := by
+    rw [div_le_iff₀ hNpos]; rw [div_lt_iff₀ hε] at hNeps; linarith
+  rw [tvDist_comm]
+  linarith
+
 
 /-- Convolution of two independent Poisson binomials is the Poisson binomial of the disjoint
 union of their parameter families. -/
@@ -474,6 +504,26 @@ theorem dconv_pbNat_union [DecidableEq ι] {s t : Finset ι} (hst : Disjoint s t
     exact Finset.sum_congr rfl fun k _ => by rw [pbNat_eq_coeff, pbNat_eq_coeff]
   rw [hL, pbNat_eq_coeff, hpoly, Polynomial.coeff_mul]
 
+/-- **Darroch's theorem for a convolution of two Poisson binomials.**  The convolution is itself a
+Poisson binomial, on the disjoint union of the two parameter families, and its mean is the sum of
+the two means, so the mode sits at that sum whenever it is an integer. -/
+theorem mode_of_dconv_pbNat {p : ι → ℝ} {q : κ → ℝ} (hp0 : ∀ i, 0 ≤ p i) (hp1 : ∀ i, p i ≤ 1)
+    (hq0 : ∀ i, 0 ≤ q i) (hq1 : ∀ i, q i ≤ 1) (s : Finset ι) (t : Finset κ) {M : ℕ}
+    (hmean : ∑ i ∈ s, p i + ∑ i ∈ t, q i = M)
+    (hpos : 0 < dconv (pbNat s p) (pbNat t q) M) :
+    ∀ k, dconv (pbNat s p) (pbNat t q) k ≤ dconv (pbNat s p) (pbNat t q) M := by
+  classical
+  intro k
+  have hmean' : ∑ x ∈ s.disjSum t, Sum.elim p q x = ((M : ℤ) : ℝ) := by
+    rw [Finset.sum_disjSum]
+    simp only [Sum.elim_inl, Sum.elim_inr]
+    push_cast
+    exact hmean
+  rw [dconv_pbNat] at hpos ⊢
+  rw [pbNat, pbNat]
+  exact pbPmf_le_of_mean_eq (Sum.rec hp0 hq0) (Sum.rec hp1 hq1) hmean'
+    (by rw [← pbNat]; exact hpos) k
+
 /-- **The truncation cost.**  Dropping a block `t` of Bernoulli factors and carrying its mean in
 the Poisson parameter preserves the total mean exactly and changes the law by at most
 `2\sum_{i\in t}p_i^2` — Le Cam's inequality again, now applied to the dropped block.  This is
@@ -490,11 +540,8 @@ theorem tvDist_truncate_le [DecidableEq ι] {p : ι → ℝ} (hp0 : ∀ i, 0 ≤
       = dconv (poisPMF (∑ i ∈ t, p i)) (poisPMF lam) := by
     rw [dconv_poisPMF, add_comm]
   rw [hsplit, hpois]
-  have h := tvDist_dconv_le₂ (isPMF_pbNat hp0 hp1 s) (isPMF_pbNat hp0 hp1 s)
-    ((isPMF_pbNat hp0 hp1 t).dconv (isPMF_poisPMF hlam))
-    ((isPMF_poisPMF htsum).dconv (isPMF_poisPMF hlam))
-  rw [tvDist_self] at h
-  refine h.trans ?_
+  refine (tvDist_dconv_le' ((isPMF_pbNat hp0 hp1 t).dconv (isPMF_poisPMF hlam))
+    ((isPMF_poisPMF htsum).dconv (isPMF_poisPMF hlam)) (isPMF_pbNat hp0 hp1 s)).trans ?_
   have h2 : tvDist (dconv (pbNat t p) (poisPMF lam)) (dconv (poisPMF (∑ i ∈ t, p i))
       (poisPMF lam)) ≤ tvDist (pbNat t p) (poisPMF (∑ i ∈ t, p i)) :=
     tvDist_dconv_le (isPMF_pbNat hp0 hp1 t) (isPMF_poisPMF htsum) (isPMF_poisPMF hlam)
@@ -550,86 +597,28 @@ theorem mode_of_dconv_pbNat_poisPMF {p : ι → ℝ} (hp0 : ∀ i, 0 ≤ p i) (h
     ∀ k, dconv (pbNat s p) (poisPMF lam) k ≤ dconv (pbNat s p) (poisPMF lam) M := by
   classical
   have hsP : IsPMF (pbNat s p) := isPMF_pbNat hp0 hp1 s
-  have hsum0 : 0 ≤ ∑ i ∈ s, p i := Finset.sum_nonneg fun j _ => hp0 j
   refine mode_of_tvDist_le ?_
   intro ε hε
-  obtain ⟨N, hNgt⟩ := exists_nat_gt (max (max (M : ℝ) 1) (max lam (2 * lam ^ 2 / ε)))
-  have hNM : (M : ℝ) < N := lt_of_le_of_lt ((le_max_left _ _).trans (le_max_left _ _)) hNgt
-  have hN1 : (1 : ℝ) < N := lt_of_le_of_lt ((le_max_right _ _).trans (le_max_left _ _)) hNgt
-  have hNlam : lam < N := lt_of_le_of_lt ((le_max_left _ _).trans (le_max_right _ _)) hNgt
-  have hNeps : 2 * lam ^ 2 / ε < N :=
-    lt_of_le_of_lt ((le_max_right _ _).trans (le_max_right _ _)) hNgt
-  have hNpos : (0 : ℝ) < N := by linarith
-  have hNnat : 0 < N := by exact_mod_cast hNpos
-  have hMN : M ≤ N := by exact_mod_cast hNM.le
-  set t : ℝ := lam / N with ht
-  have ht0 : 0 < t := by rw [ht]; positivity
-  have ht1 : t < 1 := by rw [ht, div_lt_one hNpos]; exact hNlam
-  set q : Fin N → ℝ := fun _ => t with hq
-  have hq0 : ∀ i, 0 ≤ q i := fun _ => ht0.le
-  have hq1 : ∀ i, q i ≤ 1 := fun _ => ht1.le
-  have hqsum : ∑ i : Fin N, q i = lam := by
-    rw [hq, Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul, ht]
-    field_simp
+  obtain ⟨N, q, hMN, hqpos, hqlt, hqsum, htv⟩ := exists_pbNat_tvDist_poisPMF_le hlam hε M
+  have hq0 : ∀ i, 0 ≤ q i := fun i => (hqpos i).le
+  have hq1 : ∀ i, q i ≤ 1 := fun i => (hqlt i).le
   set B : ℕ → ℝ := pbNat (Finset.univ : Finset (Fin N)) q with hB
   have hBP : IsPMF B := isPMF_pbNat hq0 hq1 _
   refine ⟨dconv (pbNat s p) B, ?_, ?_, ?_⟩
   · exact (hsP.dconv (isPMF_poisPMF hlam.le)).summable_sub (hsP.dconv hBP)
-  · -- the replacement cost
+  · -- the replacement costs at most `ε`, by the choice of approximant
     have hcost : tvDist (dconv (pbNat s p) (poisPMF lam)) (dconv (pbNat s p) B)
-        ≤ tvDist (pbNat s p) (pbNat s p) + tvDist (poisPMF lam) B :=
-      tvDist_dconv_le₂ hsP hsP (isPMF_poisPMF hlam.le) hBP
-    have hlecam : tvDist B (poisPMF lam) ≤ 2 * ∑ i : Fin N, q i ^ 2 := by
-      have h := tvDist_pbNat_poisPMF_le hq0 hq1 (Finset.univ : Finset (Fin N))
-      rwa [hqsum] at h
-    have hsq : (2 : ℝ) * ∑ i : Fin N, q i ^ 2 = 2 * lam ^ 2 / N := by
-      rw [hq, Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul, ht]
-      field_simp
-    have hfin : 2 * lam ^ 2 / N ≤ ε := by
-      rw [div_le_iff₀ hNpos]
-      rw [div_lt_iff₀ hε] at hNeps
-      linarith
-    rw [tvDist_self] at hcost
-    rw [tvDist_comm (poisPMF lam) B] at hcost
+        ≤ tvDist (poisPMF lam) B :=
+      tvDist_dconv_le' (isPMF_poisPMF hlam.le) hBP hsP
     linarith
   · -- Darroch on the replacement
-    intro k
-    have hsplit : dconv (pbNat s p) B = pbNat (s.disjSum (Finset.univ : Finset (Fin N)))
-        (Sum.elim p q) := by rw [hB, dconv_pbNat]
-    have he0 : ∀ x : ι ⊕ Fin N, 0 ≤ Sum.elim p q x := by
-      intro x; cases x with
-      | inl a => exact hp0 a
-      | inr b => exact hq0 b
-    have he1 : ∀ x : ι ⊕ Fin N, Sum.elim p q x ≤ 1 := by
-      intro x; cases x with
-      | inl a => exact hp1 a
-      | inr b => exact hq1 b
-    have hmean' : ∑ x ∈ s.disjSum (Finset.univ : Finset (Fin N)), Sum.elim p q x
-        = ((M : ℤ) : ℝ) := by
-      rw [Finset.sum_disjSum]
-      simp only [Sum.elim_inl, Sum.elim_inr]
-      rw [hqsum]
-      push_cast
-      exact hmean
-    have hpos : 0 < pbNat (s.disjSum (Finset.univ : Finset (Fin N))) (Sum.elim p q) M := by
-      rw [← hsplit, dconv]
-      have hterm : pbNat s p 0 * B (M - 0) ≤ ∑ j ∈ Finset.range (M + 1), pbNat s p j * B (M - j) :=
-        Finset.single_le_sum
-          (f := fun j => pbNat s p j * B (M - j))
-          (fun j _ => mul_nonneg (pbNat_nonneg hp0 hp1 s j) (hBP.nonneg _))
-          (Finset.mem_range.2 (Nat.succ_pos M))
-      have h1 : 0 < pbNat s p 0 := pbNat_zero_pos hlt
-      have h2 : 0 < B M := by
-        rw [hB]
-        exact pbNat_pos hq0 hq1 _ (fun _ _ => ht0) (fun _ _ => ht1) M
-          (by rw [Finset.card_univ, Fintype.card_fin]; exact hMN)
-      have : 0 < pbNat s p 0 * B (M - 0) := by rw [Nat.sub_zero]; positivity
-      linarith
-    have hdar := pbPmf_le_of_mean_eq he0 he1 hmean' (by rw [← pbNat]; exact hpos)
-    have hk := hdar (k : ℤ)
-    rw [hsplit]
-    rw [pbNat, pbNat]
-    exact hk
+    have hpos : 0 < dconv (pbNat s p) B M :=
+      dconv_pos (pbNat_nonneg hp0 hp1 s) (fun n => hBP.nonneg n) (pbNat_zero_pos hlt)
+        (by rw [hB]
+            exact pbNat_pos hq0 hq1 _ (fun i _ => hqpos i) (fun i _ => hqlt i) M
+              (by rw [Finset.card_univ, Fintype.card_fin]; exact hMN))
+    rw [hB] at hpos ⊢
+    exact mode_of_dconv_pbNat hp0 hp1 hq0 hq1 s Finset.univ (by rw [hqsum]; exact hmean) hpos
 
 /-- **The mode placement survives an infinite Bernoulli family.**  A law approximable in total
 variation by Bernoulli–Poisson convolutions of the same integer mean has its mode at that mean.
@@ -648,5 +637,12 @@ theorem mode_of_approx_bernPoisson {P : ℕ → ℝ} {M : ℕ} (hP : IsPMF P)
   exact ⟨dconv (pbNat s p) (poisPMF lam),
     hP.summable_sub ((isPMF_pbNat hp0 hp1 s).dconv (isPMF_poisPMF hlam.le)), htv,
     mode_of_dconv_pbNat_poisPMF hp0 hp1 hlt hlam hmean⟩
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.mode_of_approx_bernPoisson' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms mode_of_approx_bernPoisson
 
 end Shields

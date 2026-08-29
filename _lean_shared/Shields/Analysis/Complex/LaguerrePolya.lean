@@ -10,6 +10,7 @@ import Mathlib.Analysis.Complex.RealDeriv
 import Mathlib.Analysis.SpecialFunctions.Complex.LogBounds
 import Mathlib.Analysis.Complex.Trigonometric
 import Mathlib.Analysis.Normed.Module.MultipliableUniformlyOn
+import Shields.Analysis.Complex.Hurwitz
 import Shields.Analysis.Complex.RealRootedPolynomial
 
 /-!
@@ -150,7 +151,7 @@ theorem exists_poly_tendstoLocallyUniformly_of_tendstoLocallyUniformly
     calc dist (F z) ((p j m).eval z)
         ≤ dist (F z) (f j z) + dist (f j z) ((p j m).eval z) := dist_triangle _ _ _
       _ < 1 / (2 * (k + 1)) + 1 / (2 * (k + 1)) := add_lt_add (hj z hz) (hm z hz)
-      _ = 1 / (k + 1) := by field_simp; ring
+      _ = 1 / (k + 1) := by field
   choose q hqP hqapprox using key
   refine ⟨q, hqP, ?_⟩
   rw [tendstoLocallyUniformly_iff_forall_isCompact]
@@ -197,14 +198,13 @@ the reality of the limit's zeros is read off from, and it survives the limit. -/
 
 private theorem norm_sub_le_of_im_eq_zero {a : ℂ} (ha : a.im = 0) {x y y' : ℝ} (h : |y'| ≤ |y|) :
     ‖(x : ℂ) + y' * I - a‖ ≤ ‖(x : ℂ) + y * I - a‖ := by
-  have hy : y' ^ 2 ≤ y ^ 2 := by
-    nlinarith [abs_nonneg y', abs_nonneg y, sq_abs y', sq_abs y]
+  have hy : y' ^ 2 ≤ y ^ 2 := sq_le_sq.mpr h
   have hsq : ‖(x : ℂ) + y' * I - a‖ ^ 2 ≤ ‖(x : ℂ) + y * I - a‖ ^ 2 := by
     rw [← Complex.normSq_eq_norm_sq, ← Complex.normSq_eq_norm_sq]
     simp only [Complex.normSq_apply, Complex.sub_re, Complex.sub_im, Complex.add_re,
       Complex.add_im, Complex.ofReal_re, Complex.ofReal_im, Complex.mul_I_re, Complex.mul_I_im, ha]
     nlinarith
-  nlinarith [norm_nonneg ((x : ℂ) + y' * I - a), norm_nonneg ((x : ℂ) + y * I - a)]
+  exact le_of_pow_le_pow_left₀ two_ne_zero (norm_nonneg _) hsq
 
 private theorem prod_norm_le_of_im_eq_zero {x y y' : ℝ} (h : |y'| ≤ |y|) (M : Multiset ℂ) :
     (∀ a ∈ M, a.im = 0) →
@@ -311,6 +311,34 @@ private theorem exists_derivative_eq_zero_of_eval_eq_zero {q : Polynomial ℂ}
   rw [hd.deriv] at hderiv
   exact Complex.ext (by simpa using hderiv) (by simpa using hcoeff.derivative.im_eval_ofReal c)
 
+/-- **A real sign change gives a real zero.**  A polynomial with real coefficients whose values at
+two real points have opposite sign vanishes at a real point between them: on the real axis the real
+part is a real continuous function that changes sign, and the imaginary part vanishes identically.
+
+This is the intermediate value theorem half of the count, the mirror of Rolle's theorem above. -/
+private theorem exists_ofReal_root_of_re_mul_neg {q : Polynomial ℂ} (hcoeff : HasRealCoeffs q)
+    {a b : ℝ} (hsign : (q.eval (a : ℂ)).re * (q.eval (b : ℂ)).re < 0) :
+    ∃ t ∈ uIcc a b, q.eval (t : ℂ) = 0 := by
+  have hcont : ContinuousOn (fun t : ℝ => (q.eval (t : ℂ)).re) (uIcc a b) :=
+    (Complex.continuous_re.comp (q.continuous.comp Complex.continuous_ofReal)).continuousOn
+  have hmem : (0 : ℝ) ∈ uIcc ((q.eval (a : ℂ)).re) ((q.eval (b : ℂ)).re) :=
+    Set.mem_uIcc.mpr ((mul_nonpos_iff.mp hsign.le).elim (fun h => Or.inr ⟨h.2, h.1⟩) Or.inl)
+  obtain ⟨t, ht, htz⟩ := intermediate_value_uIcc hcont hmem
+  exact ⟨t, ht, Complex.ext (by simpa using htz) (by simpa using hcoeff.im_eval_ofReal t)⟩
+
+/-- **A root of a real-rooted polynomial in a disc about a real center is real**, and the three
+facts that follow from it: the root is the coercion of its own real part, it is a root there, and
+its real part lies in the real interval the disc cuts out.  Those three are exactly what the Rolle
+and intermediate value arguments consume, and reality is what makes them available. -/
+private theorem ofReal_re_of_mem_rootsIn {q : Polynomial ℂ} (hreal : IsRealRooted q) {x₀ r : ℝ}
+    {z : ℂ} (hz : z ∈ rootsIn q ((x₀ : ℂ)) r) :
+    ((z.re : ℝ) : ℂ) = z ∧ q.eval ((z.re : ℝ) : ℂ) = 0 ∧ |z.re - x₀| < r := by
+  obtain ⟨hroot, hball⟩ := mem_rootsIn.mp hz
+  have hre : ((z.re : ℝ) : ℂ) = z := Complex.ext (by simp) (by simp [hreal.2 z hroot])
+  refine ⟨hre, by rw [hre]; exact (mem_roots'.mp hroot).2, ?_⟩
+  have h := mem_ball.mp hball
+  rwa [← hre, dist_ofReal_ofReal] at h
+
 /-- **A disc on which the derivative does not vanish carries at most one zero.**  For a real-rooted
 polynomial with real coefficients, all the zeros in a disc about a real point are real; two of them
 give a critical point between them by Rolle's theorem, and a double one is a critical point
@@ -333,8 +361,6 @@ theorem card_rootsIn_le_one_of_derivative_ne_zero {q : Polynomial ℂ} (hreal : 
   obtain ⟨haroot, haball⟩ := mem_rootsIn.mp ha
   obtain ⟨hbroot, hbball⟩ := mem_rootsIn.mp hbM
   have hq0 : q ≠ 0 := fun h => by simp [h] at haroot
-  have haim : a.im = 0 := hreal.2 a haroot
-  have hbim : b.im = 0 := hreal.2 b hbroot
   by_cases hab : a = b
   · have hcount : 1 < q.rootMultiplicity a := by
       have hle : rootsIn q ((x₀ : ℂ)) r ≤ q.roots := Multiset.filter_le _ _
@@ -344,17 +370,9 @@ theorem card_rootsIn_le_one_of_derivative_ne_zero {q : Polynomial ℂ} (hreal : 
       have hpos : 0 < Multiset.count a M := Multiset.count_pos.mpr (by rw [hab]; exact hb)
       omega
     exact hder a haball ((one_lt_rootMultiplicity_iff_isRoot hq0).mp hcount).2
-  · have ha' : ((a.re : ℝ) : ℂ) = a := by apply Complex.ext <;> simp [haim]
-    have hb' : ((b.re : ℝ) : ℂ) = b := by apply Complex.ext <;> simp [hbim]
+  · obtain ⟨ha', hea, haball'⟩ := ofReal_re_of_mem_rootsIn hreal ha
+    obtain ⟨hb', heb, hbball'⟩ := ofReal_re_of_mem_rootsIn hreal hbM
     have hne : a.re ≠ b.re := fun h => hab (by rw [← ha', ← hb', h])
-    have hea : q.eval ((a.re : ℝ) : ℂ) = 0 := by rw [ha']; exact (mem_roots'.mp haroot).2
-    have heb : q.eval ((b.re : ℝ) : ℂ) = 0 := by rw [hb']; exact (mem_roots'.mp hbroot).2
-    have haball' : |a.re - x₀| < r := by
-      have h := mem_ball.mp haball
-      rwa [← ha', dist_ofReal_ofReal] at h
-    have hbball' : |b.re - x₀| < r := by
-      have h := mem_ball.mp hbball
-      rwa [← hb', dist_ofReal_ofReal] at h
     have key : ∀ u v : ℝ, u < v → q.eval (u : ℂ) = 0 → q.eval (v : ℂ) = 0 →
         |u - x₀| < r → |v - x₀| < r → False := by
       intro u v huv hu hv hub hvb
@@ -376,34 +394,21 @@ private theorem exists_sign_change {G : ℝ → ℝ} {x₀ c ρ : ℝ} (hd : Has
   have hev := (hd.mul_const c).eventually_const_lt hpos
   rw [eventually_nhdsWithin_iff, Metric.eventually_nhds_iff] at hev
   obtain ⟨δ, hδ, hδmem⟩ := hev
-  obtain ⟨d, hdpos, hdδ, hdρ⟩ : ∃ d : ℝ, 0 < d ∧ d < δ ∧ d < ρ :=
-    ⟨min δ ρ / 2, by have := lt_min hδ hρ; linarith,
-      by have := lt_min hδ hρ; have := min_le_left δ ρ; linarith,
-      by have := lt_min hδ hρ; have := min_le_right δ ρ; linarith⟩
-  have key : ∀ y : ℝ, y ≠ x₀ → G y = slope G x₀ y * (y - x₀) := by
-    intro y hy
-    have hyne : y - x₀ ≠ 0 := sub_ne_zero.mpr hy
+  obtain ⟨d, hdpos, hdδ, hdρ⟩ : ∃ d : ℝ, 0 < d ∧ d < δ ∧ d < ρ := by
+    have h := lt_min hδ hρ
+    exact ⟨min δ ρ / 2, by linarith, by linarith [min_le_left δ ρ], by linarith [min_le_right δ ρ]⟩
+  have key : ∀ y : ℝ, y ≠ x₀ → G y = slope G x₀ y * (y - x₀) := fun y hy => by
     rw [slope_def_field, h0, sub_zero]
-    field_simp
-  have hda : dist (x₀ - d) x₀ < δ := by
-    rw [Real.dist_eq, show x₀ - d - x₀ = -d by ring, abs_neg, abs_of_pos hdpos]; exact hdδ
-  have hdb : dist (x₀ + d) x₀ < δ := by
-    rw [Real.dist_eq, show x₀ + d - x₀ = d by ring, abs_of_pos hdpos]; exact hdδ
-  have hane : x₀ - d ∈ ({x₀}ᶜ : Set ℝ) := by
-    simp only [Set.mem_compl_iff, Set.mem_singleton_iff]
-    intro h; linarith
-  have hbne : x₀ + d ∈ ({x₀}ᶜ : Set ℝ) := by
-    simp only [Set.mem_compl_iff, Set.mem_singleton_iff]
-    intro h; linarith
-  have hsa : 0 < slope G x₀ (x₀ - d) * c := hδmem hda hane
-  have hsb : 0 < slope G x₀ (x₀ + d) * c := hδmem hdb hbne
+    field_simp [sub_ne_zero.mpr hy]
+  have hslope : ∀ y : ℝ, y ≠ x₀ → |y - x₀| < δ → 0 < slope G x₀ y * c := fun y hy hyd =>
+    hδmem (by rwa [Real.dist_eq]) (by simpa using hy)
+  have hsa := hslope (x₀ - d) (by intro h; linarith) (by rw [abs_lt]; constructor <;> linarith)
+  have hsb := hslope (x₀ + d) (by intro h; linarith) (by rw [abs_lt]; constructor <;> linarith)
   have hprod : 0 < slope G x₀ (x₀ - d) * slope G x₀ (x₀ + d) := by
     nlinarith [mul_pos hsa hsb, hpos]
   refine ⟨x₀ - d, x₀ + d, by linarith, by linarith, by linarith, by linarith, ?_⟩
   rw [key (x₀ - d) (by intro h; linarith), key (x₀ + d) (by intro h; linarith)]
-  have h1 : x₀ - d - x₀ < 0 := by linarith
-  have h2 : 0 < x₀ + d - x₀ := by linarith
-  nlinarith [mul_pos hprod (mul_pos (neg_pos.mpr h1) h2)]
+  nlinarith [mul_pos hprod (mul_pos hdpos hdpos)]
 
 /-- **A simple real zero of the limit attracts exactly one finite zero.**  Below some threshold
 radius, *every* disc about `x₀` carries exactly one
@@ -417,33 +422,23 @@ theorem exists_radius_eventually_card_rootsIn_eq_one {p : ℕ → Polynomial ℂ
       ∀ᶠ n in atTop, (rootsIn (p n) ((x₀ : ℂ)) ε).card = 1 := by
   have hdiff : Differentiable ℂ f := IsLaguerrePolyaLimit.differentiable ⟨p, hreal, hcoeff, hconv⟩
   have hderconv := tendstoLocallyUniformly_derivative hconv
-  have hdcont : Continuous (deriv f) := by
-    have hd : Differentiable ℂ (deriv f) := by
-      rw [← differentiableOn_univ]
-      exact (tendstoLocallyUniformlyOn_univ.mpr hderconv).differentiableOn
-        (.of_forall fun n => (Polynomial.derivative (p n)).differentiable.differentiableOn)
-        isOpen_univ
-    exact hd.continuous
+  have hdcont : Continuous (deriv f) :=
+    (differentiableOn_univ.mp ((tendstoLocallyUniformlyOn_univ.mpr hderconv).differentiableOn
+      (.of_forall fun n => (Polynomial.derivative (p n)).differentiable.differentiableOn)
+      isOpen_univ)).continuous
   obtain ⟨r₁, hr₁, hsub⟩ := Metric.isOpen_iff.mp (isOpen_compl_singleton.preimage hdcont)
     ((x₀ : ℂ)) (by simpa using hsimple)
   refine ⟨r₁ / 2, by linarith, ?_⟩
   have hrpos : (0 : ℝ) < r₁ / 2 := by linarith
   have hcb : closedBall ((x₀ : ℂ)) (r₁ / 2) ⊆ ball ((x₀ : ℂ)) r₁ :=
     closedBall_subset_ball (by linarith)
-  obtain ⟨z₁, hz₁, hz₁min⟩ := (isCompact_closedBall ((x₀ : ℂ)) (r₁ / 2)).exists_isMinOn
-    ⟨(x₀ : ℂ), mem_closedBall_self hrpos.le⟩ hdcont.norm.continuousOn
-  have hmpos : 0 < ‖deriv f z₁‖ := norm_pos_iff.mpr (by simpa using hsub (hcb hz₁))
   have hunifder : TendstoUniformlyOn (fun n z => (Polynomial.derivative (p n)).eval z) (deriv f)
       atTop (closedBall ((x₀ : ℂ)) (r₁ / 2)) :=
     tendstoLocallyUniformly_iff_forall_isCompact.mp hderconv _ (isCompact_closedBall _ _)
-  have hevder : ∀ᶠ n in atTop, ∀ z ∈ ball ((x₀ : ℂ)) (r₁ / 2),
-      (Polynomial.derivative (p n)).eval z ≠ 0 := by
-    filter_upwards [Metric.tendstoUniformlyOn_iff.mp hunifder _ hmpos] with n hn z hz hcontra
-    have h1 : ‖deriv f z‖ < ‖deriv f z₁‖ := by
-      have h2 := hn z (ball_subset_closedBall hz)
-      rw [hcontra, dist_zero_right] at h2
-      exact h2
-    exact absurd (isMinOn_iff.mp hz₁min z (ball_subset_closedBall hz)) (not_le.mpr h1)
+  have hevder : ∀ᶠ n in atTop, ∀ z ∈ closedBall ((x₀ : ℂ)) (r₁ / 2),
+      (Polynomial.derivative (p n)).eval z ≠ 0 :=
+    eventually_zero_free_of_tendstoUniformlyOn (isCompact_closedBall _ _) hdcont.continuousOn
+      (fun z hz => by simpa using hsub (hcb hz)) hunifder
   have hderim : (deriv f ((x₀ : ℂ))).im = 0 :=
     im_apply_ofReal_of_tendsto (fun n => (hcoeff n).derivative) hderconv x₀
   have hcre : (deriv f ((x₀ : ℂ))).re ≠ 0 := fun h =>
@@ -460,16 +455,8 @@ theorem exists_radius_eventually_card_rootsIn_eq_one {p : ℕ → Polynomial ℂ
     ((hpt (a : ℂ)).mul (hpt (b : ℂ))).eventually_lt_const hsign
   filter_upwards [hevder, hsigneq] with n hnder hnsign
   refine le_antisymm (card_rootsIn_le_one_of_derivative_ne_zero (hreal n) (hcoeff n)
-    (fun z hz => hnder z (ball_subset_ball hεr hz))) ?_
-  have hcontn : ContinuousOn (fun t : ℝ => ((p n).eval (t : ℂ)).re) (uIcc a b) :=
-    (Complex.continuous_re.comp ((p n).continuous.comp Complex.continuous_ofReal)).continuousOn
-  have hmem : (0 : ℝ) ∈ uIcc (((p n).eval ((a : ℂ))).re) (((p n).eval ((b : ℂ))).re) := by
-    rcases mul_neg_iff.mp hnsign with ⟨h1, h2⟩ | ⟨h1, h2⟩
-    · exact Set.mem_uIcc.mpr (Or.inr ⟨h2.le, h1.le⟩)
-    · exact Set.mem_uIcc.mpr (Or.inl ⟨h1.le, h2.le⟩)
-  obtain ⟨t, ht, htz⟩ := intermediate_value_uIcc hcontn hmem
-  have hroot : (p n).eval ((t : ℂ)) = 0 :=
-    Complex.ext (by simpa using htz) (by simpa using (hcoeff n).im_eval_ofReal t)
+    (fun z hz => hnder z (ball_subset_closedBall (ball_subset_ball hεr hz)))) ?_
+  obtain ⟨t, ht, hroot⟩ := exists_ofReal_root_of_re_mul_neg (hcoeff n) hnsign
   have hpn0 : p n ≠ 0 := fun h => by simp [h] at hnsign
   have htdist : |t - x₀| < ε := by
     rcases Set.mem_uIcc.mp ht with ⟨h1, h2⟩ | ⟨h1, h2⟩ <;>
@@ -557,17 +544,11 @@ private theorem norm_eval_expApprox_sub_exp_le {R : ℝ} (hR : 0 < R) {n : ℕ}
   have hwn : ‖w‖ ≤ R / n := by
     rw [hwdef, norm_div, Complex.norm_natCast]
     gcongr
-  have hwhalf : ‖w‖ ≤ 1 / 2 := by
-    refine hwn.trans ?_
-    rw [div_le_div_iff₀ hn0 (by norm_num)]
-    linarith
+  have hwhalf : ‖w‖ ≤ 1 / 2 :=
+    hwn.trans (by rw [div_le_div_iff₀ hn0 (by norm_num)]; linarith)
   have hwlt : ‖w‖ < 1 := by linarith
-  have h1w : (1 : ℂ) + w ≠ 0 := by
-    intro h
-    have hw1 : w = -1 := by linear_combination h
-    rw [hw1] at hwhalf
-    simp at hwhalf
-    linarith
+  have h1w : (1 : ℂ) + w ≠ 0 := fun h => by
+    rw [show w = -1 by linear_combination h] at hwhalf; norm_num at hwhalf
   have hlog : ‖(n : ℂ) * Complex.log (1 + w) - z‖ ≤ R ^ 2 / n := by
     have hfac : (n : ℂ) * Complex.log (1 + w) - z = (n : ℂ) * (Complex.log (1 + w) - w) := by
       rw [mul_sub, hnw]
@@ -581,17 +562,12 @@ private theorem norm_eval_expApprox_sub_exp_le {R : ℝ} (hR : 0 < R) {n : ℕ}
     rw [hfac, norm_mul, Complex.norm_natCast]
     calc (n : ℝ) * ‖Complex.log (1 + w) - w‖ ≤ (n : ℝ) * (R / n) ^ 2 := by gcongr
       _ = R ^ 2 / n := by field_simp
-  have hle1 : ‖(n : ℂ) * Complex.log (1 + w) - z‖ ≤ 1 := by
-    refine hlog.trans ?_
-    rw [div_le_one hn0]
-    exact hnsq
+  have hle1 : ‖(n : ℂ) * Complex.log (1 + w) - z‖ ≤ 1 := hlog.trans ((div_le_one hn0).mpr hnsq)
   have hpow : (expApprox n).eval z = Complex.exp ((n : ℂ) * Complex.log (1 + w)) := by
     rw [heval, Complex.exp_nat_mul, Complex.exp_log h1w]
   have hsplit : Complex.exp ((n : ℂ) * Complex.log (1 + w)) - Complex.exp z
       = Complex.exp z * (Complex.exp ((n : ℂ) * Complex.log (1 + w) - z) - 1) := by
-    rw [mul_sub, mul_one, ← Complex.exp_add]
-    congr 2
-    ring
+    rw [mul_sub, mul_one, ← Complex.exp_add]; congr 2; ring
   rw [hpow, hsplit, norm_mul, Complex.norm_exp]
   have hre : Real.exp z.re ≤ Real.exp R :=
     Real.exp_le_exp.mpr ((Complex.re_le_norm z).trans hz)
@@ -693,5 +669,28 @@ to the limit buys. -/
 theorem exists_isLaguerrePolyaLimit_not_polynomial :
     ∃ f : ℂ → ℂ, IsLaguerrePolyaLimit f ∧ ¬ ∃ q : Polynomial ℂ, ∀ z : ℂ, q.eval z = f z :=
   ⟨Complex.exp, isLaguerrePolyaLimit_exp, not_exists_polynomial_eval_eq_exp⟩
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.IsLaguerrePolyaLimit.of_tendstoLocallyUniformly' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms IsLaguerrePolyaLimit.of_tendstoLocallyUniformly
+
+/-- info: 'Shields.IsLaguerrePolyaLimit.im_eq_zero_of_eq_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms IsLaguerrePolyaLimit.im_eq_zero_of_eq_zero
+
+/-- info: 'Shields.exists_radius_eventually_card_rootsIn_eq_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_radius_eventually_card_rootsIn_eq_one
+
+/-- info: 'Shields.exists_isLaguerrePolyaLimit_not_polynomial' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_isLaguerrePolyaLimit_not_polynomial
+
+/-- info: 'Shields.exists_tendstoLocallyUniformly_exp' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_tendstoLocallyUniformly_exp
 
 end Shields

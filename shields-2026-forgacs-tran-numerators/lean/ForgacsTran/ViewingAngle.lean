@@ -4,6 +4,9 @@ Released under the MIT license as described in the file LICENSE.txt.
 Authors: Johnny Shields
 -/
 import Mathlib
+import Shields.Topology.EMetricSpace.BoundedVariationAlgebra
+import Shields.Topology.EMetricSpace.BoundedVariationRestrict
+import ForgacsTran.ComplexPart
 
 /-!
 # Radon's viewing-angle bound
@@ -30,7 +33,8 @@ angle — that last being the arc's real-analyticity, which the manuscript takes
   `phaseFold_eq_of_mem_strip` makes it affine with slope `(-1)^k` on `[kπ, (k+1)π]`, which is
   what lets the excess telescope.
 * `eVariationOn_neg`, `AntitoneOn.eVariationOn_eq` — two variation lemmas Mathlib does not
-  carry; the second is `MonotoneOn.eVariationOn_eq` on the decreasing pieces.
+  carry, re-exported from `Shields.Topology.EMetricSpace.BoundedVariationAlgebra`; the
+  second is `MonotoneOn.eVariationOn_eq` on the decreasing pieces.
 * `eVariationOn_le_of_stripPartition` — the folding argument itself, over a given cut.
 * `hasDerivAt_viewingAngle` — from the polar data `γ - β = ρ e^{iφ}`, `γ' = ν e^{iϑ}`:
   `φ' = (ν/ρ) sin(ϑ - φ)`.  This is what makes the sign of `φ'` a function of `ϑ - φ`.
@@ -148,23 +152,12 @@ theorem phaseFold_sub_eq_of_mem_strip {k : ℤ} {x y : ℝ}
     phaseFold y - phaseFold x = stripSign k * (y - x) := by
   rw [phaseFold_eq_of_mem_strip hy1 hy2, phaseFold_eq_of_mem_strip hx1 hx2]; ring
 
-/-! ### Two variation lemmas Mathlib does not carry -/
+/-! ### Two variation lemmas Mathlib does not carry
 
-theorem eVariationOn_neg (f : ℝ → ℝ) (s : Set ℝ) :
-    eVariationOn (fun x => -f x) s = eVariationOn f s := by
-  simp only [eVariationOn]
-  exact iSup_congr fun p => Finset.sum_congr rfl fun i _ => by
-    rw [edist_dist, edist_dist, dist_neg_neg]
+`Shields.eVariationOn_neg` and `AntitoneOn.eVariationOn_eq`, the latter at the root
+namespace beside Mathlib's own `MonotoneOn.eVariationOn_eq`, which it is proved from. -/
 
-theorem AntitoneOn.eVariationOn_eq {f : ℝ → ℝ} {s : Set ℝ} {a b : ℝ}
-    (hf : AntitoneOn f s) (as : a ∈ s) (bs : b ∈ s) :
-    eVariationOn f (s ∩ Icc a b) = ENNReal.ofReal (f a - f b) := by
-  have h : MonotoneOn (fun x => -f x) s := fun x hx y hy hxy => neg_le_neg (hf hx hy hxy)
-  have h2 := h.eVariationOn_eq as bs
-  rw [eVariationOn_neg] at h2
-  rw [h2]
-  congr 1
-  ring
+export Shields (eVariationOn_neg)
 
 
 /-! ### The folding argument -/
@@ -926,9 +919,7 @@ theorem hasDerivAt_polarAngle_base (hU : IsOpen U) (hsub : Icc a b ⊆ U)
     (hne : ∀ s ∈ Icc a b, γ s ≠ β) {c : ℝ} (hcmem : c ∈ Icc a b) {s : ℝ} (hs : s ∈ Icc a b) :
     HasDerivAt (polarAngle γ dγ β c) ((dγ s / (γ s - β)).im) s := by
   have hL := hasDerivAt_logLift_base hU hsub hd hc hne hcmem hs
-  have h2 := Complex.imCLM.hasFDerivAt.comp_hasDerivAt s hL
-  simp only [Function.comp_def, Complex.imCLM_apply] at h2
-  exact h2
+  exact hL.im
 
 theorem hasDerivAt_polarAngle (hU : IsOpen U) (hsub : Icc a b ⊆ U)
     (hd : ∀ s ∈ U, HasDerivAt γ (dγ s) s) (hc : ContinuousOn dγ U)
@@ -1146,75 +1137,14 @@ folded phase runs to `π` at `m` from the left and to `0` from the right, so by
 tangent-angle variation over it, and the two together are below `𝒦_γ`.  The manuscript's
 `𝒦_γ + π` follows; the `π` is what the point-off-the-arc case needs and this case does not. -/
 
-/-- **Ordered disjoint pieces sum below the whole.**  If the sets `J i`, `i ∈ t`, sit inside
-`s` and are ordered by their index, their variations add up to at most the variation over `s`.
-`eVariationOn.union` needs the pieces to meet; here they need not, and the gaps are exactly
-what the deleted parameters of `eq:linear-phase-variation` create. -/
-theorem eVariationOn_sum_le {f : ℝ → ℝ} {J : ℕ → Set ℝ} (t : Finset ℕ) :
-    ∀ s : Set ℝ, (∀ i ∈ t, J i ⊆ s) →
-      (∀ i ∈ t, ∀ j ∈ t, i < j → ∀ x ∈ J i, ∀ y ∈ J j, x ≤ y) →
-      ∑ i ∈ t, eVariationOn f (J i) ≤ eVariationOn f s := by
-  classical
-  induction t using Finset.induction_on_max with
-  | empty => intro s _ _; simp
-  | insert n t hmax ih =>
-      intro s hJs hord
-      have hnt : n ∉ t := fun h => lt_irrefl n (hmax n h)
-      set T : Set ℝ := {x | ∃ i ∈ t, x ∈ J i} with hT
-      have hTs : T ⊆ s := by
-        rintro x ⟨i, hi, hx⟩
-        exact hJs i (Finset.mem_insert_of_mem hi) hx
-      have hsum : ∑ i ∈ t, eVariationOn f (J i) ≤ eVariationOn f T :=
-        ih T (fun i hi => fun x hx => ⟨i, hi, hx⟩)
-          (fun i hi j hj hij => hord i (Finset.mem_insert_of_mem hi) j
-            (Finset.mem_insert_of_mem hj) hij)
-      have hcross : ∀ x ∈ T, ∀ y ∈ J n, x ≤ y := by
-        rintro x ⟨i, hi, hx⟩ y hy
-        exact hord i (Finset.mem_insert_of_mem hi) n (Finset.mem_insert_self n t)
-          (hmax i hi) x hx y hy
-      have hunion : T ∪ J n ⊆ s :=
-        Set.union_subset hTs (hJs n (Finset.mem_insert_self n t))
-      calc ∑ i ∈ insert n t, eVariationOn f (J i)
-          = eVariationOn f (J n) + ∑ i ∈ t, eVariationOn f (J i) := Finset.sum_insert hnt
-        _ ≤ eVariationOn f (J n) + eVariationOn f T := by gcongr
-        _ = eVariationOn f T + eVariationOn f (J n) := add_comm _ _
-        _ ≤ eVariationOn f (T ∪ J n) := eVariationOn.add_le_union f hcross
-        _ ≤ eVariationOn f s := eVariationOn.mono f hunion
+/-! ### Splitting the variation over subintervals
 
-/-- The variation over a half-open interval is controlled by the variations over its closed
-subintervals: every finite sample lies in one of them. -/
-theorem eVariationOn_Ico_le {f : ℝ → ℝ} {a m : ℝ} {C : ENNReal}
-    (h : ∀ c ∈ Set.Ico a m, eVariationOn f (Icc a c) ≤ C) :
-    eVariationOn f (Set.Ico a m) ≤ C := by
-  apply iSup_le
-  rintro ⟨n, ⟨u, hu, us⟩⟩
-  have hvmono : Monotone (fun i => u (min i n)) := fun i j hij => hu (min_le_min hij le_rfl)
-  have hvmem : ∀ i, (fun i => u (min i n)) i ∈ Icc a (u n) := fun i =>
-    ⟨(us _).1, hu (min_le_right _ _)⟩
-  have hbound := eVariationOn.sum_le (f := f) (s := Icc a (u n)) (n := n) hvmono hvmem
-  refine le_trans (le_trans (le_of_eq ?_) hbound) (h (u n) (us n))
-  refine Finset.sum_congr rfl fun i hi => ?_
-  have hi' : i < n := mem_range.1 hi
-  have e1 : min i n = i := min_eq_left hi'.le
-  have e2 : min (i + 1) n = i + 1 := min_eq_left hi'
-  simp only [e1, e2]
+`Shields.eVariationOn_sum_le` sums ordered disjoint pieces below the whole -- the gaps are
+exactly what the deleted parameters of `eq:linear-phase-variation` create -- and
+`Shields.eVariationOn_Ico_le`, `Shields.eVariationOn_Ioc_le` reach a half-open interval
+from the closed ones inside it. -/
 
-/-- The mirror of `eVariationOn_Ico_le` at the other end. -/
-theorem eVariationOn_Ioc_le {f : ℝ → ℝ} {m b : ℝ} {C : ENNReal}
-    (h : ∀ d ∈ Set.Ioc m b, eVariationOn f (Icc d b) ≤ C) :
-    eVariationOn f (Set.Ioc m b) ≤ C := by
-  apply iSup_le
-  rintro ⟨n, ⟨u, hu, us⟩⟩
-  have hvmono : Monotone (fun i => u (min i n)) := fun i j hij => hu (min_le_min hij le_rfl)
-  have hvmem : ∀ i, (fun i => u (min i n)) i ∈ Icc (u 0) b := fun i =>
-    ⟨hu (Nat.zero_le _), (us _).2⟩
-  have hbound := eVariationOn.sum_le (f := f) (s := Icc (u 0) b) (n := n) hvmono hvmem
-  refine le_trans (le_trans (le_of_eq ?_) hbound) (h (u 0) (us 0))
-  refine Finset.sum_congr rfl fun i hi => ?_
-  have hi' : i < n := mem_range.1 hi
-  have e1 : min i n = i := min_eq_left hi'.le
-  have e2 : min (i + 1) n = i + 1 := min_eq_left hi'
-  simp only [e1, e2]
+export Shields (eVariationOn_Ico_le eVariationOn_Ioc_le eVariationOn_sum_le)
 
 private theorem le_of_forall_ofReal_add {X Y : ENNReal} {t : ℝ} (ht : 0 < t)
     (h : ∀ ε : ℝ, 0 < ε → ε < t → X ≤ Y + ENNReal.ofReal ε) : X ≤ Y := by
@@ -1429,7 +1359,10 @@ continuously has become the gap between the two components, which the sum does n
 
 **Containment.**  No hypothesis mentions `eVariationOn` at all: what is asked is the arc's
 regularity, that `γ` meets `β` at `m` and nowhere else, and that each viewing angle has
-finitely many critical points.  Both sides of the conclusion are produced, not carried. -/
+finitely many critical points.  `hS₁` and `hS₂` do name the very `polarAngle` functions the
+conclusion takes the variation of, but only to locate the parameters where two of them differ
+by a multiple of `π`.  Both sides of the conclusion are produced here, by
+`viewing_angle_bound_to_meet` and `viewing_angle_bound_from_meet` over the split at `m`. -/
 theorem viewing_angle_bound_on_arc
     (ham : a ≤ m) (hmb : m ≤ b) (hU : IsOpen U) (hsub : Icc a b ⊆ U)
     (hd : ∀ s ∈ U, HasDerivAt γ (dγ s) s)

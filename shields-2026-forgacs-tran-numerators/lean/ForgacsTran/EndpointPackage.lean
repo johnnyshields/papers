@@ -10,13 +10,14 @@ import ForgacsTran.DominanceFT
 import ForgacsTran.FTGeometryAssembly
 import ForgacsTran.FTMinModulus.RealCritical
 import ForgacsTran.FTGeometryCone
+import ForgacsTran.PencilIndex
 
 /-!
 # The lower-endpoint package
 
 `EndpointBranch` supplies the analysis: the blow-up limit of the branch radius,
 the chart `g - z_e = w^k` and its local inverse, and the cluster branches.  This
-module states what `DominanceFT.weighted_dominance_of_branch_any_multiplicity_at`
+module states what `DominanceFTBranch.weighted_dominance_of_branch_any_multiplicity_at`
 asks for at the lower endpoint, at `2 ≤ ρ`, in that theorem's own binder shapes.
 
 **The datum is one number reached three ways, and they agree.**  The squeeze gives
@@ -36,7 +37,7 @@ that type-checks.
 **`ρ = 1` is not this module's case and must not be folded into it.**
 `clusterAlpha` divides by `\sin(π/ρ)`, which is `0` at `ρ = 1`, so a supplier
 written once for every `ρ` returns a wrong *finite* value there with nothing
-failing — `EndpointBranch.clusterAlpha_one_eq_zero`.  The `ρ = 1` datum is
+failing — `Cluster.clusterAlpha_one_eq_zero`.  The `ρ = 1` datum is
 `i·t_a` at `t_e = t_a` strictly inside the first gap, and it belongs to a
 physically separate producer.
 
@@ -180,8 +181,7 @@ theorem hasDerivWithinAt_ftPrincipal_ftTauLower {n r ρ : ℕ} {a : Fin n → �
   simp only [slope, vsub_eq_sub, sub_zero, Complex.real_smul, Complex.ofReal_inv]
   rw [ftPrincipal_ftTauLower_zero, ftPrincipal, ftTauLower_agree a r (n - 1) x₁ hδ0]
   push_cast
-  field_simp
-  ring
+  field
 
 
 /-- The spectral parameter extended to the closed endpoint interval by its limit.
@@ -435,9 +435,7 @@ theorem exists_tendsto_z_div_pow_of_two_le_rho {n r ρ : ℕ} {a : Fin n → ℝ
     simp only [Function.comp_def, Complex.ofReal_im] at h
     exact tendsto_nhds_unique h tendsto_const_nhds
   -- positivity of the branch value gives positivity of the limit
-  have hparp : Even (n + (n - 1) + 1) := by
-    have hEq : n + (n - 1) + 1 = 2 * n := by omega
-    rw [hEq]; exact even_two_mul n
+  have hparp : Even (n + (n - 1) + 1) := even_add_pred_add_one (by omega)
   have hpos : ∀ᶠ δ in 𝓝[>] (0 : ℝ), 0 < ftBranchZLower a c r (n - 1) δ / δ ^ ρ := by
     filter_upwards [self_mem_nhdsWithin,
       Ioo_mem_nhdsGT (show (0 : ℝ) < Real.pi / r by positivity)] with δ hδ0 hδarc
@@ -486,9 +484,7 @@ theorem exists_tendsto_ftClusterParam_div {n r ρ : ℕ} {a : Fin n → ℝ} {c 
   filter_upwards [self_mem_nhdsWithin,
     Ioo_mem_nhdsGT (show (0 : ℝ) < Real.pi / r by positivity)] with δ hδ0 hδarc
   have hδ : (0 : ℝ) < δ := hδ0
-  have hparp : Even (n + (n - 1) + 1) := by
-    have hEq : n + (n - 1) + 1 = 2 * n := by omega
-    rw [hEq]; exact even_two_mul n
+  have hparp : Even (n + (n - 1) + 1) := even_add_pred_add_one (by omega)
   have hzpos : 0 < ftBranchZLower a c r (n - 1) δ := by
     rw [ftBranchZLower_agree a c r (n - 1) hδ]
     exact ftBranchZ_pos ha hc hparp (ftArc_subset hr hδarc)
@@ -564,9 +560,7 @@ theorem ftClusterParam_pos {n r ρ : ℕ} {a : Fin n → ℝ} {c : ℝ} (hn : 0 
     (ha : ∀ k, 0 < a k) (hc : 0 < c) (hr : 1 ≤ r) (hnr : 2 ≤ n ∨ 2 ≤ r) :
     ∀ᶠ δ in 𝓝[>] (0 : ℝ), 0 < ftClusterParam a c r (n - 1) ρ δ := by
   have hrR : (0 : ℝ) < r := by exact_mod_cast hr
-  have hparp : Even (n + (n - 1) + 1) := by
-    have hEq : n + (n - 1) + 1 = 2 * n := by omega
-    rw [hEq]; exact even_two_mul n
+  have hparp : Even (n + (n - 1) + 1) := even_add_pred_add_one (by omega)
   filter_upwards [self_mem_nhdsWithin,
     Ioo_mem_nhdsGT (show (0 : ℝ) < Real.pi / r by positivity)] with δ hδ0 hδarc
   have hδ : (0 : ℝ) < δ := hδ0
@@ -649,9 +643,7 @@ theorem exists_cluster_family_of_two_le_rho {n r ρ : ℕ} {a : Fin n → ℝ} {
       ((ftClusterParam a c r (n - 1) ρ δ : ℝ) : ℂ) ^ ρ
         = ((ftBranchZLower a c r (n - 1) δ : ℝ) : ℂ) := by
     have hrR : (0 : ℝ) < r := by exact_mod_cast hr
-    have hparp : Even (n + (n - 1) + 1) := by
-      have hEq : n + (n - 1) + 1 = 2 * n := by omega
-      rw [hEq]; exact even_two_mul n
+    have hparp : Even (n + (n - 1) + 1) := even_add_pred_add_one (by omega)
     filter_upwards [self_mem_nhdsWithin,
       Ioo_mem_nhdsGT (show (0 : ℝ) < Real.pi / r by positivity)] with δ hδ0 hδarc
     have hδ : (0 : ℝ) < δ := hδ0
@@ -733,7 +725,7 @@ the branch's spectral parameter stays inside `ftSepWindow`, which it does becaus
 `z(δ) → 0` at the rate `eq:z-endpoint-order` gives.
 
 Two of the three circle binders of
-`DominanceFT.weighted_dominance_of_branch_any_multiplicity_at` come out of this:
+`DominanceFTBranch.weighted_dominance_of_branch_any_multiplicity_at` come out of this:
 `hCbd₀` directly, and the zero-freeness `huniq₀` needs before it can count.  The
 third, `haR₀`, is about the cluster's position and waits on the enumeration.
 
@@ -1385,16 +1377,14 @@ theorem tendsto_norm_sub_one_div_of_slope {z : ℝ → ℂ} {w : ℂ}
     have hδ0 : δ ≠ 0 := ne_of_gt hδ
     simp only [Function.comp_apply, Complex.div_re, Complex.ofReal_re, Complex.ofReal_im,
       Complex.sub_re, Complex.sub_im, Complex.one_re, Complex.one_im, Complex.normSq_apply]
-    field_simp
-    ring
+    field
   have him : Filter.Tendsto (fun δ : ℝ => (z δ).im / δ) (𝓝[>] (0 : ℝ)) (𝓝 w.im) := by
     refine ((Complex.continuous_im.tendsto w).comp hz).congr' ?_
     filter_upwards [self_mem_nhdsWithin] with δ hδ
     have hδ0 : δ ≠ 0 := ne_of_gt hδ
     simp only [Function.comp_apply, Complex.div_im, Complex.ofReal_re, Complex.ofReal_im,
       Complex.sub_re, Complex.sub_im, Complex.one_re, Complex.one_im, Complex.normSq_apply]
-    field_simp
-    ring
+    field
   have hzre : Filter.Tendsto (fun δ : ℝ => (z δ).re + 1) (𝓝[>] (0 : ℝ)) (𝓝 2) := by
     have h := ((Complex.continuous_re.tendsto (1 : ℂ)).comp hz1).add_const (1 : ℝ)
     simpa [Function.comp, show (1 : ℝ) + 1 = 2 by norm_num] using h
@@ -1408,8 +1398,7 @@ theorem tendsto_norm_sub_one_div_of_slope {z : ℝ → ℂ} {w : ℂ}
     filter_upwards [self_mem_nhdsWithin] with δ hδ
     have hδ0 : δ ≠ 0 := ne_of_gt hδ
     rw [← Complex.normSq_eq_norm_sq, Complex.normSq_apply]
-    field_simp
-    ring
+    field
   have hden : Filter.Tendsto (fun δ : ℝ => ‖z δ‖ + 1) (𝓝[>] (0 : ℝ)) (𝓝 2) := by
     have h := (hz1.norm).add_const (1 : ℝ)
     simpa [show (1 : ℝ) + 1 = 2 by norm_num] using h
@@ -1421,8 +1410,7 @@ theorem tendsto_norm_sub_one_div_of_slope {z : ℝ → ℂ} {w : ℂ}
   filter_upwards [self_mem_nhdsWithin] with δ hδ
   have hδ0 : δ ≠ 0 := ne_of_gt hδ
   have hpos : (0 : ℝ) < ‖z δ‖ + 1 := by positivity
-  field_simp
-  ring
+  field
 
 /-- **`hgapin₀`: `eq:endpoint-linear-gap` from the slopes alone.**  Every member
 enters `x_1` with slope `α_{idx i}` and the principal branch with `α_0`, so the
@@ -1501,15 +1489,13 @@ theorem exists_linear_gap_of_slopes {ρ : ℕ} {x₁ : ℝ} (hx₁ : 0 < x₁) (
         = -(clusterOmega ρ (idx i) - clusterOmega ρ 0)
           / ((Real.sin (Real.pi / ρ) : ℝ) : ℂ) := by
       rw [clusterAlpha, clusterAlpha]
-      field_simp
-      ring
+      field
     have hω0 : (clusterOmega ρ 0).re = Real.cos (Real.pi / ρ) := by
       rw [clusterOmega_zero_eq, Complex.exp_ofReal_mul_I_re, Real.cos_neg]
     rw [hid, hR]
     simp only [Complex.div_re, Complex.ofReal_re, Complex.ofReal_im, Complex.neg_re,
       Complex.neg_im, Complex.sub_re, Complex.sub_im, Complex.normSq_apply, hω0]
-    field_simp
-    ring
+    field
   -- each normalized member's modulus rises at rate `R i`
   have hgap : ∀ i, Filter.Tendsto (fun δ : ℝ => (‖g i δ‖ / τ δ - 1) / δ)
       (𝓝[>] (0 : ℝ)) (𝓝 (R i)) := by
@@ -1528,8 +1514,7 @@ theorem exists_linear_gap_of_slopes {ρ : ℕ} {x₁ : ℝ} (hx₁ : 0 < x₁) (
       filter_upwards [self_mem_nhdsWithin, hτ] with δ hδ hpd
       have hne : ((δ : ℝ) : ℂ) ≠ 0 := by exact_mod_cast ne_of_gt hδ
       have hPne : P δ ≠ 0 := hpd.2
-      field_simp
-      ring
+      field
     have hnorm := tendsto_norm_sub_one_div_of_slope hquot
     rw [hslopeRe i] at hnorm
     refine hnorm.congr' ?_

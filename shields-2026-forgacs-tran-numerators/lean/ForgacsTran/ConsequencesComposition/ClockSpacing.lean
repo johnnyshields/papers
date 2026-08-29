@@ -4,6 +4,7 @@ Released under the MIT license as described in the file LICENSE.txt.
 Authors: Johnny Shields
 -/
 import ForgacsTran.ConsequencesComposition.PhaseQuantization
+import ForgacsTran.ComplexPart
 
 /-!
 # The local strong clock, composed, and carried back to `F_M`
@@ -137,7 +138,7 @@ theorem hasDerivAt_im_logDeriv {W dW ddW : ℝ → ℂ} {θ : ℝ}
       = ddW θ / W θ - (dW θ / W θ) ^ 2 := by
     field_simp
   rw [heq] at hq
-  exact Complex.imCLM.hasFDerivAt.comp_hasDerivAt θ hq
+  exact hq.im
 
 /-- **The second-derivative bound, by compactness**, mirroring
 `Amplitude.exists_phase_derivative_bound` one order up.  What it asks of the
@@ -753,8 +754,8 @@ theorem derivative_eval_ne_zero_of_transversal {P : Polynomial ℝ}
     {τ z A Φ e dΦ de : ℝ → ℝ} {τ' z' A' : ℝ} {M : ℕ} {θ : ℝ}
     (hid : (fun s => τ s ^ (M + 1) * P.eval (z s))
       =ᶠ[nhds θ] fun s => 2 * A s * (Real.cos (Φ s) + e s))
-    (hτ : HasDerivAt τ τ' θ) (hτ0 : 0 < τ θ)
-    (hz : HasDerivAt z z' θ) (hz0 : z' ≠ 0)
+    (hτ : HasDerivAt τ τ' θ) (_hτ0 : 0 < τ θ)
+    (hz : HasDerivAt z z' θ) (_hz0 : z' ≠ 0)
     (hA : HasDerivAt A A' θ) (hA0 : 0 < A θ)
     (hΦ : HasDerivAt Φ (dΦ θ) θ) (hedv : HasDerivAt e (de θ) θ)
     (hPz : P.eval (z θ) = 0) (hzero : Real.cos (Φ θ) + e θ = 0)
@@ -783,14 +784,6 @@ theorem derivative_eval_ne_zero_of_transversal {P : Polynomial ℝ}
   intro hcon
   rw [hcon, zero_mul, mul_zero] at heq
   exact mul_ne_zero (by positivity) hcross heq.symm
-
-/-- A real polynomial's complexification, evaluated at a real point, is the
-real value coerced.  Factored out because both the value and the derivative
-transfer through it. -/
-theorem eval_map_ofReal {P : Polynomial ℝ} {x : ℝ} :
-    (P.map (algebraMap ℝ ℂ)).eval ((x : ℝ) : ℂ) = ((P.eval x : ℝ) : ℂ) := by
-  rw [Polynomial.eval_map]
-  simpa using Polynomial.eval₂_at_apply (algebraMap ℝ ℂ) x
 
 /-- The normalized coefficient is real at a real parameter, so its real part is
 the real model's value outright.  This is what makes the identity
@@ -912,7 +905,7 @@ theorem adjacent_phase_zeros_consecutive_index {Φ dΦ e de : ℝ → ℝ}
   -- `k ≠ k'` because the index is unique
   have hne : k ≠ k' := by
     intro hEq
-    exact absurd (phase_zero_index_unique hδ hδ4 hcos hmono hΦd hed hΦpos hde hCe
+    exact absurd (phase_zero_index_unique hδ hδ4 hmono hΦd hed hΦpos hde hCe
       (hcosk k) hθ hθ' hz hz' hk (hEq ▸ hk')) (ne_of_lt hlt)
   -- so `k + 1 ≤ k'`; adjacency forbids `k + 2 ≤ k'`
   have hlt' : k + 1 ≤ k' := by omega

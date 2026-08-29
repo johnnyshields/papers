@@ -118,24 +118,23 @@ theorem tendsto_cpow_mul_Gamma_div_Gamma {s : ℂ} (hs : ∀ m : ℕ, s ≠ -m) 
     field_simp
   simpa only [heq] using h
 
+/-- Euler's limit at the shift `s - 1`, read at the argument `n + s`.  This is the shape both
+halves of the ratio asymptotic consume. -/
+theorem tendsto_cpow_mul_Gamma_div_Gamma_shift {s : ℂ} (hs : ∀ m : ℕ, s ≠ 1 - m) :
+    Tendsto (fun n : ℕ => (n : ℂ) ^ (s - 1) * Complex.Gamma (n + 1) / Complex.Gamma (n + s))
+      atTop (𝓝 1) := by
+  have hs' : ∀ m : ℕ, s - 1 ≠ -m := fun m hm => hs m (by linear_combination hm)
+  have h := tendsto_cpow_mul_Gamma_div_Gamma hs'
+  simpa only [show ∀ n : ℕ, s - 1 + (n : ℂ) + 1 = (n : ℂ) + s from fun n => by ring] using h
+
 /-- `Γ(n + a) / Γ(n + b) ∼ n ^ (a - b)`.  The hypotheses say that `a` and `b` avoid the
 poles of `Γ` together with all their forward integer translates. -/
 theorem tendsto_Gamma_div_Gamma_div_cpow {a b : ℂ}
     (ha : ∀ m : ℕ, a ≠ 1 - m) (hb : ∀ m : ℕ, b ≠ 1 - m) :
     Tendsto (fun n : ℕ => Complex.Gamma (n + a) / (Complex.Gamma (n + b) * (n : ℂ) ^ (a - b)))
       atTop (𝓝 1) := by
-  have hsa : ∀ m : ℕ, a - 1 ≠ -m := fun m h => ha m (by linear_combination h)
-  have hsb : ∀ m : ℕ, b - 1 ≠ -m := fun m h => hb m (by linear_combination h)
-  have Ha : Tendsto
-      (fun n : ℕ => (n : ℂ) ^ (a - 1) * Complex.Gamma (n + 1) / Complex.Gamma (n + a))
-      atTop (𝓝 1) := by
-    have h := tendsto_cpow_mul_Gamma_div_Gamma hsa
-    simpa only [show ∀ n : ℕ, a - 1 + (n : ℂ) + 1 = (n : ℂ) + a from fun n => by ring] using h
-  have Hb : Tendsto
-      (fun n : ℕ => (n : ℂ) ^ (b - 1) * Complex.Gamma (n + 1) / Complex.Gamma (n + b))
-      atTop (𝓝 1) := by
-    have h := tendsto_cpow_mul_Gamma_div_Gamma hsb
-    simpa only [show ∀ n : ℕ, b - 1 + (n : ℂ) + 1 = (n : ℂ) + b from fun n => by ring] using h
+  have Ha := tendsto_cpow_mul_Gamma_div_Gamma_shift ha
+  have Hb := tendsto_cpow_mul_Gamma_div_Gamma_shift hb
   have key := Hb.div Ha one_ne_zero
   rw [one_div_one] at key
   refine key.congr' ?_
@@ -147,15 +146,11 @@ theorem tendsto_Gamma_div_Gamma_div_cpow {a b : ℂ}
     exact_mod_cast Nat.factorial_ne_zero n
   have hGa : Complex.Gamma ((n : ℂ) + a) ≠ 0 := Gamma_natCast_add_ne_zero ha n
   have hGb : Complex.Gamma ((n : ℂ) + b) ≠ 0 := Gamma_natCast_add_ne_zero hb n
-  have hpa : (n : ℂ) ^ (a - 1) ≠ 0 := fun h => hn0 ((Complex.cpow_eq_zero_iff _ _).mp h).1
-  have hpb : (n : ℂ) ^ (b - 1) ≠ 0 := fun h => hn0 ((Complex.cpow_eq_zero_iff _ _).mp h).1
-  have hpab : (n : ℂ) ^ (a - b) ≠ 0 := fun h => hn0 ((Complex.cpow_eq_zero_iff _ _).mp h).1
+  have hp : ∀ s : ℂ, (n : ℂ) ^ s ≠ 0 := fun _ => Complex.cpow_ne_zero_iff.mpr (Or.inl hn0)
   have hsplit : (n : ℂ) ^ (a - 1) = (n : ℂ) ^ (a - b) * (n : ℂ) ^ (b - 1) := by
-    rw [← Complex.cpow_add _ _ hn0]
-    congr 1
-    ring
+    rw [← Complex.cpow_add _ _ hn0]; congr 1; ring
   rw [hsplit]
-  field_simp
+  field_simp [hp]
 
 /-- The real form of `Shields.tendsto_Gamma_div_Gamma_div_cpow`. -/
 theorem tendsto_Gamma_div_Gamma_div_rpow {a b : ℝ}
@@ -178,5 +173,12 @@ theorem tendsto_Gamma_div_Gamma_div_rpow {a b : ℝ}
   have h3 := (Complex.continuous_re.tendsto (1 : ℂ)).comp h
   simp only [Function.comp_def, Complex.ofReal_re, Complex.one_re] at h3
   exact h3
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.tendsto_Gamma_div_Gamma_div_rpow' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms tendsto_Gamma_div_Gamma_div_rpow
 
 end Shields

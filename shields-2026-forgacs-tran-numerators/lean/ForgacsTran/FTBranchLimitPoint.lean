@@ -4,6 +4,7 @@ Released under the MIT license as described in the file LICENSE.txt.
 Authors: Johnny Shields
 -/
 import ForgacsTran.FTBranchEndpoint
+import ForgacsTran.PencilIndex
 
 /-!
 # Identifying the endpoint limit
@@ -126,7 +127,7 @@ theorem ftTau_limit_eq_of_repeated_min {n r : ℕ} {a : Fin n → ℝ} {L : ℝ}
   have hπ := pi_pos
   have hr0 : (0 : ℝ) < r := by exact_mod_cast hr
   have hn : 0 < n := by omega
-  have hn1 : ((n - 1 : ℕ) : ℝ) = (n : ℝ) - 1 := by rw [Nat.cast_sub hn, Nat.cast_one]
+  have hn1 : ((n - 1 : ℕ) : ℝ) = (n : ℝ) - 1 := cast_pred_eq_sub_one hn
   have hnR : (2 : ℝ) ≤ n := by exact_mod_cast hn2
   have harc : ∀ᶠ θ in 𝓝[>] (0 : ℝ), θ ∈ Ioo (0 : ℝ) (π / r) :=
     Ioo_mem_nhdsGT (by positivity)
@@ -712,7 +713,8 @@ example : ∃ C ε : ℝ, 0 < C ∧ 0 < ε ∧ ∀ δ : ℝ, 0 < δ → δ ≤ �
     intro k; fin_cases k <;> simp [hadef]
   have hgap : ∀ k ∉ ({0, 1} : Finset (Fin 3)), a 0 * (1 + (1 : ℝ)) < a k := by
     intro k hk
-    fin_cases k <;> simp_all <;> norm_num
+    fin_cases k <;> simp_all
+    norm_num
   have hpos : ∀ k, 0 < a k := by
     intro k; fin_cases k <;> simp [hadef]
   have h := exists_bound_ftTau_sub_linear (n := 3) (r := 1) (ρ := 2) (a := a)

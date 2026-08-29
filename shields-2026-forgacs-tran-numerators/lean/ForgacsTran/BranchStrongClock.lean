@@ -451,7 +451,7 @@ theorem exists_ft_local_strong_clock_at_branch_closed
   have hzinj : ∀ w ∈ (fun θ : ℝ => ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)) '' Icc lo hi,
       ∃! θ : ℝ, θ ∈ Icc lo hi ∧ ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ) = w := by
     have hmonoz : StrictMonoOn (ftBranchZ a c r (n - 1)) (Ioo 0 (π / r)) :=
-      ftBranchZ_strictMonoOn hn ha hc hr (even_add_sub_one hn)
+      ftBranchZ_strictMonoOn hn ha hc hr (even_add_pred_add_one hn)
         (fun _s hs => ftBranchAt_of_arc_principal hn ha hr hnr hs)
     have hinj : Set.InjOn (ftBranchZ a c r (n - 1)) (Icc lo hi) :=
       (hmonoz.injOn).mono (fun θ hθ => harc (hsub hθ))
@@ -564,7 +564,7 @@ theorem ft_local_strong_clock_at_branch_closed_applies :
   have h3 : (3 : ℝ) < π := Real.pi_gt_three
   have harc : Icc (1 : ℝ) 2 ⊆ Ioo 0 (π / ((1 : ℕ) : ℝ)) := by
     intro θ hθ
-    exact ⟨by linarith [hθ.1], by push_cast; rw [div_one]; linarith [hθ.2]⟩
+    exact ⟨by linarith [hθ.1], by rw [pi_div_natCast_one]; linarith [hθ.2]⟩
   obtain ⟨κ, hκ, κ₂, hκ₂, C, hC, σ, hσ0, hσ1, M₀, hbody⟩ :=
     exists_ft_local_strong_clock_at_branch_closed (n := 3) (a := ![1, 1, 1]) (c := 1)
       (B := 1) (lo' := 1) (hi' := 2) (lo := 6 / 5) (hi := 9 / 5) (δ := π / 4)

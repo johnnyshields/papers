@@ -309,7 +309,7 @@ theorem exists_endpoint_dominance_of_split_of_threshold {n : ℕ}
   exact ⟨M₀, hM₀⟩
 
 /-- `exists_endpoint_dominance_of_split_of_threshold` with `h` produced from
-`WeightedDominance.exists_cluster_threshold`.  Kept for consumers written against
+`Dominance.exists_cluster_threshold`.  Kept for consumers written against
 the bundled form; new callers wanting the paper's `h = h(Q,r)` should take the
 threshold form, whose supplying lemma mentions no numerator data. -/
 theorem exists_endpoint_dominance_of_split {n : ℕ} {ε Amin c Ccont σ : ℝ} {p : ℕ}
@@ -394,7 +394,7 @@ theorem exists_upper_endpoint_dominance_of_split_of_threshold {n : ℕ}
       (Rrem := fun M η => Rrem M (b - η)) hAmin hC hσ0 hσ1 hhpos hcl hamp hCW hgap hsplit)
 
 /-- `exists_upper_endpoint_dominance_of_split_of_threshold` with `h` produced from
-`WeightedDominance.exists_cluster_threshold`.  Kept for consumers written against
+`Dominance.exists_cluster_threshold`.  Kept for consumers written against
 the bundled form. -/
 theorem exists_upper_endpoint_dominance_of_split {n : ℕ} {ε b Amin c Ccont σ : ℝ} {p : ℕ}
     (hc : 0 < c) (hε : 0 ≤ ε) (hAmin : 0 < Amin) (hC : 0 ≤ Ccont)

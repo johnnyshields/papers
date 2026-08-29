@@ -144,9 +144,9 @@ uniformly over windows, at the constants
 The `α`, `β` binders come **last**, which is what lets one application serve the
 window and both of its complements in `abs_windowCount_sub_le`. -/
 theorem exists_windowZeros_of_supply {Q B : Polynomial ℂ} {r M : ℕ} {z τ : ℝ → ℝ}
-    {hcol κ₀ κ₁ : ℝ} (hh : 0 ≤ hcol) (hκ₀ : 0 ≤ κ₀) (hκ₁ : 0 ≤ κ₁)
-    (hzmono : StrictMonoOn z (Icc 0 (π / r))) (hzcont : ContinuousOn z (Icc 0 (π / r)))
-    (hτ : ∀ θ ∈ Icc 0 (π / r), 0 < τ θ)
+    {hcol κ₀ κ₁ : ℝ} (hh : 0 < hcol) (hκ₀ : 0 ≤ κ₀) (hκ₁ : 0 ≤ κ₁)
+    (hzmono : StrictMonoOn z (Ioo 0 (π / r))) (hzcont : ContinuousOn z (Ioo 0 (π / r)))
+    (hτ : ∀ θ ∈ Ioo 0 (π / r), 0 < τ θ)
     (hs : FTPhaseSupply Q B r z τ hcol κ₀ κ₁ M)
     {α β : ℝ} (hα : 0 ≤ α) (hαβ : α ≤ β) (hβ : β ≤ π / r) :
     ∃ Z : Finset ℂ,
@@ -157,12 +157,15 @@ theorem exists_windowZeros_of_supply {Q B : Polynomial ℂ} {r M : ℕ} {z τ : 
   obtain ⟨P, e, Ret, J, ρ, hPeq, hPne, hdeg, hM1, hρ, hJK, he, hwin, hRet, hWne,
     hdom, hbranch⟩ := hs
   have hcolnn : (0 : ℝ) ≤ hcol / M := by positivity
-  set Ret' : Set ℝ := Ret ∩ Icc 0 (π / r) with hRet'
-  have hRet'sub : Ret' ⊆ Icc 0 (π / r) := inter_subset_right
+  have hcolpos : (0 : ℝ) < hcol / M := by
+    have : (0 : ℝ) < M := by exact_mod_cast lt_of_lt_of_le Nat.zero_lt_one hM1
+    positivity
+  set Ret' : Set ℝ := Ret ∩ Ioo 0 (π / r) with hRet'
+  have hRet'sub : Ret' ⊆ Ioo 0 (π / r) := inter_subset_right
   set W : ℝ → ℂ := fun θ => ftAmp Q B r ((z θ : ℝ) : ℂ) (ftPrincipal τ θ) with hW
   set Rm : ℝ → ℝ := fun θ => (τ θ) ^ (M + 1) * P.eval (z θ)
       - 2 * (W θ * Complex.exp (-(((((M : ℝ) + 1) * θ : ℝ)) : ℂ) * Complex.I)).re with hRm
-  have hdec : ∀ θ ∈ Icc 0 (π / r), (τ θ) ^ (M + 1) * P.eval (z θ)
+  have hdec : ∀ θ ∈ Ioo 0 (π / r), (τ θ) ^ (M + 1) * P.eval (z θ)
       = 2 * (W θ * Complex.exp (-(((((M : ℝ) + 1) * θ : ℝ)) : ℂ) * Complex.I)).re
         + Rm θ := fun θ _ => by rw [hRm]; ring
   have hdomb : ∀ θ ∈ Ret', |Rm θ| ≤ ‖W θ‖ / 2 := by
@@ -174,7 +177,7 @@ theorem exists_windowZeros_of_supply {Q B : Polynomial ℂ} {r M : ℕ} {z τ : 
   have hRet'mem : ∀ θ, hcol / M ≤ θ → θ ≤ π / r - hcol / M →
       (∀ j, j < J → ρ ≤ |θ - e j|) → θ ∈ Ret' := by
     intro θ h1 h2 h3
-    exact ⟨hRet θ h1 h2 h3, ⟨le_trans hcolnn h1, by linarith⟩⟩
+    exact ⟨hRet θ h1 h2 h3, ⟨lt_of_lt_of_le hcolpos h1, by linarith⟩⟩
   obtain ⟨Z, hZc, hZr, hZm⟩ :=
     exists_windowZeros (P := P) (z := z) (τ := fun θ => (τ θ) ^ (M + 1))
       (Rm := Rm) (W := W) (e := e) (Ret := Ret') (J := J) (M := M) (K := B.natDegree)
@@ -197,10 +200,10 @@ doubling is the complementation: `subsec:proof` gets the upper bound by applying
 `eq:angular-distinct-lower` to the two complementary intervals, so the two-sided
 constant is twice the one-sided one. -/
 theorem ftAngularDiscrepancy_of_supply {Q : Polynomial ℂ} {r : ℕ} {z τ : ℝ → ℝ}
-    (hzmono : StrictMonoOn z (Icc 0 (π / r)))
-    (hzcont : ContinuousOn z (Icc 0 (π / r)))
-    (hτ : ∀ θ ∈ Icc 0 (π / r), 0 < τ θ)
-    (hsupply : ∃ hcol κ₀ κ₁ : ℝ, 0 ≤ hcol ∧ 0 ≤ κ₀ ∧ 0 ≤ κ₁ ∧
+    (hzmono : StrictMonoOn z (Ioo 0 (π / r)))
+    (hzcont : ContinuousOn z (Ioo 0 (π / r)))
+    (hτ : ∀ θ ∈ Ioo 0 (π / r), 0 < τ θ)
+    (hsupply : ∃ hcol κ₀ κ₁ : ℝ, 0 < hcol ∧ 0 ≤ κ₀ ∧ 0 ≤ κ₁ ∧
       ∀ B : Polynomial ℂ, HasRealCoeffs B → B.eval 0 ≠ 0 →
         ∃ M₀ : ℕ, ∀ M : ℕ, M₀ ≤ M → FTPhaseSupply Q B r z τ hcol κ₀ κ₁ M) :
     FTAngularDiscrepancy Q r z := by

@@ -468,8 +468,7 @@ theorem ftDen_cubicQ_eval_cubicThird (θ : ℝ) :
           - ((cubicTau θ : ℝ) : ℂ) ^ 6
           - 2 * ((Real.cos θ : ℝ) : ℂ) * ((cubicTau θ : ℝ) : ℂ) ^ 3)
         / ((cubicTau θ : ℝ) : ℂ) ^ 6 := by
-    field_simp
-    ring
+    field
   rw [hsplit, hnum, zero_div]
 
 /-- **`Forgacs2017RationalDenominator` Props. 1--2 at the witness.**  The

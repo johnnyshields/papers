@@ -17,6 +17,15 @@ import ForgacsTran.EventualDegree
                         — the same off-ray bound from leaner inputs: the `sec:reduction`
                           recurrence plus the phase count, with the degree bound
                           derived rather than assumed.
+  `interior_distinct_count`
+                        — clause 2(iii), and **a re-binding rather than a
+                          derivation**: the `Finset` it returns is the one
+                          `FTInputs.interiorZeros` handed it, so it changes the
+                          statement's shape and not its content.  It is here
+                          because the Lean statement should mirror the paper's;
+                          `MainClauses.interior_distinct_count_of_dominance` and
+                          `MainFT.interior_distinct_count_of_supply` are where the
+                          zero set is built instead of assumed.
 
 Both take the analytic inputs as an explicit `(H : FTInputs)` hypothesis, so the
 proofs are unconditional given `H`: `#print axioms` on either reports only Lean's

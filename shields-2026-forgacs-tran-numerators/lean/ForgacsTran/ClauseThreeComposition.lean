@@ -267,10 +267,12 @@ quantified the same way, so clause 3 here rests on the hypotheses clauses 1 and 
 
 **Containment.**  The conclusion asserts `NumeratorUniform` of the defect family and produces
 a `Finset ℂ` of roots of `(Pof N M).map` inside `Complex.ofReal '' T`.  No binder mentions
-`NumeratorUniform`, `IsRoot`, `Finset ℂ` or a cardinality; `hdom` compares two norms, `hgeom`
-speaks only of the branch and the weight, and `hB`, `hP` identify `B_N` and `P_{N,m}` without
-saying anything about their zeros.  So neither the constant family nor the zero set is carried
-in. -/
+`NumeratorUniform`, `IsRoot`, `Finset ℂ` or the cardinality of a root set; `hdom` compares two
+norms, and `hB`, `hP` identify `B_N` and `P_{N,m}` without saying anything about their zeros.
+`hgeom` is `FTChainGeom`, which unfolds to a statement about the branch, the chain and the
+weight; the one count in it is the number `n ≤ K + 1` of components.  The family is built by
+`ClauseThree.numeratorUniform_defect`, which has no hypotheses at all, and the zero set by
+`phaseSupply_of_ftChainGeom` through `exists_interiorZeros_of_phaseSupply`. -/
 theorem clauseThree_of_ftGeometry
     (Q : Polynomial ℝ) (r : ℕ) (hr : 1 ≤ r)
     {QC : Polynomial ℂ} {z τ : ℝ → ℝ} {T : Set ℝ} {hwin κ₀ κ₁ bb : ℝ}

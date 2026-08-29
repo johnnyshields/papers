@@ -203,7 +203,7 @@ theorem isLittleO_sum_divisor_canonicalProduct (ha : ∀ n, a n ≠ 0)
   have hε : 0 < ε := by rw [hεdef]; positivity
   obtain ⟨B, hB⟩ := (hasExpType_canonicalProduct ha hsum hε).exists_sum_divisor_le hε.le hdiff hne
   have hcoef : 2 * ε / Real.log 2 = δ / 4 := by
-    rw [hεdef]; field_simp; ring
+    rw [hεdef]; field
   filter_upwards [eventually_gt_atTop (0 : ℝ), eventually_ge_atTop (4 * |B| / δ)] with r hr hrB
   rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_nonneg (sum_divisor_nonneg hdiff),
     abs_of_pos hr]
@@ -224,5 +224,9 @@ theorem isLittleO_sum_divisor_canonicalProduct (ha : ∀ n, a n ≠ 0)
 /-- info: 'Shields.isLittleO_sum_divisor_canonicalProduct' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms isLittleO_sum_divisor_canonicalProduct
+
+/-- info: 'Shields.HasExpType.isBigO_sum_divisor' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms HasExpType.isBigO_sum_divisor
 
 end Shields

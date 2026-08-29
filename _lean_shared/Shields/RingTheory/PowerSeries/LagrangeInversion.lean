@@ -47,14 +47,14 @@ section Residue
 
 variable {A : Type*} [CommRing A] {u v : A⟦X⟧}
 
-/-- Differentiating `u v = 1` gives `v² u' = -v'`. -/
+/-- Differentiating `u v = 1` gives `v² u' = -v'`.  This is `Derivation.leibniz_of_mul_eq_one`
+for the power-series derivation, restated with the product written out and the square on the
+side the residue identities use it from. -/
 theorem sq_mul_derivative_of_mul_eq_one (huv : u * v = 1) :
     v ^ 2 * d⁄dX A u = -d⁄dX A v := by
-  have h : u * d⁄dX A v + v * d⁄dX A u = 0 := by
-    have h1 : d⁄dX A (u * v) = 0 := by rw [huv]; simp
-    rw [Derivation.leibniz] at h1
-    simpa [smul_eq_mul] using h1
-  linear_combination v * h - (d⁄dX A v) * huv
+  have h := (derivative A).leibniz_of_mul_eq_one (by rw [mul_comm]; exact huv : v * u = 1)
+  simp only [smul_eq_mul] at h
+  rw [h]; ring
 
 /-- `(X u)' = u + X u'`. -/
 theorem derivative_X_mul (u : A⟦X⟧) : d⁄dX A (X * u) = u + X * d⁄dX A u := by
@@ -445,20 +445,10 @@ theorem logDeriv_eq_of_C_mul {c c' : A} (hc : c * c' = 1) {qf qg pf pg : A⟦X�
 variable [IsAddTorsionFree A]
 
 /-- Over a torsion-free ring a formal power series with vanishing derivative is its own constant
-term.  Coefficientwise this is `(n+1)·[X^{n+1}]F = 0`, and torsion-freeness cancels the `n+1`. -/
-theorem eq_C_of_derivative_eq_zero {F : A⟦X⟧} (h : d⁄dX A F = 0) : F = C (constantCoeff F) := by
-  ext n
-  rcases n with _ | n
-  · simp
-  · have hn : coeff n (d⁄dX A F) = 0 := by rw [h]; simp
-    rw [coeff_derivative] at hn
-    have hsm : ((n + 1 : ℕ)) • coeff (n + 1) F = 0 := by
-      rw [nsmul_eq_mul]
-      push_cast
-      linear_combination hn
-    rcases nsmul_eq_zero_iff.mp hsm with hz | hz
-    · rw [hz]; simp
-    · exact absurd hz (Nat.succ_ne_zero n)
+term.  Both sides have derivative zero and the same constant term, which is what
+`PowerSeries.derivative.ext` asks for. -/
+theorem eq_C_of_derivative_eq_zero {F : A⟦X⟧} (h : d⁄dX A F = 0) : F = C (constantCoeff F) :=
+  PowerSeries.derivative.ext (by simp [h]) (by simp)
 
 /-- **Conversely, equal logarithmic derivatives force a constant factor.**  The quotient
 `q_g p_f` has zero derivative, hence is constant; multiplying back by `q_f` gives
@@ -494,5 +484,20 @@ theorem C_mul_of_logDeriv_eq {qf qg pf pg : A⟦X⟧} (hqf : qf * pf = 1) (hqg :
     _ = C (constantCoeff (qg * pf)) * qf := congrArg (· * qf) hconst
 
 end LogDeriv
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.lagrange_burmann_coeff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms lagrange_burmann_coeff
+
+/-- info: 'Shields.exists_compInverse' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_compInverse
+
+/-- info: 'Shields.expOf' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms expOf
 
 end Shields

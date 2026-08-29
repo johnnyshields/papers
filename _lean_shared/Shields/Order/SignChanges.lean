@@ -24,9 +24,10 @@ cannot increase, and this file gives it two descriptions:
 * `Shields.AltIndices x k` -- `x` alternates in sign along some strictly increasing family of
   `k + 1` indices.  `Shields.signChanges x` is the largest such `k`.
 * `Shields.jumpCount u j` -- the number of adjacent sign changes strictly before index `j`.
-  On a vector with no zero entry the two agree, and the jump count is the one that carries an
-  induction: `Shields.jumpCount_parity` says the sign of `u j` relative to `u 0` is the parity
-  of `jumpCount u j`.
+  On a vector with no zero entry the jump count is a lower bound for the sign-change count; the
+  reverse inequality is not proved here.  The jump count is the one that carries an induction:
+  `Shields.jumpCount_parity` says the sign of `u j` relative to `u 0` is the parity of
+  `jumpCount u j`.
 
 The parity statement is what turns a sign pattern into a block decomposition, which is how the
 variation-diminishing property is proved.
@@ -205,59 +206,62 @@ parity and hence opposite sign. -/
 theorem altIndices_jumpCount {x : Fin n → ℝ} (hx : ∀ j, x j ≠ 0) (hn : 0 < n) :
     AltIndices x (jumpCount (vecExt x) (n - 1)) := by
   have hune : ∀ p ≤ n - 1, vecExt x p ≠ 0 := fun p hp => vecExt_ne_zero hx (by omega)
+  -- every index of the alternating family is a jump count the vector actually reaches
+  have hle : ∀ t : Fin (jumpCount (vecExt x) (n - 1) + 1),
+      (t : ℕ) ≤ jumpCount (vecExt x) (n - 1) := fun t => Nat.lt_succ_iff.mp t.isLt
   have hbound : ∀ t : Fin (jumpCount (vecExt x) (n - 1) + 1),
       blockStart (vecExt x) (t : ℕ) < n := fun t =>
-    lt_of_le_of_lt (blockStart_le (N := n - 1) (by have := t.isLt; omega)) (by omega)
+    lt_of_le_of_lt (blockStart_le (hle t)) (by omega)
+  have hcount : ∀ t : Fin (jumpCount (vecExt x) (n - 1) + 1),
+      jumpCount (vecExt x) (blockStart (vecExt x) (t : ℕ)) = (t : ℕ) :=
+    fun t => jumpCount_blockStart (hle t)
   refine ⟨fun t => ⟨blockStart (vecExt x) (t : ℕ), hbound t⟩, ?_, ?_⟩
   · intro a b hab
-    refine Fin.mk_lt_mk.mpr (blockStart_strictMono (N := n - 1) ?_ ?_ ?_)
-    · have := a.isLt; omega
-    · have := b.isLt; omega
-    · exact_mod_cast hab
+    exact Fin.mk_lt_mk.mpr (blockStart_strictMono (hle a) (hle b) (by exact_mod_cast hab))
   · intro s
-    have hs := s.isLt
-    have hcs : (s.castSucc : ℕ) = (s : ℕ) := Fin.val_castSucc s
-    have hss : (s.succ : ℕ) = (s : ℕ) + 1 := Fin.val_succ s
-    have h1 : jumpCount (vecExt x) (blockStart (vecExt x) (s.castSucc : ℕ))
-        = (s.castSucc : ℕ) := jumpCount_blockStart (N := n - 1) (by omega)
-    have h2 : jumpCount (vecExt x) (blockStart (vecExt x) (s.succ : ℕ))
-        = (s.succ : ℕ) := jumpCount_blockStart (N := n - 1) (by omega)
     have hodd : Odd (jumpCount (vecExt x) (blockStart (vecExt x) (s.castSucc : ℕ))
         + jumpCount (vecExt x) (blockStart (vecExt x) (s.succ : ℕ))) := by
-      rw [h1, h2, hcs, hss]; exact ⟨(s : ℕ), by omega⟩
+      rw [hcount, hcount, Fin.val_castSucc, Fin.val_succ]; exact ⟨(s : ℕ), by omega⟩
     have hneg := mul_neg_of_jumpCount_odd (N := n - 1) hune
       (a := blockStart (vecExt x) (s.castSucc : ℕ))
       (b := blockStart (vecExt x) (s.succ : ℕ))
       (by have := hbound s.castSucc; omega) (by have := hbound s.succ; omega) hodd
-    rw [vecExt_of_lt (hbound s.castSucc), vecExt_of_lt (hbound s.succ)] at hneg
-    exact hneg
+    rwa [vecExt_of_lt (hbound s.castSucc), vecExt_of_lt (hbound s.succ)] at hneg
+
+/-- **The jump count sees only the sign of the adjacent products.**  Two sequences whose
+adjacent products are negative at the same places below `N` have the same jump count at `N`. -/
+theorem jumpCount_congr_of_iff {u v : ℕ → ℝ} {N : ℕ}
+    (h : ∀ p < N, (u p * u (p + 1) < 0 ↔ v p * v (p + 1) < 0)) :
+    jumpCount u N = jumpCount v N := by
+  unfold jumpCount
+  exact congrArg Finset.card
+    (Finset.filter_congr fun p hp => h p (Finset.mem_range.mp hp))
 
 /-- Two sequences agreeing up to `N` have the same jump count at `N`. -/
 theorem jumpCount_congr {u v : ℕ → ℝ} {N : ℕ} (h : ∀ p ≤ N, u p = v p) :
-    jumpCount u N = jumpCount v N := by
-  unfold jumpCount
-  congr 1
-  ext p
-  simp only [Finset.mem_filter, Finset.mem_range]
-  constructor
-  · rintro ⟨hp, hlt⟩
-    exact ⟨hp, by rwa [← h p (by omega), ← h (p + 1) (by omega)]⟩
-  · rintro ⟨hp, hlt⟩
-    exact ⟨hp, by rwa [h p (by omega), h (p + 1) (by omega)]⟩
+    jumpCount u N = jumpCount v N :=
+  jumpCount_congr_of_iff fun p hp => by rw [h p hp.le, h (p + 1) hp]
 
 /-- Two sequences agreeing in sign up to `N` have the same jump count at `N`. -/
 theorem jumpCount_congr_of_sign {u v : ℕ → ℝ} {N : ℕ} (h : ∀ p ≤ N, 0 < u p * v p) :
-    jumpCount u N = jumpCount v N := by
-  unfold jumpCount
-  congr 1
-  ext p
-  simp only [Finset.mem_filter, Finset.mem_range]
-  constructor
-  · rintro ⟨hp, hlt⟩
-    refine ⟨hp, ?_⟩
-    nlinarith [mul_pos (h p (by omega)) (h (p + 1) (by omega))]
-  · rintro ⟨hp, hlt⟩
-    refine ⟨hp, ?_⟩
-    nlinarith [mul_pos (h p (by omega)) (h (p + 1) (by omega))]
+    jumpCount u N = jumpCount v N :=
+  jumpCount_congr_of_iff fun p hp =>
+    ⟨fun hlt => by nlinarith [mul_pos (h p (by omega)) (h (p + 1) (by omega))],
+     fun hlt => by nlinarith [mul_pos (h p (by omega)) (h (p + 1) (by omega))]⟩
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.altIndices_jumpCount' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms altIndices_jumpCount
+
+/-- info: 'Shields.le_signChanges' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms le_signChanges
+
+/-- info: 'Shields.signChanges_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms signChanges_le
 
 end Shields

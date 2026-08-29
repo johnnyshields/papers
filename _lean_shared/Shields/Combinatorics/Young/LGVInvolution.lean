@@ -3,7 +3,9 @@ Copyright (c) 2026 Johnny Shields. All rights reserved.
 Released under the MIT license as described in the file LICENSE.txt.
 Authors: Johnny Shields
 -/
+import Shields.Algebra.BigOperators.Finset
 import Shields.Combinatorics.Young.LGVPaths
+import Shields.Combinatorics.Young.LGVSelection
 import Shields.LinearAlgebra.Matrix.TotallyNonneg.Basic
 
 /-!
@@ -100,9 +102,20 @@ zero path, which nothing looks at. -/
 def famPath (F : Fin m → ℕ → ℕ) (n : ℕ) : ℕ → ℕ :=
   if h : n < m then F ⟨n, h⟩ else fun _ => 0
 
+/-- In range, the family read at a natural-number index is the path at that index. -/
+theorem famPath_of_lt (F : Fin m → ℕ → ℕ) {n : ℕ} (h : n < m) : famPath F n = F ⟨n, h⟩ :=
+  dif_pos h
+
 @[simp]
-theorem famPath_val (F : Fin m → ℕ → ℕ) (w : Fin m) : famPath F (w : ℕ) = F w := by
-  rw [famPath, dif_pos w.isLt]
+theorem famPath_val (F : Fin m → ℕ → ℕ) (w : Fin m) : famPath F (w : ℕ) = F w :=
+  famPath_of_lt F w.isLt
+
+/-- A product over the family is a product over `range m` of its natural-number
+reading.  This is `Fin.prod_univ_eq_prod_range` through `famPath`. -/
+theorem prod_univ_eq_prod_range_famPath {M : Type*} [CommMonoid M] (F : Fin m → ℕ → ℕ)
+    (g : (ℕ → ℕ) → M) : ∏ w : Fin m, g (F w) = ∏ i ∈ Finset.range m, g (famPath F i) := by
+  rw [← Fin.prod_univ_eq_prod_range (fun i => g (famPath F i)) m]
+  exact Finset.prod_congr rfl fun w _ => by rw [famPath_val]
 
 /-- Two paths of the family share a lattice point. -/
 def Intersects (b : ℕ) (F : Fin m → ℕ → ℕ) : Prop :=
@@ -118,100 +131,88 @@ soon as the family intersects, and each names the data the next one is cut out
 by. -/
 
 /-- The heights at which some pair of the family shares a lattice point. -/
-def crossHeights (b : ℕ) (F : Fin m → ℕ → ℕ) : Set ℕ :=
-  {i | ∃ u v : Fin m, u < v ∧ i ∈ crossSet b (F u) (F v)}
+def crossHeights (b : ℕ) (F : Fin m → ℕ → ℕ) : Set ℕ := selHeights (crossSet b) F
 
 /-- The least height at which two paths of the family meet. -/
-noncomputable def famHeight (b : ℕ) (F : Fin m → ℕ → ℕ) : ℕ := sInf (crossHeights b F)
+noncomputable def famHeight (b : ℕ) (F : Fin m → ℕ → ℕ) : ℕ := selHeight (crossSet b) F
 
 /-- The paths that meet a later path at the least crossing height. -/
-def crossIndices (b : ℕ) (F : Fin m → ℕ → ℕ) : Set ℕ :=
-  {n | ∃ u : Fin m, (u : ℕ) = n ∧ ∃ v : Fin m, u < v ∧
-    ∃ x, Sweeps (F u) (famHeight b F) x ∧ Sweeps (F v) (famHeight b F) x}
+def crossIndices (b : ℕ) (F : Fin m → ℕ → ℕ) : Set ℕ := selIndices Sweeps (crossSet b) F
 
 /-- The least path index meeting a later path at the least crossing height. -/
-noncomputable def famIndex (b : ℕ) (F : Fin m → ℕ → ℕ) : ℕ := sInf (crossIndices b F)
+noncomputable def famIndex (b : ℕ) (F : Fin m → ℕ → ℕ) : ℕ := selIndex Sweeps (crossSet b) F
 
 /-- The abscissae the selected path shares with a later one at the selected
 height. -/
-def crossAbscissae (b : ℕ) (F : Fin m → ℕ → ℕ) : Set ℕ :=
-  {x | ∃ u : Fin m, (u : ℕ) = famIndex b F ∧ Sweeps (F u) (famHeight b F) x ∧
-    ∃ v : Fin m, u < v ∧ Sweeps (F v) (famHeight b F) x}
+def crossAbscissae (b : ℕ) (F : Fin m → ℕ → ℕ) : Set ℕ := selAbscissae Sweeps (crossSet b) F
 
 /-- The least such abscissa. -/
-noncomputable def famAbscissa (b : ℕ) (F : Fin m → ℕ → ℕ) : ℕ := sInf (crossAbscissae b F)
+noncomputable def famAbscissa (b : ℕ) (F : Fin m → ℕ → ℕ) : ℕ :=
+  selAbscissa Sweeps (crossSet b) F
 
 /-- The later paths through the selected lattice point. -/
-def crossPartners (b : ℕ) (F : Fin m → ℕ → ℕ) : Set ℕ :=
-  {n | ∃ v : Fin m, (v : ℕ) = n ∧ famIndex b F < n ∧
-    Sweeps (F v) (famHeight b F) (famAbscissa b F)}
+def crossPartners (b : ℕ) (F : Fin m → ℕ → ℕ) : Set ℕ := selPartners Sweeps (crossSet b) F
 
 /-- The least such later path. -/
-noncomputable def famPartner (b : ℕ) (F : Fin m → ℕ → ℕ) : ℕ := sInf (crossPartners b F)
+noncomputable def famPartner (b : ℕ) (F : Fin m → ℕ → ℕ) : ℕ := selPartner Sweeps (crossSet b) F
 
 variable {b : ℕ} {F : Fin m → ℕ → ℕ}
 
-theorem crossHeights_nonempty (h : Intersects b F) : (crossHeights b F).Nonempty := by
-  obtain ⟨u, v, huv, i, hi⟩ := h
-  exact ⟨i, u, v, huv, hi⟩
+/-- Two crossing paths share the later of their two arrivals, which is all the selection
+asks of the sweep geometry. -/
+theorem sharesAbscissa_crossSet (b : ℕ) : SharesAbscissa Sweeps (crossSet b) :=
+  fun _ _ hq hr _ hmem => ⟨_, sweeps_of_mem_crossSet hq hr hmem⟩
+
+theorem crossHeights_nonempty (h : Intersects b F) : (crossHeights b F).Nonempty :=
+  selHeights_nonempty h
 
 theorem famHeight_mem (h : Intersects b F) : famHeight b F ∈ crossHeights b F :=
-  Nat.sInf_mem (crossHeights_nonempty h)
+  selHeight_mem h
 
-theorem famHeight_le {i : ℕ} (hi : i ∈ crossHeights b F) : famHeight b F ≤ i := Nat.sInf_le hi
+theorem famHeight_le {i : ℕ} (hi : i ∈ crossHeights b F) : famHeight b F ≤ i := selHeight_le hi
 
 theorem famHeight_lt (h : Intersects b F) : famHeight b F < b := by
   obtain ⟨u, v, -, hmem⟩ := famHeight_mem h
   exact (mem_crossSet.mp hmem).1
 
 theorem crossIndices_nonempty (hF : ∀ w, Monotone (F w)) (h : Intersects b F) :
-    (crossIndices b F).Nonempty := by
-  obtain ⟨u, v, huv, hmem⟩ := famHeight_mem h
-  obtain ⟨h1, h2⟩ := sweeps_of_mem_crossSet (hF u) (hF v) hmem
-  exact ⟨u, u, rfl, v, huv, _, h1, h2⟩
+    (crossIndices b F).Nonempty :=
+  selIndices_nonempty (sharesAbscissa_crossSet b) hF h
 
 theorem famIndex_mem (hF : ∀ w, Monotone (F w)) (h : Intersects b F) :
     famIndex b F ∈ crossIndices b F :=
-  Nat.sInf_mem (crossIndices_nonempty hF h)
+  selIndex_mem (sharesAbscissa_crossSet b) hF h
 
-theorem famIndex_le {n : ℕ} (hn : n ∈ crossIndices b F) : famIndex b F ≤ n := Nat.sInf_le hn
+theorem famIndex_le {n : ℕ} (hn : n ∈ crossIndices b F) : famIndex b F ≤ n := selIndex_le hn
 
 theorem crossAbscissae_nonempty (hF : ∀ w, Monotone (F w)) (h : Intersects b F) :
-    (crossAbscissae b F).Nonempty := by
-  obtain ⟨u, hu, v, huv, x, h1, h2⟩ := famIndex_mem hF h
-  exact ⟨x, u, hu, h1, v, huv, h2⟩
+    (crossAbscissae b F).Nonempty :=
+  selAbscissae_nonempty (sharesAbscissa_crossSet b) hF h
 
 theorem famAbscissa_mem (hF : ∀ w, Monotone (F w)) (h : Intersects b F) :
     famAbscissa b F ∈ crossAbscissae b F :=
-  Nat.sInf_mem (crossAbscissae_nonempty hF h)
+  selAbscissa_mem (sharesAbscissa_crossSet b) hF h
 
 theorem famAbscissa_le {x : ℕ} (hx : x ∈ crossAbscissae b F) : famAbscissa b F ≤ x :=
-  Nat.sInf_le hx
+  selAbscissa_le hx
 
 theorem crossPartners_nonempty (hF : ∀ w, Monotone (F w)) (h : Intersects b F) :
-    (crossPartners b F).Nonempty := by
-  obtain ⟨u, hu, h1, v, huv, h2⟩ := famAbscissa_mem hF h
-  refine ⟨v, v, rfl, ?_, h2⟩
-  rw [← hu]
-  exact huv
+    (crossPartners b F).Nonempty :=
+  selPartners_nonempty (sharesAbscissa_crossSet b) hF h
 
 theorem famPartner_mem (hF : ∀ w, Monotone (F w)) (h : Intersects b F) :
     famPartner b F ∈ crossPartners b F :=
-  Nat.sInf_mem (crossPartners_nonempty hF h)
+  selPartner_mem (sharesAbscissa_crossSet b) hF h
 
-theorem famPartner_le {n : ℕ} (hn : n ∈ crossPartners b F) : famPartner b F ≤ n := Nat.sInf_le hn
+theorem famPartner_le {n : ℕ} (hn : n ∈ crossPartners b F) : famPartner b F ≤ n := selPartner_le hn
 
 /-- **The selected lattice point.**  The two selected paths, the selected height
 and the selected abscissa, packaged as the swap consumes them. -/
 theorem select_spec (hF : ∀ w, Monotone (F w)) (h : Intersects b F) :
     ∃ u v : Fin m, (u : ℕ) = famIndex b F ∧ (v : ℕ) = famPartner b F ∧ u < v ∧
       Sweeps (F u) (famHeight b F) (famAbscissa b F) ∧
-      Sweeps (F v) (famHeight b F) (famAbscissa b F) := by
-  obtain ⟨u, hu, hsu, -⟩ := famAbscissa_mem hF h
-  obtain ⟨v, hv, hlt, hsv⟩ := famPartner_mem hF h
-  refine ⟨u, v, hu, hv, ?_, hsu, hsv⟩
-  rw [Fin.lt_def, hu, hv]
-  exact hlt
+      Sweeps (F v) (famHeight b F) (famAbscissa b F) :=
+  selSpec (sharesAbscissa_crossSet b) hF h
 
 end Family
 
@@ -323,9 +324,9 @@ noncomputable def lgvFam (b : ℕ) (F : Fin m → ℕ → ℕ) : Fin m → ℕ �
 
 /-- **The selection is its own fixed point.**  The four selectors read the same
 values off the spliced family as off the original, which is what makes the swap
-an involution.  Each is forced by the one before it: below the selected height
-nothing moved, at that height the two sweeps have the same union, and an abscissa
-below the selected one on the selected path was already swept by it. -/
+an involution.  Below the selected height nothing moved, at that height the two
+sweeps have the same union, and an abscissa below the selected one on a selected
+path was already swept by it. -/
 theorem select_lgvFam (hF : ∀ w, Monotone (F w)) (h : Intersects b F) :
     Intersects b (lgvFam b F) ∧ famHeight b (lgvFam b F) = famHeight b F ∧
       famIndex b (lgvFam b F) = famIndex b F ∧
@@ -334,108 +335,26 @@ theorem select_lgvFam (hF : ∀ w, Monotone (F w)) (h : Intersects b F) :
   obtain ⟨u, v, hu, hv, huv, hsu, hsv⟩ := select_spec hF h
   have hne : u ≠ v := ne_of_lt huv
   have hib : famHeight b F < b := famHeight_lt h
+  have hGu : Sweeps (famSplice (famHeight b F) (u : ℕ) (v : ℕ) F u) (famHeight b F)
+      (famAbscissa b F) := by
+    rw [sweeps_famSplice_left]; simp only [Sweeps] at hsu hsv ⊢; omega
+  have hGv : Sweeps (famSplice (famHeight b F) (u : ℕ) (v : ℕ) F v) (famHeight b F)
+      (famAbscissa b F) := by
+    rw [sweeps_famSplice_right hne]; simp only [Sweeps] at hsu hsv ⊢; omega
+  have hGdown : ∀ (w : Fin m) (y : ℕ), (w = u ∨ w = v) → y < famAbscissa b F →
+      Sweeps (famSplice (famHeight b F) (u : ℕ) (v : ℕ) F w) (famHeight b F) y →
+      Sweeps (F w) (famHeight b F) y := by
+    rintro w y (rfl | rfl) hy hs
+    · rw [sweeps_famSplice_left] at hs; simp only [Sweeps] at hsu hsv hs ⊢; omega
+    · rw [sweeps_famSplice_right hne] at hs; simp only [Sweeps] at hsu hsv hs ⊢; omega
   have hGdef : lgvFam b F = famSplice (famHeight b F) (u : ℕ) (v : ℕ) F := by
     rw [lgvFam, hu, hv]
   rw [hGdef]
-  set G := famSplice (famHeight b F) (u : ℕ) (v : ℕ) F with hG
-  -- the spliced family, through the six facts the argument uses
-  have hGleft : ∀ y : ℕ, Sweeps (G u) (famHeight b F) y ↔
-      (F u (famHeight b F) ≤ y ∧ y ≤ F v (famHeight b F + 1)) := by
-    intro y; rw [hG, sweeps_famSplice_left]
-  have hGright : ∀ y : ℕ, Sweeps (G v) (famHeight b F) y ↔
-      (F v (famHeight b F) ≤ y ∧ y ≤ F u (famHeight b F + 1)) := by
-    intro y; rw [hG, sweeps_famSplice_right hne]
-  have hGother : ∀ w : Fin m, w ≠ u → w ≠ v → G w = F w := by
-    intro w h1 h2; rw [hG, famSplice_other h1 h2]
-  have hGlow : ∀ (w w' : Fin m) (k : ℕ), k < famHeight b F →
-      (k ∈ crossSet b (G w) (G w') ↔ k ∈ crossSet b (F w) (F w')) := by
-    intro w w' k hk; rw [hG, mem_crossSet_famSplice_of_lt hk]
-  have hGor : ∀ (w : Fin m) (y : ℕ), (w = u ∨ w = v) → Sweeps (G w) (famHeight b F) y →
-      (Sweeps (F u) (famHeight b F) y ∨ Sweeps (F v) (famHeight b F) y) := by
-    intro w y hw hs
-    rw [hG] at hs
-    exact sweeps_or_of_sweeps_famSplice hne hsu hsv hw hs
-  have hGmono : ∀ w, Monotone (G w) := by
-    rw [hG]
-    refine monotone_famSplice hF ?_ ?_ <;> · simp only [Sweeps] at hsu hsv; omega
-  -- the two selected paths still meet at the selected point
-  have hGu : Sweeps (G u) (famHeight b F) (famAbscissa b F) := by
-    rw [hGleft]; simp only [Sweeps] at hsu hsv; omega
-  have hGv : Sweeps (G v) (famHeight b F) (famAbscissa b F) := by
-    rw [hGright]; simp only [Sweeps] at hsu hsv; omega
-  clear_value G
-  clear hG hGdef
-  have hGint : Intersects b G :=
-    ⟨u, v, huv, famHeight b F, mem_crossSet_of_sweeps hib hGu hGv⟩
-  -- (1) the height
-  have h1 : famHeight b G = famHeight b F := by
-    refine le_antisymm (famHeight_le ⟨u, v, huv, mem_crossSet_of_sweeps hib hGu hGv⟩) ?_
-    by_contra hcon
-    obtain ⟨w, w', hww', hmem⟩ := famHeight_mem hGint
-    rw [hGlow w w' _ (by omega)] at hmem
-    have := famHeight_le (b := b) (F := F) ⟨w, w', hww', hmem⟩
-    omega
-  -- (2) the path index
-  have h2 : famIndex b G = (u : ℕ) := by
-    refine le_antisymm (famIndex_le ⟨u, rfl, v, huv, famAbscissa b F, by rw [h1]; exact hGu,
-      by rw [h1]; exact hGv⟩) ?_
-    obtain ⟨w, hw, w', hww', y, hy1, hy2⟩ := famIndex_mem hGmono hGint
-    rw [h1] at hy1 hy2
-    by_contra hcon
-    have hwu : w < u := by rw [Fin.lt_def, hw]; omega
-    have hFw : Sweeps (F w) (famHeight b F) y := by
-      rwa [hGother w (ne_of_lt hwu) (ne_of_lt (lt_trans hwu huv))] at hy1
-    have hpair : ∃ w'' : Fin m, w < w'' ∧ Sweeps (F w'') (famHeight b F) y := by
-      by_cases hc : w' = u ∨ w' = v
-      · rcases hGor w' y hc hy2 with hs | hs
-        · exact ⟨u, hwu, hs⟩
-        · exact ⟨v, lt_trans hwu huv, hs⟩
-      · rw [not_or] at hc
-        exact ⟨w', hww', by rwa [hGother w' hc.1 hc.2] at hy2⟩
-    obtain ⟨w'', hlt, hs⟩ := hpair
-    have hle := famIndex_le (b := b) (F := F) ⟨w, rfl, w'', hlt, y, hFw, hs⟩
-    rw [← hu] at hle
-    rw [Fin.lt_def] at hwu
-    omega
-  -- (3) the abscissa
-  have h3 : famAbscissa b G = famAbscissa b F := by
-    refine le_antisymm (famAbscissa_le ⟨u, by rw [h2], by rw [h1]; exact hGu, v, huv,
-      by rw [h1]; exact hGv⟩) ?_
-    obtain ⟨w, hw, hy1, w', hww', hy2⟩ := famAbscissa_mem hGmono hGint
-    rw [h2] at hw
-    rw [(Fin.val_eq_val w u).mp hw] at hy1 hww'
-    rw [h1] at hy1 hy2
-    by_contra hcon
-    have hFu : Sweeps (F u) (famHeight b F) (famAbscissa b G) := by
-      rw [hGleft] at hy1
-      simp only [Sweeps] at hsu hsv ⊢
-      omega
-    have hpair : ∃ w'' : Fin m, u < w'' ∧ Sweeps (F w'') (famHeight b F) (famAbscissa b G) := by
-      by_cases hc : w' = v
-      · rw [hc] at hy2
-        refine ⟨v, huv, ?_⟩
-        rw [hGright] at hy2
-        simp only [Sweeps] at hsu hsv ⊢
-        omega
-      · exact ⟨w', hww', by rwa [hGother w' (ne_of_gt hww') hc] at hy2⟩
-    obtain ⟨w'', hlt, hs⟩ := hpair
-    exact absurd (famAbscissa_le (b := b) (F := F) ⟨u, hu, hFu, w'', hlt, hs⟩) hcon
-  -- (4) the partner
-  have h4 : famPartner b G = (v : ℕ) := by
-    refine le_antisymm (famPartner_le ⟨v, rfl, by rw [h2, ← Fin.lt_def]; exact huv,
-      by rw [h1, h3]; exact hGv⟩) ?_
-    obtain ⟨w, hw, hlt, hs⟩ := famPartner_mem hGmono hGint
-    rw [h1, h3] at hs
-    rw [h2] at hlt
-    by_contra hcon
-    have hwv : w ≠ v := by intro hc; rw [hc] at hw; omega
-    have hwu : w ≠ u := by intro hc; rw [hc] at hw; omega
-    rw [hGother w hwu hwv] at hs
-    have hlt' : famIndex b F < (w : ℕ) := by rw [← hu, hw]; exact hlt
-    have hle := famPartner_le (b := b) (F := F) ⟨w, rfl, hlt', hs⟩
-    rw [← hv] at hle
-    omega
-  exact ⟨hGint, h1, by rw [h2, hu], h3, by rw [h4, hv]⟩
+  exact select_eq (sharesAbscissa_crossSet b) hu hv huv
+    (monotone_famSplice hF (hsu.1.trans hsv.2) (hsv.1.trans hsu.2))
+    (fun _ h1 h2 => famSplice_other h1 h2) (fun _ _ _ hk => mem_crossSet_famSplice_of_lt hk)
+    (fun _ _ hw hs => sweeps_or_of_sweeps_famSplice hne hsu hsv hw hs) hGdown hGu hGv
+    (mem_crossSet_of_sweeps hib hGu hGv)
 
 /-- **The swap is an involution on the intersecting families.** -/
 theorem lgvFam_lgvFam (hF : ∀ w, Monotone (F w)) (h : Intersects b F) :
@@ -580,7 +499,7 @@ theorem prod_pathWeight_lgvFam (β : ℕ → R)
 
 /-- **The cancellation.**  The signed sum over all families is the signed sum over
 the families whose paths share no lattice point — for any endpoints and any number
-of paths.  This is `LGV.sum_crossing_eq_sum_transposed` at every `m`. -/
+of paths.  This is `sum_crossing_eq_sum_transposed` at every `m`. -/
 theorem sum_famWeight_eq_sum_nonIntersecting (b : ℕ) {m : ℕ} (β : ℕ → R) (S C : Fin m → ℕ) :
     ∑ x ∈ famFinset b S C, famWeight b β x
       = ∑ x ∈ (famFinset b S C).filter fun x => ¬ Intersects b x.2, famWeight b β x := by
@@ -607,7 +526,7 @@ end Signed
 
 /-! ## The determinant
 
-With the endpoints prescribes — sources from `μ` and sinks
+With the endpoints prescribed — sources from `μ` and sinks
 from `λ`, both shifted by `m-1-u` so that weakly decreasing row lengths become
 strictly decreasing endpoints — an intersecting family is forced whenever the
 sink assignment is not the identity, so the determinant is the total weight of
@@ -617,16 +536,6 @@ the non-intersecting families.
 section Determinant
 
 variable {R : Type*} [CommRing R] {b m : ℕ}
-
-/-- Shifting both indices of a Jacobi--Trudi entry leaves it unchanged. -/
-theorem jtCoeff_add_right (d : ℕ → R) (p q k : ℕ) : jtCoeff d (p + k) (q + k) = jtCoeff d p q := by
-  unfold jtCoeff
-  split_ifs with h1 h2 h2
-  · congr 1
-    omega
-  · omega
-  · omega
-  · rfl
 
 /-- The sources of: the row lengths of `μ`, shifted so that
 they strictly decrease. -/
@@ -699,12 +608,12 @@ theorem perm_eq_one_of_not_intersects {S C : Fin m → ℕ} {σ : Equiv.Perm (Fi
 families of `m` paths, from the sources of `μ` to the sinks of `λ` in order, no
 two of which share a lattice point.
 
-This is `LGV.jacobiTrudiDet_two_eq_sum_nonCrossing` at every `m`.  Identifying the
+This is `jacobiTrudiDet_two_eq_sum_nonCrossing` at every `m`.  Identifying the
 non-intersecting families with the tableaux of `λ/μ` is the other half, and it is
 proved: at two rows in `LGVTableau` (`nonCrossingIsSkewSchur`) and at every `m`
 in `LGVTableauM` (`sum_nonIntersecting_eq_skewSchur`).  Composing the two gives
 `JacobiTrudi.SkewJacobiTrudi` for the even alphabet,
-`LGVTableauM.skewJacobiTrudi_even`. -/
+`skewJacobiTrudi_even`. -/
 theorem jacobiTrudiDet_eq_sum_nonIntersecting (β : ℕ → R) (lam mu : YoungDiagram) :
     jacobiTrudiDet (fun k => completeHom b k β) lam mu m
       = ∑ F ∈ (Fintype.piFinset fun w : Fin m =>
@@ -734,7 +643,7 @@ theorem jacobiTrudiDet_eq_sum_nonIntersecting (β : ℕ → R) (lam mu : YoungDi
     rw [famWeight, h1]
     simp
 
-/-- At two paths the endpoints are those of `LGV.jacobiTrudiDet_two_eq_sum_nonCrossing`:
+/-- At two paths the endpoints are those of `jacobiTrudiDet_two_eq_sum_nonCrossing`:
 the first row is shifted by one and the second is not. -/
 theorem jtSource_two (mu : YoungDiagram) :
     jtSource mu 2 0 = mu.rowLen 0 + 1 ∧ jtSource mu 2 1 = mu.rowLen 1 := ⟨rfl, rfl⟩
@@ -755,5 +664,32 @@ theorem sum_nonIntersecting_two (β : ℕ → R) (lam mu : YoungDiagram) :
     (jacobiTrudiDet_two_eq_sum_nonCrossing β lam mu)
 
 end Determinant
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.Intersects' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Intersects
+
+/-- info: 'Shields.famHeight' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms famHeight
+
+/-- info: 'Shields.famIndex' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms famIndex
+
+/-- info: 'Shields.famAbscissa' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms famAbscissa
+
+/-- info: 'Shields.famPartner' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms famPartner
+
+/-- info: 'Shields.famSplice' does not depend on any axioms -/
+#guard_msgs in
+#print axioms famSplice
 
 end Shields

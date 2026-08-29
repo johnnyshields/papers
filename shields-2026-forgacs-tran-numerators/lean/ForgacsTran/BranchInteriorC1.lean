@@ -4,12 +4,14 @@ Released under the MIT license as described in the file LICENSE.txt.
 Authors: Johnny Shields
 -/
 import ForgacsTran.BranchAmplitude
+import ForgacsTran.PencilIndex
 import ForgacsTran.FTBranchZMono
 import ForgacsTran.InteriorSeparation
 import ForgacsTran.FTGeometryClosure
 import ForgacsTran.FTGeometryCone
 import ForgacsTran.ConsequencesComposition.PhaseQuantization
 import ForgacsTran.QuotientDerivBound
+import ForgacsTran.ComplexPart
 
 /-!
 # Groundwork for `eq:C1-interior-remainder` at the general branch
@@ -72,16 +74,12 @@ section BranchZ
 
 variable {n r : ℕ} {a : Fin n → ℝ} {c : ℝ} {lo hi : ℝ}
 
-/-- At `l = n - 1` the parity `Even (n + l + 1)` that `ftBranchZ_pos` asks for is
-`2n`, so it costs nothing on the principal branch. -/
-theorem even_add_sub_one (hn : 0 < n) : Even (n + (n - 1) + 1) := ⟨n, by omega⟩
-
 /-- **`z > 0` on the viewing arc, on the principal branch.**  `ftBranchZ_pos` with
 its parity discharged and the branch supplied. -/
 theorem ftBranchZ_pos_principal (hn : 0 < n) (ha : ∀ k, 0 < a k) (hc : 0 < c)
     (hr : 1 ≤ r) (hnr : 2 ≤ n ∨ 2 ≤ r) {θ : ℝ} (hθ : θ ∈ Ioo 0 (π / r)) :
     0 < ftBranchZ a c r (n - 1) θ :=
-  ftBranchZ_pos ha hc (even_add_sub_one hn) (ftArc_subset hr hθ)
+  ftBranchZ_pos ha hc (even_add_pred_add_one hn) (ftArc_subset hr hθ)
     (ftBranchAt_of_arc_principal hn ha hr hnr hθ)
 
 /-- **`Σ` is continuous along the branch.**  `ftSigma a r t = ∑_k t/(a_k - t) + r`,
@@ -211,16 +209,6 @@ theorem ft_minModulus_at_branch_principal (hn2 : 2 ≤ n) (ha : ∀ k, 0 < a k)
   · intro w hzero hwp hwm
     exact ft_minModulus_at_branch_two_le hn2 ha hc hr2 θ hθ w hzero hwp
       (by rw [conj_ftPrincipal]; exact hwm)
-
-/-- The pencil is a nonzero polynomial: `D(0,z) = Q(0) ≠ 0` once `r ≥ 1`. -/
-theorem ftDen_ftRootPoly_ne_zero (ha : ∀ k, 0 < a k) (hc : 0 < c) (hr : 1 ≤ r)
-    (w : ℂ) : ftDen (ftRootPoly c a) r w ≠ 0 := by
-  intro h
-  have h0 : (ftDen (ftRootPoly c a) r w).eval 0 = 0 := by rw [h, Polynomial.eval_zero]
-  rw [ftDen_eval, zero_pow (by omega), mul_zero, add_zero, eval_ftRootPoly] at h0
-  refine absurd h0 (mul_ne_zero (Complex.ofReal_ne_zero.2 hc.ne')
-    (Finset.prod_ne_zero_iff.2 fun k _ => ?_))
-  simpa using Complex.ofReal_ne_zero.2 (ha k).ne'
 
 /-- **A floor for `‖D‖` on a sphere, uniform over a compact angle interval.**
 Compactness of the product with the sphere; the hypothesis is that no zero of the
@@ -411,12 +399,17 @@ are `private` and specialized to `1/2 ≤ τ`. -/
 
 section Arithmetic
 
-theorem norm_cast_pow_real_mul' {N k : ℕ} {t d : ℝ} (ht : 0 < t) (w : ℂ) :
+/-- The whole real scale comes out of the norm: the index `N`, the positive power `t ^ k`
+and the derivative `d`.  This is the prefactor of `eq:C1-interior-remainder`'s derivative,
+measured. -/
+theorem norm_natCast_mul_ofReal_pow_mul_ofReal_mul {N k : ℕ} {t d : ℝ} (ht : 0 < t) (w : ℂ) :
     ‖((N : ℂ)) * ((t : ℝ) : ℂ) ^ k * ((d : ℝ) : ℂ) * w‖ = (N : ℝ) * t ^ k * |d| * ‖w‖ := by
   rw [norm_mul, norm_mul, norm_mul, norm_pow, Complex.norm_real, Real.norm_eq_abs,
     Complex.norm_real, Real.norm_eq_abs, abs_of_pos ht, Complex.norm_natCast]
 
-theorem norm_pow_real_mul_smul' {k : ℕ} {t z' : ℝ} (ht : 0 < t) (w : ℂ) :
+/-- The same where the spectral derivative arrives as a real scalar action rather than as a
+factor, which is the shape `ftContourRemDeriv` returns it in. -/
+theorem norm_ofReal_pow_mul_smul {k : ℕ} {t z' : ℝ} (ht : 0 < t) (w : ℂ) :
     ‖((t : ℝ) : ℂ) ^ k * (z' • w)‖ = t ^ k * (|z'| * ‖w‖) := by
   rw [norm_mul, norm_pow, Complex.norm_real, Real.norm_eq_abs, abs_of_pos ht,
     norm_smul, Real.norm_eq_abs]
@@ -434,7 +427,10 @@ theorem pow_mul_le_of_floor {k : ℕ} {t v cst tmin : ℝ} (htmin : 0 < tmin)
   rw [le_div_iff₀ htmin]
   nlinarith [mul_nonneg hpk hv]
 
-theorem add_le_scaled' {mm x y s p q : ℝ} (hm : 1 ≤ mm) (hs : 0 ≤ s)
+/-- Two bounds sharing the scale `s` add at the larger multiplier.  `mm` is `M + 1`, which
+one summand carries and the other does not, and `1 ≤ mm` is what lets the smaller ride on
+the larger. -/
+theorem add_le_mul_add_of_one_le {mm x y s p q : ℝ} (hm : 1 ≤ mm) (hs : 0 ≤ s)
     (hq : 0 ≤ q) (hx : x ≤ mm * s * p) (hy : y ≤ s * q) :
     x + y ≤ mm * s * (p + q) := by
   nlinarith [mul_nonneg (sub_nonneg.2 hm) (mul_nonneg hs hq)]
@@ -685,7 +681,7 @@ theorem exists_ft_interior_C1_on_window (hn2 : 2 ≤ n) (ha : ∀ k, 0 < a k)
   have hDden : HasDerivAt (fun s => 2 * ‖ftBranchAmp (ftRootPoly c a) B a r (n - 1) s‖)
       (2 * ftBranchAmpNormDeriv (ftRootPoly c a) B a r (n - 1) θ) θ :=
     (hasDerivAt_ftBranchAmpNorm hn ha hc.ne' hr hnr hθarc (hBne θ (hKsublh hθK))).const_mul 2
-  have hquot := (Complex.reCLM.hasFDerivAt.comp_hasDerivAt θ (hpow.mul hCR)).div hDden h2W.ne'
+  have hquot := (hpow.mul hCR).re.div hDden h2W.ne'
   refine ⟨_, hquot, ?_, ?_⟩
   · -- the derivative bound
     have hNs : |((((ftTau a r (n - 1) θ : ℝ) : ℂ)) ^ (M + 1)
@@ -708,7 +704,8 @@ theorem exists_ft_interior_C1_on_window (hn2 : 2 ≤ n) (ha : ∀ k, 0 < a k)
               ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ))).re|
         ≤ ((M : ℝ) + 1) * σ ^ M * cN' := by
       refine le_trans (Complex.abs_re_le_norm _) (le_trans (norm_add_le _ _) ?_)
-      rw [Nat.add_sub_cancel, norm_cast_pow_real_mul' hτ0, norm_pow_real_mul_smul' hτ0]
+      rw [Nat.add_sub_cancel, norm_natCast_mul_ofReal_pow_mul_ofReal_mul hτ0,
+        norm_ofReal_pow_mul_smul hτ0]
       have hpm : ftTau a r (n - 1) θ ^ M
           * ‖ftContourRem (ftRootPoly c a) B r R₀ M
               ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)‖ ≤ cN * σ ^ M / τmin :=
@@ -719,7 +716,7 @@ theorem exists_ft_interior_C1_on_window (hn2 : 2 ≤ n) (ha : ∀ k, 0 < a k)
         (τmax := τmax) (Z := Z) (z' := ftBranchZDeriv a c r (n - 1) θ)
         hR₀ hm2 hτ0.le hτhi (hZ θ hθK) hCB
         (hDbθ (ftBranchZ a c r (n - 1) θ) (by rw [sub_self, abs_zero]; positivity))
-      rw [norm_pow_real_mul_smul' hτ0] at hsmul
+      rw [norm_ofReal_pow_mul_smul hτ0] at hsmul
       have ht1 : ((M + 1 : ℕ) : ℝ) * ftTau a r (n - 1) θ ^ M
             * |ftTauDeriv a r (n - 1) θ|
             * ‖ftContourRem (ftRootPoly c a) B r R₀ M
@@ -758,7 +755,7 @@ theorem exists_ft_interior_C1_on_window (hn2 : 2 ≤ n) (ha : ∀ k, 0 < a k)
               exact pow_le_pow_left₀ (by positivity) (by gcongr) M
           _ = (τmax / R₀) ^ M * (τmax * Z * CB * R₀ ^ r / (m / 2) ^ 2) := by ring
       rw [hcN']
-      exact add_le_scaled' hM1 hσn (by positivity) ht1 ht2
+      exact add_le_mul_add_of_one_le hM1 hσn (by positivity) ht1 ht2
     have hDb' : |2 * ftBranchAmpNormDeriv (ftRootPoly c a) B a r (n - 1) θ| ≤ 2 * Wd := by
       rw [abs_mul, abs_of_nonneg (by norm_num : (0:ℝ) ≤ 2)]
       have h1 := abs_ftBranchAmpNormDeriv_le hn ha hc.ne' hr hnr hθarc

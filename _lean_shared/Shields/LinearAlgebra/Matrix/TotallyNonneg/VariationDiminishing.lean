@@ -123,6 +123,54 @@ private theorem det_augment (C : Matrix (Fin (p + 1)) (Fin p) ℝ) (z : Fin p �
     rw [hmv]
     ring
 
+/-- A sequence whose consecutive products are negative has `(-1)^b w_0 w_b > 0`: the signs
+alternate, so no entry vanishes and the sign of `w_0 w_b` is the parity of `b`. -/
+private theorem sign_alternating {p : ℕ} (hp : 0 < p) {w : Fin (p + 1) → ℝ}
+    (halt : ∀ a : Fin p, w a.castSucc * w a.succ < 0) (b : Fin (p + 1)) :
+    0 < (-1 : ℝ) ^ (b : ℕ) * (w 0 * w b) := by
+  induction b using Fin.induction with
+  | zero =>
+      simp only [Fin.val_zero, pow_zero, one_mul]
+      refine mul_self_pos.mpr fun hc => ?_
+      have h0 := halt ⟨0, hp⟩
+      rw [show (⟨0, hp⟩ : Fin p).castSucc = (0 : Fin (p + 1)) from rfl, hc, zero_mul] at h0
+      exact lt_irrefl 0 h0
+  | succ c ih =>
+      have hlt := halt c
+      have hsq : 0 < w c.castSucc * w c.castSucc := by
+        refine mul_self_pos.mpr fun hc => ?_
+        rw [hc, zero_mul] at hlt
+        exact lt_irrefl 0 hlt
+      rw [show (c.succ : ℕ) = (c.castSucc : ℕ) + 1 by simp, pow_add, pow_one]
+      nlinarith [mul_pos ih (neg_pos.mpr hlt), hsq]
+
+/-- **The alternating combination of maximal minors vanishes.**  Bordering `C` with `C z` gives a
+singular matrix -- the vector `(z, -1)` lies in its kernel -- and expanding the determinant along
+that appended column is the identity below, with the sign of the `b`-th term rewritten as the
+parity of `b`. -/
+private theorem sum_alt_mulVec_minor_eq_zero {p : ℕ} (C : Matrix (Fin (p + 1)) (Fin p) ℝ)
+    (z : Fin p → ℝ) :
+    ∑ b : Fin (p + 1), ((-1 : ℝ) ^ (b : ℕ) * ((C *ᵥ z) 0 * (C *ᵥ z) b))
+        * (C.submatrix b.succAbove id).det = 0 := by
+  have hlap := Matrix.det_succ_column (augment C z) (Fin.last p)
+  rw [det_augment] at hlap
+  have hsub : ∀ b : Fin (p + 1),
+      (augment C z).submatrix b.succAbove (Fin.last p).succAbove
+        = C.submatrix b.succAbove id := fun b => by ext r t; simp [augment, Fin.succAbove_last]
+  have hentry : ∀ b : Fin (p + 1), augment C z b (Fin.last p) = (C *ᵥ z) b :=
+    fun b => by simp [augment]
+  simp only [hsub, hentry, Fin.val_last] at hlap
+  have hpow : ∀ b : Fin (p + 1),
+      ((-1 : ℝ) ^ p) * ((-1 : ℝ) ^ ((b : ℕ) + p)) = (-1 : ℝ) ^ (b : ℕ) := fun b => by
+    rw [← pow_add, show p + ((b : ℕ) + p) = (b : ℕ) + 2 * p by ring, pow_add, pow_mul]
+    norm_num
+  have hz : ((-1 : ℝ) ^ p * (C *ᵥ z) 0) * (∑ b : Fin (p + 1),
+      (-1 : ℝ) ^ ((b : ℕ) + p) * (C *ᵥ z) b * (C.submatrix b.succAbove id).det) = 0 := by
+    rw [← hlap]; ring
+  rw [Finset.mul_sum] at hz
+  rw [← hz]
+  exact Finset.sum_congr rfl fun b _ => by rw [← hpow b]; ring
+
 /-- **A strictly alternating vector in the column span kills every maximal minor.**  The augmented
 matrix is singular; expanding its determinant along the appended column gives an alternating sum
 of the maximal minors of `C` against the entries of `C z`, and the alternation makes every term
@@ -131,59 +179,14 @@ theorem minors_eq_zero_of_alternating {p : ℕ} (hp : 0 < p)
     {C : Matrix (Fin (p + 1)) (Fin p) ℝ} (hC : RectMinorsNonneg C) {z : Fin p → ℝ}
     (halt : ∀ a : Fin p, (C *ᵥ z) a.castSucc * (C *ᵥ z) a.succ < 0) (a : Fin (p + 1)) :
     (C.submatrix a.succAbove id).det = 0 := by
-  set w := C *ᵥ z with hw
-  -- the alternation fixes the sign of each entry
-  have hpar : ∀ b : Fin (p + 1), 0 < (-1 : ℝ) ^ (b : ℕ) * (w 0 * w b) := by
-    intro b
-    induction b using Fin.induction with
-    | zero =>
-        simp only [Fin.val_zero, pow_zero, one_mul]
-        refine mul_self_pos.mpr fun hc => ?_
-        have h0 := halt ⟨0, hp⟩
-        rw [show (⟨0, hp⟩ : Fin p).castSucc = (0 : Fin (p + 1)) from rfl, hc, zero_mul] at h0
-        exact lt_irrefl 0 h0
-    | succ c ih =>
-        have hlt := halt c
-        have hsq : 0 < w c.castSucc * w c.castSucc := by
-          refine mul_self_pos.mpr fun hc => ?_
-          rw [hc, zero_mul] at hlt
-          exact lt_irrefl 0 hlt
-        have hprev : 0 < (-1 : ℝ) ^ (c.castSucc : ℕ) * (w 0 * w c.castSucc) := ih
-        have hval : (c.succ : ℕ) = (c.castSucc : ℕ) + 1 := by simp
-        rw [hval, pow_add, pow_one]
-        nlinarith [mul_pos hprev (neg_pos.mpr hlt), hsq]
-  -- the Laplace expansion of the singular augmented matrix
-  have hlap := Matrix.det_succ_column (augment C z) (Fin.last p)
-  rw [det_augment] at hlap
-  have hsub : ∀ b : Fin (p + 1),
-      (augment C z).submatrix b.succAbove (Fin.last p).succAbove = C.submatrix b.succAbove id := by
-    intro b
-    ext r t
-    simp [augment, Fin.succAbove_last]
-  have hentry : ∀ b : Fin (p + 1), augment C z b (Fin.last p) = w b := by
-    intro b; simp [augment, hw]
-  simp only [hsub, hentry, Fin.val_last] at hlap
-  set Mm : Fin (p + 1) → ℝ := fun b => (C.submatrix b.succAbove id).det with hM
-  have hMnn : ∀ b, 0 ≤ Mm b := fun b =>
+  have hpar := sign_alternating hp halt
+  have hMnn : ∀ b : Fin (p + 1), 0 ≤ (C.submatrix b.succAbove id).det := fun b =>
     hC p (b.succAbove) id (Fin.strictMono_succAbove b) strictMono_id
-  have hsum : ∑ b : Fin (p + 1), ((-1 : ℝ) ^ (b : ℕ) * (w 0 * w b)) * Mm b = 0 := by
-    have hz : ((-1 : ℝ) ^ p * w 0) *
-        (∑ b : Fin (p + 1), (-1 : ℝ) ^ ((b : ℕ) + p) * w b * Mm b) = 0 := by
-      rw [← hlap]; ring
-    rw [Finset.mul_sum] at hz
-    rw [← hz]
-    refine Finset.sum_congr rfl fun b _ => ?_
-    have hpow : ((-1 : ℝ) ^ p) * ((-1 : ℝ) ^ ((b : ℕ) + p)) = (-1 : ℝ) ^ (b : ℕ) := by
-      rw [← pow_add, show p + ((b : ℕ) + p) = (b : ℕ) + 2 * p by ring, pow_add, pow_mul]
-      norm_num
-    calc ((-1 : ℝ) ^ (b : ℕ) * (w 0 * w b)) * Mm b
-        = (((-1 : ℝ) ^ p) * ((-1 : ℝ) ^ ((b : ℕ) + p))) * (w 0 * (w b * Mm b)) := by
-          rw [hpow]; ring
-      _ = ((-1 : ℝ) ^ p * w 0) * ((-1 : ℝ) ^ ((b : ℕ) + p) * w b * Mm b) := by ring
   have hterm : ∀ b ∈ (univ : Finset (Fin (p + 1))),
-      0 ≤ ((-1 : ℝ) ^ (b : ℕ) * (w 0 * w b)) * Mm b := fun b _ =>
-    mul_nonneg (hpar b).le (hMnn b)
-  have hzero := (Finset.sum_eq_zero_iff_of_nonneg hterm).mp hsum a (Finset.mem_univ a)
+      0 ≤ ((-1 : ℝ) ^ (b : ℕ) * ((C *ᵥ z) 0 * (C *ᵥ z) b))
+        * (C.submatrix b.succAbove id).det := fun b _ => mul_nonneg (hpar b).le (hMnn b)
+  have hzero := (Finset.sum_eq_zero_iff_of_nonneg hterm).mp
+    (sum_alt_mulVec_minor_eq_zero C z) a (Finset.mem_univ a)
   rcases mul_eq_zero.mp hzero with h | h
   · exact absurd h (ne_of_gt (hpar a))
   · exact h
@@ -213,10 +216,7 @@ theorem exists_dropCol {m p : ℕ} {D : Matrix (Fin m) (Fin (p + 1)) ℝ}
     {c : Fin (p + 1) → ℝ} (hc0 : c ≠ 0) (hc : D *ᵥ c = 0) (z : Fin (p + 1) → ℝ) :
     ∃ (j : Fin (p + 1)) (z' : Fin p → ℝ),
       (D.submatrix id j.succAbove) *ᵥ z' = D *ᵥ z := by
-  obtain ⟨j, hj⟩ : ∃ j, c j ≠ 0 := by
-    by_contra hcon
-    push Not at hcon
-    exact hc0 (funext hcon)
+  obtain ⟨j, hj⟩ : ∃ j, c j ≠ 0 := Function.ne_iff.mp hc0
   refine ⟨j, fun t => z (j.succAbove t) - z j * c (j.succAbove t) / c j, ?_⟩
   funext i
   have hz : (D *ᵥ z) i = D i j * z j + ∑ t : Fin p, D i (j.succAbove t) * z (j.succAbove t) :=
@@ -235,13 +235,48 @@ theorem exists_dropCol {m p : ℕ} {D : Matrix (Fin m) (Fin (p + 1)) ℝ}
         - (z j / c j) * ∑ t : Fin p, D i (j.succAbove t) * c (j.succAbove t) := by
     rw [Finset.mul_sum, ← Finset.sum_sub_distrib]
     exact Finset.sum_congr rfl fun t _ => by ring
-  rw [hsplit]
-  have hcsum : ∑ t : Fin p, D i (j.succAbove t) * c (j.succAbove t) = -(D i j * c j) := by
-    linarith [hcz]
-  rw [hcsum]
+  rw [hsplit, show ∑ t : Fin p, D i (j.succAbove t) * c (j.succAbove t) = -(D i j * c j) from by
+    linarith [hcz]]
   field
 
 /-! ### The core bound -/
+
+/-- **The inductive step.**  With the bound known at `p` columns, suppose `D z` alternates at
+`k ≥ p + 1` indices.  Restricting to the first `p + 2` of them gives a matrix whose maximal minors
+all vanish, so its columns are dependent; dropping one leaves `D z` on those rows unchanged, and
+the induction hypothesis applies to the shorter matrix. -/
+private theorem altIndices_step {p : ℕ}
+    (ih : ∀ (M : ℕ) (D : Matrix (Fin M) (Fin p) ℝ), RectMinorsNonneg D →
+      ∀ (z : Fin p → ℝ) (k : ℕ), AltIndices (D *ᵥ z) k → k < p ∨ D *ᵥ z = 0)
+    (M : ℕ) (D : Matrix (Fin M) (Fin (p + 1)) ℝ) (hD : RectMinorsNonneg D)
+    (z : Fin (p + 1) → ℝ) (k : ℕ) (hk : AltIndices (D *ᵥ z) k) :
+    k < p + 1 ∨ D *ᵥ z = 0 := by
+  by_contra hcon
+  push Not at hcon
+  obtain ⟨hkp, -⟩ := hcon
+  obtain ⟨i, hi, halt⟩ := hk
+  have hle : (p + 1) + 1 ≤ k + 1 := by omega
+  set C := D.submatrix (fun a : Fin (p + 2) => i (Fin.castLE hle a)) id with hCdef
+  have hCtn : RectMinorsNonneg C := hD.submatrixRows (hi.comp (Fin.strictMono_castLE hle))
+  have hCval : ∀ a : Fin (p + 2), (C *ᵥ z) a = (D *ᵥ z) (i (Fin.castLE hle a)) := fun _ => rfl
+  have hCalt : ∀ a : Fin (p + 1), (C *ᵥ z) a.castSucc * (C *ᵥ z) a.succ < 0 := by
+    intro a
+    have has : (a : ℕ) < k := by have := a.isLt; omega
+    rw [hCval, hCval,
+      show Fin.castLE hle a.castSucc = (⟨(a : ℕ), has⟩ : Fin k).castSucc from Fin.ext (by simp),
+      show Fin.castLE hle a.succ = (⟨(a : ℕ), has⟩ : Fin k).succ from Fin.ext (by simp)]
+    exact halt ⟨(a : ℕ), has⟩
+  obtain ⟨c, hc0, hcz⟩ := exists_mulVec_eq_zero_of_minors_eq_zero (D := C) (fun f hf => by
+    obtain ⟨a, rfl⟩ := exists_succAbove_eq hf
+    exact minors_eq_zero_of_alternating (by omega) hCtn hCalt a)
+  obtain ⟨j, z', hz'⟩ := exists_dropCol hc0 hcz z
+  rcases ih (p + 2) _ (hCtn.submatrixCols (Fin.strictMono_succAbove j)) z' (p + 1)
+    ⟨id, strictMono_id, fun a => by rw [hz']; exact hCalt a⟩ with hlt | hzero
+  · omega
+  · rw [hz'] at hzero
+    have := hCalt ⟨0, by omega⟩
+    rw [hzero] at this
+    simp at this
 
 /-- **A totally nonnegative matrix with `p` columns cannot produce `p` sign changes.**  The
 induction is on the number of columns: if the image alternates that often, the maximal minors of
@@ -254,59 +289,8 @@ theorem altIndices_lt_of_rectMinorsNonneg :
   induction p with
   | zero =>
       intro M D _ z k _
-      right
-      funext i
-      change (∑ t : Fin 0, D i t * z t) = (0 : Fin M → ℝ) i
-      rw [Fin.sum_univ_zero]
-      rfl
-  | succ p ih =>
-      intro M D hD z k hk
-      by_contra hcon
-      push Not at hcon
-      obtain ⟨hkp, hnz⟩ := hcon
-      have hple : p + 1 ≤ k := by omega
-      obtain ⟨i, hi, halt⟩ := hk
-      have hle : (p + 1) + 1 ≤ k + 1 := by omega
-      have hcastmono : StrictMono (Fin.castLE hle) := Fin.strictMono_castLE hle
-      have hi'mono : StrictMono (fun a : Fin (p + 2) => i (Fin.castLE hle a)) :=
-        hi.comp hcastmono
-      have hCtn : RectMinorsNonneg (D.submatrix (fun a : Fin (p + 2) => i (Fin.castLE hle a)) id) :=
-        hD.submatrixRows hi'mono
-      have hCval : ∀ a : Fin (p + 2),
-          ((D.submatrix (fun a : Fin (p + 2) => i (Fin.castLE hle a)) id) *ᵥ z) a
-            = (D *ᵥ z) (i (Fin.castLE hle a)) := fun a => rfl
-      have hCalt : ∀ a : Fin (p + 1),
-          ((D.submatrix (fun a : Fin (p + 2) => i (Fin.castLE hle a)) id) *ᵥ z) a.castSucc *
-            ((D.submatrix (fun a : Fin (p + 2) => i (Fin.castLE hle a)) id) *ᵥ z) a.succ < 0 := by
-        intro a
-        have has : (a : ℕ) < k := by have := a.isLt; omega
-        have h1 : Fin.castLE hle a.castSucc = (⟨(a : ℕ), has⟩ : Fin k).castSucc := by
-          apply Fin.ext; simp
-        have h2 : Fin.castLE hle a.succ = (⟨(a : ℕ), has⟩ : Fin k).succ := by
-          apply Fin.ext; simp
-        rw [hCval, hCval, h1, h2]
-        exact halt ⟨(a : ℕ), has⟩
-      have hmin : ∀ f : Fin (p + 1) → Fin (p + 2), StrictMono f →
-          ((D.submatrix (fun a : Fin (p + 2) => i (Fin.castLE hle a)) id).submatrix
-            f id).det = 0 := by
-        intro f hf
-        obtain ⟨a, rfl⟩ := exists_succAbove_eq hf
-        exact minors_eq_zero_of_alternating (by omega) hCtn hCalt a
-      obtain ⟨c, hc0, hcz⟩ := exists_mulVec_eq_zero_of_minors_eq_zero hmin
-      obtain ⟨j, z', hz'⟩ := exists_dropCol hc0 hcz z
-      have halt' : AltIndices
-          (((D.submatrix (fun a : Fin (p + 2) => i (Fin.castLE hle a)) id).submatrix
-            id j.succAbove) *ᵥ z') (p + 1) := by
-        refine ⟨id, strictMono_id, fun a => ?_⟩
-        rw [hz']
-        exact hCalt a
-      rcases ih (p + 2) _ (hCtn.submatrixCols (Fin.strictMono_succAbove j)) z' (p + 1) halt' with
-        hlt | hzero
-      · omega
-      · rw [hz'] at hzero
-        have := hCalt ⟨0, by omega⟩
-        rw [hzero] at this
-        simp at this
+      exact Or.inr (funext fun i => by simp [Matrix.mulVec, dotProduct])
+  | succ p ih => exact altIndices_step ih
 
 /-! ### Products, and the block decomposition of the acting vector -/
 
@@ -314,9 +298,7 @@ theorem rectMinorsNonneg_mul {M n r : ℕ} {A : Matrix (Fin M) (Fin n) ℝ}
     {B : Matrix (Fin n) (Fin r) ℝ} (hA : RectMinorsNonneg A) (hB : RectMinorsNonneg B) :
     RectMinorsNonneg (A * B) := by
   intro k f g hf hg
-  have hsub : (A * B).submatrix f g = A.submatrix f id * B.submatrix id g := by
-    ext a b; simp [Matrix.mul_apply]
-  rw [hsub, det_mul_eq_sum_increasing]
+  rw [Matrix.submatrix_mul A B f id g Function.bijective_id, det_mul_eq_sum_increasing]
   refine Finset.sum_nonneg fun h hh => ?_
   rw [mem_increasingSelections] at hh
   exact mul_nonneg (hA k f h hf hh) (hB k h g hh hg)
@@ -336,12 +318,10 @@ theorem det_pattern_nonneg {r n q : ℕ} {φ : Fin n → ℕ} (hφ : Monotone φ
     have hzero : ∏ a, (Matrix.of fun a b : Fin r =>
         if φ (h a) = (g b : ℕ) then (1 : ℝ) else 0) (σ a) a = 0 := by
       by_contra hc
-      have hall : ∀ a, φ (h (σ a)) = (g a : ℕ) := by
-        intro a
+      have hall : ∀ a, φ (h (σ a)) = (g a : ℕ) := fun a => by
         by_contra hca
-        refine hc (Finset.prod_eq_zero (Finset.mem_univ a) ?_)
-        dsimp only [Matrix.of_apply]
-        rw [if_neg hca]
+        exact hc (Finset.prod_eq_zero (Finset.mem_univ a)
+          (by dsimp only [Matrix.of_apply]; rw [if_neg hca]))
       have hψmono : Monotone fun a => φ (h a) := hφ.comp hh.monotone
       have hσmono : StrictMono σ := by
         intro a b hab
@@ -441,10 +421,7 @@ theorem altIndices_mulVec_le {M n : ℕ} {A : Matrix (Fin M) (Fin n) ℝ} (hA : 
     · exact absurd (halt ⟨0, hk0⟩) (by simp)
   rcases Nat.eq_zero_or_pos n with hn | hn
   · subst hn
-    have hzero : A *ᵥ x = 0 := by
-      funext i
-      change (∑ t : Fin 0, A i t * x t) = (0 : Fin M → ℝ) i
-      rw [Fin.sum_univ_zero]; rfl
+    have hzero : A *ᵥ x = 0 := funext fun i => by simp [Matrix.mulVec, dotProduct]
     simp [hkill hzero]
   · have hWv := blockMatrix_mulVec hx hn
     have hfac : (A * blockMatrix x (jumpCount (vecExt x) (n - 1))) *ᵥ
@@ -468,5 +445,16 @@ theorem signChanges_mulVec_le {M n : ℕ} {A : Matrix (Fin M) (Fin n) ℝ} (hA :
   rcases Nat.eq_zero_or_pos n with hn | hn
   · subst hn; simp
   · exact le_signChanges (altIndices_jumpCount hx hn)
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.minors_eq_zero_of_alternating' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms minors_eq_zero_of_alternating
+
+/-- info: 'Shields.signChanges_mulVec_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms signChanges_mulVec_le
 
 end Shields

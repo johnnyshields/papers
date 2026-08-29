@@ -142,4 +142,11 @@ theorem psum_eq_mul_coeff_sub_sum (s : Multiset R) (k : ℕ) (hk : 0 < k) :
   simp only [coeff_prod_one_add_C_mul_X]
   exact psum_eq_mul_esymm_sub_sum s k hk
 
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.psum_eq_mul_coeff_sub_sum' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms psum_eq_mul_coeff_sub_sum
+
 end Shields

@@ -26,8 +26,9 @@ a positive multiple of a power of `\gamma`.  In particular it never vanishes for
 The proof clears one factorial per row and column, which turns the entries into descending
 factorials, and then evaluates the resulting matrix by the standard Vandermonde argument: a
 matrix of monic polynomials of strictly increasing degrees evaluated at distinct points has the
-Vandermonde determinant, and here the points are `0,1,\ldots,n-1`, whose Vandermonde product is
-`\prod_{j<n} j!`.
+Vandermonde determinant, and here the points are `k,k+1,\ldots,k+n-1`, whose Vandermonde product
+depends only on the gaps.  `Shields.prod_gaps_eq_prod_factorial` evaluates that product as the
+superfactorial `\prod_{j<n} j!`; the closed form below carries the gap product itself.
 
 ## Main results
 
@@ -41,9 +42,9 @@ Vandermonde determinant, and here the points are `0,1,\ldots,n-1`, whose Vanderm
 
 ## Implementation notes
 
-The clearing step is stated separately as `Shields.factorial_clearing` and
-`Shields.expCoeff_factor`, since that is where the hypothesis `n \le k+1` is spent: it is what
-keeps every index nonnegative so that the descending factorials are the honest ones.
+The clearing step is stated separately as `Shields.expCoeff_factor`, since that is where the
+hypothesis `n \le k+1` is spent: it is what keeps every index nonnegative so that the descending
+factorials are the honest ones.
 
 ## References
 
@@ -114,7 +115,8 @@ theorem prod_gaps_eq_prod_factorial (n : ℕ) :
       refine Finset.prod_congr rfl fun i hi => ?_
       simp only [Finset.mem_range] at hi
       rw [show Finset.Ioo i (m + 1) = insert m (Finset.Ioo i m) from by
-        ext y; simp; omega, Finset.prod_insert (by simp)]
+        rw [Finset.Ioo_insert_right hi, ← Order.succ_eq_add_one, Finset.Ioo_succ_right_eq_Ioc],
+        Finset.prod_insert (by simp)]
       ring
 
 /-- **A monic family of degree `i` has the Vandermonde determinant.**  If `p i` is
@@ -134,13 +136,6 @@ theorem det_monic_eval_eq_pow {R : Type*} [CommRing R] {n : ℕ} (p : Fin n → 
   have hR : (Matrix.of fun i j : Fin n => (x j) ^ (i : ℕ)) = (Matrix.vandermonde x)ᵀ := rfl
   rw [hL, hR, Matrix.det_transpose, Matrix.det_transpose, ← h]
 
-/-- **The factorial clearing.**  `(k+j-i)! · P_i(k+j) = (k+j)!` for `i ≤ k+j`,
-where `P_i` is the descending factorial.  This is what turns the entry
-`γ^{k+j-i}/(k+j-i)!` into `γ^{k+j-i} P_i(k+j)/(k+j)!`. -/
-theorem factorial_clearing {k j i : ℕ} (h : i ≤ k + j) :
-    (k + j - i).factorial * (k + j).descFactorial i = (k + j).factorial :=
-  Nat.factorial_mul_descFactorial h
-
 /-- The entry factorization: `γ^{k+j-i}/(k+j-i)!` splits as a row factor
 `γ^{k-i}`, a column factor `γ^j/(k+j)!`, and the descending factorial
 `P_i(k+j)`.  This is the "clearing factorials" step made explicit. -/
@@ -152,7 +147,7 @@ theorem expCoeff_factor (γ : ℝ) {k n : ℕ} (hk : n ≤ k + 1) (i j : Fin n) 
   have hnorm : k + (j : ℕ) - (i : ℕ) = (k - (i : ℕ)) + (j : ℕ) := by omega
   have hfac : (((k - (i : ℕ)) + (j : ℕ)).factorial : ℝ) * ((k + j).descFactorial i : ℝ)
       = ((k + j).factorial : ℝ) := by
-    have := factorial_clearing hik
+    have := Nat.factorial_mul_descFactorial hik
     rw [hnorm] at this
     exact_mod_cast congrArg (Nat.cast : ℕ → ℝ) this
   have hne : (((k - (i : ℕ)) + (j : ℕ)).factorial : ℝ) ≠ 0 :=
@@ -188,9 +183,10 @@ theorem det_descFactorial_matrix (k n : ℕ) :
   \det[a_{k+j-i}]_{i,j=0}^{n-1}
     = \gamma^{nk}\,\frac{\prod_{i<j<n}(j-i)}{\prod_{j<n}(k+j)!},
 \]
-the numerator being the superfactorial `∏_{j<n} j!` by
-`prod_gaps_eq_prod_factorial`.  Requires `n ≤ k+1` so that every index
-`k+j-i` is genuine rather than truncated.
+the numerator being the gap product `∏_{i<j<n}(j-i)`, which
+`Shields.prod_gaps_eq_prod_factorial` evaluates as the superfactorial
+`∏_{j<n} j!`.  Requires `n ≤ k+1` so that every index `k+j-i` is genuine rather
+than truncated.
 
 At `γ > 0` the right side is positive, which is strict positivity for the
 exponential factor. -/
@@ -213,5 +209,24 @@ theorem expVandermonde (γ : ℝ) {k n : ℕ} (hk : n ≤ k + 1) :
     ring
   rw [hA, Matrix.det_mul_column, hBdet, hD, det_descFactorial_matrix]
   ring
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.prod_gaps_eq_prod_factorial' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms prod_gaps_eq_prod_factorial
+
+/-- info: 'Shields.expVandermonde' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms expVandermonde
+
+/-- info: 'Shields.expVandermonde_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms expVandermonde_one
+
+/-- info: 'Shields.expVandermonde_two' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms expVandermonde_two
 
 end Shields

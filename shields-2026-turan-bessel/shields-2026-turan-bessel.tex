@@ -1345,111 +1345,6 @@ the conclusion is immediate; for \(a>1/2\), \(qg<1\) is
 \eqref{eq:trig-upper-half} at \(y=a\).
 \end{proof}
 
-\begin{figure}[t]
-\centering
-\begin{tikzpicture}[x=1cm,y=1cm]
-%% ---- panel (a): the endpoint fibers -------------------------------------
-\node[font=\small, anchor=west] at (-0.35,6.05) {(a)};
-\draw[black!45, line width=0.4pt] (0.69,5.20) rectangle (3.19,6.20);
-\node at (1.94,5.87) {\(M_0\)};
-\node[font=\footnotesize] at (1.94,5.45) {\(\succeq0\), rank one};
-\draw[line width=1.1pt] (3.69,5.20) rectangle (6.79,6.20);
-\node at (5.24,5.87) {\(M_1\)};
-\node[font=\footnotesize] at (5.24,5.45) {possibly indefinite};
-\draw[black!45, line width=0.4pt] (7.29,5.20) rectangle (10.59,6.20);
-\node at (8.94,5.87) {\(M_m\), \(m\ge2\)};
-\node[font=\footnotesize] at (8.94,5.45) {\(\succ0\)};
-\node[font=\footnotesize, align=center, anchor=north] at (5.24,5.05)
-  {indefinite for \(0<a<a_*\); \(\succeq0\) of rank one at \(a=a_*\);\\
-   \(\succ0\) for \(a>a_*\), where \(a_*=0.3690738484\ldots\)};
-%% ---- panel (b): the pairing array ---------------------------------------
-\node[font=\small, anchor=west] at (-0.35,3.37) {(b)};
-\node[font=\footnotesize, anchor=west] at (0.55,3.37)
-  {row \(\Delta_n\): the ordered pairs \((k,\ell)\) with \(k+\ell=n\)};
-\node[font=\small, anchor=east] at (1.25,2.62) {\(\Delta_1\)};
-\node[font=\small, anchor=east] at (1.25,2.07) {\(\Delta_2\)};
-\node[font=\small, anchor=east] at (1.25,1.52) {\(\Delta_3\)};
-\node[font=\small, anchor=east] at (1.25,0.97) {\(\Delta_4\)};
-\node[font=\small, anchor=east] at (1.25,0.42) {\(\Delta_5\)};
-\node[font=\small, anchor=east] at (1.25,-0.03) {\(\vdots\)};
-\fill[black!10] (1.40,2.41) rectangle (2.40,2.83);  % cell 0,1
-\draw[black!45, line width=0.4pt] (1.40,2.41) rectangle (2.40,2.83);
-\node[font=\footnotesize] at (1.90,2.62) {\(0,1\)};
-\fill[black!10] (2.56,2.41) rectangle (3.56,2.83);  % cell 1,0
-\draw[black!45, line width=0.4pt] (2.56,2.41) rectangle (3.56,2.83);
-\node[font=\footnotesize] at (3.06,2.62) {\(1,0\)};
-\draw[black!45, line width=0.4pt] (1.40,1.86) rectangle (2.40,2.28);  % cell 0,2
-\node[font=\footnotesize] at (1.90,2.07) {\(0,2\)};
-\fill[black!22] (2.56,1.86) rectangle (3.56,2.28);  % cell 1,1
-\draw[line width=1.1pt] (2.56,1.86) rectangle (3.56,2.28);
-\node[font=\footnotesize] at (3.06,2.07) {\(1,1\)};
-\draw[black!45, line width=0.4pt] (3.72,1.86) rectangle (4.72,2.28);  % cell 2,0
-\node[font=\footnotesize] at (4.22,2.07) {\(2,0\)};
-\draw[black!45, line width=0.4pt] (1.40,1.31) rectangle (2.40,1.73);  % cell 0,3
-\node[font=\footnotesize] at (1.90,1.52) {\(0,3\)};
-\fill[black!10] (2.56,1.31) rectangle (3.56,1.73);  % cell 1,2
-\draw[black!45, line width=0.4pt] (2.56,1.31) rectangle (3.56,1.73);
-\node[font=\footnotesize] at (3.06,1.52) {\(1,2\)};
-\fill[black!10] (3.72,1.31) rectangle (4.72,1.73);  % cell 2,1
-\draw[black!45, line width=0.4pt] (3.72,1.31) rectangle (4.72,1.73);
-\node[font=\footnotesize] at (4.22,1.52) {\(2,1\)};
-\draw[black!45, line width=0.4pt] (4.88,1.31) rectangle (5.88,1.73);  % cell 3,0
-\node[font=\footnotesize] at (5.38,1.52) {\(3,0\)};
-\draw[black!45, line width=0.4pt] (1.40,0.76) rectangle (2.40,1.18);  % cell 0,4
-\node[font=\footnotesize] at (1.90,0.97) {\(0,4\)};
-\fill[black!10] (2.56,0.76) rectangle (3.56,1.18);  % cell 1,3
-\draw[black!45, line width=0.4pt] (2.56,0.76) rectangle (3.56,1.18);
-\node[font=\footnotesize] at (3.06,0.97) {\(1,3\)};
-\draw[black!45, line width=0.4pt] (3.72,0.76) rectangle (4.72,1.18);  % cell 2,2
-\node[font=\footnotesize] at (4.22,0.97) {\(2,2\)};
-\fill[black!10] (4.88,0.76) rectangle (5.88,1.18);  % cell 3,1
-\draw[black!45, line width=0.4pt] (4.88,0.76) rectangle (5.88,1.18);
-\node[font=\footnotesize] at (5.38,0.97) {\(3,1\)};
-\draw[black!45, line width=0.4pt] (6.04,0.76) rectangle (7.04,1.18);  % cell 4,0
-\node[font=\footnotesize] at (6.54,0.97) {\(4,0\)};
-\draw[black!45, line width=0.4pt] (1.40,0.21) rectangle (2.40,0.63);  % cell 0,5
-\node[font=\footnotesize] at (1.90,0.42) {\(0,5\)};
-\fill[black!10] (2.56,0.21) rectangle (3.56,0.63);  % cell 1,4
-\draw[black!45, line width=0.4pt] (2.56,0.21) rectangle (3.56,0.63);
-\node[font=\footnotesize] at (3.06,0.42) {\(1,4\)};
-\draw[black!45, line width=0.4pt] (3.72,0.21) rectangle (4.72,0.63);  % cell 2,3
-\node[font=\footnotesize] at (4.22,0.42) {\(2,3\)};
-\draw[black!45, line width=0.4pt] (4.88,0.21) rectangle (5.88,0.63);  % cell 3,2
-\node[font=\footnotesize] at (5.38,0.42) {\(3,2\)};
-\fill[black!10] (6.04,0.21) rectangle (7.04,0.63);  % cell 4,1
-\draw[black!45, line width=0.4pt] (6.04,0.21) rectangle (7.04,0.63);
-\node[font=\footnotesize] at (6.54,0.42) {\(4,1\)};
-\draw[black!45, line width=0.4pt] (7.20,0.21) rectangle (8.20,0.63);  % cell 5,0
-\node[font=\footnotesize] at (7.70,0.42) {\(5,0\)};
-%% ---- legend -------------------------------------------------------------
-\fill[black!10] (8.70,2.51) rectangle (9.30,2.83);
-\draw[black!45, line width=0.4pt] (8.70,2.51) rectangle (9.30,2.83);
-\node[font=\footnotesize, anchor=west, align=left] at (9.45,2.67)
-  {one index \(=1\): mixed pairing,\\strictly positive};
-\fill[black!22] (8.70,1.71) rectangle (9.30,2.03);
-\draw[line width=1.1pt] (8.70,1.71) rectangle (9.30,2.03);
-\node[font=\footnotesize, anchor=west, align=left] at (9.45,1.87)
-  {the sole self-pair:\\\(\MD(M_1,M_1)=2\det M_1\)};
-\draw[black!45, line width=0.4pt] (8.70,0.91) rectangle (9.30,1.23);
-\node[font=\footnotesize, anchor=west, align=left] at (9.45,1.07)
-  {neither index \(1\): both fibers\\positive semidefinite};
-\end{tikzpicture}
-\caption{Finite-defect localization at the endpoint \((\kappa,\tau)=(1,1)\).
-Panel (a): \(M_0\) is positive semidefinite of rank one, \(M_m\succ0\) for
-\(m\ge2\) (\Cref{thm:gram}), and \(M_1\) is the only fiber whose inertia can
-change (\Cref{lem:M1-indefinite}).  Panel (b): by \eqref{eq:Delta-n-MD},
-determinant degree \(n\) receives the ordered pairs \((k,\ell)\) with
-\(k+\ell=n\), the pair \((k,\ell)\) contributing
-\(S_kS_\ell\MD(M_k,M_\ell)/2\).  A pair with one index equal to \(1\) is a
-mixed pairing and is strictly positive, by \eqref{eq:Delta1-sharp} when the
-partner is \(M_0\) and by \eqref{eq:M1-Mm-positive} when it is \(M_m\) with
-\(m\ge2\); a pair with neither index equal to \(1\) has both fibers positive
-semidefinite.  The sole self-pair \((1,1)\) therefore occurs in \(\Delta_2\)
-and in no other degree, so the possible fiber-level defect is confined to one
-determinant degree, closed there by the explicit decomposition
-\eqref{eq:Delta2-unsimplified} (\Cref{lem:Delta2-positive}).}
-\label{fig:defect-localization}
-\end{figure}
 
 The constant matrix is
 \[
@@ -1582,6 +1477,112 @@ Applying \eqref{eq:trig-lower} at \(y=a+1\) gives
 All three coefficients in \eqref{eq:Qstar-decomp} are positive for \(a>0\),
 so \(\Delta_2>0\).
 \end{proof}
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+%% ---- panel (a): the endpoint fibers -------------------------------------
+\node[font=\small, anchor=west] at (-0.35,6.05) {(a)};
+\draw[black!45, line width=0.4pt] (0.69,5.20) rectangle (3.19,6.20);
+\node at (1.94,5.87) {\(M_0\)};
+\node[font=\footnotesize] at (1.94,5.45) {\(\succeq0\), rank one};
+\draw[line width=1.1pt] (3.69,5.20) rectangle (6.79,6.20);
+\node at (5.24,5.87) {\(M_1\)};
+\node[font=\footnotesize] at (5.24,5.45) {possibly indefinite};
+\draw[black!45, line width=0.4pt] (7.29,5.20) rectangle (10.59,6.20);
+\node at (8.94,5.87) {\(M_m\), \(m\ge2\)};
+\node[font=\footnotesize] at (8.94,5.45) {\(\succ0\)};
+\node[font=\footnotesize, align=center, anchor=north] at (5.24,5.05)
+  {indefinite for \(0<a<a_*\); \(\succeq0\) of rank one at \(a=a_*\);\\
+   \(\succ0\) for \(a>a_*\), where \(a_*=0.3690738484\ldots\)};
+%% ---- panel (b): the pairing array ---------------------------------------
+\node[font=\small, anchor=west] at (-0.35,3.37) {(b)};
+\node[font=\footnotesize, anchor=west] at (0.55,3.37)
+  {row \(\Delta_n\): the ordered pairs \((k,\ell)\) with \(k+\ell=n\)};
+\node[font=\small, anchor=east] at (1.25,2.62) {\(\Delta_1\)};
+\node[font=\small, anchor=east] at (1.25,2.07) {\(\Delta_2\)};
+\node[font=\small, anchor=east] at (1.25,1.52) {\(\Delta_3\)};
+\node[font=\small, anchor=east] at (1.25,0.97) {\(\Delta_4\)};
+\node[font=\small, anchor=east] at (1.25,0.42) {\(\Delta_5\)};
+\node[font=\small, anchor=east] at (1.25,-0.03) {\(\vdots\)};
+\fill[black!10] (1.40,2.41) rectangle (2.40,2.83);  % cell 0,1
+\draw[black!45, line width=0.4pt] (1.40,2.41) rectangle (2.40,2.83);
+\node[font=\footnotesize] at (1.90,2.62) {\(0,1\)};
+\fill[black!10] (2.56,2.41) rectangle (3.56,2.83);  % cell 1,0
+\draw[black!45, line width=0.4pt] (2.56,2.41) rectangle (3.56,2.83);
+\node[font=\footnotesize] at (3.06,2.62) {\(1,0\)};
+\draw[black!45, line width=0.4pt] (1.40,1.86) rectangle (2.40,2.28);  % cell 0,2
+\node[font=\footnotesize] at (1.90,2.07) {\(0,2\)};
+\fill[black!22] (2.56,1.86) rectangle (3.56,2.28);  % cell 1,1
+\draw[line width=1.1pt] (2.56,1.86) rectangle (3.56,2.28);
+\node[font=\footnotesize] at (3.06,2.07) {\(1,1\)};
+\draw[black!45, line width=0.4pt] (3.72,1.86) rectangle (4.72,2.28);  % cell 2,0
+\node[font=\footnotesize] at (4.22,2.07) {\(2,0\)};
+\draw[black!45, line width=0.4pt] (1.40,1.31) rectangle (2.40,1.73);  % cell 0,3
+\node[font=\footnotesize] at (1.90,1.52) {\(0,3\)};
+\fill[black!10] (2.56,1.31) rectangle (3.56,1.73);  % cell 1,2
+\draw[black!45, line width=0.4pt] (2.56,1.31) rectangle (3.56,1.73);
+\node[font=\footnotesize] at (3.06,1.52) {\(1,2\)};
+\fill[black!10] (3.72,1.31) rectangle (4.72,1.73);  % cell 2,1
+\draw[black!45, line width=0.4pt] (3.72,1.31) rectangle (4.72,1.73);
+\node[font=\footnotesize] at (4.22,1.52) {\(2,1\)};
+\draw[black!45, line width=0.4pt] (4.88,1.31) rectangle (5.88,1.73);  % cell 3,0
+\node[font=\footnotesize] at (5.38,1.52) {\(3,0\)};
+\draw[black!45, line width=0.4pt] (1.40,0.76) rectangle (2.40,1.18);  % cell 0,4
+\node[font=\footnotesize] at (1.90,0.97) {\(0,4\)};
+\fill[black!10] (2.56,0.76) rectangle (3.56,1.18);  % cell 1,3
+\draw[black!45, line width=0.4pt] (2.56,0.76) rectangle (3.56,1.18);
+\node[font=\footnotesize] at (3.06,0.97) {\(1,3\)};
+\draw[black!45, line width=0.4pt] (3.72,0.76) rectangle (4.72,1.18);  % cell 2,2
+\node[font=\footnotesize] at (4.22,0.97) {\(2,2\)};
+\fill[black!10] (4.88,0.76) rectangle (5.88,1.18);  % cell 3,1
+\draw[black!45, line width=0.4pt] (4.88,0.76) rectangle (5.88,1.18);
+\node[font=\footnotesize] at (5.38,0.97) {\(3,1\)};
+\draw[black!45, line width=0.4pt] (6.04,0.76) rectangle (7.04,1.18);  % cell 4,0
+\node[font=\footnotesize] at (6.54,0.97) {\(4,0\)};
+\draw[black!45, line width=0.4pt] (1.40,0.21) rectangle (2.40,0.63);  % cell 0,5
+\node[font=\footnotesize] at (1.90,0.42) {\(0,5\)};
+\fill[black!10] (2.56,0.21) rectangle (3.56,0.63);  % cell 1,4
+\draw[black!45, line width=0.4pt] (2.56,0.21) rectangle (3.56,0.63);
+\node[font=\footnotesize] at (3.06,0.42) {\(1,4\)};
+\draw[black!45, line width=0.4pt] (3.72,0.21) rectangle (4.72,0.63);  % cell 2,3
+\node[font=\footnotesize] at (4.22,0.42) {\(2,3\)};
+\draw[black!45, line width=0.4pt] (4.88,0.21) rectangle (5.88,0.63);  % cell 3,2
+\node[font=\footnotesize] at (5.38,0.42) {\(3,2\)};
+\fill[black!10] (6.04,0.21) rectangle (7.04,0.63);  % cell 4,1
+\draw[black!45, line width=0.4pt] (6.04,0.21) rectangle (7.04,0.63);
+\node[font=\footnotesize] at (6.54,0.42) {\(4,1\)};
+\draw[black!45, line width=0.4pt] (7.20,0.21) rectangle (8.20,0.63);  % cell 5,0
+\node[font=\footnotesize] at (7.70,0.42) {\(5,0\)};
+%% ---- legend -------------------------------------------------------------
+\fill[black!10] (8.70,2.51) rectangle (9.30,2.83);
+\draw[black!45, line width=0.4pt] (8.70,2.51) rectangle (9.30,2.83);
+\node[font=\footnotesize, anchor=west, align=left] at (9.45,2.67)
+  {one index \(=1\): mixed pairing,\\strictly positive};
+\fill[black!22] (8.70,1.71) rectangle (9.30,2.03);
+\draw[line width=1.1pt] (8.70,1.71) rectangle (9.30,2.03);
+\node[font=\footnotesize, anchor=west, align=left] at (9.45,1.87)
+  {the sole self-pair:\\\(\MD(M_1,M_1)=2\det M_1\)};
+\draw[black!45, line width=0.4pt] (8.70,0.91) rectangle (9.30,1.23);
+\node[font=\footnotesize, anchor=west, align=left] at (9.45,1.07)
+  {neither index \(1\): both fibers\\positive semidefinite};
+\end{tikzpicture}
+\caption{Finite-defect localization at the endpoint \((\kappa,\tau)=(1,1)\).
+Panel (a): \(M_0\) is positive semidefinite of rank one, \(M_m\succ0\) for
+\(m\ge2\) (\Cref{thm:gram}), and \(M_1\) is the only fiber whose inertia can
+change (\Cref{lem:M1-indefinite}).  Panel (b): by \eqref{eq:Delta-n-MD},
+determinant degree \(n\) receives the ordered pairs \((k,\ell)\) with
+\(k+\ell=n\), the pair \((k,\ell)\) contributing
+\(S_kS_\ell\MD(M_k,M_\ell)/2\).  A pair with one index equal to \(1\) is a
+mixed pairing and is strictly positive, by \eqref{eq:Delta1-sharp} when the
+partner is \(M_0\) and by \eqref{eq:M1-Mm-positive} when it is \(M_m\) with
+\(m\ge2\); a pair with neither index equal to \(1\) has both fibers positive
+semidefinite.  The sole self-pair \((1,1)\) therefore occurs in \(\Delta_2\)
+and in no other degree, so the possible fiber-level defect is confined to one
+determinant degree, closed there by the explicit decomposition
+\eqref{eq:Delta2-unsimplified} (\Cref{lem:Delta2-positive}).}
+\label{fig:defect-localization}
+\end{figure}
 
 \begin{proof}[Proof of \Cref{thm:coefficientwise}, sufficiency]
 For every \(a>0\) and \(n\ge1\), the endpoint assertion \(\Delta_n^{(1)}(a)>0\) holds
@@ -2770,7 +2771,7 @@ point.  The mechanism suggests that fixed-total positivity, finite-defect
 localization, and canonical--microcanonical transfer may persist beyond the
 Bessel family.
 
-The following problems isolate the most direct tests of that mechanism.
+The following problems test that mechanism.
 
 \begin{question}\label{q:wright}
 For the Wright-type family

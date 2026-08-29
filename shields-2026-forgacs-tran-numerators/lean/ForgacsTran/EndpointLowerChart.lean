@@ -3,7 +3,7 @@ Copyright (c) 2026 Johnny Shields. All rights reserved.
 Released under the MIT license as described in the file LICENSE.txt.
 Authors: Johnny Shields
 -/
-import ForgacsTran.EndpointUpperPackage
+import ForgacsTran.EndpointUpperBinders
 
 /-!
 # The lower cluster's chart, on the caller's own principal pair
@@ -34,6 +34,8 @@ is empty, which is the manuscript's "the cluster is the principal pair alone".
 
 * `shift_mod_of_lt` — the shift `(j + ρ - j_p) \bmod ρ`, resolved.
 * `exists_lower_chart` — the chart and its four facts, from `j_p` and `j_c` alone.
+* `lower_cluster_enumeration_of_chart` — the three binders, as the
+  `EndpointUpperBinders.ClusterEnumeration` both endpoint blocks return.
 
 ## References
 
@@ -122,7 +124,12 @@ two-endpoint composition must use; the caller supplies `hp` and `hq` through
 /-- **`hginj₀`, `hgmem₀` and `hgcard₀` at one angle**, from the caller's own
 cluster.  The chart names the point, the principal pair names the two erased
 positions, and the count says the `ρ` chart images are distinct — nothing else
-enters, and no cluster is constructed here. -/
+enters, and no cluster is constructed here.
+
+The three are `ClusterEnumeration` at this cluster, which is the same shape
+`EndpointLowerBlock.exists_lower_endpoint_block` goes on to return: what this
+theorem supplies is exactly the enumeration half of the block, on a `ψ` the caller
+owns rather than one this proof opens. -/
 theorem lower_cluster_enumeration_of_chart {n r ρ : ℕ} {a : Fin n → ℝ} {c x₁ : ℝ}
     {ψ : ℂ → ℂ} {jp jc : ℕ} (hjp : jp < ρ) (hjc : jc < ρ) (hjpc : jp ≠ jc)
     {chart : Fin (ρ - 2) → ℕ} (hchartinj : Function.Injective chart)
@@ -133,18 +140,11 @@ theorem lower_cluster_enumeration_of_chart {n r ρ : ℕ} {a : Fin n → ℝ} {c
     (hq : ((ftTauArc a r (n - 1) x₁ δ : ℝ) : ℂ)
         * Complex.exp (-((δ : ℝ) : ℂ) * Complex.I)
       = ψ (clusterDir ρ jc * ((ftClusterParam a c r (n - 1) ρ δ : ℝ) : ℂ))) :
-    Function.Injective (fun i : Fin (ρ - 2) =>
-        ψ (clusterDir ρ (chart i) * ((ftClusterParam a c r (n - 1) ρ δ : ℝ) : ℂ)))
-      ∧ (∀ i : Fin (ρ - 2),
-          ψ (clusterDir ρ (chart i) * ((ftClusterParam a c r (n - 1) ρ δ : ℝ) : ℂ))
-            ∈ ((ftClusterSet a c r (n - 1) ρ ψ δ).erase
-                (ftPrincipal (ftTauArc a r (n - 1) x₁) δ)).erase
-              (((ftTauArc a r (n - 1) x₁ δ : ℝ) : ℂ)
-                * Complex.exp (-((δ : ℝ) : ℂ) * Complex.I)))
-      ∧ (((ftClusterSet a c r (n - 1) ρ ψ δ).erase
-            (ftPrincipal (ftTauArc a r (n - 1) x₁) δ)).erase
-          (((ftTauArc a r (n - 1) x₁ δ : ℝ) : ℂ)
-            * Complex.exp (-((δ : ℝ) : ℂ) * Complex.I))).card = ρ - 2 := by
+    ClusterEnumeration (ftClusterSet a c r (n - 1) ρ ψ δ)
+      (ftPrincipal (ftTauArc a r (n - 1) x₁) δ)
+      (((ftTauArc a r (n - 1) x₁ δ : ℝ) : ℂ) * Complex.exp (-((δ : ℝ) : ℂ) * Complex.I))
+      (fun i : Fin (ρ - 2) =>
+        ψ (clusterDir ρ (chart i) * ((ftClusterParam a c r (n - 1) ρ δ : ℝ) : ℂ))) := by
   classical
   have hInjOn : Set.InjOn
       (fun j => ψ (clusterDir ρ j * ((ftClusterParam a c r (n - 1) ρ δ : ℝ) : ℂ)))

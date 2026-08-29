@@ -148,4 +148,11 @@ theorem residue_im_eq_zero_and_re_nonpos {R : ℂ → ℂ} {x₀ : ℝ} {c : ℂ
   rw [Real.cos_pi_div_two, Real.sin_pi_div_two] at hhalf
   exact ⟨by linarith, by linarith⟩
 
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.residue_im_eq_zero_and_re_nonpos' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms residue_im_eq_zero_and_re_nonpos
+
 end Shields

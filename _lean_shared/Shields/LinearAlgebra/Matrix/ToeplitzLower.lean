@@ -61,6 +61,16 @@ the coefficients of the product of the two series. -/
 def convCoeff (a b : ℕ → R) (n : ℕ) : R :=
   ∑ m ∈ Finset.range (n + 1), a (n - m) * b m
 
+/-- Convolving on the right with the unit sequence `1, 0, 0, …` is the identity:
+only the `m = 0` term of the convolution survives. -/
+theorem convCoeff_delta_right (a : ℕ → R) :
+    convCoeff a (fun m => if m = 0 then (1 : R) else 0) = a := by
+  funext m
+  rw [convCoeff, Finset.sum_eq_single_of_mem 0 (Finset.mem_range.mpr (Nat.succ_pos m))]
+  · simp
+  · intro j _ hj
+    simp [hj]
+
 /-- The lower-triangular Toeplitz matrix of a coefficient sequence: entry `(i,j)`
 is `a_{i−j}` on and below the diagonal, `0` above it. -/
 def toeplitzLower (a : ℕ → R) (n : ℕ) : Matrix (Fin n) (Fin n) R :=
@@ -118,23 +128,8 @@ theorem toeplitzLower_rootFactor (x : R) (n : ℕ) :
     toeplitzLower (fun m => if m = 0 then 1 else if m = 1 then x else 0) n
       = rootFactor x n := by
   ext i j
-  rw [toeplitzLower_apply, rootFactor]
-  by_cases hji : (j : ℕ) ≤ (i : ℕ)
-  · rw [if_pos hji]
-    by_cases h0 : (i : ℕ) - j = 0
-    · have : (i : ℕ) = j := by omega
-      simp [this]
-    · by_cases h1 : (i : ℕ) - j = 1
-      · have : (i : ℕ) = (j : ℕ) + 1 := by omega
-        have hne : ¬ (i : ℕ) = (j : ℕ) := by omega
-        simp [this]
-      · have hne : ¬ (i : ℕ) = (j : ℕ) := by omega
-        have hne2 : ¬ (i : ℕ) = (j : ℕ) + 1 := by omega
-        simp [h0, h1, hne, hne2]
-  · have hne : ¬ (i : ℕ) = (j : ℕ) := by omega
-    have hne2 : ¬ (i : ℕ) = (j : ℕ) + 1 := by omega
-    rw [if_neg hji]
-    simp [hne, hne2]
+  simp only [toeplitzLower_apply, rootFactor, Matrix.of_apply]
+  split_ifs <;> first | rfl | omega
 
 /-- The coefficient sequence of `∏_{y ∈ ys} (1 + y t)`, built by convolving one
 root factor at a time. -/
@@ -143,21 +138,16 @@ def rootProdCoeff : List R → ℕ → R
   | y :: ys, m =>
       convCoeff (fun k => if k = 0 then 1 else if k = 1 then y else 0) (rootProdCoeff ys) m
 
+/-- The empty product is the unit sequence `1, 0, 0, …`. -/
+theorem rootProdCoeff_nil : rootProdCoeff ([] : List R) = fun m => if m = 0 then (1 : R) else 0 :=
+  rfl
+
 /-- The Toeplitz matrix of the constant series `1` is the identity. -/
 theorem toeplitzLower_one (n : ℕ) :
     toeplitzLower (fun m => if m = 0 then (1 : R) else 0) n = 1 := by
   ext i j
-  rw [toeplitzLower_apply, Matrix.one_apply]
-  by_cases hji : (j : ℕ) ≤ (i : ℕ)
-  · rw [if_pos hji]
-    by_cases h : i = j
-    · subst h; simp
-    · have : ¬ (i : ℕ) - j = 0 := by
-        have : (j : ℕ) ≠ i := fun hc => h (Fin.ext hc.symm)
-        omega
-      simp [this, h]
-  · have h : ¬ i = j := fun hc => hji (by rw [hc])
-    rw [if_neg hji, if_neg h]
+  simp only [toeplitzLower_apply, Matrix.one_apply, Fin.ext_iff]
+  split_ifs <;> first | rfl | omega
 
 /-- **Toeplitz of a finite Pólya-frequency symbol factors.**  The Toeplitz matrix
 of `∏_{y ∈ ys}(1 + y t)` is the product of the bidiagonal root factors of
@@ -174,5 +164,12 @@ theorem toeplitzLower_rootProd (ys : List R) (n : ℕ) :
               (rootProdCoeff ys) := rfl
       rw [hstep, ← toeplitzLower_mul, toeplitzLower_rootFactor, ih]
       simp
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.toeplitzLower_rootProd' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms toeplitzLower_rootProd
 
 end Shields

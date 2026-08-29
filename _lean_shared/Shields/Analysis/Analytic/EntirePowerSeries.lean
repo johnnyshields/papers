@@ -106,4 +106,11 @@ theorem hasSum_of_entire_of_hasSum_ball {a : ℕ → ℂ} {F : ℂ → ℂ} (hF 
   simpa only [ofScalars_apply_diag, zero_add] using
     hcauchy.hasSum (mem_eball_zero_of_nnnorm_lt hzR le_rfl)
 
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.hasSum_of_entire_of_hasSum_ball' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms hasSum_of_entire_of_hasSum_ball
+
 end Shields

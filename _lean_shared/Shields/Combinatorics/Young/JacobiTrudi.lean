@@ -7,6 +7,62 @@ import Shields.Combinatorics.Young.SkewSchurPolynomial
 import Mathlib.Data.Nat.Nth
 import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
 
+/-!
+# The Jacobi--Trudi determinant, and the minors of a Toeplitz matrix
+
+A minor of a Toeplitz matrix, rows and columns taken in increasing order, is a
+Jacobi--Trudi determinant of a pair of Young diagrams.  This file sets up both sides of
+that dictionary -- the increasing enumeration of an index set, the minor, and the
+determinant `det [h_{λ_u - μ_v - u + v}]` -- proves they agree, and names the alphabet the
+entries have to be read over, the complete homogeneous, elementary and supersymmetric
+functions of `Shields.Combinatorics.Young.SkewSchurPolynomial`.
+
+The Jacobi--Trudi identity itself is not proved here.  It is carried as the predicate
+`Shields.SkewJacobiTrudi`, proved at one row below and at every number of rows over the
+Lindström--Gessel--Viennot development that builds on this file.  What the identity buys is
+the last statement: a minor is positive exactly when its row set satisfies a packing rule.
+
+## Main definitions
+
+* `Shields.nthElem`: the `v`-th smallest element of a `Finset ℕ`, counting from `0`, so
+  that a statement about a sorted enumeration `i_1 < ⋯ < i_m` becomes a statement about
+  below-counts.
+* `Shields.toeplitzMinor`: the minor `det [d_{k + j - i}]` of the Toeplitz matrix of `d`
+  shifted by `k`, over a row set `I` and a column set `J` read in increasing order.
+* `Shields.jacobiTrudiDet`: the right-hand determinant of skew Jacobi--Trudi,
+  `det [h_{λ_u - μ_v - u + v}]_{u, v < m}`.
+* `Shields.SkewJacobiTrudi`: the skew Jacobi--Trudi identity for a coefficient sequence and
+  a pair of alphabets, as a predicate on shapes rather than on index sets.
+* `Shields.completeHom`, `Shields.elemHom`, `Shields.superHom`: the complete homogeneous
+  and elementary symmetric functions of the even and the odd alphabet, as skew Schur
+  functions of a one-row and a one-column rectangle, and their convolution.
+
+## Main results
+
+* `Shields.rowLen_betaDiagram`: the row lengths of the diagram a row set builds, read off
+  the sorted enumeration rather than the membership rule that defines it.
+* `Shields.toeplitzMinor_eq_jacobiTrudiDet`: **the minor is a Jacobi--Trudi determinant.**
+  No positivity, no alphabet and no hypothesis on the coefficients -- this is the index
+  bookkeeping alone.
+* `Shields.toeplitzMinor_eq_superSkewSchur` and `Shields.toeplitzMinor_pos_iff`: given the
+  identity, the minor is the supersymmetric skew Schur function of that pair of shapes, and
+  over `ℝ` with positive variables it is positive exactly under the packing rule.
+* `Shields.skewSchur_translate`: a skew shape and any translate of it carry the same
+  tableaux, so a skew row is a straight row and a skew column a straight column.
+* `Shields.jacobiTrudiDet_eq_superSkewSchur_of_le_one`: the identity at one row, which also
+  pins down which alphabet the coefficients have to be, `d m = superHom b a m β α`.
+
+## Implementation notes
+
+`nthElem` is `Nat.nth`, which returns a junk value past the last element of the set.  That
+keeps the minor a total function of its index sets; every lemma saying anything about the
+enumeration carries the bound `v < I.card` instead.
+
+## Tags
+
+Jacobi--Trudi, Toeplitz matrix, Schur polynomial, skew shape, symmetric function
+-/
+
 namespace Shields
 
 open Finset
@@ -21,8 +77,8 @@ keeps the minor a total function of `I` and `m`; every lemma below that says any
 `nthElem` carries the bound `u < I.card`.
 -/
 
-/-- The `v`-th smallest element of `I`, counting from `0`: the `i_{v+1}` of, whose enumeration
-starts at `1`. -/
+/-- The `v`-th smallest element of `I`, counting from `0`, so it is the `i_{v+1}` of a sorted
+enumeration `i_1 < ⋯ < i_m`. -/
 noncomputable def nthElem (I : Finset ℕ) (v : ℕ) : ℕ := Nat.nth (· ∈ I) v
 
 /-- `Set.Finite.toFinset` of the membership set recovers the finset, for *any* finiteness proof.
@@ -40,16 +96,15 @@ theorem nthElem_lt {I : Finset ℕ} {n v : ℕ} (hIn : I ⊆ Finset.range n) (hv
     nthElem I v < n :=
   Finset.mem_range.mp (hIn (nthElem_mem hv))
 
-/-- `belowCount` of `Shields.SuperSchur` is `Nat.count`, which is what
-carries the enumeration lemmas. -/
+/-- `belowCount` of `Shields.Combinatorics.Young.SkewSchurPolynomial.Index` is `Nat.count`, which
+is what carries the enumeration lemmas. -/
 theorem belowCount_eq_count (I : Finset ℕ) (y : ℕ) : belowCount I y = Nat.count (· ∈ I) y := by
   rw [Nat.count_eq_card_filter_range, belowCount]
   apply Finset.card_nbij id <;>
     simp +contextual [Set.MapsTo, Set.InjOn, Set.SurjOn, and_comm]
 
-/-- **The below-count dictionary.**  Every statement of the appendix phrased
-with the sorted enumeration `i_1 < ⋯ < i_m` is a statement about below-counts,
-and this is the translation. -/
+/-- **The below-count dictionary.**  A statement phrased with the sorted enumeration
+`i_1 < ⋯ < i_m` is a statement about below-counts, and this is the translation. -/
 theorem lt_belowCount_iff {I : Finset ℕ} {v y : ℕ} (hv : v < I.card) :
     v < belowCount I y ↔ nthElem I v < y := by
   have hfin := Set.finite_mem_finset I
@@ -63,15 +118,15 @@ theorem lt_belowCount_iff {I : Finset ℕ} {v y : ℕ} (hv : v < I.card) :
   rw [Nat.count_succ, hcount, if_pos hmem] at hmono
   omega
 
-/-! ## read off the shape
+/-! ## Row lengths read off the shape
 
-`betaDiagram I L` is defined in `Shields.SuperSchur` by a membership rule
-that never sorts `I`.  These two lemmas say it is the shape of, with the rows past the last one
-included.
+`betaDiagram I L` is defined in `Shields.Combinatorics.Young.SkewSchurPolynomial.Index` by a
+membership rule that never sorts `I`.  These two lemmas read its row lengths off the sorted
+enumeration instead, the empty rows past the last one included.
 -/
 
-/-- **.**  Row `v` of `betaDiagram I L` has length
-`L - i_v + v`, written `L + v + 1 - i_v` for the enumeration starting at `0`. -/
+/-- Row `v` of `betaDiagram I L` has length `L - i_v + v`, written `L + v + 1 - i_v` for the
+enumeration starting at `0`. -/
 theorem rowLen_betaDiagram {I : Finset ℕ} {L v : ℕ} (hv : v < I.card) :
     (betaDiagram I L).rowLen v = L + v + 1 - nthElem I v := by
   have key : ∀ j : ℕ, (v, j) ∈ betaDiagram I L ↔ j < L + v + 1 - nthElem I v := by
@@ -95,12 +150,13 @@ theorem rowLen_betaDiagram_of_card_le {I : Finset ℕ} {L v : ℕ} (hv : I.card 
   omega
 
 /-- **The Jacobi--Trudi index is the Toeplitz index.**  With `λ` and `μ` the
-shapes of built from `I` and `J = tailSet n k I`,
+shapes `betaDiagram` builds from `I` and `J = tailSet n k I`,
 
 `λ_u - μ_v - u + v = k + j_v - i_u`,
 
-which is the entry of.  Stated additively, since both sides are
-differences that a truncated subtraction would misreport. -/
+which is the index of the Toeplitz entry at row `i_u` and column `j_v`.  Stated
+additively, since both sides are differences that a truncated subtraction would
+misreport. -/
 theorem rowLen_betaDiagram_add {n k L Lk : ℕ} (hL : Lk + k = L) (hkn : k ≤ n) (hnL : n ≤ Lk)
     {I : Finset ℕ} (hIn : I ⊆ Finset.range n) (hkI : ∀ x, x < k → x ∈ I) {u v : ℕ}
     (hu : u < I.card) (hv : v < I.card) :
@@ -115,19 +171,29 @@ theorem rowLen_betaDiagram_add {n k L Lk : ℕ} (hL : Lk + k = L) (hkn : k ≤ n
 
 /-! ## The minor and the Jacobi--Trudi determinant -/
 
-/-- The Toeplitz entry `d_{k + j - i}` of, zero where the index
-would be negative. -/
+/-- The entry at row `i` and column `j` of the Toeplitz matrix of `d` shifted by `k`, zero where
+the index would be negative. -/
 def shiftedCoeff (d : ℕ → R) (k i j : ℕ) : R := if i ≤ k + j then d (k + j - i) else 0
 
-/-- **.**  The minor `Δ_C = det[d_{k + j - i}]_{i ∈ I, j ∈ J}` of
-the Toeplitz matrix of `d`, rows and columns taken in increasing order.  `m` is
-the common size `m_C` of. -/
+/-- The minor `det[d_{k + j - i}]_{i ∈ I, j ∈ J}` of the Toeplitz matrix of `d`, rows and columns
+taken in increasing order.  `m` is the common size of `I` and `J`. -/
 noncomputable def toeplitzMinor (d : ℕ → R) (k m : ℕ) (I J : Finset ℕ) : R :=
   (Matrix.of fun u v : Fin m => shiftedCoeff d k (nthElem I u) (nthElem J v)).det
 
 /-- The Jacobi--Trudi entry `h_{p - q}`, zero where the index would be
 negative. -/
 def jtCoeff (d : ℕ → R) (p q : ℕ) : R := if q ≤ p then d (p - q) else 0
+
+/-- Shifting both indices of a Jacobi--Trudi entry leaves it unchanged: only the
+difference of the two is read. -/
+theorem jtCoeff_add_right (d : ℕ → R) (p q k : ℕ) : jtCoeff d (p + k) (q + k) = jtCoeff d p q := by
+  unfold jtCoeff
+  split_ifs with h1 h2 h2
+  · congr 1
+    omega
+  · omega
+  · omega
+  · rfl
 
 /-- The right-hand determinant of skew Jacobi--Trudi,
 `det [h_{λ_u - μ_v - u + v}]_{u,v ≤ m}`, for a pair of shapes and a size. -/
@@ -144,10 +210,11 @@ theorem jtCoeff_eq_shiftedCoeff {d : ℕ → R} {k i j p q : ℕ} (h : p + i = q
   · omega
   · rfl
 
-/-- **Half of, proved.**  The Toeplitz minor of is the Jacobi--Trudi determinant of the shapes
-builds from its row and column sets.  No positivity, no
-alphabet, no hypothesis on `d`: this is the index bookkeeping alone, and it
-leaves as a statement about a pair of Young diagrams. -/
+/-- **The minor is a Jacobi--Trudi determinant.**  `toeplitzMinor` is the
+Jacobi--Trudi determinant of the two shapes `betaDiagram` builds from its row
+and column sets.  No positivity, no alphabet, no hypothesis on `d`: this is the
+index bookkeeping alone, and it leaves `SkewJacobiTrudi` as a statement about a
+pair of Young diagrams. -/
 theorem toeplitzMinor_eq_jacobiTrudiDet {d : ℕ → R} {n k L Lk : ℕ} (hL : Lk + k = L)
     (hkn : k ≤ n) (hnL : n ≤ Lk) {I : Finset ℕ} (hIn : I ⊆ Finset.range n)
     (hkI : ∀ x, x < k → x ∈ I) :
@@ -160,19 +227,19 @@ theorem toeplitzMinor_eq_jacobiTrudiDet {d : ℕ → R} {n k L Lk : ℕ} (hL : L
 
 /-! ## The remaining input
 
-Everything above is bookkeeping.  What still asserts is the
-skew Jacobi--Trudi identity itself, for the two-alphabet function of over the alphabet `ρ_D`.  It
-is stated here for an arbitrary pair of shapes, so nothing about index sets, Toeplitz matrices or
-is left inside it.
+Everything above is bookkeeping.  What `SkewJacobiTrudi` still asserts is the skew Jacobi--Trudi
+identity itself, for the branching sum `superSkewSchur_eq_branching` over the alphabet `ρ_D`.  It
+is stated for an arbitrary pair of shapes, so nothing about index sets, Toeplitz matrices or the
+packing rule is left inside it.
 -/
 
-/-- ** as an identity of shapes.**  For every pair `μ ⊆ λ`
-with `λ` inside `m` rows,
+/-- **The skew Jacobi--Trudi identity, as an identity of shapes.**  For every
+pair `μ ⊆ λ` with `λ` inside `m` rows,
 
 `det [h_{λ_u - μ_v - u + v}]_{u,v ≤ m} = s_{λ/μ}(ρ_D)`,
 
-the right side being the branching sum of in `b` even
-and `a` odd variables.
+the right side being the branching sum `superSkewSchur_eq_branching` in `b`
+even and `a` odd variables.
 
 This is not proved here.
 `jacobiTrudiDet_eq_superSkewSchur_of_le_one` proves it at `m ≤ 1`, which also
@@ -182,24 +249,24 @@ ingredient of — it has no Schur polynomials, no Jacobi--Trudi, no
 Lindström--Gessel--Viennot, and no Cauchy--Binet, so both the tableau route and
 the linear-algebra route have to be built from `Matrix.det` upward.
 
-That is done, for the even alphabet, over `LGV`, `LGVInvolution`, `LGVTableau`
-and `LGVTableauM`: `LGVTableauM.skewJacobiTrudi_even` is this predicate at
+That is done, for the even alphabet, over `LGVPaths`, `LGVSelection`,
+`LGVInvolution` and `LGVTableau`: `skewJacobiTrudi_even` is this predicate at
 `a = 0`, for every commutative ring, every `b`, every `β α`, every `mu ≤ lam`
 and every `m`.
 
-With an odd alphabet it is reached too, at every `m`:
-`LGVOddTableauM.skewJacobiTrudi`, over `LGVOdd`'s geometry and splice,
-`LGVOddTableau`'s tableau bijection, `LGVMixed`'s cancellation for the mixed
-crossing predicate, and `LGVOddTableauM`'s lift of the odd tableau side.  So
-`endpoint_order_of_skewJacobiTrudi` below is discharged
-(`LGVOddTableauM.endpoint_order_uncond`), and with it on the
-appendix's own index sets. -/
+With an odd alphabet it is reached too, at every `m`: `skewJacobiTrudi`, over
+`LGVOddPaths`' geometry and splice, `LGVMixed`'s cancellation for the mixed
+crossing predicate, `LGVOddResidue`'s branching sum, and `LGVOddTableau`'s lift
+of the odd tableau side.  So the `SkewJacobiTrudi` hypothesis carried by
+`toeplitzMinor_pos_iff` below is discharged, by
+`toeplitzMinor_pos_iff_uncond`. -/
 def SkewJacobiTrudi (d : ℕ → R) (b a : ℕ) (β α : ℕ → R) : Prop :=
   ∀ (lam mu : YoungDiagram) (m : ℕ), mu ≤ lam → (∀ i, m ≤ i → lam.rowLen i = 0) →
     jacobiTrudiDet d lam mu m = superSkewSchur lam mu b a β α
 
-/-- ** on the appendix's own shapes**, given the identity for
-shapes.  The Toeplitz minor `Δ_C` is the two-alphabet skew Schur function of. -/
+/-- **The minor is a supersymmetric skew Schur function**, given the identity
+for shapes.  It is `superSkewSchur` of the two shapes `betaDiagram` builds from
+its row and column sets. -/
 theorem toeplitzMinor_eq_superSkewSchur {d : ℕ → R} {b a : ℕ} {β α : ℕ → R}
     (hJT : SkewJacobiTrudi d b a β α) {n k L Lk : ℕ} (hL : Lk + k = L) (hkn : k ≤ n)
     (hnL : n ≤ Lk) {I : Finset ℕ} (hIn : I ⊆ Finset.range n) (hkI : ∀ x, x < k → x ∈ I) :
@@ -209,9 +276,9 @@ theorem toeplitzMinor_eq_superSkewSchur {d : ℕ → R} {b a : ℕ} {β α : ℕ
   exact hJT _ _ _ (betaDiagram_tailSet_le hL hkn hIn hkI) fun _ hi =>
     rowLen_betaDiagram_of_card_le hi
 
-/-- ** and on the minor.**  `Δ_C`
-is positive exactly when `I` satisfies the packing rule
-— the form the endpoint-order argument consumes. -/
+/-- **The hook criterion on the minor.**  The minor is positive exactly when
+`I` satisfies the packing rule `BlockCondition` — the form the endpoint-order
+argument consumes. -/
 theorem toeplitzMinor_pos_iff {d : ℕ → ℝ} {b a : ℕ} {β α : ℕ → ℝ}
     (hJT : SkewJacobiTrudi d b a β α) {n k L Lk : ℕ} (hL : Lk + k = L) (hkn : k ≤ n)
     (hnL : n ≤ Lk) (hba : b < a) (hka : k ≤ a) (hβ : ∀ i, i < b → 0 < β i)
@@ -233,21 +300,6 @@ a skew column into a straight one.
 section Translate
 
 variable {lam mu lam' mu' : YoungDiagram} {di dj n : ℕ}
-
-/-- Both cells of a row comparison lie in the skew shape: the left one by
-hypothesis, the right one because `mu` is a lower set. -/
-theorem mem_skewCells_of_row {i j₁ j₂ : ℕ} (hj : j₁ < j₂) (hlam : (i, j₂) ∈ lam)
-    (hmu : (i, j₁) ∉ mu) :
-    (i, j₁) ∈ skewCells lam mu ∧ (i, j₂) ∈ skewCells lam mu :=
-  ⟨mem_skewCells.mpr ⟨lam.up_left_mem le_rfl hj.le hlam, hmu⟩,
-    mem_skewCells.mpr ⟨hlam, notMem_of_col_le hj.le hmu⟩⟩
-
-/-- Both cells of a column comparison lie in the skew shape. -/
-theorem mem_skewCells_of_col {i₁ i₂ j : ℕ} (hi : i₁ < i₂) (hlam : (i₂, j) ∈ lam)
-    (hmu : (i₁, j) ∉ mu) :
-    (i₁, j) ∈ skewCells lam mu ∧ (i₂, j) ∈ skewCells lam mu :=
-  ⟨mem_skewCells.mpr ⟨lam.up_left_mem hi.le le_rfl hlam, hmu⟩,
-    mem_skewCells.mpr ⟨hlam, notMem_of_row_le hi.le hmu⟩⟩
 
 variable (h : ∀ i j, (i, j) ∈ skewCells lam' mu' ↔ (i + di, j + dj) ∈ skewCells lam mu)
   (hlow : ∀ i j, (i, j) ∈ skewCells lam mu → di ≤ i ∧ dj ≤ j)
@@ -344,74 +396,17 @@ theorem skewSchur_translate (x : ℕ → R) : skewSchur lam mu n x = skewSchur l
 
 end Translate
 
-/-! ## Rectangles of one row and one column on a one-row skew shape needs the interval of Young
+/-! ## Rectangles of one row and one column
+
+The branching sum on a one-row skew shape needs the interval of Young
 diagrams between two one-row shapes, which is an interval of naturals.  These
 lemmas are the dictionary.
 -/
 
-theorem rowLen_rect_of_lt {n k i : ℕ} (hi : i < n) : (rect n k).rowLen i = k := by
-  have key : ∀ j : ℕ, (i, j) ∈ rect n k ↔ j < k := by
-    intro j
-    rw [mem_rect]
-    omega
-  have h1 := key ((rect n k).rowLen i)
-  have h2 := key k
-  rw [YoungDiagram.mem_iff_lt_rowLen] at h1 h2
-  omega
-
-theorem rowLen_rect_of_le {n k i : ℕ} (hi : n ≤ i) : (rect n k).rowLen i = 0 := by
-  by_contra hc
-  have hmem : (i, 0) ∈ rect n k := YoungDiagram.mem_iff_lt_rowLen.mpr (Nat.pos_of_ne_zero hc)
-  exact absurd (mem_rect.mp hmem).1 (by omega)
-
-theorem transpose_rect (n k : ℕ) : (rect n k).transpose = rect k n := by
-  refine cells_injective (Finset.ext fun c => ?_)
-  obtain ⟨i, j⟩ := c
-  simp only [YoungDiagram.mem_cells, YoungDiagram.mem_transpose, Prod.swap_prod_mk, mem_rect]
-  omega
-
-theorem rect_mono_right {n k₁ k₂ : ℕ} (h : k₁ ≤ k₂) : rect n k₁ ≤ rect n k₂ := by
-  intro c hc
-  obtain ⟨i, j⟩ := c
-  obtain ⟨hi, hj⟩ := mem_rect.mp hc
-  exact mem_rect.mpr ⟨hi, by omega⟩
-
-theorem colLen_bot (j : ℕ) : (⊥ : YoungDiagram).colLen j = 0 := by
-  by_contra hc
-  exact YoungDiagram.notMem_bot (0, j)
-    (YoungDiagram.mem_iff_lt_colLen.mpr (Nat.pos_of_ne_zero hc))
-
-/-- Row lengths are monotone in the diagram. -/
-theorem rowLen_mono {mu lam : YoungDiagram} (h : mu ≤ lam) (i : ℕ) :
-    mu.rowLen i ≤ lam.rowLen i := by
-  by_contra hc
-  have hmem : (i, lam.rowLen i) ∈ mu := YoungDiagram.mem_iff_lt_rowLen.mpr (by omega)
-  exact absurd (YoungDiagram.mem_iff_lt_rowLen.mp (h hmem)) (by omega)
-
-theorem eq_bot_of_rowLen {lam : YoungDiagram} (h : ∀ i, lam.rowLen i = 0) : lam = ⊥ := by
-  refine cells_injective (Finset.ext fun c => ?_)
-  obtain ⟨i, j⟩ := c
-  simp only [YoungDiagram.mem_cells]
-  constructor
-  · intro hc
-    rw [YoungDiagram.mem_iff_lt_rowLen, h i] at hc
-    omega
-  · intro hc
-    exact absurd hc (YoungDiagram.notMem_bot _)
-
-theorem rect_zero_right (n : ℕ) : rect n 0 = ⊥ :=
-  eq_bot_of_rowLen fun i => by
-    rcases lt_or_ge i n with hi | hi
-    · exact rowLen_rect_of_lt hi
-    · exact rowLen_rect_of_le hi
-
-theorem rect_zero_left (k : ℕ) : rect 0 k = ⊥ :=
-  eq_bot_of_rowLen fun i => rowLen_rect_of_le (Nat.zero_le i)
-
 /-- A diagram with only its first row nonempty is a one-row rectangle. -/
 theorem eq_rect_one {lam : YoungDiagram} (h : ∀ i, 1 ≤ i → lam.rowLen i = 0) :
     lam = rect 1 (lam.rowLen 0) := by
-  refine cells_injective (Finset.ext fun c => ?_)
+  refine YoungDiagram.ext (Finset.ext fun c => ?_)
   obtain ⟨i, j⟩ := c
   rw [YoungDiagram.mem_cells, YoungDiagram.mem_cells, mem_rect, YoungDiagram.mem_iff_lt_rowLen]
   constructor
@@ -439,7 +434,7 @@ theorem eq_rect_one_of_le {t l : ℕ} {nu : YoungDiagram} (h1 : rect 1 t ≤ nu)
   · have := rowLen_mono h2 0
     rwa [rowLen_rect_of_lt Nat.zero_lt_one] at this
 
-/-! ## The alphabet of
+/-! ## The alphabet `ρ_D`
 
 `ρ_D` is fixed by `∑_m h_m(ρ_D) z^m = D(z)`.  With `D` rational and normalized,
 `h_m(ρ_D) = ∑_{p+q=m} h_p(β) e_q(α)`; `superHom` is that sum, `completeHom` and
@@ -457,24 +452,13 @@ specialization in `b` even and `a` odd variables. -/
 noncomputable def superHom (b a m : ℕ) (β α : ℕ → R) : R :=
   ∑ p ∈ Finset.range (m + 1), completeHom b p β * elemHom a (m - p) α
 
-/-- An empty skew shape has one tableau and it contributes the empty product. -/
-theorem skewSchur_of_skewCells_eq_empty {lam mu : YoungDiagram} (h : skewCells lam mu = ∅)
-    (n : ℕ) (x : ℕ → R) : skewSchur lam mu n x = 1 := by
-  haveI : Unique (BoundedSkewSSYT lam mu n) :=
-    { default := BoundedSkewSSYT.ofEmpty lam mu n h
-      uniq := fun T => BoundedSkewSSYT.eq_of_skewCells_eq_empty h T _ }
-  unfold skewSchur
-  rw [Finset.sum_congr rfl fun T _ =>
-    Finset.prod_eq_one fun c hc => absurd (h ▸ hc) (Finset.notMem_empty c)]
-  simp
-
 theorem completeHom_zero (b : ℕ) (β : ℕ → R) : completeHom b 0 β = 1 := by
   rw [completeHom, rect_zero_right,
-    skewSchur_of_skewCells_eq_empty (skewCells_eq_empty_iff.mpr le_rfl)]
+    skewSchur_of_le _ _ le_rfl]
 
 theorem elemHom_zero (a : ℕ) (α : ℕ → R) : elemHom a 0 α = 1 := by
   rw [elemHom, rect_zero_left,
-    skewSchur_of_skewCells_eq_empty (skewCells_eq_empty_iff.mpr le_rfl)]
+    skewSchur_of_le _ _ le_rfl]
 
 theorem superHom_zero (b a : ℕ) (β α : ℕ → R) : superHom b a 0 β α = 1 := by
   rw [superHom]
@@ -498,11 +482,19 @@ theorem elemHom_eq_zero_of_lt {a q : ℕ} (h : a < q) (α : ℕ → R) : elemHom
   rw [skewColLen, colLen_rect_of_lt Nat.zero_lt_one, colLen_bot]
   omega
 
+/-- At no odd variables the alphabet is the even factor
+alone: only `q = 0` survives in `superHom`, and `e_0 = 1`. -/
+theorem superHom_zero_odd (b m : ℕ) (β α : ℕ → R) : superHom b 0 m β α = completeHom b m β := by
+  rw [superHom, Finset.sum_eq_single_of_mem m (Finset.self_mem_range_succ m)]
+  · rw [Nat.sub_self, elemHom_zero, mul_one]
+  · intro p hp hne
+    rw [elemHom_eq_zero_of_lt (by have := Finset.mem_range.mp hp; omega) α, mul_zero]
+
 /-! ## The one-row case of skew Jacobi--Trudi
 
 On a skew shape of one row the Jacobi--Trudi determinant is its single entry
-`d_{λ_0 - μ_0}`, and the branching sum runs over the
-one-row shapes between `μ` and `λ`.  Matching them is the identity
+`d_{λ_0 - μ_0}`, and the branching sum `superSkewSchur_eq_branching` runs over
+the one-row shapes between `μ` and `λ`.  Matching them is the identity
 `h_m(ρ_D) = ∑_{p+q=m} h_p(β) e_q(α)`, which is how `superHom` is defined.
 -/
 
@@ -562,16 +554,15 @@ theorem superSkewSchur_bot_bot (b a : ℕ) (β α : ℕ → R) :
     superSkewSchur (⊥ : YoungDiagram) ⊥ b a β α = 1 := by
   rw [superSkewSchur_eq_branching _ _ _ _ _ _ le_rfl,
     Finset.sum_eq_single_of_mem ⊥ (mem_youngIcc.mpr ⟨le_rfl, le_rfl⟩)]
-  · rw [skewSchur_of_skewCells_eq_empty (skewCells_eq_empty_iff.mpr le_rfl),
-      skewSchur_of_skewCells_eq_empty (skewCells_eq_empty_iff.mpr le_rfl), one_mul]
+  · rw [skewSchur_of_le _ _ le_rfl, skewSchur_of_le _ _ le_rfl, one_mul]
   · intro nu hnu hne
     exact absurd (le_antisymm (mem_youngIcc.mp hnu).2 (mem_youngIcc.mp hnu).1) hne
 
 /-- **`SkewJacobiTrudi` at one row, proved.**  For a skew shape inside one row
-the determinant of is its single entry `d_{λ_0 - μ_0}`, and
-the branching sum is `superHom b a (λ_0 - μ_0) β α`.  So the identity holds
-exactly when `d` is the alphabet `ρ_D` of the appendix, `d_m = ∑_{p+q=m} h_p(β)
-e_q(α)`; that hypothesis is what `hd` says.
+`jacobiTrudiDet` is its single entry `d_{λ_0 - μ_0}`, and the branching sum is
+`superHom b a (λ_0 - μ_0) β α`.  So the identity holds exactly when `d` is the
+alphabet `ρ_D`, `d_m = ∑_{p+q=m} h_p(β) e_q(α)`; that hypothesis is what `hd`
+says.
 
 This is the rung the general statement is built from, and it also settles what
 the general statement is *about*: no other sequence `d` can satisfy
@@ -596,10 +587,10 @@ theorem jacobiTrudiDet_eq_superSkewSchur_of_le_one {d : ℕ → R} {b a : ℕ} {
           (superSkewSchur_rect_row htl β α).symm
       _ = superSkewSchur lam mu b a β α := by rw [← hlam, ← hmu2]
 
-/-- ** at `m_C ≤ 1`, unconditionally.**  A row set of at most
-one element gives a `1 × 1` minor `d_{k + j - i}`, and that is the skew Schur
-function of the shapes builds.  No `SkewJacobiTrudi`
-hypothesis is carried. -/
+/-- A row set of at most one element gives a `1 × 1` minor `d_{k + j - i}`, and
+that is the skew Schur function of the shapes `betaDiagram` builds.  So
+`toeplitzMinor_eq_superSkewSchur` holds at `I.card ≤ 1` with no
+`SkewJacobiTrudi` hypothesis carried. -/
 theorem toeplitzMinor_eq_superSkewSchur_of_card_le_one {d : ℕ → R} {b a : ℕ} {β α : ℕ → R}
     (hd : ∀ m, d m = superHom b a m β α) {n k L Lk : ℕ} (hL : Lk + k = L) (hkn : k ≤ n)
     (hnL : n ≤ Lk) {I : Finset ℕ} (hIn : I ⊆ Finset.range n) (hkI : ∀ x, x < k → x ∈ I)
@@ -612,7 +603,7 @@ theorem toeplitzMinor_eq_superSkewSchur_of_card_le_one {d : ℕ → R} {b a : �
 
 /-! ## Non-vacuity -/
 
-/-- A `1 × 1` minor of is the entry itself. -/
+/-- A `1 × 1` Toeplitz minor is the entry itself. -/
 theorem toeplitzMinor_one (d : ℕ → R) (k : ℕ) (I J : Finset ℕ) :
     toeplitzMinor d k 1 I J = shiftedCoeff d k (nthElem I 0) (nthElem J 0) := by
   simp [toeplitzMinor]
@@ -621,10 +612,25 @@ theorem nthElem_singleton (i : ℕ) : nthElem {i} 0 = i := by
   have hmem := nthElem_mem (I := ({i} : Finset ℕ)) (v := 0) (by simp)
   simpa using hmem
 
-/-- The smallest instance of, evaluated: the `1 × 1` minor
-on rows `{i}` and columns `{j}` is `d_{k + j - i}`. -/
+/-- The smallest instance of `toeplitzMinor_eq_superSkewSchur`, evaluated: the
+`1 × 1` minor on rows `{i}` and columns `{j}` is `d_{k + j - i}`. -/
 theorem toeplitzMinor_singleton (d : ℕ → R) (k i j : ℕ) (hij : i ≤ k + j) :
     toeplitzMinor d k 1 {i} {j} = d (k + j - i) := by
   rw [toeplitzMinor_one, nthElem_singleton, nthElem_singleton, shiftedCoeff, if_pos hij]
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.toeplitzMinor' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms toeplitzMinor
+
+/-- info: 'Shields.SkewJacobiTrudi' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms SkewJacobiTrudi
+
+/-- info: 'Shields.superHom' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms superHom
 
 end Shields

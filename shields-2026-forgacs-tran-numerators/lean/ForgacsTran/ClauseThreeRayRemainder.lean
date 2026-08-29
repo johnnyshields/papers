@@ -123,7 +123,7 @@ theorem ray_ftRemainder_eq_zero {q0 q1 q2 : ℝ} (hq0 : 0 < q0) (hq1 : q1 < 0) {
   rw [hre, ← Complex.ofReal_sub,
     show rayTau q0 q1 θ * Real.sin φ / (q0 * Real.sin θ)
         - 2 * (rayTau q0 q1 θ * Real.sin φ / (2 * q0 * Real.sin θ)) = 0 by
-      field_simp; ring]
+      field]
   simp
 
 
@@ -496,7 +496,7 @@ theorem witness_clauseThree_ray_pow (k : ℕ) {q0 q1 q2 : ℝ} (hq0 : 0 < q0) (h
       have : (5 : ℝ) / Real.pi ≤ 2 := by rw [div_le_iff₀ hπ]; linarith
       push_cast
       have h5 : 4 * (1 : ℝ) / Real.pi + 1 / Real.pi + 0 / Real.pi = 5 / Real.pi := by
-        field_simp; ring
+        field
       linarith [h5.symm.le, h5.le]
     · refine Nat.ceil_le.2 ?_
       rw [defectC₁]

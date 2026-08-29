@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-r"""Render the manuscript's figure to a one-figure-per-page PDF.
+r"""Render the manuscript's figures to a one-figure-per-page PDF.
 
 The paper carries three floats: fig:phase-diagram, a bare tikzpicture schematic,
 fig:defect-localization (a bare tikzpicture) and fig:wall-fan (a pgfplots axis).  Journal
@@ -8,7 +8,7 @@ the caption left in the manuscript text.  This script extracts the
 axis environment from the manuscript itself -- not from a hand-kept copy, so
 the artwork cannot drift from the paper -- and typesets it on its own A4 page in
 
-    shields-2026-turan-bessel-figure.pdf
+    shields-2026-turan-bessel-figures.pdf
 
 The generated wrapper is written to scripts/figures_pages.tex for inspection
 (scripts/.gitignore excludes *.tex, as for every generated snippet here).
@@ -34,7 +34,7 @@ from pathlib import Path
 PAPER_DIR = Path(__file__).resolve().parent.parent
 PAPER = PAPER_DIR / "shields-2026-turan-bessel.tex"
 WRAPPER = PAPER_DIR / "scripts" / "figures_pages.tex"
-OUTPUT = PAPER_DIR / "shields-2026-turan-bessel-figure.pdf"
+OUTPUT = PAPER_DIR / "shields-2026-turan-bessel-figures.pdf"
 
 # every float to render, in the order it appears in the manuscript; one page
 # each.  `kind` is "axis" for a pgfplots axis inside the tikzpicture and "tikz"

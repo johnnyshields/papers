@@ -32,6 +32,8 @@ criterion, and the file proves it together with the two determinant identities i
   arbitrary matrix, obtained from the previous two.
 * `Shields.det_consecutive_pos`: a minor against a **consecutive** column block is positive as
   soon as every minor against an initial block is.
+* `Shields.det_pos_of_no_gap`: the base case of the dispersion induction -- a column family with
+  no gap is a consecutive block.
 * `Shields.det_pos_of_initialPosOn`, `Shields.det_pos_of_initialPos`: the criterion itself, in a
   windowed and an unrestricted form.
 
@@ -110,8 +112,56 @@ theorem det_submatrix_eq_zero_of_row_lt_col {k : ℕ} {T : Matrix ℕ ℕ R}
     omega
   exact smul_eq_zero_of_right _ (Finset.prod_eq_zero (Finset.mem_univ a) ha)
 
+/-- `Fin.snoc` against a shifted index: dropping the FIRST entry of a snoc-tuple snocs the
+shifted tuple.  Mathlib carries the `castSucc` companion as `Fin.snoc_comp_castSucc` and not
+this one. -/
+theorem snoc_comp_succ {α : Sort*} {n : ℕ} (f : Fin (n + 1) → α) (x : α) :
+    (Fin.snoc f x : Fin (n + 2) → α) ∘ Fin.succ = Fin.snoc (f ∘ Fin.succ) x := by
+  funext b
+  induction b using Fin.lastCases with
+  | last =>
+      simp only [Function.comp_apply,
+        show (Fin.last n).succ = Fin.last (n + 1) from rfl, Fin.snoc_last]
+  | cast j =>
+      simp only [Function.comp_apply,
+        show (j.castSucc : Fin (n + 1)).succ = (j.succ : Fin (n + 1)).castSucc from
+          (Fin.succ_castSucc j).symm, Fin.snoc_castSucc]
+
+/-- `Fin.snoc` against the interior positions: `i ↦ i.castSucc.succ` never reaches the last
+index, so a snoc-tuple read there is the shifted tuple. -/
+theorem snoc_comp_castSucc_succ {α : Sort*} {n : ℕ} (f : Fin (n + 1) → α) (x : α) :
+    (Fin.snoc f x : Fin (n + 2) → α) ∘ (fun i : Fin n => i.castSucc.succ) = f ∘ Fin.succ := by
+  funext j
+  simp only [Function.comp_apply,
+    show (j.castSucc : Fin (n + 1)).succ = (j.succ : Fin (n + 1)).castSucc from
+      (Fin.succ_castSucc j).symm, Fin.snoc_castSucc]
+
+/-- `Fin.succAbove` at an interior position leaves the last index last. -/
+theorem succAbove_succ_last {m : ℕ} (l : Fin m) :
+    (l.castSucc.succ).succAbove (Fin.last m) = Fin.last (m + 1) := by
+  rw [Fin.succAbove_succ_of_lt _ _ (Fin.castSucc_lt_last l)]
+  rfl
+
+/-- `Fin.snoc` of a family with one interior entry moved to the end, read from the second index
+on: the same construction one size down, at the shifted family.  The `castSucc` and interior
+companions are `Fin.snoc_comp_castSucc` and `Shields.snoc_comp_castSucc_succ`. -/
+theorem snoc_succAbove_comp_succ {α : Type*} {m : ℕ} (r : Fin (m + 2) → α) (l : Fin m) :
+    (Fin.snoc (r ∘ (l.castSucc.succ).succAbove) (r (l.castSucc.succ)) : Fin (m + 2) → α)
+        ∘ Fin.succ
+      = Fin.snoc ((r ∘ Fin.succ) ∘ (l.castSucc).succAbove) ((r ∘ Fin.succ) l.castSucc) := by
+  rw [snoc_comp_succ]
+  congr 1
+  funext j
+  simp only [Function.comp_apply, Fin.succ_succAbove_succ]
+
 /-! ### The three-term identity at an arbitrary column family -/
 
+/-- **The three-term identity, deleting a row.**  For a lower-triangular matrix with unit
+diagonal, the minor on a strictly monotone row family `r` with the interior row `l + 1`
+deleted, against an arbitrary column family `σ`, is expressed by the minors with the first
+row deleted and with the last row deleted.  It is Desnanot--Jacobi on the square matrix whose
+rows are `r` with the interior row moved to the end and whose columns are `σ` with `r (m+1)`
+appended; triangularity and the unit diagonal are what evaluate that added column. -/
 theorem minor_three_term {A : Matrix ℕ ℕ R}
     (hlow : ∀ i j : ℕ, i < j → A i j = 0) (hdiag : ∀ i : ℕ, A i i = 1)
     {m : ℕ} (r : Fin (m + 2) → ℕ) (hr : StrictMono r) (σ : Fin (m + 1) → ℕ)
@@ -122,68 +172,22 @@ theorem minor_three_term {A : Matrix ℕ ℕ R}
           * (A.submatrix ((r ∘ (l.castSucc.succ).succAbove) ∘ Fin.castSucc) (σ ∘ Fin.succ)).det
         + (A.submatrix (r ∘ Fin.castSucc) σ).det
             * (A.submatrix ((r ∘ (l.castSucc.succ).succAbove) ∘ Fin.succ) (σ ∘ Fin.succ)).det := by
-  have hcl : ∀ {k : ℕ} (j : Fin k), j.castSucc < Fin.last k := by
-    intro k j
-    rw [Fin.lt_def, Fin.val_castSucc, Fin.val_last]; exact j.isLt
-  have hlt : l.castSucc < Fin.last m := hcl l
-  have hsA_last : (l.castSucc.succ).succAbove (Fin.last m) = Fin.last (m + 1) := by
-    rw [Fin.succAbove_succ_of_lt _ _ hlt]; rfl
+  have hsA_last := succAbove_succ_last l
   -- Desnanot--Jacobi on the matrix with rows `r` and columns `0, …, m, r (m+1)`
   have hDJ := desnanot_jacobi (A.submatrix
     (Fin.snoc (r ∘ (l.castSucc.succ).succAbove) (r (l.castSucc.succ)))
     (Fin.snoc σ (r (Fin.last (m + 1)))))
   simp only [Matrix.submatrix_submatrix] at hDJ
   -- the row and column maps of the four terms and the interior block
-  have hσc : (Fin.snoc σ (r (Fin.last (m + 1)))
-      : Fin (m + 2) → ℕ) ∘ Fin.castSucc = σ := by
-    funext b; simp only [Function.comp_apply, Fin.snoc_castSucc]
-  have hσs : (Fin.snoc σ (r (Fin.last (m + 1)))
-      : Fin (m + 2) → ℕ) ∘ Fin.succ
-      = Fin.snoc (σ ∘ Fin.succ) (r (Fin.last (m + 1))) := by
-    funext b
-    induction b using Fin.lastCases with
-    | last =>
-        have h1 : (Fin.last m).succ = Fin.last (m + 1) := rfl
-        simp only [Function.comp_apply, h1, Fin.snoc_last]
-    | cast j =>
-        have h1 : (j.castSucc : Fin (m + 1)).succ = (j.succ : Fin (m + 1)).castSucc :=
-          (Fin.succ_castSucc j).symm
-        simp only [Function.comp_apply, h1, Fin.snoc_castSucc]
-  have hσi : (Fin.snoc σ (r (Fin.last (m + 1)))
-      : Fin (m + 2) → ℕ) ∘ (fun i : Fin m => i.castSucc.succ)
-      = σ ∘ Fin.succ := by
-    funext j
-    have h1 : (j.castSucc : Fin (m + 1)).succ = (j.succ : Fin (m + 1)).castSucc :=
-      (Fin.succ_castSucc j).symm
-    simp only [Function.comp_apply, h1, Fin.snoc_castSucc]
-  have hρc : (Fin.snoc (r ∘ (l.castSucc.succ).succAbove) (r (l.castSucc.succ))
-      : Fin (m + 2) → ℕ) ∘ Fin.castSucc = r ∘ (l.castSucc.succ).succAbove := by
-    funext b; simp only [Function.comp_apply, Fin.snoc_castSucc]
-  have hρs : (Fin.snoc (r ∘ (l.castSucc.succ).succAbove) (r (l.castSucc.succ))
-      : Fin (m + 2) → ℕ) ∘ Fin.succ
-      = Fin.snoc ((r ∘ Fin.succ) ∘ (l.castSucc).succAbove) ((r ∘ Fin.succ) l.castSucc) := by
-    funext b
-    induction b using Fin.lastCases with
-    | last =>
-        have h1 : (Fin.last m).succ = Fin.last (m + 1) := rfl
-        simp only [Function.comp_apply, h1, Fin.snoc_last]
-    | cast j =>
-        have h1 : (j.castSucc : Fin (m + 1)).succ = (j.succ : Fin (m + 1)).castSucc :=
-          (Fin.succ_castSucc j).symm
-        simp only [Function.comp_apply, h1, Fin.snoc_castSucc, Fin.succ_succAbove_succ]
-  have hρi : (Fin.snoc (r ∘ (l.castSucc.succ).succAbove) (r (l.castSucc.succ))
-      : Fin (m + 2) → ℕ) ∘ (fun i : Fin m => i.castSucc.succ)
-      = (r ∘ (l.castSucc.succ).succAbove) ∘ Fin.succ := by
-    funext j
-    have h1 : (j.castSucc : Fin (m + 1)).succ = (j.succ : Fin (m + 1)).castSucc :=
-      (Fin.succ_castSucc j).symm
-    simp only [Function.comp_apply, h1, Fin.snoc_castSucc]
-  rw [hρc, hσc, hρs, hσs, hρi, hσi] at hDJ
+  rw [Fin.snoc_comp_castSucc, Fin.snoc_comp_castSucc, snoc_succAbove_comp_succ r l,
+    snoc_comp_succ σ (r (Fin.last (m + 1))),
+    snoc_comp_castSucc_succ (r ∘ (l.castSucc.succ).succAbove) (r (l.castSucc.succ)),
+    snoc_comp_castSucc_succ σ (r (Fin.last (m + 1)))] at hDJ
   -- the two rows-out-of-order terms, and the three border collapses
   rw [det_submatrix_snoc_succAbove A r _ (l.castSucc.succ),
     det_submatrix_snoc_succAbove A (r ∘ Fin.succ) _ l.castSucc,
     det_submatrix_snoc_succAbove A (r ∘ Fin.succ) _ l.castSucc] at hDJ
-  rw [det_submatrix_border hlow hdiag r rfl (fun j => hr (hcl j)),
+  rw [det_submatrix_border hlow hdiag r rfl (fun j => hr (Fin.castSucc_lt_last j)),
     det_submatrix_border hlow hdiag (r ∘ Fin.succ)
       (show (r ∘ Fin.succ) (Fin.last m) = r (Fin.last (m + 1)) from rfl)
       (fun j => hr (by
@@ -193,15 +197,12 @@ theorem minor_three_term {A : Matrix ℕ ℕ R}
       (by rw [Function.comp_apply, hsA_last])
       (fun j => hr (by
         rw [← hsA_last]
-        exact Fin.succAbove_lt_succAbove_iff.mpr (hcl j)))] at hDJ
+        exact Fin.succAbove_lt_succAbove_iff.mpr (Fin.castSucc_lt_last j)))] at hDJ
   -- the signs on the two sides agree
   have hexp : ((l.castSucc.succ : Fin (m + 2)) : ℕ) + (m + 1)
       = ((l.castSucc : Fin (m + 1)) : ℕ) + m + 2 := by
-    simp only [Fin.val_succ, Fin.val_castSucc]
-    omega
-  rw [hexp, pow_add] at hDJ
-  have hsq : ((-1 : R)) ^ (2 : ℕ) = 1 := by norm_num
-  rw [hsq, mul_one] at hDJ
+    simp only [Fin.val_succ, Fin.val_castSucc]; omega
+  rw [hexp, pow_add, show ((-1 : R)) ^ (2 : ℕ) = 1 from by norm_num, mul_one] at hDJ
   have hXX : ((-1 : R) ^ (((l.castSucc : Fin (m + 1)) : ℕ) + m))
       * ((-1 : R) ^ (((l.castSucc : Fin (m + 1)) : ℕ) + m)) = 1 := by
     rw [← pow_add, ← two_mul, pow_mul]; norm_num
@@ -262,37 +263,16 @@ theorem minor_three_term_col (A : Matrix ℕ ℕ R) {m : ℕ} (γ : Fin (m + 2) 
         + (A.submatrix ρ (γ ∘ Fin.castSucc)).det
             * (A.submatrix (ρ ∘ Fin.succ) ((γ ∘ (l.castSucc.succ).succAbove) ∘ Fin.succ)).det := by
   set n : ℕ := (Finset.univ.sup ρ) + 1 with hn
-  have hRw : ∀ b, ρ b < n := by
-    intro b
-    have h := Finset.le_sup (f := ρ) (Finset.mem_univ b)
-    rw [hn]
-    omega
+  have hRw : ∀ b, ρ b < n := fun b =>
+    hn ▸ Nat.lt_succ_of_le (Finset.le_sup (f := ρ) (Finset.mem_univ b))
   have hRw' : ∀ b : Fin m, (ρ ∘ Fin.succ) b < n := fun b => hRw _
   have hmono : StrictMono (fun a => n + γ a) := fun _ _ hab => Nat.add_lt_add_left (hγ hab) n
   have key := minor_three_term (A := detT A n) (detT_low A n) (detT_diag A n)
     (fun a => n + γ a) hmono ρ l
-  have e1 : ((detT A n).submatrix ((fun a => n + γ a) ∘ (l.castSucc.succ).succAbove) ρ).det
-      = (A.submatrix ρ (γ ∘ (l.castSucc.succ).succAbove)).det :=
-    det_detT A (γ ∘ (l.castSucc.succ).succAbove) ρ hRw
-  have e2 : ((detT A n).submatrix (((fun a => n + γ a) ∘ Fin.succ) ∘ Fin.castSucc)
-        (ρ ∘ Fin.succ)).det
-      = (A.submatrix (ρ ∘ Fin.succ) ((γ ∘ Fin.succ) ∘ Fin.castSucc)).det :=
-    det_detT A ((γ ∘ Fin.succ) ∘ Fin.castSucc) (ρ ∘ Fin.succ) hRw'
-  have e3 : ((detT A n).submatrix ((fun a => n + γ a) ∘ Fin.succ) ρ).det
-      = (A.submatrix ρ (γ ∘ Fin.succ)).det :=
-    det_detT A (γ ∘ Fin.succ) ρ hRw
-  have e4 : ((detT A n).submatrix
-        (((fun a => n + γ a) ∘ (l.castSucc.succ).succAbove) ∘ Fin.castSucc) (ρ ∘ Fin.succ)).det
-      = (A.submatrix (ρ ∘ Fin.succ) ((γ ∘ (l.castSucc.succ).succAbove) ∘ Fin.castSucc)).det :=
-    det_detT A ((γ ∘ (l.castSucc.succ).succAbove) ∘ Fin.castSucc) (ρ ∘ Fin.succ) hRw'
-  have e5 : ((detT A n).submatrix ((fun a => n + γ a) ∘ Fin.castSucc) ρ).det
-      = (A.submatrix ρ (γ ∘ Fin.castSucc)).det :=
-    det_detT A (γ ∘ Fin.castSucc) ρ hRw
-  have e6 : ((detT A n).submatrix
-        (((fun a => n + γ a) ∘ (l.castSucc.succ).succAbove) ∘ Fin.succ) (ρ ∘ Fin.succ)).det
-      = (A.submatrix (ρ ∘ Fin.succ) ((γ ∘ (l.castSucc.succ).succAbove) ∘ Fin.succ)).det :=
-    det_detT A ((γ ∘ (l.castSucc.succ).succAbove) ∘ Fin.succ) (ρ ∘ Fin.succ) hRw'
-  rw [e1, e2, e3, e4, e5, e6] at key
+  -- the six minors of the embedding, each a minor of `A` with its index families exchanged
+  rw [← det_detT A _ ρ hRw, ← det_detT A _ (ρ ∘ Fin.succ) hRw', ← det_detT A _ ρ hRw,
+    ← det_detT A _ (ρ ∘ Fin.succ) hRw', ← det_detT A _ ρ hRw,
+    ← det_detT A _ (ρ ∘ Fin.succ) hRw']
   exact key
 
 end Embed
@@ -352,12 +332,37 @@ private theorem strictMono_borderRows {k : ℕ} (i : ℕ) {S : Fin k → ℕ} (h
     · rw [borderRows_left i S hb]; exact hab
     · rw [borderRows_right i S hb]
       have h1 := hdom ⟨(b : ℕ) - i, by have := b.isLt; omega⟩
-      dsimp only at h1
       omega
   · rw [borderRows_right i S ha]
     have hb : ¬ (b : ℕ) < i := by omega
     rw [borderRows_right i S hb]
     exact hS (by rw [Fin.lt_def]; simp only; omega)
+
+omit [LinearOrder R] [IsStrictOrderedRing R] in
+/-- **The block-triangular split.**  Bordering both index families with `0, …, i-1` makes the
+top-right block vanish -- a lower-triangular matrix has zeros above the diagonal, and those rows
+sit above those columns -- so the bordered minor factors as the leading principal minor times the
+minor against the consecutive block. -/
+private theorem det_borderRows {A : Matrix ℕ ℕ R} (hlow : ∀ i j : ℕ, i < j → A i j = 0)
+    {k : ℕ} (i : ℕ) (S : Fin k → ℕ) :
+    (A.submatrix (borderRows i S) (fun b : Fin (i + k) => (b : ℕ))).det
+      = (A.submatrix (fun c : Fin i => (c : ℕ)) (fun c : Fin i => (c : ℕ))).det
+        * (A.submatrix S (fun b : Fin k => i + (b : ℕ))).det := by
+  rw [← Matrix.det_submatrix_equiv_self finSumFinEquiv]
+  have hblocks : (A.submatrix (borderRows i S) (fun b : Fin (i + k) => (b : ℕ))).submatrix
+        finSumFinEquiv finSumFinEquiv
+      = Matrix.fromBlocks
+          (A.submatrix (fun c : Fin i => (c : ℕ)) (fun c : Fin i => (c : ℕ))) 0
+          (A.submatrix S (fun c : Fin i => (c : ℕ)))
+          (A.submatrix S (fun b : Fin k => i + (b : ℕ))) := by
+    ext a b
+    rcases a with a | a <;> rcases b with b | b <;>
+      simp only [Matrix.submatrix_apply, Matrix.fromBlocks_apply₁₁, Matrix.fromBlocks_apply₁₂,
+        Matrix.fromBlocks_apply₂₁, Matrix.fromBlocks_apply₂₂, finSumFinEquiv_apply_left,
+        finSumFinEquiv_apply_right, borderRows_castAdd, borderRows_natAdd, Matrix.zero_apply,
+        Fin.val_natAdd, Fin.val_castAdd]
+    exact hlow _ _ (by have := a.isLt; omega)
+  rw [hblocks, Matrix.det_fromBlocks_zero₁₂]
 
 /-- **The consecutive-column step.**  With every initial-block minor positive, every minor against
 a consecutive column block `i, …, i+k-1` is positive, provided the rows dominate. -/
@@ -374,44 +379,29 @@ theorem det_consecutive_pos {A : Matrix ℕ ℕ R} (hlow : ∀ i j : ℕ, i < j 
       exact hSN _
   have hborder : 0 < (A.submatrix (borderRows i S) (fun b : Fin (i + k) => (b : ℕ))).det :=
     hInit _ _ (strictMono_borderRows i hS hdom) hbN
-  have hsplit : (A.submatrix (borderRows i S) (fun b : Fin (i + k) => (b : ℕ))).det
-      = (A.submatrix (fun c : Fin i => (c : ℕ)) (fun c : Fin i => (c : ℕ))).det
-        * (A.submatrix S (fun b : Fin k => i + (b : ℕ))).det := by
-    rw [← Matrix.det_submatrix_equiv_self finSumFinEquiv]
-    have hblocks : (A.submatrix (borderRows i S) (fun b : Fin (i + k) => (b : ℕ))).submatrix
-          finSumFinEquiv finSumFinEquiv
-        = Matrix.fromBlocks
-            (A.submatrix (fun c : Fin i => (c : ℕ)) (fun c : Fin i => (c : ℕ))) 0
-            (A.submatrix S (fun c : Fin i => (c : ℕ)))
-            (A.submatrix S (fun b : Fin k => i + (b : ℕ))) := by
-      ext a b
-      rcases a with a | a <;> rcases b with b | b
-      · rw [Matrix.submatrix_apply, Matrix.submatrix_apply, Matrix.fromBlocks_apply₁₁,
-          Matrix.submatrix_apply, finSumFinEquiv_apply_left, finSumFinEquiv_apply_left,
-          borderRows_castAdd]
-        simp
-      · rw [Matrix.submatrix_apply, Matrix.submatrix_apply, Matrix.fromBlocks_apply₁₂,
-          finSumFinEquiv_apply_left, finSumFinEquiv_apply_right, borderRows_castAdd,
-          Matrix.zero_apply]
-        refine hlow _ _ ?_
-        have := a.isLt
-        simp only [Fin.val_natAdd]
-        omega
-      · rw [Matrix.submatrix_apply, Matrix.submatrix_apply, Matrix.fromBlocks_apply₂₁,
-          Matrix.submatrix_apply, finSumFinEquiv_apply_right, finSumFinEquiv_apply_left,
-          borderRows_natAdd]
-        simp
-      · rw [Matrix.submatrix_apply, Matrix.submatrix_apply, Matrix.fromBlocks_apply₂₂,
-          Matrix.submatrix_apply, finSumFinEquiv_apply_right, finSumFinEquiv_apply_right,
-          borderRows_natAdd]
-        simp
-    rw [hblocks, Matrix.det_fromBlocks_zero₁₂]
   have hlead : 0 < (A.submatrix (fun c : Fin i => (c : ℕ)) (fun c : Fin i => (c : ℕ))).det :=
     hInit _ _ (fun a b hab => by simpa using hab) (fun c => by have := c.isLt; omega)
-  rw [hsplit] at hborder
-  by_contra hcon
-  rw [not_lt] at hcon
+  rw [det_borderRows hlow i S] at hborder
   nlinarith [hborder, hlead]
+
+/-- **The dispersion base case.**  A strictly monotone column family with no gap is a
+consecutive block starting at `C 0`, which is what `det_consecutive_pos` asks for. -/
+theorem det_pos_of_no_gap {A : Matrix ℕ ℕ R} (hlow : ∀ i j : ℕ, i < j → A i j = 0)
+    {N : ℕ} (hInit : InitialPosOn A N) {m : ℕ} (S C : Fin (m + 1) → ℕ)
+    (hS : StrictMono S) (hC : StrictMono C) (hdom : ∀ b, C b ≤ S b) (hSN : ∀ b, S b < N)
+    (hgap : ∀ j : Fin m, C j.succ ≤ C j.castSucc + 1) :
+    0 < (A.submatrix S C).det := by
+  have hC0 : ∀ b : Fin (m + 1), C b = C 0 + (b : ℕ) := by
+    have hcons := eq_consecutive_of_no_gap C hC fun j => by have := hgap j; omega
+    intro b
+    have h : C b = (b : ℕ) + C 0 := congrFun hcons b
+    omega
+  have heq : (fun b : Fin (m + 1) => C 0 + (b : ℕ)) = C := funext fun b => (hC0 b).symm
+  rw [← heq]
+  refine det_consecutive_pos hlow hInit (C 0) S hS (fun b => by rw [← hC0 b]; exact hdom b) hSN ?_
+  have h0 := hdom 0
+  have h1 := hSN 0
+  omega
 
 end Consecutive
 
@@ -436,6 +426,105 @@ private theorem val_le_succAbove {n : ℕ} (p : Fin (n + 1)) (i : Fin n) :
   · rw [Fin.succAbove_of_le_castSucc _ _ h, Fin.val_succ]
     omega
 
+/-- The inserted family of `Shields.exists_insert_of_gap` is dominated wherever `C` is: it takes
+at position `b.castSucc` a value `C` takes no earlier than `b`. -/
+private theorem insert_dom {m : ℕ} {C S : Fin (m + 1) → ℕ} {j : Fin m} {γ : Fin (m + 2) → ℕ}
+    (hγ : StrictMono γ) (hγC : γ ∘ (j.castSucc.succ).succAbove = C) (hdom : ∀ b, C b ≤ S b)
+    (b : Fin (m + 1)) : γ b.castSucc ≤ S b := by
+  have hval : γ ((j.castSucc.succ).succAbove b) = C b := congrFun hγC b
+  have hle : γ b.castSucc ≤ γ ((j.castSucc.succ).succAbove b) :=
+    hγ.monotone (by rw [Fin.le_def, Fin.val_castSucc]; exact val_le_succAbove _ b)
+  have := hdom b
+  omega
+
+/-- Dropping either end of the inserted family shortens its span.  The insertion agrees with `C`
+at both ends, and each of the two deletions gives one of them up. -/
+private theorem insert_dispersion_lt {m : ℕ} {C : Fin (m + 1) → ℕ} {j : Fin m}
+    {γ : Fin (m + 2) → ℕ} (hγ : StrictMono γ) (hγC : γ ∘ (j.castSucc.succ).succAbove = C) :
+    (γ ∘ Fin.castSucc) (Fin.last m) - (γ ∘ Fin.castSucc) 0 < C (Fin.last m) - C 0
+      ∧ (γ ∘ Fin.succ) (Fin.last m) - (γ ∘ Fin.succ) 0 < C (Fin.last m) - C 0 := by
+  have hsAlast := succAbove_succ_last j
+  have hγ0 : γ 0 = C 0 := by rw [← hγC]; simp
+  have hγlast : γ (Fin.last (m + 1)) = C (Fin.last m) := by rw [← hγC]; simp [hsAlast]
+  have hcl : γ (Fin.castSucc (Fin.last m)) < C (Fin.last m) := by
+    rw [← hγlast]
+    exact hγ (by rw [Fin.lt_def, Fin.val_castSucc, Fin.val_last, Fin.val_last]; omega)
+  have hs0 : C 0 < γ (Fin.succ 0) := by
+    rw [← hγ0]; exact hγ (by rw [Fin.lt_def, Fin.val_succ]; simp)
+  have hm1 : C 0 ≤ γ (Fin.castSucc (Fin.last m)) := by
+    rw [← hγ0]; exact hγ.monotone (Fin.zero_le _)
+  have hm2 : γ (Fin.succ 0) ≤ C (Fin.last m) := by
+    rw [← hγlast]; exact hγ.monotone (Fin.le_last _)
+  simp only [Function.comp_apply,
+    show (Fin.castSucc (0 : Fin (m + 1)) : Fin (m + 2)) = 0 from rfl,
+    show (Fin.succ (Fin.last m) : Fin (m + 2)) = Fin.last (m + 1) from rfl, hγ0, hγlast]
+  omega
+
+/-- **The dispersion step.**  With the criterion known one size down, and known at this size for
+column families of strictly smaller dispersion, a family carrying a gap is positive.  Insert the
+missing column: the three-term identity writes the minor at the deleted column against the
+minors at the two ends, both of smaller dispersion.  One of the four minors it produces is only
+nonnegative -- it vanishes as soon as its rows stop dominating its columns -- and that is
+exactly what the identity absorbs. -/
+private theorem det_pos_of_gap {A : Matrix ℕ ℕ R} (hlow : ∀ i j : ℕ, i < j → A i j = 0)
+    {N m sp : ℕ}
+    (ih : ∀ S C : Fin m → ℕ, StrictMono S → StrictMono C → (∀ b, C b ≤ S b) →
+      (∀ b, S b < N) → 0 < (A.submatrix S C).det)
+    (ihsp : ∀ S C : Fin (m + 1) → ℕ, StrictMono S → StrictMono C → (∀ b, C b ≤ S b) →
+      (∀ b, S b < N) → C (Fin.last m) - C 0 < sp → 0 < (A.submatrix S C).det)
+    (S C : Fin (m + 1) → ℕ) (hS : StrictMono S) (hC : StrictMono C) (hdom : ∀ b, C b ≤ S b)
+    (hSN : ∀ b, S b < N) (hsp : C (Fin.last m) - C 0 ≤ sp)
+    (j : Fin m) (hj : C j.castSucc + 1 < C j.succ) :
+    0 < (A.submatrix S C).det := by
+  obtain ⟨γ, hγ, hγC⟩ := exists_insert_of_gap C hC j hj
+  obtain ⟨hd1, hd2⟩ := insert_dispersion_lt hγ hγC
+  have hSs : StrictMono (S ∘ Fin.succ) := hS.comp Fin.strictMono_succ
+  have hγs : StrictMono (γ ∘ Fin.succ) := hγ.comp Fin.strictMono_succ
+  have hSN' : ∀ b : Fin m, (S ∘ Fin.succ) b < N := fun b => hSN _
+  have hdomγ : ∀ b : Fin m, γ (Fin.succ (Fin.castSucc b)) ≤ S (Fin.succ b) :=
+    fun b => Fin.succ_castSucc b ▸ insert_dom hγ hγC hdom b.succ
+  have hL2 : 0 < (A.submatrix (S ∘ Fin.succ) ((γ ∘ Fin.succ) ∘ Fin.castSucc)).det :=
+    ih _ _ hSs (hγs.comp Fin.strictMono_castSucc) hdomγ hSN'
+  have hR1b : 0 < (A.submatrix (S ∘ Fin.succ) (C ∘ Fin.castSucc)).det := by
+    refine ih _ _ hSs (hC.comp Fin.strictMono_castSucc) (fun b => ?_) hSN'
+    refine le_trans (hdom b.castSucc) (hS.monotone ?_)
+    rw [Fin.le_def, Fin.val_castSucc, Fin.val_succ]
+    omega
+  have hR2b : 0 < (A.submatrix (S ∘ Fin.succ) (C ∘ Fin.succ)).det :=
+    ih _ _ hSs (hC.comp Fin.strictMono_succ) (fun b => hdom _) hSN'
+  have hR2a : 0 < (A.submatrix S (γ ∘ Fin.castSucc)).det :=
+    ihsp S _ hS (hγ.comp Fin.strictMono_castSucc) (insert_dom hγ hγC hdom) hSN (by omega)
+  have hR1a : 0 ≤ (A.submatrix S (γ ∘ Fin.succ)).det := by
+    by_cases hd : ∀ b, (γ ∘ Fin.succ) b ≤ S b
+    · exact (ihsp S _ hS hγs hd hSN (by omega)).le
+    · push Not at hd
+      obtain ⟨b, hb⟩ := hd
+      exact le_of_eq (det_submatrix_eq_zero_of_row_lt_col hlow hS hγs.monotone hb).symm
+  have hid := minor_three_term_col A γ hγ S j
+  rw [hγC] at hid
+  nlinarith [hid, hL2, hR1a, hR1b, hR2a, hR2b]
+
+/-- **The criterion at one size, by induction on the dispersion of the column family.**  A
+family with no gap is a consecutive block; one with a gap reduces to strictly smaller
+dispersion. -/
+private theorem det_pos_of_dispersion_le {A : Matrix ℕ ℕ R}
+    (hlow : ∀ i j : ℕ, i < j → A i j = 0) {N : ℕ} (hInit : InitialPosOn A N) {m : ℕ}
+    (ih : ∀ S C : Fin m → ℕ, StrictMono S → StrictMono C → (∀ b, C b ≤ S b) →
+      (∀ b, S b < N) → 0 < (A.submatrix S C).det) :
+    ∀ (sp : ℕ) (S C : Fin (m + 1) → ℕ), StrictMono S → StrictMono C → (∀ b, C b ≤ S b) →
+      (∀ b, S b < N) → C (Fin.last m) - C 0 ≤ sp → 0 < (A.submatrix S C).det := by
+  intro sp
+  induction sp using Nat.strong_induction_on with
+  | _ sp ihsp =>
+    intro S C hS hC hdom hSN hsp
+    by_cases hgap : ∃ j : Fin m, C j.castSucc + 1 < C j.succ
+    · obtain ⟨j, hj⟩ := hgap
+      exact det_pos_of_gap hlow ih
+        (fun S' C' h1 h2 h3 h4 h5 => ihsp _ h5 S' C' h1 h2 h3 h4 le_rfl)
+        S C hS hC hdom hSN hsp j hj
+    · push Not at hgap
+      exact det_pos_of_no_gap hlow hInit S C hS hC hdom hSN hgap
+
 /-- **The triangular criterion at an arbitrary column set.**  Every minor against an initial
 column block positive forces every dominating minor positive. -/
 theorem det_pos_of_initialPosOn {A : Matrix ℕ ℕ R} (hlow : ∀ i j : ℕ, i < j → A i j = 0)
@@ -451,124 +540,8 @@ theorem det_pos_of_initialPosOn {A : Matrix ℕ ℕ R} (hlow : ∀ i j : ℕ, i 
         rw [Matrix.det_isEmpty]
         exact zero_lt_one
     | (m + 1) =>
-      have inner : ∀ sp : ℕ, ∀ S C : Fin (m + 1) → ℕ, StrictMono S → StrictMono C →
-          (∀ b, C b ≤ S b) → (∀ b, S b < N) → C (Fin.last m) - C 0 ≤ sp →
-          0 < (A.submatrix S C).det := by
-        intro sp
-        induction sp using Nat.strong_induction_on with
-        | _ sp ihsp =>
-          intro S C hS hC hdom hSN hsp
-          by_cases hgap : ∃ j : Fin m, C j.castSucc + 1 < C j.succ
-          · obtain ⟨j, hj⟩ := hgap
-            obtain ⟨γ, hγ, hγC⟩ := exists_insert_of_gap C hC j hj
-            -- where the inserted family's two ends sit
-            have hsA0 : (j.castSucc.succ).succAbove 0 = 0 := by
-              rw [Fin.succAbove_of_castSucc_lt]
-              · rfl
-              · rw [Fin.lt_def, Fin.val_succ]; simp
-            have hsAlast : (j.castSucc.succ).succAbove (Fin.last m) = Fin.last (m + 1) := by
-              rw [Fin.succAbove_succ_of_lt]
-              · rfl
-              · rw [Fin.lt_def, Fin.val_castSucc, Fin.val_last]; exact j.isLt
-            have hγ0 : γ 0 = C 0 := by rw [← hγC]; simp [hsA0]
-            have hγlast : γ (Fin.last (m + 1)) = C (Fin.last m) := by
-              rw [← hγC]; simp [hsAlast]
-            -- the inserted family is dominated where it has to be
-            have hγval : ∀ b : Fin (m + 1), γ ((j.castSucc.succ).succAbove b) = C b := by
-              intro b
-              rw [← hγC]
-              rfl
-            have hdomγ : ∀ b : Fin (m + 1), γ b.castSucc ≤ S b := by
-              intro b
-              have hle : γ b.castSucc ≤ γ ((j.castSucc.succ).succAbove b) :=
-                hγ.monotone (by rw [Fin.le_def, Fin.val_castSucc]; exact val_le_succAbove _ b)
-              have := hγval b
-              have := hdom b
-              omega
-            have hdomγ2 : ∀ b : Fin m, γ (Fin.succ (Fin.castSucc b)) ≤ S (Fin.succ b) := by
-              intro b
-              have hle : γ (Fin.succ (Fin.castSucc b))
-                  ≤ γ ((j.castSucc.succ).succAbove (Fin.succ b)) := by
-                refine hγ.monotone ?_
-                rw [Fin.le_def, Fin.val_succ, Fin.val_castSucc]
-                have h := val_le_succAbove (j.castSucc.succ) (Fin.succ b)
-                rw [Fin.val_succ] at h
-                omega
-              have := hγval (Fin.succ b)
-              have := hdom (Fin.succ b)
-              omega
-            -- strict monotonicity of the five index families
-            have hSsucc : StrictMono (S ∘ Fin.succ) := hS.comp Fin.strictMono_succ
-            have hγsucc : StrictMono (γ ∘ Fin.succ) := hγ.comp Fin.strictMono_succ
-            have hγcast : StrictMono (γ ∘ Fin.castSucc) := hγ.comp Fin.strictMono_castSucc
-            have hCcast : StrictMono (C ∘ Fin.castSucc) := hC.comp Fin.strictMono_castSucc
-            have hCsucc : StrictMono (C ∘ Fin.succ) := hC.comp Fin.strictMono_succ
-            -- the five positive factors and the one merely nonnegative
-            have hSsuccN : ∀ b : Fin m, (S ∘ Fin.succ) b < N := fun b => hSN _
-            have hL2 : 0 < (A.submatrix (S ∘ Fin.succ) ((γ ∘ Fin.succ) ∘ Fin.castSucc)).det :=
-              ihk m (by omega) _ _ hSsucc (hγsucc.comp Fin.strictMono_castSucc) hdomγ2 hSsuccN
-            have hR1b : 0 < (A.submatrix (S ∘ Fin.succ) (C ∘ Fin.castSucc)).det := by
-              refine ihk m (by omega) _ _ hSsucc hCcast (fun b => ?_) hSsuccN
-              refine le_trans (hdom b.castSucc) (hS.monotone ?_)
-              rw [Fin.le_def, Fin.val_castSucc, Fin.val_succ]
-              omega
-            have hR2b : 0 < (A.submatrix (S ∘ Fin.succ) (C ∘ Fin.succ)).det :=
-              ihk m (by omega) _ _ hSsucc hCsucc (fun b => hdom _) hSsuccN
-            have hspC : C 0 ≤ C (Fin.last m) := hC.monotone (Fin.zero_le _)
-            have hR2a : 0 < (A.submatrix S (γ ∘ Fin.castSucc)).det := by
-              refine ihsp ((γ ∘ Fin.castSucc) (Fin.last m) - (γ ∘ Fin.castSucc) 0) ?_ _ _ hS
-                hγcast hdomγ hSN le_rfl
-              have e2 : (γ ∘ Fin.castSucc) (0 : Fin (m + 1)) = C 0 := by
-                change γ (Fin.castSucc (0 : Fin (m + 1))) = C 0
-                rw [show (Fin.castSucc (0 : Fin (m + 1)) : Fin (m + 2)) = 0 from rfl, hγ0]
-              have h1 : (γ ∘ Fin.castSucc) (Fin.last m) < C (Fin.last m) := by
-                rw [← hγlast]
-                exact hγ (by rw [Fin.lt_def, Fin.val_castSucc, Fin.val_last, Fin.val_last]; omega)
-              have h3 : (γ ∘ Fin.castSucc) (0 : Fin (m + 1))
-                  ≤ (γ ∘ Fin.castSucc) (Fin.last m) := hγcast.monotone (Fin.zero_le _)
-              omega
-            have hR1a : 0 ≤ (A.submatrix S (γ ∘ Fin.succ)).det := by
-              by_cases hd : ∀ b, (γ ∘ Fin.succ) b ≤ S b
-              · refine le_of_lt (ihsp ((γ ∘ Fin.succ) (Fin.last m) - (γ ∘ Fin.succ) 0) ?_ _ _ hS
-                  hγsucc hd hSN le_rfl)
-                have e1 : (γ ∘ Fin.succ) (Fin.last m) = C (Fin.last m) := by
-                  change γ (Fin.succ (Fin.last m)) = C (Fin.last m)
-                  rw [show (Fin.succ (Fin.last m) : Fin (m + 2)) = Fin.last (m + 1) from rfl,
-                    hγlast]
-                have h1 : C 0 < (γ ∘ Fin.succ) (0 : Fin (m + 1)) := by
-                  change C 0 < γ (Fin.succ 0)
-                  rw [← hγ0]
-                  exact hγ (by rw [Fin.lt_def, Fin.val_succ]; simp)
-                have h3 : (γ ∘ Fin.succ) (0 : Fin (m + 1)) ≤ (γ ∘ Fin.succ) (Fin.last m) :=
-                  hγsucc.monotone (Fin.zero_le _)
-                omega
-              · push Not at hd
-                obtain ⟨b, hb⟩ := hd
-                exact le_of_eq (det_submatrix_eq_zero_of_row_lt_col hlow hS
-                  hγsucc.monotone hb).symm
-            -- the identity
-            have hid := minor_three_term_col A γ hγ S j
-            rw [hγC] at hid
-            by_contra hcon
-            rw [not_lt] at hcon
-            nlinarith [hid, hL2, hR1a, hR1b, hR2a, hR2b, hcon]
-          · -- no gap: the column set is consecutive
-            push Not at hgap
-            have hcons := eq_consecutive_of_no_gap C hC fun j => by
-              have := hgap j; omega
-            have hC0 : ∀ b : Fin (m + 1), C b = C 0 + (b : ℕ) := by
-              intro b
-              have h : C b = (b : ℕ) + C 0 := congrFun hcons b
-              omega
-            have heq : (fun b : Fin (m + 1) => C 0 + (b : ℕ)) = C := by
-              funext b; exact (hC0 b).symm
-            rw [← heq]
-            refine det_consecutive_pos hlow hInit (C 0) S hS (fun b => by
-              rw [← hC0 b]; exact hdom b) hSN ?_
-            have h0 := hdom 0
-            have h1 := hSN 0
-            omega
-      exact fun S C hS hC hdom hSN => inner (C (Fin.last m) - C 0) S C hS hC hdom hSN le_rfl
+        intro S C hS hC hdom hSN
+        exact det_pos_of_dispersion_le hlow hInit (ihk m (by omega)) _ S C hS hC hdom hSN le_rfl
 
 /-- **The unwindowed criterion.**  Taking the window past every index used. -/
 theorem det_pos_of_initialPos {A : Matrix ℕ ℕ R} (hlow : ∀ i j : ℕ, i < j → A i j = 0)
@@ -576,11 +549,29 @@ theorem det_pos_of_initialPos {A : Matrix ℕ ℕ R} (hlow : ∀ i j : ℕ, i < 
     ∀ (k : ℕ) (S C : Fin k → ℕ), StrictMono S → StrictMono C → (∀ b, C b ≤ S b) →
       0 < (A.submatrix S C).det := by
   intro k S C hS hC hdom
-  refine det_pos_of_initialPosOn hlow (N := (Finset.univ.sup S) + 1)
-    (fun k' S' h' _ => hInit k' S' h') k S C hS hC hdom fun b => ?_
-  have h := Finset.le_sup (f := S) (Finset.mem_univ b)
-  omega
+  exact det_pos_of_initialPosOn hlow (N := (Finset.univ.sup S) + 1)
+    (fun k' S' h' _ => hInit k' S' h') k S C hS hC hdom fun b =>
+      Nat.lt_succ_of_le (Finset.le_sup (f := S) (Finset.mem_univ b))
 
 end Criterion
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.det_submatrix_eq_zero_of_row_lt_col' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms det_submatrix_eq_zero_of_row_lt_col
+
+/-- info: 'Shields.minor_three_term_col' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms minor_three_term_col
+
+/-- info: 'Shields.det_pos_of_no_gap' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms det_pos_of_no_gap
+
+/-- info: 'Shields.det_pos_of_initialPos' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms det_pos_of_initialPos
 
 end Shields

@@ -79,8 +79,7 @@ theorem hasDerivAt_ftAngleDerivTau_tau {a τ s : ℝ} (ha : 0 < a) (hτ : 0 < τ
   have hquot := ((hsq.mul_const a).div hden hne).neg
   refine hquot.congr_deriv ?_
   rw [ftAngleDeriv2Tau]
-  field_simp
-  ring
+  field
 
 
 /-- `∂²θ_k/∂τ∂θ` in the clean form `(∂θ_k/∂τ)·\cos(2θ_k-θ)/\sin θ`.  The two
@@ -104,8 +103,7 @@ theorem hasDerivAt_ftAngleDerivAngle_tau {a τ s : ℝ} (ha : 0 < a) (hτ : 0 < 
   rw [ftAngleDeriv2AngleTau,
     show (2 : ℝ) * ftAngle a τ s - s = ftAngle a τ s + (ftAngle a τ s - s) by ring,
     Real.cos_add]
-  field_simp
-  ring
+  field
 
 /-- `∂²θ_k/∂θ∂τ`, the mixed partial taken the other way: `∂θ_k/∂τ`
 differentiated in the angle. -/
@@ -132,8 +130,7 @@ theorem hasDerivAt_ftAngleDerivTau_angle {a τ s : ℝ} (ha : 0 < a) (hτ : 0 < 
   refine (((hsq.mul_const a).div hden hne).neg).congr_deriv ?_
   simp only [Pi.pow_apply]
   rw [ftAngleDeriv2TauAngle]
-  field_simp
-  ring
+  field
 
 /-- `∂²θ_k/∂θ²`. -/
 noncomputable def ftAngleDeriv2Angle (a τ s : ℝ) : ℝ :=
@@ -257,8 +254,7 @@ theorem hasDerivAt_ftAngleDerivAngle_comp {a : ℝ} {u : ℝ → ℝ} {u' θ : �
   rw [ftAngleDeriv2AngleTau, ftAngleDeriv2Angle,
     show (2 : ℝ) * ftAngle a (u θ) θ - θ
       = ftAngle a (u θ) θ + (ftAngle a (u θ) θ - θ) by ring, Real.cos_add]
-  field_simp
-  ring
+  field
 
 /-- **`∂θ_k/∂τ` along a moving radius**, decomposed as `∂²θ_k/∂τ² · u' + ∂²θ_k/∂θ∂τ`. -/
 theorem hasDerivAt_ftAngleDerivTau_comp {a : ℝ} {u : ℝ → ℝ} {u' θ : ℝ}
@@ -274,8 +270,7 @@ theorem hasDerivAt_ftAngleDerivTau_comp {a : ℝ} {u : ℝ → ℝ} {u' θ : ℝ
   refine (((hsq.mul_const a).div ((hu.pow 2).mul (Real.hasDerivAt_sin θ)) hne).neg).congr_deriv ?_
   simp only [Pi.pow_apply, Pi.mul_apply]
   rw [ftAngleDeriv2Tau, ftAngleDeriv2TauAngle]
-  field_simp
-  ring
+  field
 
 
 /-! ### `τ''`

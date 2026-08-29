@@ -105,8 +105,7 @@ theorem two_le_rootMultiplicity_ftDen_endpoint_pi {n : ℕ} {a : Fin n → ℝ} 
   have hPval : P.eval (-L) = (-L) * (derivative P).eval (-L) := by linarith [hEr]
   have hdb : (derivative P).eval (-L) + b = 0 := by
     rw [hb, hPval]
-    field_simp
-    ring
+    field
   -- the pencil is nonzero, because it does not vanish at the origin
   have hDne : ftDen (ftRootPoly c a) 1 ((b : ℝ) : ℂ) ≠ 0 := by
     intro h0
@@ -124,8 +123,7 @@ theorem two_le_rootMultiplicity_ftDen_endpoint_pi {n : ℕ} {a : Fin n → ℝ} 
     have hLC : ((L : ℝ) : ℂ) ≠ 0 := by exact_mod_cast hL.ne'
     rw [Polynomial.IsRoot, ftDen_eval, hval, pow_one, hb]
     push_cast
-    field_simp
-    ring
+    field
   · -- and `E(-L) = 0` makes the derivative vanish there too
     rw [Polynomial.IsRoot, eval_derivative_ftDen_eq, hdval]
     simp only [Nat.cast_one, Nat.sub_self, pow_zero, mul_one]
@@ -273,8 +271,7 @@ theorem eight_mul_pow_le_prod_of_sum_eq_one {a : Fin 3 → ℝ}
   have hau : ∀ k, a k * u k = L * (1 - u k) := by
     intro k
     rw [hu]
-    field_simp [(hpos k).ne']
-    ring
+    field [(hpos k).ne']
   have h0 := hau 0
   have h1 := hau 1
   have h2 := hau 2
@@ -377,9 +374,15 @@ One coefficient ratio: the constant term is `Q(0) = c\prod a_k`, the leading
 coefficient is `c(-1)^n`, and the sign from `\prod(0 - root)` cancels the sign in
 the leading coefficient exactly.  The spectral parameter drops out — `zX` has no
 constant term and cannot reach the leading one — so the identity holds along the
-whole branch, not only at the endpoint. -/
+whole branch, not only at the endpoint.
+
+Vieta needs no sign condition on the `a_k`: the two hypotheses are `c \ne 0`,
+without which the leading coefficient vanishes, and `2 ≤ n`, without which `zX`
+reaches the leading coefficient and moves the product.  The lemma is therefore
+stated for arbitrary real `a`, and its callers in the positive regime supply
+positivity where they need it and not here. -/
 theorem prod_roots_ftDen_one {n : ℕ} {c : ℝ} (hc : c ≠ 0) {a : Fin n → ℝ}
-    (ha : ∀ k, 0 < a k) (hn2 : 2 ≤ n) (z : ℂ) :
+    (hn2 : 2 ≤ n) (z : ℂ) :
     (ftDen (ftRootPoly c a) 1 z).roots.prod = ((∏ k, a k : ℝ) : ℂ) := by
   classical
   obtain ⟨hdeg, hlead⟩ := natDegree_and_leadingCoeff_ftDen_one hc a hn2 z
@@ -472,7 +475,7 @@ theorem norm_mul_sq_eq_prod_of_mem_roots_endpoint_pi {a : Fin 3 → ℝ} {c : �
     simpa using hmem
   -- Vieta, read against the split
   have hprod : p.roots.prod = ((∏ k, a k : ℝ) : ℂ) :=
-    prod_roots_ftDen_one hc.ne' ha hn2 _
+    prod_roots_ftDen_one hc.ne' hn2 _
   have hval : p.roots.prod = ((-L : ℝ) : ℂ) ^ 2 * w' := by
     conv_lhs => rw [← hsplit]
     rw [Multiset.prod_add, heq, Multiset.prod_replicate, hw', Multiset.prod_singleton]

@@ -21,6 +21,34 @@ The per-root bound is **discharged**, not hypothesized: the branches are
 `ViewingAngle.polarAngle γ γ' β a`, one per zero of `B`, each built by the lift and each
 capped by `viewing_angle_bound_regular` from the arc's regularity alone.
 
+## Which form to use
+
+Eight statements below bound the same quantity, and they are not interchangeable.
+**`linear_phase_variation_components_regular` is the canonical one**: it is the
+manuscript's own left-hand side — summed over the components of
+`(0, π/r) ∖ {W = 0}` — it hypothesizes nothing about any argument branch, and it
+allows a zero of `B` to lie **on** the arc, which the principal arc's zeros do.  A
+caller with the arc's `C²` package and an ordered family of components wants that one.
+
+The other seven are the rungs it is built from, and each is reachable on its own:
+
+* `linear_phase_variation` — the branches are given and the per-root Radon bound is
+  already in hand.
+* `linear_phase_variation_multiset` — the same, with the count as a multiset
+  cardinality rather than an abstract `K`.
+* `linear_phase_variation_of_arc` — one branch over one set, per-root bound
+  discharged, and **no zero of `B` on the arc**.
+* `linear_phase_variation_regular` — the same asking only for a regular arc, with
+  nothing about any branch.
+* `linear_phase_variation_components` — the summed form at abstract branches, the
+  per-root bound still a hypothesis.
+* `phase_variation_le_laurentWeight` and `…_of_arc` — the count is `deg B_N` of
+  `eq:canonical-Laurent-factorization` rather than a free `K`.
+
+None is superseded: a bound stated at a free `K` is strictly more general than the
+same bound at `deg B`, and the two `_of_arc` forms are the only ones that name the
+reduced weight.
+
 ## Main statements
 
 * `eVariationOn_add_le`, `eVariationOn_finsetSum_le`, `eVariationOn_multisetSum_le` —
@@ -391,7 +419,7 @@ theorem linear_phase_variation_regular
 that the arc *meets* has no argument branch at that parameter, so the corollary above — which
 asks that no zero lie on the arc — does not reach that case.  Here it does: the components are
 carried as an ordered family, each root's summed contribution is capped by
-`eq:viewing-angle-bound`, and `ViewingAngle.eVariationOn_sum_le` is what makes a family finer
+`eq:viewing-angle-bound`, and `Shields.eVariationOn_finsetSum_le` is what makes a family finer
 than one root's own components cost no more than those. -/
 
 private theorem finset_multiset_sum_comm {ι κ : Type*} (m : Multiset κ) (t : Finset ι)

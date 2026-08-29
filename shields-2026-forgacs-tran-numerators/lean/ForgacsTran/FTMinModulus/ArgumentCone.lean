@@ -6,6 +6,7 @@ Authors: Johnny Shields
 import ForgacsTran.FTMinModulus.PrincipalGap
 import ForgacsTran.FTBranchGap
 import ForgacsTran.FTBranchMonotone
+import ForgacsTran.PencilIndex
 
 /-!
 # The argument of an inner zero
@@ -96,9 +97,7 @@ theorem negDivPow_ftTau_lt_ftBranchZ {n r : ℕ} {a : Fin n → ℝ} {c : ℝ} (
   set τ : ℝ := ftTau a r (n - 1) θ with hτdef
   have hτ : 0 < τ := ftTau_pos hb
   have hτr : (0 : ℝ) < τ ^ r := by positivity
-  have hparp : Even (n + (n - 1) + 1) := by
-    have hEq : n + (n - 1) + 1 = 2 * n := by omega
-    rw [hEq]; exact even_two_mul n
+  have hparp : Even (n + (n - 1) + 1) := even_add_pred_add_one hn
   have hZ : ftBranchZ a c r (n - 1) θ = c * ftChordProd a τ θ / τ ^ r :=
     ftBranchZ_eq_chordProd ha hparp hθπ hb rfl
   have hsθ : 0 < Real.sin θ := Real.sin_pos_of_pos_of_lt_pi hθπ.1 hθπ.2
@@ -196,9 +195,7 @@ theorem no_neg_real_root_of_even {n r : ℕ} {a : Fin n → ℝ} {c : ℝ} (hn :
     -(ftRootPolyReal c a).eval s / s ^ r < ftBranchZ a c r (n - 1) θ := by
   have hθπ : θ ∈ Ioo 0 π := ftArc_subset hr hθ
   have hb : FTBranchAt a r (n - 1) θ := ftBranchAt_of_arc_principal hn ha hr hnr hθ
-  have hparp : Even (n + (n - 1) + 1) := by
-    have hEq : n + (n - 1) + 1 = 2 * n := by omega
-    rw [hEq]; exact even_two_mul n
+  have hparp : Even (n + (n - 1) + 1) := even_add_pred_add_one hn
   have hz : 0 < ftBranchZ a c r (n - 1) θ := ftBranchZ_pos ha hc hparp hθπ hb
   have hQ : 0 < (ftRootPolyReal c a).eval s := by
     rw [eval_ftRootPolyReal]
@@ -237,6 +234,15 @@ theorem eval_ftDen_zero_ne_zero {n r : ℕ} {a : Fin n → ℝ} {c : ℝ} (ha : 
     show ((c : ℂ) * ∏ k, ((a k : ℂ) - 0)) = (((c * ∏ k, a k : ℝ)) : ℂ) by simp]
   exact_mod_cast hQ.ne'
 
+
+/-- **The pencil is a nonzero polynomial**, since `D(0,z) = Q(0) ≠ 0` once `r ≥ 1`.
+Stated separately from `eval_ftDen_zero_ne_zero` because the consumers want the
+polynomial nonzero — to take a degree or a root multiplicity — rather than the
+value at `0`. -/
+theorem ftDen_ftRootPoly_ne_zero {n r : ℕ} {a : Fin n → ℝ} {c : ℝ} (ha : ∀ k, 0 < a k)
+    (hc : 0 < c) (hr : 1 ≤ r) (z : ℂ) : ftDen (ftRootPoly c a) r z ≠ 0 := fun h =>
+  eval_ftDen_zero_ne_zero ha hc hr z (by rw [h]; simp)
+
 /-- **`hcone` at `r = 1` is the absence of a real zero in the closed disk.**  The
 double cone `|\arg t| < π/r` is then the whole plane cut along the reals, so
 their second paragraph — the one that runs on `C₁ ∩ C₂` and the angle bound —
@@ -248,12 +254,10 @@ theorem cone_of_no_real_root_pi {n r : ℕ} {a : Fin n → ℝ} {c : ℝ} (hr1 :
       -(ftRootPolyReal c a).eval s / s ^ r < ftBranchZ a c r (n - 1) θ)
     (hneg : ∀ θ ∈ Ioo (0 : ℝ) (π / r), ∀ s : ℝ, s < 0 → -s ≤ ftTau a r (n - 1) θ →
       -(ftRootPolyReal c a).eval s / s ^ r ≠ ftBranchZ a c r (n - 1) θ) :
-    ∀ θ ∈ Ioo (0 : ℝ) (π / r), ∀ w : ℂ,
-      (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)).eval w = 0 →
-        ‖w‖ ≤ ftTau a r (n - 1) θ → |Complex.arg w| ∈ Ioo 0 (π / r) := by
+    FTArgumentCone (ftRootPoly c a) r (ftBranchZ a c r (n - 1)) (ftTau a r (n - 1)) := by
   subst hr1
   intro θ hθ w hw hnorm
-  have hπr : π / ((1 : ℕ) : ℝ) = π := by norm_num
+  have hπr : π / ((1 : ℕ) : ℝ) = π := pi_div_natCast_one
   rw [hπr]
   refine abs_arg_mem_Ioo_pi fun him => ?_
   -- a real zero solves the real pencil equation

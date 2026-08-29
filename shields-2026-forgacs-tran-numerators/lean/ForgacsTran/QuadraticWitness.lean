@@ -328,6 +328,11 @@ noncomputable def witTau : ℝ → ℝ := fun _ => quadMod 1 1
 /-- The witness coefficient sequence, of degree exactly `M`. -/
 noncomputable def witP (M : ℕ) : Polynomial ℝ := quadCoeff 1 (-4) 1 M
 
+/-! Three definitional unfoldings.  Each is `rfl`, and they exist so a consumer can
+rewrite the witness back to its parametric form without unfolding a `def` in tactic
+position.  `witness_ftBranchData` below uses all three, and `ClauseThreeWitness` uses
+them at five further sites. -/
+
 theorem witQ_eq : witQ = quadPoly 1 (-4) 1 := rfl
 
 theorem witZfun_eq : witZ = quadZ 1 (-4) 1 := rfl

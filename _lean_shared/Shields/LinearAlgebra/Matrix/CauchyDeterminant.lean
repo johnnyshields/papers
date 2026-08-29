@@ -65,6 +65,12 @@ noncomputable def cauchyPoly (y : Fin n → K) (j : Fin n) : Polynomial K :=
 noncomputable def cauchyCoeff (y : Fin n → K) : Matrix (Fin n) (Fin n) K :=
   Matrix.of fun d j => (cauchyPoly y j).coeff (d : ℕ)
 
+/-- The node polynomial evaluated: `p_j(t) = ∏_{l ≠ j}(t + y_l)`. -/
+theorem eval_cauchyPoly (y : Fin n → K) (j : Fin n) (t : K) :
+    (cauchyPoly y j).eval t = ∏ l ∈ (Finset.univ : Finset (Fin n)).erase j, (t + y l) := by
+  rw [cauchyPoly, Polynomial.eval_prod]
+  exact Finset.prod_congr rfl fun l _ => by simp
+
 theorem natDegree_cauchyPoly_lt (y : Fin n → K) (j : Fin n) :
     (cauchyPoly y j).natDegree < n := by
   have hle : (cauchyPoly y j).natDegree
@@ -93,11 +99,8 @@ theorem vandermonde_mul_cauchyCoeff (x y : Fin n → K) :
 theorem eval_cauchyPoly_neg (y : Fin n → K) (i j : Fin n) :
     (cauchyPoly y j).eval (-(y i))
       = if i = j then ∏ l ∈ (Finset.univ : Finset (Fin n)).erase j, (y l - y j) else 0 := by
-  have hval : (cauchyPoly y j).eval (-(y i))
-      = ∏ l ∈ (Finset.univ : Finset (Fin n)).erase j, (y l - y i) := by
-    rw [cauchyPoly, Polynomial.eval_prod]
-    exact Finset.prod_congr rfl fun l _ => by simp [sub_eq_neg_add]
-  rw [hval]
+  rw [eval_cauchyPoly, Finset.prod_congr rfl fun l (_ : l ∈ _) =>
+    show -(y i) + y l = y l - y i from by ring]
   by_cases hij : i = j
   · subst hij; simp
   · rw [if_neg hij]
@@ -114,6 +117,19 @@ theorem vandermonde_neg_mul_cauchyCoeff (y : Fin n → K) :
   by_cases hij : i = j
   · subst hij; simp
   · simp [hij]
+
+/-- **The row scaling.**  Multiplying row `i` of the Cauchy matrix by `∏_j (x_i + y_j)` cancels
+each entry's denominator and leaves the node polynomial evaluated at `x_i`.  The two companion
+products are `Shields.vandermonde_mul_cauchyCoeff` and
+`Shields.vandermonde_neg_mul_cauchyCoeff`. -/
+theorem diagonal_prod_mul_cauchyMat (x y : Fin n → K) (hxy : ∀ i j, x i + y j ≠ 0) :
+    Matrix.diagonal (fun i => ∏ j : Fin n, (x i + y j)) * cauchyMat x y
+      = Matrix.of fun i j => (cauchyPoly y j).eval (x i) := by
+  ext i j
+  rw [Matrix.diagonal_mul, cauchyMat, Matrix.of_apply, Matrix.of_apply, eval_cauchyPoly,
+    ← Finset.prod_erase_mul _ _ (Finset.mem_univ j)]
+  have h0 : x i + y j ≠ 0 := hxy i j
+  field_simp
 
 /-- The ordered pairs `(l, j)` with `l ≠ j` split into `l < j` and `l > j`. -/
 theorem prod_erase_split (f : Fin n → Fin n → K) :
@@ -152,20 +168,9 @@ theorem det_cauchyMat_mul_prod (x y : Fin n → K) (hxy : ∀ i j, x i + y j ≠
       = (∏ i : Fin n, ∏ j ∈ Finset.Ioi i, (x j - x i))
         * ∏ i : Fin n, ∏ j ∈ Finset.Ioi i, (y j - y i) := by
   -- the row scaling turns the Cauchy matrix into the node-polynomial matrix
-  have hrow : Matrix.diagonal (fun i => ∏ j : Fin n, (x i + y j)) * cauchyMat x y
-      = Matrix.of fun i j => (cauchyPoly y j).eval (x i) := by
-    ext i j
-    rw [Matrix.diagonal_mul, cauchyMat, Matrix.of_apply, Matrix.of_apply]
-    have hval : (cauchyPoly y j).eval (x i)
-        = ∏ l ∈ (Finset.univ : Finset (Fin n)).erase j, (x i + y l) := by
-      rw [cauchyPoly, Polynomial.eval_prod]
-      exact Finset.prod_congr rfl fun l _ => by simp
-    have h0 : x i + y j ≠ 0 := hxy i j
-    rw [hval, ← Finset.prod_erase_mul _ _ (Finset.mem_univ j)]
-    field_simp
   have hdetrow : (∏ i : Fin n, ∏ j : Fin n, (x i + y j)) * (cauchyMat x y).det
       = (Matrix.of fun i j => (cauchyPoly y j).eval (x i) : Matrix (Fin n) (Fin n) K).det := by
-    rw [← hrow, Matrix.det_mul, Matrix.det_diagonal]
+    rw [← diagonal_prod_mul_cauchyMat x y hxy, Matrix.det_mul, Matrix.det_diagonal]
   -- the two determinant equations
   have hA : Matrix.det (Matrix.vandermonde x) * Matrix.det (cauchyCoeff y)
       = (Matrix.of fun i j => (cauchyPoly y j).eval (x i) : Matrix (Fin n) (Fin n) K).det := by
@@ -207,5 +212,12 @@ theorem det_cauchyMat_mul_prod (x y : Fin n → K) (hxy : ∀ i j, x i + y j ≠
     rw [← hdetrow] at hA
     rw [hVx, hdetB] at hA
     linear_combination -hA
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.det_cauchyMat_mul_prod' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms det_cauchyMat_mul_prod
 
 end Shields

@@ -25,7 +25,7 @@ identifies `P_m` with `F_{m-λ_N}` for large `m`
 
 ## Main statements
 
-* `ftInputs_of_supply` — the analytic bundle, built.
+* `exists_ftInputs_of_supply` — the analytic bundle, built.
 * `main_bound_of_supply`, `main_bound_interval_of_supply` — `thm:main` clauses 1
   and 2, with **no interior-zero binder**: what is assumed is
   `FTPhaseSupply`, which is `thm:FT-geometry`, `lem:amplitude-divisor` and
@@ -89,10 +89,10 @@ theorem exists_ftInputs_of_supply {Q : ℂ[X]} {r : ℕ} (hr : 1 ≤ r)
     (coeffPoly : ℕ → ℂ[X])
     (hP : ∀ m, denomConv (ftDenom Q r) coeffPoly m = (swapVars N).coeff m)
     {z τ : ℝ → ℝ}
-    (hzmono : StrictMonoOn z (Icc 0 (π / r))) (hzcont : ContinuousOn z (Icc 0 (π / r)))
-    (hτ : ∀ θ ∈ Icc 0 (π / r), 0 < τ θ)
+    (hzmono : StrictMonoOn z (Ioo 0 (π / r))) (hzcont : ContinuousOn z (Ioo 0 (π / r)))
+    (hτ : ∀ θ ∈ Ioo 0 (π / r), 0 < τ θ)
     (hzpos : ∀ θ ∈ Ioo 0 (π / r), 0 < z θ)
-    (hsupply : ∃ hcol κ₀ κ₁ : ℝ, 0 ≤ hcol ∧ 0 ≤ κ₀ ∧ 0 ≤ κ₁ ∧
+    (hsupply : ∃ hcol κ₀ κ₁ : ℝ, 0 < hcol ∧ 0 ≤ κ₀ ∧ 0 ≤ κ₁ ∧
       ∃ M₀ : ℕ, ∀ M : ℕ, M₀ ≤ M →
         FTPhaseSupply Q (laurentWeight Q r N) r z τ hcol κ₀ κ₁ M) :
     ∃ (C₀ C₁ : ℝ) (H : FTInputs), 0 ≤ C₀ ∧ 0 ≤ C₁ ∧
@@ -188,10 +188,10 @@ theorem main_bound_of_supply {Q : ℂ[X]} {r : ℕ} (hr : 1 ≤ r)
     (coeffPoly : ℕ → ℂ[X])
     (hP : ∀ m, denomConv (ftDenom Q r) coeffPoly m = (swapVars N).coeff m)
     {z τ : ℝ → ℝ}
-    (hzmono : StrictMonoOn z (Icc 0 (π / r))) (hzcont : ContinuousOn z (Icc 0 (π / r)))
-    (hτ : ∀ θ ∈ Icc 0 (π / r), 0 < τ θ)
+    (hzmono : StrictMonoOn z (Ioo 0 (π / r))) (hzcont : ContinuousOn z (Ioo 0 (π / r)))
+    (hτ : ∀ θ ∈ Ioo 0 (π / r), 0 < τ θ)
     (hzpos : ∀ θ ∈ Ioo 0 (π / r), 0 < z θ)
-    (hsupply : ∃ hcol κ₀ κ₁ : ℝ, 0 ≤ hcol ∧ 0 ≤ κ₀ ∧ 0 ≤ κ₁ ∧
+    (hsupply : ∃ hcol κ₀ κ₁ : ℝ, 0 < hcol ∧ 0 ≤ κ₀ ∧ 0 ≤ κ₁ ∧
       ∃ M₀ : ℕ, ∀ M : ℕ, M₀ ≤ M →
         FTPhaseSupply Q (laurentWeight Q r N) r z τ hcol κ₀ κ₁ M) :
     ∃ C : ℕ, ∀ m, coeffPoly m ≠ 0 →
@@ -214,10 +214,10 @@ theorem main_bound_interval_of_supply {Q : ℂ[X]} {r : ℕ} (hr : 1 ≤ r)
     (coeffPoly : ℕ → ℂ[X])
     (hP : ∀ m, denomConv (ftDenom Q r) coeffPoly m = (swapVars N).coeff m)
     {z τ : ℝ → ℝ}
-    (hzmono : StrictMonoOn z (Icc 0 (π / r))) (hzcont : ContinuousOn z (Icc 0 (π / r)))
-    (hτ : ∀ θ ∈ Icc 0 (π / r), 0 < τ θ)
+    (hzmono : StrictMonoOn z (Ioo 0 (π / r))) (hzcont : ContinuousOn z (Ioo 0 (π / r)))
+    (hτ : ∀ θ ∈ Ioo 0 (π / r), 0 < τ θ)
     (hzpos : ∀ θ ∈ Ioo 0 (π / r), 0 < z θ)
-    (hsupply : ∃ hcol κ₀ κ₁ : ℝ, 0 ≤ hcol ∧ 0 ≤ κ₀ ∧ 0 ≤ κ₁ ∧
+    (hsupply : ∃ hcol κ₀ κ₁ : ℝ, 0 < hcol ∧ 0 ≤ κ₀ ∧ 0 ≤ κ₁ ∧
       ∃ M₀ : ℕ, ∀ M : ℕ, M₀ ≤ M →
         FTPhaseSupply Q (laurentWeight Q r N) r z τ hcol κ₀ κ₁ M) :
     ∃ (C₀ C₁ : ℝ) (C m0 : ℕ), 0 ≤ C₀ ∧ 0 ≤ C₁ ∧
@@ -236,5 +236,44 @@ theorem main_bound_interval_of_supply {Q : ℂ[X]} {r : ℕ} (hr : 1 ≤ r)
   rw [hc, hs] at h2
   exact ⟨C₀, C₁, H.Cbulk, max m1 m2, hC₀, hC₁, hCb, fun m hm =>
     ⟨h1 m (le_trans (le_max_left _ _) hm), h2 m (le_trans (le_max_right _ _) hm)⟩⟩
+
+/-- **`thm:main` clause 2(iii), off the discrepancy.**  For all large `m`, at
+least `deg P_m - C` **distinct** zeros of `P_m` lie inside the angular window
+`z((0,π/r))`, with `C ≤ C₀ + C₁deg B_N + 1` from `prop:angular-discrepancy`.
+
+Unlike `Main.interior_distinct_count`, which returns the `Finset` its own
+hypothesis handed it, the zero set here is a **conclusion**: no hypothesis names
+it.  What is assumed is `FTPhaseSupply` — `thm:FT-geometry`,
+`lem:amplitude-divisor` and `thm:weighted-dominance` — and the zeros are the
+ones `AngularWindow.exists_windowZeros` produces from the phase count on
+`(0,π/r)`.  That is the containment check `Main.interior_distinct_count` fails,
+passed on the same route `MainClauses.interior_distinct_count_of_dominance`
+takes from the dominance side.
+
+Contained in `main_bound_interval_of_supply`, which states it alongside clause
+2's multiplicity bound; it is stated alone because the paper states 2(iii)
+alone. -/
+theorem interior_distinct_count_of_supply {Q : ℂ[X]} {r : ℕ} (hr : 1 ≤ r)
+    (hQ0 : Q.coeff 0 ≠ 0) {N : (ℂ[X])[X]} (hN : N ≠ 0)
+    (hproper : ∀ β, (N.coeff β).degree < ((max Q.natDegree r : ℕ) : WithBot ℕ))
+    (coeffPoly : ℕ → ℂ[X])
+    (hP : ∀ m, denomConv (ftDenom Q r) coeffPoly m = (swapVars N).coeff m)
+    {z τ : ℝ → ℝ}
+    (hzmono : StrictMonoOn z (Ioo 0 (π / r))) (hzcont : ContinuousOn z (Ioo 0 (π / r)))
+    (hτ : ∀ θ ∈ Ioo 0 (π / r), 0 < τ θ)
+    (hzpos : ∀ θ ∈ Ioo 0 (π / r), 0 < z θ)
+    (hsupply : ∃ hcol κ₀ κ₁ : ℝ, 0 < hcol ∧ 0 ≤ κ₀ ∧ 0 ≤ κ₁ ∧
+      ∃ M₀ : ℕ, ∀ M : ℕ, M₀ ≤ M →
+        FTPhaseSupply Q (laurentWeight Q r N) r z τ hcol κ₀ κ₁ M) :
+    ∃ (C₀ C₁ : ℝ) (C m0 : ℕ), 0 ≤ C₀ ∧ 0 ≤ C₁ ∧
+      (C : ℝ) ≤ C₀ + C₁ * ((laurentWeight Q r N).natDegree : ℝ) + 1 ∧
+      ∀ m, m0 ≤ m → ∃ Z : Finset ℂ, (coeffPoly m).natDegree - C ≤ Z.card ∧
+        (∀ w ∈ Z, (coeffPoly m).IsRoot w) ∧ (∀ w ∈ Z, w ∈ ftWindow z 0 (π / r)) := by
+  obtain ⟨C₀, C₁, H, hC₀, hC₁, hc, hs, hCb⟩ :=
+    exists_ftInputs_of_supply hr hQ0 hN hproper coeffPoly hP hzmono hzcont hτ hzpos
+      hsupply
+  obtain ⟨m0, hm0⟩ := interior_distinct_count H
+  rw [hc, hs] at hm0
+  exact ⟨C₀, C₁, H.Cbulk, m0, hC₀, hC₁, hCb, hm0⟩
 
 end ForgacsTran

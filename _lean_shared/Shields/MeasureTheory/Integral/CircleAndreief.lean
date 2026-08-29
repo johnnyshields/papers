@@ -37,13 +37,16 @@ continuous counterpart of the Cauchy--Binet expansion.
 
 ## Main results
 
-* `Shields.det_staircase_eq_circleIntegralPow`: **the integral Andréief identity**.
+* `Shields.det_staircase_eq_circleIntegralPow`: **the integral Andréief identity**, and its two
+  halves `Shields.det_staircase_eq_circleIntegralPow_vandermonde` (Leibniz and Fubini) and
+  `Shields.factorial_mul_circleIntegralPow_vandermonde` (symmetrization).
 * `Shields.circleIntegralPow_eq_torusIntegral`: the `k`-fold integral is `torusIntegral` at
   center `0` and constant radius.
 * `Shields.circleIntegralPow_prod`: a product integrand factors into `k` one-variable integrals.
 * `Shields.circleIntegralPow_comp_perm`: the integral is invariant under permuting the variables.
 * `Shields.sum_sign_prod_pow`, `Shields.sum_sign_prod_zpow_neg`: the two alternants, in ascending
-  and in descending powers, as Vandermonde products.
+  and in descending powers, as Vandermonde products; `Shields.sum_sign_prod_zpow_shift` and
+  `Shields.sum_vandermondeProd_comp_perm` are the same two carrying the weight `G`.
 
 ## Implementation notes
 
@@ -454,39 +457,84 @@ theorem continuous_vandermondeProd :
   refine continuous_finsetProd _ fun a _ => continuous_finsetProd _ fun b _ => ?_
   exact (continuous_apply b).sub (continuous_apply a)
 
-/-- **The integral Andréief identity.**  If
-`B m` is the `m`th coefficient integral of `G` over the circle `|t| = ρ`, then
-the `k × k` staircase minor `det [B (n-i+j)]` is the `k`-fold contour integral
-\[
-  \frac{(-1)^{k(k-1)/2}}{k!\,(2\pi i)^k}
-  \int\cdots\int\Delta(t)^2\prod_{a=1}^k G(t_a)\,t_a^{-n-k}\,dt_a .
-\]
-Indices are zero-based here, so the entry in row `i` and column `j` is
-`B (n - i + j)` for `i j : Fin k`; the one-based
-`\det[B_{n-i+j}]_{i,j=1}^k` is the same matrix.  The order `n` is an arbitrary
-integer: nothing forces `B m` to vanish for negative `m`. -/
-theorem det_staircase_eq_circleIntegralPow (n : ℤ) (hρ : 0 < ρ)
+/-- **The weighted first alternant.**  Shifting the exponent by `σ(j)` factors the ascending
+alternant out of the Leibniz sum, and `sum_sign_prod_pow` evaluates it as a Vandermonde product. -/
+theorem sum_sign_prod_zpow_shift (n : ℤ) {t : Fin k → ℂ} (hne : ∀ a, t a ≠ 0) :
+    (∑ σ : Equiv.Perm (Fin k), ((Equiv.Perm.sign σ : ℤ) : ℂ)
+        * ∏ j, G (t j) * t j ^ (((σ j).val : ℤ) - (j.val : ℤ) - n - 1))
+      = vandermondeProd t * ∏ j, G (t j) * t j ^ (-(j.val : ℤ) - n - 1) := by
+  calc (∑ σ : Equiv.Perm (Fin k), ((Equiv.Perm.sign σ : ℤ) : ℂ)
+          * ∏ j, G (t j) * t j ^ (((σ j).val : ℤ) - (j.val : ℤ) - n - 1))
+      = ∑ σ : Equiv.Perm (Fin k),
+          (((Equiv.Perm.sign σ : ℤ) : ℂ) * ∏ j, t j ^ ((σ j).val : ℕ))
+            * ∏ j, G (t j) * t j ^ (-(j.val : ℤ) - n - 1) :=
+        Finset.sum_congr rfl fun σ _ => by
+          rw [mul_assoc, ← Finset.prod_mul_distrib]
+          refine congrArg _ (Finset.prod_congr rfl fun j _ => ?_)
+          rw [← zpow_natCast (t j) ((σ j).val),
+            show (((σ j).val : ℤ) - (j.val : ℤ) - n - 1)
+              = ((σ j).val : ℤ) + (-(j.val : ℤ) - n - 1) by ring,
+            zpow_add₀ (hne j)]
+          ring
+    _ = (∑ σ : Equiv.Perm (Fin k), ((Equiv.Perm.sign σ : ℤ) : ℂ)
+            * ∏ j, t j ^ ((σ j).val : ℕ))
+          * ∏ j, G (t j) * t j ^ (-(j.val : ℤ) - n - 1) := (Finset.sum_mul _ _ _).symm
+    _ = vandermondeProd t * ∏ j, G (t j) * t j ^ (-(j.val : ℤ) - n - 1) := by
+        rw [sum_sign_prod_pow t]
+
+/-- **The weighted second alternant.**  Summing the integrand over the permutations of the
+variables factors the descending alternant out, and `sum_sign_prod_zpow_neg` evaluates it as the
+second Vandermonde factor, whose powers merge with the weight. -/
+theorem sum_vandermondeProd_comp_perm (n : ℤ) {t : Fin k → ℂ} (hne : ∀ a, t a ≠ 0) :
+    (∑ τ : Equiv.Perm (Fin k), vandermondeProd (t ∘ τ)
+        * ∏ j, G ((t ∘ τ) j) * (t ∘ τ) j ^ (-(j.val : ℤ) - n - 1))
+      = (-1) ^ (k * (k - 1) / 2)
+        * (vandermondeProd t ^ 2 * ∏ a, G (t a) * t a ^ (-n - (k : ℤ))) := by
+  have hmerge : (∏ a, t a ^ (-((k : ℤ) - 1))) * ∏ a, G (t a) * t a ^ (-n - 1)
+      = ∏ a, G (t a) * t a ^ (-n - (k : ℤ)) := by
+    rw [← Finset.prod_mul_distrib]
+    refine Finset.prod_congr rfl fun a _ => ?_
+    rw [show (-n - (k : ℤ)) = (-((k : ℤ) - 1)) + (-n - 1) by ring, zpow_add₀ (hne a)]
+    ring
+  calc (∑ τ : Equiv.Perm (Fin k), vandermondeProd (t ∘ τ)
+          * ∏ j, G ((t ∘ τ) j) * (t ∘ τ) j ^ (-(j.val : ℤ) - n - 1))
+      = ∑ τ : Equiv.Perm (Fin k),
+          (((Equiv.Perm.sign τ : ℤ) : ℂ) * ∏ j, t (τ j) ^ (-(j.val : ℤ)))
+            * (vandermondeProd t * ∏ a, G (t a) * t a ^ (-n - 1)) :=
+        Finset.sum_congr rfl fun τ _ => by
+          rw [vandermondeProd_comp_perm t τ,
+            show (∏ j, G ((t ∘ τ) j) * (t ∘ τ) j ^ (-(j.val : ℤ) - n - 1))
+              = ∏ j, t (τ j) ^ (-(j.val : ℤ)) * (G (t (τ j)) * t (τ j) ^ (-n - 1)) from
+              Finset.prod_congr rfl fun j _ => by
+                simp only [Function.comp_apply]
+                rw [show (-(j.val : ℤ) - n - 1) = -(j.val : ℤ) + (-n - 1) by ring,
+                  zpow_add₀ (hne (τ j))]
+                ring,
+            Finset.prod_mul_distrib,
+            Equiv.prod_comp τ fun a => G (t a) * t a ^ (-n - 1)]
+          ring
+    _ = (∑ τ : Equiv.Perm (Fin k),
+            ((Equiv.Perm.sign τ : ℤ) : ℂ) * ∏ j, t (τ j) ^ (-(j.val : ℤ)))
+          * (vandermondeProd t * ∏ a, G (t a) * t a ^ (-n - 1)) :=
+        (Finset.sum_mul _ _ _).symm
+    _ = (-1) ^ (k * (k - 1) / 2)
+          * (vandermondeProd t ^ 2 * ∏ a, G (t a) * t a ^ (-n - (k : ℤ))) := by
+        rw [sum_sign_prod_zpow_neg t hne, ← hmerge]
+        ring
+
+/-- **The Leibniz half of the Andréief identity.**  Expanding the staircase determinant by the
+Leibniz formula attaches one product of `k` coefficient integrals to each permutation; Fubini turns
+each such product into a single `k`-fold integral, and the signed sum over permutations collapses
+to one Vandermonde product by `sum_sign_prod_pow`. -/
+theorem det_staircase_eq_circleIntegralPow_vandermonde (n : ℤ) (hρ : 0 < ρ)
     (hG : ContinuousOn G (Metric.sphere 0 ρ)) {B : ℤ → ℂ}
     (hB : ∀ m : ℤ, B m = (2 * π * I)⁻¹ * ∮ z in C(0, ρ), G z * z ^ (-m - 1)) :
     (Matrix.of fun i j : Fin k => B (n - (i.val : ℤ) + (j.val : ℤ))).det
-      = (-1) ^ (k * (k - 1) / 2) / ((Nat.factorial k : ℂ) * (2 * π * I) ^ k)
-        * circleIntegralPow k ρ
-            (fun t => vandermondeProd t ^ 2 * ∏ a, G (t a) * t a ^ (-n - (k : ℤ))) := by
-  have hπ : (2 * π * I : ℂ) ≠ 0 := by simp [Real.pi_ne_zero]
-  have hfac : (Nat.factorial k : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero k)
-  -- Integrability of every integrand met below.
+      = ((2 * π * I : ℂ)⁻¹) ^ k * circleIntegralPow k ρ
+          (fun t => vandermondeProd t * ∏ j, G (t j) * t j ^ (-(j.val : ℤ) - n - 1)) := by
   have hint : ∀ e : Fin k → ℤ,
       CircleIntegrablePow k ρ (fun t => ∏ a, G (t a) * t a ^ e a) := fun e =>
     CircleIntegrablePow.of_continuousOn (continuousOn_polyCircle_prod hρ hG e)
-  have hsumint : ∀ F : Equiv.Perm (Fin k) → (Fin k → ℂ) → ℂ,
-      (∀ σ, CircleIntegrablePow k ρ (F σ)) →
-      (∑ σ : Equiv.Perm (Fin k), circleIntegralPow k ρ (F σ))
-        = circleIntegralPow k ρ (fun t => ∑ σ : Equiv.Perm (Fin k), F σ t) :=
-    fun F hF => (circleIntegralPow_finset_sum Finset.univ F fun σ _ => hF σ).symm
-  have hintV : ∀ e : Fin k → ℤ,
-      CircleIntegrablePow k ρ (fun t => vandermondeProd t * ∏ a, G (t a) * t a ^ e a) :=
-    fun e => CircleIntegrablePow.of_continuousOn
-      (continuous_vandermondeProd.continuousOn.mul (continuousOn_polyCircle_prod hρ hG e))
   -- Fubini on the Leibniz term attached to a permutation.
   have hfub : ∀ σ : Equiv.Perm (Fin k),
       circleIntegralPow k ρ
@@ -506,123 +554,123 @@ theorem det_staircase_eq_circleIntegralPow (n : ℤ) (hρ : 0 < ρ)
     have hexp : -(n - ((σ j).val : ℤ) + (j.val : ℤ)) - 1
         = ((σ j).val : ℤ) - (j.val : ℤ) - n - 1 := by ring
     rw [hB, hexp]
-  -- Step 1: expand the determinant and merge the `k` coefficient integrals.
-  have step1 : (Matrix.of fun i j : Fin k => B (n - (i.val : ℤ) + (j.val : ℤ))).det
-      = ((2 * π * I : ℂ)⁻¹) ^ k * circleIntegralPow k ρ
-          (fun t => vandermondeProd t * ∏ j, G (t j) * t j ^ (-(j.val : ℤ) - n - 1)) := by
-    rw [Matrix.det_apply']
-    calc (∑ σ : Equiv.Perm (Fin k), ((Equiv.Perm.sign σ : ℤ) : ℂ)
-            * ∏ i, (Matrix.of fun i j : Fin k => B (n - (i.val : ℤ) + (j.val : ℤ))) (σ i) i)
-        = ∑ σ : Equiv.Perm (Fin k), ((2 * π * I : ℂ)⁻¹) ^ k * circleIntegralPow k ρ
-            (fun t => ((Equiv.Perm.sign σ : ℤ) : ℂ)
-              * ∏ j, G (t j) * t j ^ (((σ j).val : ℤ) - (j.val : ℤ) - n - 1)) :=
-          Finset.sum_congr rfl fun σ _ => by
-            rw [circleIntegralPow_const_mul,
-              show (∏ i, (Matrix.of fun i j : Fin k =>
-                  B (n - (i.val : ℤ) + (j.val : ℤ))) (σ i) i)
-                = ∏ j, B (n - ((σ j).val : ℤ) + (j.val : ℤ)) from rfl, hBprod σ]
-            ring
-      _ = ((2 * π * I : ℂ)⁻¹) ^ k * ∑ σ : Equiv.Perm (Fin k), circleIntegralPow k ρ
-            (fun t => ((Equiv.Perm.sign σ : ℤ) : ℂ)
-              * ∏ j, G (t j) * t j ^ (((σ j).val : ℤ) - (j.val : ℤ) - n - 1)) :=
-          (Finset.mul_sum _ _ _).symm
-      _ = ((2 * π * I : ℂ)⁻¹) ^ k * circleIntegralPow k ρ
-            (fun t => ∑ σ : Equiv.Perm (Fin k), ((Equiv.Perm.sign σ : ℤ) : ℂ)
-              * ∏ j, G (t j) * t j ^ (((σ j).val : ℤ) - (j.val : ℤ) - n - 1)) :=
-          congrArg (fun x => ((2 * π * I : ℂ)⁻¹) ^ k * x)
-            (hsumint (fun σ t => ((Equiv.Perm.sign σ : ℤ) : ℂ)
-                * ∏ j, G (t j) * t j ^ (((σ j).val : ℤ) - (j.val : ℤ) - n - 1))
-              fun σ => (hint fun j => ((σ j).val : ℤ) - (j.val : ℤ) - n - 1).const_mul _)
-      _ = ((2 * π * I : ℂ)⁻¹) ^ k * circleIntegralPow k ρ
-            (fun t => vandermondeProd t * ∏ j, G (t j) * t j ^ (-(j.val : ℤ) - n - 1)) := by
-          refine congrArg _ (circleIntegralPow_congr fun t ht => ?_)
-          have hne : ∀ a, t a ≠ 0 := fun a => ne_zero_of_mem_polyCircle hρ.ne' ht a
-          calc (∑ σ : Equiv.Perm (Fin k), ((Equiv.Perm.sign σ : ℤ) : ℂ)
-                  * ∏ j, G (t j) * t j ^ (((σ j).val : ℤ) - (j.val : ℤ) - n - 1))
-              = ∑ σ : Equiv.Perm (Fin k),
-                  (((Equiv.Perm.sign σ : ℤ) : ℂ) * ∏ j, t j ^ ((σ j).val : ℕ))
-                    * ∏ j, G (t j) * t j ^ (-(j.val : ℤ) - n - 1) :=
-                Finset.sum_congr rfl fun σ _ => by
-                  rw [mul_assoc, ← Finset.prod_mul_distrib]
-                  refine congrArg _ (Finset.prod_congr rfl fun j _ => ?_)
-                  rw [← zpow_natCast (t j) ((σ j).val),
-                    show (((σ j).val : ℤ) - (j.val : ℤ) - n - 1)
-                      = ((σ j).val : ℤ) + (-(j.val : ℤ) - n - 1) by ring,
-                    zpow_add₀ (hne j)]
-                  ring
-            _ = (∑ σ : Equiv.Perm (Fin k), ((Equiv.Perm.sign σ : ℤ) : ℂ)
-                    * ∏ j, t j ^ ((σ j).val : ℕ))
-                  * ∏ j, G (t j) * t j ^ (-(j.val : ℤ) - n - 1) := (Finset.sum_mul _ _ _).symm
-            _ = vandermondeProd t * ∏ j, G (t j) * t j ^ (-(j.val : ℤ) - n - 1) := by
-                rw [sum_sign_prod_pow t]
-  -- Step 2: symmetrize the `k` variables.
-  have step2 : (Nat.factorial k : ℂ) * circleIntegralPow k ρ
+  rw [Matrix.det_apply']
+  calc (∑ σ : Equiv.Perm (Fin k), ((Equiv.Perm.sign σ : ℤ) : ℂ)
+          * ∏ i, (Matrix.of fun i j : Fin k => B (n - (i.val : ℤ) + (j.val : ℤ))) (σ i) i)
+      = ∑ σ : Equiv.Perm (Fin k), ((2 * π * I : ℂ)⁻¹) ^ k * circleIntegralPow k ρ
+          (fun t => ((Equiv.Perm.sign σ : ℤ) : ℂ)
+            * ∏ j, G (t j) * t j ^ (((σ j).val : ℤ) - (j.val : ℤ) - n - 1)) :=
+        Finset.sum_congr rfl fun σ _ => by
+          rw [circleIntegralPow_const_mul,
+            show (∏ i, (Matrix.of fun i j : Fin k =>
+                B (n - (i.val : ℤ) + (j.val : ℤ))) (σ i) i)
+              = ∏ j, B (n - ((σ j).val : ℤ) + (j.val : ℤ)) from rfl, hBprod σ]
+          ring
+    _ = ((2 * π * I : ℂ)⁻¹) ^ k * ∑ σ : Equiv.Perm (Fin k), circleIntegralPow k ρ
+          (fun t => ((Equiv.Perm.sign σ : ℤ) : ℂ)
+            * ∏ j, G (t j) * t j ^ (((σ j).val : ℤ) - (j.val : ℤ) - n - 1)) :=
+        (Finset.mul_sum _ _ _).symm
+    _ = ((2 * π * I : ℂ)⁻¹) ^ k * circleIntegralPow k ρ
+          (fun t => ∑ σ : Equiv.Perm (Fin k), ((Equiv.Perm.sign σ : ℤ) : ℂ)
+            * ∏ j, G (t j) * t j ^ (((σ j).val : ℤ) - (j.val : ℤ) - n - 1)) :=
+        congrArg (fun x => ((2 * π * I : ℂ)⁻¹) ^ k * x)
+          (circleIntegralPow_finset_sum Finset.univ
+            (fun (σ : Equiv.Perm (Fin k)) (t : Fin k → ℂ) => ((Equiv.Perm.sign σ : ℤ) : ℂ)
+              * ∏ j, G (t j) * t j ^ (((σ j).val : ℤ) - (j.val : ℤ) - n - 1))
+            (fun σ _ =>
+              (hint fun j => ((σ j).val : ℤ) - (j.val : ℤ) - n - 1).const_mul _)).symm
+    _ = ((2 * π * I : ℂ)⁻¹) ^ k * circleIntegralPow k ρ
+          (fun t => vandermondeProd t * ∏ j, G (t j) * t j ^ (-(j.val : ℤ) - n - 1)) :=
+        congrArg _ (circleIntegralPow_congr fun t ht =>
+          sum_sign_prod_zpow_shift n fun a => ne_zero_of_mem_polyCircle hρ.ne' ht a)
+
+/-- **The symmetrizing half of the Andréief identity.**  The `k`-fold integral is invariant under
+permuting the variables, so summing the integrand over the `k!` permutations multiplies the
+integral by `k!`; on the integrand that sum is the second alternant, which by
+`sum_sign_prod_zpow_neg` supplies the missing Vandermonde factor and levels the powers. -/
+theorem factorial_mul_circleIntegralPow_vandermonde (n : ℤ) (hρ : 0 < ρ)
+    (hG : ContinuousOn G (Metric.sphere 0 ρ)) :
+    (Nat.factorial k : ℂ) * circleIntegralPow k ρ
         (fun t => vandermondeProd t * ∏ j, G (t j) * t j ^ (-(j.val : ℤ) - n - 1))
       = (-1) ^ (k * (k - 1) / 2) * circleIntegralPow k ρ
           (fun t => vandermondeProd t ^ 2 * ∏ a, G (t a) * t a ^ (-n - (k : ℤ))) := by
-    have hcard : ((Finset.univ : Finset (Equiv.Perm (Fin k))).card : ℂ)
-        = (Nat.factorial k : ℂ) := by
-      rw [Finset.card_univ, Fintype.card_perm, Fintype.card_fin]
-    calc (Nat.factorial k : ℂ) * circleIntegralPow k ρ
-          (fun t => vandermondeProd t * ∏ j, G (t j) * t j ^ (-(j.val : ℤ) - n - 1))
-        = ∑ _τ : Equiv.Perm (Fin k), circleIntegralPow k ρ
-            (fun t => vandermondeProd t * ∏ j, G (t j) * t j ^ (-(j.val : ℤ) - n - 1)) := by
-          rw [Finset.sum_const, nsmul_eq_mul, hcard]
-      _ = ∑ τ : Equiv.Perm (Fin k), circleIntegralPow k ρ
-            (fun t => (fun s : Fin k → ℂ => vandermondeProd s
-                * ∏ j, G (s j) * s j ^ (-(j.val : ℤ) - n - 1)) (t ∘ τ)) :=
-          Finset.sum_congr rfl fun τ _ =>
-            (circleIntegralPow_comp_perm ρ _ τ).symm
-      _ = circleIntegralPow k ρ (fun t => ∑ τ : Equiv.Perm (Fin k),
-            (fun s : Fin k → ℂ => vandermondeProd s
+  have hintV : ∀ e : Fin k → ℤ,
+      CircleIntegrablePow k ρ (fun t => vandermondeProd t * ∏ a, G (t a) * t a ^ e a) :=
+    fun e => CircleIntegrablePow.of_continuousOn
+      (continuous_vandermondeProd.continuousOn.mul (continuousOn_polyCircle_prod hρ hG e))
+  have hcard : ((Finset.univ : Finset (Equiv.Perm (Fin k))).card : ℂ)
+      = (Nat.factorial k : ℂ) := by
+    rw [Finset.card_univ, Fintype.card_perm, Fintype.card_fin]
+  calc (Nat.factorial k : ℂ) * circleIntegralPow k ρ
+        (fun t => vandermondeProd t * ∏ j, G (t j) * t j ^ (-(j.val : ℤ) - n - 1))
+      = ∑ _τ : Equiv.Perm (Fin k), circleIntegralPow k ρ
+          (fun t => vandermondeProd t * ∏ j, G (t j) * t j ^ (-(j.val : ℤ) - n - 1)) := by
+        rw [Finset.sum_const, nsmul_eq_mul, hcard]
+    _ = ∑ τ : Equiv.Perm (Fin k), circleIntegralPow k ρ
+          (fun t => (fun s : Fin k → ℂ => vandermondeProd s
               * ∏ j, G (s j) * s j ^ (-(j.val : ℤ) - n - 1)) (t ∘ τ)) :=
-          hsumint (fun τ t => (fun s : Fin k → ℂ => vandermondeProd s
-              * ∏ j, G (s j) * s j ^ (-(j.val : ℤ) - n - 1)) (t ∘ τ))
-            fun τ => (hintV fun j => -(j.val : ℤ) - n - 1).comp_perm τ
-      _ = (-1) ^ (k * (k - 1) / 2) * circleIntegralPow k ρ
+        Finset.sum_congr rfl fun τ _ =>
+          (circleIntegralPow_comp_perm ρ _ τ).symm
+    _ = circleIntegralPow k ρ (fun t => ∑ τ : Equiv.Perm (Fin k),
+          (fun s : Fin k → ℂ => vandermondeProd s
+            * ∏ j, G (s j) * s j ^ (-(j.val : ℤ) - n - 1)) (t ∘ τ)) :=
+        (circleIntegralPow_finset_sum Finset.univ
+          (fun (τ : Equiv.Perm (Fin k)) (t : Fin k → ℂ) => (fun s : Fin k → ℂ => vandermondeProd s
+            * ∏ j, G (s j) * s j ^ (-(j.val : ℤ) - n - 1)) (t ∘ τ))
+          (fun τ _ => (hintV fun j => -(j.val : ℤ) - n - 1).comp_perm τ)).symm
+    _ = (-1) ^ (k * (k - 1) / 2) * circleIntegralPow k ρ
+          (fun t => vandermondeProd t ^ 2 * ∏ a, G (t a) * t a ^ (-n - (k : ℤ))) := by
+        rw [← circleIntegralPow_const_mul]
+        refine circleIntegralPow_congr fun t ht => ?_
+        exact sum_vandermondeProd_comp_perm n (fun a => ne_zero_of_mem_polyCircle hρ.ne' ht a)
+
+/-- **The integral Andréief identity.**  If
+`B m` is the `m`th coefficient integral of `G` over the circle `|t| = ρ`, then
+the `k × k` staircase minor `det [B (n-i+j)]` is the `k`-fold contour integral
+\[
+  \frac{(-1)^{k(k-1)/2}}{k!\,(2\pi i)^k}
+  \int\cdots\int\Delta(t)^2\prod_{a=1}^k G(t_a)\,t_a^{-n-k}\,dt_a .
+\]
+Indices are zero-based here, so the entry in row `i` and column `j` is
+`B (n - i + j)` for `i j : Fin k`; the one-based
+`\det[B_{n-i+j}]_{i,j=1}^k` is the same matrix.  The order `n` is an arbitrary
+integer: nothing forces `B m` to vanish for negative `m`. -/
+theorem det_staircase_eq_circleIntegralPow (n : ℤ) (hρ : 0 < ρ)
+    (hG : ContinuousOn G (Metric.sphere 0 ρ)) {B : ℤ → ℂ}
+    (hB : ∀ m : ℤ, B m = (2 * π * I)⁻¹ * ∮ z in C(0, ρ), G z * z ^ (-m - 1)) :
+    (Matrix.of fun i j : Fin k => B (n - (i.val : ℤ) + (j.val : ℤ))).det
+      = (-1) ^ (k * (k - 1) / 2) / ((Nat.factorial k : ℂ) * (2 * π * I) ^ k)
+        * circleIntegralPow k ρ
             (fun t => vandermondeProd t ^ 2 * ∏ a, G (t a) * t a ^ (-n - (k : ℤ))) := by
-          rw [← circleIntegralPow_const_mul]
-          refine circleIntegralPow_congr fun t ht => ?_
-          have hne : ∀ a, t a ≠ 0 := fun a => ne_zero_of_mem_polyCircle hρ.ne' ht a
-          have hmerge : (∏ a, t a ^ (-((k : ℤ) - 1))) * ∏ a, G (t a) * t a ^ (-n - 1)
-              = ∏ a, G (t a) * t a ^ (-n - (k : ℤ)) := by
-            rw [← Finset.prod_mul_distrib]
-            refine Finset.prod_congr rfl fun a _ => ?_
-            rw [show (-n - (k : ℤ)) = (-((k : ℤ) - 1)) + (-n - 1) by ring, zpow_add₀ (hne a)]
-            ring
-          calc (∑ τ : Equiv.Perm (Fin k), vandermondeProd (t ∘ τ)
-                  * ∏ j, G ((t ∘ τ) j) * (t ∘ τ) j ^ (-(j.val : ℤ) - n - 1))
-              = ∑ τ : Equiv.Perm (Fin k),
-                  (((Equiv.Perm.sign τ : ℤ) : ℂ) * ∏ j, t (τ j) ^ (-(j.val : ℤ)))
-                    * (vandermondeProd t * ∏ a, G (t a) * t a ^ (-n - 1)) :=
-                Finset.sum_congr rfl fun τ _ => by
-                  rw [vandermondeProd_comp_perm t τ,
-                    show (∏ j, G ((t ∘ τ) j) * (t ∘ τ) j ^ (-(j.val : ℤ) - n - 1))
-                      = ∏ j, t (τ j) ^ (-(j.val : ℤ)) * (G (t (τ j)) * t (τ j) ^ (-n - 1)) from
-                      Finset.prod_congr rfl fun j _ => by
-                        simp only [Function.comp_apply]
-                        rw [show (-(j.val : ℤ) - n - 1) = -(j.val : ℤ) + (-n - 1) by ring,
-                          zpow_add₀ (hne (τ j))]
-                        ring,
-                    Finset.prod_mul_distrib,
-                    Equiv.prod_comp τ fun a => G (t a) * t a ^ (-n - 1)]
-                  ring
-            _ = (∑ τ : Equiv.Perm (Fin k),
-                    ((Equiv.Perm.sign τ : ℤ) : ℂ) * ∏ j, t (τ j) ^ (-(j.val : ℤ)))
-                  * (vandermondeProd t * ∏ a, G (t a) * t a ^ (-n - 1)) :=
-                (Finset.sum_mul _ _ _).symm
-            _ = (-1) ^ (k * (k - 1) / 2)
-                  * (vandermondeProd t ^ 2 * ∏ a, G (t a) * t a ^ (-n - (k : ℤ))) := by
-                rw [sum_sign_prod_zpow_neg t hne, ← hmerge]
-                ring
-  rw [step1, show circleIntegralPow k ρ
+  have hfac : (Nat.factorial k : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero k)
+  rw [det_staircase_eq_circleIntegralPow_vandermonde n hρ hG hB, show circleIntegralPow k ρ
         (fun t => vandermondeProd t * ∏ j, G (t j) * t j ^ (-(j.val : ℤ) - n - 1))
       = (Nat.factorial k : ℂ)⁻¹ * ((-1) ^ (k * (k - 1) / 2) * circleIntegralPow k ρ
           (fun t => vandermondeProd t ^ 2 * ∏ a, G (t a) * t a ^ (-n - (k : ℤ)))) by
-    rw [← step2, ← mul_assoc, inv_mul_cancel₀ hfac, one_mul]]
+    rw [← factorial_mul_circleIntegralPow_vandermonde n hρ hG, ← mul_assoc,
+      inv_mul_cancel₀ hfac, one_mul]]
   rw [inv_pow, div_eq_mul_inv, mul_inv]
   ring
 
 end Andreief
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.polyCircle' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms polyCircle
+
+/-- info: 'Shields.circleIntegralPow' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms circleIntegralPow
+
+/-- info: 'Shields.CircleIntegrablePow' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms CircleIntegrablePow
+
+/-- info: 'Shields.vandermondeProd' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms vandermondeProd
 
 end Shields

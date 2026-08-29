@@ -129,7 +129,11 @@ theorem continuousOn_ftAngleSumDerivTau {n : ℕ} (a : Fin n → ℝ) :
       (ne_of_gt (sin_pos_of_pos_of_lt_pi (hp.2).1 (hp.2).2))
 
 /-- The mean value theorem on `uIcc`, which covers `x = y` without a case split:
-the degenerate interval makes both sides zero. -/
+the degenerate interval makes both sides zero.
+
+**A general fact about real functions, filed where it was first needed.**  The
+angle system does not enter it; it is here because the `τ`-partial's mean value
+step is the first place the unordered interval was wanted. -/
 theorem exists_hasDerivAt_eq_sub_uIcc (f f' : ℝ → ℝ) {x y : ℝ}
     (hd : ∀ u ∈ uIcc x y, HasDerivAt f (f' u) u) :
     ∃ ξ ∈ uIcc x y, f y - f x = f' ξ * (y - x) := by

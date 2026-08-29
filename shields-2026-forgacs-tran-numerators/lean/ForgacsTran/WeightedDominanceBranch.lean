@@ -9,7 +9,7 @@ import ForgacsTran.EndpointUpperGap
 /-!
 # `thm:weighted-dominance` at the Forgács–Tran branch
 
-`DominanceFT.weighted_dominance_of_branch_any_multiplicity_at_of_threshold_of_data`
+`DominanceFTBranch.weighted_dominance_of_branch_any_multiplicity_at_of_threshold_of_data`
 states the weighted dominance bound against fifty binders describing an abstract branch,
 its two endpoint clusters and the two thresholds.  This module discharges every
 one of them at the branch itself, so what is left is the admissible class: `Q` a

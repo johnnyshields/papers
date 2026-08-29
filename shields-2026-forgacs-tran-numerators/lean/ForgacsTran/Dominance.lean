@@ -78,7 +78,7 @@ theorem log_le_log_one_add_div {x : ℝ} (hx : 0 ≤ x) :
     x / (1 + x) ≤ Real.log (1 + x) := by
   have h1 : (0:ℝ) < 1 + x := by linarith
   have h := Real.one_sub_inv_le_log_of_pos h1
-  rwa [show 1 - (1 + x)⁻¹ = x / (1 + x) by field_simp; ring] at h
+  rwa [show 1 - (1 + x)⁻¹ = x / (1 + x) by field] at h
 
 /-- Paper `subsec:weighted-dominance`, `lem:near-cluster-suppression`: the conversion of the
 linear endpoint modulus gap `|ζ_j| ≥ 1 + c₀θ` into exponential suppression.

@@ -24,7 +24,9 @@ the pushforwards out of the statements.
 
 * `Shields.clampIcc`: the retraction `x ↦ max a (min b x)` of the line onto `[a, b]`, used to
   turn an unbounded continuous integrand into a bounded one without changing any integral
-  against a measure concentrated on the interval.
+  against a measure concentrated on the interval.  It is `Set.projIcc a b` followed by the
+  coercion back to `ℝ`, kept real-valued so that it composes with an integrand `ℝ → ℝ` and
+  carries no `a ≤ b` argument.
 
 ## Main statements
 
@@ -156,15 +158,13 @@ theorem tendsto_of_tendsto_integral_pow {ι : Type*} {L : Filter ι}
   rw [Metric.tendsto_nhds] at hpoly
   filter_upwards [hpoly (ε / 4) (by positivity)] with i hi
   rw [Real.dist_eq] at hi ⊢
-  have h₁ := hnear _ inferInstance (hμs i)
-  have h₂ := hnear _ inferInstance hμ
-  have t₁ := abs_sub_le (∫ x, f x ∂(μs i : Measure ℝ)) (∫ x, p.eval x ∂(μs i : Measure ℝ))
-    (∫ x, f x ∂(μ : Measure ℝ))
-  have t₂ := abs_sub_le (∫ x, p.eval x ∂(μs i : Measure ℝ)) (∫ x, p.eval x ∂(μ : Measure ℝ))
-    (∫ x, f x ∂(μ : Measure ℝ))
-  have t₃ : |∫ x, p.eval x ∂(μ : Measure ℝ) - ∫ x, f x ∂(μ : Measure ℝ)|
-      = |∫ x, f x ∂(μ : Measure ℝ) - ∫ x, p.eval x ∂(μ : Measure ℝ)| := abs_sub_comm _ _
-  linarith
+  -- three steps `f, μs i` → `p, μs i` → `p, μ` → `f, μ`, each below `ε/4`
+  linarith [hnear _ inferInstance (hμs i), hnear _ inferInstance hμ,
+    abs_sub_le (∫ x, f x ∂(μs i : Measure ℝ)) (∫ x, p.eval x ∂(μs i : Measure ℝ))
+      (∫ x, f x ∂(μ : Measure ℝ)),
+    abs_sub_le (∫ x, p.eval x ∂(μs i : Measure ℝ)) (∫ x, p.eval x ∂(μ : Measure ℝ))
+      (∫ x, f x ∂(μ : Measure ℝ)),
+    abs_sub_comm (∫ x, p.eval x ∂(μ : Measure ℝ)) (∫ x, f x ∂(μ : Measure ℝ))]
 
 /-- Two probability measures concentrated on the same compact interval with the same moments are
 equal: the uniqueness half of the Hausdorff moment problem. -/
@@ -267,5 +267,12 @@ theorem exists_tendsto_of_forall_exists_tendsto_integral_pow (hab : a ≤ b)
   have : c = ∫ x, x ^ k ∂(μ : Measure ℝ) :=
     tendsto_nhds_unique (hc.comp hφ.tendsto_atTop) hsub
   rwa [← this]
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.clampIcc' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms clampIcc
 
 end Shields

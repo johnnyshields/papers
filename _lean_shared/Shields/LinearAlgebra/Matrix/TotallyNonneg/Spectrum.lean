@@ -168,7 +168,7 @@ theorem tendsto_gaussKernel (n : ℕ) :
 
 /-- **A nonnegative matrix sandwiched between two positive ones is positive**,
 unless it is zero. -/
-theorem pos_of_pos_mul_mul_pos {ι : Type*} [Fintype ι] [DecidableEq ι]
+theorem pos_of_pos_mul_mul_pos {ι : Type*} [Fintype ι]
     {P N Q : Matrix ι ι ℝ} (hP : ∀ i j, 0 < P i j) (hQ : ∀ i j, 0 < Q i j)
     (hN : ∀ i j, 0 ≤ N i j) (hNne : N ≠ 0) (i j : ι) : 0 < (P * N * Q) i j := by
   obtain ⟨k, l, hkl⟩ : ∃ k l, N k l ≠ 0 := by
@@ -250,5 +250,12 @@ theorem genVandermonde_charpoly_roots_card {m : ℕ} {x : Fin m → ℝ} {k : Fi
     (hx : StrictMono x) (hxpos : ∀ i, 0 < x i) (hk : StrictMono k) :
     Multiset.card (genVandermonde x k).charpoly.roots = m :=
   charpoly_roots_card_of_minorsNonneg _ fun r => minorsNonneg_genVandermonde hx hxpos hk r
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.charpoly_roots_card_of_minorsNonneg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms charpoly_roots_card_of_minorsNonneg
 
 end Shields

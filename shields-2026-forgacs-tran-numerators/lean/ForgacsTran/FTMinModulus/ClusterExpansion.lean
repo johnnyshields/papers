@@ -94,15 +94,15 @@ and third derivative conditions combine to `(r-1)P'(t_e) - t_e P''(t_e) = 0`.
 Their proof then plays this against the interlacing of the zeros of `P'` and
 `P''` to contradict `ρ = 1`; that interlacing step is not here. -/
 theorem second_deriv_relation {P : Polynomial ℂ} {r : ℕ} (hr : 2 ≤ r) {a te : ℂ}
-    (hte : te ≠ 0)
+    (_hte : te ≠ 0)
     (h2 : (derivative P).eval te + (r : ℂ) * a * te ^ (r - 1) = 0)
     (h3 : (derivative (derivative P)).eval te
       + (r : ℂ) * ((r : ℂ) - 1) * a * te ^ (r - 2) = 0) :
     ((r : ℂ) - 1) * (derivative P).eval te
       - te * (derivative (derivative P)).eval te = 0 := by
   have hpow : te ^ (r - 1) = te * te ^ (r - 2) := by
-    conv_lhs => rw [show r - 1 = 1 + (r - 2) by omega]
-    rw [pow_add, pow_one]
+    rw [show r - 2 = r - 1 - 1 by omega]
+    exact (mul_pow_sub_one (by omega) te).symm
   have e2 : (derivative P).eval te = -((r : ℂ) * a * te ^ (r - 1)) := by linear_combination h2
   have e3 : (derivative (derivative P)).eval te
       = -((r : ℂ) * ((r : ℂ) - 1) * a * te ^ (r - 2)) := by linear_combination h3
@@ -421,7 +421,7 @@ a supplier shrinks its window rather than strengthening its hypotheses.
 and the cluster expansion itself is the input, not the output. -/
 theorem cluster_normalized_expansion {n₀ : ℕ} {x₁ : ℝ} (hx : 0 < x₁) {ρ : ℕ} (hρ : 2 ≤ ρ)
     {idx₀ : Fin n₀ → ℕ} {jp : ℕ} {g₀ : ℝ → Fin n₀ → ℂ} {τ : ℝ → ℝ} {tp : ℝ → ℂ}
-    {C ε : ℝ} (hC : 0 ≤ C) (hε : 0 < ε) (hε1 : ε ≤ 1)
+    {C ε : ℝ} (hC : 0 ≤ C) (_hε : 0 < ε) (hε1 : ε ≤ 1)
     (hεs : ε ≤ Real.sin (Real.pi / ρ) / 2)
     (hp : (clusterOmega ρ jp).re = Real.cos (Real.pi / ρ))
     (hτeq : ∀ δ : ℝ, 0 < δ → δ ≤ ε → τ δ = ‖tp δ‖)
@@ -994,6 +994,18 @@ theorem norm_pow_sub_pow_le_of_norm_le {t s : ℂ} {M : ℝ} {r : ℕ}
       ≤ ∑ _i ∈ Finset.range r, M ^ (r - 1) := Finset.sum_le_sum hterm
     _ = r * M ^ (r - 1) := by rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
 
+/-- **The Lipschitz constant on a disk is nonnegative.**  Every summand of
+`∑_k ‖c_k‖·kM^{k-1}` is a product of nonnegative factors.
+
+Small, and named because it is not local: the same sum is the constant of
+`norm_eval_sub_eval_le_of_norm_le`, of `RoucheModel.norm_pencil_sub_model_le_of_norm_le`
+and of `UpperEndpoint.exists_ftDen_root_near_origin_model_root`, and every caller
+that carries it as a `set` needs this before it can use it. -/
+theorem lipschitzSum_nonneg (q : ℂ[X]) {M : ℝ} (hM : 0 ≤ M) :
+    0 ≤ ∑ k ∈ Finset.range (q.natDegree + 1), ‖q.coeff k‖ * ((k : ℝ) * M ^ (k - 1)) :=
+  Finset.sum_nonneg fun k _ =>
+    mul_nonneg (norm_nonneg _) (mul_nonneg (Nat.cast_nonneg k) (pow_nonneg hM _))
+
 /-- **The polynomial increment, the other half of the ratio supply.**  On a disk
 of radius `M` a polynomial is Lipschitz with the explicit constant
 `∑_k ‖c_k‖·kM^{k-1}`, by summing `norm_pow_sub_pow_le_of_norm_le` over the
@@ -1032,9 +1044,7 @@ theorem norm_eval_mem_of_norm_sub_le {q : ℂ[X]} {t s : ℂ} {M e : ℝ}
     ‖q.eval s‖ / 2 ≤ ‖q.eval t‖ ∧ ‖q.eval t‖ ≤ 3 * ‖q.eval s‖ / 2 := by
   have hM0 : (0 : ℝ) ≤ M := le_trans (norm_nonneg t) ht
   have hL0 : (0 : ℝ) ≤ ∑ k ∈ Finset.range (q.natDegree + 1),
-      ‖q.coeff k‖ * ((k : ℝ) * M ^ (k - 1)) :=
-    Finset.sum_nonneg fun k _ =>
-      mul_nonneg (norm_nonneg _) (mul_nonneg (Nat.cast_nonneg k) (pow_nonneg hM0 _))
+      ‖q.coeff k‖ * ((k : ℝ) * M ^ (k - 1)) := lipschitzSum_nonneg q hM0
   have hbd : ‖q.eval t - q.eval s‖
       ≤ (∑ k ∈ Finset.range (q.natDegree + 1), ‖q.coeff k‖ * ((k : ℝ) * M ^ (k - 1))) * e :=
     le_trans (norm_eval_sub_eval_le_of_norm_le ht hs)

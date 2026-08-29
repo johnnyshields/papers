@@ -8,8 +8,9 @@ import Mathlib
 /-!
 # The angular bookkeeping of `subsec:proof`
 
-Three small facts the counting argument of `prop:angular-discrepancy` runs on, none of which
-needs the analysis:
+The bookkeeping the counting argument of `prop:angular-discrepancy` runs on, none of which
+needs the analysis: the reparametrization, the block count, the monotonicity of `Φ_M`, and
+the deleted family of `eq:amplitude-deletion` with its negligibility.
 
 ## Main statements
 
@@ -26,6 +27,24 @@ needs the analysis:
   depend on the weight — the constants are not.
 * `strictMonoOn_phase_congr` — the same for an abstract `Φ` given only `Φ = φ - ψ` on the
   component, which is the shape a phase-count lemma carries it in.
+* `strictMonoOn_phase_lt`, `strictMonoOn_phase_congr_lt` — the two above with `|ψ'| < M + 1`
+  **pointwise** rather than through a uniform `κ`.  This is the form the count actually
+  consumes, and asking for the uniform one instead turns a threshold on `M` into a growth
+  claim about `κ_M`, because the retained range moves with `M`.
+* `continuousOn_phase_congr` — `Φ_M` is continuous on the component, for the same reason it
+  is monotone there.
+* `windowRadius`, `amplitudeWindows`, `deletedLength` — `eq:amplitude-deletion`'s family,
+  **built** rather than posited: one open interval per amplitude zero, of exactly the
+  half-width `thm:weighted-dominance`'s own inequality names.
+* `amplitudeWindows_spec` — that family meets the dominance theorem's window inequality by
+  construction, with no hypothesis at all.
+* `windowRadius_le` — every radius is below the one the largest multiplicity gives, which is
+  what lets `AngularBlocks` take the whole family at one common half-width; a nested family
+  has no ordered block decomposition.
+* `tendsto_deletedLength`, `eventually_deletedLength_le_one` —
+  `eq:amplitude-window-negligible`: `(M+1)∑_j|Θ_{j,M}| → 0`, an exponential in `M` against a
+  linear prefactor.  The rate sees `B` through `|S|`, `max ν_j` and `σ`; the statement it
+  feeds does not.
 
 ## Implementation notes
 
@@ -34,7 +53,8 @@ Sorry-free.
 ## References
 
 Formalizes `../shields-2026-forgacs-tran-numerators.tex`, «Angular discrepancy and proof of
-the main theorem» (`subsec:proof`, `eq:angular-subinterval`, `eq:Omega-M`, `eq:Phi-def`).
+the main theorem» (`subsec:proof`, `eq:angular-subinterval`, `eq:Omega-M`, `eq:Phi-def`,
+`eq:amplitude-deletion`, `eq:amplitude-window-negligible`).
 
 ## Tags
 

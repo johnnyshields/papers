@@ -73,7 +73,7 @@ second half of this module.
 one component of the complement of the amplitude zeros, and the retained range of
 `eq:dominance-bound` moves with `M`; those are different sets.  But the bound the
 strong clock consumes does not come from the retained range.
-`DominanceFT.interior_remainder_uniform` holds on a **fixed compact interval**
+`DominanceFTSupply.interior_remainder_uniform` holds on a **fixed compact interval**
 with no window condition at all, and on a compact zero-free subarc the amplitude
 floor is compactness of `|W|`, not `eq:amplitude-deletion`.  The deleted windows
 exist to handle the *zeros* of the amplitude; a subarc chosen to avoid them needs

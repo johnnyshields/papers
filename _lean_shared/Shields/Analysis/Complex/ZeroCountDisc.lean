@@ -53,9 +53,7 @@ theorem FactoredOn.card_eq {F : ℂ → ℂ} {c : ℂ} {R : ℝ} (hR : 0 < R)
     (h : FactoredOn F c R n a G) (h' : FactoredOn F c R n' a' G') : n = n' := by
   have h₁ := circleIntegral_logDeriv_eq_of_factoredOn hR h
   have h₂ := circleIntegral_logDeriv_eq_of_factoredOn hR h'
-  have h2pi : (2 * (Real.pi : ℂ) * I) ≠ 0 := by
-    simp [Real.pi_ne_zero, Complex.I_ne_zero]
-  exact_mod_cast mul_right_cancel₀ h2pi (h₁.symm.trans h₂)
+  exact_mod_cast mul_right_cancel₀ two_pi_I_ne_zero (h₁.symm.trans h₂)
 
 /-! ### Restriction to a concentric subdisk
 
@@ -195,17 +193,10 @@ nonvanishing on the circle; here the witness may sit anywhere, which is what a f
 *does* vanish on the circle needs. -/
 theorem finite_zeros_of_entire {c : ℂ} {R : ℝ} {F : ℂ → ℂ} (hF : Differentiable ℂ F)
     {w₀ : ℂ} (hne : F w₀ ≠ 0) : {z ∈ Metric.closedBall c R | F z = 0}.Finite := by
-  by_contra hinf
-  obtain ⟨y, hy, hacc⟩ :=
-    Set.Infinite.exists_accPt_of_subset_isCompact hinf (isCompact_closedBall c R)
-      (fun z hz => hz.1)
   have hA : AnalyticOnNhd ℂ F Set.univ := fun z _ => hF.analyticAt z
-  rcases (hA y (mem_univ y)).eventually_eq_zero_or_eventually_ne_zero with hz | hz
-  · exact hne (hA.eqOn_zero_of_preconnected_of_eventuallyEq_zero isPreconnected_univ
-      (mem_univ y) hz (mem_univ w₀))
-  · rw [accPt_iff_frequently_nhdsNE] at hacc
-    obtain ⟨z, hz₁, hz₂⟩ := (hacc.and_eventually hz).exists
-    exact hz₂ hz₁.2
+  refine finite_zeros_of_analyticOnNhd (fun z _ => hF.analyticAt z) fun w _ hw => hne ?_
+  exact hA.eqOn_zero_of_preconnected_of_eventuallyEq_zero isPreconnected_univ
+    (mem_univ w) hw (mem_univ w₀)
 
 /-! ### Multiplicity at a point -/
 
@@ -306,5 +297,24 @@ theorem FactoredOn.count_eq_one_of_deriv_ne_zero {F : ℂ → ℂ} {c : ℂ} {R 
     rw [hFeq]
     exact hmul
   exact h1 hFd.deriv
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.FactoredOn.card_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms FactoredOn.card_eq
+
+/-- info: 'Shields.FactoredOn.restrict' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms FactoredOn.restrict
+
+/-- info: 'Shields.FactoredOn.count_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms FactoredOn.count_eq
+
+/-- info: 'Shields.FactoredOn.count_eq_one_of_deriv_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms FactoredOn.count_eq_one_of_deriv_ne_zero
 
 end Shields

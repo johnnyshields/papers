@@ -4,47 +4,56 @@ Released under the MIT license as described in the file LICENSE.txt.
 Authors: Johnny Shields
 -/
 import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
-import Mathlib.Tactic
+import Mathlib.Tactic.Common
 
 /-!
 # Laplace expansion along unit rows
 
-Mathlib expands a determinant along **one** row (`Matrix.det_succ_row`).  This file supplies
-the specialization to a row that is a standard basis vector, and then the two-row form.
+Mathlib expands a determinant along **one** row (`Matrix.det_succ_row`).  This file supplies the
+specialization to a row that is a standard basis vector, its two-row form, and the deletion of
+`k` unit rows at once, together with the `q`-expansion of `det(A + qB)` those deletions evaluate.
 
-* `det_of_row_eq_single`: if row `i` of `M` is `e_j`, the expansion at `i` has a single
+## Main results
+
+* `Shields.det_of_row_eq_single`: if row `i` of `M` is `e_j`, the expansion at `i` has a single
   surviving term, so `det M = (-1)^{i+j} · det M[î | ĵ]`.
-* `det_of_two_rows_eq_single`: rows `i₀ < i₁` are `e_{j₀}` and `e_{j₁}` with `j₀ < j₁`.
+* `Shields.det_of_two_rows_eq_single`: rows `i₀ < i₁` are `e_{j₀}` and `e_{j₁}` with `j₀ < j₁`.
   Deleting the first pair moves the second row and column index down by one **each**, so the
   two shifts cancel in the exponent and the accumulated sign is again `(-1)^{Σ(i + j)}`.
+* `Shields.det_of_unitRows`, `Shields.det_of_unitRows_of_card`: `k` unit rows deleted at once.
+  The surviving minor is taken on strictly monotone selections avoiding the deleted rows, and
+  the sign is again `(-1)^{Σ(ι a + κ a)}`.
+* `Shields.det_add_smul_eq_sum`: the `q`-expansion of `det(A + qB)` over row subsets, each
+  subset taken from `B` contributing a power of `q` equal to its size.
 
-What this is for.  The `q`-expansion of `det(A + qE)` with `E` carrying unit rows -- the mixed
-staircase `T_{n,2} + qS_n^2` of a Toeplitz symbol is the case at hand -- has coefficients that
-are, term by term, complementary minors of `A`.  Reading them off means deleting a set of unit
-rows at once, and the cancellation above is why the sign comes out `+1` when the row and
-column sets are translates of one another: `Σ(i + (i - c))` is even for a constant shift `c`.
+## Implementation notes
 
-The other half of the machinery -- expanding `det(A + qB)` over row subsets -- is **not**
-missing from Mathlib: `MultilinearMap.map_add_univ` does it for any multilinear map, and
-`Matrix.detRowAlternating` is that map in the rows.  `det_add_smul_eq_sum` below is that
-statement in matrix language with the scalar pulled out, and costs nothing beyond naming.
+The `q`-expansion of `det(A + qE)` with `E` carrying unit rows has coefficients that are, term
+by term, complementary minors of `A`.  Reading them off means deleting a set of unit rows at
+once, and the sign cancellation above is why the sign comes out `+1` when the row and column
+sets are translates of one another: `Σ(i + (i - c))` is even for a constant shift `c`.
 
-The `k`-row deletion, `det_of_unitRows`, is the one thing genuinely absent upstream, and it is
-proved here.  The induction peels the smallest unit row and the same `succAbove` bookkeeping
-recurs; the two-row case above is that induction at `k = 2`, kept because it is where the sign
-cancellation is visible.
+Expanding `det(A + qB)` over row subsets is **not** missing from Mathlib:
+`MultilinearMap.map_add_univ` does it for any multilinear map, and `Matrix.detRowAlternating`
+is that map in the rows.  `det_add_smul_eq_sum` is that statement in matrix language with the
+scalar pulled out, and costs nothing beyond naming.
+
+The `k`-row deletion is the one thing genuinely absent upstream.  The induction peels the
+smallest unit row, and `exists_strictMono_succAbove_zero` carries the `succAbove` bookkeeping
+that peel needs -- the row and the column family use it identically.  The two-row case is that
+induction at `k = 2`, kept because it is where the sign cancellation is visible.
 
 The statement does **not** name the surviving row and column selections -- it asserts only that
-they exist, are strictly monotone, and avoid the deleted rows.  That sidesteps having to present
-the complement of a `Finset` as an ordered index type, which is what had made the general case
-look like a development rather than a lemma, and it is exactly what a total-nonnegativity
-hypothesis consumes.  The avoidance clause is what identifies the surviving minor as a minor of
-the *other* summand: without it the conclusion is a determinant identity that carries no sign
-information.
+they exist, are strictly monotone, and avoid the deleted rows.  That sidesteps having to
+present the complement of a `Finset` as an ordered index type, and it is exactly what a
+total-nonnegativity hypothesis consumes.  The avoidance clause is what identifies the surviving
+minor as a minor of the *other* summand: without it the conclusion is a determinant identity
+that carries no sign information.
 
-Sorry-free.
+## Tags
+
+determinant, laplace expansion, minor, unit row, multilinear
 -/
-
 namespace Shields
 
 open Matrix
@@ -62,6 +71,22 @@ theorem det_of_row_eq_single {n : ℕ} (M : Matrix (Fin (n + 1)) (Fin (n + 1)) R
     rw [hrow b, if_neg hb, mul_zero, zero_mul]
   · intro h
     exact absurd (Finset.mem_univ j) h
+
+/-- **A unit row survives the deletion of another row and its column.**  If row `r` of `M` is
+`e_c`, and `r`, `c` are the images of `a`, `b` under deletion at `p`, `q`, then row `a` of the
+deleted matrix is `e_b`.  Injectivity of `Fin.succAbove` is what keeps the other entries at
+zero. -/
+theorem submatrix_succAbove_row_eq_single {N : ℕ} (M : Matrix (Fin (N + 1)) (Fin (N + 1)) R)
+    {p q r c : Fin (N + 1)} {a b : Fin N}
+    (hrow : ∀ k, M r k = if k = c then 1 else 0)
+    (ha : p.succAbove a = r) (hb : q.succAbove b = c) (k : Fin N) :
+    (M.submatrix p.succAbove q.succAbove) a k = if k = b then 1 else 0 := by
+  rw [Matrix.submatrix_apply, ha, hrow]
+  by_cases hk : k = b
+  · rw [if_pos hk, hk, hb, if_pos rfl]
+  · refine (if_neg ?_).trans (if_neg hk).symm
+    intro hc
+    exact hk (Fin.succAbove_right_inj.mp (hc.trans hb.symm))
 
 /-- `succAbove` above the deleted index is `succ`: the surviving index drops by one. -/
 theorem val_of_succAbove_eq {n : ℕ} {p : Fin (n + 2)} {a : Fin (n + 1)} {r : Fin (n + 2)}
@@ -83,14 +108,7 @@ theorem det_of_two_rows_eq_single {n : ℕ} (M : Matrix (Fin (n + 2)) (Fin (n + 
     (ha : i₀.succAbove a = i₁) (hb : j₀.succAbove b = j₁) :
     M.det = (-1) ^ ((i₀ : ℕ) + (j₀ : ℕ) + (i₁ : ℕ) + (j₁ : ℕ))
       * ((M.submatrix i₀.succAbove j₀.succAbove).submatrix a.succAbove b.succAbove).det := by
-  have hrow : ∀ k, (M.submatrix i₀.succAbove j₀.succAbove) a k = if k = b then 1 else 0 := by
-    intro k
-    rw [Matrix.submatrix_apply, ha, h₁]
-    by_cases hk : k = b
-    · rw [if_pos hk, hk, hb, if_pos rfl]
-    · refine (if_neg ?_).trans (if_neg hk).symm
-      intro hc
-      exact hk (Fin.succAbove_right_injective (p := j₀) (by rw [hc, hb]))
+  have hrow := submatrix_succAbove_row_eq_single M h₁ ha hb
   rw [det_of_row_eq_single M i₀ j₀ h₀,
     det_of_row_eq_single (M.submatrix i₀.succAbove j₀.succAbove) a b hrow, ← mul_assoc]
   have hav : (i₁ : ℕ) = (a : ℕ) + 1 := val_of_succAbove_eq ha hi
@@ -173,6 +191,41 @@ identify the complement of a `Finset` as an ordered index type.
 
 section UnitRows
 
+/-- **Peeling the smallest member of a strictly monotone family.**  A strictly monotone
+`ν : Fin (k + 1) → Fin (N + 1)` is its smallest member `ν 0` inserted into a strictly monotone
+family `ν'` of length `k`, via `succAbove` at that member.  Each `ν' a` sits one below
+`ν a.succ`, since every later member is past `ν 0`. -/
+theorem exists_strictMono_succAbove_zero {N k : ℕ} {ν : Fin (k + 1) → Fin (N + 1)}
+    (hν : StrictMono ν) :
+    ∃ ν' : Fin k → Fin N, StrictMono ν' ∧ (∀ a, ((ν' a : ℕ)) + 1 = (ν a.succ : ℕ)) ∧
+      ∀ a, (ν 0).succAbove (ν' a) = ν a.succ := by
+  have hpos : ∀ a : Fin k, ν 0 < ν a.succ := fun a => hν (Fin.succ_pos a)
+  have hne : ∀ a : Fin k, ν a.succ ≠ 0 := fun a =>
+    Fin.ne_of_gt (lt_of_le_of_lt (Fin.zero_le _) (hpos a))
+  have hval : ∀ a, (((ν a.succ).pred (hne a) : Fin N) : ℕ) + 1 = (ν a.succ : ℕ) := by
+    intro a
+    have := hpos a
+    rw [Fin.lt_def] at this
+    rw [Fin.val_pred]
+    omega
+  refine ⟨fun a => (ν a.succ).pred (hne a), fun a b hab => ?_, hval, fun a => ?_⟩
+  · change (ν a.succ).pred (hne a) < (ν b.succ).pred (hne b)
+    rw [Fin.lt_def]
+    have hlt := hν (Fin.succ_lt_succ_iff.mpr hab)
+    rw [Fin.lt_def] at hlt
+    have ha := hval a
+    have hb := hval b
+    omega
+  · change (ν 0).succAbove ((ν a.succ).pred (hne a)) = ν a.succ
+    have hle : ν 0 ≤ ((ν a.succ).pred (hne a)).castSucc := by
+      rw [Fin.le_def, Fin.val_castSucc]
+      have hv := hval a
+      have h2 := hpos a
+      rw [Fin.lt_def] at h2
+      omega
+    rw [Fin.succAbove_of_le_castSucc _ _ hle]
+    exact Fin.succ_pred _ _
+
 /-- **Laplace expansion along `k` unit rows.**  If rows `ι 0 < ⋯ < ι (k-1)` of `M` are the
 standard basis vectors `e_{κ 0}, …, e_{κ (k-1)}` with `κ` increasing as well, then `det M` is
 `(-1)^{Σ(ι a + κ a)}` times a minor of `M` taken on strictly increasing selections.
@@ -193,75 +246,16 @@ theorem det_of_unitRows (m : ℕ) :
       exact ⟨id, id, strictMono_id, strictMono_id, fun _ b => b.elim0, by simp⟩
   | succ k ih =>
       intro M ι κ hι hκ hrow
+      -- the tails of the two families, peeled at their smallest members
+      obtain ⟨ι', hι'mono, hι'val, hιsucc⟩ := exists_strictMono_succAbove_zero hι
+      obtain ⟨κ', hκ'mono, hκ'val, hκsucc⟩ := exists_strictMono_succAbove_zero hκ
       -- the smallest unit row, and its column
       set i₀ : Fin (m + k + 1) := ι 0 with hi₀
       set j₀ : Fin (m + k + 1) := κ 0 with hj₀
-      have hipos : ∀ a : Fin k, i₀ < ι a.succ := fun a => hι (by exact Fin.succ_pos a)
-      have hjpos : ∀ a : Fin k, j₀ < κ a.succ := fun a => hκ (by exact Fin.succ_pos a)
-      have hine : ∀ a : Fin k, ι a.succ ≠ 0 := fun a =>
-        Fin.ne_of_gt (lt_of_le_of_lt (Fin.zero_le _) (hipos a))
-      have hjne : ∀ a : Fin k, κ a.succ ≠ 0 := fun a =>
-        Fin.ne_of_gt (lt_of_le_of_lt (Fin.zero_le _) (hjpos a))
-      set ι' : Fin k → Fin (m + k) := fun a => (ι a.succ).pred (hine a) with hι'
-      set κ' : Fin k → Fin (m + k) := fun a => (κ a.succ).pred (hjne a) with hκ'
-      have hι'val : ∀ a, ((ι' a : ℕ)) + 1 = (ι a.succ : ℕ) := by
-        intro a
-        have := (hipos a)
-        rw [Fin.lt_def] at this
-        simp only [hι', Fin.val_pred]
-        omega
-      have hκ'val : ∀ a, ((κ' a : ℕ)) + 1 = (κ a.succ : ℕ) := by
-        intro a
-        have := (hjpos a)
-        rw [Fin.lt_def] at this
-        simp only [hκ', Fin.val_pred]
-        omega
-      have hιsucc : ∀ a, i₀.succAbove (ι' a) = ι a.succ := by
-        intro a
-        have hle : i₀ ≤ (ι' a).castSucc := by
-          rw [Fin.le_def, Fin.val_castSucc]
-          have := hι'val a
-          have h2 := hipos a
-          rw [Fin.lt_def] at h2
-          omega
-        rw [Fin.succAbove_of_le_castSucc _ _ hle]
-        exact Fin.succ_pred _ _
-      have hκsucc : ∀ a, j₀.succAbove (κ' a) = κ a.succ := by
-        intro a
-        have hle : j₀ ≤ (κ' a).castSucc := by
-          rw [Fin.le_def, Fin.val_castSucc]
-          have := hκ'val a
-          have h2 := hjpos a
-          rw [Fin.lt_def] at h2
-          omega
-        rw [Fin.succAbove_of_le_castSucc _ _ hle]
-        exact Fin.succ_pred _ _
-      have hι'mono : StrictMono ι' := by
-        intro a b hab
-        rw [Fin.lt_def]
-        have := hι (Fin.succ_lt_succ_iff.mpr hab)
-        rw [Fin.lt_def] at this
-        have ha := hι'val a
-        have hb := hι'val b
-        omega
-      have hκ'mono : StrictMono κ' := by
-        intro a b hab
-        rw [Fin.lt_def]
-        have := hκ (Fin.succ_lt_succ_iff.mpr hab)
-        rw [Fin.lt_def] at this
-        have ha := hκ'val a
-        have hb := hκ'val b
-        omega
       set M' : Matrix (Fin (m + k)) (Fin (m + k)) R :=
         M.submatrix i₀.succAbove j₀.succAbove with hM'
-      have hrow' : ∀ a c, M' (ι' a) c = if c = κ' a then 1 else 0 := by
-        intro a c
-        rw [hM', Matrix.submatrix_apply, hιsucc, hrow]
-        by_cases hc : c = κ' a
-        · rw [if_pos hc, hc, hκsucc, if_pos rfl]
-        · refine (if_neg ?_).trans (if_neg hc).symm
-          intro hcc
-          exact hc (Fin.succAbove_right_injective (p := j₀) (by rw [hcc, hκsucc]))
+      have hrow' : ∀ a c, M' (ι' a) c = if c = κ' a then 1 else 0 := fun a =>
+        submatrix_succAbove_row_eq_single M (hrow a.succ) (hιsucc a) (hκsucc a)
       obtain ⟨f', g', hf', hg', havoid', hdet'⟩ := ih M' ι' κ' hι'mono hκ'mono hrow'
       have havoid : ∀ (a : Fin m) (b : Fin (k + 1)), i₀.succAbove (f' a) ≠ ι b := by
         intro a b
@@ -286,7 +280,6 @@ theorem det_of_unitRows (m : ℕ) :
       have htot : ∑ a : Fin (k + 1), ((ι a : ℕ) + (κ a : ℕ))
           = ((i₀ : ℕ) + (j₀ : ℕ) + ∑ a : Fin k, ((ι' a : ℕ) + (κ' a : ℕ))) + 2 * k := by
         rw [Fin.sum_univ_succ, ← hsum]
-        ring_nf
         omega
       have hpar : ∀ x y : ℕ, ((-1 : R)) ^ (x + 2 * y) = (-1) ^ x := fun x y => by
         rw [pow_add, pow_mul]
@@ -307,5 +300,20 @@ theorem det_of_unitRows_of_card {n m k : ℕ} (hn : n = m + k)
   exact det_of_unitRows m k M ι κ hι hκ hrow
 
 end UnitRows
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.det_of_two_rows_eq_single' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms det_of_two_rows_eq_single
+
+/-- info: 'Shields.det_of_unitRows_of_card' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms det_of_unitRows_of_card
+
+/-- info: 'Shields.det_add_smul_eq_sum' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms det_add_smul_eq_sum
 
 end Shields

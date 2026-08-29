@@ -4,6 +4,7 @@ Released under the MIT license as described in the file LICENSE.txt.
 Authors: Johnny Shields
 -/
 import ForgacsTran.BranchAmplitude
+import ForgacsTran.PencilIndex
 import ForgacsTran.CubicPhaseSign
 import ForgacsTran.InteriorSupply
 
@@ -338,11 +339,6 @@ A **degenerate** subarc `lo = hi` is legal and makes the `M`-body vacuous, corre
 `hlo` and `hhi` then read `Φ(lo) ≤ u_0 - δ` and `u_0 + π + δ ≤ Φ(lo)`, which
 contradict each other.  Two consecutive zeros do not fit in a point. -/
 
-theorem hasRealCoeffs_one : HasRealCoeffs (1 : Polynomial ℂ) := fun k => by
-  rcases Nat.eq_zero_or_pos k with rfl | hk
-  · simp
-  · rw [Polynomial.coeff_one, if_neg (Nat.ne_of_gt hk), map_zero]
-
 /-- **`exists_ft_local_strong_clock_at_branch` applies at a real pencil.**  The polar
 identity is its first conjunct; obtaining it discharges the whole hypothesis list, so
 this is the non-vacuity witness rather than a new statement. -/
@@ -357,7 +353,7 @@ theorem ft_local_strong_clock_at_branch_applies :
   have harc : Icc (1 : ℝ) 2 ⊆ Ioo 0 (π / ((1 : ℕ) : ℝ)) := by
     intro θ hθ
     have h3 : (3 : ℝ) < π := Real.pi_gt_three
-    exact ⟨by linarith [hθ.1], by push_cast; rw [div_one]; linarith [hθ.2]⟩
+    exact ⟨by linarith [hθ.1], by rw [pi_div_natCast_one]; linarith [hθ.2]⟩
   obtain ⟨κ, hκ0, κ₂, hκ₂0, ψ, hpolar, -⟩ :=
     exists_ft_local_strong_clock_at_branch (n := 3) (a := ![1, 1, 1]) (c := 1)
       (B := 1) (by norm_num) (fun k => by fin_cases k <;> norm_num) one_ne_zero
@@ -367,18 +363,39 @@ theorem ft_local_strong_clock_at_branch_applies :
 
 /-- **`exists_ft_branch_clock_data` applies at the same pencil.**  Its five constants
 exist there, so the wider hypothesis list — the interior supply's class split and
-`B ≠ 0` on top of the branch side — is met too. -/
+`B ≠ 0` on top of the branch side — is met too.
+
+**The clauses naming the pencil are carried into the conclusion, not discarded.**  The
+five constants and their signs are satisfiable by five numbers, so a witness stating
+only `∃ κ κ₂ CI A σ, 0 ≤ κ ∧ … ∧ σ < 1` certifies nothing whatever its proof does.  What
+has content is `κ` bounding `Im(W'/W)` at a **named** pencil, and `e` pinned to the
+actual coefficient polynomial by the decomposition and then bounded geometrically — the
+error clause alone would be met by `e = 0`, so the two travel together.  This is the same
+`-`-discard trap `BranchStrongClock.ft_local_strong_clock_at_branch_closed_applies`
+records. -/
 theorem ft_branch_clock_data_applies :
-    ∃ κ κ₂ CI A σ : ℝ, 0 ≤ κ ∧ 0 ≤ κ₂ ∧ 0 ≤ CI ∧ 0 < A ∧ 0 < σ ∧ σ < 1 := by
+    ∃ (κ κ₂ CI A σ : ℝ) (ψ : ℝ → ℝ) (e : ℕ → ℝ → ℝ),
+      0 ≤ κ ∧ 0 ≤ κ₂ ∧ 0 ≤ CI ∧ 0 < A ∧ 0 < σ ∧ σ < 1 ∧
+      (∀ θ ∈ Icc (1 : ℝ) 2,
+        |(ftBranchAmpDeriv (ftRootPoly 1 ![1, 1, 1]) 1 ![1, 1, 1] 1 2 θ
+          / ftBranchAmp (ftRootPoly 1 ![1, 1, 1]) 1 ![1, 1, 1] 1 2 θ).im| ≤ κ) ∧
+      (∀ (M : ℕ), ∀ θ ∈ Icc (1 : ℝ) 2,
+        ((((ftTau ![1, 1, 1] 1 2 θ : ℝ) : ℂ)) ^ (M + 1)
+              * (ftCoeffPoly (ftRootPoly 1 ![1, 1, 1]) 1 1 M).eval
+                  ((ftBranchZ ![1, 1, 1] 1 1 2 θ : ℝ) : ℂ)).re
+            / (2 * ftPrincipalAmp (ftRootPoly 1 ![1, 1, 1]) 1 1
+                (ftBranchZ ![1, 1, 1] 1 1 2) (ftTau ![1, 1, 1] 1 2) θ)
+          = Real.cos (((M : ℝ) + 1) * θ - ψ θ) + e M θ) ∧
+      (∀ (M : ℕ), ∀ θ ∈ Icc (1 : ℝ) 2, |e M θ| ≤ CI / (2 * A) * σ ^ M) := by
   have harc : Icc (1 : ℝ) 2 ⊆ Ioo 0 (π / ((1 : ℕ) : ℝ)) := by
     intro θ hθ
     have h3 : (3 : ℝ) < π := Real.pi_gt_three
-    exact ⟨by linarith [hθ.1], by push_cast; rw [div_one]; linarith [hθ.2]⟩
-  obtain ⟨κ, κ₂, CI, A, σ, -, -, hκ, hκ₂, hCI, hA, hσ0, hσ1, -⟩ :=
+    exact ⟨by linarith [hθ.1], by rw [pi_div_natCast_one]; linarith [hθ.2]⟩
+  obtain ⟨κ, κ₂, CI, A, σ, ψ, e, hκ, hκ₂, hCI, hA, hσ0, hσ1, hbd, -, -, hdec, herr⟩ :=
     exists_ft_branch_clock_data (n := 3) (a := ![1, 1, 1]) (c := 1) (B := 1)
       (by norm_num) (fun k => by fin_cases k <;> norm_num) one_pos le_rfl
       (Or.inl (by norm_num)) hasRealCoeffs_one one_ne_zero (by norm_num) harc
       (fun θ _ => by simp)
-  exact ⟨κ, κ₂, CI, A, σ, hκ, hκ₂, hCI, hA, hσ0, hσ1⟩
+  exact ⟨κ, κ₂, CI, A, σ, ψ, e, hκ, hκ₂, hCI, hA, hσ0, hσ1, hbd, hdec, herr⟩
 
 end ForgacsTran

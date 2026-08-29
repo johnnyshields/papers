@@ -20,10 +20,10 @@ consequences used repeatedly in envelope estimates are collected here.
   statement homogenized.  This is the sharp form of "a logarithm is beaten by a linear
   function", and the constant `1 / e` is attained.
 * `Shields.two_mul_sub_div_add_le_log` — `2 (x - 1) / (x + 1) ≤ log x` for `x ≥ 1`, the
-  Padé lower bound.  The weaker `1 - x⁻¹ ≤ log x` loses a factor of two at `x` near one
-  and is not enough for a ratio of two nearby quantities; the difference of the two sides
-  here has derivative `(x - 1)² / (x (x + 1)²)`, which is
-  `Shields.hasDerivAt_log_sub_two_mul_sub_div_add`.
+  Padé lower bound, which is Mathlib's `Real.le_log_one_add_of_nonneg` written at base
+  point `1` rather than `0`, and `Shields.two_mul_sub_div_add_le_log_sub`, its two-argument
+  form `2 (a - b) / (a + b) ≤ log a - log b`.  The weaker `1 - x⁻¹ ≤ log x` loses a factor
+  of two at `x` near one and is not enough for a ratio of two nearby quantities.
 * `Shields.mul_log_one_add_div_mono` — `k ↦ k * log (1 + v / k)` is monotone, which is
   `(1 + v / k) ^ k` increasing in `k` in logarithmic form, proved from Bernoulli's
   inequality rather than by differentiating.
@@ -52,48 +52,11 @@ theorem mul_log_div_le_div_exp_one {x y : ℝ} (hx : 0 < x) (hy : 0 < y) :
   calc x * Real.log (y / x) ≤ x * (y / x / Real.exp 1) := this
     _ = y / Real.exp 1 := by field_simp
 
-/-- **The Padé defect has derivative `(t - 1)^2 / (t (t + 1)^2)`.**
-
-This one formula is the whole reason `two_mul_sub_div_add_le_log` holds and is sharper than
-`1 - x⁻¹ ≤ log x`: the derivative is nonnegative on all of `(0, ∞)` and vanishes to second order
-at `t = 1`, so the defect is monotone there with a double zero rather than a simple one. -/
-theorem hasDerivAt_log_sub_two_mul_sub_div_add {t : ℝ} (ht : 0 < t) :
-    HasDerivAt (fun s : ℝ => Real.log s - 2 * (s - 1) / (s + 1))
-      ((t - 1) ^ 2 / (t * (t + 1) ^ 2)) t := by
-  have ht1 : t + 1 ≠ 0 := by positivity
-  have h1 : HasDerivAt Real.log t⁻¹ t := Real.hasDerivAt_log (ne_of_gt ht)
-  have h2 : HasDerivAt (fun s : ℝ => 2 * (s - 1)) 2 t := by
-    simpa using ((hasDerivAt_id t).sub_const 1).const_mul 2
-  have h3 : HasDerivAt (fun s : ℝ => s + 1) 1 t := (hasDerivAt_id t).add_const 1
-  have h5 := h1.sub (h2.div h3 ht1)
-  have hval : t⁻¹ - (2 * (t + 1) - 2 * (t - 1) * 1) / (t + 1) ^ 2
-      = (t - 1) ^ 2 / (t * (t + 1) ^ 2) := by
-    field
-  rwa [hval] at h5
-
 /-- **The Padé lower bound** `2 (x - 1) / (x + 1) ≤ log x` for `x ≥ 1`. -/
 theorem two_mul_sub_div_add_le_log {x : ℝ} (hx : 1 ≤ x) :
     2 * (x - 1) / (x + 1) ≤ Real.log x := by
-  have hderiv : ∀ t : ℝ, 0 < t →
-      HasDerivAt (fun s : ℝ => Real.log s - 2 * (s - 1) / (s + 1))
-        ((t - 1) ^ 2 / (t * (t + 1) ^ 2)) t := fun _ ht => hasDerivAt_log_sub_two_mul_sub_div_add ht
-  have hcont : ContinuousOn (fun s : ℝ => Real.log s - 2 * (s - 1) / (s + 1))
-      (Ici (1 : ℝ)) := fun t ht =>
-    ((hderiv t (lt_of_lt_of_le one_pos ht)).differentiableAt.continuousAt).continuousWithinAt
-  have hmono : MonotoneOn (fun s : ℝ => Real.log s - 2 * (s - 1) / (s + 1))
-      (Ici (1 : ℝ)) := by
-    refine monotoneOn_of_deriv_nonneg (convex_Ici 1) hcont
-      (fun t ht => ?_) fun t ht => ?_
-    · rw [interior_Ici] at ht
-      exact (hderiv t (lt_trans one_pos ht)).differentiableAt.differentiableWithinAt
-    · rw [interior_Ici] at ht
-      have ht0 : (0 : ℝ) < t := lt_trans one_pos ht
-      rw [(hderiv t ht0).deriv]
-      positivity
-  have := hmono (mem_Ici.mpr le_rfl) (mem_Ici.mpr hx) hx
-  simp only [Real.log_one] at this
-  norm_num at this
-  linarith
+  have h := Real.le_log_one_add_of_nonneg (x := x - 1) (by linarith)
+  rwa [show x - 1 + 2 = x + 1 by ring, show (1 : ℝ) + (x - 1) = x by ring] at h
 
 /-- The two-argument form: for `0 < b ≤ a`, `2 (a - b) / (a + b) ≤ log a - log b`. -/
 theorem two_mul_sub_div_add_le_log_sub {a b : ℝ} (hb : 0 < b) (hab : b ≤ a) :
@@ -129,5 +92,20 @@ theorem mul_log_one_add_div_mono {v K k : ℝ} (hv : 0 ≤ v) (hK : 0 < K) (hk :
   have := mul_le_mul_of_nonneg_left hlog (le_of_lt hK)
   calc K * Real.log (1 + v / K) ≤ K * ((k / K) * Real.log (1 + v / k)) := this
     _ = k * Real.log (1 + v / k) := by field_simp
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.mul_log_div_le_div_exp_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms mul_log_div_le_div_exp_one
+
+/-- info: 'Shields.two_mul_sub_div_add_le_log_sub' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms two_mul_sub_div_add_le_log_sub
+
+/-- info: 'Shields.mul_log_one_add_div_mono' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms mul_log_one_add_div_mono
 
 end Shields

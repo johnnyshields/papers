@@ -151,7 +151,7 @@ theorem tendsto_upper_member_slope {Q : Polynomial ℂ} {r : ℕ} (hr : 1 ≤ r)
       rw [div_pow, div_eq_div_iff (pow_ne_zero _ hpn) hqp]
       linear_combination (g δ ^ r) * hpz - (p δ ^ r) * hgz
     have hone : (1 + v δ) ^ r = Q.eval (g δ) / Q.eval (p δ) := by
-      have hid : 1 + v δ = (g δ / p δ) / μ := by rw [hv]; field_simp; ring
+      have hid : 1 + v δ = (g δ / p δ) / μ := by rw [hv]; field
       rw [hid, div_pow, hμ, div_one, hratio]
     have hgeom : (∑ i ∈ Finset.range r, (1 + v δ) ^ i) * ((1 + v δ) - 1)
         = (1 + v δ) ^ r - 1 := geom_sum_mul _ _
@@ -173,8 +173,7 @@ theorem tendsto_upper_member_slope {Q : Polynomial ℂ} {r : ℕ} (hr : 1 ≤ r)
     refine hmain.congr' ?_
     filter_upwards [hp0] with δ hpn
     rw [hAeval (g δ), hAeval (p δ)]
-    field_simp
-    ring
+    field
   -- assemble
   have hcomb : Filter.Tendsto (fun δ => v δ * W δ / p δ) (𝓝[>] (0 : ℝ))
       (𝓝 ((μ - 1) * A.eval 0 / Q.eval 0)) := by
@@ -217,8 +216,7 @@ theorem tendsto_ftPrincipal_div_upper {n r : ℕ} {a : Fin n → ℝ} {x₁ : �
   have hδC : ((δ : ℝ) : ℂ) ≠ 0 := by exact_mod_cast ne_of_gt (show (0:ℝ) < δ from hδ)
   simp only [slope, vsub_eq_sub, sub_zero, Complex.real_smul, Complex.ofReal_inv]
   rw [ftPrincipal_ftTauArc_arc_end]
-  field_simp
-  ring
+  field
 
 /-- **`eq:endpoint-linear-gap`'s coefficient, as a limit.**  A retained member's
 normalized modulus rises off `1` at exactly
@@ -405,8 +403,7 @@ theorem upper_gap_coeff_pos {r j : ℕ} (hr : 2 ≤ r) (hj : j < r) (hj0 : j ≠
       rw [clusterDir_last (by omega : 1 ≤ r), hω₁, ← Complex.exp_add]
       congr 1
       push_cast
-      field_simp
-      ring
+      field
     rw [hlast] at hEq
     have hω0 : ω₁ ≠ 0 := Complex.exp_ne_zero _
     exact hjr (clusterDir_inj (by omega) hj (by omega) (mul_right_cancel₀ hω0 hEq))
@@ -418,7 +415,12 @@ One producer for the upper side of
 the enumeration, `hL₁`/`hratio₁`, and `hgapin₁`, all against one `R₁`, one `g₁`
 and one window.  Stating them separately would leave three existentials that need
 not name the same enumeration, which is exactly the defect the "which index"
-family produces. -/
+family produces.
+
+The retained set and the enumeration together are
+`EndpointUpperBinders.RetainedCluster`, which
+`EndpointLowerBlock.exists_lower_endpoint_block` returns as well; only the angle,
+the radius and the spectral parameter differ between the two ends. -/
 
 /-- **`thm:weighted-dominance`'s upper endpoint at the branch.**  `n_1 = r - 2`,
 the separating circle is `R₁` with `τ ≤ R₁/2` so `σ₁ = 1/2`, and the retained
@@ -437,29 +439,9 @@ theorem exists_upper_endpoint_block {n r : ℕ} {a : Fin n → ℝ} {c x₁ : �
           1 + c₁ * δ ≤ ‖g₁ (Real.pi / r - δ) i‖
             / ftTauArc a r (n - 1) x₁ (Real.pi / r - δ))
       ∧ (∃ e₁ > (0 : ℝ), ∀ δ : ℝ, 0 < δ → δ ≤ e₁ →
-        0 < ftTauArc a r (n - 1) x₁ (Real.pi / r - δ)
-        ∧ ftTauArc a r (n - 1) x₁ (Real.pi / r - δ) ≤ R₁ / 2
-        ∧ (∀ t ∈ sfun₁ δ, (ftDen (ftRootPoly c a) r
-            ((ftBranchZ a c r (n - 1) (Real.pi / r - δ) : ℝ) : ℂ)).eval t = 0)
-        ∧ (∀ t ∈ sfun₁ δ, (Polynomial.derivative (ftDen (ftRootPoly c a) r
-            ((ftBranchZ a c r (n - 1) (Real.pi / r - δ) : ℝ) : ℂ))).eval t ≠ 0)
-        ∧ (∀ t ∈ sfun₁ δ, ‖t‖ < R₁)
-        ∧ (∀ t : ℂ, ‖t‖ ≤ R₁ → (ftDen (ftRootPoly c a) r
-            ((ftBranchZ a c r (n - 1) (Real.pi / r - δ) : ℝ) : ℂ)).eval t = 0 → t ∈ sfun₁ δ)
-        ∧ (ftDen (ftRootPoly c a) r
-            ((ftBranchZ a c r (n - 1) (Real.pi / r - δ) : ℝ) : ℂ)).eval
-            (ftPrincipal (ftTauArc a r (n - 1) x₁) (Real.pi / r - δ)) = 0
-        ∧ ftPrincipal (ftTauArc a r (n - 1) x₁) (Real.pi / r - δ)
-            ≠ ((ftTauArc a r (n - 1) x₁ (Real.pi / r - δ) : ℝ) : ℂ)
-              * Complex.exp (-((Real.pi / r - δ : ℝ) : ℂ) * I)
-        ∧ Function.Injective (g₁ (Real.pi / r - δ))
-        ∧ (∀ i : Fin (r - 2), g₁ (Real.pi / r - δ) i ∈
-            ((sfun₁ δ).erase (ftPrincipal (ftTauArc a r (n - 1) x₁) (Real.pi / r - δ))).erase
-              (((ftTauArc a r (n - 1) x₁ (Real.pi / r - δ) : ℝ) : ℂ)
-                * Complex.exp (-((Real.pi / r - δ : ℝ) : ℂ) * I)))
-        ∧ (((sfun₁ δ).erase (ftPrincipal (ftTauArc a r (n - 1) x₁) (Real.pi / r - δ))).erase
-            (((ftTauArc a r (n - 1) x₁ (Real.pi / r - δ) : ℝ) : ℂ)
-              * Complex.exp (-((Real.pi / r - δ : ℝ) : ℂ) * I))).card = r - 2)
+        RetainedCluster (ftRootPoly c a) r (ftBranchZ a c r (n - 1))
+          (ftTauArc a r (n - 1) x₁) (Real.pi / r - δ) R₁ (R₁ / 2) (sfun₁ δ)
+          (g₁ (Real.pi / r - δ)))
       ∧ ∀ (B : Polynomial ℂ), B.eval 0 ≠ 0 → ∃ L₁ : Fin (r - 2) → ℂ,
           (∀ i, ‖L₁ i‖ = 1)
         ∧ (∀ i : Fin (r - 2), Filter.Tendsto

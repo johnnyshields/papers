@@ -108,12 +108,12 @@ carries the discrepancy from two bracketing indices to every index between them,
 and `Consequences.angular_clock` turns the index bound into the angular one at
 `L = M + 1`: every bulk-zero angle sits within `π(Δ+1)/(M+1)` of the
 uniform clock `π j/(M+1)`. -/
-theorem angular_clock_of_bracketing {jm jp j M : ℕ} {θ Δ : ℝ} (hΔ : 0 ≤ Δ)
+theorem angular_clock_of_bracketing {jm jp j M : ℕ} {θ Δ : ℝ}
     (hjm : |(jm : ℝ) - ((M : ℝ) + 1) * θ / π| ≤ Δ)
     (hjp : |(jp : ℝ) - ((M : ℝ) + 1) * θ / π| ≤ Δ)
     (h1 : jm < j) (h2 : j ≤ jp) :
     |θ - π * (j : ℝ) / ((M : ℝ) + 1)| ≤ π * (Δ + 1) / ((M : ℝ) + 1) :=
-  angular_clock (by positivity) hΔ (angular_rigidity hjm hjp h1 h2)
+  angular_clock (by positivity) (angular_rigidity hjm hjp h1 h2)
 
 
 /-! ### The angular window as a set of zeros
@@ -229,7 +229,7 @@ count from exceeding `T_{αβ}` without limit.  The upper side is
 `hout`, `hsum` and `hD` together, and it is where the degree enters. -/
 theorem ft_angular_discrepancy {P : Polynomial ℂ} (hP : P ≠ 0) {z : ℝ → ℝ}
     {a b α β T Tab C₁ C₂ C₃ : ℝ}
-    (hzinj : Set.InjOn z (Set.Icc a b))
+    (hzinj : Set.InjOn z (Set.Ioo a b))
     (haα : a ≤ α) (hαβ : α ≤ β) (hβb : β ≤ b)
     [DecidablePred (· ∈ ftWindow z α β)]
     {Zlo Zhi : Finset ℂ}
@@ -242,12 +242,12 @@ theorem ft_angular_discrepancy {P : Polynomial ℂ} (hP : P ≠ 0) {z : ℝ → 
       ≤ max C₁ (C₂ + C₃) := by
   classical
   have hab : a ≤ b := le_trans haα (le_trans hαβ hβb)
-  have hIlo : Set.Ioo a α ⊆ Set.Icc a b :=
-    fun x hx => ⟨hx.1.le, le_trans (le_trans hx.2.le hαβ) hβb⟩
-  have hIin : Set.Ioo α β ⊆ Set.Icc a b :=
-    fun x hx => ⟨le_trans haα hx.1.le, le_trans hx.2.le hβb⟩
-  have hIhi : Set.Ioo β b ⊆ Set.Icc a b :=
-    fun x hx => ⟨le_trans haα (le_trans hαβ hx.1.le), hx.2.le⟩
+  have hIlo : Set.Ioo a α ⊆ Set.Ioo a b :=
+    fun x hx => ⟨hx.1, lt_of_lt_of_le (lt_of_lt_of_le hx.2 hαβ) hβb⟩
+  have hIin : Set.Ioo α β ⊆ Set.Ioo a b :=
+    fun x hx => ⟨lt_of_le_of_lt haα hx.1, lt_of_lt_of_le hx.2 hβb⟩
+  have hIhi : Set.Ioo β b ⊆ Set.Ioo a b :=
+    fun x hx => ⟨lt_of_le_of_lt (le_trans haα hαβ) hx.1, hx.2⟩
   -- the complementary windows carry no zero of the inner one
   have hnotlo : ∀ w ∈ Zlo, w ∉ ftWindow z α β := fun w hw =>
     notMem_ftWindow hzinj hIlo hIin (fun x hx hx' => absurd (lt_of_lt_of_le hx.2 hx'.1.le)
@@ -291,7 +291,7 @@ theorem ft_equidistribution {P : Polynomial ℂ} (hP : P ≠ 0) {z : ℝ → ℝ
     {a b α β C₁ C₂ : ℝ} {M r d s : ℕ}
     (hr : 1 ≤ r) (hd : 1 ≤ d) (hM : M = r * d + s) (hs : s < r)
     (hdeg : P.natDegree = M / r) (hlen : b - a = π / r)
-    (hzinj : Set.InjOn z (Set.Icc a b))
+    (hzinj : Set.InjOn z (Set.Ioo a b))
     (haα : a ≤ α) (hαβ : α ≤ β) (hβb : β ≤ b)
     [DecidablePred (· ∈ ftWindow z α β)]
     {Zlo Zhi : Finset ℂ}
@@ -320,7 +320,6 @@ feeding both discrepancies to `angular_clock_of_bracketing` gives
 `eq:angular-clock` for the zeros of `F_M` themselves. -/
 theorem ft_angular_clock {P : Polynomial ℂ} {z : ℝ → ℝ} {a θ θ' : ℝ} {M j : ℕ} {Δ : ℝ}
     [DecidablePred (· ∈ ftWindow z a θ)] [DecidablePred (· ∈ ftWindow z a θ')]
-    (hΔ : 0 ≤ Δ)
     (hm : |(Multiset.card (P.roots.filter (· ∈ ftWindow z a θ)) : ℝ)
         - ((M : ℝ) + 1) * θ / π| ≤ Δ)
     (hp : |(Multiset.card (P.roots.filter (· ∈ ftWindow z a θ')) : ℝ)
@@ -328,7 +327,7 @@ theorem ft_angular_clock {P : Polynomial ℂ} {z : ℝ → ℝ} {a θ θ' : ℝ}
     (h1 : Multiset.card (P.roots.filter (· ∈ ftWindow z a θ)) < j)
     (h2 : j ≤ Multiset.card (P.roots.filter (· ∈ ftWindow z a θ'))) :
     |θ - π * (j : ℝ) / ((M : ℝ) + 1)| ≤ π * (Δ + 1) / ((M : ℝ) + 1) :=
-  angular_clock_of_bracketing hΔ hm hp h1 h2
+  angular_clock_of_bracketing hm hp h1 h2
 
 /-- **`eq:angular-clock` with a numerator-uniform defect** — `thm:main` clause 3's
 shape applied to `cor:angular-rigidity`.  When the defect is
@@ -352,7 +351,7 @@ theorem ft_angular_clock_numeratorUniform {Q : Polynomial ℝ} {r : ℕ}
             / ((M : ℝ) + 1) := by
   obtain ⟨E₀, E₁, hE⟩ := hFU
   refine ⟨E₀, E₁, fun N M j θ P z a θ' _ _ hm hp h1 h2 => ?_⟩
-  have hclock := ft_angular_clock (Nat.cast_nonneg _) hm hp h1 h2
+  have hclock := ft_angular_clock hm hp h1 h2
   refine le_trans hclock ?_
   have hbd : (Fdef N : ℝ)
       ≤ (E₀ : ℝ) + (E₁ : ℝ) * ((laurentWeight Q r N).natDegree : ℝ) := by
@@ -373,9 +372,9 @@ cubic in `1/L` outright, and the `E` term beats every power.
 The constant is exhibited rather than existential — `1` for the exponential
 term, `8κ_2(π+2A)^2` for the Taylor term and `2πκ^2` for the
 curvature term — so nothing about it depends on `M`. -/
-private theorem clock_rate_aux {L κ κ₂ A E c : ℝ} (hκ : 0 ≤ κ) (hκ₂ : 0 ≤ κ₂)
+private theorem clock_rate_aux {L κ κ₂ A E c : ℝ} (_hκ : 0 ≤ κ) (hκ₂ : 0 ≤ κ₂)
     (hA : 0 ≤ A) (hE0 : 0 ≤ E) (hEA : E ≤ A) (hL1 : 1 ≤ L) (hκL : 2 * κ ≤ L)
-    (hc0 : 0 ≤ c) (hEc : E ≤ A * c) (hgeom : 4 * A * (L ^ 2 * c) ≤ 1) :
+    (_hc0 : 0 ≤ c) (hEc : E ≤ A * c) (hgeom : 4 * A * (L ^ 2 * c) ≤ 1) :
     (2 * E + κ₂ * ((π + 2 * E) / (L - κ)) ^ 2) / (L - κ)
         + π * κ ^ 2 / (L ^ 2 * (L - κ))
       ≤ (1 + 8 * κ₂ * (π + 2 * A) ^ 2 + 2 * π * κ ^ 2) / L ^ 3 := by
@@ -573,18 +572,17 @@ theorem interior_cos_decomposition {Q B : Polynomial ℂ} {r M : ℕ} {z τ ψ :
   refine ⟨(((((τ θ : ℝ) : ℂ)) ^ (M + 1) * (ftCoeffPoly Q B r M).eval ((z θ : ℝ) : ℂ)).re
       - 2 * ftPrincipalAmp Q B r z τ θ * Real.cos (((M : ℝ) + 1) * θ - ψ θ))
       / (2 * ftPrincipalAmp Q B r z τ θ), ?_, ?_⟩
-  · field_simp
-    ring
+  · field
   · rw [abs_div, abs_of_pos h2W]
     exact div_le_div_of_nonneg_right (abs_interior_cos_error_le hτ hpolar) h2W.le
 
 /-- **The error is `O(σ^M)`, uniformly on the subarc.**  Composing the
-decomposition with `DominanceFT.interior_remainder_uniform`'s bound and the
+decomposition with `DominanceFTSupply.interior_remainder_uniform`'s bound and the
 amplitude floor: the constant is `C_I/(2A)` and the ratio is the interior
 `σ`, neither carrying `M`.  This is `eq:C1-interior-remainder`'s `C^0` half
 in the coordinate the quantization runs in. -/
 theorem interior_cos_error_geometric {Q B : Polynomial ℂ} {r M : ℕ} {z τ ψ : ℝ → ℝ}
-    {θ CI A σ : ℝ} (hτ : 0 < τ θ) (hA : 0 < A) (hσ : 0 ≤ σ)
+    {θ CI A σ : ℝ} (hτ : 0 < τ θ) (hA : 0 < A) (_hσ : 0 ≤ σ)
     (hW : A ≤ ftPrincipalAmp Q B r z τ θ)
     (hrem : |ftRemainder Q B r z τ M θ| ≤ CI * σ ^ M)
     (hpolar : ftAmp Q B r ((z θ : ℝ) : ℂ) (ftPrincipal τ θ)
@@ -649,7 +647,7 @@ theorem exists_amplitude_floor_on_subarc {Q B : Polynomial ℂ} {r : ℕ} {z τ 
 /-- **`prop:local-strong-clock`'s first display, on the whole subarc.**  Every
 constant produced rather than assumed: the floor `A` by compactness, the phase
 `ψ` by the polar form, and the error's `C_Iσ^M` by
-`DominanceFT.interior_remainder_uniform`.  What is left to reach
+`DominanceFTSupply.interior_remainder_uniform`.  What is left to reach
 `eq:local-phase-quantization` is the `C^1` half, which
 `PoleExpansion.norm_smul_ftContourRemDeriv_le` now supplies, and the change of
 variable of `Consequences.norm_le_of_mul_eq`. -/
@@ -868,7 +866,7 @@ theorem abs_phase_cos_deriv_lower {Φ dΦ de s Ce : ℝ}
 while `|e'| = O(Mσ^M)`, so the gap the previous lemma needs opens for all
 `M` beyond a threshold and never closes again — which is what makes the
 `θ`-coordinate localization unconditional rather than a large-`M` hope. -/
-theorem eventually_phase_cos_deriv_gap {s C σ : ℝ} (hs : 0 < s) (hC : 0 ≤ C)
+theorem eventually_phase_cos_deriv_gap {s C σ : ℝ} (hs : 0 < s)
     (hσ0 : 0 ≤ σ) (hσ1 : σ < 1) :
     ∃ M₀ : ℕ, ∀ M : ℕ, M₀ ≤ M → C * (M : ℝ) * σ ^ M < s * ((1 / 2 : ℝ) * (M : ℝ)) ∨ M = 0 := by
   obtain ⟨M₁, hM₁⟩ := exists_pow_mul_geometric_le (K := C) hσ0 hσ1 (by positivity : (0:ℝ) < s / 4) 1
@@ -878,7 +876,7 @@ theorem eventually_phase_cos_deriv_gap {s C σ : ℝ} (hs : 0 < s) (hC : 0 ≤ C
   have hgeom := hM₁ M (le_trans (le_max_right _ _) hM)
   have hrw : C * ((M : ℝ) ^ 1 * σ ^ M) = C * (M : ℝ) * σ ^ M := by ring
   rw [hrw] at hgeom
-  nlinarith [hgeom, hMr, hs, hC]
+  nlinarith [hgeom, hMr, hs]
 
 /-! ### The window, with its signs resolved
 
@@ -1159,8 +1157,8 @@ into the window by monotonicity, and on the window
 This is what makes the *index* of a zero well defined, which is the half of
 `prop:local-strong-clock`'s "for a unique `θ_{k,M}`" that is about the zeros
 rather than about `z`. -/
-theorem phase_zero_index_unique {Φ dΦ e de : ℝ → ℝ} {a b u₀ δ Ce : ℝ}
-    (hδ : 0 < δ) (hδ4 : δ ≤ Real.pi / 4) (hcos : Real.cos u₀ = 0)
+theorem phase_zero_index_unique {Φ dΦ e de : ℝ → ℝ} {a b δ Ce : ℝ}
+    (hδ : 0 < δ) (hδ4 : δ ≤ Real.pi / 4)
     (hmono : StrictMonoOn Φ (Set.Icc a b))
     (hΦd : ∀ θ ∈ Set.Icc a b, HasDerivAt Φ (dΦ θ) θ)
     (hed : ∀ θ ∈ Set.Icc a b, HasDerivAt e (de θ) θ)

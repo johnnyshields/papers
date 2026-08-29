@@ -5,48 +5,75 @@ Authors: Johnny Shields
 -/
 import Shields.Combinatorics.Young.JacobiTrudi
 
+/-!
+# Lindström--Gessel--Viennot: paths, words, and the cancellation at two paths
+
+The even half of skew Jacobi--Trudi is a statement about lattice paths.  Expanding the
+determinant `det [h_{λ_u - μ_v - u + v}]` term by term turns it into a signed sum over
+families of paths; the families in which two paths meet cancel against each other under a
+tail swap, and the families that never meet are the semistandard tableaux of the skew
+shape.  This file builds that machinery and runs it to the end at two paths, which is where
+the whole cancellation is already visible: a `2 × 2` determinant is a difference of two path
+sums, every pair in the subtracted sum crosses, and the splice carries the crossing pairs of
+the leading sum onto it bijectively.
+
+Two independent ingredients are stated and not proved here, both discharged over
+`Shields.Combinatorics.Young.LGVTableau`: the identification of the non-crossing pairs with
+the tableaux of the shape, and the extension of the cancellation past two paths.
+
+## Main definitions
+
+* `Shields.hPaths`: the paths from `s` to `e` across `b` heights, recorded by profile --
+  `q i` is the abscissa at which the path arrives at height `i`.  Profiles are functions
+  `ℕ → ℕ`, constant from `b` on, which keeps every index computation free of `Fin`
+  coercions.
+* `Shields.pathWeight`: the weight of a path, one variable per height crossed.
+* `Shields.pathLetter`, `Shields.wordOfPath`, `Shields.pathOfWord`: the dictionary between a
+  path and a word.  The letter at abscissa `s + j` is the height at which the path crosses
+  it, so the word weakly increases and is a one-row bounded tableau.
+* `Shields.wordProfile`: the inverse reading, which needs only that the word is weakly
+  increasing and bounded, and so serves the conjugate model as well.
+* `Shields.crossSet`, `Shields.Crosses`, `Shields.crossHeight`, `Shields.spliceAt`,
+  `Shields.swapPair`: two paths cross at a height where the abscissa intervals they sweep
+  there meet, and splicing at the least such height exchanges their sinks.
+* `Shields.NonCrossingIsSkewSchur`: the tableau input at two rows, as a predicate.
+
+## Main results
+
+* `Shields.hPaths_sum_eq_completeHom`: the total weight of the paths from `s` to `s + m` is
+  `completeHom b m β`, which is what identifies the alphabet the path model computes in.
+* `Shields.crossHeight_spliceAt`, `Shields.pathWeight_spliceAt_mul`,
+  `Shields.swapPair_swapPair`: the splice keeps the crossing height, multiplies the two
+  weights to the same product, and is an involution.
+* `Shields.jacobiTrudiDet_two_eq_edgeSum` and
+  `Shields.jacobiTrudiDet_two_eq_sum_nonCrossing`: the `2 × 2` determinant as a sum over
+  path pairs, and then over the non-crossing ones alone.
+* `Shields.lt_of_not_crosses`: two non-crossing paths with ordered sources stay apart by a
+  full step -- the strict inequality that makes a column of a two-row filling increase.
+* `Shields.skewJacobiTrudi_two_of_nonCrossing`: skew Jacobi--Trudi at two rows and no odd
+  variables, given the tableau input.
+
+## Tags
+
+Lindström--Gessel--Viennot, lattice path, sign-reversing involution, Jacobi--Trudi,
+semistandard tableau
+-/
+
 namespace Shields
 
 open Finset
 
-/-! ## The sign-reversing involution
+section Bilinear
 
-Mathlib has `Finset.sum_involution`: an involution `g` on a `Finset` with
-`f a + f (g a) = 0` throughout forces the sum to vanish.  Lindström--Gessel--Viennot
-needs it in the form where the involution is only defined — only fixed-point-free
-— off a distinguished subpredicate, the sum collapsing to that subpredicate
-rather than to zero.
--/
+variable {R : Type*} [CommRing R]
 
-section Involution
+/-- A product of two sums is a single sum over the product `Finset`.  This is
+`Finset.sum_mul_sum` with the double sum contracted. -/
+theorem sum_mul_sum_prod {ι κ : Type*} (u : Finset ι) (v : Finset κ) (f : ι → R) (g : κ → R) :
+    (∑ x ∈ u, f x) * ∑ y ∈ v, g y = ∑ z ∈ u ×ˢ v, f z.1 * g z.2 := by
+  rw [Finset.sum_mul_sum, Finset.sum_product]
 
-variable {ι M : Type*} [AddCommGroup M]
-
-/-- **The engine.**  If `g` maps the part of `s` where `P` fails into itself
-without fixed points, is involutive there, and reverses the sign of `f`, then
-only the part where `P` holds survives.
-
-The four hypotheses are exactly the four obligations of `Finset.sum_involution`,
-relativized to `¬ P`; `gP` is the extra one, that the involution does not escape
-the part it is defined on. -/
-theorem sum_eq_sum_filter_of_signReversing (s : Finset ι) (f : ι → M) (P : ι → Prop)
-    [DecidablePred P] (g : ι → ι) (gmem : ∀ a ∈ s, ¬ P a → g a ∈ s)
-    (gP : ∀ a ∈ s, ¬ P a → ¬ P (g a)) (gne : ∀ a ∈ s, ¬ P a → g a ≠ a)
-    (ginv : ∀ a ∈ s, ¬ P a → g (g a) = a) (gsign : ∀ a ∈ s, ¬ P a → f a + f (g a) = 0) :
-    ∑ a ∈ s, f a = ∑ a ∈ s.filter P, f a := by
-  have hzero : ∑ a ∈ s.filter (fun a => ¬ P a), f a = 0 := by
-    have hmem : ∀ a ∈ s.filter (fun a => ¬ P a), g a ∈ s.filter (fun a => ¬ P a) := by
-      intro a ha
-      rw [mem_filter] at ha ⊢
-      exact ⟨gmem a ha.1 ha.2, gP a ha.1 ha.2⟩
-    refine Finset.sum_involution (fun a _ => g a) (fun a ha => gsign a ?_ ?_)
-      (fun a ha _ => gne a ?_ ?_) (fun a ha => hmem a ha) (fun a ha => ginv a ?_ ?_) <;>
-      first
-        | exact (mem_filter.mp ha).1
-        | exact (mem_filter.mp ha).2
-  rw [← Finset.sum_filter_add_sum_filter_not s P f, hzero, add_zero]
-
-end Involution
+end Bilinear
 
 /-! ## Paths
 
@@ -189,12 +216,114 @@ theorem card_pathLetter_lt {b s m : ℕ} {q : ℕ → ℕ} (hq : q ∈ hPaths b 
     · intro h; exact ⟨by omega, by omega⟩
   rw [hval, Finset.card_range]
 
-/-- Rows of a one-row bounded tableau are weakly increasing. -/
-theorem boundedSSYT_row_mono {m b : ℕ} (T : BoundedSSYT (rect 1 m) b) {j₁ j₂ : ℕ}
-    (h : j₁ ≤ j₂) (hj₂ : j₂ < m) : T 0 j₁ ≤ T 0 j₂ := by
-  rcases eq_or_lt_of_le h with rfl | hlt
-  · exact le_rfl
-  · exact T.1.row_weak hlt (mem_rect.mpr ⟨Nat.zero_lt_one, hj₂⟩)
+/-! ### The profile of a word
+
+Everything the profile of a word does depends only on the word being weakly increasing
+and bounded.  The even model reads its word along a row of a one-row tableau and the odd
+model along a column of a one-column one; `pathOfWord` and `ePathOfWord` are this
+profile at those two readings, so the facts below are proved once here and
+instantiated on both sides. -/
+
+section WordProfile
+
+variable {s m : ℕ} {w : ℕ → ℕ}
+
+/-- The profile of a word of length `m` starting at `s`: at height `i` it stands at `s`
+plus the number of letters below `i`. -/
+noncomputable def wordProfile (s m : ℕ) (w : ℕ → ℕ) (i : ℕ) : ℕ :=
+  s + ((Finset.range m).filter fun j => w j < i).card
+
+/-- A letter below `i` puts its abscissa behind the profile at height `i`. -/
+theorem lt_wordProfile (hw : ∀ j₁ j₂, j₁ ≤ j₂ → j₂ < m → w j₁ ≤ w j₂) {i j : ℕ}
+    (hj : j < m) (h : w j < i) : s + j < wordProfile s m w i := by
+  have hsub : Finset.range (j + 1) ⊆ (Finset.range m).filter fun j' => w j' < i := by
+    intro j' hj'
+    rw [Finset.mem_range] at hj'
+    exact Finset.mem_filter.mpr ⟨Finset.mem_range.mpr (by omega),
+      lt_of_le_of_lt (hw j' j (by omega) hj) h⟩
+  have hcard := Finset.card_le_card hsub
+  rw [Finset.card_range] at hcard
+  have hval : wordProfile s m w i
+      = s + ((Finset.range m).filter fun j' => w j' < i).card := rfl
+  omega
+
+/-- A letter at or above `i` stops the profile at its abscissa. -/
+theorem wordProfile_le (hw : ∀ j₁ j₂, j₁ ≤ j₂ → j₂ < m → w j₁ ≤ w j₂) {i j : ℕ}
+    (h : i ≤ w j) : wordProfile s m w i ≤ s + j := by
+  have hsub : ((Finset.range m).filter fun j' => w j' < i) ⊆ Finset.range j := by
+    intro j' hj'
+    rw [Finset.mem_filter, Finset.mem_range] at hj'
+    rw [Finset.mem_range]
+    by_contra hcon
+    exact absurd (hw j j' (by omega) hj'.1) (by omega)
+  have hcard := Finset.card_le_card hsub
+  rw [Finset.card_range] at hcard
+  have hval : wordProfile s m w i
+      = s + ((Finset.range m).filter fun j' => w j' < i).card := rfl
+  omega
+
+/-- The profile never runs past the far end of the word: every letter counted lies
+in `range m`. -/
+theorem wordProfile_le_length (i : ℕ) : wordProfile s m w i ≤ s + m := by
+  have h := Finset.card_filter_le (Finset.range m) fun j => w j < i
+  rw [Finset.card_range] at h
+  exact Nat.add_le_add_left h s
+
+/-- The letter the profile writes at abscissa `s + j` is the word's own letter there:
+below a height `i'`, the profile has passed `s + j` exactly when `w j` exceeds `i'`. -/
+theorem pathLetter_wordProfile {b : ℕ} (hw : ∀ j₁ j₂, j₁ ≤ j₂ → j₂ < m → w j₁ ≤ w j₂)
+    (hb : ∀ j, j < m → w j < b) {j : ℕ} (hj : j < m) :
+    pathLetter b s (wordProfile s m w) j = w j := by
+  have hset : ((Finset.range b).filter fun i' => wordProfile s m w (i' + 1) ≤ s + j)
+      = Finset.range (w j) := by
+    ext i'
+    rw [Finset.mem_filter, Finset.mem_range, Finset.mem_range, wordProfile,
+      Nat.add_le_add_iff_left]
+    constructor
+    · rintro ⟨-, h⟩
+      by_contra hcon
+      have := lt_wordProfile (s := s) hw hj (show w j < i' + 1 by omega)
+      rw [wordProfile] at this
+      omega
+    · intro h
+      refine ⟨lt_trans h (hb j hj), ?_⟩
+      have := wordProfile_le (s := s) (m := m) hw (show i' + 1 ≤ w j by omega)
+      rw [wordProfile] at this
+      omega
+  rw [pathLetter, hset, Finset.card_range]
+
+/-- A word that reads off the letters of a path has that path as its profile.  With
+`pathLetter_wordProfile` this makes profile and letter-reading mutually inverse. -/
+theorem wordProfile_of_pathLetter {b : ℕ} {q : ℕ → ℕ} (hq : q ∈ hPaths b s (s + m))
+    (hw : ∀ j, j < m → w j = pathLetter b s q j) : wordProfile s m w = q := by
+  funext i
+  have hset : ((Finset.range m).filter fun j => w j < i)
+      = (Finset.range m).filter fun j => pathLetter b s q j < i :=
+    Finset.filter_congr fun j hj => by rw [hw j (Finset.mem_range.mp hj)]
+  rcases le_or_gt i b with hi | hi
+  · rw [wordProfile, hset, card_pathLetter_lt hq hi]
+    have := (hPaths_le hq i).1
+    omega
+  · rw [wordProfile, hset, hPaths_top hq hi.le]
+    have hfull : ((Finset.range m).filter fun j => pathLetter b s q j < i)
+        = Finset.range m :=
+      Finset.filter_true_of_mem fun j _ => lt_of_le_of_lt (pathLetter_le b s q j) hi
+    rw [hfull, Finset.card_range]
+
+/-- The profile of a word bounded by `b` is a path from `s` to `s + m` across `b`
+heights: it starts at `s`, advances with the height, and has passed every letter
+by height `b`. -/
+theorem wordProfile_mem_hPaths (b : ℕ) (hb : ∀ j, j < m → w j < b) :
+    wordProfile s m w ∈ hPaths b s (s + m) := by
+  refine mem_hPaths.mpr ⟨by simp [wordProfile], fun i₁ i₂ h => ?_, fun i hi => ?_⟩
+  · refine Nat.add_le_add_left (Finset.card_le_card fun j hj => ?_) s
+    rw [Finset.mem_filter] at hj ⊢
+    exact ⟨hj.1, by omega⟩
+  · have hfull : ((Finset.range m).filter fun j => w j < i) = Finset.range m :=
+      Finset.filter_true_of_mem fun j hj => lt_of_lt_of_le (hb j (Finset.mem_range.mp hj)) hi
+    rw [wordProfile, hfull, Finset.card_range]
+
+end WordProfile
 
 end PathWord
 
@@ -232,80 +361,68 @@ theorem wordOfPath_apply {b s m : ℕ} {q : ℕ → ℕ} (hq : q ∈ hPaths b s 
   rfl
 
 /-- The profile of a word: the abscissa reached at height `i` is `s` plus the
-number of letters below `i`. -/
+number of letters below `i`.  This is `wordProfile` on the row of `T`, and the
+facts proved there apply to it. -/
 noncomputable def pathOfWord (b s m : ℕ) (T : BoundedSSYT (rect 1 m) b) (i : ℕ) : ℕ :=
   s + ((Finset.range m).filter fun j => T 0 j < i).card
 
+/-- The row of a bounded one-row tableau, read as a word: weakly increasing. -/
+theorem oneRow_mono {b m : ℕ} (T : BoundedSSYT (rect 1 m) b) :
+    ∀ j₁ j₂, j₁ ≤ j₂ → j₂ < m → T 0 j₁ ≤ T 0 j₂ :=
+  fun _ _ h hj₂ => boundedSSYT_row_mono T h hj₂
+
+theorem oneRow_lt {b m : ℕ} (T : BoundedSSYT (rect 1 m) b) : ∀ j, j < m → T 0 j < b :=
+  fun _ hj => T.lt (mem_rect.mpr ⟨Nat.zero_lt_one, hj⟩)
+
+/-- A letter below `i` puts its abscissa behind the profile at height `i`. -/
+theorem lt_pathOfWord {b s len : ℕ} (W : BoundedSSYT (rect 1 len) b) {i jj : ℕ}
+    (hjj : jj < len) (h : W 0 jj < i) : s + jj < pathOfWord b s len W i :=
+  lt_wordProfile (oneRow_mono W) hjj h
+
+/-- A letter at or above `i` stops the profile at its abscissa. -/
+theorem pathOfWord_le {b s len : ℕ} (W : BoundedSSYT (rect 1 len) b) {i jj : ℕ}
+    (h : i ≤ W 0 jj) : pathOfWord b s len W i ≤ s + jj :=
+  wordProfile_le (oneRow_mono W) h
+
 theorem pathOfWord_mem (b s m : ℕ) (T : BoundedSSYT (rect 1 m) b) :
-    pathOfWord b s m T ∈ hPaths b s (s + m) := by
-  refine mem_hPaths.mpr ⟨by simp [pathOfWord], fun i₁ i₂ h => ?_, fun i hi => ?_⟩
-  · refine Nat.add_le_add_left (Finset.card_le_card fun j hj => ?_) s
-    rw [Finset.mem_filter] at hj ⊢
-    exact ⟨hj.1, by omega⟩
-  · have hfull : ((Finset.range m).filter fun j => T 0 j < i) = Finset.range m :=
-      Finset.filter_true_of_mem fun j hj =>
-        lt_of_lt_of_le (T.lt (mem_rect.mpr ⟨Nat.zero_lt_one, Finset.mem_range.mp hj⟩)) hi
-    rw [pathOfWord, hfull, Finset.card_range]
+    pathOfWord b s m T ∈ hPaths b s (s + m) :=
+  wordProfile_mem_hPaths b (oneRow_lt T)
 
 theorem pathOfWord_wordOfPath {b s m : ℕ} {q : ℕ → ℕ} (hq : q ∈ hPaths b s (s + m)) :
-    pathOfWord b s m (wordOfPath b s m q hq) = q := by
+    pathOfWord b s m (wordOfPath b s m q hq) = q :=
+  wordProfile_of_pathLetter hq fun j hj => by rw [wordOfPath_apply, if_pos ⟨rfl, hj⟩]
+
+/-- A one-row word whose letters are those of a path traces that path back. -/
+theorem pathOfWord_eq_of_entry {b s m : ℕ} {q : ℕ → ℕ} (hq : q ∈ hPaths b s (s + m))
+    (T : BoundedSSYT (rect 1 m) b) (h : ∀ j, j < m → T 0 j = pathLetter b s q j) :
+    pathOfWord b s m T = q := by
+  rw [← pathOfWord_wordOfPath hq]
   funext i
-  have hset : ∀ k : ℕ, ((Finset.range m).filter fun j => wordOfPath b s m q hq 0 j < k)
-      = (Finset.range m).filter fun j => pathLetter b s q j < k := by
-    intro k
+  have hset : ((Finset.range m).filter fun j => T 0 j < i)
+      = (Finset.range m).filter fun j => wordOfPath b s m q hq 0 j < i := by
     ext j
-    rw [Finset.mem_filter, Finset.mem_filter, wordOfPath_apply]
+    rw [Finset.mem_filter, Finset.mem_filter]
     constructor
-    · rintro ⟨hj, h⟩
-      rw [if_pos ⟨rfl, Finset.mem_range.mp hj⟩] at h
-      exact ⟨hj, h⟩
-    · rintro ⟨hj, h⟩
-      exact ⟨hj, by rw [if_pos ⟨rfl, Finset.mem_range.mp hj⟩]; exact h⟩
-  rcases le_or_gt i b with hi | hi
-  · rw [pathOfWord, hset, card_pathLetter_lt hq hi]
-    have := (hPaths_le hq i).1
-    omega
-  · rw [pathOfWord, hset, hPaths_top hq hi.le]
-    have hfull : ((Finset.range m).filter fun j => pathLetter b s q j < i)
-        = Finset.range m :=
-      Finset.filter_true_of_mem fun j _ => lt_of_le_of_lt (pathLetter_le b s q j) hi
-    rw [hfull, Finset.card_range]
+    · rintro ⟨hj, hlt⟩
+      refine ⟨hj, ?_⟩
+      rw [wordOfPath_apply hq, if_pos ⟨rfl, Finset.mem_range.mp hj⟩,
+        ← h j (Finset.mem_range.mp hj)]
+      exact hlt
+    · rintro ⟨hj, hlt⟩
+      rw [wordOfPath_apply hq, if_pos ⟨rfl, Finset.mem_range.mp hj⟩] at hlt
+      refine ⟨hj, ?_⟩
+      rw [h j (Finset.mem_range.mp hj)]
+      exact hlt
+  change s + ((Finset.range m).filter fun j => T 0 j < i).card
+      = s + ((Finset.range m).filter fun j => wordOfPath b s m q hq 0 j < i).card
+  rw [hset]
 
 /-- The letter the profile of a word writes at abscissa `s + j` is the word's own
 letter there: below a height `i'`, the profile has passed `s + j` exactly when
 `T 0 j` exceeds `i'`. -/
 theorem pathLetter_pathOfWord {b s m : ℕ} (T : BoundedSSYT (rect 1 m) b) {j : ℕ}
-    (hj : j < m) : pathLetter b s (pathOfWord b s m T) j = T 0 j := by
-  have hcell : (0, j) ∈ rect 1 m := mem_rect.mpr ⟨Nat.zero_lt_one, hj⟩
-  have hset : ((Finset.range b).filter
-      fun i' => pathOfWord b s m T (i' + 1) ≤ s + j) = Finset.range (T 0 j) := by
-    ext i'
-    rw [Finset.mem_filter, Finset.mem_range, Finset.mem_range, pathOfWord,
-      Nat.add_le_add_iff_left]
-    constructor
-    · rintro ⟨-, h⟩
-      by_contra hcon
-      have hsub : Finset.range (j + 1)
-          ⊆ (Finset.range m).filter fun j' => T 0 j' < i' + 1 := by
-        intro j' hj'
-        rw [Finset.mem_range] at hj'
-        exact Finset.mem_filter.mpr ⟨Finset.mem_range.mpr (by omega),
-          lt_of_le_of_lt (boundedSSYT_row_mono T (by omega) hj) (by omega)⟩
-      have := Finset.card_le_card hsub
-      rw [Finset.card_range] at this
-      omega
-    · intro h
-      refine ⟨lt_trans h (T.lt hcell), ?_⟩
-      have hsub : ((Finset.range m).filter fun j' => T 0 j' < i' + 1) ⊆ Finset.range j := by
-        intro j' hj'
-        rw [Finset.mem_filter, Finset.mem_range] at hj'
-        rw [Finset.mem_range]
-        by_contra hcon
-        exact absurd (boundedSSYT_row_mono T (by omega : j ≤ j') hj'.1) (by omega)
-      have := Finset.card_le_card hsub
-      rw [Finset.card_range] at this
-      omega
-  rw [pathLetter, hset, Finset.card_range]
+    (hj : j < m) : pathLetter b s (pathOfWord b s m T) j = T 0 j :=
+  pathLetter_wordProfile (oneRow_mono T) (oneRow_lt T) hj
 
 theorem wordOfPath_pathOfWord {b s m : ℕ} (T : BoundedSSYT (rect 1 m) b) :
     wordOfPath b s m (pathOfWord b s m T) (pathOfWord_mem b s m T) = T := by
@@ -558,14 +675,8 @@ theorem edgeSum_eq_jtCoeff (b : ℕ) (β : ℕ → R) (s e : ℕ) :
 
 /-- Shifting both indices of a Jacobi--Trudi entry leaves it unchanged: only the
 difference of the two is read. -/
-theorem jtCoeff_succ_succ (d : ℕ → R) (p q : ℕ) : jtCoeff d (p + 1) (q + 1) = jtCoeff d p q := by
-  unfold jtCoeff
-  split_ifs with h1 h2 h2
-  · congr 1
-    omega
-  · omega
-  · omega
-  · rfl
+theorem jtCoeff_succ_succ (d : ℕ → R) (p q : ℕ) : jtCoeff d (p + 1) (q + 1) = jtCoeff d p q :=
+  jtCoeff_add_right d p q 1
 
 /-- **The `2 × 2` determinant as path sums.**  The sources are `μ_0 + 1, μ_1` and
 the sinks `λ_0 + 1, λ_1`: the shift by `m - 1 - u` turns weakly decreasing row
@@ -593,23 +704,17 @@ to the lower sink and one from the lower source to the higher sink must share a
 lattice point: the first starts to the right and finishes to the left. -/
 theorem crosses_of_lt {b s₁ e₁ s₂ e₂ : ℕ} {q r : ℕ → ℕ} (hq : q ∈ hPaths b s₁ e₁)
     (hr : r ∈ hPaths b s₂ e₂) (hs : s₂ < s₁) (he : e₁ < e₂) : Crosses b q r := by
-  have hb : q b ≤ r b := by rw [hPaths_top hq le_rfl, hPaths_top hr le_rfl]; omega
-  have hex : ∃ k, q k ≤ r k := ⟨b, hb⟩
-  have hspec : q (Nat.find hex) ≤ r (Nat.find hex) := Nat.find_spec hex
-  have hkb : Nat.find hex ≤ b := Nat.find_le hb
-  have hk0 : Nat.find hex ≠ 0 := by
-    intro h0
-    rw [h0, hPaths_zero hq, hPaths_zero hr] at hspec
+  obtain ⟨j, hmin, hle⟩ := Nat.exists_not_and_succ_of_not_zero_of_exists
+    (p := fun k => q k ≤ r k)
+    (by rw [hPaths_zero hq, hPaths_zero hr]; omega)
+    ⟨b, by rw [hPaths_top hq le_rfl, hPaths_top hr le_rfl]; omega⟩
+  have hjb : j < b := by
+    by_contra hc
+    rw [hPaths_top hq (by omega), hPaths_top hr (by omega)] at hmin
     omega
-  have hmin : ¬ q (Nat.find hex - 1) ≤ r (Nat.find hex - 1) :=
-    Nat.find_min hex (by omega)
-  have hsucc : Nat.find hex - 1 + 1 = Nat.find hex := by omega
-  refine ⟨Nat.find hex - 1, mem_crossSet.mpr ⟨by omega, ?_, ?_⟩⟩
-  · rw [hsucc]
-    exact le_trans (hPaths_mono hq (by omega : Nat.find hex - 1 ≤ Nat.find hex)) hspec
-  · rw [hsucc]
-    exact le_trans (by omega : r (Nat.find hex - 1) ≤ q (Nat.find hex - 1))
-      (hPaths_mono hq (by omega))
+  exact ⟨j, mem_crossSet.mpr ⟨hjb,
+    le_trans (hPaths_mono hq (Nat.le_succ j)) hle,
+    le_trans (by omega) (hPaths_mono hq (Nat.le_succ j))⟩⟩
 
 /-- The splice of a crossing pair, at the least height where it crosses. -/
 noncomputable def swapPair (b : ℕ) (x : (ℕ → ℕ) × (ℕ → ℕ)) : (ℕ → ℕ) × (ℕ → ℕ) :=
@@ -671,13 +776,10 @@ theorem jacobiTrudiDet_two_eq_sum_nonCrossing {b : ℕ} (β : ℕ → R) (lam mu
                 hPaths b (mu.rowLen 1) (lam.rowLen 1)).filter
                   fun x => ¬ Crosses b x.1 x.2,
           pathWeight b β x.1 * pathWeight b β x.2 := by
-  have hprod : ∀ s t : Finset (ℕ → ℕ),
-      (∑ q ∈ s, pathWeight b β q) * ∑ r ∈ t, pathWeight b β r
-        = ∑ x ∈ s ×ˢ t, pathWeight b β x.1 * pathWeight b β x.2 := fun s t => by
-    rw [Finset.sum_mul_sum, Finset.sum_product]
   have hmu : mu.rowLen 1 ≤ mu.rowLen 0 := mu.rowLen_anti 0 1 (by omega)
   have hlam : lam.rowLen 1 ≤ lam.rowLen 0 := lam.rowLen_anti 0 1 (by omega)
-  rw [jacobiTrudiDet_two_eq_edgeSum, edgeSum, edgeSum, edgeSum, edgeSum, hprod, hprod,
+  rw [jacobiTrudiDet_two_eq_edgeSum, edgeSum, edgeSum, edgeSum, edgeSum, sum_mul_sum_prod,
+    sum_mul_sum_prod,
     ← sum_crossing_eq_sum_transposed (b := b) (s₁ := mu.rowLen 0 + 1)
       (e₁ := lam.rowLen 0 + 1) (s₂ := mu.rowLen 1) (e₂ := lam.rowLen 1) β
       (by omega) (by omega),
@@ -730,14 +832,6 @@ theorem lt_of_not_crosses {b s₁ e₁ s₂ e₂ : ℕ} {q r : ℕ → ℕ} (hq 
     · have h4 := hPaths_mono hq (show i ≤ i + 1 + 1 by omega)
       omega
 
-/-- At no odd variables the alphabet of is the even factor
-alone: only `q = 0` survives in `superHom`, and `e_0 = 1`. -/
-theorem superHom_zero_odd (b m : ℕ) (β α : ℕ → R) : superHom b 0 m β α = completeHom b m β := by
-  rw [superHom, Finset.sum_eq_single_of_mem m (Finset.self_mem_range_succ m)]
-  · rw [Nat.sub_self, elemHom_zero, mul_one]
-  · intro p hp hne
-    rw [elemHom_eq_zero_of_lt (by have := Finset.mem_range.mp hp; omega) α, mul_zero]
-
 /-- **Residue one: the tableau bijection.**  The non-crossing pairs of paths for
 a pair of two-row shapes carry the total weight of the semistandard tableaux of
 `λ / μ`.
@@ -770,5 +864,28 @@ theorem skewJacobiTrudi_two_of_nonCrossing {b : ℕ} {β α : ℕ → R}
     superSkewSchur_zero_odd β α hmu]
 
 end Residue
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.wordOfPath' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms wordOfPath
+
+/-- info: 'Shields.pathOfWord' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms pathOfWord
+
+/-- info: 'Shields.wordProfile' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms wordProfile
+
+/-- info: 'Shields.swapPair' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms swapPair
+
+/-- info: 'Shields.NonCrossingIsSkewSchur' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms NonCrossingIsSkewSchur
 
 end Shields

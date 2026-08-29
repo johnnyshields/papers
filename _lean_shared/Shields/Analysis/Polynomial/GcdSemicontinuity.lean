@@ -31,14 +31,17 @@ of a closed set under a projection along a compact factor, hence closed.
 
 * `Shields.HasCommonFactor`: `P` and `H` admit a common divisor of degree at least `d`.
 * `Shields.toPoly`: the polynomial with a prescribed coefficient vector, `∑_{i<a} uᵢXⁱ`.
+* `Shields.syzygyLocus`: the pairs `(λ, u)` with `u` a unit coefficient vector whose blocks
+  annihilate the pair at `λ`.
 
 ## Main results
 
 * `Shields.hasCommonFactor_iff`: the Bézout comparison.
+* `Shields.setOf_hasCommonFactor_eq_image`: the comparison as a set identity — the parameter set
+  is the projection of the syzygy locus.
+* `Shields.isClosed_syzygyLocus`: the locus is closed, the coefficients being convolutions.
 * `Shields.isClosed_hasCommonFactor`: **upper semicontinuity**, the closedness statement above.
 * `Shields.isOpen_not_hasCommonFactor`: the complementary open set.
-* `Shields.eq_empty_of_dense_compl`: an open set with dense complement is empty, so a property
-  that is open and holds generically in fact holds everywhere.
 
 ## Implementation notes
 
@@ -89,6 +92,14 @@ theorem exists_bezout (P H : K[X]) : ∃ g u v : K[X], g ∣ P ∧ g ∣ H ∧ u
   obtain ⟨u, v, huv⟩ := IsBezout.gcd_eq_sum P H
   exact ⟨IsBezout.gcd P H, u, v, IsBezout.gcd_dvd_left P H, IsBezout.gcd_dvd_right P H, huv⟩
 
+/-- The degree of a nonzero polynomial splits over any factorization of it.  This is
+`Polynomial.natDegree_mul` in the form a divisibility witness `P = g * Q` delivers, where the
+two factors are nonzero for the same reason. -/
+theorem natDegree_eq_add_of_eq_mul {P g Q : K[X]} (hP : P ≠ 0) (hPQ : P = g * Q) :
+    P.natDegree = g.natDegree + Q.natDegree := by
+  rw [hPQ, Polynomial.natDegree_mul (left_ne_zero_of_mul (hPQ ▸ hP))
+    (right_ne_zero_of_mul (hPQ ▸ hP))]
+
 /-- **The Bézout comparison.**  A common factor of degree at least `d` is the same thing as a
 nonzero syzygy `AP + BH = 0` with `deg A ≤ deg H - d` and `deg B ≤ deg P - d`.  The forward
 direction takes `(A,B) = (H/g, -P/g)`; the backward one divides by the generator of the ideal
@@ -100,46 +111,30 @@ theorem hasCommonFactor_iff {P H : K[X]} (hP : P ≠ 0) (hH : H ≠ 0) {d : ℕ}
         B.natDegree ≤ P.natDegree - d ∧ A * P + B * H = 0 := by
   constructor
   · rintro ⟨g, ⟨P₁, hP₁⟩, ⟨H₁, hH₁⟩, hdg⟩
-    have hg : g ≠ 0 := fun h => hP (by simp [hP₁, h])
-    have hP₁0 : P₁ ≠ 0 := fun h => hP (by simp [hP₁, h])
-    have hH₁0 : H₁ ≠ 0 := fun h => hH (by simp [hH₁, h])
-    have hdegP : P.natDegree = g.natDegree + P₁.natDegree := by
-      rw [hP₁, Polynomial.natDegree_mul hg hP₁0]
-    have hdegH : H.natDegree = g.natDegree + H₁.natDegree := by
-      rw [hH₁, Polynomial.natDegree_mul hg hH₁0]
+    have hH₁0 : H₁ ≠ 0 := right_ne_zero_of_mul (hH₁ ▸ hH)
+    have hdegP := natDegree_eq_add_of_eq_mul hP hP₁
+    have hdegH := natDegree_eq_add_of_eq_mul hH hH₁
     refine ⟨H₁, -P₁, Or.inl hH₁0, by omega, ?_, ?_⟩
     · rw [Polynomial.natDegree_neg]; omega
     · rw [hP₁, hH₁]; ring
   · rintro ⟨A, B, hAB, hA, _, hrel⟩
-    have hA0 : A ≠ 0 := by
-      rcases hAB with h | h
-      · exact h
-      · intro hA0
-        rw [hA0, zero_mul, zero_add] at hrel
-        exact h ((mul_eq_zero.mp hrel).resolve_right hH)
+    have hA0 : A ≠ 0 := fun hA0 => hAB.elim (fun h => h hA0) fun h => h <| by
+      rw [hA0, zero_mul, zero_add] at hrel
+      exact (mul_eq_zero.mp hrel).resolve_right hH
     obtain ⟨g, u, v, ⟨P₁, hP₁⟩, ⟨H₁, hH₁⟩, huv⟩ := exists_bezout P H
-    have hg : g ≠ 0 := fun h => hP (by simp [hP₁, h])
-    have hH₁0 : H₁ ≠ 0 := fun h => hH (by simp [hH₁, h])
-    have hone : u * P₁ + v * H₁ = 1 := by
-      refine mul_left_cancel₀ hg ?_
-      rw [mul_one]
-      calc g * (u * P₁ + v * H₁) = u * (g * P₁) + v * (g * H₁) := by ring
-        _ = u * P + v * H := by rw [← hP₁, ← hH₁]
-        _ = g := huv
-    have hcancel : A * P₁ + B * H₁ = 0 := by
-      refine mul_left_cancel₀ hg ?_
-      rw [mul_zero]
-      calc g * (A * P₁ + B * H₁) = A * (g * P₁) + B * (g * H₁) := by ring
-        _ = A * P + B * H := by rw [← hP₁, ← hH₁]
-        _ = 0 := hrel
+    have hg : g ≠ 0 := left_ne_zero_of_mul (hP₁ ▸ hP)
+    -- dividing a relation `sP + tH = gc` through by the common factor `g`
+    have hdiv : ∀ s t c : K[X], s * P + t * H = g * c → s * P₁ + t * H₁ = c :=
+      fun s t c hst => mul_left_cancel₀ hg <| by
+        rw [show g * (s * P₁ + t * H₁) = s * (g * P₁) + t * (g * H₁) by ring, ← hP₁, ← hH₁, hst]
+    have hone : u * P₁ + v * H₁ = 1 := hdiv u v 1 (by rw [huv, mul_one])
+    have hcancel : A * P₁ + B * H₁ = 0 := hdiv A B 0 (by rw [hrel, mul_zero])
     have hdvd : H₁ ∣ A := ⟨v * A - u * B, by
-      have : A = A * (u * P₁ + v * H₁) := by rw [hone, mul_one]
-      calc A = A * (u * P₁ + v * H₁) := this
+      calc A = A * (u * P₁ + v * H₁) := by rw [hone, mul_one]
         _ = u * (A * P₁ + B * H₁) + H₁ * (v * A - u * B) := by ring
         _ = H₁ * (v * A - u * B) := by rw [hcancel, mul_zero, zero_add]⟩
     have hle : H₁.natDegree ≤ A.natDegree := Polynomial.natDegree_le_of_dvd hdvd hA0
-    have hdegH : H.natDegree = g.natDegree + H₁.natDegree := by
-      rw [hH₁, Polynomial.natDegree_mul hg hH₁0]
+    have hdegH := natDegree_eq_add_of_eq_mul hH hH₁
     exact ⟨g, ⟨P₁, hP₁⟩, ⟨H₁, hH₁⟩, by omega⟩
 
 /-! ### Coefficient vectors -/
@@ -188,6 +183,12 @@ theorem toPoly_smul {a : ℕ} (c : K) (u : Fin a → K) : toPoly (c • u) = C c
   simp only [toPoly, Finset.mul_sum, Pi.smul_apply, smul_eq_mul, map_mul]
   exact Finset.sum_congr rfl fun i _ => by ring
 
+/-- Rescaling a pair of coefficient vectors rescales the syzygy their blocks define. -/
+theorem toPoly_smul_mul_add {a b : ℕ} (t : K) (w : (Fin a → K) × (Fin b → K)) (P H : K[X]) :
+    toPoly (t • w).1 * P + toPoly (t • w).2 * H
+      = C t * (toPoly w.1 * P + toPoly w.2 * H) := by
+  rw [Prod.smul_fst, Prod.smul_snd, toPoly_smul, toPoly_smul]; ring
+
 /-- The coefficients of `(∑_{j<a} uⱼXʲ)P` are the convolution, which is what makes them
 continuous in `(u, P)`. -/
 theorem coeff_toPoly_mul {a : ℕ} (u : Fin a → K) (P : K[X]) (i : ℕ) :
@@ -202,6 +203,84 @@ theorem coeff_toPoly_mul {a : ℕ} (u : Fin a → K) (P : K[X]) (i : ℕ) :
 section Topology
 
 variable {Λ : Type*} [TopologicalSpace Λ]
+
+/-- The **normalized syzygy locus** of a family of polynomial pairs: those `(\lambda, u)` with `u`
+a coefficient vector of unit norm whose two blocks `A = \sum u_i X^i` and `B` annihilate the pair,
+`AP(\lambda) + BH(\lambda) = 0`.
+
+The whole point of normalizing to the sphere is that the fiber over `\lambda` is then compact, so
+the projection to the parameter is a closed map. -/
+def syzygyLocus (P H : Λ → ℂ[X]) (a b : ℕ) :
+    Set (Λ × Metric.sphere (0 : (Fin a → ℂ) × (Fin b → ℂ)) 1) :=
+  {q | toPoly (q.2 : (Fin a → ℂ) × (Fin b → ℂ)).1 * P q.1
+        + toPoly (q.2 : (Fin a → ℂ) × (Fin b → ℂ)).2 * H q.1 = 0}
+
+/-- **The syzygy locus is closed.**  A polynomial vanishes exactly when all its coefficients do,
+and each coefficient of `AP + BH` is the convolution `\sum_j u_j P_{i-j}`, which is continuous in
+the parameter and in the coefficient vector jointly. -/
+theorem isClosed_syzygyLocus {P H : Λ → ℂ[X]} {a b : ℕ}
+    (hPc : ∀ i, Continuous fun l => (P l).coeff i)
+    (hHc : ∀ i, Continuous fun l => (H l).coeff i) :
+    IsClosed (syzygyLocus P H a b) := by
+  set E := (Fin a → ℂ) × (Fin b → ℂ) with hE
+  have hrw : syzygyLocus P H a b = ⋂ i : ℕ, {q : Λ × Metric.sphere (0 : E) 1 |
+      (toPoly (q.2 : E).1 * P q.1 + toPoly (q.2 : E).2 * H q.1).coeff i = 0} := by
+    ext q
+    simp only [syzygyLocus, Set.mem_iInter, Set.mem_ofPred_eq, Polynomial.ext_iff,
+      Polynomial.coeff_zero]
+  rw [hrw]
+  refine isClosed_iInter fun i => ?_
+  refine isClosed_eq ?_ continuous_const
+  simp only [Polynomial.coeff_add, coeff_toPoly_mul]
+  have hval : Continuous fun q : Λ × Metric.sphere (0 : E) 1 => (q.2 : E) :=
+    continuous_subtype_val.comp continuous_snd
+  refine (continuous_finsetSum _ fun j _ => ?_).add (continuous_finsetSum _ fun j _ => ?_)
+  · refine Continuous.mul ((continuous_apply j).comp (continuous_fst.comp hval)) ?_
+    by_cases hj : (j : ℕ) ≤ i
+    · simp only [if_pos hj]; exact (hPc _).comp continuous_fst
+    · simp only [if_neg hj]; exact continuous_const
+  · refine Continuous.mul ((continuous_apply j).comp (continuous_snd.comp hval)) ?_
+    by_cases hj : (j : ℕ) ≤ i
+    · simp only [if_pos hj]; exact (hHc _).comp continuous_fst
+    · simp only [if_neg hj]; exact continuous_const
+
+omit [TopologicalSpace Λ] in
+/-- **The parameter set is the projection of the syzygy locus.**  This is the Bézout comparison
+read as a set identity: a common factor gives a syzygy, which rescales to the sphere without
+changing its degree bounds, and a point of the locus gives back a syzygy with those bounds.
+
+Nothing topological enters: only the algebra of the comparison and the rescaling. -/
+theorem setOf_hasCommonFactor_eq_image {P H : Λ → ℂ[X]} {n m d : ℕ}
+    (hPd : ∀ l, (P l).natDegree = n) (hHd : ∀ l, (H l).natDegree = m)
+    (hP0 : ∀ l, P l ≠ 0) (hH0 : ∀ l, H l ≠ 0) (hdm : d ≤ m) :
+    {l | HasCommonFactor (P l) (H l) d}
+      = Prod.fst '' syzygyLocus P H (m - d + 1) (n - d + 1) := by
+  set a := m - d + 1 with ha
+  set b := n - d + 1 with hb
+  set E := (Fin a → ℂ) × (Fin b → ℂ) with hE
+  refine Set.Subset.antisymm (fun l hl => ?_) ?_
+  · rw [Set.mem_ofPred_eq, hasCommonFactor_iff (hP0 l) (hH0 l) (by rw [hHd l]; exact hdm)] at hl
+    obtain ⟨A, B, hAB, hA, hB, hrel⟩ := hl
+    set w : E := (fun i : Fin a => A.coeff (i : ℕ), fun i : Fin b => B.coeff (i : ℕ)) with hw
+    have hwA : toPoly w.1 = A := toPoly_coeff A (by rw [hHd l] at hA; omega)
+    have hwB : toPoly w.2 = B := toPoly_coeff B (by rw [hPd l] at hB; omega)
+    have hw0 : w ≠ 0 := fun h => hAB.elim
+      (fun hh => hh (by rw [← hwA]; exact toPoly_eq_zero_iff.mpr (congrArg Prod.fst h)))
+      (fun hh => hh (by rw [← hwB]; exact toPoly_eq_zero_iff.mpr (congrArg Prod.snd h)))
+    have hsphere : ((‖w‖ : ℂ))⁻¹ • w ∈ Metric.sphere (0 : E) 1 := by
+      rw [Metric.mem_sphere, dist_zero_right]; exact norm_smul_inv_norm (𝕜 := ℂ) hw0
+    refine ⟨(l, ⟨_, hsphere⟩), ?_, rfl⟩
+    change toPoly (((‖w‖ : ℂ)⁻¹ • w : E)).1 * P l + toPoly (((‖w‖ : ℂ)⁻¹ • w : E)).2 * H l = 0
+    rw [toPoly_smul_mul_add, hwA, hwB, hrel, mul_zero]
+  · rintro _ ⟨q, hq, rfl⟩
+    rw [Set.mem_ofPred_eq, hasCommonFactor_iff (hP0 q.1) (hH0 q.1) (by rw [hHd q.1]; exact hdm)]
+    have hqne : (q.2 : E) ≠ 0 := ne_zero_of_mem_unit_sphere q.2
+    refine ⟨toPoly (q.2 : E).1, toPoly (q.2 : E).2, ?_, ?_, ?_, hq⟩
+    · rcases eq_or_ne (q.2 : E).1 0 with h1 | h1
+      · exact Or.inr fun h => hqne (Prod.ext h1 (toPoly_eq_zero_iff.mp h))
+      · exact Or.inl fun h => h1 (toPoly_eq_zero_iff.mp h)
+    · rw [hHd q.1]; have := natDegree_toPoly_le (q.2 : E).1; omega
+    · rw [hPd q.1]; have := natDegree_toPoly_le (q.2 : E).2; omega
 
 /-- **The degree of a greatest common divisor is upper semicontinuous.**  For a family of
 polynomial pairs of constant degrees whose coefficients vary continuously, the parameters
@@ -224,82 +303,11 @@ theorem isClosed_hasCommonFactor {P H : Λ → ℂ[X]} {n m d : ℕ}
       intro h
       exact hdm ((hHd l) ▸ h.le_natDegree (hH0 l))
     rw [this]; exact isClosed_empty
-  set a := m - d + 1 with ha
-  set b := n - d + 1 with hb
-  set E := (Fin a → ℂ) × (Fin b → ℂ) with hE
-  haveI : CompactSpace (Metric.sphere (0 : E) 1) :=
+  haveI : CompactSpace
+      (Metric.sphere (0 : (Fin (m - d + 1) → ℂ) × (Fin (n - d + 1) → ℂ)) 1) :=
     isCompact_iff_compactSpace.mp (isCompact_sphere _ _)
-  set S : Set (Λ × Metric.sphere (0 : E) 1) :=
-    {q | toPoly (q.2 : E).1 * P q.1 + toPoly (q.2 : E).2 * H q.1 = 0} with hS
-  have hSclosed : IsClosed S := by
-    have hrw : S = ⋂ i : ℕ, {q : Λ × Metric.sphere (0 : E) 1 |
-        (toPoly (q.2 : E).1 * P q.1 + toPoly (q.2 : E).2 * H q.1).coeff i = 0} := by
-      ext q
-      simp only [hS, Set.mem_iInter, Set.mem_ofPred_eq, Polynomial.ext_iff, Polynomial.coeff_zero]
-    rw [hrw]
-    refine isClosed_iInter fun i => ?_
-    refine isClosed_eq ?_ continuous_const
-    simp only [Polynomial.coeff_add, coeff_toPoly_mul]
-    have hval : Continuous fun q : Λ × Metric.sphere (0 : E) 1 => (q.2 : E) :=
-      continuous_subtype_val.comp continuous_snd
-    refine (continuous_finsetSum _ fun j _ => ?_).add (continuous_finsetSum _ fun j _ => ?_)
-    · refine Continuous.mul ((continuous_apply j).comp (continuous_fst.comp hval)) ?_
-      by_cases hj : (j : ℕ) ≤ i
-      · simp only [if_pos hj]; exact (hPc _).comp continuous_fst
-      · simp only [if_neg hj]; exact continuous_const
-    · refine Continuous.mul ((continuous_apply j).comp (continuous_snd.comp hval)) ?_
-      by_cases hj : (j : ℕ) ≤ i
-      · simp only [if_pos hj]; exact (hHc _).comp continuous_fst
-      · simp only [if_neg hj]; exact continuous_const
-  have himg : {l | HasCommonFactor (P l) (H l) d} = Prod.fst '' S := by
-    ext l
-    constructor
-    · intro hl
-      rw [Set.mem_ofPred_eq, hasCommonFactor_iff (hP0 l) (hH0 l) (by rw [hHd l]; exact hdm)] at hl
-      obtain ⟨A, B, hAB, hA, hB, hrel⟩ := hl
-      have hAa : A.natDegree < a := by rw [ha, hHd l] at *; omega
-      have hBb : B.natDegree < b := by rw [hb, hPd l] at *; omega
-      set w : E := (fun i : Fin a => A.coeff (i : ℕ), fun i : Fin b => B.coeff (i : ℕ)) with hw
-      have hwA : toPoly w.1 = A := toPoly_coeff A hAa
-      have hwB : toPoly w.2 = B := toPoly_coeff B hBb
-      have hw0 : w ≠ 0 := by
-        intro h
-        rcases hAB with hh | hh
-        · exact hh (by rw [← hwA, h]; exact toPoly_eq_zero_iff.mpr rfl)
-        · exact hh (by rw [← hwB, h]; exact toPoly_eq_zero_iff.mpr rfl)
-      have hnorm : ‖w‖ ≠ 0 := fun h => hw0 (norm_eq_zero.mp h)
-      set t : ℂ := ((‖w‖ : ℂ))⁻¹ with ht
-      have ht0 : t ≠ 0 := inv_ne_zero (by exact_mod_cast hnorm)
-      have hsphere : t • w ∈ Metric.sphere (0 : E) 1 := by
-        rw [Metric.mem_sphere, dist_zero_right, norm_smul, ht]
-        rw [norm_inv, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg (norm_nonneg w)]
-        exact inv_mul_cancel₀ hnorm
-      refine ⟨(l, ⟨t • w, hsphere⟩), ?_, rfl⟩
-      change toPoly ((t • w : E)).1 * P l + toPoly ((t • w : E)).2 * H l = 0
-      have h1 : ((t • w : E)).1 = t • w.1 := rfl
-      have h2 : ((t • w : E)).2 = t • w.2 := rfl
-      rw [h1, h2, toPoly_smul, toPoly_smul, hwA, hwB]
-      calc C t * A * P l + C t * B * H l = C t * (A * P l + B * H l) := by ring
-        _ = 0 := by rw [hrel, mul_zero]
-    · rintro ⟨q, hq, rfl⟩
-      have hqne : (q.2 : E) ≠ 0 := by
-        intro h
-        have := q.2.2
-        rw [Metric.mem_sphere, dist_zero_right, h, norm_zero] at this
-        exact zero_ne_one this
-      change HasCommonFactor (P q.1) (H q.1) d
-      rw [hasCommonFactor_iff (hP0 q.1) (hH0 q.1) (by rw [hHd q.1]; exact hdm)]
-      refine ⟨toPoly (q.2 : E).1, toPoly (q.2 : E).2, ?_, ?_, ?_, hq⟩
-      · by_cases h1 : (q.2 : E).1 = 0
-        · refine Or.inr fun h => ?_
-          exact hqne (Prod.ext h1 (toPoly_eq_zero_iff.mp h))
-        · exact Or.inl fun h => h1 (toPoly_eq_zero_iff.mp h)
-      · have := natDegree_toPoly_le (q.2 : E).1
-        rw [hHd q.1]; omega
-      · have := natDegree_toPoly_le (q.2 : E).2
-        rw [hPd q.1]; omega
-  rw [himg]
-  exact isClosedMap_fst_of_compactSpace S hSclosed
+  rw [setOf_hasCommonFactor_eq_image hPd hHd hP0 hH0 hdm]
+  exact isClosedMap_fst_of_compactSpace _ (isClosed_syzygyLocus hPc hHc)
 
 /-- The complementary open set: the parameters at which no common factor of degree `d` occurs. -/
 theorem isOpen_not_hasCommonFactor {P H : Λ → ℂ[X]} {n m d : ℕ}
@@ -310,13 +318,17 @@ theorem isOpen_not_hasCommonFactor {P H : Λ → ℂ[X]} {n m d : ℕ}
     IsOpen {l | ¬ HasCommonFactor (P l) (H l) d} :=
   (isClosed_hasCommonFactor hPc hHc hPd hHd hP0 hH0).isOpen_compl
 
-/-- **An open set with dense complement is empty.**  Consequently a property whose locus is open
-and which holds generically holds at *every* point: for such a property "generic" costs nothing,
-and no dense open subset ever has to be produced. -/
-theorem eq_empty_of_dense_compl {X : Type*} [TopologicalSpace X] {U : Set X} (hU : IsOpen U)
-    (hd : Dense Uᶜ) : U = ∅ := by
-  rw [← hU.interior_eq, ← compl_compl U, interior_compl, hd.closure_eq, Set.compl_univ]
-
 end Topology
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.HasCommonFactor' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms HasCommonFactor
+
+/-- info: 'Shields.syzygyLocus' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms syzygyLocus
 
 end Shields

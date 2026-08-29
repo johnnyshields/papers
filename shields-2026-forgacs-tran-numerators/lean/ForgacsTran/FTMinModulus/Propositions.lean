@@ -141,12 +141,10 @@ theorem hasDerivAt_negDivPow (P : Polynomial ℝ) {r : ℕ} (hr : 1 ≤ r) {s : 
     (P.hasDerivAt s).neg
   have hden : HasDerivAt (fun u : ℝ => u ^ r) ((r : ℝ) * s ^ (r - 1)) s := hasDerivAt_pow r s
   have h := hnum.div hden (pow_ne_zero r hs)
-  have hA : s ^ r = s * s ^ (r - 1) := by
-    conv_lhs => rw [show r = 1 + (r - 1) by omega]
-    rw [pow_add, pow_one]
+  have hA : s ^ r = s * s ^ (r - 1) := (mul_pow_sub_one (by omega) s).symm
   have hB : s ^ (r + 1) = s ^ 2 * s ^ (r - 1) := by
-    conv_lhs => rw [show r + 1 = 2 + (r - 1) by omega]
-    rw [pow_add]
+    rw [show r - 1 = r + 1 - 2 by omega]
+    exact (pow_mul_pow_sub s (by omega)).symm
   have hval : (-(derivative P).eval s * s ^ r - -P.eval s * ((r : ℝ) * s ^ (r - 1)))
       / (s ^ r) ^ 2 = -(s * (derivative P).eval s - r * P.eval s) / s ^ (r + 1) := by
     rw [div_eq_div_iff (pow_ne_zero 2 (pow_ne_zero r hs)) (pow_ne_zero (r + 1) hs), hA, hB]
@@ -155,7 +153,7 @@ theorem hasDerivAt_negDivPow (P : Polynomial ℝ) {r : ℕ} (hr : 1 ≤ r) {s : 
 
 /-- **`-P(s)/s^r` is strictly increasing below the first critical point.**  This
 is the step `Forgacs2017RationalDenominator` Prop. 1 uses to place a real zero. -/
-theorem strictMonoOn_negDivPow {P : Polynomial ℝ} {r : ℕ} (hr : 1 ≤ r) {T : ℝ} (hT : 0 < T)
+theorem strictMonoOn_negDivPow {P : Polynomial ℝ} {r : ℕ} (hr : 1 ≤ r) {T : ℝ} (_hT : 0 < T)
     (hneg : ∀ s ∈ Set.Ioo (0 : ℝ) T, s * (derivative P).eval s - r * P.eval s < 0) :
     StrictMonoOn (fun u : ℝ => -P.eval u / u ^ r) (Set.Ioc 0 T) := by
   refine strictMonoOn_of_deriv_pos (convex_Ioc 0 T) ?_ ?_

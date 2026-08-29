@@ -199,16 +199,37 @@ end BlockMono
 
 /-! ### Every increasing selection extends to a block-monotone permutation -/
 
+/-- The permutation assembled from a `k`-element subset `s` and the increasing enumeration of its
+complement: the first `k` positions are sent to `s` in order, the remaining `N - k` to `sᶜ` in
+order.  This is Mathlib's `finSumEquivOfFinset` transported along `Fin N ≃ Fin k ⊕ Fin (N-k)`. -/
+private def blockPerm {k : ℕ} {s : Finset (Fin N)} (hm : #s = k) (hn : #sᶜ = N - k)
+    (hNk : N = k + (N - k)) : Equiv.Perm (Fin N) :=
+  ((finCongr hNk).trans finSumFinEquiv.symm).trans (finSumEquivOfFinset hm hn)
+
+/-- On the low block, `blockPerm` is the increasing enumeration of `s`. -/
+private theorem blockPerm_apply_lt {k : ℕ} {s : Finset (Fin N)} (hm : #s = k) (hn : #sᶜ = N - k)
+    (hNk : N = k + (N - k)) {i : Fin N} (hi : (i : ℕ) < k) :
+    blockPerm hm hn hNk i = s.orderEmbOfFin hm ⟨i, hi⟩ := by
+  simp only [blockPerm, Equiv.trans_apply, finCongr_apply]
+  rw [show (Fin.cast hNk i) = Fin.castAdd _ ⟨i, hi⟩ from rfl,
+    finSumFinEquiv_symm_apply_castAdd, finSumEquivOfFinset_inl]
+
+/-- On the high block, `blockPerm` is the increasing enumeration of `sᶜ`. -/
+private theorem blockPerm_apply_ge {k : ℕ} {s : Finset (Fin N)} (hm : #s = k) (hn : #sᶜ = N - k)
+    (hNk : N = k + (N - k)) {i : Fin N} (hi : k ≤ (i : ℕ)) :
+    blockPerm hm hn hNk i = sᶜ.orderEmbOfFin hn ⟨(i : ℕ) - k, by have := i.isLt; omega⟩ := by
+  simp only [blockPerm, Equiv.trans_apply, finCongr_apply]
+  rw [show (Fin.cast hNk i) = Fin.natAdd _ ⟨(i : ℕ) - k, by have := i.isLt; omega⟩ from
+      Fin.ext (by simp; omega),
+    finSumFinEquiv_symm_apply_natAdd, finSumEquivOfFinset_inr]
+
 /-- **The complement of an increasing selection.**  For strictly monotone
 `f : Fin k → Fin N` there is a permutation of `Fin N` that agrees with `f` on
 `{0,…,k-1}` and enumerates the complement of the range of `f` increasingly
 above.
 
-This is `finSumEquivOfFinset` at `s = range f`, transported along
-`Fin N ≃ Fin k ⊕ Fin (N-k)`: that equivalence sends the left summand to `s` and
-the right to `sᶜ`, order-preserving on each half, which is exactly `BlockMono`.
-Agreement with `f` on the low block is `orderEmbOfFin_unique` — a strictly
-monotone map is the increasing enumeration of its own image. -/
+Agreement with `f` on the low block is `orderEmbOfFin_unique` -- a strictly monotone map is the
+increasing enumeration of its own image. -/
 theorem exists_blockMono {k : ℕ} (hk : k ≤ N) {f : Fin k → Fin N} (hf : StrictMono f) :
     ∃ ρ : Equiv.Perm (Fin N), BlockMono k ρ ∧
       ∀ a : Fin k, ρ ⟨a, lt_of_lt_of_le a.isLt hk⟩ = f a := by
@@ -217,33 +238,30 @@ theorem exists_blockMono {k : ℕ} (hk : k ≤ N) {f : Fin k → Fin N} (hf : St
   have hn : #(univ.image f)ᶜ = N - k := by
     rw [Finset.card_compl, hm]; simp
   have hNk : N = k + (N - k) := by omega
-  refine ⟨((finCongr hNk).trans finSumFinEquiv.symm).trans (finSumEquivOfFinset hm hn),
-    ⟨?_, ?_⟩, ?_⟩
-  · intro i j hij hjk
-    have hik : (i : ℕ) < k := lt_trans (by exact_mod_cast hij) hjk
-    simp only [Equiv.trans_apply, finCongr_apply]
-    rw [show (Fin.cast hNk i) = Fin.castAdd _ ⟨i, hik⟩ from rfl,
-      show (Fin.cast hNk j) = Fin.castAdd _ ⟨j, hjk⟩ from rfl,
-      finSumFinEquiv_symm_apply_castAdd, finSumFinEquiv_symm_apply_castAdd,
-      finSumEquivOfFinset_inl, finSumEquivOfFinset_inl]
+  refine ⟨blockPerm hm hn hNk, ⟨fun i j hij hjk => ?_, fun i j hij hik => ?_⟩, fun a => ?_⟩
+  · have hik : (i : ℕ) < k := lt_trans (by exact_mod_cast hij) hjk
+    rw [blockPerm_apply_lt hm hn hNk hik, blockPerm_apply_lt hm hn hNk hjk]
     exact ((univ.image f).orderEmbOfFin hm).strictMono (by simpa using hij)
-  · intro i j hij hik
-    have hjk : k ≤ (j : ℕ) := le_trans hik (le_of_lt (by exact_mod_cast hij))
-    simp only [Equiv.trans_apply, finCongr_apply]
-    rw [show (Fin.cast hNk i) = Fin.natAdd _ ⟨(i : ℕ) - k, by omega⟩ from
-        Fin.ext (by simp; omega),
-      show (Fin.cast hNk j) = Fin.natAdd _ ⟨(j : ℕ) - k, by omega⟩ from
-        Fin.ext (by simp; omega),
-      finSumFinEquiv_symm_apply_natAdd, finSumFinEquiv_symm_apply_natAdd,
-      finSumEquivOfFinset_inr, finSumEquivOfFinset_inr]
+  · have hjk : k ≤ (j : ℕ) := le_trans hik (le_of_lt (by exact_mod_cast hij))
+    rw [blockPerm_apply_ge hm hn hNk hik, blockPerm_apply_ge hm hn hNk hjk]
     refine ((univ.image f)ᶜ.orderEmbOfFin hn).strictMono ?_
     have : (i : ℕ) < (j : ℕ) := by exact_mod_cast hij
-    simp only [Fin.mk_lt_mk]; omega
-  · intro a
-    simp only [Equiv.trans_apply, finCongr_apply]
-    rw [show (Fin.cast hNk ⟨(a : ℕ), lt_of_lt_of_le a.isLt hk⟩) = Fin.castAdd _ a from rfl,
-      finSumFinEquiv_symm_apply_castAdd, finSumEquivOfFinset_inl]
-    exact (congrFun (Finset.orderEmbOfFin_unique hm
+    simp only [Fin.mk_lt_mk]
+    omega
+  · rw [blockPerm_apply_lt hm hn hNk (show ((⟨a, lt_of_lt_of_le a.isLt hk⟩ : Fin N) : ℕ) < k from
+      a.isLt)]
+    simpa using (congrFun (Finset.orderEmbOfFin_unique hm
       (fun i => Finset.mem_image_of_mem f (mem_univ i)) hf) a).symm
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.BlockMono.sign' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms BlockMono.sign
+
+/-- info: 'Shields.exists_blockMono' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_blockMono
 
 end Shields

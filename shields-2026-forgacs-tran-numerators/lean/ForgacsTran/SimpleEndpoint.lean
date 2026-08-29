@@ -19,7 +19,7 @@ relaxing a binder, and what it took to remove it.
 
 `clusterAlpha x₁ ρ j = -x₁ω_j/sin(π/ρ)` divides by `sin(π/ρ)`, which is `0` at
 `ρ = 1`.  So `clusterAlpha x₁ 1 j` is not a degenerate case of the formula but
-the division convention's `0` (`clusterAlpha_one_eq_zero`), and
+the division convention's `0` (`Cluster.clusterAlpha_one_eq_zero`), and
 `Cluster.clusterAlpha_ne_zero` is false there rather than merely unproven.
 Relaxing `2 ≤ ρ` to `1 ≤ ρ` would give a theorem about that junk value.
 
@@ -53,11 +53,12 @@ describe this endpoint at all: at `ρ = 1` the collision point is **not a zero o
 
 ## Main statements
 
-* `clusterAlpha_one_eq_zero` — the value at `ρ = 1` is the junk value.
+* `not_clusterAlpha_ne_zero_one` — `Cluster.clusterAlpha_ne_zero` is false at
+  `ρ = 1`, where the direction is the division convention's junk value.
 * `derivative_eval_eq_zero_of_two_le_rootMultiplicity` — at a collision the
   denominator's derivative vanishes, which is what `hEp₀` denies at `ρ = 1`.
-* `hEp_false_of_rho_one` — those two together: at `ρ = 1` the `hEp₀` limit and
-  `c_Q ≠ 0` are contradictory.
+* `hEp_false_of_rho_one` — at `ρ = 1` the exponent `ρ - 1` is `0`, so `hEp₀`
+  asks for the limit `c_Q ≠ 0`, while the collision forces `∂_tD → 0`.
 
 ## Tags
 
@@ -70,16 +71,8 @@ open Polynomial
 
 /-! ### The cluster directions degenerate at `ρ = 1` -/
 
-theorem sin_pi_div_one : Real.sin (Real.pi / (1 : ℕ)) = 0 := by
-  norm_num
-
-/-- **The binder `2 ≤ ρ` is not relaxable.**  At `ρ = 1` the cluster direction is
-Lean's `x / 0 = 0`, not a limiting case of `-x₁ω_j/sin(π/ρ)`. -/
-theorem clusterAlpha_one_eq_zero (x₁ : ℝ) (j : ℕ) : clusterAlpha x₁ 1 j = 0 := by
-  rw [clusterAlpha, sin_pi_div_one]
-  simp
-
-/-- `Cluster.clusterAlpha_ne_zero` is false at `ρ = 1`, not merely unproven. -/
+/-- **`Cluster.clusterAlpha_ne_zero` is false at `ρ = 1`, not merely unproven** —
+the binder `2 ≤ ρ` on its consumers is therefore not relaxable. -/
 theorem not_clusterAlpha_ne_zero_one (x₁ : ℝ) (j : ℕ) :
     ¬ clusterAlpha x₁ 1 j ≠ 0 := by
   rw [not_not]

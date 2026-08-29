@@ -336,6 +336,8 @@ def main():
     verify(len(panels))
     size = OUTPUT.stat().st_size
     print(f"wrote {OUTPUT.relative_to(PAPER_DIR)} ({size / 1024:.0f} KB)")
+    print(f"\nALL PASS: render_figures -- {len(FIGURES)} figure floats in the "
+          f"manuscript, {len(panels)} vector pages rendered")
 
 
 if __name__ == "__main__":

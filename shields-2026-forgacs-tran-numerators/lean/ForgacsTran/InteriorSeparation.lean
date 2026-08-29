@@ -62,7 +62,7 @@ a disk holding exactly two zeros with multiplicity holds them and nothing else.
 at one angle; one radius across the interior compares `sup τ` against the
 non-principal infimum at *different* angles, and no same-angle statement settles
 that.  The cover is therefore finite rather than a singleton, which costs nothing
-downstream — `DominanceFT.interior_data_of_geometry` runs on each piece with that
+downstream — `DominanceFTSupply.interior_data_of_geometry` runs on each piece with that
 piece's radius, and its constants reassemble over a finite set.
 
 `scripts/check_interior_fixed_radius.py` measures the stronger form: on eight
@@ -467,7 +467,7 @@ theorem exists_finite_separation_cover {Q : Polynomial ℂ} {r : ℕ} {z τ : �
 
 /-! ### Reassembling the interior data across the pieces
 
-`DominanceFT.interior_data_of_geometry` runs on each piece of the cover with that
+`DominanceFTSupply.interior_data_of_geometry` runs on each piece of the cover with that
 piece's radius, and its conclusions combine over a finite set.  The theorem itself
 is untouched: `hpair` is satisfiable **per piece**, so the binder stays exactly as
 it stands and only what a caller does with it changes.

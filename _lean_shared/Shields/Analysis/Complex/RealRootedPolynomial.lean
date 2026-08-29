@@ -245,10 +245,10 @@ theorem mem_roots_conj_of_coeff_im_eq_zero {p : Polynomial ℂ} (hp : ∀ i, (p.
 has all its roots real and `f n → f₀` uniformly on the closed disc `|s - c| ≤ R`, then every zero
 of `f₀` in the open disc is real.
 
-The proof is local at a putative nonreal zero `w`.  A radius `r` is chosen below `|Im w|`, below the
-isolation radius of `w` as a zero of `f₀`, and below `R - |w - c|`, so that `ball w r` misses the
-real axis and sits inside `ball c R` while `sphere w r` carries no zero of `f₀`.  Zero transfer on
-that circle hands `f n` a zero in `ball w r` for some large `n`, and that zero is nonreal.
+The proof is local at a putative nonreal zero `w`.  The attraction statement
+`Shields.exists_radius_card_rootsIn_eq_rootMultiplicity`, applied on the disc
+`closedBall w (R - |w - c|)`, supplies a radius; taking one below that and below `|Im w|` keeps
+`ball w r` off the real axis, so the zero of `f n` it produces is both real and nonreal.
 
 The convergence hypothesis is uniform on the **closed disc**, not merely on its boundary circle:
 zero transfer is applied on an interior circle around `w`, which boundary data alone does not
@@ -263,49 +263,25 @@ theorem im_eq_zero_of_mem_rootsIn {f : ℕ → Polynomial ℂ} {f₀ : Polynomia
   by_contra him
   obtain ⟨hwroot, hwball⟩ := mem_rootsIn.mp hw
   have hf₀ : f₀ ≠ 0 := (mem_roots'.mp hwroot).1
-  have hw0 : f₀.eval w = 0 := (mem_roots'.mp hwroot).2
-  obtain ⟨ρ₁, hρ₁, hiso⟩ := exists_ball_eq_of_eval_eq_zero hf₀ w
-  have himpos : 0 < |w.im| := abs_pos.mpr him
+  have hmult : 0 < f₀.rootMultiplicity w := (rootMultiplicity_pos hf₀).2 (mem_roots'.mp hwroot).2
   have hdist : dist w c < R := mem_ball.mp hwball
-  set m : ℝ := min (min ρ₁ |w.im|) (R - dist w c)
-  have hmpos : 0 < m := lt_min (lt_min hρ₁ himpos) (by linarith)
-  set r : ℝ := m / 2 with hr
-  have hrpos : 0 < r := by rw [hr]; linarith
-  have hrm : r < m := by rw [hr]; linarith
-  have hr1 : r < ρ₁ := hrm.trans_le ((min_le_left _ _).trans (min_le_left _ _))
-  have hr2 : r < |w.im| := hrm.trans_le ((min_le_left _ _).trans (min_le_right _ _))
-  have hr3 : r < R - dist w c := hrm.trans_le (min_le_right _ _)
-  -- The small circle carries no zero of the limit.
-  have hns : ∀ z ∈ sphere w r, f₀.eval z ≠ 0 := by
-    intro z hz hzero
-    rw [mem_sphere] at hz
-    have hzb : z ∈ ball w ρ₁ := by rw [mem_ball, hz]; exact hr1
-    have hzw := hiso z hzb hzero
-    rw [hzw, dist_self] at hz
-    exact hrpos.ne' hz.symm
-  -- The small circle sits inside the disc on which the convergence is uniform.
-  have hsub : sphere w r ⊆ closedBall c R := by
-    intro z hz
-    rw [mem_sphere] at hz
-    rw [mem_closedBall]
-    calc dist z c ≤ dist z w + dist w c := dist_triangle z w c
-      _ = r + dist w c := by rw [hz]
-      _ ≤ R := by linarith
-  have hisoR : ∀ z ∈ ball w r, f₀.eval z = 0 → z = w := fun z hz =>
-    hiso z (ball_subset_ball hr1.le hz)
-  have hcard : (rootsIn f₀ w r).card = f₀.rootMultiplicity w :=
-    card_rootsIn_eq_rootMultiplicity hrpos hisoR
-  have hpos : 0 < f₀.rootMultiplicity w := (rootMultiplicity_pos hf₀).2 hw0
-  -- Zero transfer on that circle produces a nonreal zero of some `f n`.
-  obtain ⟨n, hn1, hn2⟩ :=
-    (hreal.and (eventually_card_rootsIn_eq hrpos (hunif.mono hsub) hns)).exists
-  have hcpos : 0 < (rootsIn (f n) w r).card := by rw [hn2, hcard]; exact hpos
-  obtain ⟨z, hz⟩ := Multiset.card_pos_iff_exists_mem.mp hcpos
+  have hsub : closedBall w (R - dist w c) ⊆ closedBall c R := fun z hz =>
+    mem_closedBall.mpr ((dist_triangle z w c).trans (by linarith [mem_closedBall.mp hz]))
+  obtain ⟨ρ, hρ, -, hattract⟩ := exists_radius_card_rootsIn_eq_rootMultiplicity hf₀ w
+    (by linarith : (0 : ℝ) < R - dist w c) (hunif.mono hsub)
+  -- A radius below the attraction radius and below the distance from `w` to the real axis.
+  obtain ⟨r, hrpos, hrρ, hrim⟩ : ∃ r : ℝ, 0 < r ∧ r < ρ ∧ r < |w.im| := by
+    have h := lt_min hρ (abs_pos.mpr him)
+    exact ⟨min ρ |w.im| / 2, by linarith, by linarith [min_le_left ρ |w.im|],
+      by linarith [min_le_right ρ |w.im|]⟩
+  -- Some `f n` therefore has a zero in `ball w r`, and it is real while `w` is not.
+  obtain ⟨N, hN⟩ := hattract r hrpos hrρ
+  obtain ⟨n, hn, hnN⟩ := (hreal.and (eventually_ge_atTop N)).exists
+  obtain ⟨z, hz⟩ := Multiset.card_pos_iff_exists_mem.mp (by rw [hN n hnN]; exact hmult)
   obtain ⟨hzroot, hzball⟩ := mem_rootsIn.mp hz
-  have hzim : z.im = 0 := hn1.2 z hzroot
   have hle : |w.im| ≤ dist w z := by
     rw [dist_eq_norm]
-    simpa [hzim] using Complex.abs_im_le_norm (w - z)
+    simpa [hn.2 z hzroot] using Complex.abs_im_le_norm (w - z)
   have hzw : dist w z < r := by rw [dist_comm]; exact mem_ball.mp hzball
   linarith
 
@@ -317,5 +293,16 @@ theorem im_eq_zero_of_eval_eq_zero {f : ℕ → Polynomial ℂ} {f₀ : Polynomi
       (closedBall c R)) :
     ∀ w ∈ ball c R, f₀.eval w = 0 → w.im = 0 := fun w hw hzero =>
   im_eq_zero_of_mem_rootsIn hreal hunif w (mem_rootsIn.mpr ⟨mem_roots'.mpr ⟨hf₀, hzero⟩, hw⟩)
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.exists_radius_card_rootsIn_eq_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_radius_card_rootsIn_eq_one
+
+/-- info: 'Shields.im_eq_zero_of_mem_rootsIn' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms im_eq_zero_of_mem_rootsIn
 
 end Shields

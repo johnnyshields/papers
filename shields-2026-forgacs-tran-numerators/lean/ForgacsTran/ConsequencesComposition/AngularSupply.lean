@@ -146,7 +146,6 @@ theorem ft_angular_clock_of_discrepancy {Q : Polynomial ℂ} {r : ℕ} {z : ℝ 
   have hr0 : (0 : ℝ) < r := by exact_mod_cast hr
   have hMpos : (0 : ℝ) < (M : ℝ) + 1 := by positivity
   set Δ : ℝ := C₀ + C₁ * (B.natDegree : ℝ) with hΔ
-  have hΔ0 : 0 ≤ Δ := by rw [hΔ]; positivity
   -- the open window, directly
   have hopen := hM₀ M hM 0 θ le_rfl hθ0 hθr.le
   rw [sub_zero] at hopen
@@ -193,6 +192,6 @@ theorem ft_angular_clock_of_discrepancy {Q : Polynomial ℂ} {r : ℕ} {z : ℝ 
         nlinarith [this, hdiv]
       have := (abs_le.1 hup).2
       linarith
-  exact angular_clock_of_bracketing hΔ0 hopen hIoc h1 h2
+  exact angular_clock_of_bracketing hopen hIoc h1 h2
 
 end ForgacsTran

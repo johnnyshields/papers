@@ -4,6 +4,7 @@ Released under the MIT license as described in the file LICENSE.txt.
 Authors: Johnny Shields
 -/
 import Mathlib.Analysis.Complex.ValueDistribution.LogCounting.Basic
+import Mathlib.Topology.LocallyFinsupp
 
 /-!
 # The exponent of convergence of a divisor
@@ -21,6 +22,8 @@ since `‖0‖ ^ (-p) = 0` there.
   counting function of `D` is bounded by a constant multiple of `r ^ p`.
 * `Shields.summable_rpow_of_summable_zero` — convergence at the exponent `0` forces finite support,
   hence convergence at every exponent.
+* `Shields.locallyFinsuppWithin_apply_intCast_nonneg` — a nonnegative function with locally finite
+  support takes values whose image in an ordered ring is nonnegative.
 
 ## Tags
 
@@ -31,6 +34,17 @@ open Filter Function Metric Real Set
 open scoped ENNReal NNReal
 
 namespace Shields
+
+/--
+A nonnegative integer-valued function with locally finite support takes values whose image in an
+ordered ring is nonnegative.  The order on `Function.locallyFinsuppWithin U ℤ` is the pointwise
+one, so this is the cast of that; the cast is where a real-valued estimate consumes the fact.
+-/
+theorem locallyFinsuppWithin_apply_intCast_nonneg {X : Type*} [TopologicalSpace X] {U : Set X}
+    {R : Type*} [Ring R] [PartialOrder R] [IsOrderedRing R]
+    {D : Function.locallyFinsuppWithin U ℤ} (hD : 0 ≤ D) (x : X) :
+    (0 : R) ≤ (D x : R) :=
+  Int.cast_nonneg (hD x)
 
 variable {E : Type*} [NormedAddCommGroup E]
 
@@ -55,19 +69,48 @@ Nonnegativity of the summands defining the exponent of convergence.
 -/
 theorem summand_nonneg {D : locallyFinsupp E ℤ} (hD : 0 ≤ D) (p : ℝ) (z : E) :
     0 ≤ (D z : ℝ) * ‖z‖ ^ (-p) := by
-  have hDz : (0 : ℤ) ≤ D z := by simpa using (locallyFinsuppWithin.le_def.1 hD) z
-  have : (0 : ℝ) ≤ (D z : ℝ) := by exact_mod_cast hDz
+  have : (0 : ℝ) ≤ (D z : ℝ) := locallyFinsuppWithin_apply_intCast_nonneg hD z
   positivity
 
 /--
-For `r ≥ 1` and `p > 0`, the logarithm is bounded by `r ^ p / p`.
+**The termwise Jensen bound.**  A point of the divisor contributes to `logCounting r` at most
+`r ^ p / p` times what it contributes to `∑ z, D z * ‖z‖ ^ (-p)`.
+
+The points outside the ball of radius `r` are carried as well, contributing nothing on the left,
+so the bound may be summed over the whole space rather than over the ball.
 -/
-theorem log_le_rpow_div {p r : ℝ} (hp : 0 < p) (hr : 1 ≤ r) : log r ≤ r ^ p / p := by
-  have hr0 : (0 : ℝ) < r := lt_of_lt_of_le zero_lt_one hr
-  have h1 : log (r ^ p) ≤ r ^ p - 1 := Real.log_le_sub_one_of_pos (by positivity)
-  rw [Real.log_rpow hr0] at h1
-  rw [le_div_iff₀ hp]
-  nlinarith
+theorem logTerm_le_rpow_div_mul_summand {D : locallyFinsupp E ℤ} (hD : 0 ≤ D)
+    {p : ℝ} (hp : 0 < p) {r : ℝ} (hr : 0 < r) (z : E) :
+    ((D.toClosedBall r) z : ℝ) * log (r * ‖z‖⁻¹)
+      ≤ r ^ p / p * ((D z : ℝ) * ‖z‖ ^ (-p)) := by
+  have hnn := summand_nonneg hD p z
+  have hcoef : (0 : ℝ) ≤ r ^ p / p := by positivity
+  rcases eq_or_ne z 0 with rfl | hz
+  · simp [Real.zero_rpow (neg_ne_zero.2 hp.ne')]
+  have hznorm : (0 : ℝ) < ‖z‖ := norm_pos_iff.2 hz
+  have hDz : (0 : ℝ) ≤ (D z : ℝ) := locallyFinsuppWithin_apply_intCast_nonneg hD z
+  by_cases hmem : z ∈ closedBall (0 : E) |r|
+  · rw [locallyFinsuppWithin.toClosedBall_eval_within D hmem]
+    have hzr : ‖z‖ ≤ r := by
+      have := mem_closedBall_zero_iff.1 hmem
+      rwa [abs_of_pos hr] at this
+    have h2 : (r * ‖z‖⁻¹) ^ p = r ^ p * ‖z‖ ^ (-p) := by
+      rw [Real.mul_rpow hr.le (inv_nonneg.2 (norm_nonneg z)), Real.inv_rpow (norm_nonneg z),
+        Real.rpow_neg (norm_nonneg z)]
+    have hlog : log (r * ‖z‖⁻¹) ≤ r ^ p / p * ‖z‖ ^ (-p) := by
+      have hge : (1 : ℝ) ≤ r * ‖z‖⁻¹ := by
+        rw [← div_eq_mul_inv]; exact (one_le_div hznorm).2 hzr
+      have h1 := Real.log_le_rpow_div (zero_le_one.trans hge) hp
+      rw [h2] at h1
+      calc log (r * ‖z‖⁻¹) ≤ r ^ p * ‖z‖ ^ (-p) / p := h1
+        _ = r ^ p / p * ‖z‖ ^ (-p) := by ring
+    calc ((D z : ℝ)) * log (r * ‖z‖⁻¹) ≤ (D z : ℝ) * (r ^ p / p * ‖z‖ ^ (-p)) :=
+          mul_le_mul_of_nonneg_left hlog hDz
+      _ = r ^ p / p * ((D z : ℝ) * ‖z‖ ^ (-p)) := by ring
+  · rw [show (D.toClosedBall r) z = 0 from by
+      by_contra hne
+      exact hmem (locallyFinsuppWithin.toClosedBall_support_subset_closedBall D hne)]
+    simpa using mul_nonneg hcoef hnn
 
 /--
 If the series `∑ z, D z * ‖z‖ ^ (-p)` converges for some `p > 0`, then the logarithmic counting
@@ -78,41 +121,8 @@ theorem logCounting_le_const_mul_rpow [ProperSpace E] {D : locallyFinsupp E ℤ}
     (hsum : Summable fun z : E ↦ (D z : ℝ) * ‖z‖ ^ (-p)) {r : ℝ} (hr : 1 ≤ r) :
     D.logCounting r ≤ ((∑' z : E, (D z : ℝ) * ‖z‖ ^ (-p)) + (D 0 : ℝ)) / p * r ^ p := by
   have hr0 : (0 : ℝ) < r := lt_of_lt_of_le zero_lt_one hr
-  have hD0 : (0 : ℝ) ≤ (D 0 : ℝ) := by
-    have : (0 : ℤ) ≤ D 0 := by simpa using (locallyFinsuppWithin.le_def.1 hD) 0
-    exact_mod_cast this
-  -- Termwise bound `log (r / ‖z‖) ≤ r ^ p / p * ‖z‖ ^ (-p)`, valid also at the excluded points.
-  have key : ∀ z : E, ((D.toClosedBall r) z : ℝ) * log (r * ‖z‖⁻¹)
-      ≤ r ^ p / p * ((D z : ℝ) * ‖z‖ ^ (-p)) := by
-    intro z
-    have hnn := summand_nonneg hD p z
-    have hcoef : (0 : ℝ) ≤ r ^ p / p := by positivity
-    rcases eq_or_ne z 0 with rfl | hz
-    · have h0 : (0 : ℝ) ^ (-p) = 0 := Real.zero_rpow (neg_ne_zero.2 hp.ne')
-      simp [h0]
-    have hznorm : (0 : ℝ) < ‖z‖ := norm_pos_iff.2 hz
-    have hDz : (0 : ℝ) ≤ (D z : ℝ) := by
-      have : (0 : ℤ) ≤ D z := by simpa using (locallyFinsuppWithin.le_def.1 hD) z
-      exact_mod_cast this
-    by_cases hmem : z ∈ closedBall (0 : E) |r|
-    · rw [locallyFinsuppWithin.toClosedBall_eval_within D hmem]
-      have h2 : (r * ‖z‖⁻¹) ^ p = r ^ p * ‖z‖ ^ (-p) := by
-        rw [Real.mul_rpow hr0.le (inv_nonneg.2 (norm_nonneg z)), Real.inv_rpow (norm_nonneg z),
-          Real.rpow_neg (norm_nonneg z)]
-      have h1 : log ((r * ‖z‖⁻¹) ^ p) ≤ (r * ‖z‖⁻¹) ^ p - 1 :=
-        Real.log_le_sub_one_of_pos (by positivity)
-      rw [Real.log_rpow (by positivity), h2] at h1
-      have hlog : log (r * ‖z‖⁻¹) ≤ r ^ p / p * ‖z‖ ^ (-p) := by
-        rw [div_mul_eq_mul_div, le_div_iff₀ hp]
-        nlinarith
-      calc ((D z : ℝ)) * log (r * ‖z‖⁻¹) ≤ (D z : ℝ) * (r ^ p / p * ‖z‖ ^ (-p)) :=
-            mul_le_mul_of_nonneg_left hlog hDz
-        _ = r ^ p / p * ((D z : ℝ) * ‖z‖ ^ (-p)) := by ring
-    · have : (D.toClosedBall r) z = 0 := by
-        by_contra hne
-        exact hmem (locallyFinsuppWithin.toClosedBall_support_subset_closedBall D hne)
-      rw [this]
-      simpa using mul_nonneg hcoef hnn
+  have hD0 : (0 : ℝ) ≤ (D 0 : ℝ) := locallyFinsuppWithin_apply_intCast_nonneg hD 0
+  have key := logTerm_le_rpow_div_mul_summand hD hp hr0
   -- The sum over the closed ball is finite, and is bounded by the total sum.
   have hfinsupp :
       (Function.support fun z : E ↦ ((D.toClosedBall r) z : ℝ) * log (r * ‖z‖⁻¹)).Finite := by
@@ -134,7 +144,7 @@ theorem logCounting_le_const_mul_rpow [ProperSpace E] {D : locallyFinsupp E ℤ}
           refine mul_le_mul_of_nonneg_left ?_ (by positivity)
           exact Summable.sum_le_tsum _ (fun z _ ↦ summand_nonneg hD p z) hsum
   have hsum2 : (D 0 : ℝ) * log r ≤ (D 0 : ℝ) * (r ^ p / p) :=
-    mul_le_mul_of_nonneg_left (log_le_rpow_div hp hr) hD0
+    mul_le_mul_of_nonneg_left (Real.log_le_rpow_div (zero_le_one.trans hr) hp) hD0
   have hunfold : D.logCounting r
       = (∑ᶠ z : E, ((D.toClosedBall r) z : ℝ) * log (r * ‖z‖⁻¹)) + (D 0 : ℝ) * log r := by
     simp only [locallyFinsuppWithin.logCounting, AddMonoidHom.coe_mk, ZeroHom.coe_mk]
@@ -146,6 +156,23 @@ theorem logCounting_le_const_mul_rpow [ProperSpace E] {D : locallyFinsupp E ℤ}
   exact add_le_add hsum1 hsum2
 
 /--
+**A summable real family that is at least `1` wherever it is nonzero has finite support.**
+
+Summability sends the family to `0` along the cofinite filter, so all but finitely many values lie
+in the ball of radius `1` about `0`; the lower bound leaves those values no room to be nonzero.
+-/
+theorem finite_support_of_summable_of_forall_one_le {α : Type*} {f : α → ℝ} (hsum : Summable f)
+    (h1 : ∀ a, f a ≠ 0 → 1 ≤ f a) :
+    (Function.support f).Finite := by
+  have hcofin : (f ⁻¹' Metric.ball (0 : ℝ) 1)ᶜ.Finite :=
+    Filter.mem_cofinite.1 (hsum.tendsto_cofinite_zero (Metric.ball_mem_nhds 0 one_pos))
+  refine hcofin.subset fun a ha ↦ ?_
+  have hfa := h1 a ha
+  simp only [Set.mem_compl_iff, Set.mem_preimage, Metric.mem_ball, Real.dist_eq, sub_zero, not_lt]
+  rw [abs_of_nonneg (by linarith)]
+  exact hfa
+
+/--
 A nonnegative function with locally finite support whose series converges at the exponent `0` has
 finite support, hence its series converges at every exponent.
 -/
@@ -153,22 +180,28 @@ theorem summable_rpow_of_summable_zero {D : locallyFinsupp E ℤ} (hD : 0 ≤ D)
     (h : Summable fun z : E ↦ (D z : ℝ) * ‖z‖ ^ (-(0 : ℝ))) (p : ℝ) :
     Summable fun z : E ↦ (D z : ℝ) * ‖z‖ ^ (-p) := by
   have h' : Summable fun z : E ↦ (D z : ℝ) := by simpa using h
-  have hev : (fun z : E ↦ (D z : ℝ)) ⁻¹' (Metric.ball (0 : ℝ) 1) ∈ Filter.cofinite :=
-    h'.tendsto_cofinite_zero (Metric.ball_mem_nhds 0 one_pos)
-  have hcofin : ((fun z : E ↦ (D z : ℝ)) ⁻¹' (Metric.ball (0 : ℝ) 1))ᶜ.Finite :=
-    Filter.mem_cofinite.1 hev
-  refine summable_of_hasFiniteSupport (Set.Finite.subset hcofin ?_)
-  intro z hz
-  simp only [Function.mem_support, ne_eq, mul_eq_zero, not_or] at hz
-  have hDz : (0 : ℤ) ≤ D z := by simpa using (locallyFinsuppWithin.le_def.1 hD) z
-  have hne : D z ≠ 0 := by
-    intro hcon
-    exact hz.1 (by exact_mod_cast congrArg (Int.cast : ℤ → ℝ) hcon)
-  have h1 : (1 : ℝ) ≤ (D z : ℝ) := by
-    have : (1 : ℤ) ≤ D z := by omega
-    exact_mod_cast this
-  simp only [Set.mem_compl_iff, Set.mem_preimage, Metric.mem_ball, Real.dist_eq, sub_zero, not_lt]
-  rw [abs_of_nonneg (by linarith)]
-  exact h1
+  have h1 : ∀ z : E, (D z : ℝ) ≠ 0 → 1 ≤ (D z : ℝ) := fun z hz ↦ by
+    have hDz : (0 : ℤ) ≤ D z := hD z
+    have hne : D z ≠ 0 := fun hcon ↦ hz (by exact_mod_cast congrArg (Int.cast : ℤ → ℝ) hcon)
+    exact_mod_cast (by omega : (1 : ℤ) ≤ D z)
+  refine summable_of_hasFiniteSupport
+    ((finite_support_of_summable_of_forall_one_le h' h1).subset fun z hz ↦ ?_)
+  simp only [Function.mem_support, ne_eq, mul_eq_zero, not_or] at hz ⊢
+  exact hz.1
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.expConvergence' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms expConvergence
+
+/-- info: 'Shields.logCounting_le_const_mul_rpow' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms logCounting_le_const_mul_rpow
+
+/-- info: 'Shields.summable_rpow_of_summable_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms summable_rpow_of_summable_zero
 
 end Shields

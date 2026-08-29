@@ -4,6 +4,7 @@ Released under the MIT license as described in the file LICENSE.txt.
 Authors: Johnny Shields
 -/
 import ForgacsTran.FTBranchSine
+import ForgacsTran.PencilIndex
 
 /-!
 # The angle-sum inequality behind the monotonicity of `τ`
@@ -70,7 +71,7 @@ theorem card_le_one_of_lt_pi {n r : ℕ} {θ : ℝ} {φ : Fin n → ℝ} (hr : 1
     by_contra h
     have : n = 1 := by omega
     exact hjj (Fin.ext (by omega : (j : ℕ) = (j' : ℕ)))
-  have hn1 : ((n - 1 : ℕ) : ℝ) = (n : ℝ) - 1 := by rw [Nat.cast_sub hn, Nat.cast_one]
+  have hn1 : ((n - 1 : ℕ) : ℝ) = (n : ℝ) - 1 := cast_pred_eq_sub_one hn
   set g : Fin n → ℝ := fun k => 2 * π - θ - (2 * φ k - θ) with hg
   have hgpos : ∀ k, 0 < g k := by
     intro k
@@ -270,7 +271,7 @@ theorem sum_sin_two_mul_sub_lt {n r : ℕ} {θ : ℝ} {φ : Fin n → ℝ} (hn :
   have hrθ : (r : ℝ) * θ < π := by rw [lt_div_iff₀ hr0] at hθr; linarith
   have hθπ : θ < π := by nlinarith
   have hsθ : 0 < Real.sin θ := sin_pos_of_pos_of_lt_pi hθ0 hθπ
-  have hn1 : ((n - 1 : ℕ) : ℝ) = (n : ℝ) - 1 := by rw [Nat.cast_sub hn, Nat.cast_one]
+  have hn1 : ((n - 1 : ℕ) : ℝ) = (n : ℝ) - 1 := cast_pred_eq_sub_one hn
   have hUne : (Finset.univ : Finset (Fin n)).Nonempty :=
     Finset.univ_nonempty_iff.2 (Fin.pos_iff_nonempty.1 hn)
   -- the range condition clause (i) forces

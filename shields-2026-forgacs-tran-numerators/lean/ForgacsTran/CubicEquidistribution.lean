@@ -98,6 +98,37 @@ theorem cubicZbranch_continuousOn (s : Set ℝ) : ContinuousOn cubicZbranch s :=
 theorem cubicZbranch_strictMonoOn : StrictMonoOn cubicZbranch (Icc 0 π) :=
   cubicZ_strictMonoOn
 
+/-- **The two clipped lengths cover the window, whatever the window is.**  Delete a
+half-width `e` at each of `α`, `β` and the split point `m`; what is retained is at most
+two intervals, and their lengths sum to at least `(β - α) - 4e`.
+
+Either may be empty — a window lying wholly on one side of `m`, or one shorter than
+`2e`, empties one of them — which is exactly what the `max … 0` carries, and it is why
+no straddle hypothesis and no clearance hypothesis are needed.  That the *sum* is
+bounded below whatever `α` and `β` do is the only fact the count consumes.
+
+Four cases, on which side of `m` each endpoint falls.  Nothing about the branch enters,
+so it is stated over bare reals with `m` free rather than at `π/2`. -/
+private theorem clipped_lengths_cover {α β m e : ℝ} (he : 0 ≤ e) :
+    (β - α) - 4 * e
+      ≤ max (min (β - e) (m - e) - (α + e)) 0
+        + max (β - e - max (α + e) (m + e)) 0 := by
+  rcases le_or_gt β m with hb | hb
+  · rw [min_eq_left (by linarith : β - e ≤ m - e)]
+    have k1 := le_max_left (β - e - (α + e)) 0
+    have k2 := le_max_right (β - e - max (α + e) (m + e)) 0
+    linarith
+  · rw [min_eq_right (by linarith : m - e ≤ β - e)]
+    rcases le_or_gt m α with ha2 | ha2
+    · rw [max_eq_left (by linarith : m + e ≤ α + e)]
+      have k1 := le_max_right (m - e - (α + e)) 0
+      have k2 := le_max_left (β - e - (α + e)) 0
+      linarith
+    · rw [max_eq_right (by linarith : α + e ≤ m + e)]
+      have k1 := le_max_left (m - e - (α + e)) 0
+      have k2 := le_max_left (β - e - (m + e)) 0
+      linarith
+
 /-- **`eq:angular-distinct-lower` at the cubic pencil, for an arbitrary window.**
 Past one threshold in `M`, for every `0 ≤ α ≤ β ≤ π`, the coefficient polynomial
 `F_M` has at least `(M+1)(β-α)/π - C` distinct zeros inside `z(I_{α,β})`, at a
@@ -198,6 +229,8 @@ theorem cubic_window_zeros :
   -- the two components are separated by the deleted middle, so they share no zero
   have hdisj : Disjoint Z₁ Z₂ := by
     refine Finset.disjoint_left.2 fun w hw1 hw2 => ?_
+    -- both components are nonempty here, which is what puts them in order: a
+    -- shrinking component can be empty, and then there is nothing to separate
     have h1 := hZ₁n ⟨w, hw1⟩
     have h2 := hZ₂n ⟨w, hw2⟩
     have hv1le : min (β - e) (π / 2 - e) ≤ π / 2 - e := min_le_right _ _
@@ -212,24 +245,7 @@ theorem cubic_window_zeros :
         (by linarith)
     linarith [hx.2, hy.1]
   -- the two clipped lengths cover the window up to `4h/M`, whatever the window is
-  have hlen : (β - α) - 4 * e
-      ≤ max (min (β - e) (π / 2 - e) - (α + e)) 0
-        + max (β - e - max (α + e) (π / 2 + e)) 0 := by
-    rcases le_or_gt β (π / 2) with hb | hb
-    · rw [min_eq_left (by linarith : β - e ≤ π / 2 - e)]
-      have k1 := le_max_left (β - e - (α + e)) 0
-      have k2 := le_max_right (β - e - max (α + e) (π / 2 + e)) 0
-      linarith
-    · rw [min_eq_right (by linarith : π / 2 - e ≤ β - e)]
-      rcases le_or_gt (π / 2) α with ha2 | ha2
-      · rw [max_eq_left (by linarith : π / 2 + e ≤ α + e)]
-        have k1 := le_max_right (π / 2 - e - (α + e)) 0
-        have k2 := le_max_left (β - e - (α + e)) 0
-        linarith
-      · rw [max_eq_right (by linarith : α + e ≤ π / 2 + e)]
-        have k1 := le_max_left (π / 2 - e - (α + e)) 0
-        have k2 := le_max_left (β - e - (π / 2 + e)) 0
-        linarith
+  have hlen := clipped_lengths_cover (α := α) (β := β) (m := π / 2) he0.le
   refine ⟨Z₁ ∪ Z₂, fun w hw => (Finset.mem_union.1 hw).elim (hZ₁r w) (hZ₂r w),
     fun w hw => (Finset.mem_union.1 hw).elim (hZ₁w w) (hZ₂w w), ?_⟩
   rw [Finset.card_union_of_disjoint hdisj]
@@ -248,7 +264,7 @@ theorem cubic_window_zeros :
   have hexp : ((M : ℝ) - 1 / 2) * ((β - α) - 4 * e) / π
       = ((M : ℝ) + 1) * (β - α) / π - (3 / 2) * (β - α) / π
         - ((M : ℝ) - 1 / 2) * (4 * e) / π := by
-    field_simp; ring
+    field
   have h32 : (3 / 2 : ℝ) * (β - α) / π ≤ 3 / 2 := by
     rw [div_le_iff₀ hπ]; nlinarith
   have hbig : ((M : ℝ) - 1 / 2) * (4 * e) / π ≤ 4 * h / π := by
@@ -298,7 +314,7 @@ theorem cubic_window_counts :
     refine ⟨Zlo, Zhi, hlor, hlow, hhir, hhiw, ?_⟩
     have harith : ((M : ℝ) + 1) * (π - 0) / π - ((M : ℝ) + 1) * (β - α) / π
         = ((M : ℝ) + 1) * (α - 0) / π + ((M : ℝ) + 1) * (π - β) / π := by
-      field_simp; ring
+      field
     linarith
 
 /-! ### `eq:angular-discrepancy`, unconditional at this pencil -/
@@ -334,7 +350,7 @@ theorem cubic_angular_discrepancy :
   have hdisc := ft_angular_discrepancy (P := ftCoeffPoly cubicQ witB 1 M)
     (ftCoeffPoly_cubic_ne_zero M) (z := cubicZbranch) (a := 0) (b := π)
     (T := ((M : ℝ) + 1) * (π - 0) / π) (Tab := ((M : ℝ) + 1) * (β - α) / π)
-    (C₃ := 0) cubicZbranch_strictMonoOn.injOn hα hαβ hβ
+    (C₃ := 0) (cubicZbranch_strictMonoOn.mono Ioo_subset_Icc_self).injOn hα hαβ hβ
     hlor hlom hhir hhim hin hout hD
   rw [add_zero, max_self] at hdisc
   exact hdisc
@@ -369,7 +385,7 @@ theorem cubic_equidistribution :
     (C₁ := C) (C₂ := C) (M := M) (r := 1) (d := M) (s := 0)
     le_rfl hM1 (by omega) (by omega)
     (by rw [natDegree_ftCoeffPoly_cubic]; omega) (by norm_num)
-    cubicZbranch_strictMonoOn.injOn hα hαβ hβ
+    (cubicZbranch_strictMonoOn.mono Ioo_subset_Icc_self).injOn hα hαβ hβ
     hlor hlom hhir hhim hin hout
   rw [max_self] at hmain
   simpa using hmain
@@ -452,7 +468,7 @@ theorem cubic_angular_clock :
         (· ∈ ftWindowIoc cubicZbranch 0 θ)) : ℝ) := by
     exact_mod_cast count_filter_mono
       (P := ftCoeffPoly cubicQ witB 1 M) ftWindow_subset_ftWindowIoc
-  refine angular_clock_of_bracketing hC ?_ ?_ h1 h2
+  refine angular_clock_of_bracketing ?_ ?_ h1 h2
   · rw [abs_le]; constructor <;> linarith
   · rw [abs_le]; constructor <;> linarith
 

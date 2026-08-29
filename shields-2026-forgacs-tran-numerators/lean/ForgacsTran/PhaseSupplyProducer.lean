@@ -26,6 +26,10 @@ to be needed has to appear as a third.
 
 ## Main statements
 
+* `FTBranchSupply` — the second of those two hypotheses, named: the branch data
+  `lem:amplitude-divisor` and `cor:linear-phase-variation` supply over an ordered
+  family of blocks.  It is the clause list every consumer of this file would
+  otherwise transcribe.
 * `ftWindowRadius` — the common half-width of `eq:amplitude-deletion`, at the
   largest multiplicity, so that the deleted family is nested-free (`AngularBlocks`).
 * `exists_ftPhaseSupply_of_dominance` — the producer.
@@ -73,6 +77,36 @@ open Polynomial
 namespace ForgacsTran
 
 open Set Real
+
+/-- **The branch supply of `lem:amplitude-divisor` and `cor:linear-phase-variation`**,
+in the form the phase supply consumes it: eventually in `M`, on every ordered family
+of blocks the amplitude does not vanish on, a polar branch of the amplitude's argument
+whose derivative is under `M+1` and whose increments sum under `κ₀ + κ₁ deg B`.
+
+This is one of the two hypotheses `exists_ftPhaseSupply_of_dominance` is left with, and
+it is the one that recurs: the same clause list is what `ft_branchSupply_general`
+concludes and what `ftAngularDiscrepancy_of_dominance` asks for inside `hsupply`.
+
+**The variation enters summed**, exactly as in `AngularDiscrepancyFT.FTPhaseSupply`: a
+per-block cap of `κ₀ + κ₁ deg B` would sum to `(J+1)(κ₀ + κ₁ deg B)`, quadratic once
+`J ≤ deg B`, which is the uniformity `thm:main` clause 3 asserts. -/
+def FTBranchSupply (Q B : Polynomial ℂ) (r : ℕ) (z τ : ℝ → ℝ) (κ₀ κ₁ : ℝ) : Prop :=
+  ∃ Mb : ℕ, ∀ M : ℕ, Mb ≤ M → ∀ (k : ℕ) (Lb Rb : Fin k → ℝ),
+    (∀ i, Lb i ∈ Icc 0 (π / r)) → (∀ i, Rb i ∈ Icc 0 (π / r)) →
+    (∀ i j, i < j → Rb i ≤ Lb j) →
+    (∀ i, Lb i < Rb i → Icc (Lb i) (Rb i) ⊆ Ioo (0 : ℝ) (π / r)) →
+    (∀ i, Lb i < Rb i → ∀ θ ∈ Icc (Lb i) (Rb i),
+      ftAmp Q B r ((z θ : ℝ) : ℂ) (ftPrincipal τ θ) ≠ 0) →
+    ∃ (ψ dψ : Fin k → ℝ → ℝ) (varψ : Fin k → ℝ),
+      (∀ i, Lb i < Rb i → ∀ θ ∈ Icc (Lb i) (Rb i),
+        ftAmp Q B r ((z θ : ℝ) : ℂ) (ftPrincipal τ θ)
+          = ((ftPrincipalAmp Q B r z τ θ : ℝ) : ℂ)
+            * Complex.exp ((ψ i θ : ℂ) * Complex.I)) ∧
+      (∀ i, Lb i < Rb i → ∀ θ ∈ Icc (Lb i) (Rb i), HasDerivAt (ψ i) (dψ i θ) θ) ∧
+      (∀ i, Lb i < Rb i → ∀ θ ∈ Icc (Lb i) (Rb i), |dψ i θ| < (M : ℝ) + 1) ∧
+      (∀ i, 0 ≤ varψ i) ∧
+      (∀ i, Lb i < Rb i → |ψ i (Rb i) - ψ i (Lb i)| ≤ varψ i) ∧
+      ∑ i, varψ i ≤ κ₀ + κ₁ * B.natDegree
 
 /-- **`eq:amplitude-deletion` at one common half-width.**  Every window is taken
 at the largest multiplicity's radius, which contains all of them
@@ -186,21 +220,7 @@ theorem exists_ftPhaseSupply_of_dominance
       ftRemainder Q B r z τ M θ ≤ ftPrincipalAmp Q B r z τ θ / 2)
     -- (2) `lem:amplitude-divisor` + `cor:linear-phase-variation` on any ordered
     --     family of blocks where the amplitude does not vanish
-    (hbranch : ∃ Mb : ℕ, ∀ M : ℕ, Mb ≤ M → ∀ (k : ℕ) (Lb Rb : Fin k → ℝ),
-      (∀ i, Lb i ∈ Icc 0 (π / r)) → (∀ i, Rb i ∈ Icc 0 (π / r)) →
-      (∀ i j, i < j → Rb i ≤ Lb j) →
-      (∀ i, Lb i < Rb i → ∀ θ ∈ Icc (Lb i) (Rb i),
-        ftAmp Q B r ((z θ : ℝ) : ℂ) (ftPrincipal τ θ) ≠ 0) →
-      ∃ (ψ dψ : Fin k → ℝ → ℝ) (varψ : Fin k → ℝ),
-        (∀ i, Lb i < Rb i → ∀ θ ∈ Icc (Lb i) (Rb i),
-          ftAmp Q B r ((z θ : ℝ) : ℂ) (ftPrincipal τ θ)
-            = ((ftPrincipalAmp Q B r z τ θ : ℝ) : ℂ)
-              * Complex.exp ((ψ i θ : ℂ) * Complex.I)) ∧
-        (∀ i, Lb i < Rb i → ∀ θ ∈ Icc (Lb i) (Rb i), HasDerivAt (ψ i) (dψ i θ) θ) ∧
-        (∀ i, Lb i < Rb i → ∀ θ ∈ Icc (Lb i) (Rb i), |dψ i θ| < (M : ℝ) + 1) ∧
-        (∀ i, 0 ≤ varψ i) ∧
-        (∀ i, Lb i < Rb i → |ψ i (Rb i) - ψ i (Lb i)| ≤ varψ i) ∧
-        ∑ i, varψ i ≤ κ₀ + κ₁ * B.natDegree) :
+    (hbranch : FTBranchSupply Q B r z τ κ₀ κ₁) :
     ∃ M₀ : ℕ, ∀ M : ℕ, M₀ ≤ M → FTPhaseSupply Q B r z τ hcol κ₀ κ₁ M := by
   classical
   obtain ⟨Md, hdom⟩ := hdom
@@ -276,11 +296,16 @@ theorem exists_ftPhaseSupply_of_dominance
     ∧ ∀ j, j < J → ρ ≤ |θ - e j|} with hRetdef
   have hMR : (0 : ℝ) < (M : ℝ) := by exact_mod_cast hM1le
   have hcolpos : 0 < hcol / M := by positivity
+  -- the retained range is a collar inside the arc, which is what pins the branch blocks
+  -- to the open arc where the derivative data lives
+  have hRetIoo : ∀ θ ∈ Ret, θ ∈ Ioo (0 : ℝ) (π / r) := by
+    rintro θ ⟨h1, h2, -⟩
+    exact ⟨lt_of_lt_of_le hcolpos h1, lt_of_le_of_lt h2 (by linarith)⟩
   -- the amplitude does not vanish anywhere on the retained range
   have hWne : ∀ θ ∈ Ret, ftAmp Q B r ((z θ : ℝ) : ℂ) (ftPrincipal τ θ) ≠ 0 := by
-    rintro θ ⟨h1, h2, h3⟩ hzero
-    have hθopen : θ ∈ Ioo (0 : ℝ) (π / r) :=
-      ⟨lt_of_lt_of_le hcolpos h1, lt_of_le_of_lt h2 (by linarith)⟩
+    rintro θ hθ hzero
+    obtain ⟨h1, h2, h3⟩ := hθ
+    have hθopen : θ ∈ Ioo (0 : ℝ) (π / r) := hRetIoo θ ⟨h1, h2, h3⟩
     have hmemS : θ ∈ S :=
       ftAmplitudeDivisor_complete hB0 hεband hτ hroot hsimple (hband θ hθopen hzero) hzero
     obtain ⟨i, hiJ, hei⟩ := hesurj θ hmemS
@@ -311,6 +336,7 @@ theorem exists_ftPhaseSupply_of_dominance
   · -- the branch supply
     intro k Lb Rb hL hR hord hret
     exact hbranch M hMb k Lb Rb hL hR hord
+      (fun i hi θ hθ => hRetIoo θ (hret i hi hθ))
       fun i hi θ hθ => hWne θ (hret i hi hθ)
 
 /-- **`prop:angular-discrepancy` from `eq:dominance-bound` and the branch.**  The
@@ -325,8 +351,8 @@ alone and a `B`-dependent collar is unwritable — while `ε` and `σ` are bound
 decrease to some `0 < ε ≤ ε_*`"), and `M₀` after that. -/
 theorem ftAngularDiscrepancy_of_dominance {Q : Polynomial ℂ} {r : ℕ} {z τ : ℝ → ℝ}
     (hQ : HasRealCoeffs Q) (hr : 1 ≤ r) (hQ0 : Q.coeff 0 ≠ 0) (hQ1 : Q.coeff 1 ≠ 0)
-    (hzmono : StrictMonoOn z (Icc 0 (π / r))) (hzcont : ContinuousOn z (Icc 0 (π / r)))
-    (hτ0 : ∀ θ ∈ Icc 0 (π / r), 0 < τ θ)
+    (hzmono : StrictMonoOn z (Ioo 0 (π / r))) (hzcont : ContinuousOn z (Ioo 0 (π / r)))
+    (hτ0 : ∀ θ ∈ Ioo 0 (π / r), 0 < τ θ)
     (hsupply : ∃ hcol κ₀ κ₁ : ℝ, 0 < hcol ∧ 0 ≤ κ₀ ∧ 0 ≤ κ₁ ∧
       ∀ B : Polynomial ℂ, HasRealCoeffs B → B.eval 0 ≠ 0 →
         ∃ ε σ : ℝ, 0 ≤ ε ∧ 0 < σ ∧ σ < 1 ∧
@@ -343,31 +369,19 @@ theorem ftAngularDiscrepancy_of_dominance {Q : Polynomial ℂ} {r : ℕ} {z τ :
             (∀ θj ∈ ftAmplitudeDivisor Q B r z τ ε (π / r - ε),
               ftWindowRadius Q B r z τ ε σ M ≤ |θ - θj|) →
             ftRemainder Q B r z τ M θ ≤ ftPrincipalAmp Q B r z τ θ / 2) ∧
-          (∃ Mb : ℕ, ∀ M : ℕ, Mb ≤ M → ∀ (k : ℕ) (Lb Rb : Fin k → ℝ),
-            (∀ i, Lb i ∈ Icc 0 (π / r)) → (∀ i, Rb i ∈ Icc 0 (π / r)) →
-            (∀ i j, i < j → Rb i ≤ Lb j) →
-            (∀ i, Lb i < Rb i → ∀ θ ∈ Icc (Lb i) (Rb i),
-              ftAmp Q B r ((z θ : ℝ) : ℂ) (ftPrincipal τ θ) ≠ 0) →
-            ∃ (ψ dψ : Fin k → ℝ → ℝ) (varψ : Fin k → ℝ),
-              (∀ i, Lb i < Rb i → ∀ θ ∈ Icc (Lb i) (Rb i),
-                ftAmp Q B r ((z θ : ℝ) : ℂ) (ftPrincipal τ θ)
-                  = ((ftPrincipalAmp Q B r z τ θ : ℝ) : ℂ)
-                    * Complex.exp ((ψ i θ : ℂ) * Complex.I)) ∧
-              (∀ i, Lb i < Rb i → ∀ θ ∈ Icc (Lb i) (Rb i),
-                HasDerivAt (ψ i) (dψ i θ) θ) ∧
-              (∀ i, Lb i < Rb i → ∀ θ ∈ Icc (Lb i) (Rb i), |dψ i θ| < (M : ℝ) + 1) ∧
-              (∀ i, 0 ≤ varψ i) ∧
-              (∀ i, Lb i < Rb i → |ψ i (Rb i) - ψ i (Lb i)| ≤ varψ i) ∧
-              ∑ i, varψ i ≤ κ₀ + κ₁ * B.natDegree)) :
+          FTBranchSupply Q B r z τ κ₀ κ₁) :
     FTAngularDiscrepancy Q r z := by
   obtain ⟨hcol, κ₀, κ₁, hh, hκ₀, hκ₁, hmain⟩ := hsupply
   refine ftAngularDiscrepancy_of_supply hzmono hzcont hτ0
-    ⟨hcol, κ₀, κ₁, hh.le, hκ₀, hκ₁, fun B hB hBev => ?_⟩
+    ⟨hcol, κ₀, κ₁, hh, hκ₀, hκ₁, fun B hB hBev => ?_⟩
   obtain ⟨ε, σ, hε0, hσ0, hσ1, hεband, hroot, hsimple, hband, hdom, hbranch⟩ :=
     hmain B hB hBev
   have hB0 : B ≠ 0 := fun h => hBev (by rw [h]; simp)
-  have hsub : Icc ε (π / r - ε) ⊆ Icc 0 (π / r) :=
-    Icc_subset_Icc hε0 (by linarith)
+  -- the band is strictly interior: `hεband` applied to its own left endpoint gives `0 < ε`
+  have hsub : Icc ε (π / r - ε) ⊆ Ioo 0 (π / r) := by
+    intro θ hθ
+    have hεpos : 0 < ε := (hεband ⟨le_rfl, le_trans hθ.1 hθ.2⟩).1
+    exact ⟨(hεband hθ).1, lt_of_le_of_lt hθ.2 (by linarith)⟩
   exact exists_ftPhaseSupply_of_dominance hQ hB hr hQ0 hQ1 hB0 hBev hσ0 hσ1 hh
     hεband (fun θ hθ => hτ0 θ (hsub hθ)) hroot hsimple hband hdom hbranch
 

@@ -6,26 +6,63 @@ Authors: Johnny Shields
 import Mathlib.Analysis.Complex.LocallyUniformLimit
 import Shields.Analysis.Complex.Rouche
 
+/-!
+# Hurwitz's theorem on a disc
+
+Zero counts pass to a uniform limit.  Where `f` is analytic on a closed disc and zero-free on its
+circle, any function uniformly close to `f` on that circle carries exactly the zero count of `f`
+inside, with multiplicity; and where `f` vanishes inside, so does every function close enough.
+
+Mathlib has no Hurwitz theorem for analytic functions at the pinned revision.  The `Hurwitz` in
+`Mathlib.NumberTheory.LSeries` is Hurwitz *zeta*, an unrelated object.
+
+## Main results
+
+* `Shields.eventually_zero_free_of_tendstoUniformlyOn` — a limit zero-free on a compact set forces
+  the approximants eventually zero-free there.
+* `Shields.factoredOn_of_norm_sub_lt` — `Shields.factoredOn_of_norm_lt` with the perturbation
+  written as a difference, which is the form a convergent family supplies it in.
+* `Shields.eventually_factoredOn_of_tendstoUniformlyOn` — **Hurwitz's theorem**: the count inside
+  transfers to every late approximant.
+* `Shields.factoredOn_one_of_simple_zero` and
+  `Shields.eventually_existsUnique_zero_of_simple_zero` — a simple zero of the limit at the center
+  becomes exactly one zero of each late approximant in the disc.
+* `Shields.eventually_zero_count` — the count over an observation range: one zero in each of
+  finitely many disks, and none on a compact set disjoint from them.
+* `Shields.factoredOn_of_dist_lt_of_const` and `Shields.eventually_factoredOn_sub_const` — the
+  solution count of `h = w` is locally constant in `w`, which is Hurwitz with the perturbation a
+  constant rather than a limit.
+* `Shields.eventually_exists_zero_of_tendstoUniformlyOn` — the converse direction: a zero of the
+  limit forces a zero of every late approximant strictly inside.
+* `Shields.mem_of_tendstoLocallyUniformly_of_zeros_subset` — a closed constraint on the zeros of the
+  approximants passes to the zeros of the limit.
+
+## Implementation notes
+
+Everything runs through `Shields.FactoredOn`, the displayed factorization of
+`Shields.Analysis.Complex.Rouche`, rather than through a divisor: the count a caller wants is the
+length of the list, and `Shields.factoredOn_of_norm_lt` transports it one-sidedly, so no
+factorization of the perturbed function is ever assumed.
+
+`Shields.factoredOn_id`, `Shields.tendstoUniformlyOn_sub_const` and
+`Shields.eventually_existsUnique_zero_natCast_shift` are non-vacuity witnesses on the family
+`z ↦ z - cₙ`, inhabited by a sequence Mathlib already knows converges.
+
+## Papers depending on this file
+
+* `edrei-spectral-classification`, `exterior-sinc-hierarchies`, `hard-edge-edrei`,
+  `toeplitz-newton-boundary` — zero counting under a limit.
+
+## Tags
+
+Hurwitz, uniform convergence, zero counting, Rouché, analytic function
+-/
+
 open Filter Topology Set
 
 namespace Shields
 
-/-! ## Bounded away from zero on a compact set
-
-Stated for a normed space over an arbitrary topological domain rather than for real-valued
-functions on `ℝ`, so that it applies to complex-valued families.
--/
-
-/-- A continuous nowhere-zero function on a compact set is bounded away from
-zero. -/
-theorem exists_pos_forall_le_norm {X : Type*} [TopologicalSpace X]
-    {E : Type*} [NormedAddCommGroup E] {f : X → E} {K : Set X} (hK : IsCompact K)
-    (hfc : ContinuousOn f K) (hfne : ∀ x ∈ K, f x ≠ 0) :
-    ∃ m : ℝ, 0 < m ∧ ∀ x ∈ K, m ≤ ‖f x‖ := by
-  rcases K.eq_empty_or_nonempty with rfl | hne
-  · exact ⟨1, one_pos, by simp⟩
-  · obtain ⟨x₀, hx₀, hmin⟩ := hK.exists_isMinOn hne hfc.norm
-    exact ⟨‖f x₀‖, norm_pos_iff.mpr (hfne x₀ hx₀), fun x hx => isMinOn_iff.mp hmin x hx⟩
+/-! ## No intruding zeros -/
 
 /-- **No intruding zeros.**  Where the limit is zero-free on a compact set, the
 approximants are eventually zero-free there. -/
@@ -41,53 +78,26 @@ theorem eventually_zero_free_of_tendstoUniformlyOn
   rw [dist_eq_norm, hx0, sub_zero] at hdist
   exact absurd (hlb x hx) (not_le.mpr hdist)
 
-/-- The same statement on a *circle*, which is the set Rouché reads.  Uniform
-convergence there puts the difference below the limit's own modulus, which is the
-Rouché hypothesis. -/
-theorem eventually_norm_sub_lt_of_tendstoUniformlyOn
-    {X : Type*} [TopologicalSpace X] {E : Type*} [NormedAddCommGroup E]
-    {ι : Type*} {L : Filter ι} {F : ι → X → E} {f : X → E} {K : Set X}
-    (hK : IsCompact K) (hfc : ContinuousOn f K) (hfne : ∀ x ∈ K, f x ≠ 0)
-    (hunif : TendstoUniformlyOn F f L K) :
-    ∀ᶠ i in L, ∀ x ∈ K, ‖F i x - f x‖ < ‖f x‖ := by
-  obtain ⟨m, hm, hlb⟩ := exists_pos_forall_le_norm hK hfc hfne
-  filter_upwards [Metric.tendstoUniformlyOn_iff.mp hunif m hm] with i hi x hx
-  have hdist := hi x hx
-  rw [dist_eq_norm, ← norm_neg, neg_sub] at hdist
-  exact lt_of_lt_of_le hdist (hlb x hx)
-
 /-! ## The Rouché corollary
 
-`ArgumentPrinciple.rouche` compares two *given* factorizations.  What both
-consumers below need is the one-sided form: the perturbed function inherits the
-count, with no factorization of it assumed. -/
+`factoredOn_of_norm_lt` states the perturbation additively.  A convergent family
+supplies it as a difference, so that is the form recorded here. -/
 
 /-- **The zero count survives a small perturbation.**  If `F` differs from `f` by
 less than `‖f‖` on the circle, and `f` factors with `n` roots inside, then so does
 `F`.
 
-This is Rouché read one-sidedly.  `exists_factoredOn` produces *some*
-factorization of `F` — it needs only analyticity and non-vanishing on the circle,
-both of which the hypothesis supplies — and `rouche` then identifies its length
-with `n`. -/
+This is `factoredOn_of_norm_lt` with the perturbation written as a difference,
+which is the form a convergent family supplies it in. -/
 theorem factoredOn_of_norm_sub_lt {c : ℂ} {R : ℝ} (hR : 0 < R) {f F : ℂ → ℂ}
     (hf : AnalyticOnNhd ℂ f (Metric.closedBall c R))
     (hF : AnalyticOnNhd ℂ F (Metric.closedBall c R))
     (hlt : ∀ z ∈ Metric.sphere c R, ‖F z - f z‖ < ‖f z‖)
     {n : ℕ} {a : ℕ → ℂ} {G : ℂ → ℂ} (hfac : FactoredOn f c R n a G) :
     ∃ (a' : ℕ → ℂ) (G' : ℂ → ℂ), FactoredOn F c R n a' G' := by
-  have hg : AnalyticOnNhd ℂ (fun w => F w - f w) (Metric.closedBall c R) :=
-    fun z hz => (hF z hz).sub (hf z hz)
-  have hne : ∀ z ∈ Metric.sphere c R, F z ≠ 0 := by
-    intro z hz hz0
-    have h := hlt z hz
-    rw [hz0, zero_sub, norm_neg] at h
-    exact absurd h (lt_irrefl _)
-  obtain ⟨n', a', G', hfac'⟩ := exists_factoredOn hR hF hne
-  have hsum : FactoredOn (fun w => f w + (F w - f w)) c R n' a' G' :=
-    hfac'.congr fun z => by ring
-  have hnn : n = n' := rouche hR hf hg hlt hfac hsum
-  exact ⟨a', G', by rw [hnn]; exact hfac'⟩
+  obtain ⟨a', G', hfac'⟩ := factoredOn_of_norm_lt (g := fun w => F w - f w) hR hf
+    (fun z hz => (hF z hz).sub (hf z hz)) hlt hfac
+  exact ⟨a', G', hfac'.congr fun z => by ring⟩
 
 /-! ## Hurwitz's theorem
 
@@ -294,6 +304,8 @@ theorem tendsto_natCast_add_one_inv : Tendsto (fun n : ℕ => ((n : ℂ) + 1)⁻
       Real.norm_eq_abs, abs_of_pos (by positivity)]
   simpa only [hnorm] using tendsto_one_div_add_atTop_nhds_zero_nat
 
+/-- The worked instance at a concrete sequence: `z ↦ z - (n + 1)⁻¹` eventually has exactly one
+zero in the closed unit disc. -/
 theorem eventually_existsUnique_zero_natCast_shift :
     ∀ᶠ (n : ℕ) in atTop, ∃! w : ℂ,
       w ∈ Metric.closedBall (0 : ℂ) 1 ∧ w - ((n : ℂ) + 1)⁻¹ = 0 :=
@@ -336,6 +348,26 @@ theorem eventually_exists_zero_of_tendstoUniformlyOn
   have hmem := hfac'.mem_ball 0 hn
   exact ⟨a' 0, hmem, (hfac'.eq_zero_iff (Metric.ball_subset_closedBall hmem)).mpr ⟨0, hn, rfl⟩⟩
 
+/-- An isolated zero has arbitrarily small circles about it carrying no zero.  The identity
+theorem is what rules out the alternative, that `f` vanishes on a whole neighborhood, which is
+where `∃ w, f w ≠ 0` is spent. -/
+theorem exists_lt_forall_mem_sphere_ne_zero {f : ℂ → ℂ} (hfa : AnalyticOnNhd ℂ f univ)
+    (hfne : ∃ w, f w ≠ 0) (z₀ : ℂ) {ε : ℝ} (hε : 0 < ε) :
+    ∃ R : ℝ, 0 < R ∧ R < ε ∧ ∀ z ∈ Metric.sphere z₀ R, f z ≠ 0 := by
+  rcases (hfa z₀ (mem_univ _)).eventually_eq_zero_or_eventually_ne_zero with hzero | hiso
+  · obtain ⟨w, hw⟩ := hfne
+    exact absurd (hfa.eqOn_zero_of_preconnected_of_eventuallyEq_zero
+      isPreconnected_univ (mem_univ z₀) hzero (mem_univ w)) hw
+  rw [eventually_nhdsWithin_iff, Metric.eventually_nhds_iff] at hiso
+  obtain ⟨δ, hδ, hδne⟩ := hiso
+  refine ⟨min ε δ / 2, by have := lt_min hε hδ; linarith,
+    by have := min_le_left ε δ; linarith, fun z hz => ?_⟩
+  rw [Metric.mem_sphere] at hz
+  refine hδne (y := z) (by rw [hz]; have := min_le_right ε δ; linarith) fun hzz => ?_
+  rw [Set.mem_singleton_iff.mp hzz, dist_self] at hz
+  have := lt_min hε hδ
+  linarith
+
 /-- **Hurwitz's theorem, zero localization.**  If the zeros of every approximant lie in a closed set
 `S`, the approximants converge locally uniformly, and the limit does not vanish identically, then
 every zero of the limit lies in `S`.
@@ -352,43 +384,35 @@ theorem mem_of_tendstoLocallyUniformly_of_zeros_subset
     z₀ ∈ S := by
   by_contra hz₀S
   -- `f` is entire, being a locally uniform limit of entire functions.
-  have hFa : ∀ i, AnalyticOnNhd ℂ (F i) univ := fun i =>
-    (hFd i).differentiableOn.analyticOnNhd isOpen_univ
   have hlu : TendstoLocallyUniformlyOn F f L univ := tendstoLocallyUniformlyOn_univ.mpr hconv
-  have hfd : Differentiable ℂ f := by
-    rw [← differentiableOn_univ]
-    exact hlu.differentiableOn (.of_forall fun i => (hFd i).differentiableOn) isOpen_univ
-  have hfa : AnalyticOnNhd ℂ f univ := hfd.differentiableOn.analyticOnNhd isOpen_univ
-  -- A radius `ε` inside the complement of `S`.
+  have hfa : AnalyticOnNhd ℂ f univ :=
+    (hlu.differentiableOn (.of_forall fun i => (hFd i).differentiableOn)
+      isOpen_univ).analyticOnNhd isOpen_univ
+  -- A radius `ε` inside the complement of `S`, then a zero-free circle inside that.
   obtain ⟨ε, hε, hεS⟩ := Metric.isOpen_iff.mp hS.isOpen_compl z₀ hz₀S
-  -- `z₀` is an isolated zero: the alternative is that `f` vanishes identically.
-  rcases (hfa z₀ (mem_univ _)).eventually_eq_zero_or_eventually_ne_zero with hzero | hiso
-  · obtain ⟨w, hw⟩ := hfne
-    exact hw (hfa.eqOn_zero_of_preconnected_of_eventuallyEq_zero
-      isPreconnected_univ (mem_univ z₀) hzero (mem_univ w))
-  -- A radius `R` below both `ε` and the isolation radius.
-  rw [eventually_nhdsWithin_iff, Metric.eventually_nhds_iff] at hiso
-  obtain ⟨δ, hδ, hδne⟩ := hiso
-  have hR : 0 < min (ε / 2) (δ / 2) := lt_min (by linarith) (by linarith)
-  set R : ℝ := min (ε / 2) (δ / 2) with hRdef
-  have hRε : R < ε := lt_of_le_of_lt (min_le_left _ _) (by linarith)
-  have hRδ : R < δ := lt_of_le_of_lt (min_le_right _ _) (by linarith)
-  have hsub : Metric.ball z₀ R ⊆ Sᶜ := fun z hz => hεS (Metric.ball_subset_ball hRε.le hz)
-  have hsphere : ∀ z ∈ Metric.sphere z₀ R, f z ≠ 0 := by
-    intro z hz
-    rw [Metric.mem_sphere] at hz
-    refine hδne (y := z) (by rw [hz]; exact hRδ) ?_
-    simp only [Set.mem_compl_iff, Set.mem_singleton_iff]
-    intro hzz
-    rw [hzz, dist_self] at hz
-    exact absurd hz hR.ne
+  obtain ⟨R, hR, hRε, hsphere⟩ := exists_lt_forall_mem_sphere_ne_zero hfa hfne z₀ hε
   have hunif : TendstoUniformlyOn F f L (Metric.sphere z₀ R) :=
     (tendstoLocallyUniformly_iff_forall_isCompact.mp hconv) _ (isCompact_sphere z₀ R)
-  obtain ⟨i, hi, hiz⟩ := (hzeros.and (eventually_exists_zero_of_tendstoUniformlyOn hR
-    (hfa.mono (subset_univ _)) (fun i => (hFa i).mono (subset_univ _))
-    hz₀ hsphere hunif)).exists
-  obtain ⟨z, hzmem, hzzero⟩ := hiz
-  exact hsub hzmem (hi z hzzero)
+  obtain ⟨i, hi, z, hzmem, hzzero⟩ := (hzeros.and
+    (eventually_exists_zero_of_tendstoUniformlyOn hR (hfa.mono (subset_univ _))
+      (fun i => ((hFd i).differentiableOn.analyticOnNhd isOpen_univ).mono (subset_univ _))
+      hz₀ hsphere hunif)).exists
+  exact hεS (Metric.ball_subset_ball hRε.le hzmem) (hi z hzzero)
 
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.eventually_zero_count' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms eventually_zero_count
+
+/-- info: 'Shields.eventually_factoredOn_sub_const' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms eventually_factoredOn_sub_const
+
+/-- info: 'Shields.mem_of_tendstoLocallyUniformly_of_zeros_subset' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms mem_of_tendstoLocallyUniformly_of_zeros_subset
 
 end Shields

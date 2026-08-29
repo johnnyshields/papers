@@ -87,4 +87,11 @@ theorem isBigO_rpow_of_monotoneOn {u : ℝ → ℝ} {x₀ C p : ℝ} (hp : 0 ≤
         exact mul_le_mul_of_nonneg_left (by rw [← h₆]; exact h₅) (le_max_right C 0)
     _ = max C 0 * (M + 1) ^ p * r ^ p := by ring
 
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.isBigO_rpow_of_monotoneOn' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms isBigO_rpow_of_monotoneOn
+
 end Shields

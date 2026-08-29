@@ -229,6 +229,36 @@ def AllWindows (n k a b : ℕ) (I : Finset ℕ) : Prop :=
 def BlockCondition (n k a b : ℕ) (I : Finset ℕ) : Prop :=
   ∀ t : ℕ, b ≤ t → t + (a - b) ≤ n → k - b ≤ (I ∩ Finset.Ico t (t + (a - b))).card
 
+/-- The initial block fills whatever a window reaches of it: `[t, t+r)` holds at least the
+`min (t + r) k - t` of its sites that lie below `k`. -/
+theorem card_inter_Ico_initial {k : ℕ} {I : Finset ℕ} (hkI : ∀ x, x < k → x ∈ I) (t r : ℕ) :
+    min (t + r) k - t ≤ (I ∩ Finset.Ico t (t + r)).card := by
+  have hsub : Finset.Ico t (min (t + r) k) ⊆ I ∩ Finset.Ico t (t + r) := by
+    intro x hx
+    simp only [Finset.mem_Ico, Finset.mem_inter] at hx ⊢
+    exact ⟨hkI x (by omega), hx.1, by omega⟩
+  have := Finset.card_le_card hsub
+  rwa [Nat.card_Ico] at this
+
+/-- A window running past `n` holds at least what the last window inside `n` holds, less
+the distance it slid: the two overlap in all but `z - (n - r)` sites. -/
+theorem card_inter_Ico_slide (I : Finset ℕ) {n r z : ℕ} (hrn : r ≤ n) (hz : n - r ≤ z) :
+    (I ∩ Finset.Ico (n - r) (n - r + r)).card
+      ≤ (z - (n - r)) + (I ∩ Finset.Ico z (z + r)).card := by
+  have hn : n - r + r = n := Nat.sub_add_cancel hrn
+  have hsub : I ∩ Finset.Ico (n - r) (n - r + r)
+      ⊆ Finset.Ico (n - r) z ∪ I ∩ Finset.Ico z (z + r) := by
+    intro x hx
+    simp only [Finset.mem_inter, Finset.mem_Ico] at hx
+    rcases lt_or_ge x z with hxz | hxz
+    · exact Finset.mem_union_left _ (Finset.mem_Ico.mpr ⟨hx.2.1, hxz⟩)
+    · exact Finset.mem_union_right _
+        (Finset.mem_inter.mpr ⟨hx.1, Finset.mem_Ico.mpr ⟨hxz, by omega⟩⟩)
+  have hcard := Finset.card_le_card hsub
+  have hun := Finset.card_union_le (Finset.Ico (n - r) z) (I ∩ Finset.Ico z (z + r))
+  rw [Nat.card_Ico] at hun
+  omega
+
 /-- The windows below `t = b` carry no information: the initial block of `I`
 forces them, using `k ≤ a` to compare `k - b` with the window width `a - b`. -/
 theorem allWindows_iff_blockCondition {n k a b : ℕ} (hka : k ≤ a) {I : Finset ℕ}
@@ -240,12 +270,7 @@ theorem allWindows_iff_blockCondition {n k a b : ℕ} (hka : k ≤ a) {I : Finse
   · intro h t ht
     rcases le_or_gt b t with hbt | hbt
     · exact h t hbt ht
-    · have hsub : Finset.Ico t (min (t + (a - b)) k) ⊆ I ∩ Finset.Ico t (t + (a - b)) := by
-        intro x hx
-        simp only [Finset.mem_Ico, Finset.mem_inter] at hx ⊢
-        exact ⟨hkI x (by omega), hx.1, by omega⟩
-      have hcard := Finset.card_le_card hsub
-      rw [Nat.card_Ico] at hcard
+    · have := card_inter_Ico_initial hkI t (a - b)
       omega
 
 /-- The below-count form of the index hook condition is a single window
@@ -292,12 +317,7 @@ theorem indexHook_iff_blockCondition {n k a b : ℕ} (hba : b < a) (hka : k ≤ 
       have hmin : min (t + (a - b) - k) n - (n - k) = 0 := by omega
       omega
     · -- the window sits inside the initial block `{0, …, k-1}`
-      have hsub : Finset.Ico t (t + (a - b)) ⊆ I ∩ Finset.Ico t (t + (a - b)) := by
-        intro x hx
-        simp only [Finset.mem_Ico] at hx
-        exact Finset.mem_inter.mpr ⟨hkI x (by omega), Finset.mem_Ico.mpr hx⟩
-      have hcard := Finset.card_le_card hsub
-      rw [Nat.card_Ico] at hcard
+      have := card_inter_Ico_initial hkI t (a - b)
       omega
   · -- from every window inside `range n` to the corrected form
     intro h z hz
@@ -314,27 +334,10 @@ theorem indexHook_iff_blockCondition {n k a b : ℕ} (hba : b < a) (hka : k ≤ 
     rw [hmin]
     rcases le_or_gt (a - b) n with hrn | hrn
     · have hlast := h (n - (a - b)) (by omega)
-      have hsub : I ∩ Finset.Ico (n - (a - b)) (n - (a - b) + (a - b))
-          ⊆ Finset.Ico (n - (a - b)) z ∪ I ∩ Finset.Ico z (z + (a - b)) := by
-        intro x hx
-        simp only [Finset.mem_inter, Finset.mem_Ico] at hx
-        rcases lt_or_ge x z with hxz | hxz
-        · exact Finset.mem_union_left _ (Finset.mem_Ico.mpr ⟨hx.2.1, hxz⟩)
-        · exact Finset.mem_union_right _
-            (Finset.mem_inter.mpr ⟨hx.1, Finset.mem_Ico.mpr ⟨hxz, by omega⟩⟩)
-      have hcard := Finset.card_le_card hsub
-      have hun := Finset.card_union_le (Finset.Ico (n - (a - b)) z)
-        (I ∩ Finset.Ico z (z + (a - b)))
-      rw [Nat.card_Ico] at hun
+      have := card_inter_Ico_slide (z := z) I hrn (by omega)
       omega
     · -- a window wider than `n`: the initial block alone already fills it
-      have hzk : z < k := by omega
-      have hsub : Finset.Ico z k ⊆ I ∩ Finset.Ico z (z + (a - b)) := by
-        intro x hx
-        simp only [Finset.mem_Ico] at hx
-        exact Finset.mem_inter.mpr ⟨hkI x hx.2, Finset.mem_Ico.mpr ⟨hx.1, by omega⟩⟩
-      have hcard := Finset.card_le_card hsub
-      rw [Nat.card_Ico] at hcard
+      have := card_inter_Ico_initial hkI z (a - b)
       omega
 
 /-! ## The shape of an index set

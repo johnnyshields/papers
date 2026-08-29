@@ -51,9 +51,10 @@ every `r ≥ 1` and every multiplicity.
 `cone_at_branch_of_two_le` relates `ftDen (ftRootPoly c a) r (ftBranchZ …)`, the
 zero `w`, `ftTau`, and `Complex.arg w`.  Its hypotheses are `2 ≤ n`,
 `∀ k, 0 < a k`, `0 < c`, `2 ≤ r`, `θ ∈ Ioo 0 (π/r)`, and the two facts about `w`
-that name it — that it is a zero and that it lies in the closed disk.  No
-hypothesis mentions `Complex.arg`, so none contains the conclusion, and the
-hypotheses are jointly satisfiable: `FTGeometryAssembly.ft_branch_root_and_pos`
+that name it — that it is a zero and that it lies in the closed disk.  None of
+them mentions `Complex.arg`; the bound on it is produced by the dichotomy above,
+`abs_arg_le_of_le_mul_cos` in the far case and `ftChord_lt_mul_sin` in the near
+one.  The hypotheses are jointly satisfiable: `FTGeometryAssembly.ft_branch_root_and_pos`
 exhibits a zero of modulus exactly `ftTau a r (n-1) θ` at every angle of the arc.
 
 ## Main statements
@@ -461,9 +462,7 @@ theorem norm_sub_upperArc_sq (τ θ x : ℝ) :
 strictly inside the double cone `|arg| < π/r`. -/
 theorem cone_at_branch_of_two_le {n r : ℕ} {a : Fin n → ℝ} {c : ℝ} (hn2 : 2 ≤ n)
     (ha : ∀ k, 0 < a k) (hc : 0 < c) (hr : 2 ≤ r) :
-    ∀ θ ∈ Ioo (0 : ℝ) (π / r), ∀ w : ℂ,
-      (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)).eval w = 0 →
-        ‖w‖ ≤ ftTau a r (n - 1) θ → |Complex.arg w| ∈ Ioo 0 (π / r) := by
+    FTArgumentCone (ftRootPoly c a) r (ftBranchZ a c r (n - 1)) (ftTau a r (n - 1)) := by
   classical
   intro θ hθ w hw hnorm
   have hπ := Real.pi_pos
@@ -544,11 +543,7 @@ theorem cone_at_branch_of_two_le {n r : ℕ} {a : Fin n → ℝ} {c : ℝ} (hn2 
 admissible class. -/
 theorem ft_minModulus_at_branch_two_le {n r : ℕ} {a : Fin n → ℝ} {c : ℝ} (hn2 : 2 ≤ n)
     (ha : ∀ k, 0 < a k) (hc : 0 < c) (hr : 2 ≤ r) :
-    ∀ θ ∈ Ioo (0 : ℝ) (π / r), ∀ w : ℂ,
-      (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)).eval w = 0 →
-        w ≠ ftPrincipal (ftTau a r (n - 1)) θ →
-        w ≠ (starRingEnd ℂ) (ftPrincipal (ftTau a r (n - 1)) θ) →
-        ftTau a r (n - 1) θ < ‖w‖ :=
+    FTMinModulusGap (ftRootPoly c a) r (ftBranchZ a c r (n - 1)) (ftTau a r (n - 1)) :=
   ft_minModulus_at_branch hn2 ha hc (by omega) (cone_at_branch_of_two_le hn2 ha hc hr)
 
 /-- **`thm:FT-geometry` at the constructed branch, `r ≥ 2`, with no analytic
@@ -558,19 +553,8 @@ theorem ft_geometry_unbounded_at_branch_two_le {n r : ℕ} {a : Fin n → ℝ} {
     (hn2 : 2 ≤ n) (ha : ∀ k, 0 < a k) (hc : 0 < c) (hr : 2 ≤ r) :
     ∃ za : ℝ,
       ftBranchZ a c r (n - 1) '' Ioo 0 (π / r) = Ioi za
-        ∧ (∀ θ ∈ Ioo 0 (π / r),
-            (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)).eval
-                (ftPrincipal (ftTau a r (n - 1)) θ) = 0
-              ∧ (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)).eval
-                  ((starRingEnd ℂ) (ftPrincipal (ftTau a r (n - 1)) θ)) = 0
-              ∧ ‖ftPrincipal (ftTau a r (n - 1)) θ‖ = ftTau a r (n - 1) θ
-              ∧ ‖(starRingEnd ℂ) (ftPrincipal (ftTau a r (n - 1)) θ)‖
-                  = ftTau a r (n - 1) θ)
-        ∧ (∀ θ ∈ Ioo 0 (π / r), ∀ w : ℂ,
-            (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)).eval w = 0 →
-              ‖w‖ ≤ ftTau a r (n - 1) θ →
-                w = ftPrincipal (ftTau a r (n - 1)) θ
-                  ∨ w = (starRingEnd ℂ) (ftPrincipal (ftTau a r (n - 1)) θ)) :=
+        ∧ FTPrincipalPair (ftRootPoly c a) r (ftBranchZ a c r (n - 1)) (ftTau a r (n - 1))
+        ∧ FTPrincipalDisk (ftRootPoly c a) r (ftBranchZ a c r (n - 1)) (ftTau a r (n - 1)) :=
   ft_geometry_unbounded_at_branch_of_cone hn2 ha hc hr (cone_at_branch_of_two_le hn2 ha hc hr)
 
 end ForgacsTran

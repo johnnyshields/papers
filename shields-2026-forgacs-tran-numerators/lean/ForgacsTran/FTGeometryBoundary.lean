@@ -155,18 +155,10 @@ theorem natDegree_ftDen_le {n : ℕ} {a : Fin n → ℝ} {c : ℝ} (hc : c ≠ 0
   refine le_trans (natDegree_add_le _ _) (max_le_max (le_of_eq (natDegree_ftRootPoly hc a)) ?_)
   exact le_trans (natDegree_C_mul_le _ _) (le_of_eq (natDegree_X_pow r))
 
-theorem ftDen_ftRootPoly_ne_zero {n r : ℕ} {a : Fin n → ℝ} {c : ℝ} (ha : ∀ k, 0 < a k)
-    (hc : 0 < c) (hr : 1 ≤ r) (z : ℂ) : ftDen (ftRootPoly c a) r z ≠ 0 := fun h =>
-  eval_ftDen_zero_ne_zero ha hc hr z (by rw [h]; simp)
-
 theorem ft_minModulus_at_branch_of_deg_le_two {n r : ℕ} {a : Fin n → ℝ} {c : ℝ}
     (hn : 0 < n) (ha : ∀ k, 0 < a k) (hc : 0 < c) (hr : 1 ≤ r) (hnr : 2 ≤ n ∨ 2 ≤ r)
     (hdeg : max n r ≤ 2) :
-    ∀ θ ∈ Ioo (0 : ℝ) (π / r), ∀ w : ℂ,
-      (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)).eval w = 0 →
-        w ≠ ftPrincipal (ftTau a r (n - 1)) θ →
-        w ≠ (starRingEnd ℂ) (ftPrincipal (ftTau a r (n - 1)) θ) →
-        ftTau a r (n - 1) θ < ‖w‖ := by
+    FTMinModulusGap (ftRootPoly c a) r (ftBranchZ a c r (n - 1)) (ftTau a r (n - 1)) := by
   intro θ hθ w hw hne hne'
   obtain ⟨hroot, hpos⟩ := ft_branch_root_and_pos (a := a) (r := r) c hn ha hr hnr
   have hθπ : θ ∈ Ioo 0 π := ftArc_subset hr hθ
@@ -187,41 +179,22 @@ nothing to separate: the pencil is quadratic, so the principal pair is the whole
 denominator. -/
 theorem ft_minModulus_at_branch_quadratic {a : Fin 2 → ℝ} {c : ℝ} (ha : ∀ k, 0 < a k)
     (hc : 0 < c) :
-    ∀ θ ∈ Ioo (0 : ℝ) (π / ((1 : ℕ) : ℝ)), ∀ w : ℂ,
-      (ftDen (ftRootPoly c a) 1 ((ftBranchZ a c 1 (2 - 1) θ : ℝ) : ℂ)).eval w = 0 →
-        w ≠ ftPrincipal (ftTau a 1 (2 - 1)) θ →
-        w ≠ (starRingEnd ℂ) (ftPrincipal (ftTau a 1 (2 - 1)) θ) →
-        ftTau a 1 (2 - 1) θ < ‖w‖ :=
+    FTMinModulusGap (ftRootPoly c a) 1 (ftBranchZ a c 1 (2 - 1)) (ftTau a 1 (2 - 1)) :=
   ft_minModulus_at_branch_of_deg_le_two (by omega) ha hc le_rfl (Or.inl (by omega)) (by norm_num)
 
 /-- **`hmin` at `(n, r) = (1, 2)`** — the linear pencil at `r = 2`, the same degree
 count in the other regime. -/
 theorem ft_minModulus_at_branch_linear_two {a : Fin 1 → ℝ} {c : ℝ} (ha : ∀ k, 0 < a k)
     (hc : 0 < c) :
-    ∀ θ ∈ Ioo (0 : ℝ) (π / ((2 : ℕ) : ℝ)), ∀ w : ℂ,
-      (ftDen (ftRootPoly c a) 2 ((ftBranchZ a c 2 (1 - 1) θ : ℝ) : ℂ)).eval w = 0 →
-        w ≠ ftPrincipal (ftTau a 2 (1 - 1)) θ →
-        w ≠ (starRingEnd ℂ) (ftPrincipal (ftTau a 2 (1 - 1)) θ) →
-        ftTau a 2 (1 - 1) θ < ‖w‖ :=
+    FTMinModulusGap (ftRootPoly c a) 2 (ftBranchZ a c 2 (1 - 1)) (ftTau a 2 (1 - 1)) :=
   ft_minModulus_at_branch_of_deg_le_two (by omega) ha hc (by omega) (Or.inr le_rfl) (by norm_num)
 
 theorem ft_geometry_at_branch_quadratic {a : Fin 2 → ℝ} {c : ℝ} (ha : ∀ k, 0 < a k)
     (hc : 0 < c) :
     ∃ za b : ℝ,
       ftBranchZ a c 1 (2 - 1) '' Ioo 0 (π / ((1 : ℕ) : ℝ)) = Ioo za b
-        ∧ (∀ θ ∈ Ioo 0 (π / ((1 : ℕ) : ℝ)),
-            (ftDen (ftRootPoly c a) 1 ((ftBranchZ a c 1 (2 - 1) θ : ℝ) : ℂ)).eval
-                (ftPrincipal (ftTau a 1 (2 - 1)) θ) = 0
-              ∧ (ftDen (ftRootPoly c a) 1 ((ftBranchZ a c 1 (2 - 1) θ : ℝ) : ℂ)).eval
-                  ((starRingEnd ℂ) (ftPrincipal (ftTau a 1 (2 - 1)) θ)) = 0
-              ∧ ‖ftPrincipal (ftTau a 1 (2 - 1)) θ‖ = ftTau a 1 (2 - 1) θ
-              ∧ ‖(starRingEnd ℂ) (ftPrincipal (ftTau a 1 (2 - 1)) θ)‖
-                  = ftTau a 1 (2 - 1) θ)
-        ∧ (∀ θ ∈ Ioo 0 (π / ((1 : ℕ) : ℝ)), ∀ w : ℂ,
-            (ftDen (ftRootPoly c a) 1 ((ftBranchZ a c 1 (2 - 1) θ : ℝ) : ℂ)).eval w = 0 →
-              ‖w‖ ≤ ftTau a 1 (2 - 1) θ →
-                w = ftPrincipal (ftTau a 1 (2 - 1)) θ
-                  ∨ w = (starRingEnd ℂ) (ftPrincipal (ftTau a 1 (2 - 1)) θ)) :=
+        ∧ FTPrincipalPair (ftRootPoly c a) 1 (ftBranchZ a c 1 (2 - 1)) (ftTau a 1 (2 - 1))
+        ∧ FTPrincipalDisk (ftRootPoly c a) 1 (ftBranchZ a c 1 (2 - 1)) (ftTau a 1 (2 - 1)) :=
   ft_geometry_at_branch_of_two_le (by omega) ha hc (ft_minModulus_at_branch_quadratic ha hc)
 
 /-! ### The linear pencil `n = 1` -/
@@ -400,9 +373,7 @@ that a single angle leaves, and at `r ≥ 3` the closing comparison
 `\sin(π/(2(r-1))) < \sin(π/r)` is already strict, so nothing is lost. -/
 theorem cone_at_branch_one_of_three_le {r : ℕ} (hr : 3 ≤ r) {a : Fin 1 → ℝ} {c : ℝ}
     (ha : ∀ k, 0 < a k) (hc : 0 < c) :
-    ∀ θ ∈ Ioo (0 : ℝ) (π / r), ∀ w : ℂ,
-      (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (1 - 1) θ : ℝ) : ℂ)).eval w = 0 →
-        ‖w‖ ≤ ftTau a r (1 - 1) θ → |Complex.arg w| ∈ Ioo 0 (π / r) := by
+    FTArgumentCone (ftRootPoly c a) r (ftBranchZ a c r (1 - 1)) (ftTau a r (1 - 1)) := by
   classical
   intro θ hθ w hw hnorm
   have hπ := Real.pi_pos
@@ -473,11 +444,7 @@ theorem cone_at_branch_one_of_three_le {r : ℕ} (hr : 3 ≤ r) {a : Fin 1 → �
 /-- **`hmin` at `n = 1`, `r ≥ 3`.** -/
 theorem ft_minModulus_at_branch_one_of_three_le {r : ℕ} (hr : 3 ≤ r) {a : Fin 1 → ℝ} {c : ℝ}
     (ha : ∀ k, 0 < a k) (hc : 0 < c) :
-    ∀ θ ∈ Ioo (0 : ℝ) (π / r), ∀ w : ℂ,
-      (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (1 - 1) θ : ℝ) : ℂ)).eval w = 0 →
-        w ≠ ftPrincipal (ftTau a r (1 - 1)) θ →
-        w ≠ (starRingEnd ℂ) (ftPrincipal (ftTau a r (1 - 1)) θ) →
-        ftTau a r (1 - 1) θ < ‖w‖ :=
+    FTMinModulusGap (ftRootPoly c a) r (ftBranchZ a c r (1 - 1)) (ftTau a r (1 - 1)) :=
   ft_minModulus_at_branch_of_or (by omega) ha hc (by omega) (Or.inr (by omega))
     (cone_at_branch_one_of_three_le hr ha hc)
 
@@ -560,11 +527,7 @@ theorem tendsto_ftBranchZ_arc_zero_one {r : ℕ} (hr : 2 ≤ r) {a : Fin 1 → �
 is the cone; the two are exhaustive. -/
 theorem ft_minModulus_at_branch_linear {r : ℕ} (hr : 2 ≤ r) {a : Fin 1 → ℝ} {c : ℝ}
     (ha : ∀ k, 0 < a k) (hc : 0 < c) :
-    ∀ θ ∈ Ioo (0 : ℝ) (π / r), ∀ w : ℂ,
-      (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (1 - 1) θ : ℝ) : ℂ)).eval w = 0 →
-        w ≠ ftPrincipal (ftTau a r (1 - 1)) θ →
-        w ≠ (starRingEnd ℂ) (ftPrincipal (ftTau a r (1 - 1)) θ) →
-        ftTau a r (1 - 1) θ < ‖w‖ := by
+    FTMinModulusGap (ftRootPoly c a) r (ftBranchZ a c r (1 - 1)) (ftTau a r (1 - 1)) := by
   rcases eq_or_lt_of_le hr with h | h
   · exact ft_minModulus_at_branch_of_deg_le_two (by omega) ha hc (by omega) (Or.inr hr) (by omega)
   · exact ft_minModulus_at_branch_one_of_three_le (by omega) ha hc
@@ -575,19 +538,8 @@ theorem ft_geometry_unbounded_at_branch_one {r : ℕ} (hr : 2 ≤ r) {a : Fin 1 
     (ha : ∀ k, 0 < a k) (hc : 0 < c) :
     ∃ za : ℝ,
       ftBranchZ a c r (1 - 1) '' Ioo 0 (π / r) = Ioi za
-        ∧ (∀ θ ∈ Ioo 0 (π / r),
-            (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (1 - 1) θ : ℝ) : ℂ)).eval
-                (ftPrincipal (ftTau a r (1 - 1)) θ) = 0
-              ∧ (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (1 - 1) θ : ℝ) : ℂ)).eval
-                  ((starRingEnd ℂ) (ftPrincipal (ftTau a r (1 - 1)) θ)) = 0
-              ∧ ‖ftPrincipal (ftTau a r (1 - 1)) θ‖ = ftTau a r (1 - 1) θ
-              ∧ ‖(starRingEnd ℂ) (ftPrincipal (ftTau a r (1 - 1)) θ)‖
-                  = ftTau a r (1 - 1) θ)
-        ∧ (∀ θ ∈ Ioo 0 (π / r), ∀ w : ℂ,
-            (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (1 - 1) θ : ℝ) : ℂ)).eval w = 0 →
-              ‖w‖ ≤ ftTau a r (1 - 1) θ →
-                w = ftPrincipal (ftTau a r (1 - 1)) θ
-                  ∨ w = (starRingEnd ℂ) (ftPrincipal (ftTau a r (1 - 1)) θ)) := by
+        ∧ FTPrincipalPair (ftRootPoly c a) r (ftBranchZ a c r (1 - 1)) (ftTau a r (1 - 1))
+        ∧ FTPrincipalDisk (ftRootPoly c a) r (ftBranchZ a c r (1 - 1)) (ftTau a r (1 - 1)) := by
   obtain ⟨hroot, hpos, hmono, hcont⟩ :=
     ft_branch_supplies (a := a) (c := c) (by omega) ha hc (by omega) (Or.inr hr)
   exact ⟨_, ft_geometry_unbounded (hasRealCoeffs_ftRootPoly c a) (by omega) hroot hpos hmono

@@ -53,6 +53,14 @@ open scoped Real Topology
 
 namespace Shields
 
+/-- Cauchy's theorem on a closed disc contained in a set where the integrand is analytic. -/
+theorem circleIntegral_eq_zero_of_analyticOnNhd {A : Set ℂ} {f : ℂ → ℂ}
+    (hf : AnalyticOnNhd ℂ f A) {c : ℂ} {r : ℝ} (hr : 0 ≤ r) (hsub : closedBall c r ⊆ A) :
+    (∮ z in C(c, r), f z) = 0 :=
+  DiffContOnCl.circleIntegral_eq_zero hr
+    ⟨(hf.mono (ball_subset_closedBall.trans hsub)).differentiableOn,
+      (hf.mono hsub).continuousOn.mono closure_ball_subset_closedBall⟩
+
 /-! ### The integral of a product of inverse linear factors -/
 
 /-- The integrand `(∏_{i ∈ S}(z - a_i))⁻¹` is continuous off the nodes. -/
@@ -115,68 +123,43 @@ theorem circleIntegral_prod_inv_eq_zero {S : Finset ℕ} {a : ℕ → ℂ} {c : 
     · exact ball_subset_closedBall hz.1.1
     · intro hmem
       exact hz.1.2 (ball_subset_closedBall hmem)
-  -- and it is arbitrarily small
-  have hbound : ∀ ε : ℝ, 0 < ε → ‖∮ z in C(c, s), (∏ i ∈ S, (z - a i))⁻¹‖ ≤ ε := by
-    intro ε hε
-    obtain ⟨T, hT1, hTs, hTε⟩ : ∃ T : ℝ, 1 ≤ T ∧ s ≤ M + T ∧ 2 * π * (M + 1) / T ≤ ε := by
-      obtain ⟨T, hT⟩ := exists_nat_gt (max (max 1 s) (2 * π * (M + 1) / ε))
-      refine ⟨(T : ℝ), ?_, ?_, ?_⟩
-      · exact le_of_lt (lt_of_le_of_lt (le_trans (le_max_left 1 s) (le_max_left _ _)) hT)
-      · have : s ≤ (T : ℝ) := le_of_lt (lt_of_le_of_lt
-          (le_trans (le_max_right 1 s) (le_max_left _ _)) hT)
-        linarith
-      · have hTpos : (0 : ℝ) < T := lt_of_lt_of_le (by norm_num)
-          (le_of_lt (lt_of_le_of_lt (le_trans (le_max_left 1 s) (le_max_left _ _)) hT))
-        rw [div_le_iff₀ hTpos]
-        have hlt : 2 * π * (M + 1) / ε < (T : ℝ) := lt_of_le_of_lt (le_max_right _ _) hT
-        rw [div_lt_iff₀ hε] at hlt
-        nlinarith
-    set T' : ℝ := M + T with hT'
-    have hT'pos : 0 < T' := by rw [hT']; linarith
-    have hTpos : (0 : ℝ) < T := by linarith
-    have hsup : ∀ z ∈ sphere c T', ‖(∏ i ∈ S, (z - a i))⁻¹‖ ≤ (T ^ 2)⁻¹ := by
+  -- on the circle of radius `M + T` every factor is at least `T`, so the
+  -- length-times-supremum bound is `2π(M + T)/T²`
+  have hbound : ∀ T : ℝ, 1 ≤ T → s ≤ M + T →
+      ‖∮ z in C(c, s), (∏ i ∈ S, (z - a i))⁻¹‖ ≤ 2 * π * (M + T) * (T ^ 2)⁻¹ := by
+    intro T hT1 hTs
+    have hsup : ∀ z ∈ sphere c (M + T), ‖(∏ i ∈ S, (z - a i))⁻¹‖ ≤ (T ^ 2)⁻¹ := by
       intro z hz
       rw [mem_sphere, dist_eq_norm] at hz
       have hfac : ∀ i ∈ S, T ≤ ‖z - a i‖ := by
         intro i hi
         have h1 : ‖z - c‖ - ‖a i - c‖ ≤ ‖z - a i‖ := by
-          have hnn := norm_sub_norm_le (z - c) (a i - c)
-          simpa [sub_sub_sub_cancel_right] using hnn
+          simpa [sub_sub_sub_cancel_right] using norm_sub_norm_le (z - c) (a i - c)
         have h2 := h i hi
-        rw [hz, hT'] at h1
+        rw [hz] at h1
         linarith
-      have hprod : T ^ S.card ≤ ‖∏ i ∈ S, (z - a i)‖ := by
-        rw [norm_prod]
-        calc T ^ S.card = ∏ _i ∈ S, T := by rw [Finset.prod_const]
-          _ ≤ ∏ i ∈ S, ‖z - a i‖ :=
-              Finset.prod_le_prod (fun i _ => by linarith) (fun i hi => hfac i hi)
-      have hpow2 : T ^ (2 : ℕ) ≤ T ^ S.card := pow_le_pow_right₀ hT1 hcard
+      have hlow : T ^ (2 : ℕ) ≤ ‖∏ i ∈ S, (z - a i)‖ := by
+        refine (pow_le_pow_right₀ hT1 hcard).trans ?_
+        rw [norm_prod, ← Finset.prod_const]
+        exact Finset.prod_le_prod (fun i _ => by linarith) hfac
       have hppos : (0 : ℝ) < T ^ (2 : ℕ) := by positivity
-      have hlow : T ^ (2 : ℕ) ≤ ‖∏ i ∈ S, (z - a i)‖ := le_trans hpow2 hprod
       rw [norm_inv, inv_le_inv₀ (lt_of_lt_of_le hppos hlow) hppos]
       exact hlow
-    have hnorm := circleIntegral.norm_integral_le_of_norm_le_const (c := c) (R := T')
-      hT'pos.le hsup
-    rw [hstep T' hTs] at hnorm
-    refine hnorm.trans ?_
-    have hkey : 2 * π * T' * (T ^ 2)⁻¹ ≤ 2 * π * (M + 1) / T := by
-      rw [hT', div_eq_mul_inv]
-      have hexp : 2 * π * (M + 1) * T⁻¹ - 2 * π * (M + T) * (T ^ 2)⁻¹
-          = 2 * π * (M * T - M) * (T ^ 2)⁻¹ := by
-        field
-      have hnn : 0 ≤ 2 * π * (M * T - M) * (T ^ 2)⁻¹ := by
-        have h1 : (0 : ℝ) ≤ M * T - M := by nlinarith
-        have h2 : (0 : ℝ) ≤ (T ^ 2)⁻¹ := by positivity
-        have h3 : (0 : ℝ) ≤ 2 * π := by positivity
-        exact mul_nonneg (mul_nonneg h3 h1) h2
-      have hfin : 0 ≤ 2 * π * (M + 1) * T⁻¹ - 2 * π * (M + T) * (T ^ 2)⁻¹ := by
-        rw [hexp]; exact hnn
-      linarith
-    exact hkey.trans hTε
-  by_contra hI
-  have hpos : 0 < ‖∮ z in C(c, s), (∏ i ∈ S, (z - a i))⁻¹‖ := norm_pos_iff.mpr hI
-  have hhalf := hbound (‖∮ z in C(c, s), (∏ i ∈ S, (z - a i))⁻¹‖ / 2) (by linarith)
-  linarith
+    have hnorm := circleIntegral.norm_integral_le_of_norm_le_const (c := c) (R := M + T)
+      (by linarith) hsup
+    rwa [hstep _ hTs] at hnorm
+  -- and the bound decays like `1/T`
+  have hlim : Tendsto (fun T : ℝ => 2 * π * (M + T) * (T ^ 2)⁻¹) atTop (𝓝 0) := by
+    have hsum : Tendsto (fun T : ℝ => 2 * π * M * (T ^ 2)⁻¹ + 2 * π * T⁻¹) atTop (𝓝 0) := by
+      have hsq := tendsto_inv_atTop_zero.comp
+        (tendsto_pow_atTop (α := ℝ) (n := 2) (by norm_num))
+      simpa using (hsq.const_mul (2 * π * M)).add (tendsto_inv_atTop_zero.const_mul (2 * π))
+    refine hsum.congr' ?_
+    filter_upwards [eventually_gt_atTop (0 : ℝ)] with T hT
+    field_simp
+  refine norm_eq_zero.mp (le_antisymm (ge_of_tendsto hlim ?_) (norm_nonneg _))
+  filter_upwards [eventually_ge_atTop (1 : ℝ), eventually_ge_atTop (s - M)] with T hT1 hTs
+  exact hbound T hT1 (by linarith)
 
 /-- The enclosed-node form of the vanishing: two or more nodes, all in the open disc. -/
 theorem circleIntegral_prod_inv_eq_zero_of_mem {S : Finset ℕ} {a : ℕ → ℂ} {c : ℂ} {s : ℝ}
@@ -248,6 +231,37 @@ private theorem circleIntegral_div_prod_eq {k : ℕ} {a : ℕ → ℂ} {h q : �
   congr 1
   exact Finset.sum_congr rfl fun j _ => circleIntegral.integral_const_mul _ _ _ _
 
+/-- **A circle enclosing every node sees only the last Newton coefficient.**  Every earlier term
+of the Newton form carries two or more factors and integrates to zero, and the analytic remainder
+integrates to zero as well, so whatever the center and the radius the value is `2πi d_{k-1}`. -/
+private theorem circleIntegral_div_prod_enclosed {k : ℕ} {a : ℕ → ℂ} {h q : ℂ → ℂ} {d : ℕ → ℂ}
+    {A : Set ℂ} (hk : 1 ≤ k) (hq : AnalyticOnNhd ℂ q A)
+    (hrep : ∀ z, (∀ i ∈ Finset.range k, z ≠ a i) →
+      h z / ∏ i ∈ Finset.range k, (z - a i)
+        = (∑ j ∈ Finset.range k, d j / ∏ i ∈ Finset.Ico j k, (z - a i)) + q z)
+    {c : ℂ} {s : ℝ} (hs : 0 < s) (hsub : closedBall c s ⊆ A) (hn : ∀ i, a i ∈ ball c s) :
+    (∮ z in C(c, s), h z / ∏ i ∈ Finset.range k, (z - a i)) = 2 * π * I * d (k - 1) := by
+  have hne : ∀ z ∈ sphere c s, ∀ i ∈ Finset.range k, z ≠ a i := fun z hz i _ =>
+    sphere_disjoint_ball.ne_of_mem hz (hn i)
+  rw [circleIntegral_div_prod_eq hrep c s hs.le hne
+      (hq.continuousOn.mono fun z hz => hsub (sphere_subset_closedBall hz)),
+    circleIntegral_eq_zero_of_analyticOnNhd hq hs.le hsub, add_zero]
+  have hterm : ∀ j ∈ Finset.range k,
+      d j * (∮ z in C(c, s), (∏ i ∈ Finset.Ico j k, (z - a i))⁻¹)
+        = if j = k - 1 then 2 * π * I * d (k - 1) else 0 := by
+    intro j hj
+    have hjk : j < k := Finset.mem_range.mp hj
+    have hcard : 1 ≤ (Finset.Ico j k).card :=
+      Finset.card_pos.mpr (Finset.nonempty_Ico.mpr hjk)
+    rw [circleIntegral_newton_term hs hcard (fun i _ => hn i), Nat.card_Ico]
+    by_cases hje : j = k - 1
+    · subst hje
+      rw [if_pos (by omega), if_pos rfl]
+      ring
+    · rw [if_neg (by omega), if_neg hje, mul_zero]
+  rw [Finset.sum_congr rfl hterm, Finset.sum_ite_eq' (Finset.range k) (k - 1),
+    if_pos (Finset.mem_range.mpr (by omega))]
+
 /-- **Deforming a circle outward past a cluster of poles.**  Let `h` be analytic on an open set
 covering the closed annulus `ρ ≤ |z| ≤ R`, let every node lie in a disc `closedBall τ rr`
 contained in the open annulus, and consider `g = h/∏_{i<k}(z - a_i)`.  Then
@@ -281,45 +295,24 @@ theorem circleIntegral_cluster_deform {ρ R rr : ℝ} {τ : ℂ} {A : Set ℂ} (
     have := (hsmall (ball_subset_closedBall (hnode i))).2
     rw [mem_closedBall, dist_zero_right, not_le] at this
     simpa using this
-  have hdecomp := fun (cc : ℂ) (ss : ℝ) (hss : 0 ≤ ss) hne hqc =>
-    circleIntegral_div_prod_eq (a := a) (h := h) (q := q) (d := d) hrep cc ss hss hne hqc
-  -- continuity of `h` and `q` on the three circles
-  have hsphR : sphere (0 : ℂ) R ⊆ A := fun z hz =>
-    hAann ⟨sphere_subset_closedBall hz, by
-      rw [mem_sphere, dist_zero_right] at hz
-      rw [mem_ball, dist_zero_right, not_lt, hz]
-      exact hρR⟩
-  have hsphρ : sphere (0 : ℂ) ρ ⊆ A := fun z hz =>
-    hAann ⟨by
-      rw [mem_sphere, dist_zero_right] at hz
-      rw [mem_closedBall, dist_zero_right, hz]
-      exact hρR, by
-      rw [mem_sphere, dist_zero_right] at hz
-      rw [mem_ball, dist_zero_right, not_lt, hz]⟩
+  -- the three circles all sit inside `A`, so the remainder is continuous on each
+  have hsphR : sphere (0 : ℂ) R ⊆ A := fun _ hz =>
+    hAann ⟨sphere_subset_closedBall hz,
+      Set.disjoint_left.mp (sphere_disjoint_ball.mono_right (ball_subset_ball hρR)) hz⟩
+  have hsphρ : sphere (0 : ℂ) ρ ⊆ A := fun _ hz =>
+    hAann ⟨closedBall_subset_closedBall hρR (sphere_subset_closedBall hz),
+      Set.disjoint_left.mp sphere_disjoint_ball hz⟩
   have hsphτ : sphere τ rr ⊆ A := fun z hz => hballA (sphere_subset_closedBall hz)
-  have hcont : ∀ {K : Set ℂ}, K ⊆ A → ContinuousOn h K ∧ ContinuousOn q K := fun hK =>
-    ⟨hh.continuousOn.mono hK, hq.continuousOn.mono hK⟩
-  have hneR : ∀ z ∈ sphere (0 : ℂ) R, ∀ i ∈ Finset.range k, z ≠ a i := by
-    intro z hz i _ hzi
-    rw [mem_sphere, dist_zero_right] at hz
-    have := hnodeR i
-    rw [mem_ball, dist_zero_right, ← hzi, hz] at this
-    exact lt_irrefl R this
-  have hneρ : ∀ z ∈ sphere (0 : ℂ) ρ, ∀ i ∈ Finset.range k, z ≠ a i := by
-    intro z hz i _ hzi
-    rw [mem_sphere, dist_zero_right] at hz
-    have := hnodeρ i
-    rw [← hzi, sub_zero, hz] at this
-    exact lt_irrefl ρ this
-  have hneτ : ∀ z ∈ sphere τ rr, ∀ i ∈ Finset.range k, z ≠ a i := by
-    intro z hz i _ hzi
-    rw [mem_sphere] at hz
-    have := hnode i
-    rw [mem_ball, ← hzi, hz] at this
-    exact lt_irrefl rr this
-  rw [hdecomp 0 R (le_trans hρ.le hρR) hneR (hcont hsphR).2,
-    hdecomp 0 ρ hρ.le hneρ (hcont hsphρ).2,
-    hdecomp τ rr hrr.le hneτ (hcont hsphτ).2]
+  have hqc : ∀ {K : Set ℂ}, K ⊆ A → ContinuousOn q K := fun hK => hq.continuousOn.mono hK
+  have hneR : ∀ z ∈ sphere (0 : ℂ) R, ∀ i ∈ Finset.range k, z ≠ a i := fun z hz i _ =>
+    sphere_disjoint_ball.ne_of_mem hz (hnodeR i)
+  have hneρ : ∀ z ∈ sphere (0 : ℂ) ρ, ∀ i ∈ Finset.range k, z ≠ a i := fun z hz i _ hzi =>
+    (hsmall (ball_subset_closedBall (hnode i))).2 (hzi ▸ sphere_subset_closedBall hz)
+  have hneτ : ∀ z ∈ sphere τ rr, ∀ i ∈ Finset.range k, z ≠ a i := fun z hz i _ =>
+    sphere_disjoint_ball.ne_of_mem hz (hnode i)
+  rw [circleIntegral_div_prod_eq hrep 0 R (le_trans hρ.le hρR) hneR (hqc hsphR),
+    circleIntegral_div_prod_eq hrep 0 ρ hρ.le hneρ (hqc hsphρ),
+    circleIntegral_div_prod_eq hrep τ rr hrr.le hneτ (hqc hsphτ)]
   -- the analytic remainder
   have hqann : (∮ z in C((0 : ℂ), R), q z) = ∮ z in C((0 : ℂ), ρ), q z := by
     refine circleIntegral_eq_of_differentiable_on_annulus_off_countable hρ hρR Set.countable_empty
@@ -327,36 +320,21 @@ theorem circleIntegral_cluster_deform {ρ R rr : ℝ} {τ : ℂ} {A : Set ℂ} (
     refine (hq z (hAann ⟨ball_subset_closedBall hz.1.1, ?_⟩)).differentiableAt
     intro hmem
     exact hz.1.2 (ball_subset_closedBall hmem)
-  have hqsmall : (∮ z in C(τ, rr), q z) = 0 := by
-    refine Complex.circleIntegral_eq_zero_of_differentiable_on_off_countable hrr.le
-      Set.countable_empty (hq.continuousOn.mono hballA) fun z hz => ?_
-    exact (hq z (hballA (ball_subset_closedBall hz.1))).differentiableAt
-  -- the rational terms
-  have hVρ : ∀ j ∈ Finset.range k,
-      (∮ z in C((0 : ℂ), ρ), (∏ i ∈ Finset.Ico j k, (z - a i))⁻¹) = 0 := by
-    intro j _
-    exact circleIntegral_prod_inv_eq_zero_of_notMem hρ.le fun i _ => hnodeρ i
-  have hVeq : ∀ j ∈ Finset.range k,
-      (∮ z in C((0 : ℂ), R), (∏ i ∈ Finset.Ico j k, (z - a i))⁻¹)
-        = ∮ z in C(τ, rr), (∏ i ∈ Finset.Ico j k, (z - a i))⁻¹ := by
+  rw [hqann, circleIntegral_eq_zero_of_analyticOnNhd hq hrr.le hballA, add_zero]
+  -- each Newton term vanishes on `|z| = ρ` and takes the same value on the other two circles
+  have hterm : ∀ j ∈ Finset.range k,
+      d j * (∮ z in C((0 : ℂ), R), (∏ i ∈ Finset.Ico j k, (z - a i))⁻¹)
+        = d j * (∮ z in C((0 : ℂ), ρ), (∏ i ∈ Finset.Ico j k, (z - a i))⁻¹)
+          + d j * ∮ z in C(τ, rr), (∏ i ∈ Finset.Ico j k, (z - a i))⁻¹ := by
     intro j hj
-    have hjk : j < k := Finset.mem_range.mp hj
-    have hcard : 1 ≤ (Finset.Ico j k).card := by
-      rw [Nat.card_Ico]
-      omega
-    rw [circleIntegral_newton_term (lt_of_lt_of_le hρ hρR) hcard (fun i _ => hnodeR i),
+    have hcard : 1 ≤ (Finset.Ico j k).card :=
+      Finset.card_pos.mpr (Finset.nonempty_Ico.mpr (Finset.mem_range.mp hj))
+    have hinner : (∮ z in C((0 : ℂ), ρ), (∏ i ∈ Finset.Ico j k, (z - a i))⁻¹) = 0 :=
+      circleIntegral_prod_inv_eq_zero_of_notMem hρ.le fun i _ => hnodeρ i
+    rw [hinner, mul_zero, zero_add,
+      circleIntegral_newton_term (lt_of_lt_of_le hρ hρR) hcard (fun i _ => hnodeR i),
       circleIntegral_newton_term hrr hcard (fun i _ => hnode i)]
-  rw [hqann, hqsmall, add_zero]
-  have hsplit : (∑ j ∈ Finset.range k, d j * ∮ z in C((0 : ℂ), R),
-        (∏ i ∈ Finset.Ico j k, (z - a i))⁻¹)
-      = (∑ j ∈ Finset.range k, d j * ∮ z in C((0 : ℂ), ρ),
-          (∏ i ∈ Finset.Ico j k, (z - a i))⁻¹)
-        + ∑ j ∈ Finset.range k, d j * ∮ z in C(τ, rr),
-          (∏ i ∈ Finset.Ico j k, (z - a i))⁻¹ := by
-    rw [← Finset.sum_add_distrib]
-    refine Finset.sum_congr rfl fun j hj => ?_
-    rw [hVρ j hj, hVeq j hj, mul_zero, zero_add]
-  rw [hsplit]
+  rw [Finset.sum_congr rfl hterm, Finset.sum_add_distrib]
   ring
 
 /-- **Two circles enclosing the same cluster give the same integral.**  Neither the center nor
@@ -373,33 +351,14 @@ theorem circleIntegral_prod_indep {c₁ c₂ : ℂ} {s₁ s₂ : ℝ} {A : Set �
     (hn₁ : ∀ i, a i ∈ ball c₁ s₁) (hn₂ : ∀ i, a i ∈ ball c₂ s₂) :
     (∮ z in C(c₁, s₁), h z / ∏ i ∈ Finset.range k, (z - a i))
       = ∮ z in C(c₂, s₂), h z / ∏ i ∈ Finset.range k, (z - a i) := by
-  have hAnode : ∀ i, a i ∈ A := fun i => hd₁ (ball_subset_closedBall (hn₁ i))
-  obtain ⟨d, q, hq, hrep⟩ := exists_newton_form_div hA a hAnode k hh
-  have hne : ∀ (c : ℂ) (sr : ℝ), (∀ i, a i ∈ ball c sr) →
-      ∀ z ∈ sphere c sr, ∀ i ∈ Finset.range k, z ≠ a i := by
-    intro c sr hin z hz i _ hzi
-    rw [mem_sphere] at hz
-    have := hin i
-    rw [mem_ball, ← hzi, hz] at this
-    exact lt_irrefl sr this
-  have hzero : ∀ (c : ℂ) (sr : ℝ), 0 < sr → closedBall c sr ⊆ A →
-      (∮ z in C(c, sr), q z) = 0 := by
-    intro c sr hsr hsub
-    refine Complex.circleIntegral_eq_zero_of_differentiable_on_off_countable hsr.le
-      Set.countable_empty (hq.continuousOn.mono hsub) fun z hz => ?_
-    exact (hq z (hsub (ball_subset_closedBall hz.1))).differentiableAt
-  have hval : ∀ (c : ℂ) (sr : ℝ), 0 < sr → closedBall c sr ⊆ A → (∀ i, a i ∈ ball c sr) →
-      (∮ z in C(c, sr), h z / ∏ i ∈ Finset.range k, (z - a i))
-        = ∑ j ∈ Finset.range k, d j * (if (Finset.Ico j k).card = 1 then 2 * π * I else 0) := by
-    intro c sr hsr hsub hin
-    rw [circleIntegral_div_prod_eq hrep c sr hsr.le (hne c sr hin)
-        (hq.continuousOn.mono (fun z hz => hsub (sphere_subset_closedBall hz))),
-      hzero c sr hsr hsub, add_zero]
-    refine Finset.sum_congr rfl fun j hj => ?_
-    have hjk : j < k := Finset.mem_range.mp hj
-    have hcard : 1 ≤ (Finset.Ico j k).card := by rw [Nat.card_Ico]; omega
-    rw [circleIntegral_newton_term hsr hcard (fun i _ => hin i)]
-  rw [hval c₁ s₁ hs₁ hd₁ hn₁, hval c₂ s₂ hs₂ hd₂ hn₂]
+  rcases Nat.eq_zero_or_pos k with rfl | hk
+  · simp only [Finset.range_zero, Finset.prod_empty, div_one]
+    rw [circleIntegral_eq_zero_of_analyticOnNhd hh hs₁.le hd₁,
+      circleIntegral_eq_zero_of_analyticOnNhd hh hs₂.le hd₂]
+  · obtain ⟨d, q, hq, hrep⟩ :=
+      exists_newton_form_div hA a (fun i => hd₁ (ball_subset_closedBall (hn₁ i))) k hh
+    rw [circleIntegral_div_prod_enclosed hk hq hrep hs₁ hd₁ hn₁,
+      circleIntegral_div_prod_enclosed hk hq hrep hs₂ hd₂ hn₂]
 
 /-- `circleIntegral_prod_indep` with the node condition asked only of the indices that appear.
 The values `a i` for `i ≥ k` never enter the integrand, and clamping them into the range restores
@@ -414,12 +373,8 @@ theorem circleIntegral_prod_indep_of_lt {c₁ c₂ : ℂ} {s₁ s₂ : ℝ} {A :
   rcases Nat.eq_zero_or_pos k with rfl | hk
   · -- No nodes: the integrand is `h`, analytic on each closed disc.
     have hzero : ∀ (c : ℂ) (sr : ℝ), 0 < sr → closedBall c sr ⊆ A →
-        (∮ z in C(c, sr), h z / ∏ i ∈ Finset.range 0, (z - a i)) = 0 := by
-      intro c sr hsr hsub
-      simp only [Finset.range_zero, Finset.prod_empty, div_one]
-      refine Complex.circleIntegral_eq_zero_of_differentiable_on_off_countable hsr.le
-        Set.countable_empty (hh.continuousOn.mono hsub) fun z hz => ?_
-      exact (hh z (hsub (ball_subset_closedBall hz.1))).differentiableAt
+        (∮ z in C(c, sr), h z / ∏ i ∈ Finset.range 0, (z - a i)) = 0 := fun c sr hsr hsub => by
+      simpa using circleIntegral_eq_zero_of_analyticOnNhd hh hsr.le hsub
     rw [hzero c₁ s₁ hs₁ hd₁, hzero c₂ s₂ hs₂ hd₂]
   · -- Clamp the tail of the node family into the range, which changes no factor.
     set a' : ℕ → ℂ := fun i => a (min i (k - 1)) with ha'
@@ -451,33 +406,13 @@ theorem exists_newton_local_value {A : Set ℂ} (hA : IsOpen A) {h : ℂ → ℂ
           = (∑ j ∈ Finset.range k, d j / ∏ i ∈ Finset.Ico j k, (z - a i)) + q z) ∧
       (∮ z in C(c, s), h z / ∏ i ∈ Finset.range k, (z - a i)) = 2 * π * I * d (k - 1) := by
   obtain ⟨d, q, hq, hrep⟩ := exists_newton_form_div hA a hAnode k hh
-  refine ⟨d, q, hq, hrep, ?_⟩
-  have hne : ∀ z ∈ sphere c s, ∀ i ∈ Finset.range k, z ≠ a i := by
-    intro z hz i _ hzi
-    rw [mem_sphere] at hz
-    have := hn i
-    rw [mem_ball, ← hzi, hz] at this
-    exact lt_irrefl s this
-  have hqzero : (∮ z in C(c, s), q z) = 0 := by
-    refine Complex.circleIntegral_eq_zero_of_differentiable_on_off_countable hs.le
-      Set.countable_empty (hq.continuousOn.mono hsub) fun z hz => ?_
-    exact (hq z (hsub (ball_subset_closedBall hz.1))).differentiableAt
-  rw [circleIntegral_div_prod_eq hrep c s hs.le hne
-      (hq.continuousOn.mono (fun z hz => hsub (sphere_subset_closedBall hz))),
-    hqzero, add_zero]
-  have hterm : ∀ j ∈ Finset.range k,
-      d j * (∮ z in C(c, s), (∏ i ∈ Finset.Ico j k, (z - a i))⁻¹)
-        = if j = k - 1 then 2 * π * I * d (k - 1) else 0 := by
-    intro j hj
-    have hjk : j < k := Finset.mem_range.mp hj
-    have hcard : 1 ≤ (Finset.Ico j k).card := by rw [Nat.card_Ico]; omega
-    rw [circleIntegral_newton_term hs hcard (fun i _ => hn i), Nat.card_Ico]
-    by_cases hje : j = k - 1
-    · subst hje
-      rw [if_pos (by omega), if_pos rfl]
-      ring
-    · rw [if_neg (by omega), if_neg hje, mul_zero]
-  rw [Finset.sum_congr rfl hterm, Finset.sum_ite_eq' (Finset.range k) (k - 1)]
-  rw [if_pos (Finset.mem_range.mpr (by omega))]
+  exact ⟨d, q, hq, hrep, circleIntegral_div_prod_enclosed hk hq hrep hs hsub hn⟩
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.circleIntegral_cluster_deform' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms circleIntegral_cluster_deform
 
 end Shields

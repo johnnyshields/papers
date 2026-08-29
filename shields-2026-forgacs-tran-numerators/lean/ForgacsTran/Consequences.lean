@@ -76,7 +76,7 @@ theorem equidistribution_of_angular_discrepancy {Z : ℝ} {M r d s : ℕ} {α β
       _ = 1 := by field_simp
   have hsplit : Z / (d : ℝ) - (r : ℝ) * (β - α) / π
       = (Z - ((M : ℝ) + 1) * (β - α) / π) / d + ((s : ℝ) + 1) * (β - α) / π / d := by
-    rw [hMr]; field_simp; ring
+    rw [hMr]; field
   rw [hsplit]
   have h1 : |(Z - ((M : ℝ) + 1) * (β - α) / π) / d| ≤ C / d := by
     rw [abs_div, abs_of_pos hd0]
@@ -108,12 +108,11 @@ theorem angular_rigidity {jm jp j : ℕ} {θ Δ L : ℝ}
 
 /-- **`eq:angular-clock`.**  The index bound rearranged into the angular one:
 every bulk-zero angle sits within `π(Δ+1)/L` of the uniform clock `πj/L`. -/
-theorem angular_clock {j : ℕ} {θ Δ L : ℝ} (hL : 0 < L) (hΔ : 0 ≤ Δ)
-    (h : |(j : ℝ) - L * θ / π| ≤ Δ) :
+theorem angular_clock {j : ℕ} {θ Δ L : ℝ} (hL : 0 < L) (h : |(j : ℝ) - L * θ / π| ≤ Δ) :
     |θ - π * (j : ℝ) / L| ≤ π * (Δ + 1) / L := by
   have hπ : (0 : ℝ) < π := pi_pos
   have hrw : θ - π * (j : ℝ) / L = -(π / L) * ((j : ℝ) - L * θ / π) := by
-    field_simp; ring
+    field
   rw [hrw, abs_mul, abs_neg, abs_of_pos (by positivity : (0:ℝ) < π / L)]
   calc π / L * |(j : ℝ) - L * θ / π| ≤ π / L * Δ :=
         mul_le_mul_of_nonneg_left h (by positivity)
@@ -130,7 +129,7 @@ the remainder carries a factor `M`, and `du/dθ ≍ M`; the chain rule divides o
 by the other, so in the `u` coordinate the derivative bound is `O(σ^M)` with no
 `M` left.  This is the step the paper flags as "exactly absorbed". -/
 theorem norm_le_of_mul_eq {dR du dε C c σ : ℝ} {M : ℕ} (hM : 1 ≤ M) (hc : 0 < c)
-    (hσ : 0 ≤ σ) (hC : 0 ≤ C) (hR : |dR| ≤ C * (M : ℝ) * σ ^ M)
+    (_hσ : 0 ≤ σ) (_hC : 0 ≤ C) (hR : |dR| ≤ C * (M : ℝ) * σ ^ M)
     (hu : c * (M : ℝ) ≤ |du|) (hchain : dε * du = dR) :
     |dε| ≤ (C / c) * σ ^ M := by
   have hM0 : (0 : ℝ) < M := by exact_mod_cast hM
@@ -187,7 +186,7 @@ theorem local_clock_spacing {L Δ dψ κ κ₂ E ek ek1 ψk ψk1 : ℝ}
   have hstep1 : |Δ - π / (L - dψ)| ≤ (2 * E + κ₂ * Δ ^ 2) / (L - κ) := by
     have hX : (0:ℝ) ≤ 2 * E + κ₂ * Δ ^ 2 := by positivity
     have hrw : Δ - π / (L - dψ) = -(π - (L - dψ) * Δ) / (L - dψ) := by
-      field_simp; ring
+      field
     rw [hrw, abs_div, abs_neg, abs_of_pos hLd]
     calc |π - (L - dψ) * Δ| / (L - dψ) ≤ (2 * E + κ₂ * Δ ^ 2) / (L - dψ) :=
           div_le_div_of_nonneg_right hrho hLd.le
@@ -196,7 +195,7 @@ theorem local_clock_spacing {L Δ dψ κ κ₂ E ek ek1 ψk ψk1 : ℝ}
           nlinarith [mul_nonneg hX (sub_nonneg.2 hdψ2)]
   have hstep2 : |π / (L - dψ) - (π / L + π * dψ / L ^ 2)| ≤ π * κ ^ 2 / (L ^ 2 * (L - κ)) := by
     have hrw : π / (L - dψ) - (π / L + π * dψ / L ^ 2) = π * dψ ^ 2 / (L ^ 2 * (L - dψ)) := by
-      field_simp; ring
+      field
     rw [hrw, abs_div, abs_of_pos (show (0:ℝ) < L ^ 2 * (L - dψ) by positivity),
       abs_of_nonneg (show (0:ℝ) ≤ π * dψ ^ 2 by positivity)]
     have hdd : dψ ^ 2 ≤ κ ^ 2 := by
@@ -394,7 +393,7 @@ estimate on a fixed disk, with no `M`. -/
 theorem norm_deriv_scaled_remainder_le {M : ℕ} {τ : ℝ → ℝ} {F : ℝ → ℂ} {θ : ℝ}
     {τ' : ℝ} {F' : ℂ} {A Aτ Bd σ : ℝ}
     (hτd : HasDerivAt τ τ' θ) (hFd : HasDerivAt F F' θ) (hτpos : 0 < τ θ)
-    (hslope : |τ'| / τ θ ≤ Aτ) (hAτ : 0 ≤ Aτ) (hσ : 0 ≤ σ)
+    (hslope : |τ'| / τ θ ≤ Aτ) (hAτ : 0 ≤ Aτ) (_hσ : 0 ≤ σ)
     (hC0 : ‖((τ θ : ℂ)) ^ (M + 1) * F θ‖ ≤ A * σ ^ M)
     (hC1 : ‖((τ θ : ℂ)) ^ (M + 1) * F'‖ ≤ Bd * σ ^ M) :
     ‖deriv (fun s : ℝ => ((τ s : ℂ)) ^ (M + 1) * F s) θ‖
@@ -424,7 +423,7 @@ band rather than merely being bounded above. -/
 theorem norm_deriv_scaled_remainder_ge {M : ℕ} {τ : ℝ → ℝ} {F : ℝ → ℂ} {θ : ℝ}
     {τ' : ℝ} {F' : ℂ} {aτ : ℝ}
     (hτd : HasDerivAt τ τ' θ) (hFd : HasDerivAt F F' θ) (hτpos : 0 < τ θ)
-    (haτ : 0 ≤ aτ) (hslope : aτ ≤ |τ'| / τ θ) :
+    (_haτ : 0 ≤ aτ) (hslope : aτ ≤ |τ'| / τ θ) :
     ((M : ℝ) + 1) * aτ * ‖((τ θ : ℂ)) ^ (M + 1) * F θ‖
         - ‖((τ θ : ℂ)) ^ (M + 1) * F'‖
       ≤ ‖deriv (fun s : ℝ => ((τ s : ℂ)) ^ (M + 1) * F s) θ‖ := by

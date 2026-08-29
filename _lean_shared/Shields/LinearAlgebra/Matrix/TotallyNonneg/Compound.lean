@@ -174,11 +174,8 @@ under products. -/
 theorem compound_mul {R : Type*} [CommRing R] (r : ℕ) (A B : Matrix (Fin n) (Fin n) R) :
     compound r (A * B) = compound r A * compound r B := by
   ext f g
-  have hsub : ((A * B).submatrix f.1 g.1)
-      = A.submatrix f.1 id * B.submatrix id g.1 := by
-    ext a b
-    simp [Matrix.mul_apply, Matrix.submatrix_apply]
-  rw [compound_apply, hsub, det_mul_eq_sum_increasing, Matrix.mul_apply]
+  rw [compound_apply, Matrix.submatrix_mul A B f.1 id g.1 Function.bijective_id,
+    det_mul_eq_sum_increasing, Matrix.mul_apply]
   exact (Finset.sum_attach (increasingSelections r n)
     fun h => (A.submatrix f.1 h).det * (B.submatrix h g.1).det).symm
 
@@ -211,7 +208,7 @@ theorem charpoly_roots_card_two {A : Matrix (Fin 2) (Fin 2) ℝ}
   have hdet : A.det = a * d - b * c := Matrix.det_fin_two A
   have hexp : ((a + d + D) / 2) * ((a + d - D) / 2) = a * d - b * c := by
     field_simp
-    nlinarith [hD2]
+    linear_combination -hD2
   have hsum : ((a + d + D) / 2) + ((a + d - D) / 2) = a + d := by ring
   have hchar : A.charpoly
       = (Polynomial.X - Polynomial.C ((a + d + D) / 2))
@@ -397,30 +394,6 @@ With `compound_mul` and `compound_one` the compound carries a conjugation
 Together with `charpoly_compound_of_upperTriangular` that reduces the eigenvalue
 statement to putting `A` in triangular form — and nothing else. -/
 
-/-- An increasing-selection minor of the identity is `1` on the diagonal and `0`
-off it: two strictly monotone selections with the same image coincide, so a
-mismatch leaves an entirely zero row. -/
-theorem det_submatrix_one {R : Type*} [CommRing R] {k : ℕ} {f g : Fin k → Fin n}
-    (hf : StrictMono f) (hg : StrictMono g) :
-    ((1 : Matrix (Fin n) (Fin n) R).submatrix f g).det = if f = g then 1 else 0 := by
-  by_cases h : f = g
-  · subst h
-    rw [Matrix.submatrix_one f hf.injective, Matrix.det_one, if_pos rfl]
-  · rw [if_neg h]
-    have himg : Finset.univ.image f ≠ Finset.univ.image g := fun hc =>
-      h (strictMono_eq_of_image_eq hf hg hc)
-    obtain ⟨a, ha⟩ : ∃ a : Fin k, ∀ b : Fin k, f a ≠ g b := by
-      by_contra hc
-      push Not at hc
-      refine himg (Finset.eq_of_subset_of_card_le ?_ ?_)
-      · intro y hy
-        obtain ⟨a, _, rfl⟩ := Finset.mem_image.mp hy
-        obtain ⟨b, hb⟩ := hc a
-        exact hb ▸ Finset.mem_image_of_mem g (Finset.mem_univ b)
-      · rw [Finset.card_image_of_injective _ hf.injective,
-          Finset.card_image_of_injective _ hg.injective]
-    exact Matrix.det_eq_zero_of_row_eq_zero a fun b => by simp [ha b]
-
 @[simp] theorem compound_one {R : Type*} [CommRing R] (r : ℕ) :
     compound r (1 : Matrix (Fin n) (Fin n) R) = 1 := by
   ext f g
@@ -495,5 +468,16 @@ theorem charpoly_compound_complex (A : Matrix (Fin n) (Fin n) ℂ) :
   · rw [hAP, Matrix.coe_units_inv, Matrix.charpoly_units_conj]
   · rw [hAP, charpoly_compound_conj, charpoly_compound_of_upperTriangular
       (fun i j hij => hT hij)]
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.charpoly_roots_nonneg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms charpoly_roots_nonneg
+
+/-- info: 'Shields.charpoly_compound_complex' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms charpoly_compound_complex
 
 end Shields

@@ -29,12 +29,11 @@ and `B` have real coefficients, and `HasRealCoeffs` says that as a fixed-point
 condition on `starRingEnd` rather than as a preimage.  So the first thing needed
 is the descent: a `HasRealCoeffs` polynomial is the image of a real one.
 
-The route is `Polynomial.lifts`, and it is worth naming why.  `lifts` is a
-`Subsemiring`, so proving `HasRealCoeffs p ↔ p ∈ lifts (algebraMap ℝ ℂ)` once
-buys closure under sums, products and finite sums for free -- and
-`ftCoeffPoly` is a strong recursion built from exactly those, so the closure is
-what the induction consumes.  Proving `HasRealCoeffs.mul` directly would mean
-reasoning about a convolution of coefficients under `starRingEnd`.
+`Amplitude` carries that descent and the closure it rests on:
+`hasRealCoeffs_iff_mem_lifts` identifies `HasRealCoeffs` with membership in
+`Polynomial.lifts (algebraMap ℝ ℂ)`, which is a `Subsemiring` and so closed under
+sums, products and finite sums.  `ftCoeffPoly` is a strong recursion built from
+exactly those, so what is consumed here is that closure.
 
 ## What is left, and what it costs
 
@@ -76,75 +75,6 @@ question nobody had asked.
 namespace ForgacsTran
 
 open Polynomial Complex
-
-/-! ### `HasRealCoeffs` is membership in `lifts`, and therefore closed -/
-
-theorem hasRealCoeffs_iff_mem_lifts {p : Polynomial ℂ} :
-    HasRealCoeffs p ↔ p ∈ Polynomial.lifts (algebraMap ℝ ℂ) := by
-  rw [Polynomial.lifts_iff_coeff_lifts]
-  constructor
-  · intro h n
-    refine ⟨(p.coeff n).re, ?_⟩
-    have hn := h n
-    rw [Complex.conj_eq_iff_re] at hn
-    simpa using hn
-  · intro h n
-    obtain ⟨x, hx⟩ := h n
-    rw [← hx]
-    simp
-
-theorem HasRealCoeffs.exists_real {p : Polynomial ℂ} (hp : HasRealCoeffs p) :
-    ∃ q : Polynomial ℝ, q.map (algebraMap ℝ ℂ) = p :=
-  (Polynomial.lifts_iff_set_range p).1 (hasRealCoeffs_iff_mem_lifts.1 hp)
-
-theorem HasRealCoeffs.mul {p q : Polynomial ℂ} (hp : HasRealCoeffs p)
-    (hq : HasRealCoeffs q) : HasRealCoeffs (p * q) :=
-  hasRealCoeffs_iff_mem_lifts.2
-    (Subsemiring.mul_mem _ (hasRealCoeffs_iff_mem_lifts.1 hp)
-      (hasRealCoeffs_iff_mem_lifts.1 hq))
-
-theorem HasRealCoeffs.sub {p q : Polynomial ℂ} (hp : HasRealCoeffs p)
-    (hq : HasRealCoeffs q) : HasRealCoeffs (p - q) := by
-  intro n
-  rw [coeff_sub, map_sub, hp n, hq n]
-
-theorem HasRealCoeffs.sum {ι : Type*} {s : Finset ι} {f : ι → Polynomial ℂ}
-    (hf : ∀ i ∈ s, HasRealCoeffs (f i)) : HasRealCoeffs (∑ i ∈ s, f i) :=
-  hasRealCoeffs_iff_mem_lifts.2
-    (Subsemiring.sum_mem _ fun i hi => hasRealCoeffs_iff_mem_lifts.1 (hf i hi))
-
-theorem hasRealCoeffs_C_ofReal (x : ℝ) : HasRealCoeffs (C ((x : ℝ) : ℂ)) := by
-  intro n
-  rcases eq_or_ne n 0 with rfl | hn
-  · simp
-  · simp [coeff_C, hn]
-
-theorem hasRealCoeffs_X : HasRealCoeffs (X : Polynomial ℂ) := by
-  intro n
-  rcases eq_or_ne n 1 with rfl | hn
-  · simp
-  · simp [coeff_X]
-
-theorem hasRealCoeffs_zero : HasRealCoeffs (0 : Polynomial ℂ) := by
-  intro n; simp
-
-/-- A `HasRealCoeffs` polynomial's coefficients are their own real parts, which
-is the form the constant-coefficient steps below consume. -/
-theorem HasRealCoeffs.coeff_ofReal {p : Polynomial ℂ} (hp : HasRealCoeffs p) (n : ℕ) :
-    p.coeff n = ((p.coeff n).re : ℂ) := by
-  have := hp n
-  rw [Complex.conj_eq_iff_re] at this
-  exact this.symm
-
-theorem HasRealCoeffs.C_coeff {p : Polynomial ℂ} (hp : HasRealCoeffs p) (n : ℕ) :
-    HasRealCoeffs (C (p.coeff n)) := by
-  rw [hp.coeff_ofReal n]
-  exact hasRealCoeffs_C_ofReal _
-
-theorem HasRealCoeffs.C_inv_coeff {p : Polynomial ℂ} (hp : HasRealCoeffs p) (n : ℕ) :
-    HasRealCoeffs (C (p.coeff n)⁻¹) := by
-  rw [hp.coeff_ofReal n, ← Complex.ofReal_inv]
-  exact hasRealCoeffs_C_ofReal _
 
 /-! ### The coefficient polynomials are real
 
@@ -318,8 +248,7 @@ theorem hasDerivAt_cubicZofTau {t : ℝ} (ht : t ≠ 0) :
   have hval : -(2 * t) - (0 * t ^ 2 - 3 * (2 * t ^ 1)) / (t ^ 2) ^ 2
       + (0 * t ^ 4 - 1 * (4 * t ^ 3)) / (t ^ 4) ^ 2
       = -2 * (t ^ 2 - 1) ^ 2 * (t ^ 2 + 2) / t ^ 5 := by
-    field_simp
-    ring
+    field
   rw [hval] at h
   exact h
 

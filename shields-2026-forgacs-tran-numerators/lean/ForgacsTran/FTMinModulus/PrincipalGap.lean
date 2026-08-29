@@ -4,6 +4,7 @@ Released under the MIT license as described in the file LICENSE.txt.
 Authors: Johnny Shields
 -/
 import ForgacsTran.FTGeometryBranch
+import ForgacsTran.PencilIndex
 
 /-!
 # The minimum-modulus gap at the constructed branch
@@ -303,9 +304,7 @@ theorem ftProp1_closing_principal {n r l : ℕ} {a : Fin n → ℝ} {c : ℝ} (h
     φ = θ := by
   have hbp : ∀ ψ ∈ Ioo (0 : ℝ) (π / r), FTBranchAt a r (n - 1) ψ :=
     fun ψ hψ => ftBranchAt_of_arc_principal hn ha hr hnr hψ
-  have hparp : Even (n + (n - 1) + 1) := by
-    have hEq : n + (n - 1) + 1 = 2 * n := by omega
-    rw [hEq]; exact even_two_mul n
+  have hparp : Even (n + (n - 1) + 1) := even_add_pred_add_one hn
   have hφπ : φ ∈ Ioo 0 π := ftArc_subset hr hφ
   have hθπ : θ ∈ Ioo 0 π := ftArc_subset hr hθ
   set σ : ℝ := ftTau a r l φ with hσdef
@@ -420,22 +419,14 @@ with `τ(φ; l)` and of `z` with `z(φ; l)`, the containment, and the closing sq
 of their Prop. 1 through `ftProp1_closing_principal`. -/
 theorem ft_minModulus_at_branch_of_or {n r : ℕ} {a : Fin n → ℝ} {c : ℝ}
     (hn : 0 < n) (ha : ∀ k, 0 < a k) (hc : 0 < c) (hr : 1 ≤ r) (hnr : 2 ≤ n ∨ 2 ≤ r)
-    (hcone : ∀ θ ∈ Ioo (0 : ℝ) (π / r), ∀ w : ℂ,
-      (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)).eval w = 0 →
-        ‖w‖ ≤ ftTau a r (n - 1) θ → |Complex.arg w| ∈ Ioo 0 (π / r)) :
-    ∀ θ ∈ Ioo (0 : ℝ) (π / r), ∀ w : ℂ,
-      (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)).eval w = 0 →
-        w ≠ ftPrincipal (ftTau a r (n - 1)) θ →
-        w ≠ (starRingEnd ℂ) (ftPrincipal (ftTau a r (n - 1)) θ) →
-        ftTau a r (n - 1) θ < ‖w‖ := by
+    (hcone : FTArgumentCone (ftRootPoly c a) r (ftBranchZ a c r (n - 1)) (ftTau a r (n - 1))) :
+    FTMinModulusGap (ftRootPoly c a) r (ftBranchZ a c r (n - 1)) (ftTau a r (n - 1)) := by
   intro θ hθ w hw hne hne'
   by_contra hcon
   push Not at hcon
   have hθπ : θ ∈ Ioo 0 π := ftArc_subset hr hθ
   have hbp : FTBranchAt a r (n - 1) θ := ftBranchAt_of_arc_principal hn ha hr hnr hθ
-  have hparp : Even (n + (n - 1) + 1) := by
-    have hEq : n + (n - 1) + 1 = 2 * n := by omega
-    rw [hEq]; exact even_two_mul n
+  have hparp : Even (n + (n - 1) + 1) := even_add_pred_add_one hn
   have hzpos : 0 < ftBranchZ a c r (n - 1) θ := ftBranchZ_pos ha hc hparp hθπ hbp
   have hargw := hcone θ hθ w hw hcon
   have hw0 : w ≠ 0 := by
@@ -502,14 +493,8 @@ with `2 ≤ n` relaxed to what the argument actually consumes, which is that the
 branch exists across the arc. -/
 theorem ft_minModulus_at_branch {n r : ℕ} {a : Fin n → ℝ} {c : ℝ}
     (hn2 : 2 ≤ n) (ha : ∀ k, 0 < a k) (hc : 0 < c) (hr : 1 ≤ r)
-    (hcone : ∀ θ ∈ Ioo (0 : ℝ) (π / r), ∀ w : ℂ,
-      (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)).eval w = 0 →
-        ‖w‖ ≤ ftTau a r (n - 1) θ → |Complex.arg w| ∈ Ioo 0 (π / r)) :
-    ∀ θ ∈ Ioo (0 : ℝ) (π / r), ∀ w : ℂ,
-      (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)).eval w = 0 →
-        w ≠ ftPrincipal (ftTau a r (n - 1)) θ →
-        w ≠ (starRingEnd ℂ) (ftPrincipal (ftTau a r (n - 1)) θ) →
-        ftTau a r (n - 1) θ < ‖w‖ :=
+    (hcone : FTArgumentCone (ftRootPoly c a) r (ftBranchZ a c r (n - 1)) (ftTau a r (n - 1))) :
+    FTMinModulusGap (ftRootPoly c a) r (ftBranchZ a c r (n - 1)) (ftTau a r (n - 1)) :=
   ft_minModulus_at_branch_of_or (by omega) ha hc hr (Or.inl hn2) hcone
 
 /-- **`ft_minModulus_at_branch` with a redundant range hypothesis.**  `n ≤ 2r` was
@@ -517,40 +502,22 @@ load-bearing while the closing squeeze ran on the intermediate index; it is not
 any more.  Kept so that consumers written against that form still elaborate. -/
 theorem ft_minModulus_at_branch_of_le_two_mul {n r : ℕ} {a : Fin n → ℝ} {c : ℝ}
     (hn2 : 2 ≤ n) (ha : ∀ k, 0 < a k) (hc : 0 < c) (hr : 1 ≤ r) (_h2r : n ≤ 2 * r)
-    (hcone : ∀ θ ∈ Ioo (0 : ℝ) (π / r), ∀ w : ℂ,
-      (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)).eval w = 0 →
-        ‖w‖ ≤ ftTau a r (n - 1) θ → |Complex.arg w| ∈ Ioo 0 (π / r)) :
-    ∀ θ ∈ Ioo (0 : ℝ) (π / r), ∀ w : ℂ,
-      (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)).eval w = 0 →
-        w ≠ ftPrincipal (ftTau a r (n - 1)) θ →
-        w ≠ (starRingEnd ℂ) (ftPrincipal (ftTau a r (n - 1)) θ) →
-        ftTau a r (n - 1) θ < ‖w‖ :=
+    (hcone : FTArgumentCone (ftRootPoly c a) r (ftBranchZ a c r (n - 1)) (ftTau a r (n - 1))) :
+    FTMinModulusGap (ftRootPoly c a) r (ftBranchZ a c r (n - 1)) (ftTau a r (n - 1)) :=
   ft_minModulus_at_branch hn2 ha hc hr hcone
 
 /-- **`ft_geometry_at_branch` with `hmin` discharged**, in the finite
 upper-endpoint convention of `eq:ab-def`. -/
 theorem ft_geometry_at_branch_of_cone {n r : ℕ} {a : Fin n → ℝ} {c : ℝ}
     (hn2 : 2 ≤ n) (ha : ∀ k, 0 < a k) (hc : 0 < c) (hr : 1 ≤ r)
-    (hcone : ∀ θ ∈ Ioo (0 : ℝ) (π / r), ∀ w : ℂ,
-      (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)).eval w = 0 →
-        ‖w‖ ≤ ftTau a r (n - 1) θ → |Complex.arg w| ∈ Ioo 0 (π / r)) {b : ℝ}
+    (hcone : FTArgumentCone (ftRootPoly c a) r (ftBranchZ a c r (n - 1)) (ftTau a r
+      (n - 1))) {b : ℝ}
     (hzb : Filter.Tendsto (ftBranchZ a c r (n - 1))
       (nhdsWithin (π / r) (Ioo 0 (π / r))) (nhds b)) :
     ∃ za : ℝ,
       ftBranchZ a c r (n - 1) '' Ioo 0 (π / r) = Ioo za b
-        ∧ (∀ θ ∈ Ioo 0 (π / r),
-            (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)).eval
-                (ftPrincipal (ftTau a r (n - 1)) θ) = 0
-              ∧ (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)).eval
-                  ((starRingEnd ℂ) (ftPrincipal (ftTau a r (n - 1)) θ)) = 0
-              ∧ ‖ftPrincipal (ftTau a r (n - 1)) θ‖ = ftTau a r (n - 1) θ
-              ∧ ‖(starRingEnd ℂ) (ftPrincipal (ftTau a r (n - 1)) θ)‖
-                  = ftTau a r (n - 1) θ)
-        ∧ (∀ θ ∈ Ioo 0 (π / r), ∀ w : ℂ,
-            (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)).eval w = 0 →
-              ‖w‖ ≤ ftTau a r (n - 1) θ →
-                w = ftPrincipal (ftTau a r (n - 1)) θ
-                  ∨ w = (starRingEnd ℂ) (ftPrincipal (ftTau a r (n - 1)) θ)) :=
+        ∧ FTPrincipalPair (ftRootPoly c a) r (ftBranchZ a c r (n - 1)) (ftTau a r (n - 1))
+        ∧ FTPrincipalDisk (ftRootPoly c a) r (ftBranchZ a c r (n - 1)) (ftTau a r (n - 1)) :=
   ft_geometry_at_branch hn2 ha hc hr hzb
     (ft_minModulus_at_branch hn2 ha hc hr hcone)
 
@@ -558,26 +525,13 @@ theorem ft_geometry_at_branch_of_cone {n r : ℕ} {a : Fin n → ℝ} {c : ℝ}
 convention of `eq:ab-def`. -/
 theorem ft_geometry_at_branch_unbounded_of_cone {n r : ℕ} {a : Fin n → ℝ} {c : ℝ}
     (hn2 : 2 ≤ n) (ha : ∀ k, 0 < a k) (hc : 0 < c) (hr : 1 ≤ r)
-    (hcone : ∀ θ ∈ Ioo (0 : ℝ) (π / r), ∀ w : ℂ,
-      (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)).eval w = 0 →
-        ‖w‖ ≤ ftTau a r (n - 1) θ → |Complex.arg w| ∈ Ioo 0 (π / r))
+    (hcone : FTArgumentCone (ftRootPoly c a) r (ftBranchZ a c r (n - 1)) (ftTau a r (n - 1)))
     (hzb : Filter.Tendsto (ftBranchZ a c r (n - 1))
       (nhdsWithin (π / r) (Ioo 0 (π / r))) Filter.atTop) :
     ∃ za : ℝ,
       ftBranchZ a c r (n - 1) '' Ioo 0 (π / r) = Ioi za
-        ∧ (∀ θ ∈ Ioo 0 (π / r),
-            (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)).eval
-                (ftPrincipal (ftTau a r (n - 1)) θ) = 0
-              ∧ (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)).eval
-                  ((starRingEnd ℂ) (ftPrincipal (ftTau a r (n - 1)) θ)) = 0
-              ∧ ‖ftPrincipal (ftTau a r (n - 1)) θ‖ = ftTau a r (n - 1) θ
-              ∧ ‖(starRingEnd ℂ) (ftPrincipal (ftTau a r (n - 1)) θ)‖
-                  = ftTau a r (n - 1) θ)
-        ∧ (∀ θ ∈ Ioo 0 (π / r), ∀ w : ℂ,
-            (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)).eval w = 0 →
-              ‖w‖ ≤ ftTau a r (n - 1) θ →
-                w = ftPrincipal (ftTau a r (n - 1)) θ
-                  ∨ w = (starRingEnd ℂ) (ftPrincipal (ftTau a r (n - 1)) θ)) :=
+        ∧ FTPrincipalPair (ftRootPoly c a) r (ftBranchZ a c r (n - 1)) (ftTau a r (n - 1))
+        ∧ FTPrincipalDisk (ftRootPoly c a) r (ftBranchZ a c r (n - 1)) (ftTau a r (n - 1)) :=
   ft_geometry_at_branch_unbounded hn2 ha hc hr hzb
     (ft_minModulus_at_branch hn2 ha hc hr hcone)
 

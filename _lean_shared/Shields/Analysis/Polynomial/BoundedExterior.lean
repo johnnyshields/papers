@@ -90,8 +90,7 @@ theorem exists_bound_eval_div_of_degree_le [ProperSpace 𝕜] {P Q : Polynomial 
   obtain ⟨M₁, hM₁⟩ := (isCompact_annulus r (max r R₂)).exists_bound_of_continuousOn hcont
   refine ⟨max (max c M₁) 0, le_max_right _ _, fun z hz => ?_⟩
   rcases le_or_gt (max r R₂) ‖z‖ with hfarz | hnearz
-  · have hQz : Q.eval z ≠ 0 := hQ z hz
-    rw [norm_div, div_le_iff₀ (norm_pos_iff.mpr hQz)]
+  · rw [norm_div, div_le_iff₀ (norm_pos_iff.mpr (hQ z hz))]
     refine (hfar ((le_max_right r R₂).trans hfarz)).trans ?_
     exact mul_le_mul_of_nonneg_right ((le_max_left c M₁).trans (le_max_left _ _)) (norm_nonneg _)
   · exact (hM₁ z ⟨hz, hnearz.le⟩).trans ((le_max_right c M₁).trans (le_max_left _ _))

@@ -125,6 +125,38 @@ noncomputable def initialDataEquiv (d : ℕ → A) (hd : IsUnit (d 0)) : (ℕ �
 @[simp] theorem initialDataEquiv_apply (d : ℕ → A) (hd : IsUnit (d 0)) (P : ℕ → A) :
     initialDataEquiv d hd P = denomConv d P := rfl
 
+/-! ### A constant numerator divides every coefficient
+
+`sec:introduction`'s necessity mechanism, algebraically.  Taking `N(t,z) = R(z)`
+— the numerator sequence `N_m = [m = 0]·R` — the convolution system is `R` times
+the system solved by the coefficients `H_m` of `1/D`, so `P_m = R · H_m` and
+every zero of `R` is a zero of every `P_m`. -/
+
+/-- Paper `sec:introduction` (supporting) — the convolution is `A`-linear in the
+coefficient sequence: scaling `P` by a ring element scales the numerator
+sequence by the same element. -/
+theorem denomConv_const_mul (d P : ℕ → A) (R : A) (m : ℕ) :
+    denomConv d (fun j => R * P j) m = R * denomConv d P m := by
+  simp only [denomConv, Finset.mul_sum]
+  exact Finset.sum_congr rfl fun j _ => by ring
+
+/-- **`sec:introduction`, transfer half.**  If the diagonal `d_0` is a unit and
+the coefficient sequence `P` solves the denominator recurrence for the constant
+numerator `N(t,z) = R(z)`, then `R ∣ P_m` for every `m`: the solution for `R` is
+`R` times the solution for `1`, and the unit diagonal makes that solution unique.
+This is the producer for `Necessity.dvd_exceptional_le`'s divisibility
+hypothesis. -/
+theorem dvd_of_denomConv_const {d : ℕ → A} (hd : IsUnit (d 0)) (R : A) {P : ℕ → A}
+    (hP : ∀ m, denomConv d P m = if m = 0 then R else 0) (m : ℕ) : R ∣ P m := by
+  obtain ⟨H, hH⟩ := exists_denomConv_eq hd (fun k => if k = 0 then (1 : A) else 0)
+  have hRH : ∀ k, denomConv d (fun j => R * H j) k = if k = 0 then R else 0 := by
+    intro k
+    rw [denomConv_const_mul, hH]
+    by_cases hk : k = 0 <;> simp [hk]
+  have hPH : P = fun j => R * H j :=
+    initial_data_unique hd fun k => (hP k).trans (hRH k).symm
+  exact ⟨H m, by rw [hPH]⟩
+
 /-- The truncated convolution of `prop:initial-data`: the `d` equations
 `∑_{j=0}^m d_j P_{m-j} = N_m` for `0 ≤ m < d`, read as a map on `d`-tuples.  The
 equations indexed by `m < n` involve only `P_0, …, P_{n-1}`, so no hypothesis on

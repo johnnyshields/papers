@@ -79,6 +79,27 @@ theorem minorDet_of_card_ne {C : ι → κ → ℂ} {S : Finset ι} {T : Finset 
     simp only [Finset.card_empty]; exact Fin.isEmpty'
   exact Matrix.det_isEmpty
 
+/-- The minor of a kernel on two sets of a common known cardinality. -/
+theorem minorDet_eq_det {r : ℕ} (C : ι → κ → ℂ) {S : Finset ι} {T : Finset κ}
+    (hS : S.card = r) (hT : T.card = r) :
+    minorDet C S T
+      = (Matrix.of fun x y : Fin r =>
+          C (S.orderEmbOfFin hS x) (T.orderEmbOfFin hT y)).det := by
+  subst hS
+  rw [minorDet, dif_pos hT]
+
+/-- **A minor of the transposed kernel is the minor of the kernel.**  Swapping the two index
+sets along with the kernel transposes the submatrix, and a determinant is transpose-invariant.
+This is what carries a statement about the rows of a minor to the statement about its
+columns. -/
+theorem minorDet_transpose (C : ι → κ → ℂ) (S : Finset ι) (T : Finset κ) :
+    minorDet (fun j i => C i j) T S = minorDet C S T := by
+  by_cases h : T.card = S.card
+  · rw [minorDet_eq_det (fun j i => C i j) h rfl, minorDet_eq_det C rfl h,
+      ← Matrix.det_transpose]
+    rfl
+  · rw [minorDet_of_card_ne (Ne.symm h), minorDet_of_card_ne h]
+
 /-- A product over the increasing enumeration of a finite set is a product over the set. -/
 theorem prod_orderEmbOfFin {M : Type*} [CommMonoid M] (S : Finset ι) {r : ℕ}
     (h : S.card = r) (f : ι → M) :
@@ -111,17 +132,53 @@ theorem normSq_minorDet_le_rows (C : ι → κ → ℂ) (S : Finset ι) (T : Fin
 /-- Hadamard's inequality along the columns of a minor. -/
 theorem normSq_minorDet_le_cols (C : ι → κ → ℂ) (S : Finset ι) (T : Finset κ) :
     ‖minorDet C S T‖ ^ 2 ≤ ∏ j ∈ T, ∑ i ∈ S, ‖C i j‖ ^ 2 := by
-  by_cases hcard : T.card = S.card
-  · rw [minorDet, dif_pos hcard]
-    refine (Shields.normSq_det_le_prod_col_energy _).trans (le_of_eq ?_)
-    rw [← prod_orderEmbOfFin T hcard (fun j => ∑ i ∈ S, ‖C i j‖ ^ 2)]
-    refine Finset.prod_congr rfl fun y _ => ?_
-    rw [← sum_orderEmbOfFin S rfl (fun i => ‖C i (T.orderEmbOfFin hcard y)‖ ^ 2)]
-    rfl
-  · rw [minorDet_of_card_ne hcard]
-    simpa using Finset.prod_nonneg fun j _ => Finset.sum_nonneg fun i _ => by positivity
+  rw [← minorDet_transpose]
+  exact normSq_minorDet_le_rows _ T S
 
 /-! ### The envelope bound -/
+
+/-- A product of sums, each term bounded by a product envelope `u i * v j`, is bounded by the
+product of the row factors times a uniform bound on the column sum, once per row.  Hadamard's
+inequality is applied to a minor along both axes, and this is the estimate that turns either
+one into an envelope; the two uses differ only by which index type plays the row. -/
+theorem prod_sum_le_of_le_mul {X Y : Type*} {g : X → Y → ℝ} {u : X → ℝ} {v : Y → ℝ} {B : ℝ}
+    (hg0 : ∀ i j, 0 ≤ g i j) (hu0 : ∀ i, 0 ≤ u i) (hg : ∀ i j, g i j ≤ u i * v j)
+    (S : Finset X) (T : Finset Y) (hB : ∑ j ∈ T, v j ≤ B) :
+    ∏ i ∈ S, ∑ j ∈ T, g i j ≤ (∏ i ∈ S, u i) * B ^ S.card := by
+  have hstep : ∀ i ∈ S, (∑ j ∈ T, g i j) ≤ u i * B := by
+    intro i _
+    refine (Finset.sum_le_sum fun j _ => hg i j).trans ?_
+    rw [← Finset.mul_sum]
+    exact mul_le_mul_of_nonneg_left hB (hu0 i)
+  calc (∏ i ∈ S, ∑ j ∈ T, g i j) ≤ ∏ i ∈ S, (u i * B) :=
+        Finset.prod_le_prod (fun i _ => Finset.sum_nonneg fun j _ => hg0 i j) hstep
+    _ = (∏ i ∈ S, u i) * B ^ S.card := by
+        rw [Finset.prod_mul_distrib, Finset.prod_const]
+
+/-- The geometric mean of two square bounds: if `x²` is under `p · Qⁿ` and also under `q · Pⁿ`,
+then `x⁴` is under `(p q) · (P Q)ⁿ`. -/
+private theorem pow_four_le_of_sq_le {x p q P Q : ℝ} {n : ℕ} (hp : 0 ≤ p) (hQ : 0 ≤ Q)
+    (h1 : x ^ 2 ≤ p * Q ^ n) (h2 : x ^ 2 ≤ q * P ^ n) :
+    x ^ 4 ≤ (p * q) * (P * Q) ^ n := by
+  have h := mul_le_mul h1 h2 (sq_nonneg x) (mul_nonneg hp (pow_nonneg hQ n))
+  calc x ^ 4 = x ^ 2 * x ^ 2 := by ring
+    _ ≤ (p * Q ^ n) * (q * P ^ n) := h
+    _ = (p * q) * (P * Q) ^ n := by rw [mul_pow]; ring
+
+omit [LinearOrder ι] [LinearOrder κ] in
+/-- The fourth power of the envelope bound, split into the two products the Hadamard estimates
+deliver and the constant. -/
+private theorem prod_mul_prod_pow_four (a : ι → ℝ) (b : κ → ℝ) (c : ℝ)
+    (S : Finset ι) (T : Finset κ) :
+    ((∏ i ∈ S, (c * a i)) * ∏ j ∈ T, b j) ^ 4
+      = ((∏ i ∈ S, (a i) ^ 4) * (∏ j ∈ T, (b j) ^ 4)) * (c ^ 4) ^ S.card := by
+  have e1 : (∏ i ∈ S, (c * a i)) ^ 4 = (c ^ 4) ^ S.card * ∏ i ∈ S, (a i) ^ 4 := by
+    rw [← Finset.prod_pow]
+    simp only [mul_pow]
+    rw [Finset.prod_mul_distrib, Finset.prod_const]
+  have e2 : (∏ j ∈ T, b j) ^ 4 = ∏ j ∈ T, (b j) ^ 4 := (Finset.prod_pow _ _ _).symm
+  rw [mul_pow, e1, e2]
+  ring
 
 /-- **The envelope bound on a minor.**  Under `|C_{ij}| ≤ a_i^2 b_j^2` the minor on
 `S × T` is at most `∏_S (c a) ∏_T b`, where `c` absorbs the two full sums.  Hadamard
@@ -139,72 +196,25 @@ theorem norm_minorDet_le_prod (C : ι → κ → ℂ) {a : ι → ℝ} {b : κ �
   have hYnn : 0 ≤ (∏ i ∈ S, (c * a i)) * ∏ j ∈ T, b j :=
     mul_nonneg (Finset.prod_nonneg fun i _ => mul_nonneg hc0 (ha0 i))
       (Finset.prod_nonneg fun j _ => hb0 j)
+  -- the envelope, squared, in the form both Hadamard bounds consume
+  have hsq : ∀ i j, ‖C i j‖ ^ 2 ≤ (a i) ^ 4 * (b j) ^ 4 := fun i j => by
+    calc ‖C i j‖ ^ 2 ≤ ((a i) ^ 2 * (b j) ^ 2) ^ 2 := pow_le_pow_left₀ (norm_nonneg _) (hC i j) 2
+      _ = (a i) ^ 4 * (b j) ^ 4 := by ring
   by_cases hcard : T.card = S.card
-  · -- the row bound
-    have hrow : ‖minorDet C S T‖ ^ 2 ≤ (∏ i ∈ S, (a i) ^ 4) * B ^ S.card := by
-      refine (normSq_minorDet_le_rows C S T).trans ?_
-      have hstep : ∀ i ∈ S, (∑ j ∈ T, ‖C i j‖ ^ 2) ≤ (a i) ^ 4 * B := by
-        intro i _
-        have h1 : (∑ j ∈ T, ‖C i j‖ ^ 2) ≤ ∑ j ∈ T, (a i) ^ 4 * (b j) ^ 4 := by
-          refine Finset.sum_le_sum fun j _ => ?_
-          have h2 := hC i j
-          have h3 : (0 : ℝ) ≤ ‖C i j‖ := norm_nonneg _
-          calc ‖C i j‖ ^ 2 ≤ ((a i) ^ 2 * (b j) ^ 2) ^ 2 := by
-                exact pow_le_pow_left₀ h3 h2 2
-            _ = (a i) ^ 4 * (b j) ^ 4 := by ring
-        refine h1.trans ?_
-        rw [← Finset.mul_sum]
-        exact mul_le_mul_of_nonneg_left (hB T) (by positivity)
-      calc (∏ i ∈ S, ∑ j ∈ T, ‖C i j‖ ^ 2) ≤ ∏ i ∈ S, ((a i) ^ 4 * B) :=
-            Finset.prod_le_prod (fun i _ => Finset.sum_nonneg fun j _ => by positivity) hstep
-        _ = (∏ i ∈ S, (a i) ^ 4) * B ^ S.card := by
-            rw [Finset.prod_mul_distrib, Finset.prod_const]
-    -- the column bound
-    have hcol : ‖minorDet C S T‖ ^ 2 ≤ (∏ j ∈ T, (b j) ^ 4) * A ^ T.card := by
-      refine (normSq_minorDet_le_cols C S T).trans ?_
-      have hstep : ∀ j ∈ T, (∑ i ∈ S, ‖C i j‖ ^ 2) ≤ (b j) ^ 4 * A := by
-        intro j _
-        have h1 : (∑ i ∈ S, ‖C i j‖ ^ 2) ≤ ∑ i ∈ S, (b j) ^ 4 * (a i) ^ 4 := by
-          refine Finset.sum_le_sum fun i _ => ?_
-          have h2 := hC i j
-          have h3 : (0 : ℝ) ≤ ‖C i j‖ := norm_nonneg _
-          calc ‖C i j‖ ^ 2 ≤ ((a i) ^ 2 * (b j) ^ 2) ^ 2 := pow_le_pow_left₀ h3 h2 2
-            _ = (b j) ^ 4 * (a i) ^ 4 := by ring
-        refine h1.trans ?_
-        rw [← Finset.mul_sum]
-        exact mul_le_mul_of_nonneg_left (hA S) (by positivity)
-      calc (∏ j ∈ T, ∑ i ∈ S, ‖C i j‖ ^ 2) ≤ ∏ j ∈ T, ((b j) ^ 4 * A) :=
-            Finset.prod_le_prod (fun j _ => Finset.sum_nonneg fun i _ => by positivity) hstep
-        _ = (∏ j ∈ T, (b j) ^ 4) * A ^ T.card := by
-            rw [Finset.prod_mul_distrib, Finset.prod_const]
-    -- combine
-    have hprodS : (0 : ℝ) ≤ ∏ i ∈ S, (a i) ^ 4 :=
-      Finset.prod_nonneg fun i _ => by positivity
-    have hprodT : (0 : ℝ) ≤ ∏ j ∈ T, (b j) ^ 4 :=
-      Finset.prod_nonneg fun j _ => by positivity
-    have hfour : ‖minorDet C S T‖ ^ 4
-        ≤ ((∏ i ∈ S, (a i) ^ 4) * (∏ j ∈ T, (b j) ^ 4)) * (A * B) ^ S.card := by
-      have h := mul_le_mul hrow hcol (by positivity) (by positivity)
-      calc ‖minorDet C S T‖ ^ 4
-          = ‖minorDet C S T‖ ^ 2 * ‖minorDet C S T‖ ^ 2 := by ring
-        _ ≤ ((∏ i ∈ S, (a i) ^ 4) * B ^ S.card)
-              * ((∏ j ∈ T, (b j) ^ 4) * A ^ T.card) := h
-        _ = ((∏ i ∈ S, (a i) ^ 4) * (∏ j ∈ T, (b j) ^ 4)) * (A * B) ^ S.card := by
-            rw [hcard, mul_pow]; ring
-    have hYpow : ((∏ i ∈ S, (c * a i)) * ∏ j ∈ T, b j) ^ 4
-        = ((∏ i ∈ S, (a i) ^ 4) * (∏ j ∈ T, (b j) ^ 4)) * (c ^ 4) ^ S.card := by
-      have e1 : (∏ i ∈ S, (c * a i)) ^ 4 = (c ^ 4) ^ S.card * ∏ i ∈ S, (a i) ^ 4 := by
-        rw [← Finset.prod_pow]
-        simp only [mul_pow]
-        rw [Finset.prod_mul_distrib, Finset.prod_const]
-      have e2 : (∏ j ∈ T, b j) ^ 4 = ∏ j ∈ T, (b j) ^ 4 := (Finset.prod_pow _ _ _).symm
-      rw [mul_pow, e1, e2]
-      ring
-    have hstep : ‖minorDet C S T‖ ^ 4 ≤ ((∏ i ∈ S, (c * a i)) * ∏ j ∈ T, b j) ^ 4 := by
-      rw [hYpow]
-      refine hfour.trans (mul_le_mul_of_nonneg_left ?_ (by positivity))
-      exact pow_le_pow_left₀ (by positivity) hc _
-    exact le_of_pow_le_pow_left₀ (by norm_num) hYnn hstep
+  · -- Hadamard along the rows, then along the columns, then their geometric mean
+    have hrow : ‖minorDet C S T‖ ^ 2 ≤ (∏ i ∈ S, (a i) ^ 4) * B ^ S.card :=
+      (normSq_minorDet_le_rows C S T).trans
+        (prod_sum_le_of_le_mul (fun i j => by positivity) (fun i => by positivity) hsq S T (hB T))
+    have hcol : ‖minorDet C S T‖ ^ 2 ≤ (∏ j ∈ T, (b j) ^ 4) * A ^ S.card := by
+      rw [← hcard]
+      exact (normSq_minorDet_le_cols C S T).trans
+        (prod_sum_le_of_le_mul (fun j i => by positivity) (fun j => by positivity)
+          (fun j i => by rw [mul_comm]; exact hsq i j) T S (hA S))
+    refine le_of_pow_le_pow_left₀ (four_ne_zero) hYnn ?_
+    rw [prod_mul_prod_pow_four]
+    refine (pow_four_le_of_sq_le (Finset.prod_nonneg fun i _ => by positivity) hB0
+      hrow hcol).trans (mul_le_mul_of_nonneg_left ?_ (by positivity))
+    exact pow_le_pow_left₀ (mul_nonneg hA0 hB0) hc _
   · rw [minorDet_of_card_ne hcard]
     simpa using hYnn
 
@@ -325,17 +335,8 @@ theorem minorDet_eq_zero_of_row {C : ι → κ → ℂ} {S : Finset ι} {T : Fin
 /-- A minor vanishes as soon as one of its columns lies outside the support. -/
 theorem minorDet_eq_zero_of_col {C : ι → κ → ℂ} {S : Finset ι} {T : Finset κ} {j : κ}
     (hj : j ∈ T) (hcol : ∀ i, C i j = 0) : minorDet C S T = 0 := by
-  by_cases hcard : T.card = S.card
-  · rw [minorDet, dif_pos hcard]
-    obtain ⟨y, hy⟩ : ∃ y : Fin S.card, T.orderEmbOfFin hcard y = j := by
-      have hrange := Finset.range_orderEmbOfFin T hcard
-      have : j ∈ Set.range (T.orderEmbOfFin hcard) := by rw [hrange]; exact_mod_cast hj
-      exact this
-    refine Matrix.det_eq_zero_of_column_eq_zero y ?_
-    intro x
-    simp only [Matrix.of_apply, hy]
-    exact hcol _
-  · exact minorDet_of_card_ne hcard
+  rw [← minorDet_transpose]
+  exact minorDet_eq_zero_of_row hj hcol
 
 /-- **A kernel supported on a finite rectangle has a finite Cauchy--Binet expansion.** -/
 theorem fredholmDet_eq_sum_of_support (C : ι → κ → ℂ) (P : Finset ι) (Q : Finset κ)
@@ -355,15 +356,6 @@ theorem fredholmDet_eq_sum_of_support (C : ι → κ → ℂ) (P : Finset ι) (Q
     rw [minorDet_eq_zero_of_col hjT (hcol j hjQ), zero_pow (by norm_num)]
 
 /-! ### Transport along order embeddings -/
-
-/-- The minor of a kernel on two sets of a common known cardinality. -/
-theorem minorDet_eq_det {r : ℕ} (C : ι → κ → ℂ) {S : Finset ι} {T : Finset κ}
-    (hS : S.card = r) (hT : T.card = r) :
-    minorDet C S T
-      = (Matrix.of fun x y : Fin r =>
-          C (S.orderEmbOfFin hS x) (T.orderEmbOfFin hT y)).det := by
-  subst hS
-  rw [minorDet, dif_pos hT]
 
 /-- The increasing enumeration of an image under an order embedding is the composite. -/
 theorem orderEmbOfFin_map {ι' : Type*} [LinearOrder ι'] (e : ι ↪o ι') (S : Finset ι)
@@ -411,6 +403,11 @@ theorem sum_sq_le_tsum_sq {f : ι → ℝ} (hf0 : ∀ i, 0 ≤ f i) (hf : Summab
         mul_le_mul_of_nonneg_left (Summable.sum_le_tsum S (fun i _ => hf0 i) hf) hT0
     _ = (∑' i, f i) ^ 2 := (sq _).symm
 
+omit [LinearOrder ι] [LinearOrder κ] in
+/-- The fourth power of a square root is the square. -/
+private theorem sqrt_pow_four {t : ℝ} (ht : 0 ≤ t) : Real.sqrt t ^ 4 = t ^ 2 := by
+  rw [show (4 : ℕ) = 2 * 2 from rfl, pow_mul, Real.sq_sqrt ht]
+
 /-- **Continuity of the Fredholm determinant under a summable product envelope.**  This
 is the form the hypothesis takes in practice: one summable envelope on the rows and one
 on the columns, holding for every kernel of the family.  It is the statement of
@@ -429,8 +426,6 @@ theorem tendsto_fredholmDet_of_summable_envelope {α : Type*} {l : Filter α}
   have hE0 : 0 ≤ ∑' i, e i := tsum_nonneg he0
   have hG0 : 0 ≤ ∑' j, g j := tsum_nonneg hg0
   have hc0 : 0 ≤ c := Real.sqrt_nonneg _
-  have hcsq : c ^ 2 = (∑' i, e i) * ∑' j, g j :=
-    Real.sq_sqrt (mul_nonneg hE0 hG0)
   refine tendsto_fredholmDet F C (a := a) (b := b)
     (A := (∑' i, e i) ^ 2) (B := (∑' j, g j) ^ 2) (c := c)
     (fun i => Real.sqrt_nonneg _) (fun j => Real.sqrt_nonneg _) hc0 ?_ ?_ ?_ ?_ ?_ ?_ hlim
@@ -442,16 +437,27 @@ theorem tendsto_fredholmDet_of_summable_envelope {α : Type*} {l : Filter α}
     rw [hasq, hbsq]
     exact hF n i j
   · intro S'
-    have : ∀ i, (a i) ^ 4 = (e i) ^ 2 := fun i => by
-      rw [show (4 : ℕ) = 2 * 2 from rfl, pow_mul, hasq]
-    simp only [this]
+    simp only [show ∀ i, (a i) ^ 4 = (e i) ^ 2 from fun i => sqrt_pow_four (he0 i)]
     exact sum_sq_le_tsum_sq he0 he S'
   · intro T'
-    have : ∀ j, (b j) ^ 4 = (g j) ^ 2 := fun j => by
-      rw [show (4 : ℕ) = 2 * 2 from rfl, pow_mul, hbsq]
-    simp only [this]
+    simp only [show ∀ j, (b j) ^ 4 = (g j) ^ 2 from fun j => sqrt_pow_four (hg0 j)]
     exact sum_sq_le_tsum_sq hg0 hg T'
-  · rw [show (4 : ℕ) = 2 * 2 from rfl, pow_mul, hcsq]
+  · rw [hc_def, sqrt_pow_four (mul_nonneg hE0 hG0)]
     exact le_of_eq (by ring)
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.summable_minorDet_sq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms summable_minorDet_sq
+
+/-- info: 'Shields.tendsto_fredholmDet' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms tendsto_fredholmDet
+
+/-- info: 'Shields.fredholmDet_eq_sum_of_support' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms fredholmDet_eq_sum_of_support
 
 end Shields

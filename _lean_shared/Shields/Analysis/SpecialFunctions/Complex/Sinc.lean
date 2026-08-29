@@ -130,8 +130,6 @@ theorem csinc_pi_mul_congr_sq {s t : ℂ} (h : s ^ 2 = t ^ 2) :
   · rfl
   · rw [mul_neg, csinc_neg]
 
--- [END COPIED]
-
 theorem analyticOnNhd_csinc (s : Set ℂ) : AnalyticOnNhd ℂ csinc s :=
   ((differentiable_csinc.differentiableOn).analyticOnNhd isOpen_univ).mono (subset_univ s)
 
@@ -192,5 +190,32 @@ theorem csinc_ne_zero_of_mem_closedBall {j : ℤ} {r : ℝ} (hrpi : r < Real.pi)
   have hlt : |m - j| < 1 := by exact_mod_cast hmj
   rw [abs_lt] at hlt
   exact hzj (by rw [show m = j by omega])
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.csinc_ofReal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms csinc_ofReal
+
+/-- info: 'Shields.analyticOnNhd_csinc' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms analyticOnNhd_csinc
+
+/-- info: 'Shields.deriv_csinc_intCast_mul_pi_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms deriv_csinc_intCast_mul_pi_ne_zero
+
+/-- info: 'Shields.csinc_ne_zero_of_mem_closedBall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms csinc_ne_zero_of_mem_closedBall
+
+/-- info: 'Shields.csinc_pi_mul_congr_sq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms csinc_pi_mul_congr_sq
+
+/-- info: 'Shields.sinc_pi_mul_congr_sq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms sinc_pi_mul_congr_sq
 
 end Shields

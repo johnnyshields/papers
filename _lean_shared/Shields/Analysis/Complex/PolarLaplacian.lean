@@ -61,6 +61,9 @@ theorem circleDir_ne_zero (θ : ℝ) : circleDir θ ≠ 0 := Complex.exp_ne_zero
   rw [circleDir, Complex.norm_exp]
   simp
 
+theorem continuous_circleDir : Continuous circleDir :=
+  Complex.continuous_exp.comp (Complex.continuous_ofReal.mul continuous_const)
+
 @[simp] theorem coe_circleExp (θ : ℝ) : ((Circle.exp θ : Circle) : ℂ) = circleDir θ :=
   Circle.coe_exp θ
 
@@ -191,5 +194,12 @@ theorem polar_laplacian {u : ℂ → ℝ} (hu : Differentiable ℝ u)
     ring
   rw [hrad1, hrad2, hang2, hbil, hlin, laplacian_apply_rotated u θ P, ← he]
   field
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.polar_laplacian' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms polar_laplacian
 
 end Shields

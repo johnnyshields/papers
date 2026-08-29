@@ -340,7 +340,7 @@ theorem quadFavard_eval_eq_zero_iff {q0 q2 : ℝ} (hq0 : 0 < q0) (hq2 : 0 < q2) 
   · rintro ⟨k, hk, rfl⟩
     have hw : (quadRoot q0 q1 q2 m k + q1) / (2 * Real.sqrt (q0 * q2))
         = Real.cos ((k + 1) * π / (m + 1)) := by
-      rw [quadRoot]; field_simp; ring
+      rw [quadRoot]; field
     rw [hw]
     have hmem : Real.cos (((k : ℝ) + 1) * π / (m + 1))
         ∈ (Polynomial.Chebyshev.U ℝ (m : ℤ)).roots := by
@@ -455,7 +455,9 @@ private theorem quadPoly_coeff (q0 q1 q2 : ℝ) :
   have h1 : j ≠ 0 := by omega
   have h2 : j ≠ 1 := by omega
   have h3 : ¬ (j = 2) := by omega
-  simp [quadPoly, coeff_C, coeff_X, coeff_X_pow, h1, h3]
+  simp only [quadPoly, coeff_add, coeff_C, h1, ↓reduceIte, coeff_C_mul, coeff_X, mul_ite,
+    mul_one, mul_zero, zero_add, coeff_X_pow, h3, add_zero, ite_eq_right_iff,
+    Complex.ofReal_eq_zero]
   intro h
   exact absurd h (by omega : ¬ ((1 : ℕ) = j))
 

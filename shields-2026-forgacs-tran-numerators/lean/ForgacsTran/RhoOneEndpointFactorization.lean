@@ -25,7 +25,7 @@ that can carry that value, and this module assembles the group over it.
 **Three of the `2 ≤ ρ` group's binders are not obstructions here, and one is.**
 `hcB₀`, `hcQ₀`, `hBp₀`, `hEp₀` and `hρ` are all conditioned on `0 < n₀`, and
 `ρ = 1` gives `n₀ = ρ - 2 = 0` in `ℕ`, so every one of them is vacuous — the
-`clusterAlpha` degeneracy `SimpleEndpoint.clusterAlpha_one_eq_zero` records, and
+`clusterAlpha` degeneracy `Cluster.clusterAlpha_one_eq_zero` records, and
 the contradiction `SimpleEndpoint.hEp_false_of_rho_one` derives, are both about
 the **unconditioned** forms and cannot be reached from a composition at `n₀ = 0`.
 What does not dissolve is `hk₀`, which names `z 0` and is false against the
@@ -33,7 +33,7 @@ hardcoded `0`.
 
 **`hγd₀` is proved, and what it rests on is one inequality about the endpoint.**
 At `2 ≤ ρ` the radius approaches `x₁` linearly and
-`EndpointPackage.tendsto_ftTau_blowup` supplies the nonzero slope.  At `ρ = 1` the
+`EndpointBranch.tendsto_ftTau_blowup` supplies the nonzero slope.  At `ρ = 1` the
 approach is quadratic, so the slope is `0` and `γ'(0⁺) = i·t_a` is purely
 imaginary.  `PencilArcSymmetry.tendsto_slope_of_ftPencilIm_eq_zero` supplies that
 vanishing from `E'(t_a) ≠ 0` alone, so
@@ -155,8 +155,7 @@ theorem hasDerivWithinAt_ftPrincipal_ftTauLower_rho_one {n r : ℕ} {a : Fin n �
   simp only [slope, vsub_eq_sub, sub_zero, Complex.real_smul, Complex.ofReal_inv]
   rw [ftPrincipal_ftTauLower_zero, ftPrincipal, ftTauLower_agree a r (n - 1) ta hδ0]
   push_cast
-  field_simp
-  ring
+  field
 
 /-- **`hγd₀` at the branch, with the slope discharged.**  The only inputs left are
 the admissible class and the two facts about the endpoint itself: `E(t_a) = 0` and
@@ -314,7 +313,15 @@ radius `R₀`, and both members are simple.
 The window is punctured and must stay so: the pair collides at `t_a`, where the
 limiting pencil has a double root, so `∂_tD(t_+)` vanishes in the limit and the
 closed-window form of the simplicity clause is false.  Same geometry as the upper
-endpoint at `r = 1`, at the other end of the arc. -/
+endpoint at `r = 1`, at the other end of the arc.
+
+**The upper statement is this conclusion again** —
+`WeightedDominanceBranchOneGeneralN.eventually_upper_retained_one_of_two_le`,
+at `r := 1`, `ta := x₁`, the angle `π - δ` for `δ`,
+the radius `2L` for `R₀` and the ceiling `3L/2` for `(t_a + R₀)/2`.  Neither names the
+shape, because the two modules are siblings with no shared home below
+`EndpointSeparation` — whose `simple_and_complete_of_count` both of them consume, and
+which is where a name for it would go. -/
 theorem eventually_lower_retained_rho_one {n r : ℕ} {a : Fin n → ℝ} {c ta R₀ : ℝ}
     (hn2 : 2 ≤ n) (ha : ∀ k, 0 < a k) (hc : 0 < c) (hr : 1 ≤ r)
     (hta : 0 < ta) (hne : ∀ k, a k - ta ≠ 0)

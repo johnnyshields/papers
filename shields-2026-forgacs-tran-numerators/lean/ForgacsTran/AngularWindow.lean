@@ -77,17 +77,17 @@ because a nested family of windows has no ordered block decomposition
 theorem exists_windowZeros
     {P : Polynomial ℝ} {z τ Rm : ℝ → ℝ} {W : ℝ → ℂ} {e : ℕ → ℝ} {Ret : Set ℝ}
     {J M K : ℕ} {ρ hcol κ₀ κ₁ bnd α β : ℝ}
-    (hM : 1 ≤ M) (hh : 0 ≤ hcol) (hρ : 0 < ρ)
+    (hM : 1 ≤ M) (hh : 0 < hcol) (hρ : 0 < ρ)
     (hα : 0 ≤ α) (hαβ : α ≤ β) (hβ : β ≤ bnd)
     (hJK : J ≤ K) (hwin : ((M : ℝ) + 1) * (2 * ρ * J) ≤ 1)
     (he : ∀ i j, i < j → j < J → e i ≤ e j)
-    (hzmono : StrictMonoOn z (Icc 0 bnd)) (hzcont : ContinuousOn z (Icc 0 bnd))
-    (hτ : ∀ θ ∈ Icc 0 bnd, 0 < τ θ)
+    (hzmono : StrictMonoOn z (Ioo 0 bnd)) (hzcont : ContinuousOn z (Ioo 0 bnd))
+    (hτ : ∀ θ ∈ Ioo 0 bnd, 0 < τ θ)
     (hRet : ∀ θ, hcol / M ≤ θ → θ ≤ bnd - hcol / M →
       (∀ j, j < J → ρ ≤ |θ - e j|) → θ ∈ Ret)
     (hWne : ∀ θ ∈ Ret, W θ ≠ 0)
     (hdomb : ∀ θ ∈ Ret, |Rm θ| ≤ ‖W θ‖ / 2)
-    (hdec : ∀ θ ∈ Icc 0 bnd, τ θ * P.eval (z θ)
+    (hdec : ∀ θ ∈ Ioo 0 bnd, τ θ * P.eval (z θ)
       = 2 * (W θ * Complex.exp (-((((M : ℝ) + 1) * θ : ℝ) : ℂ) * Complex.I)).re + Rm θ)
     (hκ₀ : 0 ≤ κ₀) (hκ₁ : 0 ≤ κ₁)
     (hbranch : ∀ (k : ℕ) (Lb Rb : Fin k → ℝ),
@@ -111,7 +111,8 @@ theorem exists_windowZeros
   have hπ : (0 : ℝ) < π := pi_pos
   have hMR : (1 : ℝ) ≤ (M : ℝ) := by exact_mod_cast hM
   have hMpos : (0 : ℝ) < (M : ℝ) := lt_of_lt_of_le one_pos hMR
-  have hcolnn : (0 : ℝ) ≤ hcol / M := by positivity
+  have hcolpos : (0 : ℝ) < hcol / M := by positivity
+  have hcolnn : (0 : ℝ) ≤ hcol / M := hcolpos.le
   have hKnn : (0 : ℝ) ≤ (K : ℝ) := Nat.cast_nonneg _
   set A : ℝ := max α (hcol / M) with hA
   set Bd : ℝ := min β (bnd - hcol / M) with hBd
@@ -121,9 +122,11 @@ theorem exists_windowZeros
     have hcA : hcol / M ≤ A := le_max_right _ _
     have hBβ : Bd ≤ β := min_le_left _ _
     have hBc : Bd ≤ bnd - hcol / M := min_le_right _ _
-    have hA0 : 0 ≤ A := le_trans hα hαA
-    have hBb : Bd ≤ bnd := le_trans hBβ hβ
-    have hsub0 : Icc A Bd ⊆ Icc 0 bnd := Icc_subset_Icc hA0 hBb
+    have hA0 : 0 < A := lt_of_lt_of_le hcolpos hcA
+    have hBb : Bd < bnd := lt_of_le_of_lt hBc (by linarith)
+    have hsub0 : Icc A Bd ⊆ Ioo 0 bnd := fun _ hx =>
+      ⟨lt_of_lt_of_le hA0 hx.1, lt_of_le_of_lt hx.2 hBb⟩
+    have hsubc : Icc A Bd ⊆ Icc 0 bnd := fun _ hx => Ioo_subset_Icc_self (hsub0 hx)
     set k : ℕ := J + 1 with hk
     set Lb : Fin k → ℝ := fun i => blockLeft A Bd ρ e (i : ℕ) with hLb
     set Rb : Fin k → ℝ := fun i => blockRight A Bd ρ e J (i : ℕ) with hRb
@@ -137,7 +140,7 @@ theorem exists_windowZeros
         (le_trans (le_trans hθ.2 (hRmem i).2) hBc) fun j hj => ?_
       exact block_avoid hAB hρ he (Nat.lt_succ_iff.1 i.isLt) hlt hθ hj
     obtain ⟨ψ, dψ, varψ, hpolar, hψd, hκ, hvarnn, hvar, hvarsum⟩ :=
-      hbranch k Lb Rb (fun i => hsub0 (hLmem i)) (fun i => hsub0 (hRmem i)) hord hret
+      hbranch k Lb Rb (fun i => hsubc (hLmem i)) (fun i => hsubc (hRmem i)) hord hret
     have hblk := exists_blockZeros (M := M) (P := P) (z := z) (τ := τ) (Rm := Rm)
       (W := W) (ψ := ψ) (dψ := dψ) (Lb := Lb) (Rb := Rb) (varψ := varψ) (Ret := Ret)
       (A := A) (b := Bd) hLmem hRmem hret (hzmono.mono hsub0)
@@ -163,7 +166,7 @@ theorem exists_windowZeros
       linarith
     have hcount := angular_count_lower_uniform (n := n) (len := fun i => Rb i - Lb i)
       (varψ := varψ) (M := M) (K := K) (α := α) (β := β) (h := hcol) (κ₀ := κ₀)
-      (κ₁ := κ₁) (collar := 2 * hcol / M) (windows := 2 * ρ * J) hh hM hn hlensum
+      (κ₁ := κ₁) (collar := 2 * hcol / M) (windows := 2 * ρ * J) hh.le hM hn hlensum
       (by rw [mul_div_assoc]) (by positivity) hwin hvarsum hkK
     -- the block zero sets are pairwise disjoint, so they add
     have hdisj : ∀ i ∈ (Finset.univ : Finset (Fin k)), ∀ j ∈ (Finset.univ : Finset (Fin k)),
@@ -192,18 +195,21 @@ theorem exists_windowZeros
       exact hZr i w hwi
     · intro w hw
       obtain ⟨i, -, hwi⟩ := Finset.mem_biUnion.1 hw
-      have himg : z '' Ioo α β = Ioo (z α) (z β) :=
-        image_Ioo_eq_Ioo hzmono hzcont hα hαβ hβ
-      have hzα : z α ≤ z (Lb i) :=
-        hzmono.monotoneOn ⟨hα, le_trans hαβ hβ⟩ (hsub0 (hLmem i))
-          (le_trans hαA (hLmem i).1)
-      have hzβ : z (Rb i) ≤ z β :=
-        hzmono.monotoneOn (hsub0 (hRmem i)) ⟨le_trans hα hαβ, hβ⟩
-          (le_trans (hRmem i).2 hBβ)
       obtain ⟨x, hx, rfl⟩ := hZm i w hwi
-      refine ⟨x, ?_, rfl⟩
-      rw [himg]
-      exact ⟨lt_of_le_of_lt hzα hx.1, lt_of_lt_of_le hx.2 hzβ⟩
+      -- `eq:angular-subinterval` on the block, not on the whole window: the block is a
+      -- compact subinterval of the *open* arc, so nothing is asked of `z` at either end
+      have hLR : Lb i ≤ Rb i := by
+        by_contra hcon
+        exact absurd (hzmono.monotoneOn (hsub0 (hRmem i)) (hsub0 (hLmem i))
+          (not_le.1 hcon).le) (not_le.2 (lt_trans hx.1 hx.2))
+      have hblk : Icc (Lb i) (Rb i) ⊆ Ioo 0 bnd := fun _ hy =>
+        hsub0 ⟨le_trans (hLmem i).1 hy.1, le_trans hy.2 (hRmem i).2⟩
+      have himg : z '' Ioo (Lb i) (Rb i) = Ioo (z (Lb i)) (z (Rb i)) :=
+        image_Ioo_eq_Ioo (hzmono.mono hblk) (hzcont.mono hblk) le_rfl hLR le_rfl
+      have hsubw : z '' Ioo (Lb i) (Rb i) ⊆ z '' Ioo α β :=
+        subset_ftInterval_image (le_trans hαA (hLmem i).1) (le_trans (hRmem i).2 hBβ)
+      rw [← himg] at hx
+      exact ⟨x, hsubw hx, rfl⟩
   · -- the collar swallows the window
     refine ⟨∅, ?_, by simp, by simp⟩
     have hd2 : 2 * hcol / M = hcol / M + hcol / M := by ring
@@ -222,7 +228,7 @@ theorem exists_windowZeros
         mul_le_mul_of_nonneg_left hgap hMp.le
       refine le_trans h1 ?_
       rw [mul_div_assoc', div_le_iff₀ hMpos]
-      nlinarith [hh, hMR]
+      nlinarith [hh.le, hMR]
     have h2 : ((M : ℝ) + 1) * (β - α) / π ≤ (4 * hcol + 1 + κ₀) / π := by
       apply div_le_div_of_nonneg_right _ hπ.le
       linarith
@@ -248,7 +254,7 @@ it, with `C₀` and `C₁` built from `h`, `κ₀`, `κ₁` alone. -/
 theorem abs_windowCount_sub_le {Pc : Polynomial ℂ} {z : ℝ → ℝ} {M K : ℕ}
     {C₀ C₁ bnd α β : ℝ}
     (hP : Pc ≠ 0) (hC₀ : 0 ≤ C₀) (hC₁ : 0 ≤ C₁)
-    (hzmono : StrictMonoOn z (Icc 0 bnd))
+    (hzmono : StrictMonoOn z (Ioo 0 bnd))
     (hα : 0 ≤ α) (hαβ : α ≤ β) (hβ : β ≤ bnd)
     (hdeg : (Pc.natDegree : ℝ) ≤ ((M : ℝ) + 1) * bnd / π)
     (hlower : ∀ α' β' : ℝ, 0 ≤ α' → α' ≤ β' → β' ≤ bnd →
@@ -275,8 +281,7 @@ theorem abs_windowCount_sub_le {Pc : Polynomial ℂ} {z : ℝ → ℝ} {M K : �
       ≤ (Zlo.card : ℝ) + (Zhi.card : ℝ) := by
     have hsplit : ((M : ℝ) + 1) * (α - 0) / π + ((M : ℝ) + 1) * (bnd - β) / π
         = ((M : ℝ) + 1) * bnd / π - ((M : ℝ) + 1) * (β - α) / π := by
-      field_simp
-      ring
+      field
     linarith
   have := ft_angular_discrepancy (P := Pc) hP
     (z := z) (a := 0) (b := bnd) (α := α) (β := β)

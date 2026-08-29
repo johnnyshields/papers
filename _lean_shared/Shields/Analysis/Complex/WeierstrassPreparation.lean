@@ -53,95 +53,6 @@ namespace Shields
 
 open Complex Metric Polynomial
 
-/-! ### Cauchy's formula for a monomial numerator
-
-Two contour integrals.  A simple pole inside the circle contributes `2πi·a^k` to the integral of
-`z^k/(z - a)`; a pole outside contributes nothing.  At `k = 0` these are Cauchy's integral formula
-and Cauchy's theorem, and `Rouche.circleIntegral_sub_inv_of_lt` is the second of them. -/
-
-/-- `z^k/(z - a)` is circle-integrable whenever the pole misses the circle. -/
-theorem circleIntegrable_pow_div_sub {c a : ℂ} {R : ℝ} (hR : 0 ≤ R) (ha : a ∉ sphere c R) (k : ℕ) :
-    CircleIntegrable (fun z => z ^ k / (z - a)) c R := by
-  refine ContinuousOn.circleIntegrable hR ?_
-  refine (continuous_pow k).continuousOn.div (continuousOn_id.sub continuousOn_const) ?_
-  intro z hz hz0
-  rw [sub_eq_zero] at hz0
-  exact ha (hz0 ▸ hz)
-
-/-- **Cauchy's integral formula for the monomial `z^k`.**  A pole inside the circle contributes
-`2πi·a^k`. -/
-theorem circleIntegral_pow_div_sub_of_mem_ball {c a : ℂ} {R : ℝ} (ha : a ∈ ball c R) (k : ℕ) :
-    (∮ z in C(c, R), z ^ k / (z - a)) = 2 * Real.pi * I * a ^ k := by
-  have hd : DifferentiableOn ℂ (fun z : ℂ => z ^ k) (closedBall c R) :=
-    (differentiable_pow k).differentiableOn
-  have h := hd.circleIntegral_sub_inv_smul ha
-  simp only [smul_eq_mul] at h
-  simpa only [div_eq_inv_mul] using h
-
-/-- A pole strictly outside the closed disc contributes nothing: `z^k/(z - a)` is differentiable on
-the closed disc and Cauchy's theorem applies. -/
-theorem circleIntegral_pow_div_sub_of_lt {c a : ℂ} {R : ℝ} (hR : 0 ≤ R) (ha : R < dist a c)
-    (k : ℕ) : (∮ z in C(c, R), z ^ k / (z - a)) = 0 := by
-  have hne : ∀ z ∈ closedBall c R, z - a ≠ 0 := by
-    intro z hz hz0
-    rw [sub_eq_zero] at hz0
-    rw [mem_closedBall, hz0] at hz
-    exact absurd hz (not_le.mpr ha)
-  refine Complex.circleIntegral_eq_zero_of_differentiable_on_off_countable hR
-    Set.countable_empty ?_ ?_
-  · exact (continuous_pow k).continuousOn.div (continuousOn_id.sub continuousOn_const) hne
-  · intro z hz
-    exact ((differentiable_pow k) z).div (differentiableAt_id.sub_const a)
-      (hne z (ball_subset_closedBall hz.1))
-
-/-! ### The weighted counting integral -/
-
-/-- A multiset of simple poles, each weighted by `z^k`, is circle-integrable when none of the poles
-lies on the circle. -/
-theorem circleIntegrable_multiset_sum_pow_div_sub {c : ℂ} {R : ℝ} (hR : 0 ≤ R) (k : ℕ)
-    (s : Multiset ℂ) (hs : ∀ r ∈ s, r ∉ sphere c R) :
-    CircleIntegrable (fun z => (s.map fun r => z ^ k / (z - r)).sum) c R := by
-  induction s using Multiset.induction_on with
-  | empty => simp
-  | cons w s ih =>
-    have h1 : CircleIntegrable (fun z => z ^ k / (z - w)) c R :=
-      circleIntegrable_pow_div_sub hR (hs w (Multiset.mem_cons_self w s)) k
-    have h2 := ih fun r hr => hs r (Multiset.mem_cons_of_mem hr)
-    have h3 : CircleIntegrable
-        (fun z => z ^ k / (z - w) + (s.map fun r => z ^ k / (z - r)).sum) c R := h1.add h2
-    simpa only [Multiset.map_cons, Multiset.sum_cons] using h3
-
-/-- **The `z^k`-weighted residue sum.**  For a multiset of points none of which lies on the circle,
-`∮ ∑_{r ∈ s} z^k/(z - r) dz = 2πi · ∑_{r ∈ s, |r - c| < R} r^k`, both counts taken with
-multiplicity. -/
-theorem circleIntegral_multiset_sum_pow_div_sub {c : ℂ} {R : ℝ} (hR : 0 < R) (k : ℕ)
-    (s : Multiset ℂ) (hs : ∀ r ∈ s, r ∉ sphere c R) :
-    (∮ z in C(c, R), (s.map fun r => z ^ k / (z - r)).sum)
-      = 2 * Real.pi * I * (((s.filter fun r => dist r c < R).map fun r => r ^ k).sum) := by
-  induction s using Multiset.induction_on with
-  | empty => simp [circleIntegral]
-  | cons w s ih =>
-    have hw : w ∉ sphere c R := hs w (Multiset.mem_cons_self w s)
-    have hrest : ∀ r ∈ s, r ∉ sphere c R := fun r hr => hs r (Multiset.mem_cons_of_mem hr)
-    have h1 : CircleIntegrable (fun z => z ^ k / (z - w)) c R :=
-      circleIntegrable_pow_div_sub hR.le hw k
-    have h2 : CircleIntegrable (fun z => (s.map fun r => z ^ k / (z - r)).sum) c R :=
-      circleIntegrable_multiset_sum_pow_div_sub hR.le k s hrest
-    simp only [Multiset.map_cons, Multiset.sum_cons]
-    rw [circleIntegral.integral_add h1 h2, ih hrest]
-    by_cases hb : dist w c < R
-    · rw [circleIntegral_pow_div_sub_of_mem_ball (mem_ball.mpr hb),
-        Multiset.filter_cons_of_pos (p := fun r => dist r c < R) s hb, Multiset.map_cons,
-        Multiset.sum_cons]
-      ring
-    · have hlt : R < dist w c := by
-        rcases lt_trichotomy (dist w c) R with h | h | h
-        · exact absurd h hb
-        · exact absurd (mem_sphere.mpr h) hw
-        · exact h
-      rw [circleIntegral_pow_div_sub_of_lt hR.le hlt,
-        Multiset.filter_cons_of_neg (p := fun r => dist r c < R) s hb, zero_add]
-
 /-! ### Power sums of the roots inside the disc -/
 
 /-- The `k`-th power sum of a multiset of complex numbers. -/
@@ -208,6 +119,22 @@ theorem mul_esymm_eq_sum_powerSum (s : Multiset ℂ) (k : ℕ) :
   exact h
 
 /-! ### The polynomial preparation theorem -/
+
+/-- Vieta for a monic polynomial of known degree. -/
+theorem coeff_eq_esymm_roots_of_monic {W : Polynomial ℂ} (hW : W.Monic) {r k : ℕ}
+    (hdeg : W.natDegree = r) (hk : k ≤ r) :
+    W.coeff k = (-1) ^ (r - k) * W.roots.esymm (r - k) := by
+  rw [Polynomial.coeff_eq_esymm_roots_of_splits (IsAlgClosed.splits W) (by rw [hdeg]; exact hk),
+    hW.leadingCoeff, one_mul, hdeg]
+
+/-- Vieta with the degree cutoff folded in: above the degree the coefficient vanishes, so one
+statement covers every `k`. -/
+theorem coeff_eq_ite_esymm_roots_of_monic {W : Polynomial ℂ} (hW : W.Monic) {r : ℕ}
+    (hdeg : W.natDegree = r) (k : ℕ) :
+    W.coeff k = if k ≤ r then (-1) ^ (r - k) * W.roots.esymm (r - k) else 0 := by
+  by_cases hk : k ≤ r
+  · rw [if_pos hk, coeff_eq_esymm_roots_of_monic hW hdeg hk]
+  · rw [if_neg hk, coeff_eq_zero_of_natDegree_lt (by rw [hdeg]; omega)]
 
 /-- The monic factor of `P` carrying exactly the roots in the open disc `ball c R`, with
 multiplicity.  This is the monic factor `W` of the preparation, for a polynomial family. -/
@@ -279,18 +206,6 @@ The contour representation is what makes the inside factor inherit the family's 
 power sums are integrals of a jointly continuous integrand, hence continuous, and Newton's
 identities are a polynomial recursion, so the elementary symmetric functions follow. -/
 
-/-- A circle integral of a family jointly continuous along the circle is continuous in the
-parameter.  `Rouche.continuous_circleIntegral_param` is the case of a real parameter. -/
-theorem continuous_circleIntegral_param' {X : Type*} [TopologicalSpace X] {c : ℂ} {R : ℝ}
-    (F : X → ℂ → ℂ) (hF : Continuous fun p : X × ℝ => F p.1 (circleMap c R p.2)) :
-    Continuous fun u : X => ∮ z in C(c, R), F u z := by
-  simp only [circleIntegral]
-  apply intervalIntegral.continuous_parametric_intervalIntegral_of_continuous'
-  have h1 : Continuous fun p : X × ℝ => deriv (circleMap c R) p.2 := by
-    simp only [deriv_circleMap]
-    exact ((continuous_circleMap 0 R).comp continuous_snd).mul continuous_const
-  exact h1.smul hF
-
 section Parametric
 
 variable {X : Type*} [TopologicalSpace X]
@@ -303,6 +218,30 @@ theorem ne_zero_of_ne_zero_on_sphere {P : Polynomial ℂ} {c : ℂ} {R : ℝ} (h
       abs_of_pos hR]
   exact fun h0 => hns _ hsph (by rw [h0]; simp)
 
+/-- **The power sum of the roots inside the disc, as a contour integral.**  This is
+`Shields.circleIntegral_pow_mul_logDeriv_polynomial` divided through by `2πi`; the polynomial is
+nonzero and its roots miss the circle for the same reason, that it does not vanish there. -/
+theorem powerSum_rootsIn_eq_circleIntegral {c : ℂ} {R : ℝ} (hR : 0 < R) {P : Polynomial ℂ}
+    (hns : ∀ z ∈ sphere c R, P.eval z ≠ 0) (k : ℕ) :
+    powerSum (rootsIn P c R) k = (2 * (Real.pi : ℂ) * I)⁻¹ *
+      ∮ z in C(c, R), z ^ k * ((derivative P).eval z / P.eval z) := by
+  rw [circleIntegral_pow_mul_logDeriv_polynomial (ne_zero_of_ne_zero_on_sphere hR hns) hR
+    (fun r hr hmem => hns r hmem (mem_roots'.mp hr).2) k, inv_mul_cancel_left₀ two_pi_I_ne_zero]
+
+/-- The weighted logarithmic derivative of a polynomial family with no zero on the circle is
+jointly continuous in the parameter and the angle. -/
+theorem continuous_pow_mul_logDeriv_circleMap {c : ℂ} {R : ℝ} (hR : 0 < R) {P : X → Polynomial ℂ}
+    (hev : Continuous fun p : X × ℂ => (P p.1).eval p.2)
+    (hev' : Continuous fun p : X × ℂ => (derivative (P p.1)).eval p.2)
+    (hns : ∀ u, ∀ z ∈ sphere c R, (P u).eval z ≠ 0) (k : ℕ) :
+    Continuous fun p : X × ℝ => (circleMap c R p.2) ^ k *
+      ((derivative (P p.1)).eval (circleMap c R p.2) / (P p.1).eval (circleMap c R p.2)) := by
+  have hcirc : Continuous fun p : X × ℝ => ((p.1, circleMap c R p.2) : X × ℂ) :=
+    continuous_fst.prodMk ((continuous_circleMap c R).comp continuous_snd)
+  refine (((continuous_circleMap c R).comp continuous_snd).pow k).mul ?_
+  exact (hev'.comp hcirc).div (hev.comp hcirc) fun p =>
+    hns p.1 _ (circleMap_mem_sphere c hR.le p.2)
+
 /-- **The power sums move continuously.**  For a polynomial family whose evaluation and
 derivative-evaluation are jointly continuous in the parameter and the point, and which has no zero
 on the circle, every power sum of the roots inside the disc is continuous in the parameter. -/
@@ -311,28 +250,20 @@ theorem continuous_powerSum_rootsIn {c : ℂ} {R : ℝ} (hR : 0 < R) {P : X → 
     (hev' : Continuous fun p : X × ℂ => (derivative (P p.1)).eval p.2)
     (hns : ∀ u, ∀ z ∈ sphere c R, (P u).eval z ≠ 0) (k : ℕ) :
     Continuous fun u : X => powerSum (rootsIn (P u) c R) k := by
-  have hcirc : Continuous fun p : X × ℝ => ((p.1, circleMap c R p.2) : X × ℂ) :=
-    continuous_fst.prodMk ((continuous_circleMap c R).comp continuous_snd)
-  have hjoint : Continuous fun p : X × ℝ => (circleMap c R p.2) ^ k *
-      ((derivative (P p.1)).eval (circleMap c R p.2) / (P p.1).eval (circleMap c R p.2)) := by
-    refine (((continuous_circleMap c R).comp continuous_snd).pow k).mul ?_
-    refine (hev'.comp hcirc).div (hev.comp hcirc) ?_
-    intro p
-    exact hns p.1 _ (circleMap_mem_sphere c hR.le p.2)
   have hI : Continuous fun u : X =>
       ∮ z in C(c, R), z ^ k * ((derivative (P u)).eval z / (P u).eval z) :=
-    continuous_circleIntegral_param' _ hjoint
-  have hrepr : ∀ u : X, powerSum (rootsIn (P u) c R) k
-      = (2 * (Real.pi : ℂ) * I)⁻¹ *
-        ∮ z in C(c, R), z ^ k * ((derivative (P u)).eval z / (P u).eval z) := by
-    intro u
-    have hP : P u ≠ 0 := ne_zero_of_ne_zero_on_sphere hR (hns u)
-    have hroots : ∀ r ∈ (P u).roots, r ∉ sphere c R := fun r hr hmem =>
-      hns u r hmem (mem_roots'.mp hr).2
-    rw [circleIntegral_pow_mul_logDeriv_polynomial hP hR hroots k,
-      inv_mul_cancel_left₀ two_pi_I_ne_zero]
-  simp only [hrepr]
+    continuous_circleIntegral_param _ (continuous_pow_mul_logDeriv_circleMap hR hev hev' hns k)
+  simp only [fun u : X => powerSum_rootsIn_eq_circleIntegral hR (hns u) k]
   exact continuous_const.mul hI
+
+/-- Newton's identity solved for `e_{m+1}`: the top elementary symmetric function is a
+combination of the strictly earlier ones against the power sums. -/
+theorem esymm_succ_eq (S : Multiset ℂ) (m : ℕ) :
+    S.esymm (m + 1) = ((m + 1 : ℕ) : ℂ)⁻¹ * ((-1) ^ (m + 2) *
+      ∑ a ∈ Finset.antidiagonal (m + 1) with a.1 < m + 1,
+        (-1) ^ a.1 * S.esymm a.1 * powerSum S a.2) := by
+  rw [← mul_esymm_eq_sum_powerSum,
+    inv_mul_cancel_left₀ (Nat.cast_ne_zero.mpr (Nat.succ_ne_zero m))]
 
 /-- **Newton's identities carry regularity from the power sums to the `e_k`.**  For a family of
 multisets whose power sums are all continuous in the parameter, every elementary symmetric function
@@ -345,14 +276,7 @@ theorem continuous_esymm_of_continuous_powerSum (S : X → Multiset ℂ)
     match k with
     | 0 => simpa [Multiset.esymm] using continuous_const (y := (1 : ℂ))
     | (m + 1) =>
-      have hm : ((m + 1 : ℕ) : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.succ_ne_zero m)
-      have key : ∀ u : X, (S u).esymm (m + 1)
-          = ((m + 1 : ℕ) : ℂ)⁻¹ * ((-1) ^ (m + 2) *
-              ∑ a ∈ Finset.antidiagonal (m + 1) with a.1 < m + 1,
-                (-1) ^ a.1 * (S u).esymm a.1 * powerSum (S u) a.2) := by
-        intro u
-        rw [← mul_esymm_eq_sum_powerSum, inv_mul_cancel_left₀ hm]
-      simp only [key]
+      simp only [fun u : X => esymm_succ_eq (S u) m]
       refine continuous_const.mul (continuous_const.mul ?_)
       refine continuous_finsetSum _ fun a ha => ?_
       have hlt : a.1 < m + 1 := (Finset.mem_filter.mp ha).2
@@ -376,20 +300,14 @@ theorem continuous_coeff_insideFactor {c : ℂ} {R : ℝ} (hR : 0 < R) {P : X �
     (hns : ∀ u, ∀ z ∈ sphere c R, (P u).eval z ≠ 0)
     (hcard : ∀ u, (rootsIn (P u) c R).card = r) (k : ℕ) :
     Continuous fun u : X => (insideFactor (P u) c R).coeff k := by
-  by_cases hk : k ≤ r
-  · have key : ∀ u : X, (insideFactor (P u) c R).coeff k
-        = (-1) ^ (r - k) * (rootsIn (P u) c R).esymm (r - k) := by
-      intro u
-      rw [coeff_insideFactor (P u) c R (by rw [hcard u]; exact hk), hcard u]
-    simp only [key]
-    exact continuous_const.mul (continuous_esymm_rootsIn hR hev hev' hns (r - k))
-  · have key : ∀ u : X, (insideFactor (P u) c R).coeff k = 0 := by
-      intro u
-      refine coeff_eq_zero_of_natDegree_lt ?_
-      rw [natDegree_insideFactor, hcard u]
-      exact not_le.mp hk
-    simp only [key]
-    exact continuous_const
+  have key : ∀ u : X, (insideFactor (P u) c R).coeff k
+      = if k ≤ r then (-1) ^ (r - k) * (rootsIn (P u) c R).esymm (r - k) else 0 := fun u => by
+    rw [coeff_eq_ite_esymm_roots_of_monic (monic_insideFactor (P u) c R)
+      ((natDegree_insideFactor (P u) c R).trans (hcard u)) k, roots_insideFactor]
+  simp only [key]
+  split_ifs
+  · exact continuous_const.mul (continuous_esymm_rootsIn hR hev hev' hns (r - k))
+  · exact continuous_const
 
 end Parametric
 
@@ -397,7 +315,7 @@ end Parametric
 
 Morera and Fubini in place of differentiation under the integral sign.  A circle integral of a
 family holomorphic in the parameter is continuous in the parameter by
-`continuous_circleIntegral_param'`, and its wedge integral over any rectangle in the domain is
+`continuous_circleIntegral_param`, and its wedge integral over any rectangle in the domain is
 antisymmetric because the two integrations commute and each slice of the contour is itself a
 holomorphic function of the parameter.  Morera then upgrades the pair to holomorphy. -/
 
@@ -411,6 +329,38 @@ theorem intervalIntegral_swap_of_continuous {a b c d : ℝ} (H : ℝ → ℝ →
     (hH.continuousOn).integrableOn_compact hcpt
   exact hint.mono_set (Set.prod_mono Set.Ioc_subset_Icc_self Set.Ioc_subset_Icc_self)
 
+/-- The circle integrand of a jointly continuous family, weighted by the contour's derivative and
+read along a continuous path `g` in the parameter, is jointly continuous. -/
+theorem continuous_deriv_circleMap_smul_slice {c : ℂ} {R : ℝ} (F : ℂ → ℂ → ℂ)
+    (hF : Continuous fun p : ℂ × ℝ => F p.1 (circleMap c R p.2)) {g : ℝ → ℂ}
+    (hg : Continuous g) :
+    Continuous fun p : ℝ × ℝ => deriv (circleMap c R) p.2 • F (g p.1) (circleMap c R p.2) := by
+  have h1 : Continuous fun q : ℝ × ℂ => deriv (circleMap c R) q.1 := by
+    simp only [deriv_circleMap]
+    exact ((continuous_circleMap 0 R).comp continuous_fst).mul continuous_const
+  exact (h1.smul (hF.comp (continuous_snd.prodMk continuous_fst))).comp
+    (continuous_snd.prodMk (hg.comp continuous_fst))
+
+/-- Along one edge of the wedge, the sliced circle integrand integrates to a continuous function of
+the angle. -/
+theorem continuous_intervalIntegral_slice {c : ℂ} {R : ℝ} (F : ℂ → ℂ → ℂ)
+    (hF : Continuous fun p : ℂ × ℝ => F p.1 (circleMap c R p.2)) {g : ℝ → ℂ}
+    (hg : Continuous g) (a b : ℝ) :
+    Continuous fun θ : ℝ => ∫ x in a..b, deriv (circleMap c R) θ • F (g x) (circleMap c R θ) := by
+  apply intervalIntegral.continuous_parametric_intervalIntegral_of_continuous'
+  exact (continuous_deriv_circleMap_smul_slice F hF hg).comp
+    (continuous_snd.prodMk continuous_fst)
+
+/-- Along one edge of the wedge, the edge integration and the contour integration commute. -/
+theorem intervalIntegral_swap_slice {c : ℂ} {R : ℝ} (F : ℂ → ℂ → ℂ)
+    (hF : Continuous fun p : ℂ × ℝ => F p.1 (circleMap c R p.2)) {g : ℝ → ℂ}
+    (hg : Continuous g) (a b : ℝ) :
+    (∫ x in a..b, ∫ θ in (0 : ℝ)..(2 * Real.pi),
+        deriv (circleMap c R) θ • F (g x) (circleMap c R θ))
+      = ∫ θ in (0 : ℝ)..(2 * Real.pi), ∫ x in a..b,
+        deriv (circleMap c R) θ • F (g x) (circleMap c R θ) :=
+  intervalIntegral_swap_of_continuous _ (continuous_deriv_circleMap_smul_slice F hF hg)
+
 /-- The circle integral commutes with the wedge integral of the parameter: the wedge integral of
 `u ↦ ∮ F u` is the contour integral of the wedge integrals of the individual slices. -/
 theorem wedgeIntegral_circleIntegral {c : ℂ} {R : ℝ} (F : ℂ → ℂ → ℂ) (z w : ℂ)
@@ -418,41 +368,17 @@ theorem wedgeIntegral_circleIntegral {c : ℂ} {R : ℝ} (F : ℂ → ℂ → �
     wedgeIntegral z w (fun v => ∮ ζ in C(c, R), F v ζ)
       = ∫ θ in (0 : ℝ)..(2 * Real.pi),
           wedgeIntegral z w fun v => deriv (circleMap c R) θ • F v (circleMap c R θ) := by
-  have hK : Continuous fun q : ℝ × ℂ =>
-      deriv (circleMap c R) q.1 • F q.2 (circleMap c R q.1) := by
-    have h1 : Continuous fun q : ℝ × ℂ => deriv (circleMap c R) q.1 := by
-      simp only [deriv_circleMap]
-      exact ((continuous_circleMap 0 R).comp continuous_fst).mul continuous_const
-    exact h1.smul (hF.comp (continuous_snd.prodMk continuous_fst))
-  have hslice : ∀ g : ℝ → ℂ, Continuous g → Continuous fun p : ℝ × ℝ =>
-      deriv (circleMap c R) p.2 • F (g p.1) (circleMap c R p.2) := fun _ hg =>
-    hK.comp (continuous_snd.prodMk (hg.comp continuous_fst))
   have hg1 : Continuous fun x : ℝ => (x : ℂ) + (z.im : ℂ) * I :=
     (Complex.continuous_ofReal.add continuous_const)
   have hg2 : Continuous fun y : ℝ => (w.re : ℂ) + (y : ℂ) * I :=
     continuous_const.add (Complex.continuous_ofReal.mul continuous_const)
-  have hA : Continuous fun θ : ℝ => ∫ x in z.re..w.re,
-      deriv (circleMap c R) θ • F ((x : ℂ) + (z.im : ℂ) * I) (circleMap c R θ) := by
-    apply intervalIntegral.continuous_parametric_intervalIntegral_of_continuous'
-    exact (hslice _ hg1).comp (continuous_snd.prodMk continuous_fst)
-  have hB : Continuous fun θ : ℝ => ∫ y in z.im..w.im,
-      deriv (circleMap c R) θ • F ((w.re : ℂ) + (y : ℂ) * I) (circleMap c R θ) := by
-    apply intervalIntegral.continuous_parametric_intervalIntegral_of_continuous'
-    exact (hslice _ hg2).comp (continuous_snd.prodMk continuous_fst)
-  have hswap1 : (∫ x in z.re..w.re, ∫ θ in (0 : ℝ)..(2 * Real.pi),
-        deriv (circleMap c R) θ • F ((x : ℂ) + (z.im : ℂ) * I) (circleMap c R θ))
-      = ∫ θ in (0 : ℝ)..(2 * Real.pi), ∫ x in z.re..w.re,
-        deriv (circleMap c R) θ • F ((x : ℂ) + (z.im : ℂ) * I) (circleMap c R θ) :=
-    intervalIntegral_swap_of_continuous _ (hslice _ hg1)
-  have hswap2 : (∫ y in z.im..w.im, ∫ θ in (0 : ℝ)..(2 * Real.pi),
-        deriv (circleMap c R) θ • F ((w.re : ℂ) + (y : ℂ) * I) (circleMap c R θ))
-      = ∫ θ in (0 : ℝ)..(2 * Real.pi), ∫ y in z.im..w.im,
-        deriv (circleMap c R) θ • F ((w.re : ℂ) + (y : ℂ) * I) (circleMap c R θ) :=
-    intervalIntegral_swap_of_continuous _ (hslice _ hg2)
-  simp only [wedgeIntegral, circleIntegral]
+  have hA := continuous_intervalIntegral_slice F hF hg1 z.re w.re
+  have hB := continuous_intervalIntegral_slice F hF hg2 z.im w.im
   have hB' : Continuous fun θ : ℝ => I • ∫ y in z.im..w.im,
       deriv (circleMap c R) θ • F ((w.re : ℂ) + (y : ℂ) * I) (circleMap c R θ) := hB.const_smul I
-  rw [hswap1, hswap2, ← intervalIntegral.integral_smul,
+  simp only [wedgeIntegral, circleIntegral]
+  rw [intervalIntegral_swap_slice F hF hg1 z.re w.re,
+    intervalIntegral_swap_slice F hF hg2 z.im w.im, ← intervalIntegral.integral_smul,
     ← intervalIntegral.integral_add (hA.intervalIntegrable 0 (2 * Real.pi))
       (hB'.intervalIntegrable 0 (2 * Real.pi))]
 
@@ -464,7 +390,7 @@ theorem differentiableOn_circleIntegral_param {U : Set ℂ} (hU : IsOpen U) {c :
     (hhol : ∀ θ : ℝ, DifferentiableOn ℂ (fun u => F u (circleMap c R θ)) U) :
     DifferentiableOn ℂ (fun u => ∮ ζ in C(c, R), F u ζ) U := by
   refine (isConservativeOn_and_continuousOn_iff_isDifferentiableOn hU).mp
-    ⟨?_, (continuous_circleIntegral_param' F hF).continuousOn⟩
+    ⟨?_, (continuous_circleIntegral_param F hF).continuousOn⟩
   intro z w hzw
   have hcons : ∀ θ : ℝ,
       IsConservativeOn (fun v => deriv (circleMap c R) θ • F v (circleMap c R θ)) U := fun θ =>
@@ -492,30 +418,14 @@ theorem differentiableOn_powerSum_rootsIn {U : Set ℂ} (hU : IsOpen U) {c : ℂ
     (hhol : ∀ z : ℂ, DifferentiableOn ℂ (fun u => (P u).eval z) U)
     (hhol' : ∀ z : ℂ, DifferentiableOn ℂ (fun u => (derivative (P u)).eval z) U) (k : ℕ) :
     DifferentiableOn ℂ (fun u => powerSum (rootsIn (P u) c R) k) U := by
-  have hcirc : Continuous fun p : ℂ × ℝ => ((p.1, circleMap c R p.2) : ℂ × ℂ) :=
-    continuous_fst.prodMk ((continuous_circleMap c R).comp continuous_snd)
-  have hjoint : Continuous fun p : ℂ × ℝ => (circleMap c R p.2) ^ k *
-      ((derivative (P p.1)).eval (circleMap c R p.2) / (P p.1).eval (circleMap c R p.2)) := by
-    refine (((continuous_circleMap c R).comp continuous_snd).pow k).mul ?_
-    refine (hev'.comp hcirc).div (hev.comp hcirc) ?_
-    intro p
-    exact hns p.1 _ (circleMap_mem_sphere c hR.le p.2)
   have hD : DifferentiableOn ℂ
       (fun u => ∮ z in C(c, R), z ^ k * ((derivative (P u)).eval z / (P u).eval z)) U := by
-    refine differentiableOn_circleIntegral_param hU _ hjoint fun θ => ?_
+    refine differentiableOn_circleIntegral_param hU _
+      (continuous_pow_mul_logDeriv_circleMap hR hev hev' hns k) fun θ => ?_
     refine DifferentiableOn.const_mul ?_ _
-    exact (hhol' _).div (hhol _) fun u _ =>
-      hns u _ (circleMap_mem_sphere c hR.le θ)
-  have hrepr : ∀ u : ℂ, powerSum (rootsIn (P u) c R) k
-      = (2 * (Real.pi : ℂ) * I)⁻¹ *
-        ∮ z in C(c, R), z ^ k * ((derivative (P u)).eval z / (P u).eval z) := by
-    intro u
-    have hP : P u ≠ 0 := ne_zero_of_ne_zero_on_sphere hR (hns u)
-    have hroots : ∀ r ∈ (P u).roots, r ∉ sphere c R := fun r hr hmem =>
-      hns u r hmem (mem_roots'.mp hr).2
-    rw [circleIntegral_pow_mul_logDeriv_polynomial hP hR hroots k,
-      inv_mul_cancel_left₀ two_pi_I_ne_zero]
-  simpa only [hrepr] using hD.const_mul (2 * (Real.pi : ℂ) * I)⁻¹
+    exact (hhol' _).div (hhol _) fun u _ => hns u _ (circleMap_mem_sphere c hR.le θ)
+  simpa only [fun u : ℂ => powerSum_rootsIn_eq_circleIntegral hR (hns u) k] using
+    hD.const_mul (2 * (Real.pi : ℂ) * I)⁻¹
 
 /-- The holomorphic counterpart of `continuous_esymm_of_continuous_powerSum`. -/
 theorem differentiableOn_esymm_of_differentiableOn_powerSum {U : Set ℂ} (S : ℂ → Multiset ℂ)
@@ -527,14 +437,7 @@ theorem differentiableOn_esymm_of_differentiableOn_powerSum {U : Set ℂ} (S : �
     | 0 =>
       simp [Multiset.esymm]
     | (m + 1) =>
-      have hm : ((m + 1 : ℕ) : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.succ_ne_zero m)
-      have key : ∀ u : ℂ, (S u).esymm (m + 1)
-          = ((m + 1 : ℕ) : ℂ)⁻¹ * ((-1) ^ (m + 2) *
-              ∑ a ∈ Finset.antidiagonal (m + 1) with a.1 < m + 1,
-                (-1) ^ a.1 * (S u).esymm a.1 * powerSum (S u) a.2) := by
-        intro u
-        rw [← mul_esymm_eq_sum_powerSum, inv_mul_cancel_left₀ hm]
-      simp only [key]
+      simp only [fun u : ℂ => esymm_succ_eq (S u) m]
       refine DifferentiableOn.const_mul (DifferentiableOn.const_mul ?_ _) _
       refine DifferentiableOn.fun_sum fun a ha => ?_
       have hlt : a.1 < m + 1 := (Finset.mem_filter.mp ha).2
@@ -564,21 +467,15 @@ theorem differentiableOn_coeff_insideFactor {U : Set ℂ} (hU : IsOpen U) {c : �
     (hhol' : ∀ z : ℂ, DifferentiableOn ℂ (fun u => (derivative (P u)).eval z) U)
     (hcard : ∀ u, (rootsIn (P u) c R).card = r) (k : ℕ) :
     DifferentiableOn ℂ (fun u => (insideFactor (P u) c R).coeff k) U := by
-  by_cases hk : k ≤ r
-  · have key : ∀ u : ℂ, (insideFactor (P u) c R).coeff k
-        = (-1) ^ (r - k) * (rootsIn (P u) c R).esymm (r - k) := by
-      intro u
-      rw [coeff_insideFactor (P u) c R (by rw [hcard u]; exact hk), hcard u]
-    simp only [key]
-    exact DifferentiableOn.const_mul
+  have key : ∀ u : ℂ, (insideFactor (P u) c R).coeff k
+      = if k ≤ r then (-1) ^ (r - k) * (rootsIn (P u) c R).esymm (r - k) else 0 := fun u => by
+    rw [coeff_eq_ite_esymm_roots_of_monic (monic_insideFactor (P u) c R)
+      ((natDegree_insideFactor (P u) c R).trans (hcard u)) k, roots_insideFactor]
+  simp only [key]
+  split_ifs
+  · exact DifferentiableOn.const_mul
       (differentiableOn_esymm_rootsIn hU hR hev hev' hns hhol hhol' (r - k)) _
-  · have key : ∀ u : ℂ, (insideFactor (P u) c R).coeff k = 0 := by
-      intro u
-      refine coeff_eq_zero_of_natDegree_lt ?_
-      rw [natDegree_insideFactor, hcard u]
-      exact not_le.mp hk
-    simp only [key]
-    exact differentiableOn_const 0
+  · exact differentiableOn_const 0
 
 /-! ### The analytic case
 
@@ -594,6 +491,35 @@ theorem eval_multisetProd_X_sub_C (s : Multiset ℂ) (z : ℂ) :
     ((s.map fun u => X - C u).prod).eval z = zeroFactor s z := by
   simp [zeroFactor, Polynomial.eval_multiset_prod, Multiset.map_map]
 
+/-- The weighted logarithmic derivative of a zero-free analytic function is continuous on the
+closed disc.  The circle integral needs it there and Cauchy's theorem needs it there. -/
+theorem continuousOn_pow_mul_logDeriv {g : ℂ → ℂ} {c : ℂ} {R : ℝ}
+    (hg : AnalyticOnNhd ℂ g (closedBall c R)) (hgne : ∀ z ∈ closedBall c R, g z ≠ 0) (k : ℕ) :
+    ContinuousOn (fun z => z ^ k * (deriv g z / g z)) (closedBall c R) :=
+  (continuous_pow k).continuousOn.mul
+    (ContinuousOn.div hg.deriv.continuousOn hg.continuousOn hgne)
+
+/-- **The splitting on the circle.**  Where `f = (∏_{u ∈ s}(· - u)) · g` with `g` zero-free, the
+`z^k`-weighted logarithmic derivative of `f` is the sum of the weighted simple poles at `s` and the
+weighted logarithmic derivative of `g`. -/
+theorem eqOn_pow_mul_logDeriv_zeroFactor {f g : ℂ → ℂ} {c : ℂ} {R : ℝ} {s : Multiset ℂ}
+    (hg : AnalyticOnNhd ℂ g (closedBall c R)) (hgne : ∀ z ∈ closedBall c R, g z ≠ 0)
+    (hfac : ∀ z, f z = zeroFactor s z * g z) (hsphne : ∀ z ∈ sphere c R, ∀ u ∈ s, z ≠ u) (k : ℕ) :
+    Set.EqOn (fun z => z ^ k * (deriv f z / f z))
+      (fun z => (s.map fun u => z ^ k / (z - u)).sum + z ^ k * (deriv g z / g z))
+      (sphere c R) := by
+  intro z hz
+  have hzc : z ∈ closedBall c R := sphere_subset_closedBall hz
+  have hsplit := logDeriv_mul (f := zeroFactor s) (g := g) z
+    (zeroFactor_ne_zero (hsphne z hz)) (hgne z hzc) ((differentiable_zeroFactor s) z)
+    (hg z hzc).differentiableAt
+  rw [logDeriv_zeroFactor (hsphne z hz)] at hsplit
+  have hlog : deriv f z / f z = (s.map fun u => (z - u)⁻¹).sum + deriv g z / g z := by
+    change logDeriv f z = _
+    rw [funext hfac, hsplit, logDeriv_apply]
+  simp only [hlog, mul_add, ← Multiset.sum_map_mul_left]
+  simp [div_eq_mul_inv]
+
 /-- **Power sums of an analytic packet as contour integrals.**  Given a factorization
 `f = (∏_{u ∈ s} (· - u)) · g` with `g` analytic and zero-free on the closed disc and `s` inside the
 open disc, the `z^k`-weighted logarithmic-derivative integral is `2πi` times the `k`-th power sum of
@@ -603,44 +529,24 @@ theorem circleIntegral_pow_mul_logDeriv_of_zeroFactor {f g : ℂ → ℂ} {c : �
     (hg : AnalyticOnNhd ℂ g (closedBall c R)) (hgne : ∀ z ∈ closedBall c R, g z ≠ 0)
     (hfac : ∀ z, f z = zeroFactor s z * g z) (k : ℕ) :
     (∮ z in C(c, R), z ^ k * (deriv f z / f z)) = 2 * Real.pi * I * powerSum s k := by
-  have hfeq : f = fun z => zeroFactor s z * g z := funext hfac
   have hnotsph : ∀ r ∈ s, r ∉ sphere c R := by
     intro r hr hmem
     exact absurd (mem_sphere.mp hmem) (ne_of_lt (mem_ball.mp (hsmem r hr)))
   have hsphne : ∀ z ∈ sphere c R, ∀ u ∈ s, z ≠ u := fun z hz u hu hzu =>
     hnotsph u hu (hzu ▸ hz)
-  have hcong : Set.EqOn (fun z => z ^ k * (deriv f z / f z))
-      (fun z => (s.map fun u => z ^ k / (z - u)).sum + z ^ k * (deriv g z / g z))
-      (sphere c R) := by
-    intro z hz
-    have hzc : z ∈ closedBall c R := sphere_subset_closedBall hz
-    have hdg : DifferentiableAt ℂ g z := (hg z hzc).differentiableAt
-    have hsplit := logDeriv_mul (f := zeroFactor s) (g := g) z
-      (zeroFactor_ne_zero (hsphne z hz)) (hgne z hzc) ((differentiable_zeroFactor s) z) hdg
-    rw [logDeriv_zeroFactor (hsphne z hz)] at hsplit
-    have hlog : deriv f z / f z = (s.map fun u => (z - u)⁻¹).sum + deriv g z / g z := by
-      change logDeriv f z = _
-      rw [hfeq, hsplit, logDeriv_apply]
-    simp only [hlog, mul_add, ← Multiset.sum_map_mul_left]
-    simp [div_eq_mul_inv]
-  rw [circleIntegral.integral_congr hR.le hcong]
+  rw [circleIntegral.integral_congr hR.le
+    (eqOn_pow_mul_logDeriv_zeroFactor hg hgne hfac hsphne k)]
   have h1 : CircleIntegrable (fun z => (s.map fun u => z ^ k / (z - u)).sum) c R :=
-    circleIntegrable_multiset_sum_pow_div_sub hR.le k s hnotsph
-  have h2 : CircleIntegrable (fun z => z ^ k * (deriv g z / g z)) c R := by
-    refine ContinuousOn.circleIntegrable hR.le ?_
-    refine (continuous_pow k).continuousOn.mul (ContinuousOn.div ?_ ?_ ?_)
-    · exact (hg.deriv.continuousOn).mono sphere_subset_closedBall
-    · exact hg.continuousOn.mono sphere_subset_closedBall
-    · exact fun z hz => hgne z (sphere_subset_closedBall hz)
+    circleIntegrable_multiset_sum_pow_div_sub k s (by rwa [abs_of_pos hR])
+  have h2 : CircleIntegrable (fun z => z ^ k * (deriv g z / g z)) c R :=
+    ContinuousOn.circleIntegrable hR.le
+      ((continuousOn_pow_mul_logDeriv hg hgne k).mono sphere_subset_closedBall)
   have hcauchy : (∮ z in C(c, R), z ^ k * (deriv g z / g z)) = 0 := by
     refine Complex.circleIntegral_eq_zero_of_differentiable_on_off_countable hR.le
-      Set.countable_empty ?_ ?_
-    · exact (continuous_pow k).continuousOn.mul
-        (ContinuousOn.div hg.deriv.continuousOn hg.continuousOn fun z hz => hgne z hz)
-    · intro z hz
-      have hzc : z ∈ closedBall c R := ball_subset_closedBall hz.1
-      exact ((differentiable_pow k) z).mul
-        (((hg.deriv z hzc).differentiableAt).div ((hg z hzc).differentiableAt) (hgne z hzc))
+      Set.countable_empty (continuousOn_pow_mul_logDeriv hg hgne k) fun z hz => ?_
+    have hzc : z ∈ closedBall c R := ball_subset_closedBall hz.1
+    exact ((differentiable_pow k) z).mul
+      (((hg.deriv z hzc).differentiableAt).div ((hg z hzc).differentiableAt) (hgne z hzc))
   rw [circleIntegral.integral_add h1 h2, hcauchy, add_zero,
     circleIntegral_multiset_sum_pow_div_sub hR k s hnotsph,
     Multiset.filter_eq_self.mpr fun r hr => mem_ball.mp (hsmem r hr)]
@@ -677,13 +583,6 @@ Vieta turn that into continuity (resp. holomorphy) of the coefficients of `W`.  
 `hcard` — a constant zero count — is Rouché's conclusion, available from
 `Shields.zeroCount_add_eq`, and is what pins the degree of `W`. -/
 
-/-- Vieta for a monic polynomial of known degree. -/
-theorem coeff_eq_esymm_roots_of_monic {W : Polynomial ℂ} (hW : W.Monic) {r k : ℕ}
-    (hdeg : W.natDegree = r) (hk : k ≤ r) :
-    W.coeff k = (-1) ^ (r - k) * W.roots.esymm (r - k) := by
-  rw [Polynomial.coeff_eq_esymm_roots_of_splits (IsAlgClosed.splits W) (by rw [hdeg]; exact hk),
-    hW.leadingCoeff, one_mul, hdeg]
-
 /-- **Weierstrass preparation with a continuous parameter, analytic case.**  A family of analytic
 functions with no zero on the circle and a constant zero count inside it factors as a monic
 polynomial of that degree times a zero-free analytic function, with the coefficients of the
@@ -706,7 +605,7 @@ theorem exists_continuous_analytic_preparation {X : Type*} [TopologicalSpace X] 
   have hpow : ∀ j, Continuous fun u : X => powerSum (W u).roots j := by
     intro j
     have hI : Continuous fun u : X => ∮ z in C(c, R), z ^ j * (deriv (f u) z / f u z) :=
-      continuous_circleIntegral_param' _
+      continuous_circleIntegral_param _
         ((((continuous_circleMap c R).comp continuous_snd).pow j).mul hlog)
     have hrepr : ∀ u : X, powerSum (W u).roots j
         = (2 * (Real.pi : ℂ) * I)⁻¹ * ∮ z in C(c, R), z ^ j * (deriv (f u) z / f u z) := by
@@ -715,15 +614,13 @@ theorem exists_continuous_analytic_preparation {X : Type*} [TopologicalSpace X] 
     simp only [hrepr]
     exact continuous_const.mul hI
   refine ⟨W, hmon, hdeg', fun u => ⟨g u, hgan u, hgne u, hfac u⟩, fun k => ?_⟩
-  by_cases hk : k ≤ r
-  · have hco : ∀ u : X, (W u).coeff k = (-1) ^ (r - k) * (W u).roots.esymm (r - k) :=
-      fun u => coeff_eq_esymm_roots_of_monic (hmon u) (hdeg' u) hk
-    simp only [hco]
-    exact continuous_const.mul (continuous_esymm_of_continuous_powerSum _ hpow (r - k))
-  · have hco : ∀ u : X, (W u).coeff k = 0 := fun u =>
-      Polynomial.coeff_eq_zero_of_natDegree_lt (by rw [hdeg' u]; omega)
-    simp only [hco]
-    exact continuous_const
+  have hco : ∀ u : X, (W u).coeff k
+      = if k ≤ r then (-1) ^ (r - k) * (W u).roots.esymm (r - k) else 0 :=
+    fun u => coeff_eq_ite_esymm_roots_of_monic (hmon u) (hdeg' u) k
+  simp only [hco]
+  split_ifs
+  · exact continuous_const.mul (continuous_esymm_of_continuous_powerSum _ hpow (r - k))
+  · exact continuous_const
 
 /-- **Weierstrass preparation with a holomorphic parameter, analytic case.**  The holomorphic
 counterpart of `exists_continuous_analytic_preparation`: on an open set of parameters over which the
@@ -759,15 +656,13 @@ theorem exists_differentiableOn_analytic_preparation {U : Set ℂ} (hU : IsOpen 
     simp only [hrepr]
     exact hI.const_mul _
   refine ⟨W, hmon, hdeg', fun u => ⟨g u, hgan u, hgne u, hfac u⟩, fun k => ?_⟩
-  by_cases hk : k ≤ r
-  · have hco : ∀ u : ℂ, (W u).coeff k = (-1) ^ (r - k) * (W u).roots.esymm (r - k) :=
-      fun u => coeff_eq_esymm_roots_of_monic (hmon u) (hdeg' u) hk
-    simp only [hco]
-    exact (differentiableOn_esymm_of_differentiableOn_powerSum _ hpow (r - k)).const_mul _
-  · have hco : ∀ u : ℂ, (W u).coeff k = 0 := fun u =>
-      Polynomial.coeff_eq_zero_of_natDegree_lt (by rw [hdeg' u]; omega)
-    simp only [hco]
-    exact differentiableOn_const 0
+  have hco : ∀ u : ℂ, (W u).coeff k
+      = if k ≤ r then (-1) ^ (r - k) * (W u).roots.esymm (r - k) else 0 :=
+    fun u => coeff_eq_ite_esymm_roots_of_monic (hmon u) (hdeg' u) k
+  simp only [hco]
+  split_ifs
+  · exact (differentiableOn_esymm_of_differentiableOn_powerSum _ hpow (r - k)).const_mul _
+  · exact differentiableOn_const 0
 
 /-! ### Coalescence at the base point
 
@@ -801,5 +696,24 @@ theorem eq_X_pow_of_preparation {f g : ℂ → ℂ} {W : Polynomial ℂ} {c : �
   refine eq_X_pow_of_monic_of_roots_eq_zero hW fun u hu => h0 u (hWmem u hu) ?_
   have hroot : W.eval u = 0 := isRoot_of_mem_roots hu
   rw [hfac u, hroot, zero_mul]
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.exists_monic_preparation' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_monic_preparation
+
+/-- info: 'Shields.exists_continuous_analytic_preparation' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_continuous_analytic_preparation
+
+/-- info: 'Shields.exists_differentiableOn_analytic_preparation' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_differentiableOn_analytic_preparation
+
+/-- info: 'Shields.circleIntegral_pow_mul_logDeriv_polynomial' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms circleIntegral_pow_mul_logDeriv_polynomial
 
 end Shields

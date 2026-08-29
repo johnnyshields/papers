@@ -4,6 +4,7 @@ Released under the MIT license as described in the file LICENSE.txt.
 Authors: Johnny Shields
 -/
 import ForgacsTran.FTBranchZRate
+import ForgacsTran.PencilIndex
 
 /-!
 # The upper endpoint of the arc
@@ -223,7 +224,7 @@ theorem tendsto_pow_mul_ftBranchZ_nhdsLT_upper {n r : ℕ} {a : Fin n → ℝ} (
   have hθπ : θ ∈ Ioo 0 π := ftArc_subset hr1 hθarc
   have hb : FTBranchAt a r (n - 1) θ := ftBranchAt_of_arc_principal hn ha hr1 (Or.inl hn2) hθarc
   have hTpos : 0 < ftTau a r (n - 1) θ := ftTau_pos hb
-  have hpar : Even (n + (n - 1) + 1) := ⟨n, by omega⟩
+  have hpar : Even (n + (n - 1) + 1) := even_add_pred_add_one hn
   rw [ftBranchZ_eq_chordProd ha hpar hθπ hb rfl]
   field_simp
 
@@ -477,7 +478,7 @@ complements sum to `π - rθ` exactly; writing each as `Y_k⁻¹` plus its own e
 puts the count in the form the second-order estimate consumes. -/
 theorem ftTau_mul_sum_inv_add_err {n r : ℕ} {a : Fin n → ℝ} (hn2 : 2 ≤ n)
     (ha : ∀ k, 0 < a k) (hr : 1 ≤ r) {θ : ℝ} (hθ : θ ∈ Ioo 0 (π / r))
-    (hd : ∀ k, 0 < a k - ftTau a r (n - 1) θ * Real.cos θ) :
+    (_hd : ∀ k, 0 < a k - ftTau a r (n - 1) θ * Real.cos θ) :
     ftTau a r (n - 1) θ
         * (Real.sin θ * ∑ k, (a k - ftTau a r (n - 1) θ * Real.cos θ)⁻¹)
       + ∑ k, (ftArccot ((a k / ftTau a r (n - 1) θ - Real.cos θ) / Real.sin θ)

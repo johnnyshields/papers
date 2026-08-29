@@ -125,7 +125,7 @@ theorem tendstoUniformlyOn_div {ι α : Type*} {φ : Filter ι} {S : Set α}
       ≤ (max Mc 0 + 1) * (ε * κ * κ / (8 * (max Mc 0 + 1))) / (κ * (κ / 2)) := by
     rw [norm_div, norm_mul, norm_mul]; gcongr
   refine lt_of_le_of_lt ((norm_add_le _ _).trans (add_le_add t1 t2)) ?_
-  have r1 : (ε * κ / 8) / (κ / 2) = ε / 4 := by field_simp; ring
+  have r1 : (ε * κ / 8) / (κ / 2) = ε / 4 := by field
   have r2 : (max Mc 0 + 1) * (ε * κ * κ / (8 * (max Mc 0 + 1))) / (κ * (κ / 2)) = ε / 4 := by
     field
   rw [r1, r2]
@@ -155,6 +155,175 @@ structure PacketFactor (f : ℂ → ℂ) (r : ℝ) (k : ℕ) where
   /-- The factorization itself. -/
   eq_prod : ∀ t : ℂ, f t = (∏ j, (t - root j)) * cofactor t
 
+/-- The packet product is `Shields.zeroFactor` of the packet's root multiset. -/
+theorem zeroFactor_map_univ {k : ℕ} (a : Fin k → ℂ) (t : ℂ) :
+    zeroFactor (Multiset.map a Finset.univ.val) t = ∏ j, (t - a j) := by
+  rw [zeroFactor, Multiset.map_map, Finset.prod_eq_multiset_prod]
+  rfl
+
+/-! ### Packets of a merely analytic function -/
+
+/-- A `PacketFactor` whose cofactor is only analytic on the closed disc.  This is the weakest
+hypothesis under which the argument principle argument runs, and — unlike `PacketFactor`, whose
+cofactor is entire — it is available for **every** function analytic on a neighborhood of the
+closed disc with no zero on the circle: see `exists_analyticPacket`.  A function analytic only on a
+disc need not extend to an entire function, so the entire cofactor of `PacketFactor` is a genuine
+restriction and not a normalization. -/
+structure AnalyticPacket (f : ℂ → ℂ) (r : ℝ) (k : ℕ) where
+  /-- The contour radius is positive. -/
+  radius_pos : 0 < r
+  /-- The enclosed zeros, listed with multiplicity. -/
+  root : Fin k → ℂ
+  /-- The zero-free cofactor. -/
+  cofactor : ℂ → ℂ
+  /-- Every root lies strictly inside the contour. -/
+  root_mem_ball : ∀ j, ‖root j‖ < r
+  /-- The cofactor is analytic on a neighborhood of the closed disc. -/
+  cofactor_analyticOnNhd : AnalyticOnNhd ℂ cofactor (closedBall (0 : ℂ) r)
+  /-- The cofactor has no zero on the closed disc: the listed roots are all of them. -/
+  cofactor_ne_zero : ∀ t : ℂ, ‖t‖ ≤ r → cofactor t ≠ 0
+  /-- The factorization itself. -/
+  eq_prod : ∀ t : ℂ, f t = (∏ j, (t - root j)) * cofactor t
+
+/-- The copied structure is a special case: an entire cofactor is analytic on the closed disc. -/
+def PacketFactor.toAnalyticPacket {f : ℂ → ℂ} {r : ℝ} {k : ℕ} (F : PacketFactor f r k) :
+    AnalyticPacket f r k where
+  radius_pos := F.radius_pos
+  root := F.root
+  cofactor := F.cofactor
+  root_mem_ball := F.root_mem_ball
+  cofactor_analyticOnNhd :=
+    (F.cofactor_differentiable.differentiableOn.analyticOnNhd isOpen_univ).mono (Set.subset_univ _)
+  cofactor_ne_zero := F.cofactor_ne_zero
+  eq_prod := F.eq_prod
+
+namespace AnalyticPacket
+
+variable {f : ℂ → ℂ} {r : ℝ} {k : ℕ}
+
+/-- The root multiset of the packet. -/
+noncomputable def rootMultiset (F : AnalyticPacket f r k) : Multiset ℂ :=
+  Multiset.map F.root Finset.univ.val
+
+theorem card_rootMultiset (F : AnalyticPacket f r k) :
+    Multiset.card F.rootMultiset = k := by simp [rootMultiset]
+
+theorem rootMultiset_mem_ball (F : AnalyticPacket f r k) {u : ℂ} (hu : u ∈ F.rootMultiset) :
+    u ∈ ball (0 : ℂ) r := by
+  obtain ⟨j, _, rfl⟩ := Multiset.mem_map.1 hu
+  exact mem_ball_zero_iff.2 (F.root_mem_ball j)
+
+theorem eq_zeroFactor_mul (F : AnalyticPacket f r k) (t : ℂ) :
+    f t = zeroFactor F.rootMultiset t * F.cofactor t := by
+  rw [rootMultiset, zeroFactor_map_univ]; exact F.eq_prod t
+
+/-- The function of an analytic packet is analytic on a neighborhood of the closed disc. -/
+theorem analyticOnNhd (F : AnalyticPacket f r k) :
+    AnalyticOnNhd ℂ f (closedBall (0 : ℂ) r) := by
+  have hfe : f = fun t ↦ zeroFactor F.rootMultiset t * F.cofactor t :=
+    funext F.eq_zeroFactor_mul
+  rw [hfe]
+  exact fun t ht ↦ (analyticAt_zeroFactor _ t).mul (F.cofactor_analyticOnNhd t ht)
+
+theorem sub_root_ne_zero (F : AnalyticPacket f r k) {t : ℂ} (ht : ‖t‖ = r) (j : Fin k) :
+    t - F.root j ≠ 0 := by
+  intro h
+  rw [sub_eq_zero] at h
+  exact absurd (h ▸ ht) (ne_of_lt (F.root_mem_ball j))
+
+/-- The contour carries no zero. -/
+theorem ne_zero_of_norm_eq (F : AnalyticPacket f r k) {t : ℂ} (ht : ‖t‖ = r) : f t ≠ 0 := by
+  rw [F.eq_prod]
+  exact mul_ne_zero (Finset.prod_ne_zero_iff.2 fun j _ ↦ F.sub_root_ne_zero ht j)
+    (F.cofactor_ne_zero t ht.le)
+
+/-- The logarithmic derivative splits over the packet and the cofactor. -/
+theorem logDeriv_eq (F : AnalyticPacket f r k) {t : ℂ} (ht : ‖t‖ = r) :
+    deriv f t / f t = (∑ j, (t - F.root j)⁻¹) + deriv F.cofactor t / F.cofactor t :=
+  logDeriv_prod_sub_mul (funext F.eq_prod) (fun j _ ↦ F.sub_root_ne_zero ht j)
+    (F.cofactor_ne_zero t ht.le)
+    (F.cofactor_analyticOnNhd t (mem_closedBall_zero_iff.2 ht.le)).differentiableAt
+
+/-- **The weighted argument principle for analytic functions.**  For `φ` analytic on a
+neighborhood of the closed disc,
+\[
+  \oint_{|t| = r} \varphi(t)\,\frac{f'(t)}{f(t)}\,dt = 2\pi i \sum_j \varphi(a_j),
+\]
+the sum over the packet with multiplicity.  Neither `RoucheAnalytic` nor `Weierstrass` carries a
+general weight; both carry a general center, which this does not.  At `φ = 1` this is the center-`0`
+case of `Shields.circleIntegral_logDeriv` and at `φ = t^m` the center-`0` case of
+`Shields.circleIntegral_pow_mul_logDeriv_of_zeroFactor`. -/
+theorem weighted_argumentPrinciple (F : AnalyticPacket f r k) {φ : ℂ → ℂ}
+    (hφ : AnalyticOnNhd ℂ φ (closedBall (0 : ℂ) r)) :
+    (∮ t in C((0 : ℂ), r), φ t * (deriv f t / f t))
+      = (2 * (Real.pi : ℂ) * Complex.I) * ∑ j, φ (F.root j) := by
+  have hr := F.radius_pos
+  have hdc : AnalyticOnNhd ℂ (deriv F.cofactor) (closedBall (0 : ℂ) r) :=
+    F.cofactor_analyticOnNhd.deriv
+  set g : ℂ → ℂ := fun t ↦ φ t * (deriv F.cofactor t / F.cofactor t) with hgdef
+  have hgdiff : ∀ t ∈ closedBall (0 : ℂ) r, DifferentiableAt ℂ g t := fun t ht ↦
+    (hφ t ht).differentiableAt.mul (((hdc t ht).differentiableAt).div
+      ((F.cofactor_analyticOnNhd t ht).differentiableAt)
+      (F.cofactor_ne_zero t (mem_closedBall_zero_iff.1 ht)))
+  have hgcont : ContinuousOn g (closedBall (0 : ℂ) r) := fun t ht ↦
+    ((hgdiff t ht).continuousAt).continuousWithinAt
+  have hrootcont : ∀ j : Fin k,
+      ContinuousOn (fun t : ℂ ↦ φ t / (t - F.root j)) (sphere (0 : ℂ) r) := by
+    intro j t ht
+    have htc : t ∈ closedBall (0 : ℂ) r := sphere_subset_closedBall ht
+    have hne : t - F.root j ≠ 0 := F.sub_root_ne_zero (mem_sphere_zero_iff_norm.1 ht) j
+    exact (((hφ t htc).continuousAt).div (by fun_prop) hne).continuousWithinAt
+  have hrootint : ∀ j ∈ (Finset.univ : Finset (Fin k)),
+      CircleIntegrable (fun t : ℂ ↦ φ t / (t - F.root j)) 0 r :=
+    fun j _ ↦ (hrootcont j).circleIntegrable hr.le
+  have hsumint : CircleIntegrable (fun t : ℂ ↦ ∑ j, φ t / (t - F.root j)) 0 r :=
+    (continuousOn_finsetSum _ fun j _ ↦ hrootcont j).circleIntegrable hr.le
+  have hgint : CircleIntegrable g 0 r :=
+    (hgcont.mono sphere_subset_closedBall).circleIntegrable hr.le
+  have hEq : Set.EqOn (fun t ↦ φ t * (deriv f t / f t))
+      (fun t ↦ (∑ j, φ t / (t - F.root j)) + g t) (sphere (0 : ℂ) r) := by
+    intro t ht
+    have hn := mem_sphere_zero_iff_norm.1 ht
+    simp only [hgdef]
+    rw [F.logDeriv_eq hn, mul_add, Finset.mul_sum]
+    congr 1
+  have hzero : (∮ t in C((0 : ℂ), r), g t) = 0 :=
+    Complex.circleIntegral_eq_zero_of_differentiable_on_off_countable hr.le Set.countable_empty
+      hgcont fun t ht ↦ hgdiff t (ball_subset_closedBall ht.1)
+  have hroot : ∀ j : Fin k, (∮ t in C((0 : ℂ), r), φ t / (t - F.root j))
+      = 2 * (Real.pi : ℂ) * Complex.I * φ (F.root j) := fun j ↦
+    Complex.circleIntegral_div_sub_of_differentiable_on_off_countable Set.countable_empty
+      (mem_ball_zero_iff.2 (F.root_mem_ball j)) hφ.continuousOn
+      fun t ht ↦ (hφ t (ball_subset_closedBall ht.1)).differentiableAt
+  rw [circleIntegral.integral_congr hr.le hEq, circleIntegral.integral_add hsumint hgint,
+    circleIntegral.integral_fun_sum hrootint, hzero, add_zero,
+    Finset.sum_congr rfl fun j (_ : j ∈ Finset.univ) ↦ hroot j, Finset.mul_sum]
+
+/-- The count. -/
+theorem circleIntegral_logDeriv (F : AnalyticPacket f r k) :
+    (∮ t in C((0 : ℂ), r), deriv f t / f t) = (2 * (Real.pi : ℂ) * Complex.I) * k := by
+  have h := F.weighted_argumentPrinciple (φ := fun _ ↦ (1 : ℂ)) analyticOnNhd_const
+  simpa using h
+
+/-- The power sums of the packet, for `f` merely analytic on the closed disc. -/
+theorem circleIntegral_pow_logDeriv (F : AnalyticPacket f r k) (m : ℕ) :
+    (∮ t in C((0 : ℂ), r), t ^ m * (deriv f t / f t))
+      = (2 * (Real.pi : ℂ) * Complex.I) * ∑ j, F.root j ^ m :=
+  F.weighted_argumentPrinciple (φ := fun t ↦ t ^ m)
+    (fun _t _ ↦ analyticAt_id.pow m)
+
+/-- **The bridge, analytic case.**  The `k` of an `AnalyticPacket` is `RoucheAnalytic`'s zero
+count. -/
+theorem zeroCount_eq (F : AnalyticPacket f r k) : zeroCount f 0 r = k := by
+  have hcard := zeroCount_eq_card (f := f) (g := F.cofactor) (c := (0 : ℂ)) (R := r)
+    (s := F.rootMultiset) (fun u hu ↦ F.rootMultiset_mem_ball hu) F.cofactor_analyticOnNhd
+    (fun z hz ↦ F.cofactor_ne_zero z (mem_closedBall_zero_iff.1 hz)) F.eq_zeroFactor_mul
+  rw [hcard, F.card_rootMultiset]
+
+end AnalyticPacket
+
+/-! ### The entire-cofactor packet -/
+
 namespace PacketFactor
 
 variable {f : ℂ → ℂ} {r : ℝ} {k : ℕ}
@@ -171,96 +340,41 @@ theorem differentiable_deriv_cofactor (F : PacketFactor f r k) :
   rwa [iteratedDeriv_one] at h
 
 theorem sub_root_ne_zero (F : PacketFactor f r k) {t : ℂ} (ht : ‖t‖ = r) (j : Fin k) :
-    t - F.root j ≠ 0 := by
-  intro h
-  rw [sub_eq_zero] at h
-  exact absurd (h ▸ ht) (ne_of_lt (F.root_mem_ball j))
+    t - F.root j ≠ 0 :=
+  F.toAnalyticPacket.sub_root_ne_zero ht j
 
 /-- The contour carries no zero. -/
-theorem ne_zero_of_norm_eq (F : PacketFactor f r k) {t : ℂ} (ht : ‖t‖ = r) : f t ≠ 0 := by
-  rw [F.eq_prod]
-  exact mul_ne_zero (Finset.prod_ne_zero_iff.2 fun j _ ↦ F.sub_root_ne_zero ht j)
-    (F.cofactor_ne_zero t ht.le)
+theorem ne_zero_of_norm_eq (F : PacketFactor f r k) {t : ℂ} (ht : ‖t‖ = r) : f t ≠ 0 :=
+  F.toAnalyticPacket.ne_zero_of_norm_eq ht
 
 /-- The logarithmic derivative splits over the packet and the cofactor. -/
 theorem logDeriv_eq (F : PacketFactor f r k) {t : ℂ} (ht : ‖t‖ = r) :
-    deriv f t / f t = (∑ j, (t - F.root j)⁻¹) + deriv F.cofactor t / F.cofactor t := by
-  have hfe : f = fun s : ℂ ↦ (∏ j, (s - F.root j)) * F.cofactor s := funext F.eq_prod
-  have hp : (∏ j, (t - F.root j)) ≠ 0 :=
-    Finset.prod_ne_zero_iff.2 fun j _ ↦ F.sub_root_ne_zero ht j
-  have hg : F.cofactor t ≠ 0 := F.cofactor_ne_zero t ht.le
-  have hdp : DifferentiableAt ℂ (fun s : ℂ ↦ ∏ j, (s - F.root j)) t :=
-    (Differentiable.fun_finsetProd fun j _ ↦ differentiable_id.sub_const _) t
-  have h1 : logDeriv f t
-      = logDeriv (fun s : ℂ ↦ (∏ j, (s - F.root j)) * F.cofactor s) t :=
-    congrArg (fun u : ℂ → ℂ ↦ logDeriv u t) hfe
-  have h2 : logDeriv (fun s : ℂ ↦ (∏ j, (s - F.root j)) * F.cofactor s) t
-      = logDeriv (fun s : ℂ ↦ ∏ j, (s - F.root j)) t + logDeriv F.cofactor t :=
-    logDeriv_mul t hp hg hdp (F.cofactor_differentiable t)
-  have h3 : logDeriv (fun s : ℂ ↦ ∏ j, (s - F.root j)) t = ∑ j, (t - F.root j)⁻¹ := by
-    rw [logDeriv_prod (f := fun (j : Fin k) (s : ℂ) ↦ s - F.root j)
-      (fun j _ ↦ F.sub_root_ne_zero ht j) (fun j _ ↦ by fun_prop)]
-    exact Finset.sum_congr rfl fun j _ ↦ by
-      simp [logDeriv_apply, one_div]
-  rw [show deriv f t / f t = logDeriv f t from rfl, h1, h2, h3, logDeriv_apply]
+    deriv f t / f t = (∑ j, (t - F.root j)⁻¹) + deriv F.cofactor t / F.cofactor t :=
+  F.toAnalyticPacket.logDeriv_eq ht
 
 /-! ### The weighted argument principle -/
 
-/-- `∮_{|t| = r} φ(t) f'(t)/f(t) dt = 2πi ∑_j φ(aⱼ)` for entire `φ`, assembled from Cauchy's
-integral formula on each root factor and Cauchy–Goursat on the cofactor's logarithmic
-derivative, which is holomorphic on the closed disc. -/
+/-- `∮_{|t| = r} φ(t) f'(t)/f(t) dt = 2πi ∑_j φ(aⱼ)` for entire `φ`.
+
+The entire case of `Shields.AnalyticPacket.weighted_argumentPrinciple`: an entire weight is
+analytic on the closed disc, and so is the entire cofactor this structure carries. -/
 theorem weighted_argumentPrinciple (F : PacketFactor f r k) {φ : ℂ → ℂ}
     (hφ : Differentiable ℂ φ) :
     (∮ t in C((0 : ℂ), r), φ t * (deriv f t / f t))
-      = (2 * (Real.pi : ℂ) * Complex.I) * ∑ j, φ (F.root j) := by
-  have hr := F.radius_pos
-  have hdc := F.differentiable_deriv_cofactor
-  set g : ℂ → ℂ := fun t ↦ φ t * (deriv F.cofactor t / F.cofactor t) with hgdef
-  have hgdiff : ∀ t : ℂ, ‖t‖ ≤ r → DifferentiableAt ℂ g t := fun t ht ↦
-    (hφ t).mul ((hdc t).div (F.cofactor_differentiable t) (F.cofactor_ne_zero t ht))
-  have hgcont : ContinuousOn g (Metric.closedBall (0 : ℂ) r) := fun t ht ↦
-    ((hgdiff t (mem_closedBall_zero_iff.1 ht)).continuousAt).continuousWithinAt
-  have hrootcont : ∀ j : Fin k,
-      ContinuousOn (fun t : ℂ ↦ φ t / (t - F.root j)) (Metric.sphere (0 : ℂ) r) := by
-    intro j t ht
-    have hne : t - F.root j ≠ 0 := F.sub_root_ne_zero (mem_sphere_zero_iff_norm.1 ht) j
-    exact (((hφ t).continuousAt).div (by fun_prop) hne).continuousWithinAt
-  have hrootint : ∀ j ∈ (Finset.univ : Finset (Fin k)),
-      CircleIntegrable (fun t : ℂ ↦ φ t / (t - F.root j)) 0 r :=
-    fun j _ ↦ (hrootcont j).circleIntegrable hr.le
-  have hsumint : CircleIntegrable (fun t : ℂ ↦ ∑ j, φ t / (t - F.root j)) 0 r :=
-    (continuousOn_finsetSum _ fun j _ ↦ hrootcont j).circleIntegrable hr.le
-  have hgint : CircleIntegrable g 0 r :=
-    (hgcont.mono Metric.sphere_subset_closedBall).circleIntegrable hr.le
-  have hEq : Set.EqOn (fun t ↦ φ t * (deriv f t / f t))
-      (fun t ↦ (∑ j, φ t / (t - F.root j)) + g t) (Metric.sphere (0 : ℂ) r) := by
-    intro t ht
-    have hn := mem_sphere_zero_iff_norm.1 ht
-    simp only [hgdef]
-    rw [F.logDeriv_eq hn, mul_add, Finset.mul_sum]
-    congr 1
-  have hzero : (∮ t in C((0 : ℂ), r), g t) = 0 :=
-    Complex.circleIntegral_eq_zero_of_differentiable_on_off_countable hr.le Set.countable_empty
-      hgcont fun t ht ↦ hgdiff t (le_of_lt (mem_ball_zero_iff.1 ht.1))
-  have hroot : ∀ j : Fin k, (∮ t in C((0 : ℂ), r), φ t / (t - F.root j))
-      = 2 * (Real.pi : ℂ) * Complex.I * φ (F.root j) := fun j ↦
-    Complex.circleIntegral_div_sub_of_differentiable_on_off_countable Set.countable_empty
-      (mem_ball_zero_iff.2 (F.root_mem_ball j)) hφ.continuous.continuousOn fun t _ ↦ hφ t
-  rw [circleIntegral.integral_congr hr.le hEq, circleIntegral.integral_add hsumint hgint,
-    circleIntegral.integral_fun_sum hrootint, hzero, add_zero,
-    Finset.sum_congr rfl fun j (_ : j ∈ Finset.univ) ↦ hroot j, Finset.mul_sum]
+      = (2 * (Real.pi : ℂ) * Complex.I) * ∑ j, φ (F.root j) :=
+  F.toAnalyticPacket.weighted_argumentPrinciple
+    ((hφ.differentiableOn.analyticOnNhd isOpen_univ).mono (Set.subset_univ _))
 
 /-- The count: `(2πi)^{-1} ∮ f'/f = k`. -/
 theorem circleIntegral_logDeriv (F : PacketFactor f r k) :
-    (∮ t in C((0 : ℂ), r), deriv f t / f t) = (2 * (Real.pi : ℂ) * Complex.I) * k := by
-  have h := F.weighted_argumentPrinciple (φ := fun _ ↦ (1 : ℂ)) (differentiable_const 1)
-  simpa using h
+    (∮ t in C((0 : ℂ), r), deriv f t / f t) = (2 * (Real.pi : ℂ) * Complex.I) * k :=
+  F.toAnalyticPacket.circleIntegral_logDeriv
 
 /-- The power sums of the packet. -/
 theorem circleIntegral_pow_logDeriv (F : PacketFactor f r k) (m : ℕ) :
     (∮ t in C((0 : ℂ), r), t ^ m * (deriv f t / f t))
       = (2 * (Real.pi : ℂ) * Complex.I) * ∑ j, F.root j ^ m :=
-  F.weighted_argumentPrinciple (φ := fun t ↦ t ^ m) (differentiable_pow m)
+  F.toAnalyticPacket.circleIntegral_pow_logDeriv m
 
 end PacketFactor
 
@@ -405,17 +519,22 @@ theorem packetPoly_natDegree {k : ℕ} (a : Fin k → ℂ) : (packetPoly a).natD
     Polynomial.natDegree_prod_of_monic _ _ fun j _ ↦ Polynomial.monic_X_sub_C (a j)]
   simp
 
+/-- The packet polynomial as a multiset product, which is the form Vieta's formulas and the
+root multiset are stated in. -/
+theorem packetPoly_eq_multiset_prod {k : ℕ} (a : Fin k → ℂ) :
+    packetPoly a
+      = (Multiset.map (fun t ↦ Polynomial.X - Polynomial.C t)
+          (Multiset.map a (Finset.univ : Finset (Fin k)).val)).prod := by
+  rw [packetPoly, Finset.prod_eq_multiset_prod, Multiset.map_map]
+  rfl
+
 /-- Vieta: the coefficients of the packet polynomial are, up to sign, the elementary
 symmetric functions of the packet. -/
 theorem packetPoly_coeff {k m : ℕ} (a : Fin k → ℂ) (hm : m ≤ k) :
     (packetPoly a).coeff m = (-1) ^ (k - m) * esymmC a (k - m) := by
   have hcard : Multiset.card (Multiset.map a (Finset.univ : Finset (Fin k)).val) = k := by simp
-  have hprod : packetPoly a
-      = (Multiset.map (fun t ↦ Polynomial.X - Polynomial.C t)
-          (Multiset.map a (Finset.univ : Finset (Fin k)).val)).prod := by
-    rw [packetPoly, Finset.prod_eq_multiset_prod, Multiset.map_map]
-    rfl
-  rw [hprod, Multiset.prod_X_sub_C_coeff _ (by rw [hcard]; exact hm), hcard, esymmC,
+  rw [packetPoly_eq_multiset_prod, Multiset.prod_X_sub_C_coeff _ (by rw [hcard]; exact hm),
+    hcard, esymmC,
     MvPolynomial.aeval_esymm_eq_multiset_esymm]
 
 theorem packetPoly_coeff_of_lt {k m : ℕ} (a : Fin k → ℂ) (hm : k < m) :
@@ -506,12 +625,6 @@ end Convergence
 
 /-! ### The bridge to `RoucheAnalytic` -/
 
-/-- The packet product is `Shields.zeroFactor` of the packet's root multiset. -/
-theorem zeroFactor_map_univ {k : ℕ} (a : Fin k → ℂ) (t : ℂ) :
-    zeroFactor (Multiset.map a Finset.univ.val) t = ∏ j, (t - a j) := by
-  rw [zeroFactor, Multiset.map_map, Finset.prod_eq_multiset_prod]
-  rfl
-
 /-- The packet polynomial evaluates to the packet product. -/
 theorem eval_packetPoly {k : ℕ} (a : Fin k → ℂ) (t : ℂ) :
     (packetPoly a).eval t = ∏ j, (t - a j) := by
@@ -520,30 +633,15 @@ theorem eval_packetPoly {k : ℕ} (a : Fin k → ℂ) (t : ℂ) :
 /-- The roots of the packet polynomial are the packet, with multiplicity. -/
 theorem roots_packetPoly {k : ℕ} (a : Fin k → ℂ) :
     (packetPoly a).roots = Multiset.map a Finset.univ.val := by
-  have hprod : packetPoly a
-      = (Multiset.map (fun t ↦ Polynomial.X - Polynomial.C t)
-          (Multiset.map a (Finset.univ : Finset (Fin k)).val)).prod := by
-    rw [packetPoly, Finset.prod_eq_multiset_prod, Multiset.map_map]
-    rfl
-  rw [hprod, Polynomial.roots_multiset_prod_X_sub_C]
+  rw [packetPoly_eq_multiset_prod, Polynomial.roots_multiset_prod_X_sub_C]
 
 /-- **The bridge.**  The `k` carried by a `PacketFactor` is `RoucheAnalytic`'s zero count: the
 number of zeros of `f` in the open disc, counted by `analyticOrderNatAt`.  Nothing beyond the
 structure's own hypotheses is needed, so the copied count `PacketFactor.circleIntegral_logDeriv`
 and `Shields.circleIntegral_logDeriv` compute the same integer. -/
 theorem PacketFactor.zeroCount_eq {f : ℂ → ℂ} {r : ℝ} {k : ℕ} (F : PacketFactor f r k) :
-    zeroCount f 0 r = k := by
-  have hg : AnalyticOnNhd ℂ F.cofactor (closedBall (0 : ℂ) r) :=
-    (F.cofactor_differentiable.differentiableOn.analyticOnNhd isOpen_univ).mono
-      (Set.subset_univ _)
-  have hcard := zeroCount_eq_card (f := f) (g := F.cofactor) (c := (0 : ℂ)) (R := r)
-    (s := Multiset.map F.root Finset.univ.val)
-    (fun u hu ↦ by
-      obtain ⟨j, _, rfl⟩ := Multiset.mem_map.1 hu
-      exact mem_ball_zero_iff.2 (F.root_mem_ball j))
-    hg (fun z hz ↦ F.cofactor_ne_zero z (mem_closedBall_zero_iff.1 hz))
-    (fun z ↦ by rw [zeroFactor_map_univ]; exact F.eq_prod z)
-  simpa using hcard
+    zeroCount f 0 r = k :=
+  F.toAnalyticPacket.zeroCount_eq
 
 /-- The copied count and `RoucheAnalytic`'s argument principle agree.  Deriving
 `PacketFactor.circleIntegral_logDeriv` a second time, through `PacketFactor.zeroCount_eq` and
@@ -559,185 +657,6 @@ theorem PacketFactor.circleIntegral_logDeriv_via_zeroCount {f : ℂ → ℂ} {r 
     F.zeroCount_eq]
   ring
 
-/-! ### Packets of a merely analytic function -/
-
-/-- A `PacketFactor` whose cofactor is only analytic on the closed disc.  This is the weakest
-hypothesis under which the argument principle argument runs, and — unlike `PacketFactor`, whose
-cofactor is entire — it is available for **every** function analytic on a neighborhood of the
-closed disc with no zero on the circle: see `exists_analyticPacket`.  A function analytic only on a
-disc need not extend to an entire function, so the entire cofactor of `PacketFactor` is a genuine
-restriction and not a normalization. -/
-structure AnalyticPacket (f : ℂ → ℂ) (r : ℝ) (k : ℕ) where
-  /-- The contour radius is positive. -/
-  radius_pos : 0 < r
-  /-- The enclosed zeros, listed with multiplicity. -/
-  root : Fin k → ℂ
-  /-- The zero-free cofactor. -/
-  cofactor : ℂ → ℂ
-  /-- Every root lies strictly inside the contour. -/
-  root_mem_ball : ∀ j, ‖root j‖ < r
-  /-- The cofactor is analytic on a neighborhood of the closed disc. -/
-  cofactor_analyticOnNhd : AnalyticOnNhd ℂ cofactor (closedBall (0 : ℂ) r)
-  /-- The cofactor has no zero on the closed disc: the listed roots are all of them. -/
-  cofactor_ne_zero : ∀ t : ℂ, ‖t‖ ≤ r → cofactor t ≠ 0
-  /-- The factorization itself. -/
-  eq_prod : ∀ t : ℂ, f t = (∏ j, (t - root j)) * cofactor t
-
-/-- The copied structure is a special case: an entire cofactor is analytic on the closed disc. -/
-def PacketFactor.toAnalyticPacket {f : ℂ → ℂ} {r : ℝ} {k : ℕ} (F : PacketFactor f r k) :
-    AnalyticPacket f r k where
-  radius_pos := F.radius_pos
-  root := F.root
-  cofactor := F.cofactor
-  root_mem_ball := F.root_mem_ball
-  cofactor_analyticOnNhd :=
-    (F.cofactor_differentiable.differentiableOn.analyticOnNhd isOpen_univ).mono (Set.subset_univ _)
-  cofactor_ne_zero := F.cofactor_ne_zero
-  eq_prod := F.eq_prod
-
-namespace AnalyticPacket
-
-variable {f : ℂ → ℂ} {r : ℝ} {k : ℕ}
-
-/-- The root multiset of the packet. -/
-noncomputable def rootMultiset (F : AnalyticPacket f r k) : Multiset ℂ :=
-  Multiset.map F.root Finset.univ.val
-
-theorem card_rootMultiset (F : AnalyticPacket f r k) :
-    Multiset.card F.rootMultiset = k := by simp [rootMultiset]
-
-theorem rootMultiset_mem_ball (F : AnalyticPacket f r k) {u : ℂ} (hu : u ∈ F.rootMultiset) :
-    u ∈ ball (0 : ℂ) r := by
-  obtain ⟨j, _, rfl⟩ := Multiset.mem_map.1 hu
-  exact mem_ball_zero_iff.2 (F.root_mem_ball j)
-
-theorem eq_zeroFactor_mul (F : AnalyticPacket f r k) (t : ℂ) :
-    f t = zeroFactor F.rootMultiset t * F.cofactor t := by
-  rw [rootMultiset, zeroFactor_map_univ]; exact F.eq_prod t
-
-/-- The function of an analytic packet is analytic on a neighborhood of the closed disc. -/
-theorem analyticOnNhd (F : AnalyticPacket f r k) :
-    AnalyticOnNhd ℂ f (closedBall (0 : ℂ) r) := by
-  have hfe : f = fun t ↦ zeroFactor F.rootMultiset t * F.cofactor t :=
-    funext F.eq_zeroFactor_mul
-  rw [hfe]
-  exact fun t ht ↦ (analyticAt_zeroFactor _ t).mul (F.cofactor_analyticOnNhd t ht)
-
-theorem sub_root_ne_zero (F : AnalyticPacket f r k) {t : ℂ} (ht : ‖t‖ = r) (j : Fin k) :
-    t - F.root j ≠ 0 := by
-  intro h
-  rw [sub_eq_zero] at h
-  exact absurd (h ▸ ht) (ne_of_lt (F.root_mem_ball j))
-
-/-- The contour carries no zero. -/
-theorem ne_zero_of_norm_eq (F : AnalyticPacket f r k) {t : ℂ} (ht : ‖t‖ = r) : f t ≠ 0 := by
-  rw [F.eq_prod]
-  exact mul_ne_zero (Finset.prod_ne_zero_iff.2 fun j _ ↦ F.sub_root_ne_zero ht j)
-    (F.cofactor_ne_zero t ht.le)
-
--- `t` now comes from analyticity on the closed disc rather than from entirety.
-/-- The logarithmic derivative splits over the packet and the cofactor. -/
-theorem logDeriv_eq (F : AnalyticPacket f r k) {t : ℂ} (ht : ‖t‖ = r) :
-    deriv f t / f t = (∑ j, (t - F.root j)⁻¹) + deriv F.cofactor t / F.cofactor t := by
-  have htc : t ∈ closedBall (0 : ℂ) r := mem_closedBall_zero_iff.2 ht.le
-  have hdg : DifferentiableAt ℂ F.cofactor t := (F.cofactor_analyticOnNhd t htc).differentiableAt
-  have hfe : f = fun s : ℂ ↦ (∏ j, (s - F.root j)) * F.cofactor s := funext F.eq_prod
-  have hp : (∏ j, (t - F.root j)) ≠ 0 :=
-    Finset.prod_ne_zero_iff.2 fun j _ ↦ F.sub_root_ne_zero ht j
-  have hg : F.cofactor t ≠ 0 := F.cofactor_ne_zero t ht.le
-  have hdp : DifferentiableAt ℂ (fun s : ℂ ↦ ∏ j, (s - F.root j)) t :=
-    (Differentiable.fun_finsetProd fun j _ ↦ differentiable_id.sub_const _) t
-  have h1 : logDeriv f t
-      = logDeriv (fun s : ℂ ↦ (∏ j, (s - F.root j)) * F.cofactor s) t :=
-    congrArg (fun u : ℂ → ℂ ↦ logDeriv u t) hfe
-  have h2 : logDeriv (fun s : ℂ ↦ (∏ j, (s - F.root j)) * F.cofactor s) t
-      = logDeriv (fun s : ℂ ↦ ∏ j, (s - F.root j)) t + logDeriv F.cofactor t :=
-    logDeriv_mul t hp hg hdp hdg
-  have h3 : logDeriv (fun s : ℂ ↦ ∏ j, (s - F.root j)) t = ∑ j, (t - F.root j)⁻¹ := by
-    rw [logDeriv_prod (f := fun (j : Fin k) (s : ℂ) ↦ s - F.root j)
-      (fun j _ ↦ F.sub_root_ne_zero ht j) (fun j _ ↦ by fun_prop)]
-    exact Finset.sum_congr rfl fun j _ ↦ by
-      simp [logDeriv_apply, one_div]
-  rw [show deriv f t / f t = logDeriv f t from rfl, h1, h2, h3, logDeriv_apply]
-
--- weight `φ` are now analytic on a neighborhood of the closed disc rather than entire.
-/-- **The weighted argument principle for analytic functions.**  For `φ` analytic on a
-neighborhood of the closed disc,
-\[
-  \oint_{|t| = r} \varphi(t)\,\frac{f'(t)}{f(t)}\,dt = 2\pi i \sum_j \varphi(a_j),
-\]
-the sum over the packet with multiplicity.  Neither `RoucheAnalytic` nor `Weierstrass` carries a
-general weight; both carry a general center, which this does not.  At `φ = 1` this is the center-`0`
-case of `Shields.circleIntegral_logDeriv` and at `φ = t^m` the center-`0` case of
-`Shields.circleIntegral_pow_mul_logDeriv_of_zeroFactor`. -/
-theorem weighted_argumentPrinciple (F : AnalyticPacket f r k) {φ : ℂ → ℂ}
-    (hφ : AnalyticOnNhd ℂ φ (closedBall (0 : ℂ) r)) :
-    (∮ t in C((0 : ℂ), r), φ t * (deriv f t / f t))
-      = (2 * (Real.pi : ℂ) * Complex.I) * ∑ j, φ (F.root j) := by
-  have hr := F.radius_pos
-  have hdc : AnalyticOnNhd ℂ (deriv F.cofactor) (closedBall (0 : ℂ) r) :=
-    F.cofactor_analyticOnNhd.deriv
-  set g : ℂ → ℂ := fun t ↦ φ t * (deriv F.cofactor t / F.cofactor t) with hgdef
-  have hgdiff : ∀ t ∈ closedBall (0 : ℂ) r, DifferentiableAt ℂ g t := fun t ht ↦
-    (hφ t ht).differentiableAt.mul (((hdc t ht).differentiableAt).div
-      ((F.cofactor_analyticOnNhd t ht).differentiableAt)
-      (F.cofactor_ne_zero t (mem_closedBall_zero_iff.1 ht)))
-  have hgcont : ContinuousOn g (closedBall (0 : ℂ) r) := fun t ht ↦
-    ((hgdiff t ht).continuousAt).continuousWithinAt
-  have hrootcont : ∀ j : Fin k,
-      ContinuousOn (fun t : ℂ ↦ φ t / (t - F.root j)) (sphere (0 : ℂ) r) := by
-    intro j t ht
-    have htc : t ∈ closedBall (0 : ℂ) r := sphere_subset_closedBall ht
-    have hne : t - F.root j ≠ 0 := F.sub_root_ne_zero (mem_sphere_zero_iff_norm.1 ht) j
-    exact (((hφ t htc).continuousAt).div (by fun_prop) hne).continuousWithinAt
-  have hrootint : ∀ j ∈ (Finset.univ : Finset (Fin k)),
-      CircleIntegrable (fun t : ℂ ↦ φ t / (t - F.root j)) 0 r :=
-    fun j _ ↦ (hrootcont j).circleIntegrable hr.le
-  have hsumint : CircleIntegrable (fun t : ℂ ↦ ∑ j, φ t / (t - F.root j)) 0 r :=
-    (continuousOn_finsetSum _ fun j _ ↦ hrootcont j).circleIntegrable hr.le
-  have hgint : CircleIntegrable g 0 r :=
-    (hgcont.mono sphere_subset_closedBall).circleIntegrable hr.le
-  have hEq : Set.EqOn (fun t ↦ φ t * (deriv f t / f t))
-      (fun t ↦ (∑ j, φ t / (t - F.root j)) + g t) (sphere (0 : ℂ) r) := by
-    intro t ht
-    have hn := mem_sphere_zero_iff_norm.1 ht
-    simp only [hgdef]
-    rw [F.logDeriv_eq hn, mul_add, Finset.mul_sum]
-    congr 1
-  have hzero : (∮ t in C((0 : ℂ), r), g t) = 0 :=
-    Complex.circleIntegral_eq_zero_of_differentiable_on_off_countable hr.le Set.countable_empty
-      hgcont fun t ht ↦ hgdiff t (ball_subset_closedBall ht.1)
-  have hroot : ∀ j : Fin k, (∮ t in C((0 : ℂ), r), φ t / (t - F.root j))
-      = 2 * (Real.pi : ℂ) * Complex.I * φ (F.root j) := fun j ↦
-    Complex.circleIntegral_div_sub_of_differentiable_on_off_countable Set.countable_empty
-      (mem_ball_zero_iff.2 (F.root_mem_ball j)) hφ.continuousOn
-      fun t ht ↦ (hφ t (ball_subset_closedBall ht.1)).differentiableAt
-  rw [circleIntegral.integral_congr hr.le hEq, circleIntegral.integral_add hsumint hgint,
-    circleIntegral.integral_fun_sum hrootint, hzero, add_zero,
-    Finset.sum_congr rfl fun j (_ : j ∈ Finset.univ) ↦ hroot j, Finset.mul_sum]
-
-/-- The count. -/
-theorem circleIntegral_logDeriv (F : AnalyticPacket f r k) :
-    (∮ t in C((0 : ℂ), r), deriv f t / f t) = (2 * (Real.pi : ℂ) * Complex.I) * k := by
-  have h := F.weighted_argumentPrinciple (φ := fun _ ↦ (1 : ℂ)) analyticOnNhd_const
-  simpa using h
-
-/-- The power sums of the packet, for `f` merely analytic on the closed disc. -/
-theorem circleIntegral_pow_logDeriv (F : AnalyticPacket f r k) (m : ℕ) :
-    (∮ t in C((0 : ℂ), r), t ^ m * (deriv f t / f t))
-      = (2 * (Real.pi : ℂ) * Complex.I) * ∑ j, F.root j ^ m :=
-  F.weighted_argumentPrinciple (φ := fun t ↦ t ^ m)
-    (fun _t _ ↦ analyticAt_id.pow m)
-
-/-- **The bridge, analytic case.**  The `k` of an `AnalyticPacket` is `RoucheAnalytic`'s zero
-count. -/
-theorem zeroCount_eq (F : AnalyticPacket f r k) : zeroCount f 0 r = k := by
-  have hcard := zeroCount_eq_card (f := f) (g := F.cofactor) (c := (0 : ℂ)) (R := r)
-    (s := F.rootMultiset) (fun u hu ↦ F.rootMultiset_mem_ball hu) F.cofactor_analyticOnNhd
-    (fun z hz ↦ F.cofactor_ne_zero z (mem_closedBall_zero_iff.1 hz)) F.eq_zeroFactor_mul
-  rw [hcard, F.card_rootMultiset]
-
-end AnalyticPacket
 
 /-! ### Analytic Weierstrass preparation -/
 

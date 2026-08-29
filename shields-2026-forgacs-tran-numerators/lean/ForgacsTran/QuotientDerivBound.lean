@@ -62,8 +62,7 @@ theorem abs_div_deriv_le {N N' D D' A bN bN' bD' : ℝ}
   have hden : 4 * A ^ 2 ≤ D ^ 2 := by nlinarith
   have hDne : D ≠ 0 := ne_of_gt hDpos
   have hsplit : (N' * D - N * D') / D ^ 2 = N' / D + -(N * D' / D ^ 2) := by
-    field_simp
-    ring
+    field
   rw [hsplit]
   refine le_trans (abs_add_le _ _) (add_le_add ?_ ?_)
   · rw [abs_div, abs_of_pos hDpos]
@@ -80,7 +79,7 @@ derivative -- and the conclusion carries it out front, so the constant is visibl
 That the factor comes out is the whole point: it is what makes the bound `O(s)` with a
 constant that does not move with `M`, rather than a bound whose constant hides the decay. -/
 theorem abs_div_deriv_le_of_scaled {N N' D D' A cN cN' bD' s : ℝ}
-    (hA : 0 < A) (hD : 2 * A ≤ D) (hs : 0 ≤ s)
+    (hA : 0 < A) (hD : 2 * A ≤ D) (_hs : 0 ≤ s)
     (hN : |N| ≤ s * cN) (hN' : |N'| ≤ s * cN') (hD' : |D'| ≤ bD') :
     |(N' * D - N * D') / D ^ 2| ≤ s * (cN' / (2 * A) + cN * bD' / (4 * A ^ 2)) := by
   have h := abs_div_deriv_le hA hD hN hN' hD'

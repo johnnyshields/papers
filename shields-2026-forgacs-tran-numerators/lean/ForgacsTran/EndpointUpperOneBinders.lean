@@ -6,6 +6,7 @@ Authors: Johnny Shields
 import ForgacsTran.EndpointUpperOne
 import ForgacsTran.EndpointUpperGap
 import ForgacsTran.PrincipalSimpleBranch
+import ForgacsTran.PencilIndex
 
 /-!
 # The upper endpoint's contour bound and amplitude floor at `r = 1`
@@ -65,9 +66,10 @@ shared cause rather than a coincidence, and
 time.
 
 So `p_1 = 0` is exactly the `ord_{-L}(B) \le 1` statement, which is what the floor
-below is proved under.  `p_1 = 0` is also the strongest the binder's `p_1 : ℕ`
-shape admits at `m = 0`, where the true rate `\eta^{-1}` cannot be stated in it at
-all.
+below is proved under; `EndpointUpperMultiplicity` carries `p_1 = ord_{-L}(B) - 1`
+at every `m`, which is what the corners consume.  `p_1 = 0` is also the strongest
+the binder's `p_1 : ℕ` shape admits at `m = 0`, where the true rate `\eta^{-1}`
+cannot be stated in it at all.
 
 ## Main statements
 
@@ -149,7 +151,7 @@ theorem exists_endpoint_limits_pi {n : ℕ} {a : Fin n → ℝ} {c : ℝ} (hn2 :
         (𝓝 (-(ftRootPolyReal c a).eval (-L) / (-L))) := by
   obtain ⟨L, hL, hτ, hE⟩ := exists_tendsto_ftTau_nhdsLT_pi hn2 ha hc
   refine ⟨L, hL, hE, hτ, ?_⟩
-  have hcast : π / ((1 : ℕ) : ℝ) = π := by push_cast; rw [div_one]
+  have hcast : π / ((1 : ℕ) : ℝ) = π := pi_div_natCast_one
   have hmem : ∀ᶠ θ in 𝓝[<] π, θ ∈ Ioo 0 π ∧ FTBranchAt a 1 (n - 1) θ := by
     filter_upwards [Ioo_mem_nhdsLT pi_pos] with θ hθ
     refine ⟨hθ, ftBranchAt_of_arc_principal (by omega) ha le_rfl (Or.inl hn2) ?_⟩
@@ -512,9 +514,12 @@ rather than two: at `m = 0` the amplitude diverges and at `m = 1` it tends to a
 positive constant, and the bound below is all either case needs.
 
 At `m \ge 2` the conclusion is FALSE — the amplitude vanishes — and `\eta^{m-1}`
-is the honest exponent there.  Proving that needs the splitting rate
-`|t_+ - t_b| \asymp \eta` of the double root, which this argument deliberately
-avoids and the tree does not carry. -/
+is the honest exponent there.  What that case needs beyond this one is a **lower**
+bound on `d`, and only that: not the two-sided splitting rate
+`|t_+ - t_b| \asymp \eta`, which is a statement about the local geometry of the
+double root.  `EndpointUpperMultiplicity` supplies the lower bound from the
+imaginary part alone and carries the floor at every `m`; this theorem is the case
+where no bound on `d` is used at all. -/
 theorem eventually_le_ftPrincipalAmp_of_rootMultiplicity_le_one
     {Q B : Polynomial ℂ} {r : ℕ} (hr : 1 ≤ r) {b : ℝ} {z τ : ℝ → ℝ} {tb : ℂ}
     (hB0 : B ≠ 0) (hE0 : ftCritical Q r ≠ 0) (htb : tb ≠ 0)
@@ -629,7 +634,7 @@ theorem branch_data_endpoint_pi {n : ℕ} {a : Fin n → ℝ} {c x₁ : ℝ}
         (derivative (ftDen (ftRootPoly c a) 1
             ((ftBranchZ a c 1 (n - 1) (π - η) : ℝ) : ℂ))).eval
             (ftPrincipal (ftTauArc a 1 (n - 1) x₁) (π - η)) ≠ 0) := by
-  have hcast : π / ((1 : ℕ) : ℝ) = π := by push_cast; rw [div_one]
+  have hcast : π / ((1 : ℕ) : ℝ) = π := pi_div_natCast_one
   have harc : ∀ᶠ η in 𝓝[>] (0 : ℝ), π - η ∈ Ioo 0 (π / ((1 : ℕ) : ℝ)) := by
     filter_upwards [Ioo_mem_nhdsGT pi_pos] with η hηπ
     rw [hcast]
@@ -911,7 +916,7 @@ theorem eventually_upper_retained_one {a : Fin 3 → ℝ} {c x₁ : ℝ}
   classical
   have hsum1 : ∑ k, L / (a k + L) = 1 := by
     simpa using sum_div_add_eq_of_eval_ftCriticalReal_neg (r := 1) ha hc hL hE
-  have hcast : π / ((1 : ℕ) : ℝ) = π := by push_cast; rw [div_one]
+  have hcast : π / ((1 : ℕ) : ℝ) = π := pi_div_natCast_one
   -- the arc data, in the chart
   have harc : ∀ᶠ δ in 𝓝[>] (0 : ℝ), π - δ ∈ Ioo 0 (π / ((1 : ℕ) : ℝ)) := by
     filter_upwards [Ioo_mem_nhdsGT pi_pos] with δ hδπ

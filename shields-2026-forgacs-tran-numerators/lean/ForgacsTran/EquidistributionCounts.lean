@@ -81,7 +81,13 @@ namespace ForgacsTran
 
 open Real Set
 
-/-! ### The bridge -/
+/-! ### The bridge
+
+Nothing under this heading mentions the cubic pencil, `ftCoeffPoly` or the branch.
+The three statements are about a polynomial, a `Finset` of its distinct roots and a
+phase-turning lower bound, and they are what turns a count of *distinct* zeros into
+the multiplicity count `eq:angular-distinct-lower` claims.  The pencil enters only
+in § `hin` at the cubic pencil below. -/
 
 /-- **`eq:angular-distinct-lower` as a multiplicity count.**  A `Finset` of
 distinct roots inside `A`, carrying at least `L/π - 2` elements, bounds the

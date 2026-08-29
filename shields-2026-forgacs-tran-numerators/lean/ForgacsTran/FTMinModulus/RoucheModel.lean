@@ -268,7 +268,7 @@ no hypothesis about `τ` assumed: `FTBranchLimitPoint.exists_bound_ftTau_sub_lin
 supplies the rate and `principal_expansion_of_tau_rate` is its transfer.
 
 The point is written out as `↑(ftTau …) * exp(↑δ * I)` rather than as
-`DominanceFT.ftPrincipal`, which is the same term — that module sits above this
+`DominanceFTSupply.ftPrincipal`, which is the same term — that module sits above this
 one. -/
 theorem exists_principal_expansion_of_branch {n r ρ : ℕ} {a : Fin n → ℝ}
     {S : Finset (Fin n)} (hn2 : 2 ≤ n) (ha : ∀ k, 0 < a k) (hr : 1 ≤ r) {i : Fin n}
@@ -509,10 +509,7 @@ theorem norm_pencil_sub_model_le_of_norm_le {q : ℂ[X]} {xc t z z₀ : ℂ} {M 
   have hM0 : (0 : ℝ) ≤ M := le_trans (norm_nonneg t) htM
   have hMr : (0 : ℝ) ≤ M ^ r := pow_nonneg hM0 r
   have hMr1 : (0 : ℝ) ≤ M ^ (r - 1) := pow_nonneg hM0 _
-  have hL0 : 0 ≤ L := by
-    rw [hL]
-    exact Finset.sum_nonneg fun k _ =>
-      mul_nonneg (norm_nonneg _) (mul_nonneg (Nat.cast_nonneg k) (pow_nonneg hM0 _))
+  have hL0 : 0 ≤ L := by rw [hL]; exact lipschitzSum_nonneg q hM0
   have hDδ : (0 : ℝ) ≤ D * δ := mul_nonneg hD0 hδ.le
   -- the `q`-increment, weighted by `‖t - x_1‖^ρ`
   have hT1 : ‖t - xc‖ ^ ρ * ‖q.eval t - q.eval xc‖ ≤ L * D ^ (ρ + 1) * δ ^ (ρ + 1) := by

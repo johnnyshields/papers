@@ -36,7 +36,7 @@
 \newcommand{\Pp}{\mathbb P}
 \newcommand{\Tur}{\Delta}
 
-\title[Cubic threshold for coefficientwise log-concavity of multiple-Pochhammer series]
+\title[Cubic threshold for multiple-Pochhammer log-concavity]
 {The cubic threshold for coefficientwise log-concavity\\
 of multiple-Pochhammer series}
 
@@ -58,11 +58,13 @@ Multiple-Pochhammer power series associated with a nonnegative log-concave seque
 were shown by Karp and Zhang to be coefficientwise log-concave at multiplicity two,
 while the cubic case remained open.  We prove the cubic conjecture, in the equivalent
 fixed-sum form of coefficientwise Schur-concavity.  Together with a degree-three
-obstruction for larger multiplicities, this yields the sharp classification:
+obstruction for every larger multiplicity, this yields the sharp classification:
 universal coefficientwise log-concavity holds precisely at multiplicities two and
-three.  The proof reduces the coefficient inequalities to monotonicity of a symmetric
-residue kernel and shows that, in the cubic case, this kernel preserves the central
-ordering imposed by log-concavity.
+three.  Degreewise, the coefficient inequalities are equivalent to monotonicity of a
+symmetric residue kernel weighted by the anti-diagonal products of the sequence, while
+log-concavity with no internal zeros is exactly central increase of these weights in
+every degree.  At multiplicity three we prove this kernel monotonicity for every
+nonnegative centrally increasing symmetric weight sequence.
 \end{abstract}
 
 \maketitle
@@ -1312,12 +1314,13 @@ mechanism also explains the sharp multiplicity threshold.
 
 Beyond that threshold, universal positivity fails, but failure of the Bernstein
 certificate does not force failure of kernel monotonicity.  \Cref{sec:threshold}
-shows this already for \(r=4\).  Two natural questions remain:
-does the constant-weight kernel at multiplicity four stay monotone in every degree,
-and which restricted cones of centrally weighted sequences continue to preserve
-monotonicity for multiplicities beyond three?  These questions separate the failure
-of a universal theorem from the finer positive structure that may survive in the
-supercritical regime.
+shows this already for \(r=4\).  Exact computation shows that, for
+\(2\le m\le50\), the constant-weight kernel fails to be monotone only at \(m=3\);
+we conjecture that degree three is its only failure.  Another natural question is: for
+multiplicities beyond three, which restricted cones of centrally increasing symmetric
+weights still produce monotone kernels?  Together these problems separate the
+failure of a universal theorem from the finer positive structure that may survive in
+the supercritical regime.
 
 \section*{Declarations}
 {\footnotesize
@@ -1331,7 +1334,7 @@ supercritical regime.
 \noindent\textbf{Data availability.} No datasets were generated or analyzed.
 
 \smallskip
-\noindent\textbf{Computational verification.} The proofs do not depend on numerical computation.  Scripts used for verification are available at \url{https://github.com/johnnyshields/papers}.
+\noindent\textbf{Computational verification.} The proofs do not depend on numerical computation.  Scripts used for verification, figures, and conjecture are available at \url{https://github.com/johnnyshields/papers}.
 
 \smallskip
 \noindent\textbf{Generative AI use.} During the preparation of this work, the author used OpenAI's ChatGPT (GPT-5.6 Sol) and Anthropic's Claude (Opus 5, Opus 4.8) to assist with mathematical research, manuscript drafting, and the development of auxiliary verification code.  After using these tools, the author reviewed and edited as needed.  The author takes full responsibility for the content of the work.\par}

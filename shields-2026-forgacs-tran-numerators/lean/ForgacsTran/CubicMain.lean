@@ -36,7 +36,7 @@ That fixed width was never the mathematics.  `weighted_dominance_of_branch` asks
 for its window inequality inside `hinterior`'s `∀ e` while using it at one `e`,
 and as `e → 0` the interior contraction ratio tends to `1`, so the half-width
 `eq:amplitude-deletion` forces tends to a fixed positive number.
-`DominanceFT.dominance_shrinking_of_fixed_window` repairs it, by fixing the
+`DominanceFTSupply.dominance_shrinking_of_fixed_window` repairs it, by fixing the
 interior parameter first -- which is what `subsec:proof` does, choosing `ε` with
 every amplitude zero inside `(ε, π/r - ε)` before `M` is quantified.
 
@@ -184,6 +184,26 @@ theorem ofReal_cubicZ_image_subset {u v : ℝ} (huv : u ≤ v)
   exact ⟨x, ⟨lt_of_lt_of_le hu.1 hx.1, lt_of_le_of_lt hx.2 hv.2⟩, rfl⟩
 
 
+/-- **Zeros in two ordered spectral intervals cannot coincide.**  The counts over the
+two components of the retained range add rather than overlap, and this is the whole
+reason: `z` carries the two components to intervals that do not meet, so a zero
+produced by one cannot be produced by the other.
+
+Stated over bare endpoints, because that is all it uses — no branch, no pencil, and no
+monotonicity beyond the single inequality `d₁ < c₂` the caller supplies from
+`cubicZ_strictMonoOn`. -/
+theorem disjoint_of_ofReal_image_lt {Z₁ Z₂ : Finset ℂ} {c₁ d₁ c₂ d₂ : ℝ}
+    (h₁ : ∀ w ∈ Z₁, w ∈ Complex.ofReal '' Set.Icc c₁ d₁)
+    (h₂ : ∀ w ∈ Z₂, w ∈ Complex.ofReal '' Set.Icc c₂ d₂)
+    (hlt : d₁ < c₂) : Disjoint Z₁ Z₂ := by
+  refine Finset.disjoint_left.2 fun w hw1 hw2 => ?_
+  obtain ⟨x, hx, rfl⟩ := h₁ w hw1
+  obtain ⟨y, hy, hxy⟩ := h₂ _ hw2
+  have hyx : y = x := by exact_mod_cast hxy
+  subst hyx
+  linarith [hx.2, hy.1]
+
+
 /-! ### The count over the retained range
 
 `cubicTheta` deletes `|θ - π/2| < 1` at every `M`, so the retained range has
@@ -259,13 +279,7 @@ theorem cubic_interior_zero_count :
     have h := cubicZ_strictMonoOn (a := Real.pi / 2 - 1) (b := Real.pi / 2 + 1)
       ⟨by linarith, by linarith⟩ ⟨by linarith, by linarith⟩ (by linarith)
     simpa using h
-  have hdisj : Disjoint Z1 Z2 := by
-    refine Finset.disjoint_left.2 fun w hw1 hw2 => ?_
-    obtain ⟨x, hx, rfl⟩ := hm1 w hw1
-    obtain ⟨y, hy, hxy⟩ := hm2 _ hw2
-    have hyx : y = x := by exact_mod_cast hxy
-    subst hyx
-    linarith [hx.2, hy.1]
+  have hdisj : Disjoint Z1 Z2 := disjoint_of_ofReal_image_lt hm1 hm2 hmid
   refine ⟨Z1 ∪ Z2, ?_, ?_, ?_⟩
   · -- the arithmetic: two components of length `π/2 - 1 - h/M` each
     rw [Finset.card_union_of_disjoint hdisj]
@@ -388,20 +402,14 @@ theorem cubic_bulk_count_of_shrinkingWindow (hdom : CubicShrinkingWindow) :
       (b := Real.pi / 2 + h / (M : ℝ)) ⟨by linarith, by linarith⟩ ⟨by linarith, by linarith⟩
       (by linarith)
     simpa using hx
-  have hdisj : Disjoint Z1 Z2 := by
-    refine Finset.disjoint_left.2 fun w hw1 hw2 => ?_
-    obtain ⟨x, hx, rfl⟩ := hm1 w hw1
-    obtain ⟨y, hy, hxy⟩ := hm2 _ hw2
-    have hyx : y = x := by exact_mod_cast hxy
-    subst hyx
-    linarith [hx.2, hy.1]
+  have hdisj : Disjoint Z1 Z2 := disjoint_of_ofReal_image_lt hm1 hm2 hmid
   refine ⟨Z1 ∪ Z2, ?_, ?_, ?_⟩
   · rw [Finset.card_union_of_disjoint hdisj]
     push_cast
     set e : ℝ := h / (M : ℝ) with he
     have hexp : ((M : ℝ) - 1 / 2) * (Real.pi / 2 - 2 * e)
         = ((M : ℝ) - 1 / 2) * Real.pi / 2 - 2 * h + e := by
-      rw [he]; field_simp; ring
+      rw [he]; field
     have hdiv : (((M : ℝ) - 1 / 2) - 4 * h / 3) / 2
         ≤ ((M : ℝ) - 1 / 2) * (Real.pi / 2 - 2 * e) / Real.pi := by
       rw [le_div_iff₀ Real.pi_pos, hexp]

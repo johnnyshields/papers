@@ -4,6 +4,7 @@ Released under the MIT license as described in the file LICENSE.txt.
 Authors: Johnny Shields
 -/
 import ForgacsTran.FTMinModulus.ScaleMatching
+import ForgacsTran.PencilIndex
 
 /-!
 # Proposition 3 Case 3, and the endpoint limits of the branch value
@@ -140,10 +141,7 @@ theorem exists_ftDen_root_near_origin_model_root {Q : ℂ[X]} {r : ℕ} (hr : 1 
   set L : ℝ := ∑ k ∈ Finset.range (Q.natDegree + 1), ‖Q.coeff k‖ * ((k : ℝ) * M ^ (k - 1))
     with hL
   have hM0 : (0 : ℝ) ≤ M := le_trans (by positivity) hM
-  have hL0 : 0 ≤ L := by
-    rw [hL]
-    exact Finset.sum_nonneg fun k _ =>
-      mul_nonneg (norm_nonneg _) (mul_nonneg (Nat.cast_nonneg k) (pow_nonneg hM0 _))
+  have hL0 : 0 ≤ L := by rw [hL]; exact lipschitzSum_nonneg Q hM0
   -- the model's modulus on the circle is a constant
   have hnu : ‖u‖ ^ r * ‖z‖ = ‖Q.eval 0‖ := norm_model_root_pow hroot
   set Mp : ℂ[X] := C z * X ^ r + C (Q.eval 0) with hMp
@@ -174,9 +172,7 @@ theorem exists_ftDen_root_near_origin_model_root {Q : ℂ[X]} {r : ℕ} (hr : 1 
     have hfge := model_norm_ge_of_near_root (c₀ := Q.eval 0) (c₁ := z) (u := u) (v := w)
       hr hQ0 hz hroot (by rw [hws]; nlinarith only [hκ4, hu0, norm_nonneg u])
     rw [hws] at hfge
-    have hpw : ‖u‖ * ‖u‖ ^ (r - 1) = ‖u‖ ^ r := by
-      conv_rhs => rw [show r = 1 + (r - 1) by omega]
-      rw [pow_add, pow_one]
+    have hpw : ‖u‖ * ‖u‖ ^ (r - 1) = ‖u‖ ^ r := mul_pow_sub_one (by omega) _
     have hconst : ‖z‖ * ((r : ℝ) / 2 * (κ * ‖u‖) * ‖u‖ ^ (r - 1))
         = (r : ℝ) / 2 * κ * ‖Q.eval 0‖ := by
       calc ‖z‖ * ((r : ℝ) / 2 * (κ * ‖u‖) * ‖u‖ ^ (r - 1))
@@ -210,10 +206,15 @@ error `5e`.
 The lower endpoint's `exists_cluster_ratio_close` needed `ρ ≥ 1` and a
 factorization `Q = (X - x_1)^ρq`; this needs neither, which is the same
 simplification `exists_ftDen_root_near_origin_model_root` shows in the
-domination. -/
+domination.
+
+`Q(t_p) ≠ 0` is not a hypothesis because it is one: the `z`-free relation gives
+`Q(t_p) = -zt_p^r`, and `hz` with `htp0` make that nonzero.  The producer
+`exists_upper_ratio_bound` still returns it, since it is what makes the ratio in
+`hclose` the quotient it is written as. -/
 theorem exists_upper_ratio_close {Q : ℂ[X]} {r : ℕ} (hr : 1 ≤ r) {z t tp : ℂ}
     (hz : z ≠ 0) (ht : (ftDen Q r z).eval t = 0) (htp : (ftDen Q r z).eval tp = 0)
-    (htp0 : tp ≠ 0) (hQtp : Q.eval tp ≠ 0) {e : ℝ} (he2 : e ≤ 1 / 2)
+    (htp0 : tp ≠ 0) {e : ℝ} (he2 : e ≤ 1 / 2)
     (hclose : ‖Q.eval t / Q.eval tp - 1‖ ≤ e) :
     ∃ μ : ℂ, μ ^ r = 1 ∧ ‖t - μ * tp‖ ≤ 5 * e * ‖tp‖ := by
   rw [ftDen_eval] at ht htp
@@ -520,7 +521,7 @@ sees `(1+u)^r` — and `norm_one_add_pow_sub_linear_le` then trades `(1+u)^r` fo
 step has already put `‖u‖` at `O(A)`.  Nothing here is asymptotic: both constants
 are explicit and the inequality is pointwise. -/
 theorem norm_nat_mul_sub_le_of_pow_eq {r : ℕ} {μ u w : ℂ} {A C K : ℝ}
-    (hμ : μ ^ r = 1) (hK : 0 ≤ K) (hA : 0 ≤ A) (hu1 : ‖u‖ ≤ 1) (hu : ‖u‖ ≤ K * A)
+    (hμ : μ ^ r = 1) (_hK : 0 ≤ K) (_hA : 0 ≤ A) (hu1 : ‖u‖ ≤ 1) (hu : ‖u‖ ≤ K * A)
     (hratio : ‖(μ * (1 + u)) ^ r - (1 + w)‖ ≤ C * A ^ 2) :
     ‖(r : ℂ) * u - w‖ ≤ (C + 2 ^ r * r * K ^ 2) * A ^ 2 := by
   have hpow : (μ * (1 + u)) ^ r = (1 + u) ^ r := by
@@ -550,7 +551,7 @@ because `‖t_p‖ = O(A)` and `‖u‖ = O(A)` — so
 The `β` here is `Q'(0)/Q(0) = -S`, and `t_p` is `O(δ)` by the τ-rate, so this is
 where the member's linear coefficient in `δ` is finally an explicit number. -/
 theorem norm_sub_beta_mul_le {r : ℕ} (hr : 1 ≤ r) {μ u tp β : ℂ} {A C K : ℝ}
-    (hK : 0 ≤ K) (hA : 0 ≤ A) (hμ1 : ‖μ‖ = 1) (htp : ‖tp‖ ≤ A) (hu : ‖u‖ ≤ K * A)
+    (_hK : 0 ≤ K) (hA : 0 ≤ A) (hμ1 : ‖μ‖ = 1) (htp : ‖tp‖ ≤ A) (hu : ‖u‖ ≤ K * A)
     (h : ‖(r : ℂ) * u - β * ((μ - 1) * tp + μ * tp * u)‖ ≤ C * A ^ 2) :
     ‖u - β / r * ((μ - 1) * tp)‖ ≤ (C + ‖β‖ * K) / r * A ^ 2 := by
   have hrR : (0 : ℝ) < (r : ℝ) := by exact_mod_cast hr
@@ -648,8 +649,14 @@ loses the `-i`, so the coefficient comes out short by exactly that — a plausib
 shortcut that yields a wrong number rather than a failed proof, which is the
 class that gets shipped.  The `-i` here is the whole content of that split, and
 it is invisible in the conclusion because it is purely imaginary and only
-`Re c` survives to `hexp₁`. -/
-theorem norm_upper_member_expansion_le {r : ℕ} (hr : 1 ≤ r)
+`Re c` survives to `hexp₁`.
+
+**`_hr` is inert in the proof and load-bearing in the statement.**  At `r = 0`
+Lean's `x/0 = 0` sends `βL/r` to `0` in `hu` and in the conclusion at once, so the
+proof term still checks while the coefficient quietly loses its `(βL/r)(μ-1)ν₁`
+half and the theorem degenerates to `c = -i`.  Both sides collapse together, which
+is why no gate reports it. -/
+theorem norm_upper_member_expansion_le {r : ℕ} (_hr : 1 ≤ r)
     {μ ν₀ ν₁ tp u β : ℂ} {δ L Cu Ct Cν : ℝ}
     (hδ : 0 ≤ δ) (hδ1 : δ ≤ 1) (hμ1 : ‖μ‖ = 1) (hν1 : ‖ν₁‖ = 1)
     (hCu : 0 ≤ Cu) (hCt : 0 ≤ Ct) (hCν : 0 ≤ Cν)
@@ -890,9 +897,7 @@ theorem continuousOn_ftBranchZ {n r : ℕ} {a : Fin n → ℝ} (c : ℝ) (hn : 0
     (continuousOn_const.mul hprod).div (hτ.pow r)
       fun θ hθ => pow_ne_zero r (ftTau_pos (hb θ hθ)).ne'
   refine hg.congr fun θ hθ => ?_
-  have hpar : Even (n + (n - 1) + 1) := by
-    have hEq : n + (n - 1) + 1 = 2 * n := by omega
-    rw [hEq]; exact even_two_mul n
+  have hpar : Even (n + (n - 1) + 1) := even_add_pred_add_one hn
   exact ftBranchZ_eq_chordProd ha hpar (ftArc_subset hr hθ) (hb θ hθ) rfl
 
 /-- Non-vacuity of `exists_tendsto_ftBranchZ_arc_zero`, witnessed at `r = 1`.

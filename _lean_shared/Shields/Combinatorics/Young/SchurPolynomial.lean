@@ -52,6 +52,22 @@ Everything below is one alphabet and a straight shape.
 Schur polynomial, Young diagram, semistandard tableau, symmetric function
 -/
 
+namespace YoungDiagram
+
+/-- A cell is missing from `μ` exactly when its row index has reached the height
+of its column. -/
+theorem notMem_iff_le_colLen {μ : YoungDiagram} {i j : ℕ} :
+    (i, j) ∉ μ ↔ μ.colLen j ≤ i := by
+  rw [mem_iff_lt_colLen, Nat.not_lt]
+
+/-- A cell is missing from `μ` exactly when its column index has reached the
+length of its row. -/
+theorem notMem_iff_le_rowLen {μ : YoungDiagram} {i j : ℕ} :
+    (i, j) ∉ μ ↔ μ.rowLen i ≤ j := by
+  rw [mem_iff_lt_rowLen, Nat.not_lt]
+
+end YoungDiagram
+
 namespace SemistandardYoungTableau
 
 variable {μ : YoungDiagram}
@@ -254,6 +270,18 @@ theorem cells_rect (n k : ℕ) : (rect n k).cells = Finset.range n ×ˢ Finset.r
 theorem mem_rect {n k i j : ℕ} : (i, j) ∈ rect n k ↔ i < n ∧ j < k := by
   simp [rect, ← YoungDiagram.mem_cells]
 
+theorem transpose_rect (n k : ℕ) : (rect n k).transpose = rect k n := by
+  refine YoungDiagram.ext (Finset.ext fun c => ?_)
+  obtain ⟨i, j⟩ := c
+  simp only [YoungDiagram.mem_cells, YoungDiagram.mem_transpose, Prod.swap_prod_mk, mem_rect]
+  omega
+
+theorem rect_mono_right {n k₁ k₂ : ℕ} (h : k₁ ≤ k₂) : rect n k₁ ≤ rect n k₂ := by
+  intro c hc
+  obtain ⟨i, j⟩ := c
+  obtain ⟨hi, hj⟩ := mem_rect.mp hc
+  exact mem_rect.mpr ⟨hi, by omega⟩
+
 theorem colLen_rect_of_lt {n k j : ℕ} (hj : j < k) : (rect n k).colLen j = n := by
   have key : ∀ i : ℕ, i < (rect n k).colLen j ↔ i < n := by
     intro i
@@ -272,6 +300,34 @@ theorem colLen_rect_le (n k j : ℕ) : (rect n k).colLen j ≤ n := by
       have : (0, j) ∈ rect n k := YoungDiagram.mem_iff_lt_colLen.mpr (by omega)
       exact hj (mem_rect.mp this).2
     omega
+
+theorem rowLen_rect_of_lt {n k i : ℕ} (hi : i < n) : (rect n k).rowLen i = k := by
+  have key : ∀ j : ℕ, (i, j) ∈ rect n k ↔ j < k := by
+    intro j
+    rw [mem_rect]
+    omega
+  have h1 := key ((rect n k).rowLen i)
+  have h2 := key k
+  rw [YoungDiagram.mem_iff_lt_rowLen] at h1 h2
+  omega
+
+theorem rowLen_rect_of_le {n k i : ℕ} (hi : n ≤ i) : (rect n k).rowLen i = 0 :=
+  Nat.le_zero.mp (YoungDiagram.notMem_iff_le_rowLen.mp fun hc =>
+    absurd (mem_rect.mp hc).1 (by omega))
+
+/-- Along a column, entries increase weakly. -/
+theorem boundedSSYT_col_mono {m a : ℕ} (T : BoundedSSYT (rect m 1) a) {i₁ i₂ : ℕ}
+    (h : i₁ ≤ i₂) (hi₂ : i₂ < m) : T i₁ 0 ≤ T i₂ 0 := by
+  rcases eq_or_lt_of_le h with rfl | hlt
+  · exact le_rfl
+  · exact le_of_lt (T.1.col_strict hlt (mem_rect.mpr ⟨hi₂, Nat.zero_lt_one⟩))
+
+/-- Rows of a one-row bounded tableau are weakly increasing. -/
+theorem boundedSSYT_row_mono {m b : ℕ} (T : BoundedSSYT (rect 1 m) b) {j₁ j₂ : ℕ}
+    (h : j₁ ≤ j₂) (hj₂ : j₂ < m) : T 0 j₁ ≤ T 0 j₂ := by
+  rcases eq_or_lt_of_le h with rfl | hlt
+  · exact le_rfl
+  · exact T.1.row_weak hlt (mem_rect.mpr ⟨Nat.zero_lt_one, hj₂⟩)
 
 /-- On the `n`-by-`k` rectangle, a tableau with entries `< n` has `T i j = i`.
 Below, `le_entry`; above, the column-gap bound run to the bottom of the column,
@@ -316,5 +372,12 @@ theorem schur_bot (n : ℕ) (x : ℕ → R) : schur ⊥ n x = 1 := by
     ext c
     simp
   rw [← h, schur_rect, pow_zero]
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.schur' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms schur
 
 end Shields

@@ -3,6 +3,7 @@ Copyright (c) 2026 Johnny Shields. All rights reserved.
 Released under the MIT license as described in the file LICENSE.txt.
 Authors: Johnny Shields
 -/
+import Mathlib.Analysis.SpecialFunctions.Choose
 import Mathlib.Analysis.SpecialFunctions.Exponential
 import Mathlib.Data.Nat.Factorial.BigOperators
 import Mathlib.Topology.Algebra.InfiniteSum.Basic
@@ -216,13 +217,7 @@ theorem elemHom_mono (q : ℕ) : Monotone fun a => elemHom a q α := by
 since the `q`-subsets are among all subsets. -/
 theorem elemHom_le_prod_one_add (a q : ℕ) :
     elemHom a q α ≤ ∏ i ∈ Finset.range a, (1 + α i) := by
-  have hprod : ∏ i ∈ Finset.range a, (1 + α i)
-      = ∑ S ∈ (Finset.range a).powerset, ∏ i ∈ S, α i := by
-    have h := Finset.prod_add (fun i => α i) (fun _ => (1 : ℝ)) (Finset.range a)
-    simp only [Finset.prod_const_one, mul_one] at h
-    rw [← h]
-    exact Finset.prod_congr rfl fun i _ => by ring
-  rw [elemHom_eq_sum_powersetCard, hprod]
+  rw [elemHom_eq_sum_powersetCard, Finset.prod_one_add]
   refine Finset.sum_le_sum_of_subset_of_nonneg ?_
     (fun S _ _ => Finset.prod_nonneg fun i _ => hα i)
   intro S hS
@@ -231,14 +226,14 @@ theorem elemHom_le_prod_one_add (a q : ℕ) :
 /-- **The uniform bound.**  A summable alphabet bounds every elementary symmetric
 function of every truncation by one constant. -/
 theorem elemHom_le_exp (hs : Summable α) (a q : ℕ) :
-    elemHom a q α ≤ Real.exp (∑' i, α i) := by
-  refine (elemHom_le_prod_one_add hα a q).trans ?_
-  have h1 : ∏ i ∈ Finset.range a, (1 + α i) ≤ ∏ i ∈ Finset.range a, Real.exp (α i) :=
-    Finset.prod_le_prod (fun i _ => by linarith [hα i])
-      (fun i _ => by rw [add_comm]; exact Real.add_one_le_exp _)
-  refine h1.trans ?_
-  rw [← Real.exp_sum]
-  exact Real.exp_le_exp.mpr (Summable.sum_le_tsum _ (fun i _ => hα i) hs)
+    elemHom a q α ≤ Real.exp (∑' i, α i) :=
+  ((elemHom_le_prod_one_add hα a q).trans (Real.prod_one_add_le_exp_sum _ hα)).trans
+    (Real.exp_le_exp.mpr (Summable.sum_le_tsum _ (fun i _ => hα i) hs))
+
+/-- The truncations of `e_q` are bounded above by the exponential of the total mass. -/
+theorem bddAbove_range_elemHom (hs : Summable α) (q : ℕ) :
+    BddAbove (Set.range fun a => elemHom a q α) :=
+  ⟨Real.exp (∑' i, α i), by rintro _ ⟨a, rfl⟩; exact elemHom_le_exp hα hs a q⟩
 
 /-- **The infinite elementary symmetric function exists.**  For a summable nonnegative
 alphabet the truncated `e_q` increase and are bounded, so they converge; this is exactly
@@ -246,66 +241,37 @@ the hypothesis that the coefficients of an infinite-alphabet symbol are limits o
 finite ones. -/
 theorem tendsto_elemHom (hs : Summable α) (q : ℕ) :
     Tendsto (fun a => elemHom a q α) atTop (𝓝 (⨆ a, elemHom a q α)) :=
-  tendsto_atTop_ciSup (elemHom_mono hα q)
-    ⟨Real.exp (∑' i, α i), by rintro _ ⟨a, rfl⟩; exact elemHom_le_exp hα hs a q⟩
+  tendsto_atTop_ciSup (elemHom_mono hα q) (bddAbove_range_elemHom hα hs q)
 
 /-- The limit is the sum over *all* `q`-element subsets of `ℕ`. -/
 theorem hasSum_elemHom (hs : Summable α) (q : ℕ) :
     HasSum (fun S : {S : Finset ℕ // S.card = q} => ∏ i ∈ S.1, α i)
       (⨆ a, elemHom a q α) := by
-  have hbdd : BddAbove (Set.range fun a => elemHom a q α) :=
-    ⟨Real.exp (∑' i, α i), by rintro _ ⟨a, rfl⟩; exact elemHom_le_exp hα hs a q⟩
-  -- every finite family of `q`-subsets sits inside one truncation
-  have hbound : ∀ F : Finset {S : Finset ℕ // S.card = q},
-      ∑ S ∈ F, ∏ i ∈ S.1, α i ≤ ⨆ a, elemHom a q α := by
-    intro F
+  have hbdd := bddAbove_range_elemHom hα hs q
+  refine hasSum_of_isLUB_of_nonneg _ (fun S => Finset.prod_nonneg fun i _ => hα i) ⟨?_, ?_⟩
+  · -- every finite family of `q`-subsets sits inside one truncation
+    rintro _ ⟨F, rfl⟩
     obtain ⟨a, ha⟩ : ∃ a : ℕ, ∀ S ∈ F, S.1 ⊆ Finset.range a := by
-      refine ⟨(F.sup fun S => S.1.sup id) + 1, fun S hS x hx => ?_⟩
-      have h1 : x ≤ S.1.sup id := Finset.le_sup (f := id) hx
-      have h2 : S.1.sup id ≤ F.sup fun S : {S : Finset ℕ // S.card = q} => S.1.sup id :=
-        Finset.le_sup (f := fun S : {S : Finset ℕ // S.card = q} => S.1.sup id) hS
-      exact Finset.mem_range.mpr (by omega)
-    have himg : Finset.image (fun S : {S : Finset ℕ // S.card = q} => S.1) F
-        ⊆ Finset.powersetCard q (Finset.range a) := by
-      intro S hS
-      obtain ⟨T, hT, rfl⟩ := Finset.mem_image.mp hS
-      exact Finset.mem_powersetCard.mpr ⟨ha T hT, T.2⟩
+      obtain ⟨a, ha⟩ := (F.sup fun S => S.1).exists_nat_subset_range
+      exact ⟨a, fun S hS =>
+        (Finset.le_sup (f := fun S : {S : Finset ℕ // S.card = q} => S.1) hS).trans ha⟩
     calc ∑ S ∈ F, ∏ i ∈ S.1, α i
-        = ∑ S ∈ Finset.image (fun S : {S : Finset ℕ // S.card = q} => S.1) F,
-            ∏ i ∈ S, α i :=
-          (Finset.sum_image (g := fun S : {S : Finset ℕ // S.card = q} => S.1)
-            (f := fun S : Finset ℕ => ∏ i ∈ S, α i)
-            (fun (S : {S : Finset ℕ // S.card = q}) _ (T : {S : Finset ℕ // S.card = q}) _
-              (h : S.1 = T.1) => Subtype.ext h)).symm
+        = ∑ S ∈ F.map (Function.Embedding.subtype _), ∏ i ∈ S, α i :=
+          (Finset.sum_subtype_map_embedding
+            (f := fun S : {S : Finset ℕ // S.card = q} => ∏ i ∈ S.1, α i) fun _ _ => rfl).symm
       _ ≤ ∑ S ∈ Finset.powersetCard q (Finset.range a), ∏ i ∈ S, α i :=
-          Finset.sum_le_sum_of_subset_of_nonneg himg
+          Finset.sum_le_sum_of_subset_of_nonneg
+            (fun S hS => by
+              obtain ⟨T, hT, rfl⟩ := Finset.mem_map.mp hS
+              exact Finset.mem_powersetCard.mpr ⟨ha T hT, T.2⟩)
             (fun S _ _ => Finset.prod_nonneg fun i _ => hα i)
       _ = elemHom a q α := (elemHom_eq_sum_powersetCard a q α).symm
       _ ≤ ⨆ a, elemHom a q α := le_ciSup hbdd a
-  apply hasSum_of_isLUB_of_nonneg
-  · intro S
-    exact Finset.prod_nonneg fun i _ => hα i
-  refine ⟨?_, ?_⟩
-  · rintro _ ⟨F, rfl⟩
-    exact hbound F
-  · intro c hc
-    refine ciSup_le fun a => ?_
-    rw [elemHom_eq_sum_powersetCard]
-    have hsub : ∀ S ∈ Finset.powersetCard q (Finset.range a), S.card = q :=
-      fun S hS => (Finset.mem_powersetCard.mp hS).2
-    set G : Finset {S : Finset ℕ // S.card = q} :=
-      (Finset.powersetCard q (Finset.range a)).attach.image
-        (fun S => ⟨S.1, hsub S.1 S.2⟩) with hG
-    have hGsum : ∑ S ∈ Finset.powersetCard q (Finset.range a), ∏ i ∈ S, α i
-        = ∑ S ∈ G, ∏ i ∈ S.1, α i := by
-      rw [hG, Finset.sum_image
-        (g := fun S : {x : Finset ℕ // x ∈ Finset.powersetCard q (Finset.range a)} =>
-          (⟨S.1, hsub S.1 S.2⟩ : {S : Finset ℕ // S.card = q}))
-        (f := fun S : {S : Finset ℕ // S.card = q} => ∏ i ∈ S.1, α i)
-        (fun S _ T _ h => Subtype.ext (congrArg (fun x : {S : Finset ℕ // S.card = q} => x.1) h))]
-      exact (Finset.sum_attach _ (fun S => ∏ i ∈ S, α i)).symm
-    rw [hGsum]
-    exact hc ⟨G, rfl⟩
+  · -- and every truncation is one such family
+    refine fun c hc => ciSup_le fun a => ?_
+    rw [elemHom_eq_sum_powersetCard, ← Finset.sum_subtype_of_mem (fun S => ∏ i ∈ S, α i)
+      fun S hS => (Finset.mem_powersetCard.mp hS).2]
+    exact hc ⟨_, rfl⟩
 
 end Limits
 
@@ -326,41 +292,14 @@ factors `1 - i/b`. -/
 theorem tendsto_choose_div_pow (q : ℕ) :
     Filter.Tendsto (fun b : ℕ => (b.choose q : ℝ) / (b : ℝ) ^ q) Filter.atTop
       (nhds (1 / (Nat.factorial q : ℝ))) := by
-  have hq : (0 : ℝ) < (Nat.factorial q : ℝ) := by exact_mod_cast Nat.factorial_pos q
-  have hprod : Filter.Tendsto (fun b : ℕ => ∏ i ∈ Finset.range q, (1 - (i : ℝ) / b))
-      Filter.atTop (nhds 1) := by
-    have h := tendsto_finsetProd (f := fun (i : ℕ) (b : ℕ) => 1 - (i : ℝ) / b)
-      (a := fun _ : ℕ => (1 : ℝ)) (x := Filter.atTop) (Finset.range q)
-      (fun i _ => by
-        simpa using (tendsto_const_nhds (x := (1 : ℝ)) (f := Filter.atTop)).sub
-          (tendsto_const_div_atTop_nhds_zero_nat (i : ℝ)))
-    simpa using h
-  have hkey : ∀ b : ℕ, q ≤ b → 0 < b →
-      (b.choose q : ℝ) / (b : ℝ) ^ q
-        = (∏ i ∈ Finset.range q, (1 - (i : ℝ) / b)) / (Nat.factorial q : ℝ) := by
-    intro b hqb hb
-    have hb0 : (0 : ℝ) < (b : ℝ) := by exact_mod_cast hb
-    have hdesc : ((b.descFactorial q : ℕ) : ℝ) = ∏ i ∈ Finset.range q, ((b : ℝ) - i) := by
-      rw [Nat.descFactorial_eq_prod_range, Nat.cast_prod]
-      refine Finset.prod_congr rfl fun i hi => ?_
-      have : i ≤ b := le_of_lt (lt_of_lt_of_le (Finset.mem_range.mp hi) hqb)
-      exact Nat.cast_sub this
-    have hchoose : (Nat.factorial q : ℝ) * (b.choose q : ℝ)
-        = ∏ i ∈ Finset.range q, ((b : ℝ) - i) := by
-      rw [← hdesc, ← Nat.cast_mul, Nat.descFactorial_eq_factorial_mul_choose]
-    have hsplit : (∏ i ∈ Finset.range q, (1 - (i : ℝ) / b))
-        = (∏ i ∈ Finset.range q, ((b : ℝ) - i)) / (b : ℝ) ^ q := by
-      rw [eq_div_iff (by positivity)]
-      have hpow : ((b : ℝ) ^ q) = ∏ _i ∈ Finset.range q, (b : ℝ) := by
-        rw [Finset.prod_const, Finset.card_range]
-      rw [hpow, ← Finset.prod_mul_distrib]
-      refine Finset.prod_congr rfl fun i _ => by field_simp
-    rw [hsplit, div_div, mul_comm ((b : ℝ) ^ q), ← div_div, ← hchoose]
-    field_simp
-  refine Filter.Tendsto.congr' ?_ (hprod.div_const (Nat.factorial q : ℝ))
-  filter_upwards [Filter.eventually_ge_atTop (max q 1)] with b hb
-  exact (hkey b (le_trans (le_max_left _ _) hb) (lt_of_lt_of_le Nat.zero_lt_one
-    (le_trans (le_max_right _ _) hb))).symm
+  have h : Asymptotics.IsEquivalent Filter.atTop
+      (fun b : ℕ => (b.choose q : ℝ) / (b : ℝ) ^ q)
+      (fun b : ℕ => ((b : ℝ) ^ q / Nat.factorial q) / (b : ℝ) ^ q) :=
+    (isEquivalent_choose q).div Asymptotics.IsEquivalent.refl
+  refine h.symm.tendsto_nhds (tendsto_const_nhds.congr' ?_)
+  filter_upwards [Filter.eventually_ge_atTop 1] with b hb
+  have hb0 : (0 : ℝ) < (b : ℝ) := by exact_mod_cast hb
+  field_simp
 
 /-- **The free parameter.**  The alphabet of `b` variables each equal to `γ/b` has
 elementary symmetric functions converging to `γ^q/q!`, the Taylor coefficients of
@@ -393,30 +332,34 @@ theorem elemHom_succ (a q : ℕ) (α : ℕ → R) :
   rw [Finset.sum_union (by
     refine Finset.disjoint_left.mpr fun S hS hS' => ?_
     obtain ⟨T, hT, rfl⟩ := Finset.mem_image.mp hS'
-    have : a ∈ Finset.range a := by
-      have := (Finset.mem_powersetCard.mp hS).1
-      exact this (Finset.mem_insert_self a T)
-    simp at this)]
+    simpa using (Finset.mem_powersetCard.mp hS).1 (Finset.mem_insert_self a T))]
   congr 1
   rw [Finset.sum_image (fun S hS T hT h => by
-    have hSa : a ∉ S := fun hx => by
-      have := (Finset.mem_powersetCard.mp hS).1 hx
-      simp at this
-    have hTa : a ∉ T := fun hx => by
-      have := (Finset.mem_powersetCard.mp hT).1 hx
-      simp at this
+    have hSa : a ∉ S := fun hx => by simpa using (Finset.mem_powersetCard.mp hS).1 hx
+    have hTa : a ∉ T := fun hx => by simpa using (Finset.mem_powersetCard.mp hT).1 hx
     have := congrArg (fun (X : Finset ℕ) => X.erase a) h
     simpa [Finset.erase_insert hSa, Finset.erase_insert hTa] using this)]
   rw [Finset.mul_sum]
   refine Finset.sum_congr rfl fun S hS => ?_
-  have hSa : a ∉ S := fun hx => by
-    have := (Finset.mem_powersetCard.mp hS).1 hx
-    simp at this
+  have hSa : a ∉ S := fun hx => by simpa using (Finset.mem_powersetCard.mp hS).1 hx
   rw [Finset.prod_insert hSa]
 
 /-- The alphabet of `a + b` letters made of `α` on the first block and `β` on the second. -/
 noncomputable def concatAlphabet (a : ℕ) (α β : ℕ → R) : ℕ → R :=
   fun i => if i < a then α i else β (i - a)
+
+/-- `e_q` reads only the first `a` letters. -/
+theorem elemHom_congr {a q : ℕ} {α α' : ℕ → R} (h : ∀ i < a, α i = α' i) :
+    elemHom a q α = elemHom a q α' := by
+  rw [elemHom_eq_sum_powersetCard, elemHom_eq_sum_powersetCard]
+  refine Finset.sum_congr rfl fun S hS => ?_
+  exact Finset.prod_congr rfl fun i hi =>
+    h i (Finset.mem_range.mp ((Finset.mem_powersetCard.mp hS).1 hi))
+
+/-- On its first block the concatenated alphabet is the first one. -/
+theorem elemHom_concatAlphabet_left {a q a₀ : ℕ} (h : a₀ ≤ a) (α β : ℕ → R) :
+    elemHom a₀ q (concatAlphabet a α β) = elemHom a₀ q α :=
+  elemHom_congr fun _i hi => if_pos (lt_of_lt_of_le hi h)
 
 /-- **The two-alphabet convolution** `e_q(A ∪ B) = ∑_{p+p'=q} e_p(A) e_{p'}(B)`.  This is
 what lets an infinite alphabet and a free parameter be passed to the limit together. -/
@@ -427,12 +370,8 @@ theorem elemHom_concat (a : ℕ) (α β : ℕ → R) :
   induction b with
   | zero =>
       intro q
-      have hpref : ∀ i < a, concatAlphabet a α β i = α i := fun i hi => if_pos hi
       have hleft : elemHom (a + 0) q (concatAlphabet a α β) = elemHom a q α := by
-        rw [Nat.add_zero, elemHom_eq_sum_powersetCard, elemHom_eq_sum_powersetCard]
-        refine Finset.sum_congr rfl fun S hS => ?_
-        exact Finset.prod_congr rfl fun i hi =>
-          hpref i (Finset.mem_range.mp ((Finset.mem_powersetCard.mp hS).1 hi))
+        rw [Nat.add_zero]; exact elemHom_concatAlphabet_left le_rfl α β
       rw [hleft, Finset.sum_eq_single q]
       · rw [Nat.sub_self, elemHom_zero, mul_one]
       · intro p hp hpq
@@ -471,24 +410,26 @@ theorem elemHom_concat (a : ℕ) (α β : ℕ → R) :
             Nat.sub_self, elemHom_zero, elemHom_zero]
           linear_combination hS
 
-/-- `e_q` reads only the first `a` letters. -/
-theorem elemHom_congr {a q : ℕ} {α α' : ℕ → R} (h : ∀ i < a, α i = α' i) :
-    elemHom a q α = elemHom a q α' := by
-  rw [elemHom_eq_sum_powersetCard, elemHom_eq_sum_powersetCard]
-  refine Finset.sum_congr rfl fun S hS => ?_
-  exact Finset.prod_congr rfl fun i hi =>
-    h i (Finset.mem_range.mp ((Finset.mem_powersetCard.mp hS).1 hi))
-
-/-- On its first block the concatenated alphabet is the first one. -/
-theorem elemHom_concatAlphabet_left {a q a₀ : ℕ} (h : a₀ ≤ a) (α β : ℕ → R) :
-    elemHom a₀ q (concatAlphabet a α β) = elemHom a₀ q α :=
-  elemHom_congr fun _i hi => if_pos (lt_of_lt_of_le hi h)
-
 /-- Hence so does the two-alphabet coefficient. -/
 theorem superHom_concatAlphabet_left {b a q a₀ : ℕ} (h : a₀ ≤ a) (β α γβ : ℕ → R) :
     superHom b a₀ q β (concatAlphabet a α γβ) = superHom b a₀ q β α := by
   rw [superHom, superHom]
   exact Finset.sum_congr rfl fun p _ => by
     rw [elemHom_concatAlphabet_left h]
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.tendsto_elemHom' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms tendsto_elemHom
+
+/-- info: 'Shields.hasSum_elemHom' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms hasSum_elemHom
+
+/-- info: 'Shields.tendsto_elemHom_const' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms tendsto_elemHom_const
 
 end Shields

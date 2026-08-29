@@ -24,6 +24,35 @@ namespace ForgacsTran
 
 open Set Polynomial Complex
 
+/-- **One retained component of `eq:Omega-M`, at one index.**  What a caller has to
+exhibit about the subarc the phase count is run on: it sits inside the retained
+range `h/M ≤ θ ≤ bb - h/M` and off the amplitude windows `Θ M`, the branch data of
+`thm:FT-geometry` holds on it, `eq:phase-derivative-bound` gives the `κ`, the phase
+turns by at least `π`, and the degree sits below that turning plus the defect.
+
+**This is `MainClauses.FTBranchData` with one clause traded for another.**  The two
+lists are the same twelve conditions except that `FTBranchData` carries
+`eq:dominance-bound` on the component while this carries the window membership that
+puts the component inside the range where `thm:weighted-dominance` already proved it.
+Trading the second for the first is the whole of `ftBranchData_of_dominance`, and
+naming both sides is what makes that one line rather than two walls of binders. -/
+def FTRetainedComponent (Q B : Polynomial ℂ) (r : ℕ) (z τ : ℝ → ℝ) (P : Polynomial ℝ)
+    (M : ℕ) (aI bI : ℝ) (C : ℕ) (h bb : ℝ) (Θ : ℕ → Set ℝ) : Prop :=
+  ∃ (a b' L : ℝ) (ψ Φ : ℝ → ℝ),
+    a ≤ b' ∧
+    (∀ θ ∈ Icc a b', h / M ≤ θ ∧ θ ≤ bb - h / M ∧ θ ∉ Θ M) ∧
+    (∀ θ ∈ Icc a b', 0 < τ θ) ∧
+    StrictMonoOn z (Icc a b') ∧
+    (∀ θ ∈ Icc a b', z θ ∈ Ioo aI bI) ∧
+    (∀ θ ∈ Icc a b', ftAmp Q B r ((z θ : ℝ) : ℂ) (ftPrincipal τ θ) ≠ 0) ∧
+    (∀ θ ∈ Icc a b', ftAmp Q B r ((z θ : ℝ) : ℂ) (ftPrincipal τ θ)
+      = ((ftPrincipalAmp Q B r z τ θ : ℝ) : ℂ) * Complex.exp ((ψ θ : ℂ) * Complex.I)) ∧
+    (∀ θ ∈ Icc a b', Φ θ = ((M : ℝ) + 1) * θ - ψ θ) ∧
+    (∃ dψ : ℝ → ℝ, ∃ κ : ℝ, (∀ θ ∈ Icc a b', HasDerivAt ψ (dψ θ) θ) ∧
+      (∀ θ ∈ Icc a b', |dψ θ| ≤ κ) ∧ κ < (M : ℝ) + 1) ∧
+    Real.pi ≤ L ∧ L ≤ Φ b' - Φ a ∧
+    ((P.map (algebraMap ℝ ℂ)).natDegree : ℝ) ≤ L / Real.pi - 2 + C
+
 /-- **The retained range meets the component.**  `thm:weighted-dominance` concludes
 `eq:dominance-bound` on the whole retained range `h/M ≤ θ ≤ b - h/M` off
 the amplitude windows, at every index past `M₀`; `FTBranchData` wants it on one
@@ -42,20 +71,8 @@ theorem ftBranchData_of_dominance {Q B : Polynomial ℂ} {r : ℕ} {z τ : ℝ �
     (hm0 : M₀ ≤ m0)
     (hdom : ∀ M : ℕ, M₀ ≤ M → ∀ θ : ℝ, h / M ≤ θ → θ ≤ bb - h / M → θ ∉ Θ M →
       ftRemainder Q B r z τ M θ ≤ ftPrincipalAmp Q B r z τ θ / 2)
-    (hcomp : ∀ M : ℕ, m0 ≤ M → ∃ (a b' L : ℝ) (ψ Φ : ℝ → ℝ),
-      a ≤ b' ∧
-      (∀ θ ∈ Icc a b', h / M ≤ θ ∧ θ ≤ bb - h / M ∧ θ ∉ Θ M) ∧
-      (∀ θ ∈ Icc a b', 0 < τ θ) ∧
-      StrictMonoOn z (Icc a b') ∧
-      (∀ θ ∈ Icc a b', z θ ∈ Ioo aI bI) ∧
-      (∀ θ ∈ Icc a b', ftAmp Q B r ((z θ : ℝ) : ℂ) (ftPrincipal τ θ) ≠ 0) ∧
-      (∀ θ ∈ Icc a b', ftAmp Q B r ((z θ : ℝ) : ℂ) (ftPrincipal τ θ)
-        = ((ftPrincipalAmp Q B r z τ θ : ℝ) : ℂ) * Complex.exp ((ψ θ : ℂ) * Complex.I)) ∧
-      (∀ θ ∈ Icc a b', Φ θ = ((M : ℝ) + 1) * θ - ψ θ) ∧
-      (∃ dψ : ℝ → ℝ, ∃ κ : ℝ, (∀ θ ∈ Icc a b', HasDerivAt ψ (dψ θ) θ) ∧
-        (∀ θ ∈ Icc a b', |dψ θ| ≤ κ) ∧ κ < (M : ℝ) + 1) ∧
-      Real.pi ≤ L ∧ L ≤ Φ b' - Φ a ∧
-      (((P M).map (algebraMap ℝ ℂ)).natDegree : ℝ) ≤ L / Real.pi - 2 + C) :
+    (hcomp : ∀ M : ℕ, m0 ≤ M →
+      FTRetainedComponent Q B r z τ (P M) M aI bI C h bb Θ) :
     ∀ M : ℕ, m0 ≤ M → FTBranchData Q B r z τ (P M) M aI bI C := by
   intro M hM
   obtain ⟨a, b', L, ψ, Φ, hab, hsub, hτ, hzmono, hzS, hWne, hpolar, hΦdef, hderiv,
@@ -86,20 +103,8 @@ theorem main_of_ftDominance {Q B : Polynomial ℂ} {r : ℕ} {z τ : ℝ → ℝ
     (haI : 0 ≤ aI) (hm0 : M₀ ≤ m0)
     (hdom : ∀ M : ℕ, M₀ ≤ M → ∀ θ : ℝ, h / M ≤ θ → θ ≤ bb - h / M → θ ∉ Θ M →
       ftRemainder Q B r z τ M θ ≤ ftPrincipalAmp Q B r z τ θ / 2)
-    (hcomp : ∀ M : ℕ, m0 ≤ M → ∃ (a b' L : ℝ) (ψ Φ : ℝ → ℝ),
-      a ≤ b' ∧
-      (∀ θ ∈ Icc a b', h / M ≤ θ ∧ θ ≤ bb - h / M ∧ θ ∉ Θ M) ∧
-      (∀ θ ∈ Icc a b', 0 < τ θ) ∧
-      StrictMonoOn z (Icc a b') ∧
-      (∀ θ ∈ Icc a b', z θ ∈ Ioo aI bI) ∧
-      (∀ θ ∈ Icc a b', ftAmp Q B r ((z θ : ℝ) : ℂ) (ftPrincipal τ θ) ≠ 0) ∧
-      (∀ θ ∈ Icc a b', ftAmp Q B r ((z θ : ℝ) : ℂ) (ftPrincipal τ θ)
-        = ((ftPrincipalAmp Q B r z τ θ : ℝ) : ℂ) * Complex.exp ((ψ θ : ℂ) * Complex.I)) ∧
-      (∀ θ ∈ Icc a b', Φ θ = ((M : ℝ) + 1) * θ - ψ θ) ∧
-      (∃ dψ : ℝ → ℝ, ∃ κ : ℝ, (∀ θ ∈ Icc a b', HasDerivAt ψ (dψ θ) θ) ∧
-        (∀ θ ∈ Icc a b', |dψ θ| ≤ κ) ∧ κ < (M : ℝ) + 1) ∧
-      Real.pi ≤ L ∧ L ≤ Φ b' - Φ a ∧
-      (((P M).map (algebraMap ℝ ℂ)).natDegree : ℝ) ≤ L / Real.pi - 2 + C) :
+    (hcomp : ∀ M : ℕ, m0 ≤ M →
+      FTRetainedComponent Q B r z τ (P M) M aI bI C h bb Θ) :
     ∀ M, m0 ≤ M →
       (∃ Z : Finset ℂ, ((P M).map (algebraMap ℝ ℂ)).natDegree - C ≤ Z.card ∧
           (∀ w ∈ Z, ((P M).map (algebraMap ℝ ℂ)).IsRoot w) ∧
@@ -217,8 +222,6 @@ theorem main_of_ftBranch_of_geometry {Q B : Polynomial ℂ}
     {p₁ : ℕ} {A₁ : ℝ} (hA₁ : 0 < A₁)
     (hamp₁ : ∃ e > (0 : ℝ), ∀ η : ℝ, 0 < η → η ≤ e →
       A₁ * η ^ p₁ ≤ ftPrincipalAmp Q B r z τ (b - η))
-    (hrootev₁ : ∀ᶠ δ in nhdsWithin (0 : ℝ) (Set.Ioi 0),
-      (ftDen Q r ((z (b - δ) : ℝ) : ℂ)).eval (ftPrincipal τ (b - δ)) = 0)
     -- `eq:lower-residue-ratio` is *not* assumed either: what is taken is the
     -- leading behavior of `B` and of `∂_tD` along each branch, which Taylor at
     -- `x_1` reads off Prop. 3's expansion; the ratio is `Cluster`'s theorem
@@ -304,21 +307,8 @@ theorem main_of_ftBranch_of_geometry {Q B : Polynomial ℂ}
     (haI : 0 ≤ aI)
     (hcomp : ∀ (hh : ℝ) (Mz : ℕ), 0 < hh → ∃ m0 : ℕ, Mz ≤ m0 ∧
       (∀ M, m0 ≤ M → (Pr M).map (algebraMap ℝ ℂ) ≠ 0) ∧
-      (∀ M : ℕ, m0 ≤ M → ∃ (a b' L : ℝ) (ψ Φ : ℝ → ℝ),
-        a ≤ b' ∧
-        (∀ θ ∈ Icc a b', hh / M ≤ θ ∧ θ ≤ b - hh / M ∧ θ ∉ Θ M) ∧
-        (∀ θ ∈ Icc a b', 0 < τ θ) ∧
-        StrictMonoOn z (Icc a b') ∧
-        (∀ θ ∈ Icc a b', z θ ∈ Ioo aI bI) ∧
-        (∀ θ ∈ Icc a b', ftAmp Q B r ((z θ : ℝ) : ℂ) (ftPrincipal τ θ) ≠ 0) ∧
-        (∀ θ ∈ Icc a b', ftAmp Q B r ((z θ : ℝ) : ℂ) (ftPrincipal τ θ)
-          = ((ftPrincipalAmp Q B r z τ θ : ℝ) : ℂ)
-            * Complex.exp ((ψ θ : ℂ) * Complex.I)) ∧
-        (∀ θ ∈ Icc a b', Φ θ = ((M : ℝ) + 1) * θ - ψ θ) ∧
-        (∃ dψ : ℝ → ℝ, ∃ κ : ℝ, (∀ θ ∈ Icc a b', HasDerivAt ψ (dψ θ) θ) ∧
-          (∀ θ ∈ Icc a b', |dψ θ| ≤ κ) ∧ κ < (M : ℝ) + 1) ∧
-        Real.pi ≤ L ∧ L ≤ Φ b' - Φ a ∧
-        (((Pr M).map (algebraMap ℝ ℂ)).natDegree : ℝ) ≤ L / Real.pi - 2 + C)) :
+      (∀ M : ℕ, m0 ≤ M →
+        FTRetainedComponent Q B r z τ (Pr M) M aI bI C hh b Θ)) :
     ∃ m0 : ℕ, ∀ M, m0 ≤ M →
       (∃ Z : Finset ℂ, ((Pr M).map (algebraMap ℝ ℂ)).natDegree - C ≤ Z.card ∧
           (∀ w ∈ Z, ((Pr M).map (algebraMap ℝ ℂ)).IsRoot w) ∧

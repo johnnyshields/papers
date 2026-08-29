@@ -161,9 +161,12 @@ theorem orderStat_le_of_card_le {n k : ℕ} (x : Fin n → ℝ) {τ : ℝ}
   refine Finset.sup'_le _ _ fun i hi => ?_
   exact (Finset.mem_filter.mp (hSsub hi)).2
 
-theorem le_orderStat_of_card_le {n k : ℕ} (x : Fin n → ℝ) {τ : ℝ}
-    [Nonempty {S : Finset (Fin n) // S.card = k + 1}]
+theorem le_orderStat_of_card_le {n k : ℕ} (x : Fin n → ℝ) {τ : ℝ} (hk : k + 1 ≤ n)
     (h : (Finset.univ.filter fun i => x i < τ).card ≤ k) : τ ≤ orderStat k x := by
+  haveI : Nonempty {S : Finset (Fin n) // S.card = k + 1} := by
+    obtain ⟨S, -, hS⟩ := Finset.exists_subset_card_eq
+      (s := (Finset.univ : Finset (Fin n))) (n := k + 1) (by simpa using hk)
+    exact ⟨⟨S, hS⟩⟩
   refine le_ciInf fun S => ?_
   obtain ⟨i, hiS, hi⟩ : ∃ i ∈ (S : Finset (Fin n)), ¬ x i < τ := by
     by_contra hcon
@@ -181,10 +184,8 @@ entry is `τ`. -/
 theorem orderStat_eq_of_card {n k : ℕ} (x : Fin n → ℝ) {τ : ℝ}
     (hlt : (Finset.univ.filter fun i => x i < τ).card ≤ k)
     (hle : k + 1 ≤ (Finset.univ.filter fun i => x i ≤ τ).card) : orderStat k x = τ := by
-  obtain ⟨S, -, hScard⟩ :=
-    Finset.exists_subset_card_eq (s := Finset.univ.filter fun i => x i ≤ τ) (n := k + 1) hle
-  haveI : Nonempty {S : Finset (Fin n) // S.card = k + 1} := ⟨⟨S, hScard⟩⟩
-  exact le_antisymm (orderStat_le_of_card_le x hle) (le_orderStat_of_card_le x hlt)
+  have hk : k + 1 ≤ n := hle.trans ((Finset.card_filter_le _ _).trans (by simp))
+  exact le_antisymm (orderStat_le_of_card_le x hle) (le_orderStat_of_card_le x hk hlt)
 
 theorem card_filter_le_eq_add {n : ℕ} (x : Fin n → ℝ) (τ : ℝ) :
     (Finset.univ.filter fun i => x i ≤ τ).card
@@ -214,5 +215,20 @@ theorem orderStat_pair_eq_of_coalescence {n : ℕ} (x : Fin n → ℝ) {m : ℕ}
     omega
   exact ⟨orderStat_eq_of_card x (by omega) (by omega),
     orderStat_eq_of_card x (by omega) (by omega)⟩
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.orderStat_of_monotone' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms orderStat_of_monotone
+
+/-- info: 'Shields.continuous_orderStat' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms continuous_orderStat
+
+/-- info: 'Shields.orderStat_pair_eq_of_coalescence' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms orderStat_pair_eq_of_coalescence
 
 end Shields

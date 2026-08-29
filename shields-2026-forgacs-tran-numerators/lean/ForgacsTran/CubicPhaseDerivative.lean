@@ -112,8 +112,7 @@ theorem eval_derivative_ftDen_cubicQ_ftPrincipal (θ : ℝ) :
           / ftPrincipal cubicTau θ := by
   have hg := ftPrincipal_cubicTau_ne_zero θ
   rw [eval_derivative_ftDen_cubicQ, cubicZ_eq_neg_div θ]
-  field_simp
-  ring
+  field
 
 /-- **`eq:W-def` at the cubic pencil, with the parameter eliminated.**  The
 residue amplitude is the rational function `γ(3γ²+1)/((1-γ)²(2γ+1))` of the
@@ -214,8 +213,7 @@ theorem hasDerivAt_cubicAmp (hθ : θ ∈ Set.Ioo 0 Real.pi) (hhalf : θ ≠ Rea
   have h1' : ftPrincipal cubicTau θ - 1 ≠ 0 := fun hc => h1 (by linear_combination -hc)
   have h2' : ftPrincipal cubicTau θ * 2 + 1 ≠ 0 := fun hc => h2 (by linear_combination hc)
   have h3' : ftPrincipal cubicTau θ ^ 2 * 3 + 1 ≠ 0 := fun hc => h3 (by linear_combination hc)
-  field_simp
-  ring
+  field
 
 
 /-! ### The retained set, and continuity there

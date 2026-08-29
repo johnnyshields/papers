@@ -61,24 +61,11 @@ limit is `exists_tendsto_ftBranchZ_arc_end_pi` and the minimum-modulus gap is
 argument condition `hcone`. -/
 theorem ft_geometry_at_branch_of_cone_pi {n : ℕ} {a : Fin n → ℝ} {c : ℝ}
     (hn3 : 3 ≤ n) (ha : ∀ k, 0 < a k) (hc : 0 < c)
-    (hcone : ∀ θ ∈ Ioo (0 : ℝ) (π / ((1 : ℕ) : ℝ)), ∀ w : ℂ,
-      (ftDen (ftRootPoly c a) 1 ((ftBranchZ a c 1 (n - 1) θ : ℝ) : ℂ)).eval w = 0 →
-        ‖w‖ ≤ ftTau a 1 (n - 1) θ → |Complex.arg w| ∈ Ioo 0 (π / ((1 : ℕ) : ℝ))) :
+    (hcone : FTArgumentCone (ftRootPoly c a) 1 (ftBranchZ a c 1 (n - 1)) (ftTau a 1 (n - 1))) :
     ∃ za b : ℝ,
       ftBranchZ a c 1 (n - 1) '' Ioo 0 (π / ((1 : ℕ) : ℝ)) = Ioo za b
-        ∧ (∀ θ ∈ Ioo 0 (π / ((1 : ℕ) : ℝ)),
-            (ftDen (ftRootPoly c a) 1 ((ftBranchZ a c 1 (n - 1) θ : ℝ) : ℂ)).eval
-                (ftPrincipal (ftTau a 1 (n - 1)) θ) = 0
-              ∧ (ftDen (ftRootPoly c a) 1 ((ftBranchZ a c 1 (n - 1) θ : ℝ) : ℂ)).eval
-                  ((starRingEnd ℂ) (ftPrincipal (ftTau a 1 (n - 1)) θ)) = 0
-              ∧ ‖ftPrincipal (ftTau a 1 (n - 1)) θ‖ = ftTau a 1 (n - 1) θ
-              ∧ ‖(starRingEnd ℂ) (ftPrincipal (ftTau a 1 (n - 1)) θ)‖
-                  = ftTau a 1 (n - 1) θ)
-        ∧ (∀ θ ∈ Ioo 0 (π / ((1 : ℕ) : ℝ)), ∀ w : ℂ,
-            (ftDen (ftRootPoly c a) 1 ((ftBranchZ a c 1 (n - 1) θ : ℝ) : ℂ)).eval w = 0 →
-              ‖w‖ ≤ ftTau a 1 (n - 1) θ →
-                w = ftPrincipal (ftTau a 1 (n - 1)) θ
-                  ∨ w = (starRingEnd ℂ) (ftPrincipal (ftTau a 1 (n - 1)) θ)) :=
+        ∧ FTPrincipalPair (ftRootPoly c a) 1 (ftBranchZ a c 1 (n - 1)) (ftTau a 1 (n - 1))
+        ∧ FTPrincipalDisk (ftRootPoly c a) 1 (ftBranchZ a c 1 (n - 1)) (ftTau a 1 (n - 1)) :=
   ft_geometry_at_branch_of_three_le hn3 ha hc
     (ft_minModulus_at_branch (by omega) ha hc le_rfl hcone)
 
@@ -87,24 +74,11 @@ analytic hypothesis.**  The `b = +∞` of `eq:ab-def`, which that display reache
 exactly when `r > 1`. -/
 theorem ft_geometry_unbounded_at_branch_of_cone {n r : ℕ} {a : Fin n → ℝ} {c : ℝ}
     (hn2 : 2 ≤ n) (ha : ∀ k, 0 < a k) (hc : 0 < c) (hr : 2 ≤ r)
-    (hcone : ∀ θ ∈ Ioo (0 : ℝ) (π / r), ∀ w : ℂ,
-      (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)).eval w = 0 →
-        ‖w‖ ≤ ftTau a r (n - 1) θ → |Complex.arg w| ∈ Ioo 0 (π / r)) :
+    (hcone : FTArgumentCone (ftRootPoly c a) r (ftBranchZ a c r (n - 1)) (ftTau a r (n - 1))) :
     ∃ za : ℝ,
       ftBranchZ a c r (n - 1) '' Ioo 0 (π / r) = Ioi za
-        ∧ (∀ θ ∈ Ioo 0 (π / r),
-            (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)).eval
-                (ftPrincipal (ftTau a r (n - 1)) θ) = 0
-              ∧ (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)).eval
-                  ((starRingEnd ℂ) (ftPrincipal (ftTau a r (n - 1)) θ)) = 0
-              ∧ ‖ftPrincipal (ftTau a r (n - 1)) θ‖ = ftTau a r (n - 1) θ
-              ∧ ‖(starRingEnd ℂ) (ftPrincipal (ftTau a r (n - 1)) θ)‖
-                  = ftTau a r (n - 1) θ)
-        ∧ (∀ θ ∈ Ioo 0 (π / r), ∀ w : ℂ,
-            (ftDen (ftRootPoly c a) r ((ftBranchZ a c r (n - 1) θ : ℝ) : ℂ)).eval w = 0 →
-              ‖w‖ ≤ ftTau a r (n - 1) θ →
-                w = ftPrincipal (ftTau a r (n - 1)) θ
-                  ∨ w = (starRingEnd ℂ) (ftPrincipal (ftTau a r (n - 1)) θ)) :=
+        ∧ FTPrincipalPair (ftRootPoly c a) r (ftBranchZ a c r (n - 1)) (ftTau a r (n - 1))
+        ∧ FTPrincipalDisk (ftRootPoly c a) r (ftBranchZ a c r (n - 1)) (ftTau a r (n - 1)) :=
   ft_geometry_at_branch_unbounded hn2 ha hc (by omega)
     (tendsto_ftBranchZ_atTop_arc_end hn2 ha hc hr)
     (ft_minModulus_at_branch hn2 ha hc (by omega) hcone)
@@ -132,19 +106,8 @@ theorem ft_geometry_at_branch_pi {n : ℕ} {a : Fin n → ℝ} {c : ℝ}
     (hn3 : 3 ≤ n) (ha : ∀ k, 0 < a k) (hc : 0 < c) :
     ∃ za b : ℝ,
       ftBranchZ a c 1 (n - 1) '' Ioo 0 (π / ((1 : ℕ) : ℝ)) = Ioo za b
-        ∧ (∀ θ ∈ Ioo 0 (π / ((1 : ℕ) : ℝ)),
-            (ftDen (ftRootPoly c a) 1 ((ftBranchZ a c 1 (n - 1) θ : ℝ) : ℂ)).eval
-                (ftPrincipal (ftTau a 1 (n - 1)) θ) = 0
-              ∧ (ftDen (ftRootPoly c a) 1 ((ftBranchZ a c 1 (n - 1) θ : ℝ) : ℂ)).eval
-                  ((starRingEnd ℂ) (ftPrincipal (ftTau a 1 (n - 1)) θ)) = 0
-              ∧ ‖ftPrincipal (ftTau a 1 (n - 1)) θ‖ = ftTau a 1 (n - 1) θ
-              ∧ ‖(starRingEnd ℂ) (ftPrincipal (ftTau a 1 (n - 1)) θ)‖
-                  = ftTau a 1 (n - 1) θ)
-        ∧ (∀ θ ∈ Ioo 0 (π / ((1 : ℕ) : ℝ)), ∀ w : ℂ,
-            (ftDen (ftRootPoly c a) 1 ((ftBranchZ a c 1 (n - 1) θ : ℝ) : ℂ)).eval w = 0 →
-              ‖w‖ ≤ ftTau a 1 (n - 1) θ →
-                w = ftPrincipal (ftTau a 1 (n - 1)) θ
-                  ∨ w = (starRingEnd ℂ) (ftPrincipal (ftTau a 1 (n - 1)) θ)) :=
+        ∧ FTPrincipalPair (ftRootPoly c a) 1 (ftBranchZ a c 1 (n - 1)) (ftTau a 1 (n - 1))
+        ∧ FTPrincipalDisk (ftRootPoly c a) 1 (ftBranchZ a c 1 (n - 1)) (ftTau a 1 (n - 1)) :=
   ft_geometry_at_branch_of_three_le hn3 ha hc
     (ft_minModulus_at_branch_pi hn3 ha hc)
 

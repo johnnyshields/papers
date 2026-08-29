@@ -111,6 +111,31 @@ theorem expPoly_eval (c : Fin m → ℝ) (k : Fin m → ℕ) (y : ℝ) :
 noncomputable def genVandermonde (x : Fin m → ℝ) (k : Fin m → ℕ) :
     Matrix (Fin m) (Fin m) ℝ := Matrix.of fun i j => x i ^ k j
 
+/-- Descartes' rule of signs by term count: a nonzero real polynomial with at most `m` terms has
+fewer than `m` positive roots, counted with multiplicity. -/
+private theorem countP_roots_pos_lt {P : Polynomial ℝ} (hP : P ≠ 0)
+    (hsupp : P.support.card ≤ m) : P.roots.countP (0 < ·) < m := by
+  have hsv : signVariations P < m := lt_of_lt_of_le (signVariations_lt_card_support hP) hsupp
+  have hdesc := Polynomial.roots_countP_pos_le_signVariations (P := P)
+  omega
+
+/-- A nonzero real polynomial vanishing at `m` distinct positive points has at least `m` positive
+roots, counted with multiplicity. -/
+private theorem le_countP_roots_pos {P : Polynomial ℝ} (hP : P ≠ 0) {x : Fin m → ℝ}
+    (hx : StrictMono x) (hxpos : ∀ i, 0 < x i) (hroot : ∀ i, P.eval (x i) = 0) :
+    m ≤ P.roots.countP (0 < ·) := by
+  have hsub : (Finset.image x Finset.univ).val ≤ P.roots.filter (0 < ·) := by
+    rw [Multiset.le_iff_subset (Finset.image x Finset.univ).nodup]
+    intro a ha
+    rw [Finset.mem_val] at ha
+    obtain ⟨i, -, rfl⟩ := Finset.mem_image.mp ha
+    rw [Multiset.mem_filter]
+    exact ⟨Polynomial.mem_roots'.mpr ⟨hP, hroot i⟩, by simpa using hxpos i⟩
+  rw [Multiset.countP_eq_card_filter]
+  calc m = (Finset.image x Finset.univ).card := by
+        rw [Finset.card_image_of_injective _ hx.injective, Finset.card_univ, Fintype.card_fin]
+    _ ≤ _ := Multiset.card_le_card hsub
+
 theorem det_genVandermonde_ne_zero {x : Fin m → ℝ} {k : Fin m → ℕ}
     (hx : StrictMono x) (hxpos : ∀ i, 0 < x i) (hk : StrictMono k) :
     (genVandermonde x k).det ≠ 0 := by
@@ -131,59 +156,60 @@ theorem det_genVandermonde_ne_zero {x : Fin m → ℝ} {k : Fin m → ℕ}
     rw [hPdef, expPoly_eval]
     have h := congrFun hc i
     simp only [Matrix.mulVec, dotProduct, genVandermonde, Matrix.of_apply, Pi.zero_apply] at h
-    calc ∑ j, c j * x i ^ k j = ∑ j, x i ^ k j * c j :=
-          Finset.sum_congr rfl fun j _ => mul_comm _ _
-      _ = 0 := h
-  -- at most `m` terms, so fewer than `m` sign variations
+    rw [← h]
+    exact Finset.sum_congr rfl fun j _ => mul_comm _ _
+  -- at most `m` terms, so fewer than `m` positive roots -- but `m` distinct positive roots
   have hsupp : P.support.card ≤ m := by
     calc P.support.card ≤ (Finset.image k Finset.univ).card :=
           Finset.card_le_card (by rw [hPdef]; exact expPoly_support c k)
       _ ≤ (Finset.univ : Finset (Fin m)).card := Finset.card_image_le
       _ = m := by simp
-  have hsv : signVariations P < m := lt_of_lt_of_le (signVariations_lt_card_support hPne) hsupp
-  -- but `m` distinct positive roots
-  have hsub : (Finset.image x Finset.univ).val ≤ P.roots.filter (0 < ·) := by
-    rw [Multiset.le_iff_subset (Finset.image x Finset.univ).nodup]
-    intro a ha
-    rw [Finset.mem_val] at ha
-    obtain ⟨i, -, rfl⟩ := Finset.mem_image.mp ha
-    rw [Multiset.mem_filter]
-    exact ⟨Polynomial.mem_roots'.mpr ⟨hPne, hroot i⟩, by simpa using hxpos i⟩
-  have hcount : m ≤ P.roots.countP (0 < ·) := by
-    rw [Multiset.countP_eq_card_filter]
-    calc m = (Finset.image x Finset.univ).card := by
-            rw [Finset.card_image_of_injective _ hx.injective, Finset.card_univ,
-              Fintype.card_fin]
-      _ ≤ _ := Multiset.card_le_card hsub
-  have hdesc := Polynomial.roots_countP_pos_le_signVariations (P := P)
-  omega
+  exact absurd (le_countP_roots_pos hPne hx hxpos hroot)
+    (not_le.mpr (countP_roots_pos_lt hPne hsupp))
 
 /-- The open cone of strictly increasing positive node vectors. -/
 def incCone (m : ℕ) : Set (Fin m → ℝ) := {x | (∀ i, 0 < x i) ∧ StrictMono x}
 
 theorem convex_incCone : Convex ℝ (incCone m) := by
   rintro u ⟨hu0, hu⟩ v ⟨hv0, hv⟩ a b ha hb hab
-  have hpos : ∀ p q : ℝ, 0 < p → 0 < q → 0 < a * p + b * q := by
-    intro p q hp hq
+  -- One weight may vanish, and then the other is `1`; either way the combination is strict.
+  have hlt : ∀ p q r t : ℝ, p < q → r < t → a * p + b * r < a * q + b * t := by
+    intro p q r t hpq hrt
     rcases lt_or_eq_of_le ha with ha' | ha'
     · nlinarith
     · have hb' : b = 1 := by linarith [ha'.symm]
       nlinarith
-  refine ⟨fun i => hpos _ _ (hu0 i) (hv0 i), ?_⟩
-  intro i j hij
-  have h1 : u i < u j := hu hij
-  have h2 : v i < v j := hv hij
-  simp only [Pi.add_apply, Pi.smul_apply, smul_eq_mul]
-  rcases lt_or_eq_of_le ha with ha' | ha'
-  · nlinarith
-  · have hb' : b = 1 := by linarith [ha'.symm]
-    nlinarith
+  refine ⟨fun i => by simpa using hlt 0 (u i) 0 (v i) (hu0 i) (hv0 i), fun i j hij => ?_⟩
+  simpa only [Pi.add_apply, Pi.smul_apply, smul_eq_mul] using
+    hlt (u i) (u j) (v i) (v j) (hu hij) (hv hij)
 
 theorem continuous_det_genVandermonde (k : Fin m → ℕ) :
     Continuous fun x : Fin m → ℝ => (genVandermonde x k).det := by
   refine Continuous.matrix_det ?_
   refine continuous_pi fun i => continuous_pi fun j => ?_
   exact ((continuous_apply i).pow (k j))
+
+/-- **No sign change along a segment of the cone.**  The determinant is continuous and nowhere
+zero on the cone, and the cone is convex, so the intermediate value theorem forbids one endpoint
+of a segment from being negative while the other is positive. -/
+private theorem not_neg_and_pos_of_mem_incCone {k : Fin m → ℕ} (hk : StrictMono k)
+    {u v : Fin m → ℝ} (hu : u ∈ incCone m) (hv : v ∈ incCone m)
+    (hun : (genVandermonde u k).det < 0) (hvp : 0 < (genVandermonde v k).det) : False := by
+  have hcont : ContinuousOn (fun t : ℝ => (genVandermonde ((1 - t) • u + t • v) k).det)
+      (Set.Icc 0 1) :=
+    (((continuous_det_genVandermonde k).comp
+      (((continuous_const.sub continuous_id).smul continuous_const).add
+        (continuous_id.smul continuous_const)))).continuousOn
+  have hmem : ∀ t ∈ Set.Icc (0 : ℝ) 1, ((1 - t) • u + t • v) ∈ incCone m := fun t ht =>
+    convex_incCone hu hv (by linarith [ht.2]) ht.1 (by ring)
+  have hzero : (0 : ℝ) ∈ Set.Icc
+      ((genVandermonde ((1 - (0 : ℝ)) • u + (0 : ℝ) • v) k).det)
+      ((genVandermonde ((1 - (1 : ℝ)) • u + (1 : ℝ) • v) k).det) := by
+    simp only [sub_zero, one_smul, zero_smul, add_zero, sub_self, zero_add]
+    exact Set.mem_Icc.mpr ⟨hun.le, hvp.le⟩
+  obtain ⟨t, ht, hgt⟩ :=
+    intermediate_value_Icc (le_of_lt (zero_lt_one : (0 : ℝ) < 1)) hcont hzero
+  exact det_genVandermonde_ne_zero (hmem t ht).2 (hmem t ht).1 hk hgt
 
 /-- **The generalized Vandermonde determinant has constant sign on the cone.**
 The cone is convex, hence any two node vectors are joined by a segment inside it;
@@ -194,25 +220,8 @@ theorem det_genVandermonde_pos_iff {k : Fin m → ℕ} (hk : StrictMono k)
     0 < (genVandermonde x k).det ↔ 0 < (genVandermonde y k).det := by
   have hne : ∀ z ∈ incCone m, (genVandermonde z k).det ≠ 0 :=
     fun z hz => det_genVandermonde_ne_zero hz.2 hz.1 hk
-  have key : ∀ u v, u ∈ incCone m → v ∈ incCone m →
-      (genVandermonde u k).det < 0 → 0 < (genVandermonde v k).det → False := by
-    intro u v hu hv hun hvp
-    have hcont : ContinuousOn (fun t : ℝ => (genVandermonde ((1 - t) • u + t • v) k).det)
-        (Set.Icc 0 1) :=
-      (((continuous_det_genVandermonde k).comp
-        (((continuous_const.sub continuous_id).smul continuous_const).add
-          (continuous_id.smul continuous_const)))).continuousOn
-    have hmem : ∀ t ∈ Set.Icc (0 : ℝ) 1, ((1 - t) • u + t • v) ∈ incCone m := by
-      intro t ht
-      exact convex_incCone hu hv (by linarith [ht.2]) ht.1 (by ring)
-    have hsub := intermediate_value_Icc (le_of_lt (zero_lt_one : (0 : ℝ) < 1)) hcont
-    have hzero : (0 : ℝ) ∈ Set.Icc
-        ((genVandermonde ((1 - (0 : ℝ)) • u + (0 : ℝ) • v) k).det)
-        ((genVandermonde ((1 - (1 : ℝ)) • u + (1 : ℝ) • v) k).det) := by
-      simp only [sub_zero, one_smul, zero_smul, add_zero, sub_self, zero_add]
-      exact Set.mem_Icc.mpr ⟨hun.le, hvp.le⟩
-    obtain ⟨t, ht, hgt⟩ := hsub hzero
-    exact hne _ (hmem t ht) hgt
+  have key := fun u v hu hv hun hvp => not_neg_and_pos_of_mem_incCone hk (u := u) (v := v)
+    hu hv hun hvp
   constructor
   · intro hxp
     rcases lt_trichotomy ((genVandermonde y k).det) 0 with h | h | h
@@ -301,5 +310,16 @@ theorem genVandermonde_perron_nonvacuous {r : ℕ} (hrm : r ≤ m) {x : Fin m �
   refine ⟨(exists_perron_compound hrm _ (minorsPos_genVandermonde hx hxpos hk r)).1,
     fun lam hlam => ?_⟩
   exact charpoly_roots_nonneg (fun j => minorsNonneg_genVandermonde hx hxpos hk j) hlam
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.signVariations_lt_card_support' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms signVariations_lt_card_support
+
+/-- info: 'Shields.minorsPos_genVandermonde' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms minorsPos_genVandermonde
 
 end Shields

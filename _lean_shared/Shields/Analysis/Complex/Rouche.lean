@@ -30,6 +30,8 @@ multiplicity, and the counting integral of `F' / F` reads it off.
 * `Shields.rouche` — **Rouché**, unconditionally: with `‖g‖ < ‖f‖` on the circle, any
   factorization of `f` and any factorization of `f + g` display the same `n`.  Neither
   count is assumed, and neither is assumed to exist.
+* `Shields.factoredOn_of_norm_lt` — Rouché one-sidedly: a factorization of `f` transfers
+  to `f + g` with the same count, no factorization of `f + g` assumed.
 * `Shields.rouche_of_analytic` — the two factorizations exhibited, for a caller that wants
   the roots rather than the number.
 
@@ -39,6 +41,12 @@ The homotopy `f + t·g` is run at the level of the counting *integral*, not of t
 the boundary hypothesis makes every member of the family factor, so the integral is
 `2πi` times an integer at every `t`, it is continuous in `t`, and a continuous integer is
 constant.  This avoids having to produce a continuous selection of the roots.
+
+`Shields.exists_factoredOn_aux` runs the same peel-one-zero induction as
+`Shields.exists_zeroFactor_aux`, over `n : ℕ` and `a : ℕ → ℂ` rather than over a `Multiset ℂ`.
+The two indexings are kept because they are what different consumers hold: a caller with a root
+list indexed by `Finset.range n` and one with a multiset of roots each read the count off the
+presentation it already has, and translating either way costs an enumeration lemma.
 
 `Shields.factoredOn_sq` and `Shields.exists_factoredOn_sq_sub` are non-vacuity witnesses:
 the first shows the count is multiplicity rather than cardinality, the second that Rouché
@@ -73,23 +81,6 @@ theorem circleIntegral_sum_sub_inv {c : ℂ} {R : ℝ} (hR : 0 < R)
   rw [Finset.sum_congr rfl fun j hj => circleIntegral.integral_sub_inv_of_mem_ball (ha j hj)]
   simp [Finset.sum_const, nsmul_eq_mul]
 
-/-- **The zero-free factor contributes nothing.**  If `g` is analytic and
-nowhere zero on the closed disk, `∮ g'/g = 0`.
-
-`g'/g` is then analytic on the disk — this is where `g` must be *analytic* rather
-than merely differentiable, so that `deriv g` is differentiable too — and Cauchy's
-theorem applies. -/
-theorem circleIntegral_logDeriv_eq_zero {c : ℂ} {R : ℝ} (hR : 0 ≤ R) (g : ℂ → ℂ)
-    (hg : AnalyticOnNhd ℂ g (Metric.closedBall c R))
-    (hgne : ∀ z ∈ Metric.closedBall c R, g z ≠ 0) :
-    (∮ z in C(c, R), deriv g z / g z) = 0 := by
-  have hlog : AnalyticOnNhd ℂ (fun z => deriv g z / g z) (Metric.closedBall c R) :=
-    fun z hz => (hg.deriv z hz).div (hg z hz) (hgne z hz)
-  refine circleIntegral_eq_zero_of_differentiable_on_off_countable hR
-    Set.countable_empty hlog.continuousOn ?_
-  intro z hz
-  exact (hlog z (Metric.ball_subset_closedBall hz.1)).differentiableAt
-
 /-- **The argument principle, factored form.**  If the logarithmic derivative of
 `f` splits as `∑_j (z - a_j)⁻¹ + g'/g` on the circle, with the `a_j` inside and `g`
 analytic and zero-free on the closed disk, then
@@ -121,79 +112,11 @@ is analytic wherever `F` is, and `(z - w) • dslope F w z = F z` at *every* `z`
 `F w = 0`.  Iterating it divides out a zero with its full multiplicity and leaves
 a function analytic on the same set as `F`.
 
-The two `dslope` lemmas this rests on are `analyticAt_dslope` and
-`analyticOnNhd_iterate_dslope`, in `Shields.Analysis.Complex.ArgumentPrinciple.Analytic`: neither
-needs `U` open, so both serve the closed-disc factorization here and the argument-principle route
+That division is `Shields.exists_pow_factor`, in
+`Shields.Analysis.Complex.ArgumentPrinciple.Analytic`, and the two `dslope` lemmas it rests on
+are `analyticAt_dslope` and `analyticOnNhd_iterate_dslope` in the same module: neither needs `U`
+open, so all three serve the closed-disc factorization here and the argument-principle route
 there. -/
-
-/-- **A zero divides out globally.**  If `F` is analytic on `U` and is not
-identically zero near `w ∈ U`, then `F z = (z - w)^k · H z` for *every* `z`, with
-`H` analytic on all of `U` and `H w ≠ 0`.
-
-The identity is global rather than local because that is what `dslope` computes,
-and `H` inherits `F`'s whole domain rather than a neighborhood of `w`. -/
-theorem exists_pow_mul_of_analyticOnNhd {U : Set ℂ} {F : ℂ → ℂ}
-    (hF : AnalyticOnNhd ℂ F U) {w : ℂ} (hw : w ∈ U)
-    (hnz : ¬ ∀ᶠ z in nhds w, F z = 0) :
-    ∃ (k : ℕ) (H : ℂ → ℂ), AnalyticOnNhd ℂ H U ∧ H w ≠ 0 ∧
-      ∀ z, F z = (z - w) ^ k * H z := by
-  obtain ⟨p, hp⟩ := hF w hw
-  have hp0 : p ≠ 0 := fun h => hnz (hp.locally_zero_iff.mpr h)
-  refine ⟨p.order, _, analyticOnNhd_iterate_dslope hw p.order hF,
-    hp.iterate_dslope_fslope_ne_zero hp0, fun z => ?_⟩
-  simpa using hp.eq_pow_order_mul_iterate_dslope z
-
-/-- A zero of a function that does not vanish on the circle lies strictly
-inside it. -/
-theorem mem_ball_of_eq_zero {c : ℂ} {R : ℝ} {F : ℂ → ℂ}
-    (hne : ∀ z ∈ Metric.sphere c R, F z ≠ 0) {w : ℂ}
-    (hw : w ∈ Metric.closedBall c R) (hw0 : F w = 0) : w ∈ Metric.ball c R := by
-  rcases lt_or_eq_of_le (Metric.mem_closedBall.mp hw) with h | h
-  · exact Metric.mem_ball.mpr h
-  · exact absurd hw0 (hne w (Metric.mem_sphere.mpr h))
-
-/-- On the closed disk, a function analytic there and nonvanishing on the circle
-is nowhere locally zero.  A local zero would propagate across the open disk by the
-identity theorem and then reach the circle by continuity. -/
-theorem not_eventually_eq_zero_of_ne_zero_on_sphere {c : ℂ} {R : ℝ} (hR : 0 < R) {F : ℂ → ℂ}
-    (hF : AnalyticOnNhd ℂ F (Metric.closedBall c R))
-    (hne : ∀ z ∈ Metric.sphere c R, F z ≠ 0) {w : ℂ} (hw : w ∈ Metric.closedBall c R) :
-    ¬ ∀ᶠ z in nhds w, F z = 0 := by
-  intro hzero
-  have hwb : w ∈ Metric.ball c R := mem_ball_of_eq_zero hne hw hzero.self_of_nhds
-  have hball : Set.EqOn F 0 (Metric.ball c R) :=
-    (hF.mono Metric.ball_subset_closedBall).eqOn_zero_of_preconnected_of_eventuallyEq_zero
-      (convex_ball c R).isPreconnected hwb hzero
-  have hz₀ : c + (R : ℂ) ∈ Metric.sphere c R := by
-    simp [abs_of_pos hR]
-  have hz₀c : c + (R : ℂ) ∈ Metric.closedBall c R := Metric.sphere_subset_closedBall hz₀
-  have hcl : c + (R : ℂ) ∈ closure (Metric.ball c R) := by
-    rw [closure_ball c hR.ne']
-    exact hz₀c
-  haveI : (nhdsWithin (c + (R : ℂ)) (Metric.ball c R)).NeBot :=
-    mem_closure_iff_nhdsWithin_neBot.mp hcl
-  have h₁ : Filter.Tendsto F (nhdsWithin (c + (R : ℂ)) (Metric.ball c R))
-      (nhds (F (c + (R : ℂ)))) := (hF _ hz₀c).continuousAt.continuousWithinAt
-  have h₂ : Filter.Tendsto F (nhdsWithin (c + (R : ℂ)) (Metric.ball c R)) (nhds 0) := by
-    refine Filter.Tendsto.congr' ?_ tendsto_const_nhds
-    exact Filter.eventually_of_mem self_mem_nhdsWithin fun x hx => (hball hx).symm
-  exact hne _ hz₀ (tendsto_nhds_unique h₁ h₂)
-
-/-- The zeros in the closed disk are finite in number: they are isolated, and an
-infinite subset of a compact set accumulates somewhere. -/
-theorem finite_zeros_of_ne_zero_on_sphere {c : ℂ} {R : ℝ} (hR : 0 < R) {F : ℂ → ℂ}
-    (hF : AnalyticOnNhd ℂ F (Metric.closedBall c R))
-    (hne : ∀ z ∈ Metric.sphere c R, F z ≠ 0) :
-    {z ∈ Metric.closedBall c R | F z = 0}.Finite := by
-  by_contra hinf
-  obtain ⟨x, hx, hacc⟩ :=
-    Set.Infinite.exists_accPt_of_subset_isCompact hinf (isCompact_closedBall c R)
-      (fun z hz => hz.1)
-  rcases (hF x hx).eventually_eq_zero_or_eventually_ne_zero with h | h
-  · exact not_eventually_eq_zero_of_ne_zero_on_sphere hR hF hne hx h
-  · rw [accPt_iff_frequently_nhdsNE] at hacc
-    obtain ⟨z, hz₁, hz₂⟩ := (hacc.and_eventually h).exists
-    exact hz₂ hz₁.2
 
 /-- **A closed-disk factorization.**  `F z = (∏_{j<n}(z - a_j))·G z` at every point
 of the plane, with each `a_j` strictly inside the circle and `G` analytic and
@@ -226,6 +149,17 @@ theorem FactoredOn.congr {F F' : ℂ → ℂ} {c : ℂ} {R : ℝ} {n : ℕ} {a :
     (h : FactoredOn F c R n a G) (heq : ∀ z, F' z = F z) : FactoredOn F' c R n a G :=
   ⟨h.mem_ball, h.analytic, h.ne_zero, fun z => (heq z).trans (h.eq z)⟩
 
+/-- **No zeros, nothing displayed.**  With the zero set of the closed disk empty, `F` is its own
+zero-free cofactor and the root list is the empty one. -/
+theorem factoredOn_of_zeros_empty {c : ℂ} {R : ℝ} {F : ℂ → ℂ}
+    (hF : AnalyticOnNhd ℂ F (Metric.closedBall c R))
+    (hempty : {z ∈ Metric.closedBall c R | F z = 0} = ∅) :
+    FactoredOn F c R 0 (fun _ => 0) F :=
+  ⟨by omega, hF, fun z hz hz0 => by
+    have hmem : z ∈ {z ∈ Metric.closedBall c R | F z = 0} := ⟨hz, hz0⟩
+    rw [hempty] at hmem
+    exact hmem, by simp⟩
+
 /-- Appending `k` copies of `w` to a root list multiplies the product by
 `(z - w)^k`. -/
 theorem prod_range_add_pow (n k : ℕ) (b : ℕ → ℂ) (w z : ℂ) :
@@ -252,25 +186,16 @@ theorem exists_factoredOn_aux {c : ℂ} {R : ℝ} (hR : 0 < R) :
   | zero =>
     intro F hF hne hcard
     have hfin := finite_zeros_of_ne_zero_on_sphere hR hF hne
-    have hempty : {z ∈ Metric.closedBall c R | F z = 0} = ∅ :=
-      (Set.ncard_eq_zero hfin).mp (Nat.le_zero.mp hcard)
-    refine ⟨0, fun _ => 0, F, ⟨by omega, hF, ?_, by simp⟩⟩
-    intro z hz hz0
-    have hmem : z ∈ {z ∈ Metric.closedBall c R | F z = 0} := ⟨hz, hz0⟩
-    rw [hempty] at hmem
-    exact hmem
+    exact ⟨0, fun _ => 0, F,
+      factoredOn_of_zeros_empty hF ((Set.ncard_eq_zero hfin).mp (Nat.le_zero.mp hcard))⟩
   | succ m ih =>
     intro F hF hne hcard
     have hfin := finite_zeros_of_ne_zero_on_sphere hR hF hne
     rcases Set.eq_empty_or_nonempty {z ∈ Metric.closedBall c R | F z = 0} with
       hempty | ⟨w, hw, hw0⟩
-    · refine ⟨0, fun _ => 0, F, ⟨by omega, hF, ?_, by simp⟩⟩
-      intro z hz hz0
-      have hmem : z ∈ {z ∈ Metric.closedBall c R | F z = 0} := ⟨hz, hz0⟩
-      rw [hempty] at hmem
-      exact hmem
+    · exact ⟨0, fun _ => 0, F, factoredOn_of_zeros_empty hF hempty⟩
     · have hwb : w ∈ Metric.ball c R := mem_ball_of_eq_zero hne hw hw0
-      obtain ⟨k, H, hH, hHw, hFH⟩ := exists_pow_mul_of_analyticOnNhd hF hw
+      obtain ⟨k, H, hH, hHw, hFH⟩ := exists_pow_factor hF hw
         (not_eventually_eq_zero_of_ne_zero_on_sphere hR hF hne hw)
       have hHne : ∀ z ∈ Metric.sphere c R, H z ≠ 0 := by
         intro z hz hz0
@@ -319,34 +244,18 @@ theorem circleIntegral_logDeriv_eq_of_factoredOn {c : ℂ} {R : ℝ} (hR : 0 < R
     exact absurd (Metric.mem_sphere.mp hz) (ne_of_lt (Metric.mem_ball.mp (h.mem_ball j hj)))
   have hsplit : Set.EqOn (fun z => deriv F z / F z)
       (fun z => (∑ j ∈ Finset.range n, (z - a j)⁻¹) + deriv G z / G z)
-      (Metric.sphere c R) := by
-    intro z hz
-    have hzc : z ∈ Metric.closedBall c R := Metric.sphere_subset_closedBall hz
-    have hGz : G z ≠ 0 := h.ne_zero z hzc
-    have hPz : (∏ j ∈ Finset.range n, (z - a j)) ≠ 0 :=
-      Finset.prod_ne_zero_iff.mpr fun j hj => hsub z hz j (Finset.mem_range.mp hj)
-    have hPd : DifferentiableAt ℂ (fun w => ∏ j ∈ Finset.range n, (w - a j)) z := by fun_prop
-    have hGd : DifferentiableAt ℂ G z := (h.analytic z hzc).differentiableAt
-    have hmul : logDeriv F z
-        = logDeriv (fun w => ∏ j ∈ Finset.range n, (w - a j)) z + logDeriv G z := by
-      rw [hFeq]
-      exact logDeriv_mul z hPz hGz hPd hGd
-    have hprod : logDeriv (fun w => ∏ j ∈ Finset.range n, (w - a j)) z
-        = ∑ j ∈ Finset.range n, (z - a j)⁻¹ := by
-      rw [logDeriv_prod (f := fun j w => w - a j)
-        (fun j hj => hsub z hz j (Finset.mem_range.mp hj)) (fun j _ => by fun_prop)]
-      exact Finset.sum_congr rfl fun j _ => by simp [logDeriv_apply]
-    rw [hprod] at hmul
-    simpa only [logDeriv_apply] using hmul
+      (Metric.sphere c R) := fun z hz =>
+    logDeriv_prod_sub_mul hFeq (fun j hj => hsub z hz j (Finset.mem_range.mp hj))
+      (h.ne_zero z (Metric.sphere_subset_closedBall hz))
+      ((h.analytic z (Metric.sphere_subset_closedBall hz)).differentiableAt)
   have hint₁ : CircleIntegrable (fun z => ∑ j ∈ Finset.range n, (z - a j)⁻¹) c R := by
     refine ContinuousOn.circleIntegrable hR.le (continuousOn_finsetSum _ fun j hj => ?_)
     exact (continuousOn_id.sub continuousOn_const).inv₀
       fun z hz => hsub z hz j (Finset.mem_range.mp hj)
-  have hint₂ : CircleIntegrable (fun z => deriv G z / G z) c R := by
-    refine ContinuousOn.circleIntegrable hR.le ?_
-    exact (h.analytic.deriv.continuousOn.mono Metric.sphere_subset_closedBall).div
-      (h.analytic.continuousOn.mono Metric.sphere_subset_closedBall)
-      fun z hz => h.ne_zero z (Metric.sphere_subset_closedBall hz)
+  have hlog : AnalyticOnNhd ℂ (fun z => deriv G z / G z) (Metric.closedBall c R) :=
+    fun z hz => (h.analytic.deriv z hz).div (h.analytic z hz) (h.ne_zero z hz)
+  have hint₂ : CircleIntegrable (fun z => deriv G z / G z) c R :=
+    (hlog.continuousOn.mono Metric.sphere_subset_closedBall).circleIntegrable hR.le
   simpa using argumentPrinciple hR (Finset.range n) a G (fun z => deriv F z / F z)
     (fun j hj => h.mem_ball j (Finset.mem_range.mp hj)) h.analytic h.ne_zero hsplit hint₁ hint₂
 
@@ -357,6 +266,21 @@ classical proof runs the count along `f + t·g` for `t ∈ [0,1]`: the boundary
 hypothesis keeps every member zero-free on the circle, so every member factors and
 its counting integral is `2πi` times a natural number; the integral moves
 continuously in `t`; and a continuous integer cannot move at all. -/
+
+/-- **The dominating function has no zero where it dominates.** -/
+theorem ne_zero_of_norm_lt {c : ℂ} {R : ℝ} {f g : ℂ → ℂ}
+    (hlt : ∀ z ∈ Metric.sphere c R, ‖g z‖ < ‖f z‖) {z : ℂ} (hz : z ∈ Metric.sphere c R) :
+    f z ≠ 0 :=
+  norm_ne_zero_iff.1 ((norm_nonneg (g z)).trans_lt (hlt z hz)).ne'
+
+/-- **Nor does the perturbed function.**  This is `add_smul_ne_zero_of_norm_lt` at the far end of
+the family, `t = 1`, with the radius resolved. -/
+theorem add_ne_zero_of_norm_lt {c : ℂ} {R : ℝ} (hR : 0 < R) {f g : ℂ → ℂ}
+    (hlt : ∀ z ∈ Metric.sphere c R, ‖g z‖ < ‖f z‖) {z : ℂ} (hz : z ∈ Metric.sphere c R) :
+    f z + g z ≠ 0 := by
+  have habs : |R| = R := abs_of_pos hR
+  simpa using add_smul_ne_zero_of_norm_lt f g (by rwa [habs]) (t := 1)
+    (Set.right_mem_Icc.mpr zero_le_one) (by rwa [habs])
 
 theorem count_eq_of_continuous {c : ℂ} {R : ℝ} (f g : ℂ → ℂ) (N : ℝ → ℤ)
     (hN : ContinuousOn N (Set.Icc (0 : ℝ) 1))
@@ -384,18 +308,8 @@ theorem circleIntegral_eq_of_int_count {c : ℂ} {R : ℝ} (Φ : ℝ → ℂ →
     (∮ z in C(c, R), Φ 0 z) = (∮ z in C(c, R), Φ 1 z) := by
   have hI : Continuous fun t : ℝ => ∮ z in C(c, R), Φ t z :=
     continuous_circleIntegral_param Φ hcont
-  have hstep : Continuous fun t : ℝ => ((N t : ℂ) * (2 * Real.pi * I)) := by
-    simpa only [hcount] using hI
-  have h2pi : (2 * (Real.pi : ℂ) * I) ≠ 0 := by
-    simp [Real.pi_ne_zero, Complex.I_ne_zero]
-  have hcast : Continuous fun t : ℝ => ((N t : ℂ)) := by
-    simpa [mul_div_assoc, div_self h2pi] using hstep.div_const (2 * (Real.pi : ℂ) * I)
-  have hreal : Continuous fun t : ℝ => ((N t : ℝ)) := by
-    have h := Complex.continuous_re.comp hcast
-    refine h.congr fun t => ?_
-    simp [Function.comp]
   rw [hcount 0, hcount 1,
-    int_eq_of_continuousOn_Icc N (continuous_int_of_continuous_cast hreal).continuousOn]
+    int_eq_of_continuous_mul_two_pi_I (N := N) (by simpa only [hcount] using hI)]
 
 /-- The deformation argument with the count supplied by hand.  `rouche_integral`
 discharges the hypothesis; this is what remains once the counting integrals are
@@ -415,79 +329,26 @@ theorem circleIntegral_logDeriv_eq_of_count {c : ℂ} {R : ℝ} (f g : ℂ → �
 
 /-- **Rouché's theorem, integral form.**  If `‖g‖ < ‖f‖` on the circle and both are
 analytic on the closed disk, the two counting integrals agree.  Nothing is assumed
-about either count: every member of `f + t·g` factors by `exists_factoredOn`, so
-`circleIntegral_logDeriv_eq_of_factoredOn` supplies the integer count at each `t`.
+about either count.
 
-The parameter is pushed through a retraction onto `[0,1]` so that the family is
-zero-free on the circle for *every* real `t`, which is what the continuity
-statement quantifies over. -/
+Each side is `2πi` times a zero count by the argument principle, and the two counts
+agree by `Shields.zeroCount_add_eq`, which deforms `f` into `f + g` along a family the
+boundary hypothesis keeps zero-free on the circle. -/
 theorem rouche_integral {c : ℂ} {R : ℝ} (hR : 0 < R) {f g : ℂ → ℂ}
     (hf : AnalyticOnNhd ℂ f (Metric.closedBall c R))
     (hg : AnalyticOnNhd ℂ g (Metric.closedBall c R))
     (hlt : ∀ z ∈ Metric.sphere c R, ‖g z‖ < ‖f z‖) :
     (∮ z in C(c, R), deriv f z / f z)
       = (∮ z in C(c, R), deriv (fun w => f w + g w) z / (f z + g z)) := by
-  have habs : |R| = R := abs_of_pos hR
-  have hlt' : ∀ z ∈ Metric.sphere c |R|, ‖g z‖ < ‖f z‖ := by rw [habs]; exact hlt
-  obtain ⟨σ, hσc, hσmem, hσ0, hσ1⟩ :
-      ∃ σ : ℝ → ℝ, Continuous σ ∧ (∀ t, σ t ∈ Set.Icc (0 : ℝ) 1) ∧ σ 0 = 0 ∧ σ 1 = 1 :=
-    ⟨fun t => max 0 (min 1 t), continuous_const.max (continuous_const.min continuous_id),
-      fun t => ⟨le_max_left _ _, max_le zero_le_one (min_le_left _ _)⟩, by simp, by simp⟩
-  have hden : ∀ (t : ℝ), ∀ z ∈ Metric.sphere c R, f z + (σ t : ℂ) * g z ≠ 0 := by
-    intro t z hz
-    exact add_smul_ne_zero_of_norm_lt f g hlt' (hσmem t) (by rwa [habs])
-  have hdiff : ∀ t : ℝ, ∀ z ∈ Metric.sphere c R,
-      deriv (fun w => f w + (σ t : ℂ) * g w) z = deriv f z + (σ t : ℂ) * deriv g z := by
-    intro t z hz
-    have hfd : DifferentiableAt ℂ f z :=
-      (hf z (Metric.sphere_subset_closedBall hz)).differentiableAt
-    have hgd : DifferentiableAt ℂ g z :=
-      (hg z (Metric.sphere_subset_closedBall hz)).differentiableAt
-    have hgd' : DifferentiableAt ℂ (fun w => (σ t : ℂ) * g w) z := hgd.const_mul _
-    rw [deriv_fun_add hfd hgd', deriv_const_mul_field]
-  -- The family, written so that only its values on the circle are used.
-  have hmaps : ∀ p : ℝ × ℝ, circleMap c R p.2 ∈ Metric.sphere c R := fun p =>
-    circleMap_mem_sphere c hR.le p.2
-  have hcircle : Continuous fun p : ℝ × ℝ => circleMap c R p.2 :=
-    (continuous_circleMap c R).comp continuous_snd
-  have hσC : Continuous fun p : ℝ × ℝ => ((σ p.1 : ℝ) : ℂ) :=
-    Complex.continuous_ofReal.comp (hσc.comp continuous_fst)
-  have hcs : ∀ u : ℂ → ℂ, AnalyticOnNhd ℂ u (Metric.closedBall c R) →
-      Continuous fun p : ℝ × ℝ => u (circleMap c R p.2) := fun u hu =>
-    (hu.continuousOn.mono Metric.sphere_subset_closedBall).comp_continuous hcircle hmaps
-  have hcont : Continuous fun p : ℝ × ℝ =>
-      (fun t z => (deriv f z + (σ t : ℂ) * deriv g z) / (f z + (σ t : ℂ) * g z))
-        p.1 (circleMap c R p.2) :=
-    Continuous.div ((hcs _ hf.deriv).add (hσC.mul (hcs _ hg.deriv)))
-      ((hcs _ hf).add (hσC.mul (hcs _ hg))) fun p => hden p.1 _ (hmaps p)
-  have hex : ∀ t : ℝ, ∃ m : ℤ,
-      (∮ z in C(c, R), (deriv f z + (σ t : ℂ) * deriv g z) / (f z + (σ t : ℂ) * g z))
-        = (m : ℂ) * (2 * Real.pi * I) := by
-    intro t
-    have hFt : AnalyticOnNhd ℂ (fun w => f w + (σ t : ℂ) * g w) (Metric.closedBall c R) :=
-      fun z hz => (hf z hz).add (analyticAt_const.mul (hg z hz))
-    obtain ⟨n, a, G, hfac⟩ := exists_factoredOn hR hFt (hden t)
-    have key := circleIntegral_logDeriv_eq_of_factoredOn hR hfac
-    refine ⟨(n : ℤ), ?_⟩
-    have hEq : (∮ z in C(c, R),
-          (deriv f z + (σ t : ℂ) * deriv g z) / (f z + (σ t : ℂ) * g z))
-        = ∮ z in C(c, R),
-            deriv (fun w => f w + (σ t : ℂ) * g w) z / (f z + (σ t : ℂ) * g z) :=
-      circleIntegral.integral_congr hR.le fun z hz => by rw [hdiff t z hz]
-    rw [hEq, key]
-    norm_cast
-  choose N hN using hex
-  have hmain := circleIntegral_eq_of_int_count
-    (fun t z => (deriv f z + (σ t : ℂ) * deriv g z) / (f z + (σ t : ℂ) * g z)) N hcont hN
-  simp only [hσ0, hσ1, Complex.ofReal_zero, Complex.ofReal_one, zero_mul, one_mul,
-    add_zero] at hmain
-  rw [hmain]
-  refine circleIntegral.integral_congr hR.le fun z hz => ?_
-  have hfd : DifferentiableAt ℂ f z :=
-    (hf z (Metric.sphere_subset_closedBall hz)).differentiableAt
-  have hgd : DifferentiableAt ℂ g z :=
-    (hg z (Metric.sphere_subset_closedBall hz)).differentiableAt
-  rw [deriv_fun_add hfd hgd]
+  have hsum : AnalyticOnNhd ℂ (f + g) (Metric.closedBall c R) := fun z hz =>
+    (hf z hz).add (hg z hz)
+  have hsumne : ∀ z ∈ Metric.sphere c R, (f + g) z ≠ 0 := fun z hz =>
+    add_ne_zero_of_norm_lt hR hlt hz
+  have key : (∮ z in C(c, R), deriv (f + g) z / (f + g) z)
+      = ((zeroCount f c R : ℕ) : ℂ) * (2 * Real.pi * I) := by
+    rw [circleIntegral_logDeriv hR hsum hsumne, zeroCount_add_eq hR hf hg hlt]
+  rw [circleIntegral_logDeriv hR hf fun z hz => ne_zero_of_norm_lt hlt hz, ← key]
+  rfl
 
 /-- **Rouché's theorem.**  If `‖g‖ < ‖f‖` on the circle and both are analytic on
 the closed disk, then `f` and `f + g` have the same number of zeros inside,
@@ -508,9 +369,21 @@ theorem rouche {c : ℂ} {R : ℝ} (hR : 0 < R) {f g : ℂ → ℂ}
   have h₂ := circleIntegral_logDeriv_eq_of_factoredOn hR hfac'
   have h₃ := rouche_integral hR hf hg hlt
   rw [h₁, h₂] at h₃
-  have h2pi : (2 * (Real.pi : ℂ) * I) ≠ 0 := by
-    simp [Real.pi_ne_zero, Complex.I_ne_zero]
-  exact_mod_cast mul_right_cancel₀ h2pi h₃
+  exact_mod_cast mul_right_cancel₀ Complex.two_pi_I_ne_zero h₃
+
+/-- **Rouché read one-sidedly.**  A factorization of `f` transfers to `f + g` with the same
+count, no factorization of `f + g` assumed: `exists_factoredOn` produces one, needing only
+analyticity and non-vanishing on the circle, and `rouche` identifies its length with `n`. -/
+theorem factoredOn_of_norm_lt {c : ℂ} {R : ℝ} (hR : 0 < R) {f g : ℂ → ℂ}
+    (hf : AnalyticOnNhd ℂ f (Metric.closedBall c R))
+    (hg : AnalyticOnNhd ℂ g (Metric.closedBall c R))
+    (hlt : ∀ z ∈ Metric.sphere c R, ‖g z‖ < ‖f z‖)
+    {n : ℕ} {a : ℕ → ℂ} {G : ℂ → ℂ} (hfac : FactoredOn f c R n a G) :
+    ∃ (a' : ℕ → ℂ) (G' : ℂ → ℂ), FactoredOn (fun w => f w + g w) c R n a' G' := by
+  obtain ⟨n', a', G', hfac'⟩ := exists_factoredOn hR (fun z hz => (hf z hz).add (hg z hz))
+    (fun z hz => add_ne_zero_of_norm_lt hR hlt hz)
+  have hnn : n = n' := rouche hR hf hg hlt hfac hfac'
+  exact ⟨a', G', by rw [hnn]; exact hfac'⟩
 
 /-- **Rouché's theorem, packaged.**  Under `‖g‖ < ‖f‖` on the circle, both `f` and
 `f + g` factor over the closed disk with the *same* number `n` of roots
@@ -521,20 +394,8 @@ theorem rouche_of_analytic {c : ℂ} {R : ℝ} (hR : 0 < R) {f g : ℂ → ℂ}
     (hlt : ∀ z ∈ Metric.sphere c R, ‖g z‖ < ‖f z‖) :
     ∃ (n : ℕ) (a a' : ℕ → ℂ) (G G' : ℂ → ℂ),
       FactoredOn f c R n a G ∧ FactoredOn (fun w => f w + g w) c R n a' G' := by
-  have hfne : ∀ z ∈ Metric.sphere c R, f z ≠ 0 := by
-    intro z hz hz0
-    have h := hlt z hz
-    rw [hz0, norm_zero] at h
-    exact absurd h (not_lt.mpr (norm_nonneg _))
-  have hsne : ∀ z ∈ Metric.sphere c R, f z + g z ≠ 0 := by
-    intro z hz
-    have h := add_smul_ne_zero_of_norm_lt f g (by rwa [abs_of_pos hR])
-      (Set.right_mem_Icc.mpr zero_le_one) (show z ∈ Metric.sphere c |R| by rwa [abs_of_pos hR])
-    simpa using h
-  obtain ⟨n, a, G, h₁⟩ := exists_factoredOn hR hf hfne
-  obtain ⟨n', a', G', h₂⟩ := exists_factoredOn hR (fun z hz => (hf z hz).add (hg z hz)) hsne
-  have hnn := rouche hR hf hg hlt h₁ h₂
-  subst hnn
+  obtain ⟨n, a, G, h₁⟩ := exists_factoredOn hR hf fun z hz => ne_zero_of_norm_lt hlt hz
+  obtain ⟨a', G', h₂⟩ := factoredOn_of_norm_lt hR hf hg hlt h₁
   exact ⟨n, a, a', G, G', h₁, h₂⟩
 
 /-! ### A worked instance
@@ -589,5 +450,12 @@ number, and the deformation argument closes.
 The geometric applications — locating the zeros of a specific family — are the caller's, and
 nothing in this module knows about them.
 -/
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.rouche_of_analytic' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms rouche_of_analytic
 
 end Shields

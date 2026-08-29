@@ -10,20 +10,26 @@ import Mathlib.Tactic.Common
 /-!
 # Hankel matrices and linear recurrences
 
-The **Hankel matrix** of a sequence `\varpi` is `[\varpi_{s+t}]`: constant along antidiagonals,
-as the Toeplitz matrix is constant along diagonals.  Its determinants detect linear recurrences.
+The **Hankel matrix** of a sequence `μ` is `[μ_{s+t}]`: constant along antidiagonals, as the
+Toeplitz matrix is constant along diagonals.  Its determinants detect linear recurrences.
 
 If the sequence satisfies a linear recurrence of order `d` — some nonzero vector annihilates every
 window — then every Hankel minor of size above `d` vanishes, because the recurrence exhibits a
-null vector of the matrix.  Conversely a nonvanishing minor at size `d` witnesses that no shorter
-recurrence holds, so the least order is read off the determinants.
+null vector of the matrix.  The size bound is sharp, and that is all this file says in the other
+direction: a sequence is exhibited whose order-`1` recurrence leaves the `1×1` determinant nonzero
+while killing the `2×2` one, so the vanishing does not reach size `d` itself and the statement is
+not vacuous.  Reading the least order off the determinants would need the converse — a
+nonvanishing minor at size `d` forcing that no recurrence of order below `d` holds — which is not
+proved here.
 
 ## Main results
 
 * `Shields.hankel` — the matrix
 * `Shields.nullVec`, `Shields.recurrence_of_annihilates`, `Shields.sum_nullVec`
 * `Shields.hankel_det_eq_zero` — **a recurrence of order `d` kills every larger minor**
-* `Shields.hankel_det_ne_zero_at_order` — and a nonvanishing minor bounds the order below
+* `Shields.exists_hankel_det_ne_zero_at_order` — a witness that the size bound is sharp
+
+Used by `toeplitz-newton-boundary`.
 
 ## Implementation notes
 
@@ -33,7 +39,7 @@ convergence or about the ring beyond commutativity.
 
 ## References
 
-* A. Hankel, *Über eine besondere Classe der symmetrischen Determinanten*, 1861.
+* H. Hankel, *Über eine besondere Classe der symmetrischen Determinanten*, 1861.
 * G. Heinig and K. Rost, *Algebraic methods for Toeplitz-like matrices and operators*, 1984.
 
 ## Tags
@@ -47,7 +53,7 @@ open Polynomial Matrix BigOperators
 
 variable {R : Type*} [CommRing R]
 
-/-- The Hankel (moment) matrix `[ϖ_{s+t}]` of a sequence. -/
+/-- The Hankel (moment) matrix `[μ_{s+t}]` of a sequence. -/
 def hankel (μ : ℕ → R) (k : ℕ) : Matrix (Fin k) (Fin k) R :=
   Matrix.of fun i j => μ (i.val + j.val)
 
@@ -56,9 +62,9 @@ matrix once the recurrence holds. -/
 noncomputable def nullVec (c : ℕ → R) (d : ℕ) : ℕ → R :=
   fun j => if j = d then 1 else if j < d then -c j else 0
 
-/-- The paper's step "`L` annihilates the ideal `(P₁)`, so it factors through
-`R[z]/(P₁)`", in the form the Hankel argument consumes: a functional killing every
-multiple of the monic `P₁ = X^d - Σ_{l<d} c_l X^l` has moments obeying that recurrence. -/
+/-- A functional killing every multiple of the monic `P₁ = X^d - Σ_{l<d} c_l X^l` has moments
+obeying that recurrence.  Equivalently, `L` annihilates the ideal `(P₁)`, so it factors through
+`R[z]/(P₁)`. -/
 theorem recurrence_of_annihilates {L : Polynomial R →ₗ[R] R} {d : ℕ} {c : ℕ → R}
     (hann : ∀ q : Polynomial R,
       L ((X ^ d - ∑ l ∈ Finset.range d, C (c l) * X ^ l) * q) = 0) (s : ℕ) :
@@ -116,13 +122,31 @@ theorem hankel_det_eq_zero [IsDomain R] {μ : ℕ → R} {d : ℕ} {c : ℕ → 
 
 /-- The bound `k > d` is sharp, so `hankel_det_eq_zero` is not vacuous: at `k = d` the
 determinant can be nonzero.  Witness `d = 1`, `μ ≡ 1`, `c 0 = 1`: the recurrence holds,
-the `1×1` determinant is `1`, and the `2×2` one is `0`. -/
-theorem hankel_det_ne_zero_at_order :
+the `1×1` determinant is `1`, and the `2×2` one is `0`.
+
+This is an existence statement about one sequence, not a converse: it does not say that a
+nonvanishing minor at size `d` bounds the order below. -/
+theorem exists_hankel_det_ne_zero_at_order :
     ∃ (μ : ℕ → ℤ) (c : ℕ → ℤ),
       (∀ s, μ (s + 1) = ∑ l ∈ Finset.range 1, c l * μ (s + l)) ∧
       (hankel μ 1).det ≠ 0 ∧ (hankel μ 2).det = 0 := by
   refine ⟨fun _ => 1, fun _ => 1, by intro s; simp, ?_, ?_⟩
   · simp [hankel]
   · simp [hankel, Matrix.det_fin_two]
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.recurrence_of_annihilates' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms recurrence_of_annihilates
+
+/-- info: 'Shields.hankel_det_eq_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms hankel_det_eq_zero
+
+/-- info: 'Shields.exists_hankel_det_ne_zero_at_order' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_hankel_det_ne_zero_at_order
 
 end Shields

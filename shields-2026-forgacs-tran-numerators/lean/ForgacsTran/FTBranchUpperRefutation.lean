@@ -9,7 +9,7 @@ import ForgacsTran.DominanceFT
 /-!
 # The upper-endpoint datum cannot be nonzero, at any `r ≥ 2`
 
-`DominanceFT.ftPrincipalAmp_lower_bound` takes the endpoint pair
+`DominanceFTSupply.ftPrincipalAmp_lower_bound` takes the endpoint pair
 
   `hγ0₁ : ftPrincipal τ (b - 0) = te₁`   and   `hte₁ : te₁ ≠ 0`
 

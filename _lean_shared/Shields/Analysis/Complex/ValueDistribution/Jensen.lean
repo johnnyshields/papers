@@ -3,6 +3,7 @@ Copyright (c) 2026 Johnny Shields. All rights reserved.
 Released under the MIT license as described in the file LICENSE.txt.
 Authors: Johnny Shields
 -/
+import Mathlib.Algebra.Order.Field.GeomSum
 import Mathlib.Analysis.Complex.ValueDistribution.LogCounting.Basic
 import Shields.Analysis.Complex.ValueDistribution.ExponentOfConvergence
 
@@ -32,6 +33,7 @@ axis alone and needs no information about where the zeros lie.
 * `Shields.counting` — the unweighted counting function, the mass of a divisor in a closed ball.
 * `Shields.sum_le_counting` — a finite sum of the masses of points in the ball is at most
   `counting`.
+* `Shields.sum_far_le` — the points beyond `r₀`, summed over dyadic shells.
 * `Shields.summable_rpow_of_counting_le` — the converse of `logCounting_le_const_mul_rpow`:
   `counting D r = O(r ^ σ)` with `σ < p` gives summability of `∑ D z * ‖z‖ ^ (-p)`.
 * `Shields.counting_le_log_div_log_two` — Jensen's inequality in counting form: the mass in the
@@ -39,6 +41,8 @@ axis alone and needs no information about where the zeros lie.
   `2 * r`.
 * `Shields.norm_le_re_of_nonneg_coeffs` — a power series with nonnegative real coefficients attains
   its maximum modulus on the positive real axis.
+* `Shields.counting_le_const_mul_rpow` — Jensen against a growth bound on the positive axis: the
+  mass in the ball of radius `r` is `O(r ^ σ)`.
 * `Shields.summable_rpow_divisor_of_growth` — the composite: a polynomial-in-`r ^ σ` bound on
   `log ‖F r‖` along the positive axis makes the zero divisor of `F` summable at every `p > σ`.
 
@@ -72,7 +76,7 @@ theorem toClosedBall_nonneg {D : locallyFinsupp E ℤ} (hD : 0 ≤ D) (r : ℝ) 
     (0 : ℤ) ≤ (D.toClosedBall r) z := by
   by_cases hmem : z ∈ closedBall (0 : E) |r|
   · rw [locallyFinsuppWithin.toClosedBall_eval_within D hmem]
-    simpa using (locallyFinsuppWithin.le_def.1 hD) z
+    exact hD z
   · have h0 : (D.toClosedBall r) z = 0 := by
       by_contra hne
       exact hmem (locallyFinsuppWithin.toClosedBall_support_subset_closedBall D hne)
@@ -126,7 +130,7 @@ theorem dyadic_shell {z : E} (hz : 1 ≤ ‖z‖) :
   constructor
   · have h1 : (2 : ℕ) ^ (Nat.log 2 ⌊‖z‖⌋₊) ≤ ⌊‖z‖⌋₊ := Nat.pow_log_le_self 2 hne
     have h2 : ((2 : ℕ) ^ (Nat.log 2 ⌊‖z‖⌋₊) : ℝ) ≤ (⌊‖z‖⌋₊ : ℝ) := by exact_mod_cast h1
-    calc (2 : ℝ) ^ (Nat.log 2 ⌊‖z‖⌋₊) = ((2 : ℕ) ^ (Nat.log 2 ⌊‖z‖⌋₊) : ℝ) := by push_cast; ring
+    calc (2 : ℝ) ^ (Nat.log 2 ⌊‖z‖⌋₊) = ((2 : ℕ) ^ (Nat.log 2 ⌊‖z‖⌋₊) : ℝ) := by norm_cast
       _ ≤ (⌊‖z‖⌋₊ : ℝ) := h2
       _ ≤ ‖z‖ := Nat.floor_le (norm_nonneg z)
   · have h1 : ⌊‖z‖⌋₊ < (2 : ℕ) ^ (Nat.log 2 ⌊‖z‖⌋₊ + 1) := Nat.lt_pow_succ_log_self one_lt_two _
@@ -135,7 +139,7 @@ theorem dyadic_shell {z : E} (hz : 1 ≤ ‖z‖) :
       exact_mod_cast this
     calc ‖z‖ < (⌊‖z‖⌋₊ : ℝ) + 1 := Nat.lt_floor_add_one ‖z‖
       _ ≤ ((2 : ℕ) ^ (Nat.log 2 ⌊‖z‖⌋₊ + 1) : ℝ) := h2
-      _ = (2 : ℝ) ^ (Nat.log 2 ⌊‖z‖⌋₊ + 1) := by push_cast; ring
+      _ = (2 : ℝ) ^ (Nat.log 2 ⌊‖z‖⌋₊ + 1) := by norm_cast
 
 /-- **The shell-to-shell ratio is `2 ^ (σ - p)`.**  A point of the `k`-th dyadic shell contributes
 at most `(2 ^ k) ^ (-p)` and the shell carries mass at most `C * (2 ^ (k+1)) ^ σ`, so its total is
@@ -159,6 +163,109 @@ theorem rpow_shell_bound (σ p C : ℝ) (k : ℕ) :
     show (σ - p) * (k : ℝ) = (k : ℝ) * (-p) + (k : ℝ) * σ by ring, Real.rpow_add h2pos]
   ring
 
+/-- **The near part is bounded once and for all.**  Points inside the ball of radius `r₀` are
+finitely many, so whatever finite set of them a partial sum happens to meet, it is dominated by the
+one fixed sum over the whole support there. -/
+theorem sum_near_le_sum_support_ball [ProperSpace E] {D : locallyFinsupp E ℤ} (hD : 0 ≤ D)
+    {p r₀ : ℝ} (hr₀ : 0 ≤ r₀) {A : Finset E} (hA : ∀ z ∈ A, ‖z‖ ≤ r₀) :
+    ∑ z ∈ A, (D z : ℝ) * ‖z‖ ^ (-p)
+      ≤ ∑ z ∈ (finite_support_toClosedBall D r₀).toFinset, (D z : ℝ) * ‖z‖ ^ (-p) := by
+  classical
+  have hfnn : ∀ z : E, 0 ≤ (D z : ℝ) * ‖z‖ ^ (-p) := fun z ↦ summand_nonneg hD p z
+  have h1 : ∑ z ∈ A.filter (fun z ↦ D z ≠ 0), (D z : ℝ) * ‖z‖ ^ (-p)
+      = ∑ z ∈ A, (D z : ℝ) * ‖z‖ ^ (-p) := by
+    refine Finset.sum_subset (Finset.filter_subset _ _) ?_
+    intro z hzA hzA0
+    have hDz : D z = 0 := by
+      by_contra hne
+      exact hzA0 (Finset.mem_filter.2 ⟨hzA, hne⟩)
+    simp [hDz]
+  have h2 : A.filter (fun z ↦ D z ≠ 0) ⊆ (finite_support_toClosedBall D r₀).toFinset := by
+    intro z hz
+    obtain ⟨hzA, hzne⟩ := Finset.mem_filter.1 hz
+    have hmem : z ∈ closedBall (0 : E) |r₀| := by
+      rw [mem_closedBall_zero_iff, abs_of_nonneg hr₀]
+      exact hA z hzA
+    rw [Set.Finite.mem_toFinset]
+    simp only [Function.mem_support, ne_eq, Int.cast_eq_zero]
+    rw [locallyFinsuppWithin.toClosedBall_eval_within D hmem]
+    exact hzne
+  rw [← h1]
+  exact Finset.sum_le_sum_of_subset_of_nonneg h2 fun z _ _ ↦ hfnn z
+
+/-- **One dyadic shell's contribution.**  A shell whose points all lie beyond `r₀` carries mass at
+most `C * (2 ^ (k+1)) ^ σ`, and each of its points is weighted by at most `(2 ^ k) ^ (-p)`;
+`rpow_shell_bound` turns the product into the `k`-th term of a geometric series of ratio
+`2 ^ (σ - p)`. -/
+theorem shell_sum_le [ProperSpace E] {D : locallyFinsupp E ℤ} (hD : 0 ≤ D)
+    {σ p C r₀ : ℝ} (hp : 0 ≤ p) (hC : 0 ≤ C)
+    (hcount : ∀ r : ℝ, r₀ ≤ r → counting D r ≤ C * r ^ σ)
+    {S : Finset E} {k : ℕ} (hlb : ∀ z ∈ S, (2 : ℝ) ^ k ≤ ‖z‖)
+    (hub : ∀ z ∈ S, ‖z‖ < (2 : ℝ) ^ (k + 1)) (hout : ∀ z ∈ S, r₀ < ‖z‖) :
+    ∑ z ∈ S, (D z : ℝ) * ‖z‖ ^ (-p) ≤ C * 2 ^ σ * ((2 : ℝ) ^ (σ - p)) ^ k := by
+  rcases S.eq_empty_or_nonempty with he | ⟨w, hw⟩
+  · rw [he, Finset.sum_empty]
+    positivity
+  have hr₀le : r₀ ≤ (2 : ℝ) ^ (k + 1) := le_of_lt (lt_trans (hout w hw) (hub w hw))
+  have hmass : ∑ z ∈ S, (D z : ℝ) ≤ C * ((2 : ℝ) ^ (k + 1)) ^ σ := by
+    refine le_trans (sum_le_counting hD ?_) (hcount _ hr₀le)
+    intro z hz
+    rw [abs_of_nonneg (by positivity : (0 : ℝ) ≤ (2 : ℝ) ^ (k + 1))]
+    exact (hub z hz).le
+  have hterm : ∀ z ∈ S, (D z : ℝ) * ‖z‖ ^ (-p) ≤ ((2 : ℝ) ^ k) ^ (-p) * (D z : ℝ) := by
+    intro z hz
+    have hDz : (0 : ℝ) ≤ (D z : ℝ) := locallyFinsuppWithin_apply_intCast_nonneg hD z
+    have hnorm : ‖z‖ ^ (-p) ≤ ((2 : ℝ) ^ k) ^ (-p) :=
+      Real.rpow_le_rpow_of_nonpos (by positivity) (hlb z hz) (by linarith)
+    calc (D z : ℝ) * ‖z‖ ^ (-p) ≤ (D z : ℝ) * ((2 : ℝ) ^ k) ^ (-p) :=
+          mul_le_mul_of_nonneg_left hnorm hDz
+      _ = ((2 : ℝ) ^ k) ^ (-p) * (D z : ℝ) := by ring
+  calc ∑ z ∈ S, (D z : ℝ) * ‖z‖ ^ (-p)
+      ≤ ∑ z ∈ S, ((2 : ℝ) ^ k) ^ (-p) * (D z : ℝ) := Finset.sum_le_sum hterm
+    _ = ((2 : ℝ) ^ k) ^ (-p) * ∑ z ∈ S, (D z : ℝ) := by rw [Finset.mul_sum]
+    _ ≤ ((2 : ℝ) ^ k) ^ (-p) * (C * ((2 : ℝ) ^ (k + 1)) ^ σ) :=
+        mul_le_mul_of_nonneg_left hmass (by positivity)
+    _ = C * 2 ^ σ * ((2 : ℝ) ^ (σ - p)) ^ k := rpow_shell_bound σ p C k
+
+
+/-- **The far part: the dyadic shells sum to a geometric series.**  A finite set of points all
+lying beyond `r₀` is cut into the shells `2 ^ k ≤ ‖z‖ < 2 ^ (k + 1)`, each of which
+`Shields.shell_sum_le` bounds by the `k`-th term of a geometric series of ratio `2 ^ (σ - p) < 1`.
+
+The companion of `Shields.sum_near_le_sum_support_ball`, which bounds the points inside `r₀`. -/
+theorem sum_far_le [ProperSpace E] {D : locallyFinsupp E ℤ} (hD : 0 ≤ D) {σ p C r₀ : ℝ}
+    (hσp : σ < p) (hp : 0 < p) (hC : 0 ≤ C) (hr₀ : 1 ≤ r₀)
+    (hcount : ∀ r : ℝ, r₀ ≤ r → counting D r ≤ C * r ^ σ) {A : Finset E}
+    (hA : ∀ z ∈ A, r₀ < ‖z‖) :
+    ∑ z ∈ A, (D z : ℝ) * ‖z‖ ^ (-p) ≤ C * 2 ^ σ * (1 - (2 : ℝ) ^ (σ - p))⁻¹ := by
+  classical
+  set q : ℝ := (2 : ℝ) ^ (σ - p) with hq
+  have hq0 : 0 < q := Real.rpow_pos_of_pos two_pos _
+  have hq1 : q < 1 := Real.rpow_lt_one_of_one_lt_of_neg one_lt_two (by linarith)
+  set idx : E → ℕ := fun z ↦ Nat.log 2 ⌊‖z‖⌋₊ with hidx
+  set K : ℕ := A.sup idx with hK
+  have hshell : ∀ z ∈ A, (2 : ℝ) ^ (idx z) ≤ ‖z‖ ∧ ‖z‖ < (2 : ℝ) ^ (idx z + 1) := fun z hz ↦
+    dyadic_shell (by linarith [hA z hz])
+  have hfar : ∀ k : ℕ, ∑ z ∈ A.filter (fun z ↦ idx z = k), (D z : ℝ) * ‖z‖ ^ (-p)
+      ≤ C * 2 ^ σ * q ^ k := by
+    intro k
+    refine shell_sum_le hD hp.le hC hcount ?_ ?_ ?_ <;> intro z hz <;>
+      obtain ⟨hzA, hzk⟩ := Finset.mem_filter.1 hz
+    · exact hzk ▸ (hshell z hzA).1
+    · exact hzk ▸ (hshell z hzA).2
+    · exact hA z hzA
+  have hmaps : ∀ z ∈ A, idx z ∈ Finset.range (K + 1) := fun z hz ↦
+    Finset.mem_range_succ_iff.2 (Finset.le_sup hz)
+  rw [← Finset.sum_fiberwise_of_maps_to hmaps]
+  calc ∑ k ∈ Finset.range (K + 1), ∑ z ∈ A.filter (fun z ↦ idx z = k), (D z : ℝ) * ‖z‖ ^ (-p)
+      ≤ ∑ k ∈ Finset.range (K + 1), C * 2 ^ σ * q ^ k := Finset.sum_le_sum fun k _ ↦ hfar k
+    _ = C * 2 ^ σ * ∑ k ∈ Finset.range (K + 1), q ^ k := by rw [Finset.mul_sum]
+    _ ≤ C * 2 ^ σ * (1 - q)⁻¹ := by
+        refine mul_le_mul_of_nonneg_left ?_ (by positivity)
+        have h := geom_sum_Ico_le_of_lt_one (x := q) (m := 0) (n := K + 1) hq0.le hq1
+        rw [pow_zero, one_div] at h
+        rwa [Finset.range_eq_Ico]
+
 /--
 **The converse of `Shields.logCounting_le_const_mul_rpow`.**  If the mass of a nonnegative divisor
 in the ball of radius `r` grows at most like `r ^ σ`, then `∑ D z * ‖z‖ ^ (-p)` converges at every
@@ -172,109 +279,19 @@ theorem summable_rpow_of_counting_le [ProperSpace E] {D : locallyFinsupp E ℤ} 
     {σ p C r₀ : ℝ} (hσp : σ < p) (hp : 0 < p) (hC : 0 ≤ C) (hr₀ : 1 ≤ r₀)
     (hcount : ∀ r : ℝ, r₀ ≤ r → counting D r ≤ C * r ^ σ) :
     Summable fun z : E ↦ (D z : ℝ) * ‖z‖ ^ (-p) := by
-  have h2pos : (0 : ℝ) < 2 := two_pos
+  classical
   set f : E → ℝ := fun z ↦ (D z : ℝ) * ‖z‖ ^ (-p) with hfdef
-  have hfnn : ∀ z, 0 ≤ f z := fun z ↦ summand_nonneg hD p z
-  set q : ℝ := (2 : ℝ) ^ (σ - p) with hq
-  have hq0 : 0 < q := Real.rpow_pos_of_pos h2pos _
-  have hq1 : q < 1 := Real.rpow_lt_one_of_one_lt_of_neg one_lt_two (by linarith)
   set F₀ : Finset E := (finite_support_toClosedBall D r₀).toFinset with hF₀
-  refine summable_of_sum_le hfnn (c := (∑ z ∈ F₀, f z) + C * 2 ^ σ * (1 - q)⁻¹) ?_
-  intro u
-  set A : Finset E := u.filter fun z ↦ ‖z‖ ≤ r₀ with hA
-  set A' : Finset E := u.filter fun z ↦ ¬ ‖z‖ ≤ r₀ with hA'
-  -- the near part is bounded by the fixed finite sum over the support in the ball of radius `r₀`
-  have hnear : ∑ z ∈ A, f z ≤ ∑ z ∈ F₀, f z := by
-    have h1 : ∑ z ∈ A.filter (fun z ↦ D z ≠ 0), f z = ∑ z ∈ A, f z := by
-      refine Finset.sum_subset (Finset.filter_subset _ _) ?_
-      intro z hzA hzA0
-      have hDz : D z = 0 := by
-        by_contra hne
-        exact hzA0 (Finset.mem_filter.2 ⟨hzA, hne⟩)
-      simp [hfdef, hDz]
-    have h2 : A.filter (fun z ↦ D z ≠ 0) ⊆ F₀ := by
-      intro z hz
-      obtain ⟨hzA, hzne⟩ := Finset.mem_filter.1 hz
-      have hznear : ‖z‖ ≤ r₀ := (Finset.mem_filter.1 hzA).2
-      have hmem : z ∈ closedBall (0 : E) |r₀| := by
-        rw [mem_closedBall_zero_iff, abs_of_nonneg (by linarith : (0 : ℝ) ≤ r₀)]
-        exact hznear
-      rw [hF₀, Set.Finite.mem_toFinset]
-      simp only [Function.mem_support, ne_eq, Int.cast_eq_zero]
-      rw [locallyFinsuppWithin.toClosedBall_eval_within D hmem]
-      exact hzne
-    rw [← h1]
-    exact Finset.sum_le_sum_of_subset_of_nonneg h2 fun z _ _ ↦ hfnn z
-  -- the far part splits into dyadic shells
-  set idx : E → ℕ := fun z ↦ Nat.log 2 ⌊‖z‖⌋₊ with hidx
-  set K : ℕ := A'.sup idx with hK
-  have hshell : ∀ z ∈ A', (2 : ℝ) ^ (idx z) ≤ ‖z‖ ∧ ‖z‖ < (2 : ℝ) ^ (idx z + 1) := by
-    intro z hz
-    have : ¬ ‖z‖ ≤ r₀ := (Finset.mem_filter.1 hz).2
-    exact dyadic_shell (by linarith [not_le.1 this])
-  have hfar : ∀ k : ℕ, ∑ z ∈ A'.filter (fun z ↦ idx z = k), f z ≤ C * 2 ^ σ * q ^ k := by
-    intro k
-    have hid : ((2 : ℝ) ^ k) ^ (-p) * (C * ((2 : ℝ) ^ (k + 1)) ^ σ) = C * (2 : ℝ) ^ σ * q ^ k := by
-      rw [hq]; exact rpow_shell_bound σ p C k
-    rcases (A'.filter (fun z ↦ idx z = k)).eq_empty_or_nonempty with he | ⟨w, hw⟩
-    · rw [he, Finset.sum_empty]
-      positivity
-    · obtain ⟨hwA', hwk⟩ := Finset.mem_filter.1 hw
-      have hwfar : r₀ < ‖w‖ := not_le.1 (Finset.mem_filter.1 hwA').2
-      have hwub : ‖w‖ < (2 : ℝ) ^ (k + 1) := by
-        have := (hshell w hwA').2
-        rwa [hwk] at this
-      have hr₀le : r₀ ≤ (2 : ℝ) ^ (k + 1) := le_of_lt (lt_trans hwfar hwub)
-      have hmass : ∑ z ∈ A'.filter (fun z ↦ idx z = k), (D z : ℝ)
-          ≤ C * ((2 : ℝ) ^ (k + 1)) ^ σ := by
-        refine le_trans (sum_le_counting hD ?_) (hcount _ hr₀le)
-        intro z hz
-        obtain ⟨hzA', hzk⟩ := Finset.mem_filter.1 hz
-        have hub : ‖z‖ < (2 : ℝ) ^ (k + 1) := by
-          have := (hshell z hzA').2
-          rwa [hzk] at this
-        rw [abs_of_nonneg (by positivity : (0 : ℝ) ≤ (2 : ℝ) ^ (k + 1))]
-        exact hub.le
-      have hterm : ∀ z ∈ A'.filter (fun z ↦ idx z = k),
-          f z ≤ ((2 : ℝ) ^ k) ^ (-p) * (D z : ℝ) := by
-        intro z hz
-        obtain ⟨hzA', hzk⟩ := Finset.mem_filter.1 hz
-        have hlb : (2 : ℝ) ^ k ≤ ‖z‖ := by
-          have := (hshell z hzA').1
-          rwa [hzk] at this
-        have hDz : (0 : ℝ) ≤ (D z : ℝ) := by
-          have : (0 : ℤ) ≤ D z := by simpa using (locallyFinsuppWithin.le_def.1 hD) z
-          exact_mod_cast this
-        have hnorm : ‖z‖ ^ (-p) ≤ ((2 : ℝ) ^ k) ^ (-p) :=
-          Real.rpow_le_rpow_of_nonpos (by positivity) hlb (by linarith)
-        calc f z = (D z : ℝ) * ‖z‖ ^ (-p) := rfl
-          _ ≤ (D z : ℝ) * ((2 : ℝ) ^ k) ^ (-p) := mul_le_mul_of_nonneg_left hnorm hDz
-          _ = ((2 : ℝ) ^ k) ^ (-p) * (D z : ℝ) := by ring
-      calc ∑ z ∈ A'.filter (fun z ↦ idx z = k), f z
-          ≤ ∑ z ∈ A'.filter (fun z ↦ idx z = k), ((2 : ℝ) ^ k) ^ (-p) * (D z : ℝ) :=
-            Finset.sum_le_sum hterm
-        _ = ((2 : ℝ) ^ k) ^ (-p) * ∑ z ∈ A'.filter (fun z ↦ idx z = k), (D z : ℝ) := by
-            rw [Finset.mul_sum]
-        _ ≤ ((2 : ℝ) ^ k) ^ (-p) * (C * ((2 : ℝ) ^ (k + 1)) ^ σ) := by
-            refine mul_le_mul_of_nonneg_left hmass (by positivity)
-        _ = C * (2 : ℝ) ^ σ * q ^ k := hid
-  have hmaps : ∀ z ∈ A', idx z ∈ Finset.range (K + 1) := by
-    intro z hz
-    exact Finset.mem_range_succ_iff.2 (Finset.le_sup hz)
-  have hfarsum : ∑ z ∈ A', f z ≤ C * 2 ^ σ * (1 - q)⁻¹ := by
-    rw [← Finset.sum_fiberwise_of_maps_to hmaps f]
-    calc ∑ k ∈ Finset.range (K + 1), ∑ z ∈ A'.filter (fun z ↦ idx z = k), f z
-        ≤ ∑ k ∈ Finset.range (K + 1), C * 2 ^ σ * q ^ k := Finset.sum_le_sum fun k _ ↦ hfar k
-      _ = C * 2 ^ σ * ∑ k ∈ Finset.range (K + 1), q ^ k := by rw [Finset.mul_sum]
-      _ ≤ C * 2 ^ σ * (1 - q)⁻¹ := by
-          refine mul_le_mul_of_nonneg_left ?_ (by positivity)
-          calc ∑ k ∈ Finset.range (K + 1), q ^ k ≤ ∑' k : ℕ, q ^ k :=
-                Summable.sum_le_tsum _ (fun k _ ↦ by positivity)
-                  (summable_geometric_of_lt_one hq0.le hq1)
-            _ = (1 - q)⁻¹ := tsum_geometric_of_lt_one hq0.le hq1
-  calc ∑ z ∈ u, f z = ∑ z ∈ A, f z + ∑ z ∈ A', f z :=
+  refine summable_of_sum_le (fun z ↦ summand_nonneg hD p z)
+    (c := (∑ z ∈ F₀, f z) + C * 2 ^ σ * (1 - (2 : ℝ) ^ (σ - p))⁻¹) fun u ↦ ?_
+  have hnear : ∑ z ∈ u.filter (fun z ↦ ‖z‖ ≤ r₀), f z ≤ ∑ z ∈ F₀, f z :=
+    sum_near_le_sum_support_ball hD (by linarith) fun z hz ↦ (Finset.mem_filter.1 hz).2
+  have hfarsum := sum_far_le hD hσp hp hC hr₀ hcount
+    (A := u.filter fun z ↦ ¬ ‖z‖ ≤ r₀) fun z hz ↦ not_le.1 (Finset.mem_filter.1 hz).2
+  calc ∑ z ∈ u, f z
+      = ∑ z ∈ u.filter (fun z ↦ ‖z‖ ≤ r₀), f z + ∑ z ∈ u.filter (fun z ↦ ¬ ‖z‖ ≤ r₀), f z :=
         (Finset.sum_filter_add_sum_filter_not u _ f).symm
-    _ ≤ (∑ z ∈ F₀, f z) + C * 2 ^ σ * (1 - q)⁻¹ := add_le_add hnear hfarsum
+    _ ≤ (∑ z ∈ F₀, f z) + C * 2 ^ σ * (1 - (2 : ℝ) ^ (σ - p))⁻¹ := add_le_add hnear hfarsum
 
 /-! ### Jensen's inequality in counting form -/
 
@@ -335,6 +352,58 @@ theorem norm_le_norm_ofReal_norm {a : ℕ → ℝ} {F : ℂ → ℂ} (ha : ∀ n
 
 /-! ### The composite: growth on the positive axis bounds the exponent of convergence -/
 
+/-- **A growth bound on the positive axis bounds the counting function.**  For `F` entire with
+nonnegative Taylor coefficients and `F 0 ≠ 0`, a bound `|log ‖F s‖| ≤ c s ^ σ` beyond `r₀ ≥ 1`
+gives `counting (divisor F) r ≤ ((c 2 ^ σ + |log ‖F 0‖|) / log 2) r ^ σ` beyond `r₀`.
+
+Nonnegative coefficients put the maximum modulus on the circle of radius `2r` at the positive real
+point of that circle, so `Shields.counting_le_log_div_log_two` reads the count off a hypothesis
+about the positive axis alone.  Nothing is assumed about where the zeros lie. -/
+theorem counting_le_const_mul_rpow {a : ℕ → ℝ} {F : ℂ → ℂ} {σ c r₀ : ℝ}
+    (hF : Differentiable ℂ F) (hF0 : F 0 ≠ 0) (ha : ∀ n, 0 ≤ a n)
+    (hsum : ∀ z : ℂ, HasSum (fun n ↦ (a n : ℂ) * z ^ n) (F z)) (hσ : 0 ≤ σ) (hc0 : 0 ≤ c)
+    (hr₀ : 1 ≤ r₀) (hbound : ∀ s : ℝ, r₀ ≤ s → |Real.log ‖F (s : ℂ)‖| ≤ c * s ^ σ)
+    {r : ℝ} (hr : r₀ ≤ r) :
+    counting (MeromorphicOn.divisor F Set.univ) r
+      ≤ (c * 2 ^ σ + |Real.log ‖F 0‖|) / Real.log 2 * r ^ σ := by
+  have hlog2 : 0 < Real.log 2 := Real.log_pos one_lt_two
+  have hr1 : 1 ≤ r := le_trans hr₀ hr
+  have hr0 : 0 < r := by linarith
+  have hrσ : 1 ≤ r ^ σ := Real.one_le_rpow hr1 hσ
+  -- the modulus bound on the circle of radius `2 * r` comes from the nonnegative coefficients
+  set M : ℝ := max 1 ‖F ((2 * r : ℝ) : ℂ)‖ with hMdef
+  have hM1 : 1 ≤ M := le_max_left _ _
+  have hM0 : 0 < M := lt_of_lt_of_le zero_lt_one hM1
+  have hbd : ∀ z : ℂ, ‖z‖ = 2 * r → ‖F z‖ ≤ M := fun z hz => by
+    refine le_trans (norm_le_norm_ofReal_norm ha hsum z) ?_
+    rw [hz]
+    exact le_max_right _ _
+  have hnn : (0 : ℝ) ≤ c * 2 ^ σ * r ^ σ :=
+    mul_nonneg (mul_nonneg hc0 (Real.rpow_nonneg (by norm_num) σ)) (Real.rpow_nonneg hr0.le σ)
+  have hlogM : Real.log M ≤ c * 2 ^ σ * r ^ σ := by
+    have hb := hbound (2 * r) (by linarith)
+    rw [Real.mul_rpow (by norm_num) hr0.le] at hb
+    rcases max_cases 1 ‖F ((2 * r : ℝ) : ℂ)‖ with ⟨he, _⟩ | ⟨he, _⟩
+    · rw [hMdef, he, Real.log_one]
+      exact hnn
+    · rw [hMdef, he]
+      linarith [le_abs_self (Real.log ‖F ((2 * r : ℝ) : ℂ)‖)]
+  have hnum : Real.log M - Real.log ‖F 0‖
+      ≤ c * 2 ^ σ * r ^ σ + |Real.log ‖F 0‖| * r ^ σ := by
+    have h1 : -Real.log ‖F 0‖ ≤ |Real.log ‖F 0‖| := neg_le_abs _
+    have h2 : |Real.log ‖F 0‖| ≤ |Real.log ‖F 0‖| * r ^ σ := by
+      nlinarith [abs_nonneg (Real.log ‖F 0‖)]
+    linarith
+  -- and Jensen turns it into a bound on the counting function
+  calc counting (MeromorphicOn.divisor F Set.univ) r
+      ≤ Real.log (M / ‖F 0‖) / Real.log 2 := counting_le_log_div_log_two hF hF0 hr0 hM1 hbd
+    _ = (Real.log M - Real.log ‖F 0‖) / Real.log 2 := by
+        rw [Real.log_div hM0.ne' (norm_ne_zero_iff.2 hF0)]
+    _ ≤ (c * 2 ^ σ * r ^ σ + |Real.log ‖F 0‖| * r ^ σ) / Real.log 2 := by
+        rw [div_eq_mul_inv, div_eq_mul_inv]
+        exact mul_le_mul_of_nonneg_right hnum (inv_nonneg.2 hlog2.le)
+    _ = (c * 2 ^ σ + |Real.log ‖F 0‖|) / Real.log 2 * r ^ σ := by ring
+
 /--
 **A growth bound along the positive axis makes the zeros of an entire function with nonnegative
 Taylor coefficients summable.**
@@ -350,63 +419,26 @@ theorem summable_rpow_divisor_of_growth {a : ℕ → ℝ} {F : ℂ → ℂ} {σ 
     (hσ : 0 ≤ σ) (hσp : σ < p)
     (hgrowth : (fun r : ℝ ↦ Real.log ‖F (r : ℂ)‖) =O[atTop] fun r : ℝ ↦ r ^ σ) :
     Summable fun z : ℂ ↦ ((MeromorphicOn.divisor F Set.univ) z : ℝ) * ‖z‖ ^ (-p) := by
-  have hp : 0 < p := lt_of_le_of_lt hσ hσp
   have hlog2 : 0 < Real.log 2 := Real.log_pos one_lt_two
   obtain ⟨c, hc0, hcw⟩ := hgrowth.exists_nonneg
   obtain ⟨r₁, hr₁⟩ := Filter.eventually_atTop.1 hcw.bound
-  set L : ℝ := |Real.log ‖F 0‖| with hL
-  have hL0 : 0 ≤ L := abs_nonneg _
-  have hDnn : 0 ≤ MeromorphicOn.divisor F Set.univ :=
-    MeromorphicOn.AnalyticOnNhd.divisor_nonneg fun x _ ↦ hF.analyticAt x
-  refine summable_rpow_of_counting_le hDnn (σ := σ) (p := p)
-    (C := (c * 2 ^ σ + L) / Real.log 2) (r₀ := max r₁ 1) hσp hp
-    (div_nonneg (by positivity) hlog2.le) (le_max_right _ _) ?_
-  intro r hrr₀
-  have hr1 : 1 ≤ r := le_trans (le_max_right r₁ 1) hrr₀
-  have hr0 : 0 < r := by linarith
-  have hr₁le : r₁ ≤ 2 * r := by
-    have : r₁ ≤ r := le_trans (le_max_left r₁ 1) hrr₀
-    linarith
-  have hrσ : 1 ≤ r ^ σ := by simpa using Real.rpow_le_rpow zero_le_one hr1 hσ
-  set M : ℝ := max 1 ‖F ((2 * r : ℝ) : ℂ)‖ with hMdef
-  have hM1 : 1 ≤ M := le_max_left _ _
-  have hM0 : 0 < M := lt_of_lt_of_le zero_lt_one hM1
-  -- the modulus bound on the circle of radius `2 * r` comes from the nonnegative coefficients
-  have hbd : ∀ z : ℂ, ‖z‖ = 2 * r → ‖F z‖ ≤ M := by
-    intro z hz
-    have h1 : ‖F z‖ ≤ (F (‖z‖ : ℂ)).re := norm_le_re_of_nonneg_coeffs ha hsum z
-    have h2 : (F (‖z‖ : ℂ)).re ≤ ‖F (‖z‖ : ℂ)‖ := Complex.re_le_norm _
-    rw [hz] at h1 h2
-    exact le_trans h1 (le_trans h2 (le_max_right _ _))
-  -- and Jensen turns it into a bound on the counting function
-  have hcnt := counting_le_log_div_log_two hF hF0 hr0 hM1 hbd
-  have hlogM : Real.log M ≤ c * 2 ^ σ * r ^ σ := by
-    have hnn : (0 : ℝ) ≤ c * 2 ^ σ * r ^ σ :=
-      mul_nonneg (mul_nonneg hc0 (Real.rpow_nonneg (by norm_num) σ)) (Real.rpow_nonneg hr0.le σ)
-    rcases max_cases 1 ‖F ((2 * r : ℝ) : ℂ)‖ with ⟨he, _⟩ | ⟨he, _⟩
-    · rw [hMdef, he, Real.log_one]
-      exact hnn
-    · rw [hMdef, he]
-      have hb := hr₁ (2 * r) hr₁le
-      have h2 : |Real.log ‖F ((2 * r : ℝ) : ℂ)‖| ≤ c * |(2 * r) ^ σ| := by
-        simpa [Real.norm_eq_abs] using hb
-      rw [abs_of_nonneg (Real.rpow_nonneg (by linarith : (0 : ℝ) ≤ 2 * r) σ)] at h2
-      have h4 : (2 * r) ^ σ = 2 ^ σ * r ^ σ := Real.mul_rpow (by norm_num) hr0.le
-      rw [h4] at h2
-      have h5 : Real.log ‖F ((2 * r : ℝ) : ℂ)‖ ≤ c * (2 ^ σ * r ^ σ) :=
-        le_trans (le_abs_self _) h2
-      linarith
-  have hnum : Real.log M - Real.log ‖F 0‖ ≤ c * 2 ^ σ * r ^ σ + L * r ^ σ := by
-    have h1 : -Real.log ‖F 0‖ ≤ L := neg_le_abs _
-    have h2 : L ≤ L * r ^ σ := by nlinarith
-    linarith
-  calc counting (MeromorphicOn.divisor F Set.univ) r
-      ≤ Real.log (M / ‖F 0‖) / Real.log 2 := hcnt
-    _ = (Real.log M - Real.log ‖F 0‖) / Real.log 2 := by
-        rw [Real.log_div hM0.ne' (norm_ne_zero_iff.2 hF0)]
-    _ ≤ (c * 2 ^ σ * r ^ σ + L * r ^ σ) / Real.log 2 := by
-        rw [div_eq_mul_inv, div_eq_mul_inv]
-        exact mul_le_mul_of_nonneg_right hnum (inv_nonneg.2 hlog2.le)
-    _ = (c * 2 ^ σ + L) / Real.log 2 * r ^ σ := by ring
+  have hbound : ∀ s : ℝ, max r₁ 1 ≤ s → |Real.log ‖F (s : ℂ)‖| ≤ c * s ^ σ := by
+    intro s hs
+    have hs1 : (1 : ℝ) ≤ s := le_trans (le_max_right r₁ 1) hs
+    have h := hr₁ s (le_trans (le_max_left r₁ 1) hs)
+    rwa [Real.norm_eq_abs, Real.norm_eq_abs,
+      abs_of_nonneg (Real.rpow_nonneg (by linarith) σ)] at h
+  refine summable_rpow_of_counting_le
+    (MeromorphicOn.AnalyticOnNhd.divisor_nonneg fun x _ ↦ hF.analyticAt x) (σ := σ) (p := p)
+    (C := (c * 2 ^ σ + |Real.log ‖F 0‖|) / Real.log 2) (r₀ := max r₁ 1) hσp
+    (lt_of_le_of_lt hσ hσp) (div_nonneg (by positivity) hlog2.le) (le_max_right _ _)
+    fun r hr ↦ counting_le_const_mul_rpow hF hF0 ha hsum hσ hc0 (le_max_right _ _) hbound hr
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.summable_rpow_divisor_of_growth' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms summable_rpow_divisor_of_growth
 
 end Shields

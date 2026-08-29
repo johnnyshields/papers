@@ -17,6 +17,11 @@ residue asymptotics and the modulus gap are all statements about *one* cluster,
 and a caller that obtains them from four separate existentials can pair one
 producer's cardinality with another's values and still build.
 
+The eleven of those clauses that describe the cluster itself are
+`EndpointUpperBinders.RetainedCluster`, which the upper block returns too — the
+two endpoints differ only in the angle, the radius and which spectral parameter
+is substituted, and naming the shape is what makes that visible.
+
 So everything here is stated at the single `ψ` of
 `exists_principal_pair_cluster_indices_of_two_le_rho`, the single chart of
 `exists_lower_chart`, and the single window their two windows intersect.  The
@@ -31,7 +36,7 @@ is the fiber of the smallest zero, which the branch exponent does not see, so th
 block holds at every `r ≥ 1` — only `¬(r = 1 ∧ n = 2)` is needed, and that is the
 degenerate pencil where the retained cluster and the principal pair exhaust the
 denominator.  At `ρ = 1` the block does not apply and cannot be repaired by
-relaxing a hypothesis: `SimpleEndpoint.clusterAlpha_one_eq_zero` says the endpoint
+relaxing a hypothesis: `Cluster.clusterAlpha_one_eq_zero` says the endpoint
 slope datum degenerates to `0` there, so `hγe₀ ≠ 0` fails, and
 `SimpleEndpoint.hEp_false_of_rho_one` shows `hEp₀` is outright false.  A simple
 smallest zero needs its own endpoint regularity, not this one weakened.
@@ -86,29 +91,8 @@ theorem exists_lower_endpoint_block {n r ρ : ℕ} {a : Fin n → ℝ} {c x₁ :
       ∧ (∃ e > (0 : ℝ), ∀ δ : ℝ, 0 < δ → δ ≤ e → ∀ i : Fin (ρ - 2),
           1 + c₀ * δ ≤ ‖g₀ δ i‖ / ftTauArc a r (n - 1) x₁ δ)
       ∧ (∃ e₀ > (0 : ℝ), ∀ δ : ℝ, 0 < δ → δ ≤ e₀ →
-        0 < ftTauArc a r (n - 1) x₁ δ
-        ∧ ftTauArc a r (n - 1) x₁ δ ≤ x₁
-        ∧ (∀ t ∈ sfun₀ δ, (ftDen (ftRootPoly c a) r
-            ((ftBranchZLower a c r (n - 1) δ : ℝ) : ℂ)).eval t = 0)
-        ∧ (∀ t ∈ sfun₀ δ, (derivative (ftDen (ftRootPoly c a) r
-            ((ftBranchZLower a c r (n - 1) δ : ℝ) : ℂ))).eval t ≠ 0)
-        ∧ (∀ t ∈ sfun₀ δ, ‖t‖ < ftSepRadius a x₁)
-        ∧ (∀ t : ℂ, ‖t‖ ≤ ftSepRadius a x₁ → (ftDen (ftRootPoly c a) r
-            ((ftBranchZLower a c r (n - 1) δ : ℝ) : ℂ)).eval t = 0 → t ∈ sfun₀ δ)
-        ∧ (ftDen (ftRootPoly c a) r
-            ((ftBranchZLower a c r (n - 1) δ : ℝ) : ℂ)).eval
-            (ftPrincipal (ftTauArc a r (n - 1) x₁) δ) = 0
-        ∧ ftPrincipal (ftTauArc a r (n - 1) x₁) δ
-            ≠ ((ftTauArc a r (n - 1) x₁ δ : ℝ) : ℂ)
-              * Complex.exp (-((δ : ℝ) : ℂ) * Complex.I)
-        ∧ Function.Injective (g₀ δ)
-        ∧ (∀ i : Fin (ρ - 2), g₀ δ i ∈
-            ((sfun₀ δ).erase (ftPrincipal (ftTauArc a r (n - 1) x₁) δ)).erase
-              (((ftTauArc a r (n - 1) x₁ δ : ℝ) : ℂ)
-                * Complex.exp (-((δ : ℝ) : ℂ) * Complex.I)))
-        ∧ (((sfun₀ δ).erase (ftPrincipal (ftTauArc a r (n - 1) x₁) δ)).erase
-            (((ftTauArc a r (n - 1) x₁ δ : ℝ) : ℂ)
-              * Complex.exp (-((δ : ℝ) : ℂ) * Complex.I))).card = ρ - 2)
+        RetainedCluster (ftRootPoly c a) r (ftBranchZLower a c r (n - 1))
+          (ftTauArc a r (n - 1) x₁) δ (ftSepRadius a x₁) x₁ (sfun₀ δ) (g₀ δ))
       ∧ ∀ (B : Polynomial ℂ), B ≠ 0 → ∃ cB₀ cQ₀ : ℂ, cB₀ ≠ 0 ∧ cQ₀ ≠ 0 ∧
           (∀ i : Fin (ρ - 2), Filter.Tendsto
             (fun δ : ℝ => B.eval (g₀ δ i)

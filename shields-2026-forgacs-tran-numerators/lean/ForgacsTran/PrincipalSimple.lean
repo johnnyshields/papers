@@ -28,11 +28,13 @@ survives the elimination, and it does not see `z` at all.
 
 `eval_derivative_ftDen_ftRootPoly_ne_zero` relates `derivative (ftDen …)`, the
 point `t`, and the data `c, a, r, z`.  No hypothesis mentions a derivative of the
-pencil, so none of them contains the conclusion: `hroot` is a *vanishing*
-statement about `ftDen` itself, `ht` constrains only `Im t`, and `ha`, `hc`, `hr`,
-`hn` constrain only the admissible class.  The hypotheses are jointly satisfiable
-— `FTBranchPencil.exists_ftDen_root_on_arc` produces such a `t` at every angle of
-the viewing arc — so the statement is not vacuous.
+pencil: `hroot` is a *vanishing* statement about `ftDen` itself, `ht` constrains
+only `Im t`, and `ha`, `hc`, `hr`, `hn` constrain only the admissible class.  The
+nonvanishing is produced from `Geometry.ftCritical_ftDen` and
+`eval_ftCritical_ftRootPoly_ne_zero`, which is where its content sits.  The
+hypotheses are jointly satisfiable — `FTBranchPencil.exists_ftDen_root_on_arc`
+produces such a `t` at every angle of the viewing arc — so the statement is not
+vacuous.
 
 ## Main statements
 

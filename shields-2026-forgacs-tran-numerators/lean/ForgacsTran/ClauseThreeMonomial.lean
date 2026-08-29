@@ -29,6 +29,17 @@ residue amplitude of `prop:isolated-dominant-cancellation` by `t^k`:
 ## Implementation notes
 
 Both hold for any denominator, so neither is tied to the Favard pencil that consumes them.
+
+**The third fact of this family is not here, and cannot be.**  The remainder obeys the same
+shift — `R_M^{(t^k)} = τ^k R_{M-k}^{(1)}`, which is `ClauseThreeWitness.ftRemainder_X_pow_of_pos`
+— and it reads as the natural companion to the two above.  It is stated there because
+`ftRemainder` is defined in `DominanceFT`, and this module is imported by
+`ClauseThreeQuadraticRay`, which stays off `DominanceFT` deliberately.  Moving the remainder
+lemma here would drag that import through and cost the ray pencil an architectural decision
+its own header records.  So the split is by *what each lemma mentions*, not by subject:
+the coefficient sequence and the amplitude are `sec:reduction` and `AttractorPole` objects,
+the remainder is a `sec:dominance` one.
+
 On the principal branch `t_+ = τ e^{iθ}` the second reads
 `|W_k| = τ^k|W_1|` and `arg W_k = kθ + arg W_1`, which is where the numerator's own
 `κ` of `eq:phase-derivative-bound` comes from: it is `k`, and it grows with the weight,

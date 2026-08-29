@@ -48,19 +48,18 @@ polynomial already at the shape `(2)`.
 * `Shields.eMeets_of_lt` -- two odd paths with transposed endpoints must meet, a discrete
   intermediate value theorem that uses the unit steps; with `Shields.eSwapPair_eSwapPair` and
   `Shields.pathWeight_eSpliceAt_mul` this gives `Shields.elemDet_two_eq_sum_nonMeeting`.
-* `Shields.sum_nonMeeting_mixed_eq_superSkewSchur` -- the super branching rule at two rows.
+* `Shields.NonMeetingIsSkewSchurTranspose` -- the residue this module leaves: that the
+  non-meeting pairs of odd paths carry the tableaux of the conjugate skew shape.  It is a
+  theorem, `nonMeetingIsSkewSchurTranspose`.
 
 ## Implementation notes
 
 The odd splice cuts at the meeting index `i` rather than at `i+1`: at an odd height the two
 profiles already agree at the meeting point, so cutting one higher would move nothing.
 
-`Shields.sum_nonMeeting_mixed_eq_superSkewSchur` takes the two tableau bijections
-(`Shields.NonCrossingIsSkewSchur` and `Shields.NonMeetingIsSkewSchurTranspose`) as hypotheses in
-its type, so that this module stays about the geometry.  Both are proved elsewhere --
-the even one in `Shields.Combinatorics.Young.LGVTableauTwo`, the odd one in
-`Shields.Combinatorics.Young.LGVOddTableauTwo` -- and nothing downstream can consume them by
-accident.
+The branching sum the splice buys is assembled one module on, in
+`Shields.Combinatorics.Young.LGVOddResidue`, where the fibering runs at every `m` at once and the
+two-row statement is its `m = 2` case.  This module stays about the geometry.
 
 No Cauchy--Binet is used, and none is available: Mathlib has none at the pinned revision.
 
@@ -164,13 +163,6 @@ section OddPathSum
 
 variable {R : Type*} [CommRing R]
 
-/-- Along a column, entries increase weakly. -/
-theorem boundedSSYT_col_mono {m a : ℕ} (T : BoundedSSYT (rect m 1) a) {i₁ i₂ : ℕ}
-    (h : i₁ ≤ i₂) (hi₂ : i₂ < m) : T i₁ 0 ≤ T i₂ 0 := by
-  rcases eq_or_lt_of_le h with rfl | hlt
-  · exact le_rfl
-  · exact le_of_lt (T.1.col_strict hlt (mem_rect.mpr ⟨hi₂, Nat.zero_lt_one⟩))
-
 /-- The word of an odd path, as a one-column tableau.  Columns increase strictly
 because the letters do; the row condition is vacuous on a shape of one
 column. -/
@@ -201,9 +193,28 @@ theorem eWordOfPath_apply {a s m : ℕ} {q : ℕ → ℕ} (hq : q ∈ ePaths a s
   rfl
 
 /-- The profile of a column word: the abscissa reached at height `i` is `s` plus
-the number of letters below `i`. -/
+the number of letters below `i`.  This is `wordProfile` on the column of `T`, and
+the facts proved there apply to it. -/
 noncomputable def ePathOfWord (a s m : ℕ) (T : BoundedSSYT (rect m 1) a) (i : ℕ) : ℕ :=
   s + ((Finset.range m).filter fun j => T j 0 < i).card
+
+/-- The column of a bounded one-column tableau, read as a word: weakly increasing. -/
+theorem oneCol_mono {a m : ℕ} (T : BoundedSSYT (rect m 1) a) :
+    ∀ j₁ j₂, j₁ ≤ j₂ → j₂ < m → T j₁ 0 ≤ T j₂ 0 :=
+  fun _ _ h hj₂ => boundedSSYT_col_mono T h hj₂
+
+theorem oneCol_lt {a m : ℕ} (T : BoundedSSYT (rect m 1) a) : ∀ j, j < m → T j 0 < a :=
+  fun _ hj => T.lt (mem_rect.mpr ⟨hj, Nat.zero_lt_one⟩)
+
+/-- A letter below `i` puts its abscissa behind the profile at height `i`. -/
+theorem lt_ePathOfWord {a s len : ℕ} (T : BoundedSSYT (rect len 1) a) {i j : ℕ}
+    (hj : j < len) (h : T j 0 < i) : s + j < ePathOfWord a s len T i :=
+  lt_wordProfile (oneCol_mono T) hj h
+
+/-- A letter at or above `i` stops the profile at its abscissa. -/
+theorem ePathOfWord_le {a s len : ℕ} (T : BoundedSSYT (rect len 1) a) {i j : ℕ}
+    (h : i ≤ T j 0) : ePathOfWord a s len T i ≤ s + j :=
+  wordProfile_le (oneCol_mono T) h
 
 /-- A column word has at most one letter at each height: that is the unit step
 of the odd model, read on the tableau side. -/
@@ -219,90 +230,33 @@ theorem card_filter_eq_le_one {m a : ℕ} (T : BoundedSSYT (rect m 1) a) (i : �
 
 theorem ePathOfWord_mem (a s m : ℕ) (T : BoundedSSYT (rect m 1) a) :
     ePathOfWord a s m T ∈ ePaths a s (s + m) := by
-  refine mem_ePaths.mpr ⟨mem_hPaths.mpr ⟨by simp [ePathOfWord], fun i₁ i₂ h => ?_,
-    fun i hi => ?_⟩, fun i hi => ?_⟩
-  · refine Nat.add_le_add_left (Finset.card_le_card fun j hj => ?_) s
+  refine mem_ePaths.mpr ⟨wordProfile_mem_hPaths a (oneCol_lt T), fun i hi => ?_⟩
+  have hsub : ((Finset.range m).filter fun j => T j 0 < i)
+      ⊆ (Finset.range m).filter fun j => T j 0 < i + 1 := by
+    intro j hj
     rw [Finset.mem_filter] at hj ⊢
     exact ⟨hj.1, by omega⟩
-  · have hfull : ((Finset.range m).filter fun j => T j 0 < i) = Finset.range m :=
-      Finset.filter_true_of_mem fun j hj =>
-        lt_of_lt_of_le (T.lt (mem_rect.mpr ⟨Finset.mem_range.mp hj, Nat.zero_lt_one⟩)) hi
-    rw [ePathOfWord, hfull, Finset.card_range]
-  · have hsub : ((Finset.range m).filter fun j => T j 0 < i)
-        ⊆ (Finset.range m).filter fun j => T j 0 < i + 1 := by
-      intro j hj
-      rw [Finset.mem_filter] at hj ⊢
-      exact ⟨hj.1, by omega⟩
-    have hsplit := Finset.card_sdiff_add_card_eq_card hsub
-    have hdiff : (((Finset.range m).filter fun j => T j 0 < i + 1) \
-        ((Finset.range m).filter fun j => T j 0 < i))
-        = (Finset.range m).filter fun j => T j 0 = i := by
-      ext j
-      simp only [Finset.mem_sdiff, Finset.mem_filter, Finset.mem_range]
-      omega
-    rw [hdiff] at hsplit
-    have hone := card_filter_eq_le_one T i
-    rw [ePathOfWord, ePathOfWord]
+  have hsplit := Finset.card_sdiff_add_card_eq_card hsub
+  have hdiff : (((Finset.range m).filter fun j => T j 0 < i + 1) \
+      ((Finset.range m).filter fun j => T j 0 < i))
+      = (Finset.range m).filter fun j => T j 0 = i := by
+    ext j
+    simp only [Finset.mem_sdiff, Finset.mem_filter, Finset.mem_range]
     omega
+  rw [hdiff] at hsplit
+  have hone := card_filter_eq_le_one T i
+  rw [ePathOfWord, ePathOfWord]
+  omega
 
 /-- The profile of a word writes the word's own letters. -/
 theorem pathLetter_ePathOfWord {a s m : ℕ} (T : BoundedSSYT (rect m 1) a) {j : ℕ}
-    (hj : j < m) : pathLetter a s (ePathOfWord a s m T) j = T j 0 := by
-  have hcell : (j, 0) ∈ rect m 1 := mem_rect.mpr ⟨hj, Nat.zero_lt_one⟩
-  have hset : ((Finset.range a).filter
-      fun i' => ePathOfWord a s m T (i' + 1) ≤ s + j) = Finset.range (T j 0) := by
-    ext i'
-    rw [Finset.mem_filter, Finset.mem_range, Finset.mem_range, ePathOfWord,
-      Nat.add_le_add_iff_left]
-    constructor
-    · rintro ⟨-, h⟩
-      by_contra hcon
-      have hsub : Finset.range (j + 1)
-          ⊆ (Finset.range m).filter fun j' => T j' 0 < i' + 1 := by
-        intro j' hj'
-        rw [Finset.mem_range] at hj'
-        exact Finset.mem_filter.mpr ⟨Finset.mem_range.mpr (by omega),
-          lt_of_le_of_lt (boundedSSYT_col_mono T (by omega) hj) (by omega)⟩
-      have := Finset.card_le_card hsub
-      rw [Finset.card_range] at this
-      omega
-    · intro h
-      refine ⟨lt_trans h (T.lt hcell), ?_⟩
-      have hsub : ((Finset.range m).filter fun j' => T j' 0 < i' + 1) ⊆ Finset.range j := by
-        intro j' hj'
-        rw [Finset.mem_filter, Finset.mem_range] at hj'
-        rw [Finset.mem_range]
-        by_contra hcon
-        exact absurd (boundedSSYT_col_mono T (by omega : j ≤ j') hj'.1) (by omega)
-      have := Finset.card_le_card hsub
-      rw [Finset.card_range] at this
-      omega
-  rw [pathLetter, hset, Finset.card_range]
+    (hj : j < m) : pathLetter a s (ePathOfWord a s m T) j = T j 0 :=
+  pathLetter_wordProfile (oneCol_mono T) (oneCol_lt T) hj
 
 theorem ePathOfWord_eWordOfPath {a s m : ℕ} {q : ℕ → ℕ} (hq : q ∈ ePaths a s (s + m)) :
-    ePathOfWord a s m (eWordOfPath a s m q hq) = q := by
-  have hq' := ePaths_mem hq
-  funext i
-  have hset : ∀ k : ℕ, ((Finset.range m).filter fun j => eWordOfPath a s m q hq j 0 < k)
-      = (Finset.range m).filter fun j => pathLetter a s q j < k := by
-    intro k
-    ext j
-    rw [Finset.mem_filter, Finset.mem_filter, eWordOfPath_apply]
-    constructor
-    · rintro ⟨hj, h⟩
-      rw [if_pos ⟨rfl, Finset.mem_range.mp hj⟩] at h
-      exact ⟨hj, h⟩
-    · rintro ⟨hj, h⟩
-      exact ⟨hj, by rw [if_pos ⟨rfl, Finset.mem_range.mp hj⟩]; exact h⟩
-  rcases le_or_gt i a with hi | hi
-  · rw [ePathOfWord, hset, card_pathLetter_lt hq' hi]
-    have := (hPaths_le hq' i).1
-    omega
-  · rw [ePathOfWord, hset, hPaths_top hq' hi.le]
-    have hfull : ((Finset.range m).filter fun j => pathLetter a s q j < i)
-        = Finset.range m :=
-      Finset.filter_true_of_mem fun j _ => lt_of_le_of_lt (pathLetter_le a s q j) hi
-    rw [hfull, Finset.card_range]
+    ePathOfWord a s m (eWordOfPath a s m q hq) = q :=
+  wordProfile_of_pathLetter (ePaths_mem hq) fun j hj => by
+    rw [eWordOfPath_apply, if_pos ⟨rfl, hj⟩]
 
 theorem eWordOfPath_ePathOfWord {a s m : ℕ} (T : BoundedSSYT (rect m 1) a) :
     eWordOfPath a s m (ePathOfWord a s m T) (ePathOfWord_mem a s m T) = T := by
@@ -314,6 +268,32 @@ theorem eWordOfPath_ePathOfWord {a s m : ℕ} (T : BoundedSSYT (rect m 1) a) :
   · rw [if_neg hc]
     exact (T.zeros fun h => hc ⟨by have := (mem_rect.mp h).2; omega,
       (mem_rect.mp h).1⟩).symm
+
+/-- Two one-column words agreeing on their cells trace the same odd path. -/
+theorem ePathOfWord_congr {a m s : ℕ} (T T' : BoundedSSYT (rect m 1) a)
+    (h : ∀ j, j < m → T j 0 = T' j 0) : ePathOfWord a s m T = ePathOfWord a s m T' := by
+  funext i
+  have hset : ((Finset.range m).filter fun j => T j 0 < i)
+      = (Finset.range m).filter fun j => T' j 0 < i := by
+    ext j
+    rw [Finset.mem_filter, Finset.mem_filter]
+    constructor
+    · rintro ⟨hj, hlt⟩
+      exact ⟨hj, by rwa [← h j (Finset.mem_range.mp hj)]⟩
+    · rintro ⟨hj, hlt⟩
+      exact ⟨hj, by rwa [h j (Finset.mem_range.mp hj)]⟩
+  change s + ((Finset.range m).filter fun j => T j 0 < i).card
+      = s + ((Finset.range m).filter fun j => T' j 0 < i).card
+  rw [hset]
+
+/-- A one-column word whose letters are those of an odd path traces that path
+back. -/
+theorem ePathOfWord_eq_of_entry {a s m : ℕ} {q : ℕ → ℕ} (hq : q ∈ ePaths a s (s + m))
+    (T : BoundedSSYT (rect m 1) a) (h : ∀ j, j < m → T j 0 = pathLetter a s q j) :
+    ePathOfWord a s m T = q := by
+  rw [← ePathOfWord_eWordOfPath hq]
+  exact ePathOfWord_congr T _ fun j hj => by
+    rw [h j hj, eWordOfPath_apply, if_pos ⟨rfl, hj⟩]
 
 /-- **The odd alphabet.**  The odd paths from `s` to `s + m` across `a` heights
 carry total weight `e_m(α_0, …, α_{a-1})`, the `elemHom` of
@@ -481,10 +461,6 @@ theorem mixedWeight_glueAt {b a s c e : ℕ} (β α : ℕ → R) {q₁ q₂ : �
     (h₁ : q₁ ∈ hPaths b s c) (h₂ : q₂ ∈ ePaths a c e) :
     mixedWeight b a β α (glueAt b q₁ q₂) = pathWeight b β q₁ * pathWeight a α q₂ := by
   rw [mixedWeight, pathWeight_glueAt, shiftAt_glueAt h₁ h₂]
-
-theorem sum_mul_sum_prod {ι κ : Type*} (u : Finset ι) (v : Finset κ) (f : ι → R) (g : κ → R) :
-    (∑ x ∈ u, f x) * ∑ y ∈ v, g y = ∑ z ∈ u ×ˢ v, f z.1 * g z.2 := by
-  rw [Finset.sum_mul_sum, Finset.sum_product]
 
 /-- **The splice at height `b`.**  The mixed paths through a fixed abscissa `c`
 at height `b` are the pairs consisting of an even path from `s` to `c` and an
@@ -1018,7 +994,7 @@ theorem rowLen_twoRow_of_le (l₀ l₁ : ℕ) {i : ℕ} (hi : 2 ≤ i) : (twoRow
 
 /-- A Young diagram is determined by its row lengths. -/
 theorem eq_of_rowLen {mu lam : YoungDiagram} (h : ∀ i, mu.rowLen i = lam.rowLen i) : mu = lam := by
-  refine cells_injective (Finset.ext fun c => ?_)
+  refine YoungDiagram.ext (Finset.ext fun c => ?_)
   obtain ⟨i, j⟩ := c
   rw [YoungDiagram.mem_cells, YoungDiagram.mem_cells, YoungDiagram.mem_iff_lt_rowLen,
     YoungDiagram.mem_iff_lt_rowLen, h i]
@@ -1047,7 +1023,7 @@ for a pair of two-row shapes carry the total weight of the tableaux of the
 conjugate shape `λ' / ν'`, the second factor of the super branching rule.
 
 This is the odd counterpart of `NonCrossingIsSkewSchur`, and like it it is a
-theorem: `LGVOddTableau.nonMeetingIsSkewSchurTranspose`, at every `a` and `α`.
+theorem: `nonMeetingIsSkewSchurTranspose`, at every `a` and `α`.
 The geometry it consumes is here — `lt_of_not_eMeets` supplies the separation and
 `pathLetter` the letters, the latter strictly increasing
 (`pathLetter_strictMono`), which is what makes the tableau a column of
@@ -1078,128 +1054,6 @@ theorem eSum_filter_eq_empty {a c₁ c₂ e₁ e₂ : ℕ} (hc : c₁ ≤ c₂) 
     rw [hPaths_top (ePaths_mem h1) le_rfl, hPaths_top (ePaths_mem h2) le_rfl] at this
     omega
 
-/-- **the super branching rule at two rows, from the splice.**  Given the two
-tableau bijections — the even one of `Shields.LGV` and the odd one above —
-the non-intersecting pairs of mixed paths carry the branching sum of
-the super branching rule.
-
-The proof is the splice and nothing else: the pairs are fibered over the
-abscissae at height `b`, each fiber factors into its even and its odd half
-(`sum_nonMeeting_mixed_split`), and the fibers are indexed by the intermediate
-shapes `μ ⊆ ν ⊆ λ` — a fiber with `ν` not a partition is empty.  No
-Cauchy--Binet, no minor pairing. -/
-theorem sum_nonMeeting_mixed_eq_superSkewSchur {b a : ℕ} {β α : ℕ → R}
-    (hH : NonCrossingIsSkewSchur b β) (hE : NonMeetingIsSkewSchurTranspose a α)
-    (lam mu : YoungDiagram) (hmu : mu ≤ lam) (hrow : ∀ i, 2 ≤ i → lam.rowLen i = 0) :
-    ∑ x ∈ (mixedPaths b a (mu.rowLen 0 + 1) (lam.rowLen 0 + 1) ×ˢ
-            mixedPaths b a (mu.rowLen 1) (lam.rowLen 1)).filter
-              fun x => ¬ MixedMeets b a x.1 x.2,
-        mixedWeight b a β α x.1 * mixedWeight b a β α x.2
-      = superSkewSchur lam mu b a β α := by
-  set s₁ := mu.rowLen 0 + 1 with hs₁
-  set s₂ := mu.rowLen 1 with hs₂
-  set e₁ := lam.rowLen 0 + 1 with he₁
-  set e₂ := lam.rowLen 1 with he₂
-  set T : Finset (ℕ × ℕ) := Finset.Icc s₁ e₁ ×ˢ Finset.Icc s₂ e₂ with hT
-  have hmurow : ∀ i, 2 ≤ i → mu.rowLen i = 0 := fun i hi =>
-    Nat.le_zero.mp (hrow i hi ▸ rowLen_mono hmu i)
-  have hmaps : ∀ x ∈ (mixedPaths b a s₁ e₁ ×ˢ mixedPaths b a s₂ e₂).filter
-      (fun x => ¬ MixedMeets b a x.1 x.2), (x.1 b, x.2 b) ∈ T := by
-    intro x hx
-    rw [Finset.mem_filter, Finset.mem_product] at hx
-    obtain ⟨⟨h1, h2⟩, -⟩ := hx
-    have hb1 := hPaths_le (mem_mixedPaths.mp h1).1 b
-    have hb2 := hPaths_le (mem_mixedPaths.mp h2).1 b
-    exact Finset.mem_product.mpr ⟨Finset.mem_Icc.mpr hb1, Finset.mem_Icc.mpr hb2⟩
-  rw [← Finset.sum_fiberwise_of_maps_to hmaps]
-  -- each fiber factors into its even and its odd half
-  have hfib : ∀ c ∈ T,
-      ∑ x ∈ ((mixedPaths b a s₁ e₁ ×ˢ mixedPaths b a s₂ e₂).filter
-          fun x => ¬ MixedMeets b a x.1 x.2).filter (fun x => (x.1 b, x.2 b) = c),
-          mixedWeight b a β α x.1 * mixedWeight b a β α x.2
-        = (∑ y ∈ (hPaths b s₁ c.1 ×ˢ hPaths b s₂ c.2).filter fun y => ¬ Crosses b y.1 y.2,
-              pathWeight b β y.1 * pathWeight b β y.2)
-          * ∑ z ∈ (ePaths a c.1 e₁ ×ˢ ePaths a c.2 e₂).filter fun z => ¬ EMeets a z.1 z.2,
-              pathWeight a α z.1 * pathWeight a α z.2 := by
-    intro c _
-    rw [Finset.filter_filter, ← sum_nonMeeting_mixed_split b a s₁ e₁ s₂ e₂ c.1 c.2 β α]
-    refine Finset.sum_congr (Finset.filter_congr fun x _ => ?_) fun _ _ => rfl
-    rw [Prod.ext_iff]
-    tauto
-  rw [Finset.sum_congr rfl hfib]
-  -- fibers with no intermediate partition are empty
-  have hvanish : ∀ c ∈ T, c ∉ T.filter (fun c => c.2 < c.1) →
-      (∑ y ∈ (hPaths b s₁ c.1 ×ˢ hPaths b s₂ c.2).filter fun y => ¬ Crosses b y.1 y.2,
-          pathWeight b β y.1 * pathWeight b β y.2)
-        * (∑ z ∈ (ePaths a c.1 e₁ ×ˢ ePaths a c.2 e₂).filter fun z => ¬ EMeets a z.1 z.2,
-            pathWeight a α z.1 * pathWeight a α z.2) = 0 := by
-    intro c hc hnot
-    rw [Finset.mem_filter] at hnot
-    have hle : c.1 ≤ c.2 := by
-      by_contra hcon
-      exact hnot ⟨hc, by omega⟩
-    have hsink : e₂ ≤ e₁ := by
-      have := lam.rowLen_anti 0 1 (by omega)
-      omega
-    rw [eSum_filter_eq_empty hle hsink, Finset.sum_empty, mul_zero]
-  rw [← Finset.sum_subset (Finset.filter_subset _ T) hvanish,
-    superSkewSchur_eq_branching _ _ _ _ _ _ hmu]
-  -- the surviving fibers are the intermediate shapes
-  refine Finset.sum_nbij' (fun c => twoRow (c.1 - 1) c.2)
-    (fun nu => (nu.rowLen 0 + 1, nu.rowLen 1)) (fun c hc => ?_) (fun nu hnu => ?_)
-    (fun c hc => ?_) (fun nu hnu => ?_) (fun c hc => ?_)
-  · rw [Finset.mem_filter, hT, Finset.mem_product, Finset.mem_Icc, Finset.mem_Icc] at hc
-    obtain ⟨⟨⟨h1, h2⟩, h3, h4⟩, h5⟩ := hc
-    refine mem_youngIcc.mpr ⟨le_iff_rowLen.mpr fun i => ?_, le_iff_rowLen.mpr fun i => ?_⟩ <;>
-      match i with
-      | 0 => rw [rowLen_twoRow_zero (by omega)]; omega
-      | 1 => rw [rowLen_twoRow_one]; omega
-      | (n + 2) =>
-        rw [rowLen_twoRow_of_le _ _ (by omega)]
-        first
-          | omega
-          | rw [hmurow _ (by omega)]
-  · obtain ⟨h1, h2⟩ := mem_youngIcc.mp hnu
-    have hnurow : ∀ i, 2 ≤ i → nu.rowLen i = 0 := fun i hi =>
-      Nat.le_zero.mp (hrow i hi ▸ rowLen_mono h2 i)
-    have hmu0 := rowLen_mono h1 0
-    have hmu1 := rowLen_mono h1 1
-    have hlam0 := rowLen_mono h2 0
-    have hlam1 := rowLen_mono h2 1
-    have hnuanti : nu.rowLen 1 ≤ nu.rowLen 0 := nu.rowLen_anti 0 1 (by omega)
-    refine Finset.mem_filter.mpr ⟨Finset.mem_product.mpr
-      ⟨Finset.mem_Icc.mpr ⟨by omega, by omega⟩, Finset.mem_Icc.mpr ⟨by omega, by omega⟩⟩, ?_⟩
-    exact by omega
-  · rw [Finset.mem_filter, hT, Finset.mem_product, Finset.mem_Icc, Finset.mem_Icc] at hc
-    obtain ⟨⟨⟨h1, -⟩, -⟩, h5⟩ := hc
-    have hc1 : c.1 - 1 + 1 = c.1 := by omega
-    rw [rowLen_twoRow_zero (by omega), rowLen_twoRow_one, hc1]
-  · obtain ⟨-, h2⟩ := mem_youngIcc.mp hnu
-    have hnurow : ∀ i, 2 ≤ i → nu.rowLen i = 0 := fun i hi =>
-      Nat.le_zero.mp (hrow i hi ▸ rowLen_mono h2 i)
-    rw [Nat.add_sub_cancel]
-    exact (eq_twoRow hnurow).symm
-  · rw [Finset.mem_filter, hT, Finset.mem_product, Finset.mem_Icc, Finset.mem_Icc] at hc
-    obtain ⟨⟨⟨h1, h2⟩, h3, h4⟩, h5⟩ := hc
-    have hnurow : ∀ i, 2 ≤ i → (twoRow (c.1 - 1) c.2).rowLen i = 0 := fun i hi =>
-      rowLen_twoRow_of_le _ _ hi
-    have hr0 : (twoRow (c.1 - 1) c.2).rowLen 0 = c.1 - 1 := rowLen_twoRow_zero (by omega)
-    have hr1 : (twoRow (c.1 - 1) c.2).rowLen 1 = c.2 := rowLen_twoRow_one _ _
-    have hmunu : mu ≤ twoRow (c.1 - 1) c.2 := by
-      refine le_iff_rowLen.mpr fun i => ?_
-      match i with
-      | 0 => rw [hr0]; omega
-      | 1 => rw [hr1]; omega
-      | (n + 2) => rw [hnurow _ (by omega), hmurow _ (by omega)]
-    have hnulam : twoRow (c.1 - 1) c.2 ≤ lam := by
-      refine le_iff_rowLen.mpr fun i => ?_
-      match i with
-      | 0 => rw [hr0]; omega
-      | 1 => rw [hr1]; omega
-      | (n + 2) => rw [hnurow _ (by omega)]; omega
-    rw [← hH _ _ hmunu hnurow, ← hE _ _ hnulam hrow, hr0, hr1,
-      show c.1 - 1 + 1 = c.1 by omega]
-
 end TwoRow
 
 /-! ## Axiom-footprint guards
@@ -1212,5 +1066,32 @@ report `sorryAx` and the build fails.
 section AxiomGuards
 
 end AxiomGuards
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.ePaths' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ePaths
+
+/-- info: 'Shields.mixedPaths' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms mixedPaths
+
+/-- info: 'Shields.mixedWeight' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms mixedWeight
+
+/-- info: 'Shields.eSwapPair' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms eSwapPair
+
+/-- info: 'Shields.MixedMeets' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MixedMeets
+
+/-- info: 'Shields.ePathOfWord' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms ePathOfWord
 
 end Shields

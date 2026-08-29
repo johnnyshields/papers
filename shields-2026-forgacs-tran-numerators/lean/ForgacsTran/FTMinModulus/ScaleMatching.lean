@@ -48,9 +48,16 @@ so the comparison is against `‖z_0‖` itself, which no upper bound on `z` sup
 
 /-- From `y^ρ = Kδ^ρ`, the crude linear bound `y ≤ (max\{K,1\})δ`.  The `ρ`-th
 root of `K` is never named: `max\{K,1\}` dominates it on either side of `1`, and
-a crude constant is all the estimate needs. -/
+a crude constant is all the estimate needs.
+
+No sign condition on `K` is carried, and the bound does not merely survive `K < 0`
+— it is never reached there.  For `δ > 0` the right side `Kδ^ρ` is negative while
+`y ≥ 0` forces `y^ρ ≥ 0`, so the hypothesis is unsatisfiable; for `δ = 0` it reads
+`y^ρ = 0`, which forces `y = 0` against a right-hand side that is also `0`.  The
+estimate is used at `K = ‖z_0‖x_1^r/‖q(x_1)‖ > 0`, and the caller still has that
+positivity for the other places that need it. -/
 theorem le_max_one_mul_of_pow_eq {y K δ : ℝ} {ρ : ℕ} (hρ : 1 ≤ ρ) (hy : 0 ≤ y)
-    (hK : 0 ≤ K) (hδ : 0 ≤ δ) (h : y ^ ρ = K * δ ^ ρ) : y ≤ max K 1 * δ := by
+    (hδ : 0 ≤ δ) (h : y ^ ρ = K * δ ^ ρ) : y ≤ max K 1 * δ := by
   have hB1 : (1 : ℝ) ≤ max K 1 := le_max_right _ _
   have hB0 : (0 : ℝ) ≤ max K 1 := le_trans zero_le_one hB1
   have hKB : K ≤ max K 1 ^ ρ :=
@@ -109,10 +116,7 @@ theorem exists_ftDen_root_near_model_root_eventually {x₁ : ℝ} (hx : 0 < x₁
   have hM0 : 0 < M := by rw [hM]; linarith only [hx, hD0]
   set L : ℝ := ∑ k ∈ Finset.range (q.natDegree + 1), ‖q.coeff k‖ * ((k : ℝ) * M ^ (k - 1))
     with hL
-  have hL0 : 0 ≤ L := by
-    rw [hL]
-    exact Finset.sum_nonneg fun k _ =>
-      mul_nonneg (norm_nonneg _) (mul_nonneg (Nat.cast_nonneg k) (pow_nonneg hM0.le _))
+  have hL0 : 0 ≤ L := by rw [hL]; exact lipschitzSum_nonneg q hM0.le
   have hρR : (0 : ℝ) < (ρ : ℝ) := by exact_mod_cast hρ
   set m : ℝ := ‖q.eval xc‖ * ((ρ : ℝ) / 2 * κ * K) with hm
   have hm0 : 0 < m := by
@@ -170,7 +174,7 @@ theorem exists_ftDen_root_near_model_root_eventually {x₁ : ℝ} (hx : 0 < x₁
       nlinarith only [hupow, pow_pos hδ ρ, hK0]
   have hule : ‖u‖ ≤ B * δ := by
     rw [hB]
-    exact le_max_one_mul_of_pow_eq hρ (norm_nonneg u) hK0.le hδ.le hupow
+    exact le_max_one_mul_of_pow_eq hρ (norm_nonneg u) hδ.le hupow
   set R : ℝ := κ * ‖u‖ with hR
   have hR0 : 0 < R := by rw [hR]; exact mul_pos hκ hunorm0
   clear_value R
@@ -208,9 +212,7 @@ theorem exists_ftDen_root_near_model_root_eventually {x₁ : ℝ} (hx : 0 < x₁
         ≤ (C₁ * δ + ‖z δ / (δ : ℂ) ^ ρ - z₀‖ * M ^ r) * δ ^ ρ :=
       norm_pencil_sub_model_le_of_norm_le hδ hD0.le hL hC₁ htM hxM htx
     have hRHS : ‖q.eval xc‖ * ((ρ : ℝ) / 2 * R * ‖u‖ ^ (ρ - 1)) = m * δ ^ ρ := by
-      have hpw : ‖u‖ * ‖u‖ ^ (ρ - 1) = ‖u‖ ^ ρ := by
-        conv_rhs => rw [show ρ = 1 + (ρ - 1) by omega]
-        rw [pow_add, pow_one]
+      have hpw : ‖u‖ * ‖u‖ ^ (ρ - 1) = ‖u‖ ^ ρ := mul_pow_sub_one (by omega) _
       rw [hR, hm]
       calc ‖q.eval xc‖ * ((ρ : ℝ) / 2 * (κ * ‖u‖) * ‖u‖ ^ (ρ - 1))
           = ‖q.eval xc‖ * ((ρ : ℝ) / 2 * κ * (‖u‖ * ‖u‖ ^ (ρ - 1))) := by ring
@@ -220,7 +222,7 @@ theorem exists_ftDen_root_near_model_root_eventually {x₁ : ℝ} (hx : 0 < x₁
     have hkey : C₁ * δ + ‖z δ / (δ : ℂ) ^ ρ - z₀‖ * M ^ r < m := by
       have h1 : ‖z δ / (δ : ℂ) ^ ρ - z₀‖ * M ^ r ≤ m / (2 * (M ^ r + 1)) * M ^ r :=
         mul_le_mul_of_nonneg_right hwδ.le hMr
-      have hp : (0 : ℝ) < 2 * (M ^ r + 1) := by linarith
+      have hp : (0 : ℝ) < 2 * (M ^ r + 1) := by linarith only [hMr]
       have h2 : m / (2 * (M ^ r + 1)) * M ^ r < m / 2 := by
         rw [div_mul_eq_mul_div, div_lt_iff₀ hp]
         nlinarith only [hm0, hMr]
@@ -257,8 +259,7 @@ theorem exists_model_rate {x₁ : ℝ} (hx : 0 < x₁) {ρ : ℕ} (hρ : 2 ≤ �
     ?_, ?_⟩
   · exact div_ne_zero (neg_ne_zero.mpr (mul_ne_zero hqx (pow_ne_zero ρ hα)))
       (pow_ne_zero r hxc)
-  · field_simp
-    ring
+  · field
 
 /-- **The lower cluster's members exist, one per direction.**  For all small `δ`
 each of the `ρ` directions of `eq:lower-cluster-expansion` carries a root of the
@@ -331,10 +332,7 @@ theorem exists_cluster_ratio_bound {q : ℂ[X]} {x₁ : ℝ} (hx : 0 < x₁)
   have hM0 : 0 < M := by rw [hM]; linarith only [hx, hA]
   set L : ℝ := ∑ k ∈ Finset.range (q.natDegree + 1), ‖q.coeff k‖ * ((k : ℝ) * M ^ (k - 1))
     with hL
-  have hL0 : 0 ≤ L := by
-    rw [hL]
-    exact Finset.sum_nonneg fun k _ =>
-      mul_nonneg (norm_nonneg _) (mul_nonneg (Nat.cast_nonneg k) (pow_nonneg hM0.le _))
+  have hL0 : 0 ≤ L := by rw [hL]; exact lipschitzSum_nonneg q hM0.le
   set Nq : ℝ := ‖q.eval xc‖ with hNq
   have hNq0 : 0 < Nq := by rw [hNq]; exact norm_pos_iff.mpr hqx
   set Dn : ℝ := Nq / 2 * (x₁ / 2) ^ r with hDn

@@ -67,31 +67,26 @@ theorem CoeffContinuous.sub {X : Type*} [TopologicalSpace X] {p q : X → Polyno
     (hp : CoeffContinuous p) (hq : CoeffContinuous q) :
     CoeffContinuous fun x => p x - q x := by
   intro k
-  have hco : (fun x => (p x - q x).coeff k) = fun x => (p x).coeff k - (q x).coeff k := by
-    funext x; exact Polynomial.coeff_sub _ _ _
-  rw [hco]
+  simp only [Polynomial.coeff_sub]
   exact (hp k).sub (hq k)
 
 theorem CoeffContinuous.zsmul {X : Type*} [TopologicalSpace X] {p : X → Polynomial ℝ}
     (hp : CoeffContinuous p) (z : ℤ) : CoeffContinuous fun x => z • p x := by
   intro k
-  have hco : (fun x => (z • p x).coeff k) = fun x => z • (p x).coeff k := by
-    funext x; exact Polynomial.coeff_smul _ _ _
-  rw [hco]
+  simp only [Polynomial.coeff_smul]
   exact (hp k).const_smul z
 
 theorem CoeffContinuous.sum {X ι : Type*} [TopologicalSpace X] {p : ι → X → Polynomial ℝ}
     (s : Finset ι) (h : ∀ i ∈ s, CoeffContinuous (p i)) :
     CoeffContinuous fun x => ∑ i ∈ s, p i x := by
   intro k
-  have hco : (fun x => (∑ i ∈ s, p i x).coeff k) = fun x => ∑ i ∈ s, (p i x).coeff k := by
-    funext x; exact Polynomial.finsetSum_coeff _ _ _
-  rw [hco]
+  simp only [Polynomial.finsetSum_coeff]
   exact continuous_finsetSum _ fun i hi => h i hi k
 
-theorem CoeffContinuous.prod {X ι : Type*} [TopologicalSpace X] [DecidableEq ι]
+theorem CoeffContinuous.prod {X ι : Type*} [TopologicalSpace X]
     {p : ι → X → Polynomial ℝ} (s : Finset ι) (h : ∀ i ∈ s, CoeffContinuous (p i)) :
     CoeffContinuous fun x => ∏ i ∈ s, p i x := by
+  classical
   induction s using Finset.induction with
   | empty => simpa using CoeffContinuous.const (X := X) 1
   | insert a s ha ih =>
@@ -156,6 +151,15 @@ theorem coeffContinuous_charpoly {n : ℕ} :
 
 /-! ### The limit -/
 
+/-- The Cauchy bound of a monic polynomial is at most one more than a uniform bound on the
+coefficients below its degree, since the leading coefficient it divides by is `1`. -/
+theorem cauchyBound_le_of_monic {p : Polynomial ℝ} (hp : p.Monic) {B : NNReal}
+    (hB : ∀ k ∈ Finset.range p.natDegree, ‖p.coeff k‖₊ ≤ B) :
+    Polynomial.cauchyBound p ≤ B + 1 := by
+  simp only [Polynomial.cauchyBound, hp.leadingCoeff, nnnorm_one, div_one]
+  exact add_le_add (Finset.sup_le hB) le_rfl
+
+
 /-- **A coefficientwise limit of split polynomials splits.**  If the monic
 degree-`n` polynomials `∏_i (X - C (ρ_m i))` have coefficients converging to
 those of `q`, then `q` is itself a product of `n` real linear factors, so its
@@ -191,13 +195,9 @@ theorem card_roots_of_tendsto_coeff {n : ℕ} {ρ : ℕ → Fin n → ℝ} {q : 
     have hev : (p m).IsRoot (ρ m i) := by
       rw [Polynomial.IsRoot, hp, Polynomial.eval_prod]
       exact Finset.prod_eq_zero (Finset.mem_univ i) (by simp)
-    have hcb : Polynomial.cauchyBound (p m) ≤ Bnn + 1 := by
-      simp only [Polynomial.cauchyBound, (hmonic m).leadingCoeff, nnnorm_one, div_one, hdeg m]
-      have hsup : ((Finset.range n).sup fun x => ‖(p m).coeff x‖₊) ≤ Bnn := by
-        refine Finset.sup_le fun k hk => ?_
-        rw [hBnn]
-        exact (hC k m).trans (Finset.single_le_sum (f := C) (fun _ _ => zero_le) hk)
-      exact add_le_add hsup le_rfl
+    have hcb : Polynomial.cauchyBound (p m) ≤ Bnn + 1 :=
+      cauchyBound_le_of_monic (hmonic m) fun k hk => (hC k m).trans
+        (Finset.single_le_sum (f := C) (fun _ _ => zero_le) (by rwa [hdeg m] at hk))
     have hlt : ‖ρ m i‖₊ ≤ Bnn + 1 :=
       le_of_lt (lt_of_lt_of_le (hev.norm_lt_cauchyBound (hmonic m).ne_zero) hcb)
     calc |ρ m i| = ((‖ρ m i‖₊ : NNReal) : ℝ) := by rw [coe_nnnorm, Real.norm_eq_abs]
@@ -222,5 +222,16 @@ theorem card_roots_of_tendsto_coeff {n : ℕ} {ρ : ℕ → Fin n → ℝ} {q : 
     rfl
   rw [hrw, Polynomial.roots_multiset_prod_X_sub_C]
   simp
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.coeffContinuous_charpoly' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms coeffContinuous_charpoly
+
+/-- info: 'Shields.card_roots_of_tendsto_coeff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms card_roots_of_tendsto_coeff
 
 end Shields

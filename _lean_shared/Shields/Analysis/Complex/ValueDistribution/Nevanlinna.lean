@@ -26,6 +26,8 @@ and the order of `F` is at most `ρ`.
 * `Shields.le_two_mul_add_of_le_add_mul_posLog` — the absorption step.  The Second Main Theorem
   bounds the characteristic by its own `log⁺`, so `T` sits on both sides until the right-hand
   occurrence is absorbed into half of the left.
+* `Shields.exists_characteristic_le_const_mul_rpow` — the explicit bound `T(r) ≤ B r ^ p` off the
+  exceptional set, where both error terms of the Second Main Theorem are spent.
 * `Shields.characteristic_isBigO_rpow_of_summable` — for `F` entire and zero-free and `a ≠ 0`,
   convergence of `∑ ‖z‖ ^ (-p)` over the `a`-points forces `T(r, F) = O(r ^ p)`.
 * `Shields.order_le_expConvergence` — the order of `F` is at most the exponent of convergence of
@@ -138,6 +140,55 @@ theorem exists_characteristic_le_logCounting {F : ℂ → ℂ} (hF : Differentia
   nlinarith [h₁, h₂, h₅]
 
 /--
+**The explicit characteristic bound, off the exceptional set.**  For `F` entire and never zero and
+`a ≠ 0`: if `∑ z, D z * ‖z‖ ^ (-p)` converges over the divisor `D` of `a`-points, the characteristic
+is below a constant multiple of `r ^ p` for all large `r` outside a set of finite measure.
+
+Everything the Second Main Theorem contributes is spent here.  Its two error terms are converted
+into multiples of `r ^ p` — `log r` by `Real.log_le_rpow_div`, and `log⁺ T` by
+`Shields.le_two_mul_add_of_le_add_mul_posLog`, which is where the characteristic on the right-hand
+side is absorbed into half of the one on the left.  The constant is explicit because both
+conversions are.
+-/
+theorem exists_characteristic_le_const_mul_rpow {F : ℂ → ℂ} (hF : Differentiable ℂ F)
+    (hF0 : ∀ z, F z ≠ 0) {a : ℂ} (ha : a ≠ 0) {p : ℝ} (hp : 0 < p)
+    (hsum : Summable fun z : ℂ ↦
+      (((MeromorphicOn.divisor (F · - a) univ)⁺ z : ℤ) : ℝ) * ‖z‖ ^ (-p)) :
+    ∃ B : ℝ, ∀ᶠ r in volume.cofinite ⊓ atTop, characteristic F ⊤ r ≤ B * r ^ p := by
+  set D := (MeromorphicOn.divisor (F · - a) univ)⁺ with hD
+  have hD0 : 0 ≤ D := posPart_nonneg _
+  -- The counting function of the `a`-points is `O(r ^ p)`, with an explicit constant.
+  set C := ((∑' z : ℂ, ((D z : ℤ) : ℝ) * ‖z‖ ^ (-p)) + ((D 0 : ℤ) : ℝ)) / p with hC
+  have hN : ∀ r : ℝ, 1 ≤ r → D.logCounting r ≤ C * r ^ p := fun r hr ↦
+    logCounting_le_const_mul_rpow hD0 hp hsum hr
+  obtain ⟨c', hc'0, hSMT⟩ := exists_characteristic_le_logCounting hF hF0 ha
+  set K := c' * log⁺ (2 * (c' + 1)) with hK
+  have hK0 : (0 : ℝ) ≤ K := by
+    have := posLog_nonneg (x := 2 * (c' + 1))
+    rw [hK]
+    positivity
+  refine ⟨2 * C + 2 * c' / p + 2 * K, ?_⟩
+  filter_upwards [hSMT, mem_inf_of_right (eventually_ge_atTop (1 : ℝ))] with r hsmt hr1
+  have hrp1 : (1 : ℝ) ≤ r ^ p := Real.one_le_rpow hr1 hp.le
+  have hT0 : 0 ≤ characteristic F ⊤ r := characteristic_nonneg hr1
+  have h₂ : logCounting F ((a : ℂ) : WithTop ℂ) r ≤ C * r ^ p := by
+    rw [logCounting_coe]
+    exact hN r hr1
+  have hclog : c' * Real.log r ≤ c' / p * r ^ p := by
+    calc c' * Real.log r ≤ c' * (r ^ p / p) :=
+          mul_le_mul_of_nonneg_left (Real.log_le_rpow_div (zero_le_one.trans hr1) hp) hc'0
+      _ = c' / p * r ^ p := by ring
+  -- the characteristic bounds its own `log⁺`, so absorb that occurrence into half of it
+  have habsorb : characteristic F ⊤ r ≤ 2 * (C * r ^ p + c' / p * r ^ p) + 2 * K :=
+    le_two_mul_add_of_le_add_mul_posLog (M := C * r ^ p + c' / p * r ^ p) hT0 hc'0
+      (by linarith [hsmt, h₂, hclog])
+  have hKr : 2 * K ≤ 2 * K * r ^ p := by nlinarith [hK0, hrp1]
+  calc characteristic F ⊤ r
+      ≤ 2 * (C * r ^ p + c' / p * r ^ p) + 2 * K := habsorb
+    _ ≤ 2 * (C * r ^ p + c' / p * r ^ p) + 2 * K * r ^ p := by linarith [hKr]
+    _ = (2 * C + 2 * c' / p + 2 * K) * r ^ p := by ring
+
+/--
 For `F` entire and never zero and `a ≠ 0`: if the series `∑ z, D z * ‖z‖ ^ (-p)` over the divisor
 `D` of `a`-points of `F` converges for some `p > 0`, then the Nevanlinna characteristic of `F` is
 `O(r ^ p)`.
@@ -147,58 +198,11 @@ theorem characteristic_isBigO_rpow_of_summable {F : ℂ → ℂ} (hF : Different
     (hsum : Summable fun z : ℂ ↦
       (((MeromorphicOn.divisor (F · - a) univ)⁺ z : ℤ) : ℝ) * ‖z‖ ^ (-p)) :
     characteristic F ⊤ =O[atTop] fun r : ℝ ↦ r ^ p := by
-  have hmero : Meromorphic F := fun x ↦ (hF.analyticAt x).meromorphicAt
-  set D := (MeromorphicOn.divisor (F · - a) univ)⁺ with hD
-  have hD0 : 0 ≤ D := posPart_nonneg _
-  -- The counting function of the `a`-points is `O(r ^ p)`, with an explicit constant.
-  set C := ((∑' z : ℂ, ((D z : ℤ) : ℝ) * ‖z‖ ^ (-p)) + ((D 0 : ℤ) : ℝ)) / p with hC
-  have hC0 : 0 ≤ C := by
-    have h₁ : 0 ≤ ∑' z : ℂ, ((D z : ℤ) : ℝ) * ‖z‖ ^ (-p) :=
-      tsum_nonneg fun z ↦ summand_nonneg hD0 p z
-    have h₂ : (0 : ℝ) ≤ ((D 0 : ℤ) : ℝ) := by
-      have : (0 : ℤ) ≤ D 0 := by simpa using (locallyFinsuppWithin.le_def.1 hD0) 0
-      exact_mod_cast this
-    rw [hC]
-    positivity
-  have hN : ∀ r : ℝ, 1 ≤ r → D.logCounting r ≤ C * r ^ p := fun r hr ↦
-    logCounting_le_const_mul_rpow hD0 hp hsum hr
-  obtain ⟨c', hc'0, hSMT⟩ := exists_characteristic_le_logCounting hF hF0 ha
-  set K := c' * log⁺ (2 * (c' + 1)) with hK
-  have hK0 : (0 : ℝ) ≤ K := by
-    have := posLog_nonneg (x := 2 * (c' + 1))
-    rw [hK]
-    positivity
-  set B := 2 * C + 2 * c' / p + 2 * K with hB
-  have hbound : ∀ᶠ r in volume.cofinite ⊓ atTop, characteristic F ⊤ r ≤ B * r ^ p := by
-    filter_upwards [hSMT, mem_inf_of_right (eventually_ge_atTop (1 : ℝ))] with r hsmt hr1
-    have hr0 : (0 : ℝ) < r := lt_of_lt_of_le zero_lt_one hr1
-    have hrp1 : (1 : ℝ) ≤ r ^ p := by
-      calc (1 : ℝ) = (1 : ℝ) ^ p := (Real.one_rpow p).symm
-        _ ≤ r ^ p := Real.rpow_le_rpow zero_le_one hr1 hp.le
-    have hrp0 : (0 : ℝ) ≤ r ^ p := le_trans zero_le_one hrp1
-    have hT0 : 0 ≤ characteristic F ⊤ r := characteristic_nonneg hr1
-    have h₂ : logCounting F ((a : ℂ) : WithTop ℂ) r ≤ C * r ^ p := by
-      rw [logCounting_coe]
-      exact hN r hr1
-    have h₃ : characteristic F ⊤ r
-        ≤ C * r ^ p + c' * log⁺ (characteristic F ⊤ r) + c' * Real.log r := by
-      linarith [hsmt, h₂]
-    have hlogr : Real.log r ≤ r ^ p / p := log_le_rpow_div hp hr1
-    have hclog : c' * Real.log r ≤ c' / p * r ^ p := by
-      calc c' * Real.log r ≤ c' * (r ^ p / p) := mul_le_mul_of_nonneg_left hlogr hc'0
-        _ = c' / p * r ^ p := by ring
-    -- the characteristic bounds its own `log⁺`, so absorb that occurrence into half of it
-    have habsorb : characteristic F ⊤ r ≤ 2 * (C * r ^ p + c' / p * r ^ p) + 2 * K :=
-      le_two_mul_add_of_le_add_mul_posLog (M := C * r ^ p + c' / p * r ^ p) hT0 hc'0
-        (by linarith [h₃, hclog])
-    have hKr : 2 * K ≤ 2 * K * r ^ p := by nlinarith [hK0, hrp1]
-    calc characteristic F ⊤ r
-        ≤ 2 * (C * r ^ p + c' / p * r ^ p) + 2 * K := habsorb
-      _ ≤ 2 * (C * r ^ p + c' / p * r ^ p) + 2 * K * r ^ p := by linarith [hKr]
-      _ = B * r ^ p := by rw [hB]; ring
+  obtain ⟨B, hbound⟩ := exists_characteristic_le_const_mul_rpow hF hF0 ha hp hsum
   exact isBigO_rpow_of_monotoneOn (x₀ := 1) hp.le
     (by filter_upwards [eventually_ge_atTop (1 : ℝ)] with r hr using characteristic_nonneg hr)
-    ((characteristic_monotoneOn hmero).mono fun x hx ↦ mem_Ioi.2 (lt_of_lt_of_le one_pos hx))
+    ((characteristic_monotoneOn (fun x ↦ (hF.analyticAt x).meromorphicAt)).mono
+      fun x hx ↦ mem_Ioi.2 (lt_of_lt_of_le one_pos hx))
     hbound
 
 /--
@@ -221,5 +225,12 @@ theorem order_le_expConvergence {F : ℂ → ℂ} (hF : Differentiable ℂ F) (h
     simp [hord]
   · exact order_le_of_isBigO
       (characteristic_isBigO_rpow_of_summable hF hF0 ha (by exact_mod_cast h0) hq)
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.order_le_expConvergence' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms order_le_expConvergence
 
 end Shields

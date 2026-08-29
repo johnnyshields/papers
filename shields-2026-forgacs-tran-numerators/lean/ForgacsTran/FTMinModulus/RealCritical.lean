@@ -5,6 +5,7 @@ Authors: Johnny Shields
 -/
 import ForgacsTran.FTMinModulus.ArgumentCone
 import ForgacsTran.FTBranchEndpointUpper
+import ForgacsTran.PencilIndex
 
 /-!
 # The first positive critical point
@@ -101,7 +102,7 @@ open Real Set Polynomial
 noncomputable def ftSigmaReal {n : ℕ} (a : Fin n → ℝ) (r : ℕ) (s : ℝ) : ℝ :=
   (∑ k, s / (a k - s)) + r
 
-/-- **`E = -Σ·Q` over `ℝ`.**  `Geometry.eval_ftCritical_ftRootPoly` is this over
+/-- **`E = -Σ·Q` over `ℝ`.**  `FTBranchZMono.eval_ftCritical_ftRootPoly` is this over
 `ℂ`; the real form is what the sign analysis below runs on. -/
 theorem eval_ftCriticalReal_eq_neg_sigma_mul {n r : ℕ} {c : ℝ} {a : Fin n → ℝ} {s : ℝ}
     (h : ∀ k, a k - s ≠ 0) :
@@ -128,8 +129,7 @@ theorem div_sub_lt_div_sub {a s t : ℝ} (ha : 0 < a) (hst : s < t)
   have hs : a - s ≠ 0 := by intro h; rw [h] at hsign; simp at hsign
   rw [← sub_pos]
   have key : t / (a - t) - s / (a - s) = a * (t - s) / ((a - t) * (a - s)) := by
-    field_simp
-    ring
+    field
   rw [key]
   exact div_pos (mul_pos ha (sub_pos.2 hst)) hsign
 
@@ -343,7 +343,7 @@ theorem negDivPow_neg_ne_ftBranchZ_one {n : ℕ} {a : Fin n → ℝ} {c : ℝ} (
     {s : ℝ} (hs : s < 0) :
     -(ftRootPolyReal c a).eval s / s ^ 1 ≠ ftBranchZ a c 1 (n - 1) θ := by
   have hn : 0 < n := by omega
-  have hcast : π / ((1 : ℕ) : ℝ) = π := by push_cast; rw [div_one]
+  have hcast : π / ((1 : ℕ) : ℝ) = π := pi_div_natCast_one
   rw [hcast] at hθ
   obtain ⟨L, hL, hτ, hEL⟩ := exists_tendsto_ftTau_nhdsLT_pi hn2 ha hc
   set b : ℝ := -(ftRootPolyReal c a).eval (-L) / (-L) ^ 1 with hbdef
@@ -351,9 +351,7 @@ theorem negDivPow_neg_ne_ftBranchZ_one {n : ℕ} {a : Fin n → ℝ} {c : ℝ} (
   have hb : ∀ ψ ∈ Ioo (0 : ℝ) π, FTBranchAt a 1 (n - 1) ψ := by
     intro ψ hψ
     exact ftBranchAt_of_arc_principal hn ha le_rfl (Or.inl hn2) (by rwa [hcast])
-  have hparp : Even (n + (n - 1) + 1) := by
-    have hEq : n + (n - 1) + 1 = 2 * n := by omega
-    rw [hEq]; exact even_two_mul n
+  have hparp : Even (n + (n - 1) + 1) := even_add_pred_add_one hn
   have hmono : StrictMonoOn (ftBranchZ a c 1 (n - 1)) (Ioo (0 : ℝ) π) := by
     have := ftBranchZ_strictMonoOn (c := c) hn ha hc (le_refl 1) hparp
       (fun ψ hψ => hb ψ (by rwa [hcast] at hψ))
@@ -414,9 +412,7 @@ theorem negDivPow_lt_ftBranchZ_of_repeated {n r : ℕ} {a : Fin n → ℝ} {c : 
   have hθπ : θ ∈ Ioo 0 π := ftArc_subset hr hθ
   have hb : FTBranchAt a r (n - 1) θ :=
     ftBranchAt_of_arc_principal hn ha hr (Or.inl hn2) hθ
-  have hparp : Even (n + (n - 1) + 1) := by
-    have hEq : n + (n - 1) + 1 = 2 * n := by omega
-    rw [hEq]; exact even_two_mul n
+  have hparp : Even (n + (n - 1) + 1) := even_add_pred_add_one hn
   have hz : 0 < ftBranchZ a c r (n - 1) θ := ftBranchZ_pos ha hc hparp hθπ hb
   have hsx : s ≤ a i :=
     le_trans hsτ (ftTau_le_of_repeated_min hn2 ha hr hne hij haij hmin hθ)
@@ -457,9 +453,7 @@ theorem negDivPow_lt_ftBranchZ_pos {n r : ℕ} {a : Fin n → ℝ} {c : ℝ}
 `r = 1` they are the whole of the argument condition. -/
 theorem cone_at_branch_pi {n : ℕ} {a : Fin n → ℝ} {c : ℝ} (hn3 : 3 ≤ n)
     (ha : ∀ k, 0 < a k) (hc : 0 < c) :
-    ∀ θ ∈ Ioo (0 : ℝ) (π / ((1 : ℕ) : ℝ)), ∀ w : ℂ,
-      (ftDen (ftRootPoly c a) 1 ((ftBranchZ a c 1 (n - 1) θ : ℝ) : ℂ)).eval w = 0 →
-        ‖w‖ ≤ ftTau a 1 (n - 1) θ → |Complex.arg w| ∈ Ioo 0 (π / ((1 : ℕ) : ℝ)) :=
+    FTArgumentCone (ftRootPoly c a) 1 (ftBranchZ a c 1 (n - 1)) (ftTau a 1 (n - 1)) :=
   cone_of_no_real_root_pi rfl ha hc
     (fun θ hθ s hs0 hsτ => negDivPow_lt_ftBranchZ_pos (by omega) ha hc (le_refl 1)
       (by omega) hθ hs0 hsτ)
@@ -471,11 +465,7 @@ with no analytic hypothesis and no restriction on the multiplicity of any zero.
 `n ≥ 3` is their own `(deg Q, r) ≠ (2,1)`. -/
 theorem ft_minModulus_at_branch_pi {n : ℕ} {a : Fin n → ℝ} {c : ℝ} (hn3 : 3 ≤ n)
     (ha : ∀ k, 0 < a k) (hc : 0 < c) :
-    ∀ θ ∈ Ioo (0 : ℝ) (π / ((1 : ℕ) : ℝ)), ∀ w : ℂ,
-      (ftDen (ftRootPoly c a) 1 ((ftBranchZ a c 1 (n - 1) θ : ℝ) : ℂ)).eval w = 0 →
-        w ≠ ftPrincipal (ftTau a 1 (n - 1)) θ →
-        w ≠ (starRingEnd ℂ) (ftPrincipal (ftTau a 1 (n - 1)) θ) →
-        ftTau a 1 (n - 1) θ < ‖w‖ :=
+    FTMinModulusGap (ftRootPoly c a) 1 (ftBranchZ a c 1 (n - 1)) (ftTau a 1 (n - 1)) :=
   ft_minModulus_at_branch (by omega) ha hc (le_refl 1) (cone_at_branch_pi hn3 ha hc)
 
 /-- `cone_at_branch_pi` with the multiplicity hypotheses it no longer needs, kept
@@ -483,9 +473,7 @@ so that consumers written against the simple-zero form still elaborate. -/
 theorem cone_at_branch_one {n : ℕ} {a : Fin n → ℝ} {c : ℝ} (hn3 : 3 ≤ n)
     (ha : ∀ k, 0 < a k) (hc : 0 < c) {i : Fin n} (_hmin : ∀ k, a i ≤ a k)
     (_hsimple : ∀ k, k ≠ i → a k ≠ a i) :
-    ∀ θ ∈ Ioo (0 : ℝ) (π / ((1 : ℕ) : ℝ)), ∀ w : ℂ,
-      (ftDen (ftRootPoly c a) 1 ((ftBranchZ a c 1 (n - 1) θ : ℝ) : ℂ)).eval w = 0 →
-        ‖w‖ ≤ ftTau a 1 (n - 1) θ → |Complex.arg w| ∈ Ioo 0 (π / ((1 : ℕ) : ℝ)) :=
+    FTArgumentCone (ftRootPoly c a) 1 (ftBranchZ a c 1 (n - 1)) (ftTau a 1 (n - 1)) :=
   cone_at_branch_pi hn3 ha hc
 
 /-- `ft_minModulus_at_branch_pi` with the multiplicity hypotheses it no longer
@@ -494,11 +482,7 @@ elaborate. -/
 theorem ft_minModulus_at_branch_one {n : ℕ} {a : Fin n → ℝ} {c : ℝ} (hn3 : 3 ≤ n)
     (ha : ∀ k, 0 < a k) (hc : 0 < c) {i : Fin n} (_hmin : ∀ k, a i ≤ a k)
     (_hsimple : ∀ k, k ≠ i → a k ≠ a i) :
-    ∀ θ ∈ Ioo (0 : ℝ) (π / ((1 : ℕ) : ℝ)), ∀ w : ℂ,
-      (ftDen (ftRootPoly c a) 1 ((ftBranchZ a c 1 (n - 1) θ : ℝ) : ℂ)).eval w = 0 →
-        w ≠ ftPrincipal (ftTau a 1 (n - 1)) θ →
-        w ≠ (starRingEnd ℂ) (ftPrincipal (ftTau a 1 (n - 1)) θ) →
-        ftTau a 1 (n - 1) θ < ‖w‖ :=
+    FTMinModulusGap (ftRootPoly c a) 1 (ftBranchZ a c 1 (n - 1)) (ftTau a 1 (n - 1)) :=
   ft_minModulus_at_branch_pi hn3 ha hc
 
 /-! ### The cubic pencil -/

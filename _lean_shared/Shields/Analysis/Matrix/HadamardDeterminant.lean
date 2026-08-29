@@ -50,6 +50,7 @@ variable {n : Type*} [Fintype n] [DecidableEq n]
 set_option linter.unusedSectionVars false
 variable {𝕜 : Type*} [RCLike 𝕜]
 
+omit [DecidableEq n] in
 /-- **Arithmetic–geometric mean inequality, product form.**  Nonnegative numbers
 whose sum is at most the cardinality have product at most one. -/
 theorem prod_le_one_of_sum_le_card {z : n → ℝ} (hz : ∀ i, 0 ≤ z i)
@@ -88,14 +89,12 @@ theorem posSemidef_re_det_le_one_of_diag_le_one {A : Matrix n n 𝕜} (hA : A.Po
   have htr : ∑ i, hA.1.eigenvalues i = ∑ i, RCLike.re (A i i) := by
     have h := hA.1.trace_eq_sum_eigenvalues
     rw [Matrix.trace] at h
-    have := congrArg (RCLike.re (K := 𝕜)) h
-    simpa [Matrix.diag, map_sum] using this.symm
-  rw [hre]
-  refine prod_le_one_of_sum_le_card (fun i => hA.eigenvalues_nonneg i) ?_
-  rw [htr]
+    simpa [Matrix.diag, map_sum] using (congrArg (RCLike.re (K := 𝕜)) h).symm
+  rw [hre]; refine prod_le_one_of_sum_le_card (fun i => hA.eigenvalues_nonneg i) ?_; rw [htr]
   calc ∑ i, RCLike.re (A i i) ≤ ∑ _i : n, (1 : ℝ) := Finset.sum_le_sum fun i _ => h1 i
     _ = (Fintype.card n : ℝ) := by simp [Finset.card_univ]
 
+omit [Fintype n] [DecidableEq n] in
 /-- In a positive semidefinite matrix a vanishing diagonal entry forces its whole
 row to vanish: the `2 × 2` principal minor on `{i, j}` has nonnegative
 determinant `A i i * A j j - ‖A i j‖²`. -/
@@ -120,6 +119,51 @@ theorem posSemidef_apply_eq_zero_of_diag_eq_zero {A : Matrix n n 𝕜} (hA : A.P
   have : ‖A i j‖ = 0 := by nlinarith [norm_nonneg (A i j)]
   exact norm_eq_zero.mp this
 
+/-- Conjugating by a real diagonal matrix scales the entry at `(i, j)` by `d i * d j`. -/
+private theorem diagonal_conj_apply (d : n → ℝ) (A : Matrix n n 𝕜) (i j : n) :
+    (Matrix.diagonal (fun k => ((d k : ℝ) : 𝕜)) * A
+        * Matrix.diagonal (fun k => ((d k : ℝ) : 𝕜))) i j
+      = ((d i : ℝ) : 𝕜) * A i j * ((d j : ℝ) : 𝕜) := by
+  simp [Matrix.mul_apply, Matrix.diagonal_apply, Finset.sum_ite_eq, Finset.sum_ite_eq',
+    mul_comm, mul_left_comm]
+
+/-- Conjugating by a real diagonal matrix scales the determinant by the square of the product
+of that diagonal. -/
+private theorem det_diagonal_conj (d : n → ℝ) (A : Matrix n n 𝕜) :
+    (Matrix.diagonal (fun k => ((d k : ℝ) : 𝕜)) * A
+        * Matrix.diagonal (fun k => ((d k : ℝ) : 𝕜))).det
+      = (((∏ k, d k : ℝ)) : 𝕜) ^ 2 * A.det := by
+  rw [Matrix.det_mul, Matrix.det_mul, Matrix.det_diagonal, RCLike.ofReal_prod]
+  ring
+
+/-- **The correlation matrix.**  Conjugating a positive semidefinite matrix whose diagonal
+is strictly positive by `diag(1/√(A i i))` gives a positive semidefinite matrix with unit
+diagonal, whose determinant is `det A` divided by the product of the diagonal. -/
+theorem exists_posSemidef_diag_one {A : Matrix n n 𝕜} (hA : A.PosSemidef)
+    (hpos : ∀ i, (0 : ℝ) < RCLike.re (A i i)) :
+    ∃ B : Matrix n n 𝕜, B.PosSemidef ∧ (∀ i, B i i = 1) ∧
+      RCLike.re B.det = (∏ i, RCLike.re (A i i))⁻¹ * RCLike.re A.det := by
+  set s : n → ℝ := fun i => Real.sqrt (RCLike.re (A i i)) with hs
+  have hspos : ∀ i, 0 < s i := fun i => Real.sqrt_pos.mpr (hpos i)
+  have hssq : ∀ i, s i * s i = RCLike.re (A i i) := fun i => Real.mul_self_sqrt (hpos i).le
+  set D : Matrix n n 𝕜 := Matrix.diagonal (fun i => (((s i)⁻¹ : ℝ) : 𝕜)) with hD
+  have hDH : Dᴴ = D := by rw [hD, Matrix.diagonal_conjTranspose]; congr 1; funext i; simp
+  have hB : (D * A * D).PosSemidef := by
+    have h := hA.mul_mul_conjTranspose_same D
+    rwa [hDH] at h
+  refine ⟨D * A * D, hB, fun i => ?_, ?_⟩
+  · rw [hD, diagonal_conj_apply, ← hA.1.coe_re_apply_self i, ← RCLike.ofReal_mul,
+      ← RCLike.ofReal_mul,
+      show ((s i)⁻¹ * RCLike.re (A i i) * (s i)⁻¹ : ℝ) = 1 by
+        rw [← hssq i]; field_simp; exact div_self (hspos i).ne']
+    simp
+  · have hsq : ((∏ i, (s i)⁻¹ : ℝ)) ^ 2 = (∏ i, RCLike.re (A i i))⁻¹ := by
+      rw [← Finset.prod_pow, ← Finset.prod_inv_distrib]
+      refine Finset.prod_congr rfl fun i _ => ?_
+      rw [← hssq i]
+      field_simp
+    rw [hD, det_diagonal_conj, ← RCLike.ofReal_pow, hsq, RCLike.re_ofReal_mul]
+
 /-- **Hadamard's determinant inequality.**  For a positive semidefinite matrix the
 determinant is at most the product of the diagonal entries. -/
 theorem posSemidef_re_det_le_prod_re_diag {A : Matrix n n 𝕜} (hA : A.PosSemidef) :
@@ -134,63 +178,20 @@ theorem posSemidef_re_det_le_prod_re_diag {A : Matrix n n 𝕜} (hA : A.PosSemid
       Finset.prod_eq_zero (Finset.mem_univ i) (by rw [hi, map_zero])
     rw [hdet, hprod, map_zero]
   · rw [not_exists] at hz
-    -- every diagonal entry is a positive real
-    have hreal : ∀ i, ((RCLike.re (A i i) : ℝ) : 𝕜) = A i i := fun i =>
-      RCLike.conj_eq_iff_re.mp (by simpa using (hA.1.apply i i))
-    have hpos : ∀ i, (0 : ℝ) < RCLike.re (A i i) := by
-      intro i
-      rcases (hdiag i).lt_or_eq with h | h
-      · exact h
-      · exact absurd (by rw [← hreal i, ← h, RCLike.ofReal_zero]) (hz i)
-    set s : n → ℝ := fun i => Real.sqrt (RCLike.re (A i i)) with hs
-    have hspos : ∀ i, 0 < s i := fun i => Real.sqrt_pos.mpr (hpos i)
-    have hssq : ∀ i, s i * s i = RCLike.re (A i i) := fun i =>
-      Real.mul_self_sqrt (hdiag i)
-    set D : Matrix n n 𝕜 := Matrix.diagonal (fun i => (((s i)⁻¹ : ℝ) : 𝕜)) with hD
-    have hDH : Dᴴ = D := by
-      rw [hD, Matrix.diagonal_conjTranspose]
-      congr 1
-      funext i
-      simp
-    have hB : (D * A * D).PosSemidef := by
-      have := hA.mul_mul_conjTranspose_same D
-      rwa [hDH] at this
-    have hBdiag : ∀ i, (D * A * D) i i = 1 := by
-      intro i
-      have hexp : (D * A * D) i i = (((s i)⁻¹ : ℝ) : 𝕜) * A i i * (((s i)⁻¹ : ℝ) : 𝕜) := by
-        rw [hD]
-        simp [Matrix.mul_apply, Matrix.diagonal_apply, Finset.sum_ite_eq,
-          Finset.sum_ite_eq', mul_comm, mul_assoc, mul_left_comm]
-      rw [hexp, ← hreal i]
-      have h1 : ((s i)⁻¹ : ℝ) ≠ 0 := inv_ne_zero (hspos i).ne'
-      rw [← RCLike.ofReal_mul, ← RCLike.ofReal_mul]
-      rw [show ((s i)⁻¹ * RCLike.re (A i i) * (s i)⁻¹ : ℝ) = 1 by
-        rw [← hssq i]; field_simp; exact div_self (hspos i).ne']
-      simp
-    have hBdet : RCLike.re (D * A * D).det ≤ 1 :=
-      posSemidef_re_det_le_one_of_diag_le_one hB (fun i => by rw [hBdiag i]; simp)
-    -- unwind the determinant of the scaled matrix
-    have hDdet : D.det = (((∏ i, (s i)⁻¹ : ℝ)) : 𝕜) := by
-      rw [hD, Matrix.det_diagonal, RCLike.ofReal_prod]
-    have hfac : (D * A * D).det = (((∏ i, (s i)⁻¹ : ℝ)) : 𝕜) ^ 2 * A.det := by
-      rw [Matrix.det_mul, Matrix.det_mul, hDdet]; ring
-    have hprodpos : (0 : ℝ) < ∏ i, RCLike.re (A i i) :=
-      Finset.prod_pos fun i _ => hpos i
-    have hsq : ((∏ i, (s i)⁻¹ : ℝ)) ^ 2 = (∏ i, RCLike.re (A i i))⁻¹ := by
-      rw [← Finset.prod_pow, ← Finset.prod_inv_distrib]
-      refine Finset.prod_congr rfl fun i _ => ?_
-      rw [← hssq i]
-      field_simp
-    have hkey : RCLike.re (D * A * D).det
-        = (∏ i, RCLike.re (A i i))⁻¹ * RCLike.re A.det := by
-      rw [hfac, ← RCLike.ofReal_pow, hsq, RCLike.re_ofReal_mul]
-    rw [hkey] at hBdet
-    have hmul := mul_le_mul_of_nonneg_left hBdet hprodpos.le
-    rw [← mul_assoc, mul_inv_cancel₀ hprodpos.ne', one_mul, mul_one] at hmul
-    exact hmul
+    -- every diagonal entry is a positive real, so `A` has a correlation matrix
+    have hpos : ∀ i, (0 : ℝ) < RCLike.re (A i i) := fun i =>
+      (hdiag i).lt_of_ne' fun h =>
+        hz i (by rw [← hA.1.coe_re_apply_self i, h, RCLike.ofReal_zero])
+    obtain ⟨B, hB, hBdiag, hBdet⟩ := exists_posSemidef_diag_one hA hpos
+    have hprodpos : (0 : ℝ) < ∏ i, RCLike.re (A i i) := Finset.prod_pos fun i _ => hpos i
+    have hle : (∏ i, RCLike.re (A i i))⁻¹ * RCLike.re A.det ≤ 1 :=
+      hBdet ▸ posSemidef_re_det_le_one_of_diag_le_one hB (fun i => by rw [hBdiag i]; simp)
+    have hmul := mul_le_mul_of_nonneg_left hle hprodpos.le
+    rwa [← mul_assoc, mul_inv_cancel₀ hprodpos.ne', one_mul, mul_one] at hmul
 
 /-! ### The general form -/
 
+omit [DecidableEq n] in
 /-- The diagonal of the Gram matrix `M Mᴴ` is the squared norm of a row of `M`. -/
 theorem self_mul_conjTranspose_diag (M : Matrix n n 𝕜) (i : n) :
     RCLike.re ((M * Mᴴ) i i) = ∑ j, ‖M i j‖ ^ 2 := by
@@ -221,5 +222,12 @@ theorem normSq_det_le_prod_col_energy (M : Matrix n n 𝕜) :
   rw [Matrix.det_transpose] at h
   refine h.trans (le_of_eq (Finset.prod_congr rfl fun j _ => ?_))
   exact Finset.sum_congr rfl fun i _ => by rw [Matrix.transpose_apply]
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.posSemidef_re_det_le_prod_re_diag' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms posSemidef_re_det_le_prod_re_diag
 
 end Shields

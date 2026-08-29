@@ -4,6 +4,7 @@ Released under the MIT license as described in the file LICENSE.txt.
 Authors: Johnny Shields
 -/
 import ForgacsTran.FTBranchLimitPoint
+import ForgacsTran.PencilIndex
 
 /-!
 # The branch radius stays inside the first gap
@@ -93,7 +94,7 @@ theorem ftAngle_lt_mid {a τ θ : ℝ} (hτ : 0 < τ) (hθ : θ ∈ Ioo 0 π) (h
   refine ftArccot_strictAnti ?_
   have key : Real.cos θ / Real.sin θ - a / (τ * Real.sin θ)
       - (Real.cos θ - 1) / Real.sin θ = (τ - a) / (τ * Real.sin θ) := by
-    field_simp; ring
+    field
   have hpos : 0 < (τ - a) / (τ * Real.sin θ) := div_pos (by linarith) (by positivity)
   linarith
 
@@ -153,8 +154,7 @@ theorem ftTau_lt_of_lt {n r : ℕ} {a : Fin n → ℝ} (ha : ∀ k, 0 < a k) (hr
           rw [Finset.sum_const, hcard, nsmul_eq_mul]
   -- and compare with what the branch equation forces
   have hsum : ftAngleSum a τ θ = r * θ + ((n - 1 : ℕ) : ℝ) * π := ftAngleSum_ftTau hb
-  have hc1 : ((n - 1 : ℕ) : ℝ) = (n : ℝ) - 1 := by
-    rw [Nat.cast_sub (by omega)]; norm_num
+  have hc1 : ((n - 1 : ℕ) : ℝ) = (n : ℝ) - 1 := cast_pred_eq_sub_one (by omega)
   have hc2 : ((n - 2 : ℕ) : ℝ) = (n : ℝ) - 2 := by
     rw [Nat.cast_sub (by omega)]; norm_num
   have hr1 : (1 : ℝ) ≤ r := by exact_mod_cast hr
@@ -172,7 +172,11 @@ theorem le_of_tendsto_ftTau {n r : ℕ} {a : Fin n → ℝ} (ha : ∀ k, 0 < a k
   exact (ftTau_lt_of_lt ha hr hθ hij hlt).le
 
 /-- The derivative of `∏ (C (a k) - X)` at a root of one of its factors: every
-term but that one carries the vanishing factor. -/
+term but that one carries the vanishing factor.
+
+**A general fact about polynomials, filed where it was first needed**, and the
+companion of `FTBranchCritical.eval_derivative_prod_sub`: that one is the
+logarithmic derivative off the roots, this one the value at a root. -/
 theorem eval_derivative_prod_sub_at_root {K ι : Type*} [CommRing K] [DecidableEq ι]
     (s : Finset ι) (a : ι → K) {j : ι} (hj : j ∈ s) :
     (derivative (∏ k ∈ s, (C (a k) - X))).eval (a j)
@@ -282,7 +286,7 @@ theorem sum_pi_sub_ftAngle_ftTau {n r : ℕ} {a : Fin n → ℝ} {θ : ℝ}
     ∑ k, (π - ftAngle (a k) (ftTau a r (n - 1) θ) θ) = π - r * θ := by
   have hsumφ : ∑ k, ftAngle (a k) (ftTau a r (n - 1) θ) θ
       = r * θ + ((n - 1 : ℕ) : ℝ) * π := ftAngleSum_ftTau hb
-  have hc1 : ((n - 1 : ℕ) : ℝ) = (n : ℝ) - 1 := by rw [Nat.cast_sub (by omega)]; norm_num
+  have hc1 : ((n - 1 : ℕ) : ℝ) = (n : ℝ) - 1 := cast_pred_eq_sub_one (by omega)
   rw [Finset.sum_sub_distrib, hsumφ, hc1, Finset.sum_const, Finset.card_univ,
     Fintype.card_fin, nsmul_eq_mul]
   ring

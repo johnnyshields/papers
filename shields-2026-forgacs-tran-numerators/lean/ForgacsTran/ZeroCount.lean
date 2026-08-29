@@ -16,6 +16,10 @@ import Mathlib
   `S` embeds, with multiplicity, into the interior part of the root multiset.
 * `exceptionalRoots_card_le` — if `Z` has at least `deg P - C` elements, then
   `P` has at most `C` roots outside `S`, counted with multiplicity.
+* `posRay`, `ftInterval`, `ftRay`, and the two inclusions — the sets `thm:main`
+  states its counts against, as subsets of `ℂ`.  They are here rather than with the
+  geometry because the counting engine above is stated over an arbitrary domain and
+  these are what instantiate it at the paper's own conclusion.
 
 ## Implementation notes
 

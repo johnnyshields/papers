@@ -117,6 +117,14 @@ theorem tendsto_residue_ftAmp {Q B : Polynomial ℂ} {r M : ℕ} {z ξ : ℂ} (h
 puts `Q` here, and the reduced numerator `B` of `sec:reduction` is real too. -/
 def HasRealCoeffs (p : Polynomial ℂ) : Prop := ∀ n, (starRingEnd ℂ) (p.coeff n) = p.coeff n
 
+/-- A real polynomial's complexification, evaluated at a real point, is the real
+value coerced.  Both the value and the derivative transfer through it, which is
+why it is stated once rather than unfolded at each use. -/
+theorem eval_map_ofReal {P : Polynomial ℝ} {x : ℝ} :
+    (P.map (algebraMap ℝ ℂ)).eval ((x : ℝ) : ℂ) = ((P.eval x : ℝ) : ℂ) := by
+  rw [Polynomial.eval_map]
+  simpa using Polynomial.eval₂_at_apply (algebraMap ℝ ℂ) x
+
 theorem HasRealCoeffs.eval_conj {p : Polynomial ℂ} (hp : HasRealCoeffs p) (t : ℂ) :
     (starRingEnd ℂ) (p.eval t) = p.eval ((starRingEnd ℂ) t) := by
   rw [eval_eq_sum_range, eval_eq_sum_range, map_sum]
@@ -129,6 +137,82 @@ theorem HasRealCoeffs.derivative {p : Polynomial ℂ} (hp : HasRealCoeffs p) :
     HasRealCoeffs (Polynomial.derivative p) := fun n => by
   rw [coeff_derivative, map_mul, hp (n + 1)]
   norm_num
+
+/-- The constant numerator is real.  This is the weight every non-vacuity witness in
+the tree runs at, since it makes the amplitude divisor empty. -/
+theorem hasRealCoeffs_one : HasRealCoeffs (1 : Polynomial ℂ) := by
+  intro k
+  rw [Polynomial.coeff_one]
+  split <;> simp
+
+/-! ### `HasRealCoeffs` is membership in `lifts`, and therefore closed -/
+
+theorem hasRealCoeffs_iff_mem_lifts {p : Polynomial ℂ} :
+    HasRealCoeffs p ↔ p ∈ Polynomial.lifts (algebraMap ℝ ℂ) := by
+  rw [Polynomial.lifts_iff_coeff_lifts]
+  constructor
+  · intro h n
+    refine ⟨(p.coeff n).re, ?_⟩
+    have hn := h n
+    rw [Complex.conj_eq_iff_re] at hn
+    simpa using hn
+  · intro h n
+    obtain ⟨x, hx⟩ := h n
+    rw [← hx]
+    simp
+
+theorem HasRealCoeffs.exists_real {p : Polynomial ℂ} (hp : HasRealCoeffs p) :
+    ∃ q : Polynomial ℝ, q.map (algebraMap ℝ ℂ) = p :=
+  (Polynomial.lifts_iff_set_range p).1 (hasRealCoeffs_iff_mem_lifts.1 hp)
+
+theorem HasRealCoeffs.mul {p q : Polynomial ℂ} (hp : HasRealCoeffs p)
+    (hq : HasRealCoeffs q) : HasRealCoeffs (p * q) :=
+  hasRealCoeffs_iff_mem_lifts.2
+    (Subsemiring.mul_mem _ (hasRealCoeffs_iff_mem_lifts.1 hp)
+      (hasRealCoeffs_iff_mem_lifts.1 hq))
+
+theorem HasRealCoeffs.sub {p q : Polynomial ℂ} (hp : HasRealCoeffs p)
+    (hq : HasRealCoeffs q) : HasRealCoeffs (p - q) := by
+  intro n
+  rw [coeff_sub, map_sub, hp n, hq n]
+
+theorem HasRealCoeffs.sum {ι : Type*} {s : Finset ι} {f : ι → Polynomial ℂ}
+    (hf : ∀ i ∈ s, HasRealCoeffs (f i)) : HasRealCoeffs (∑ i ∈ s, f i) :=
+  hasRealCoeffs_iff_mem_lifts.2
+    (Subsemiring.sum_mem _ fun i hi => hasRealCoeffs_iff_mem_lifts.1 (hf i hi))
+
+theorem hasRealCoeffs_C_ofReal (x : ℝ) : HasRealCoeffs (C ((x : ℝ) : ℂ)) := by
+  intro n
+  rcases eq_or_ne n 0 with rfl | hn
+  · simp
+  · simp [coeff_C, hn]
+
+theorem hasRealCoeffs_X : HasRealCoeffs (X : Polynomial ℂ) := by
+  intro n
+  rcases eq_or_ne n 1 with rfl | hn
+  · simp
+  · simp [coeff_X]
+
+theorem hasRealCoeffs_zero : HasRealCoeffs (0 : Polynomial ℂ) := by
+  intro n; simp
+
+/-- A `HasRealCoeffs` polynomial's coefficients are their own real parts, which
+is the form the constant-coefficient steps below consume. -/
+theorem HasRealCoeffs.coeff_ofReal {p : Polynomial ℂ} (hp : HasRealCoeffs p) (n : ℕ) :
+    p.coeff n = ((p.coeff n).re : ℂ) := by
+  have := hp n
+  rw [Complex.conj_eq_iff_re] at this
+  exact this.symm
+
+theorem HasRealCoeffs.C_coeff {p : Polynomial ℂ} (hp : HasRealCoeffs p) (n : ℕ) :
+    HasRealCoeffs (C (p.coeff n)) := by
+  rw [hp.coeff_ofReal n]
+  exact hasRealCoeffs_C_ofReal _
+
+theorem HasRealCoeffs.C_inv_coeff {p : Polynomial ℂ} (hp : HasRealCoeffs p) (n : ℕ) :
+    HasRealCoeffs (C (p.coeff n)⁻¹) := by
+  rw [hp.coeff_ofReal n, ← Complex.ofReal_inv]
+  exact hasRealCoeffs_C_ofReal _
 
 theorem hasRealCoeffs_C_mul_X_pow (z : ℝ) (r : ℕ) :
     HasRealCoeffs (C (z : ℂ) * X ^ r) := fun n => by
@@ -204,7 +288,7 @@ theorem ftAmp_eq_zero_iff {Q B : Polynomial ℂ} {r : ℕ} {z τ : ℂ}
 /-- **`eq:amplitude-zero-count`.**  Along an injective branch the zeros of `W`
 have total multiplicity at most `deg B`: their `γ`-images are distinct zeros of
 `B`, and `B` has no more than `deg B` of those. -/
-theorem amplitude_zero_count {B : Polynomial ℂ} (hB : B ≠ 0) {γ : ℝ → ℂ} {S : Finset ℝ}
+theorem amplitude_zero_count {B : Polynomial ℂ} (_hB : B ≠ 0) {γ : ℝ → ℂ} {S : Finset ℝ}
     (hinj : Set.InjOn γ (S : Set ℝ)) :
     ∑ θ ∈ S, B.rootMultiplicity (γ θ) ≤ B.natDegree := by
   classical
@@ -445,7 +529,7 @@ vanishes at the limit point and there is no order to subtract.  The manuscript
 says the same thing in one sentence — `B(0) \ne 0` means `B` does not vanish on
 the upper cluster at all.
 
-This is the twin of `DominanceFT.amplitude_lower_bound_of_endpoint_form`, and the
+This is the twin of `DominanceFTSupply.amplitude_lower_bound_of_endpoint_form`, and the
 two are not interchangeable: that one needs `t_e \ne 0`, which
 `FTBranchUpperRefutation.not_upper_endpoint_datum_ne_zero` refutes for every
 `n \ge 2` and `r \ge 2`.  The fact that refutes it — `t_e = 0` — is exactly the
@@ -515,8 +599,7 @@ theorem im_logDeriv_of_factor {U : ℝ → ℂ} {U' : ℂ} {θ θ₀ : ℝ} {ν 
         = ((θ : ℂ) - (θ₀ : ℂ)) * ((θ : ℂ) - (θ₀ : ℂ)) ^ (ν - 1) ∨ ν = 0 := by
       rcases Nat.eq_zero_or_pos ν with h | h
       · exact Or.inr h
-      · left; conv_lhs => rw [show ν = 1 + (ν - 1) by omega]
-        rw [pow_add, pow_one]
+      · exact Or.inl (mul_pow_sub_one h.ne' _).symm
     push_cast
     rcases hpsucc with hps | hps
     · rw [hps]; field_simp

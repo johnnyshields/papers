@@ -98,4 +98,15 @@ theorem det_eq_zero_of_col_eq_smul {n : ℕ} (M : Matrix (Fin n) (Fin n) R) {j j
   funext i
   simpa [Matrix.transpose_apply, smul_eq_mul] using h i
 
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.det_one_add_smul_eq_sum_principal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms det_one_add_smul_eq_sum_principal
+
+/-- info: 'Shields.det_eq_zero_of_col_eq_smul' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms det_eq_zero_of_col_eq_smul
+
 end Shields

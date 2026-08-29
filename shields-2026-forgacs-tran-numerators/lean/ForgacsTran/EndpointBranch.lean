@@ -5,9 +5,10 @@ Authors: Johnny Shields
 -/
 import Mathlib
 import ForgacsTran.EndpointRegularity
-import ForgacsTran.Cluster
+import ForgacsTran.ClusterDirections
 import ForgacsTran.FTBranchAngle
 import ForgacsTran.FTBranchFunction
+import ForgacsTran.PencilIndex
 
 /-!
 # The endpoint chart
@@ -47,17 +48,19 @@ range `ρ ≤ 2` of the smallest zero's multiplicity.
 
 ## Containment
 
-`exists_endpoint_chart` relates `w`, `Q`, `t_e` and `z_e`.  Its hypotheses are
-`1 ≤ k`, `t_e ≠ 0`, `G(t_e) ≠ 0` and the factorization `hfac`; `hfac` mentions `Q`
-and `t_e` but asserts a factorization, not a chart, and no hypothesis mentions `w`
-at all.  The hypotheses are jointly satisfiable —
+`exists_endpoint_chart` relates `w`, `Q`, `t_e` and `z_e`.  Since `w` is bound in
+the conclusion, the question is whether a hypothesis already supplies the chart,
+and none does: the hypotheses are `1 ≤ k`, `t_e ≠ 0`, `G(t_e) ≠ 0` and the
+factorization `hfac`, and `hfac` mentions `Q` and `t_e` but asserts a
+factorization of `ftDen` rather than a `k`-th root of anything.  The root is
+built by `exists_analytic_kth_root`.  The hypotheses are jointly satisfiable —
 `EndpointRegularity.exists_endpointFactor` produces `G` and `hfac` from any
 nonzero pencil, and `EndpointRegularity.rootMultiplicity_pos_of_branch` gives
 `1 ≤ k` at a branch through `t_e`.
 
 ## The endpoint datum, and the value it takes
 
-`DominanceFT.weighted_dominance_of_branch_any_multiplicity_at` carries the whole
+`DominanceFTBranch.weighted_dominance_of_branch_any_multiplicity_at` carries the whole
 endpoint group — `hte₀`, `hγe₀`, `hγ0₀`, `hγd₀`, `hk₀`, `hrootev₀` — with **no**
 guard on the lower cluster, while its `hρ`, `hcB₀`, `hcQ₀`, `hBp₀` and `hEp₀` all
 carry `0 < n₀ →`.  So the datum is owed at every multiplicity of the smallest
@@ -214,19 +217,17 @@ theorem exists_endpoint_chart {Q : Polynomial ℂ} {r k : ℕ} {ze te : ℂ} {G 
 
 /-! ### The endpoint datum, and where its closed form degenerates -/
 
-/-- **`clusterAlpha` is zero at `ρ = 1`, and silently.**  Its definition divides by
-`\sin(π/ρ)`, which is `\sin π = 0` there, so the whole expression evaluates to `0`
-rather than failing.  Anything that reads the endpoint datum `γ_e` off
-`clusterAlpha` uniformly in `ρ` therefore compiles at `ρ = 1` and supplies `0`,
-against a consumer whose `hγe₀` asks for `γ_e ≠ 0`.
+/-! **`clusterAlpha` is zero at `ρ = 1`, and silently**
+(`Cluster.clusterAlpha_one_eq_zero`).  Its definition divides by `\sin(π/ρ)`, which
+is `\sin π = 0` there, so the whole expression evaluates to `0` rather than
+failing.  Anything that reads the endpoint datum `γ_e` off `clusterAlpha`
+uniformly in `ρ` therefore compiles at `ρ = 1` and supplies `0`, against a
+consumer whose `hγe₀` asks for `γ_e ≠ 0`.
 
 The endpoint collision has multiplicity `k = max(ρ, 2)`, not `ρ`, and it is `k`
 that the datum is built from: at `ρ = 1` the two members of the principal pair
 still collide, so `k = 2` and `γ_e = i·t_e`, which is nonzero.  `clusterAlpha`
 agrees with that only from `ρ = 2` on. -/
-@[simp] theorem clusterAlpha_one_eq_zero (x₁ : ℝ) (j : ℕ) : clusterAlpha x₁ 1 j = 0 := by
-  simp [clusterAlpha]
-
 /-- **`\Im α_j = x_1` at the principal index.**  This is why `hγe₀` is free once
 the datum exists at `2 ≤ ρ`: the endpoint limit is a positive real, so the branch
 leaves it in a direction that is never real.  `Cluster.clusterAlpha_ne_zero` is
@@ -247,8 +248,7 @@ theorem clusterAlpha_im {x₁ : ℝ} {ρ : ℕ} (hρ : 2 ≤ ρ) : (clusterAlpha
     Complex.neg_re, Complex.neg_im, Complex.ofReal_re, Complex.ofReal_im,
     Complex.exp_ofReal_mul_I_re, Complex.exp_ofReal_mul_I_im, Complex.normSq_ofReal,
     Real.cos_neg, Real.sin_neg]
-  field_simp
-  ring
+  field
 
 
 /-! ### The branch angle as a complex argument -/
@@ -574,8 +574,7 @@ theorem tendsto_ftTau_blowup {n r ρ : ℕ} {a : Fin n → ℝ} {x₁ : ℝ}
   have hAmono : StrictMono A := strictMono_arg_neg_add_im hx₁
   set s₀ : ℝ := x₁ * (Real.cos (Real.pi / ρ) / Real.sin (Real.pi / ρ)) with hs₀
   have hA0 : A s₀ = Real.pi - Real.pi / ρ := arg_blowup_root hx₁ hρ
-  have hncast : ((n - 1 : ℕ) : ℝ) = (n : ℝ) - 1 := by
-    rw [Nat.cast_sub (by omega)]; norm_num
+  have hncast : ((n - 1 : ℕ) : ℝ) = (n : ℝ) - 1 := cast_pred_eq_sub_one (by omega)
   -- the branch equation, on the arc
   have hbeq : ∀ᶠ θ in 𝓝[>] (0 : ℝ),
       ftAngleSum a (ftTau a r (n - 1) θ) θ = r * θ + ((n : ℝ) - 1) * Real.pi
@@ -602,8 +601,7 @@ theorem tendsto_ftTau_blowup {n r ρ : ℕ} {a : Fin n → ℝ} {x₁ : ℝ}
   -- the limit value is zero exactly at `s₀`
   have hzero : (ρ : ℝ) * A s₀ + ((n : ℝ) - ρ) * Real.pi - ((n : ℝ) - 1) * Real.pi = 0 := by
     rw [hA0]
-    field_simp
-    ring
+    field
   refine tendsto_order.2 ⟨fun b hb => ?_, fun c hc => ?_⟩
   · -- `b < s₀`: the blown-up equation is negative at `b`, so the branch sits above it
     have hneg : (ρ : ℝ) * A b + ((n : ℝ) - ρ) * Real.pi - ((n : ℝ) - 1) * Real.pi < 0 := by
@@ -674,8 +672,7 @@ theorem clusterAlpha_eq_blowup {x₁ : ℝ} {ρ : ℕ} (hρ : 2 ≤ ρ) :
       simp [-Complex.ofReal_cos, -Complex.ofReal_sin]
   rw [clusterAlpha, homega]
   push_cast [-Complex.ofReal_cos, -Complex.ofReal_sin]
-  field_simp
-  ring
+  field
 
 
 /-! ### The chart inverted -/
@@ -774,94 +771,6 @@ theorem cluster_member_ne {ψ : ℂ → ℂ} {U : Set ℂ} (hinj : Set.InjOn ψ 
     ψ (ω₁ * v) ≠ ψ (ω₂ * v) := by
   intro h
   exact hω (mul_right_cancel₀ hv (hinj h₁ h₂ h))
-
-
-/-! ### The chart directions
-
-The `ρ` cluster members sit at the `ρ`-th roots of **unity** in the chart
-variable.  These are `clusterDir`, and they are a different family from
-`Cluster.clusterOmega`, whose `ρ`-th power is `-1`: the bridge between them is
-`clusterAlpha_mul_clusterDir`, an identity rather than a matching. -/
-
-/-- The `j`-th `ρ`-th root of unity, the direction of the `j`-th cluster member in
-the chart variable. -/
-noncomputable def clusterDir (ρ j : ℕ) : ℂ :=
-  (Complex.exp (2 * (Real.pi : ℂ) * Complex.I / (ρ : ℂ))) ^ j
-
-theorem clusterDir_pow {ρ : ℕ} (hρ : ρ ≠ 0) (j : ℕ) : (clusterDir ρ j) ^ ρ = 1 := by
-  rw [clusterDir, ← pow_mul, mul_comm j ρ, pow_mul,
-    (Complex.isPrimitiveRoot_exp ρ hρ).pow_eq_one, one_pow]
-
-theorem clusterDir_ne_zero (ρ j : ℕ) : clusterDir ρ j ≠ 0 :=
-  pow_ne_zero _ (Complex.exp_ne_zero _)
-
-theorem clusterDir_inj {ρ : ℕ} (hρ : ρ ≠ 0) {i j : ℕ} (hi : i < ρ) (hj : j < ρ)
-    (h : clusterDir ρ i = clusterDir ρ j) : i = j :=
-  (Complex.isPrimitiveRoot_exp ρ hρ).pow_inj hi hj h
-
-/-- The cluster directions rotate the chart directions: `ω_0·ζ_j = ω_j`. -/
-theorem clusterOmega_mul_clusterDir {ρ : ℕ} (hρ : ρ ≠ 0) (j : ℕ) :
-    clusterOmega ρ 0 * clusterDir ρ j = clusterOmega ρ j := by
-  have hρC : ((ρ : ℕ) : ℂ) ≠ 0 := Nat.cast_ne_zero.2 hρ
-  have hdir : clusterDir ρ j
-      = Complex.exp (2 * (Real.pi : ℂ) * Complex.I * (j : ℂ) / (ρ : ℂ)) := by
-    rw [clusterDir, ← Complex.exp_nat_mul]
-    congr 1
-    field_simp
-  rw [clusterOmega, clusterOmega, hdir, ← Complex.exp_add]
-  congr 1
-  rw [clusterAngle, clusterAngle]
-  push_cast
-  field_simp
-  ring
-
-/-- **The cluster directions are distinct.**  `ω` is `ω_0` times a chart direction,
-so the indices separate exactly as the chart's do.  This is what carries
-`idx₀ i ≠ 0, 1` — an arithmetic fact about the enumeration — over to
-`ω_{idx₀ i} ≠ ω_0, ω_1`, which is what `Geometry.endpoint_linear_coeff_pos`
-asks for. -/
-theorem clusterOmega_inj {ρ : ℕ} (hρ : ρ ≠ 0) {i j : ℕ} (hi : i < ρ) (hj : j < ρ)
-    (h : clusterOmega ρ i = clusterOmega ρ j) : i = j := by
-  have h0 : clusterOmega ρ 0 ≠ 0 := by
-    rw [clusterOmega]; exact Complex.exp_ne_zero _
-  rw [← clusterOmega_mul_clusterDir hρ i, ← clusterOmega_mul_clusterDir hρ j] at h
-  exact clusterDir_inj hρ hi hj (mul_left_cancel₀ h0 h)
-
-/-- `ω_1 = e^{iπ/ρ}` and `ω_0 = e^{-iπ/ρ}`, in the spelling
-`Geometry.endpoint_linear_coeff_pos` takes. -/
-theorem clusterOmega_one_eq {ρ : ℕ} :
-    clusterOmega ρ 1 = Complex.exp (((Real.pi / ρ : ℝ) : ℂ) * Complex.I) := by
-  rw [clusterOmega, clusterAngle]
-  push_cast
-  ring_nf
-
-theorem clusterOmega_zero_eq {ρ : ℕ} :
-    clusterOmega ρ 0 = Complex.exp (((-(Real.pi / ρ) : ℝ) : ℂ) * Complex.I) := by
-  rw [clusterOmega, clusterAngle]
-  push_cast
-  ring_nf
-
-/-- **The orbit identity.**  The `ρ` cluster directions carry `clusterAlpha` onto
-itself: `α_0·ζ_j = α_j`.  This is what pins the enumeration index — the family of
-slopes is the orbit of the principal one, so no asymptotic has to be matched
-against an index by hand. -/
-theorem clusterAlpha_mul_clusterDir (x₁ : ℝ) {ρ : ℕ} (hρ : ρ ≠ 0) (j : ℕ) :
-    clusterAlpha x₁ ρ 0 * clusterDir ρ j = clusterAlpha x₁ ρ j := by
-  have hρC : ((ρ : ℕ) : ℂ) ≠ 0 := Nat.cast_ne_zero.2 hρ
-  have hdir : clusterDir ρ j
-      = Complex.exp (2 * (Real.pi : ℂ) * Complex.I * (j : ℂ) / (ρ : ℂ)) := by
-    rw [clusterDir, ← Complex.exp_nat_mul]
-    congr 1
-    field_simp
-  have homega : clusterOmega ρ 0 * clusterDir ρ j = clusterOmega ρ j := by
-    rw [clusterOmega, clusterOmega, hdir, ← Complex.exp_add]
-    congr 1
-    rw [clusterAngle, clusterAngle]
-    push_cast
-    field_simp
-    ring
-  rw [clusterAlpha, clusterAlpha, ← homega]
-  ring
 
 
 /-- **The chart covers every nearby zero.**  A zero of the pencil close to `t_e`
@@ -1014,50 +923,5 @@ theorem exists_cluster_index_of_cover {ρ : ℕ} {ψ : ℂ → ℂ} {γe A : ℂ
   exact eventually_eq_of_cover hjp hSjp
     (fun i hi j hj hij => clusterSlope_inj hρ hγe hL (Finset.mem_range.1 hi)
       (Finset.mem_range.1 hj) hij) hcover hP hslope
-
-/-- The chart directions add in the exponent. -/
-theorem clusterDir_add (ρ a b : ℕ) :
-    clusterDir ρ (a + b) = clusterDir ρ a * clusterDir ρ b := by
-  rw [clusterDir, clusterDir, clusterDir, pow_add]
-
-theorem clusterDir_self {ρ : ℕ} (hρ : ρ ≠ 0) : clusterDir ρ ρ = 1 := by
-  have h := clusterDir_pow hρ 1
-  rw [clusterDir, pow_one] at h
-  rw [clusterDir]
-  exact h
-
-theorem clusterDir_mul_left {ρ : ℕ} (hρ : ρ ≠ 0) (k : ℕ) : clusterDir ρ (ρ * k) = 1 := by
-  have h : (Complex.exp (2 * (Real.pi : ℂ) * Complex.I / (ρ : ℂ))) ^ ρ = 1 :=
-    clusterDir_self hρ
-  rw [clusterDir, pow_mul, h, one_pow]
-
-/-- The chart directions are periodic in the index, since `ζ^ρ = 1`.  This is what
-lets a chart index be reduced mod `ρ`, and it is the whole content of the shift
-between a chart's own labelling of the cluster and the manuscript's. -/
-theorem clusterDir_mod {ρ : ℕ} (hρ : ρ ≠ 0) (m : ℕ) :
-    clusterDir ρ (m % ρ) = clusterDir ρ m := by
-  conv_rhs => rw [← Nat.div_add_mod m ρ]
-  rw [clusterDir_add, clusterDir_mul_left hρ, one_mul]
-
-/-- **The manuscript's index of a chart member.**  A chart labels the cluster by
-`ρ`-th roots of unity of its own choosing, and there is no reason for its index
-`0` to be the principal branch: if the principal branch is the chart's `j_p`, the
-chart's member `j` has slope `α_{(j + ρ - j_p) \bmod ρ}`, not `α_j`.
-
-Identifying the two labellings is a wrong statement of the residue asymptotics at
-every member at once, and it is invisible to the binders that only ask for an
-injection into a set of the right size.  `scripts/check_cluster_slope_set.py`
-checks the fact this rests on — that the slope set is exactly the `α` set — at
-four pencils. -/
-theorem clusterSlope_shift {ρ : ℕ} (hρ : ρ ≠ 0) {γe : ℂ} {L : ℝ} {x₁ : ℝ} {jp : ℕ}
-    (hjp : jp ≤ ρ) (hAp : γe * (clusterDir ρ jp * ((L : ℝ) : ℂ)) = clusterAlpha x₁ ρ 0)
-    (j : ℕ) :
-    γe * (clusterDir ρ j * ((L : ℝ) : ℂ)) = clusterAlpha x₁ ρ ((j + ρ - jp) % ρ) := by
-  have hsplit : j + ρ - jp = j + (ρ - jp) := by omega
-  have hone : clusterDir ρ jp * clusterDir ρ (ρ - jp) = 1 := by
-    rw [← clusterDir_add, Nat.add_sub_cancel' hjp, clusterDir_self hρ]
-  rw [← clusterAlpha_mul_clusterDir x₁ hρ, clusterDir_mod hρ, hsplit, clusterDir_add,
-    ← hAp]
-  linear_combination (-(γe * clusterDir ρ j * ((L : ℝ) : ℂ))) * hone
 
 end ForgacsTran

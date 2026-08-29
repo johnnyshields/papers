@@ -6,6 +6,8 @@ Authors: Johnny Shields
 import ForgacsTran.FTBranchRegularity
 import ForgacsTran.FTBranchCritical
 import ForgacsTran.Geometry
+import ForgacsTran.PencilIndex
+import ForgacsTran.ComplexPart
 
 /-!
 # The endpoint limit of the branch radius
@@ -54,10 +56,6 @@ endpoint limit, branch radius, Forgacs-Tran branch
 namespace ForgacsTran
 
 open Real Set Filter Topology Polynomial
-
-private theorem ftHasDerivAt_im {f : ℝ → ℂ} {f' : ℂ} {x : ℝ} (h : HasDerivAt f f' x) :
-    HasDerivAt (fun t => (f t).im) f'.im x :=
-  Complex.imCLM.hasFDerivAt.comp_hasDerivAt x h
 
 /-- `Im (e^{irθ} P(τ e^{-iθ}))`.  It vanishes exactly where the branch value
 `-P(t₀)/t₀^r` is real, and identically at `θ = 0`. -/
@@ -120,7 +118,7 @@ theorem hasDerivAt_ftPencilIm (P : Polynomial ℝ) (r : ℕ) (τ θ : ℝ) :
       ((derivative Q).eval (ftArcPoint τ θ) * (-Complex.I * ftArcPoint τ θ)) θ :=
     (Q.hasDerivAt (ftArcPoint τ θ)).comp θ (hasDerivAt_ftArcPoint_theta τ θ)
   have hmul := he.mul hp
-  refine (ftHasDerivAt_im hmul).congr_deriv ?_
+  refine hmul.im.congr_deriv ?_
   simp only [ftPencilImDeriv, ftCritical, eval_sub, eval_mul, eval_C, eval_X, hQ]
   congr 1
   have hpow : (ftArcPoint τ θ) * Complex.exp (((r : ℝ) * θ : ℝ) * Complex.I)
@@ -264,8 +262,7 @@ theorem ftTau_le_div_cos {n r : ℕ} {a : Fin n → ℝ} (hn2 : 2 ≤ n) (_ha : 
       Finset.univ_nonempty_iff.2 (Fin.pos_iff_nonempty.1 (by omega))
     have := Finset.sum_lt_sum_of_nonempty hne fun k (_ : k ∈ Finset.univ) => hsmall k
     simpa [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul] using this
-  have hn1 : ((n - 1 : ℕ) : ℝ) = (n : ℝ) - 1 := by
-    rw [Nat.cast_sub (by omega), Nat.cast_one]
+  have hn1 : ((n - 1 : ℕ) : ℝ) = (n : ℝ) - 1 := cast_pred_eq_sub_one (by omega)
   have hnge : (2 : ℝ) ≤ n := by exact_mod_cast hn2
   rw [hsum, hn1] at hlt
   have hr0 : (0 : ℝ) ≤ r * θ := by positivity

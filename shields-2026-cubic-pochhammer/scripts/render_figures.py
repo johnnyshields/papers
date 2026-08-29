@@ -9,7 +9,7 @@ the caption left in the manuscript text.  This script extracts the axis
 environment from the manuscript itself -- not from a hand-kept copy, so the
 artwork cannot drift from the paper -- and typesets it on its own A4 page in
 
-    shields-2026-cubic-pochhammer-figure.pdf
+    shields-2026-cubic-pochhammer-figures.pdf
 
 The generated wrapper is written to scripts/figures_pages.tex for inspection
 (scripts/.gitignore excludes *.tex, as for every generated snippet here).
@@ -41,7 +41,7 @@ from pathlib import Path
 PAPER_DIR = Path(__file__).resolve().parent.parent
 PAPER = PAPER_DIR / "shields-2026-cubic-pochhammer.tex"
 WRAPPER = PAPER_DIR / "scripts" / "figures_pages.tex"
-OUTPUT = PAPER_DIR / "shields-2026-cubic-pochhammer-figure.pdf"
+OUTPUT = PAPER_DIR / "shields-2026-cubic-pochhammer-figures.pdf"
 
 # every float to render, in the order it appears in the manuscript; one page
 # each.  `plots` is the expected number of \addplot blocks -- the four data

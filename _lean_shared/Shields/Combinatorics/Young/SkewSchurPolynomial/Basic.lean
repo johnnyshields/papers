@@ -48,6 +48,45 @@ namespace Shields
 
 open Finset
 
+/-! ## Row lengths, and the empty diagram
+
+Both length functions vanish on `⊥`, which is where the branching sum and the
+Jacobi--Trudi determinant degenerate, and vanishing row lengths detect `⊥` in turn.  Row
+length is monotone in the diagram, so a containment of shapes is a containment of rows.
+-/
+
+theorem colLen_bot (j : ℕ) : (⊥ : YoungDiagram).colLen j = 0 :=
+  Nat.le_zero.mp (YoungDiagram.notMem_iff_le_colLen.mp (YoungDiagram.notMem_bot _))
+
+theorem rowLen_bot (i : ℕ) : (⊥ : YoungDiagram).rowLen i = 0 :=
+  Nat.le_zero.mp (YoungDiagram.notMem_iff_le_rowLen.mp (YoungDiagram.notMem_bot _))
+
+/-- Row lengths are monotone in the diagram. -/
+theorem rowLen_mono {mu lam : YoungDiagram} (h : mu ≤ lam) (i : ℕ) :
+    mu.rowLen i ≤ lam.rowLen i :=
+  YoungDiagram.notMem_iff_le_rowLen.mp fun hc =>
+    (YoungDiagram.notMem_iff_le_rowLen (μ := lam)).mpr le_rfl (h hc)
+
+theorem eq_bot_of_rowLen {lam : YoungDiagram} (h : ∀ i, lam.rowLen i = 0) : lam = ⊥ := by
+  refine YoungDiagram.ext (Finset.ext fun c => ?_)
+  obtain ⟨i, j⟩ := c
+  simp only [YoungDiagram.mem_cells]
+  constructor
+  · intro hc
+    rw [YoungDiagram.mem_iff_lt_rowLen, h i] at hc
+    omega
+  · intro hc
+    exact absurd hc (YoungDiagram.notMem_bot _)
+
+theorem rect_zero_right (n : ℕ) : rect n 0 = ⊥ :=
+  eq_bot_of_rowLen fun i => by
+    rcases lt_or_ge i n with hi | hi
+    · exact rowLen_rect_of_lt hi
+    · exact rowLen_rect_of_le hi
+
+theorem rect_zero_left (k : ℕ) : rect 0 k = ⊥ :=
+  eq_bot_of_rowLen fun i => rowLen_rect_of_le (Nat.zero_le i)
+
 /-! ## Skew shapes
 
 A skew diagram is a pair of Young diagrams, its cells the set difference.  The
@@ -62,6 +101,10 @@ def skewCells (lam mu : YoungDiagram) : Finset (ℕ × ℕ) := lam.cells \ mu.ce
 theorem mem_skewCells {lam mu : YoungDiagram} {c : ℕ × ℕ} :
     c ∈ skewCells lam mu ↔ c ∈ lam ∧ c ∉ mu := by
   simp [skewCells, YoungDiagram.mem_cells]
+
+/-- A cell outside `lam` is outside the skew shape. -/
+theorem notMem_skewCells_of_notMem {lam mu : YoungDiagram} {c : ℕ × ℕ} (h : c ∉ lam) :
+    c ∉ skewCells lam mu := fun hc => h (mem_skewCells.mp hc).1
 
 theorem skewCells_bot (lam : YoungDiagram) : skewCells lam ⊥ = lam.cells := by
   ext c
@@ -80,6 +123,21 @@ theorem notMem_of_row_le {mu : YoungDiagram} {i i' j : ℕ} (h : i ≤ i')
 the right of it in its row. -/
 theorem notMem_of_col_le {mu : YoungDiagram} {i j j' : ℕ} (h : j ≤ j')
     (hj : (i, j) ∉ mu) : (i, j') ∉ mu := fun hc => hj (mu.up_left_mem le_rfl h hc)
+
+/-- Both cells of a row comparison lie in the skew shape: the left one by
+hypothesis, the right one because `mu` is a lower set. -/
+theorem mem_skewCells_of_row {lam mu : YoungDiagram} {i j₁ j₂ : ℕ} (hj : j₁ < j₂)
+    (hlam : (i, j₂) ∈ lam) (hmu : (i, j₁) ∉ mu) :
+    (i, j₁) ∈ skewCells lam mu ∧ (i, j₂) ∈ skewCells lam mu :=
+  ⟨mem_skewCells.mpr ⟨lam.up_left_mem le_rfl hj.le hlam, hmu⟩,
+    mem_skewCells.mpr ⟨hlam, notMem_of_col_le hj.le hmu⟩⟩
+
+/-- Both cells of a column comparison lie in the skew shape. -/
+theorem mem_skewCells_of_col {lam mu : YoungDiagram} {i₁ i₂ j : ℕ} (hi : i₁ < i₂)
+    (hlam : (i₂, j) ∈ lam) (hmu : (i₁, j) ∉ mu) :
+    (i₁, j) ∈ skewCells lam mu ∧ (i₂, j) ∈ skewCells lam mu :=
+  ⟨mem_skewCells.mpr ⟨lam.up_left_mem hi.le le_rfl hlam, hmu⟩,
+    mem_skewCells.mpr ⟨hlam, notMem_of_row_le hi.le hmu⟩⟩
 
 /-- The height of column `j` of `lam / mu`. -/
 def skewColLen (lam mu : YoungDiagram) (j : ℕ) : ℕ := lam.colLen j - mu.colLen j
@@ -177,11 +235,8 @@ the entries from there down are strictly increasing. -/
 theorem sub_colLen_le_entry (T : SkewSSYT lam mu) {i j : ℕ}
     (hcell : (i, j) ∈ skewCells lam mu) : i - mu.colLen j ≤ T i j := by
   obtain ⟨hlam, hmu⟩ := mem_skewCells.mp hcell
-  have htop : (mu.colLen j, j) ∉ mu := fun hc =>
-    absurd (YoungDiagram.mem_iff_lt_colLen.mp hc) (lt_irrefl _)
-  have hle : mu.colLen j ≤ i := by
-    by_contra h
-    exact hmu (YoungDiagram.mem_iff_lt_colLen.mpr (by omega))
+  have htop : (mu.colLen j, j) ∉ mu := YoungDiagram.notMem_iff_le_colLen.mpr le_rfl
+  have hle : mu.colLen j ≤ i := YoungDiagram.notMem_iff_le_colLen.mp hmu
   have := T.entry_add_sub_le (mu.colLen j) j htop i hle hlam
   omega
 
@@ -240,8 +295,8 @@ theorem skewColLen_le (T : BoundedSkewSSYT lam mu n) (j : ℕ) :
   · simp only [skewColLen]; omega
   · have hlam : (lam.colLen j - 1, j) ∈ lam :=
       YoungDiagram.mem_iff_lt_colLen.mpr (by omega)
-    have hmu : (lam.colLen j - 1, j) ∉ mu := fun hc =>
-      absurd (YoungDiagram.mem_iff_lt_colLen.mp hc) (by omega)
+    have hmu : (lam.colLen j - 1, j) ∉ mu :=
+      YoungDiagram.notMem_iff_le_colLen.mpr (by omega)
     have hcell : (lam.colLen j - 1, j) ∈ skewCells lam mu := mem_skewCells.mpr ⟨hlam, hmu⟩
     have h1 : lam.colLen j - 1 - mu.colLen j ≤ T.1 (lam.colLen j - 1) j :=
       T.1.sub_colLen_le_entry hcell
@@ -258,22 +313,14 @@ def skewHighestWeight (lam mu : YoungDiagram) (n : ℕ)
   refine ⟨{ entry := fun i j => if (i, j) ∈ skewCells lam mu then i - mu.colLen j else 0
             row_weak' := ?_, col_strict' := ?_, zeros' := ?_ }, ?_⟩
   · intro i j₁ j₂ hj hlam hmu
-    have hc₂ : (i, j₂) ∈ skewCells lam mu :=
-      mem_skewCells.mpr ⟨hlam, notMem_of_col_le hj.le hmu⟩
-    have hc₁ : (i, j₁) ∈ skewCells lam mu :=
-      mem_skewCells.mpr ⟨lam.up_left_mem le_rfl hj.le hlam, hmu⟩
+    obtain ⟨hc₁, hc₂⟩ := mem_skewCells_of_row hj hlam hmu
     rw [if_pos hc₁, if_pos hc₂]
     have := mu.colLen_anti j₁ j₂ hj.le
     omega
   · intro i₁ i₂ j hi hlam hmu
-    have hc₁ : (i₁, j) ∈ skewCells lam mu :=
-      mem_skewCells.mpr ⟨lam.up_left_mem hi.le le_rfl hlam, hmu⟩
-    have hc₂ : (i₂, j) ∈ skewCells lam mu :=
-      mem_skewCells.mpr ⟨hlam, notMem_of_row_le hi.le hmu⟩
+    obtain ⟨hc₁, hc₂⟩ := mem_skewCells_of_col hi hlam hmu
     rw [if_pos hc₁, if_pos hc₂]
-    have hge : mu.colLen j ≤ i₁ := by
-      by_contra hlt
-      exact hmu (YoungDiagram.mem_iff_lt_colLen.mpr (by omega))
+    have hge : mu.colLen j ≤ i₁ := YoungDiagram.notMem_iff_le_colLen.mp hmu
     omega
   · intro i j hc
     exact if_neg hc
@@ -282,9 +329,7 @@ def skewHighestWeight (lam mu : YoungDiagram) (n : ℕ)
     rw [if_pos hc]
     obtain ⟨hlam, hmu⟩ := mem_skewCells.mp hc
     have h1 : i < lam.colLen j := YoungDiagram.mem_iff_lt_colLen.mp hlam
-    have h2 : mu.colLen j ≤ i := by
-      by_contra hlt
-      exact hmu (YoungDiagram.mem_iff_lt_colLen.mpr (by omega))
+    have h2 : mu.colLen j ≤ i := YoungDiagram.notMem_iff_le_colLen.mp hmu
     have h3 := h j
     simp only [skewColLen] at h3
     omega
@@ -337,7 +382,7 @@ def boundedSkewSSYTBotEquiv (lam : YoungDiagram) (n : ℕ) :
     ⟨⟨T.1.entry,
         fun hj hcell => T.1.row_weak hj hcell (YoungDiagram.notMem_bot _),
         fun hi hcell => T.1.col_strict hi hcell (YoungDiagram.notMem_bot _),
-        fun hc => T.1.zeros fun hx => hc (mem_skewCells.mp hx).1⟩,
+        fun hc => T.1.zeros (notMem_skewCells_of_notMem hc)⟩,
       fun _ _ hcell => T.2 _ _ (mem_skewCells.mpr ⟨hcell, YoungDiagram.notMem_bot _⟩)⟩
   invFun T :=
     ⟨⟨T.1.entry,
@@ -421,17 +466,9 @@ The branching formula sums over `mu ⊆ nu ⊆ lam`.  Mathlib has no
 `cells` map is injective and lands in `lam.cells.powerset`.
 -/
 
-theorem cells_injective : Function.Injective YoungDiagram.cells := by
-  intro a b h
-  obtain ⟨ca, pa⟩ := a
-  obtain ⟨cb, pb⟩ := b
-  simp only at h
-  subst h
-  rfl
-
 theorem finite_between (mu lam : YoungDiagram) :
     {nu : YoungDiagram | mu ≤ nu ∧ nu ≤ lam}.Finite := by
-  refine Set.Finite.of_finite_image ?_ cells_injective.injOn
+  refine Set.Finite.of_finite_image ?_ fun _ _ _ _ h => YoungDiagram.ext h
   refine Set.Finite.subset (lam.cells.powerset : Finset (Finset (ℕ × ℕ))).finite_toSet ?_
   rintro s ⟨nu, ⟨-, hnu⟩, rfl⟩
   exact Finset.mem_coe.mpr (Finset.mem_powerset.mpr (YoungDiagram.cells_subset_iff.mpr hnu))
@@ -444,5 +481,12 @@ noncomputable def youngIcc (mu lam : YoungDiagram) : Finset YoungDiagram :=
 theorem mem_youngIcc {mu lam nu : YoungDiagram} :
     nu ∈ youngIcc mu lam ↔ mu ≤ nu ∧ nu ≤ lam := by
   simp [youngIcc]
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.youngIcc' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms youngIcc
 
 end Shields

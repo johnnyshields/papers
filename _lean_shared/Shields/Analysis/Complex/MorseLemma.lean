@@ -63,29 +63,21 @@ theorem exists_quadratic_factor (hf : AnalyticAt ℂ f τ) (hm : f τ = c)
     ∃ g : ℂ → ℂ, AnalyticAt ℂ g τ ∧ g τ = iteratedDeriv 2 f τ / 2 ∧ g τ ≠ 0 ∧
       ∀ᶠ t in 𝓝 τ, f t - c = (t - τ) ^ 2 • g t := by
   have hF : AnalyticAt ℂ (fun t => f t - c) τ := hf.sub analyticAt_const
-  have hrw : (fun t => f t - c) = fun t => (-c) + f t := by funext t; ring
-  have hd : ∀ k : ℕ, 0 < k →
-      iteratedDeriv k (fun t => f t - c) τ = iteratedDeriv k f τ := by
-    intro k hk
-    rw [hrw]
-    exact iteratedDeriv_const_add hk (-c)
+  have hd : ∀ k : ℕ, 0 < k → iteratedDeriv k (fun t => f t - c) τ = iteratedDeriv k f τ :=
+    fun k hk => by simpa [sub_eq_neg_add] using iteratedDeriv_const_add (f := f) (x := τ) hk (-c)
   have hord : analyticOrderAt (fun t => f t - c) τ = (2 : ℕ) := by
     rw [analyticOrderAt_eq_nat_iff_iteratedDeriv_eq_zero hF]
-    refine ⟨fun k hk => ?_, ?_⟩
-    · interval_cases k
-      · simpa [iteratedDeriv_zero] using sub_eq_zero.mpr hm
-      · rw [hd 1 one_pos, iteratedDeriv_one]; exact h1
-    · rw [hd 2 (by norm_num)]; exact h2
+    refine ⟨fun k hk => ?_, by rw [hd 2 (by norm_num)]; exact h2⟩
+    interval_cases k <;> simp_all [hd 1 one_pos, iteratedDeriv_one]
   obtain ⟨g, hg, hg0, hgeq⟩ := hF.analyticOrderAt_eq_natCast.mp hord
   refine ⟨g, hg, ?_, hg0, hgeq⟩
   have hFeq : (fun t => f t - c) =ᶠ[𝓝 τ] fun t => (t - τ) ^ 2 * g t := by
     filter_upwards [hgeq] with t ht; simpa using ht
-  have hgnear : ∀ᶠ t in 𝓝 τ, AnalyticAt ℂ g t := hg.eventually_analyticAt
   have hsq : ∀ u : ℂ, HasDerivAt (fun s : ℂ => (s - τ) ^ 2) (2 * (u - τ)) u := fun u =>
     (((hasDerivAt_id u).sub_const τ).pow 2).congr_deriv (by norm_num)
   have hd1 : deriv (fun t => (t - τ) ^ 2 * g t)
       =ᶠ[𝓝 τ] fun t => 2 * (t - τ) * g t + (t - τ) ^ 2 * deriv g t := by
-    filter_upwards [hgnear] with t hgt
+    filter_upwards [hg.eventually_analyticAt] with t hgt
     exact ((hsq t).mul hgt.differentiableAt.hasDerivAt).deriv
   have hlin : HasDerivAt (fun t : ℂ => 2 * (t - τ)) 2 τ :=
     (((hasDerivAt_id τ).sub_const τ).const_mul (2 : ℂ)).congr_deriv (by ring)
@@ -93,10 +85,8 @@ theorem exists_quadratic_factor (hf : AnalyticAt ℂ f τ) (hm : f τ = c)
       (2 * g τ) τ :=
     ((hlin.mul hg.differentiableAt.hasDerivAt).add
       ((hsq τ).mul hg.deriv.differentiableAt.hasDerivAt)).congr_deriv (by ring)
-  have hkey : iteratedDeriv 2 f τ = 2 * g τ := by
-    rw [← hd 2 (by norm_num), hFeq.iteratedDeriv_eq 2, iteratedDeriv_succ,
-      iteratedDeriv_one, hd1.deriv_eq, hd2.deriv]
-  rw [hkey]; ring
+  rw [← hd 2 (by norm_num), hFeq.iteratedDeriv_eq 2, iteratedDeriv_succ,
+    iteratedDeriv_one, hd1.deriv_eq, hd2.deriv]; ring
 
 /-- **A holomorphic square root exists wherever the value is `1`.**  If `q` is analytic at `τ`
 with `q τ = 1`, then `s = exp (log q / 2)` is analytic at `τ`, equals `1` there, and squares to `q`
@@ -151,22 +141,25 @@ theorem exists_morse_inverse (hf : AnalyticAt ℂ f τ) (hm : f τ = c)
   set ψ := hH.hasStrictDerivAt.localInverse _ _ _ hne with hψdef
   have hψa : AnalyticAt ℂ ψ (H τ) := hH.analyticAt_localInverse hne
   have hψ0 : ψ (H τ) = τ := HasStrictFDerivAt.localInverse_apply_image ..
-  have hright : ∀ᶠ w in 𝓝 (H τ), H (ψ w) = w :=
-    hH.hasStrictDerivAt.eventually_right_inverse ..
+  have hright : ∀ᶠ w in 𝓝 (H τ), H (ψ w) = w := hH.hasStrictDerivAt.eventually_right_inverse ..
   have hψd : deriv ψ (H τ) = 1 := by
-    have hinv : deriv ψ (H τ) = (deriv H τ)⁻¹ :=
-      (hH.hasStrictDerivAt.to_localInverse (hf' := hne)).hasDerivAt.deriv
-    rw [hinv, hH1, inv_one]
+    rw [(hH.hasStrictDerivAt.to_localInverse (hf' := hne)).hasDerivAt.deriv, hH1, inv_one]
   rw [hH0] at hψa hψ0 hright hψd
   refine ⟨ψ, κ, hκv, hκ, hψa, hψ0, hψd, ?_, ?_⟩
   swap
   · obtain ⟨s, hs, hsub⟩ := Filter.eventually_iff_exists_mem.mp hright
     exact ⟨s, hs, fun u hu v hv huv => by rw [← hsub u hu, ← hsub v hv, huv]⟩
-  have hmem : ∀ᶠ w in 𝓝 (0 : ℂ), f (ψ w) - c = κ * H (ψ w) ^ 2 := by
-    have htend : Filter.Tendsto ψ (𝓝 0) (𝓝 τ) := hψ0 ▸ hψa.continuousAt
-    exact htend.eventually hHeq
+  have hmem : ∀ᶠ w in 𝓝 (0 : ℂ), f (ψ w) - c = κ * H (ψ w) ^ 2 :=
+    (hψ0 ▸ hψa.continuousAt : Filter.Tendsto ψ (𝓝 0) (𝓝 τ)).eventually hHeq
   filter_upwards [hmem, hright] with w hw hrw
   rw [hrw] at hw
   linear_combination hw
+
+
+/-! ### Axiom footprint -/
+
+/-- info: 'Shields.exists_morse_inverse' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms exists_morse_inverse
 
 end Shields

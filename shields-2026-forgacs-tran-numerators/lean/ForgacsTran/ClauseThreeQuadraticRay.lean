@@ -88,7 +88,7 @@ theorem rayZ_mul_sq {q0 q1 q2 : ℝ} (hq0 : 0 < q0) (hq1 : q1 < 0) {θ : ℝ}
 
 /-- Vieta, second relation: the sum of the principal pair is `2τcosθ = -q_1/(q_2+z)`,
 which after clearing is `q_1τ = -2q_0cosθ`. -/
-theorem rayTau_mul {q0 q1 : ℝ} (hq1 : q1 < 0) (q2 : ℝ) (θ : ℝ) :
+theorem rayTau_mul {q0 q1 : ℝ} (hq1 : q1 < 0) (_q2 : ℝ) (θ : ℝ) :
     q1 * rayTau q0 q1 θ = -2 * q0 * Real.cos θ := by
   have h : q1 ≠ 0 := hq1.ne
   rw [rayTau]
@@ -274,9 +274,10 @@ theorem ray_denominator_recurrence {q0 q1 q2 : ℝ} (hq0 : 0 < q0) {M : ℕ} (hM
     have h1 : j ≠ 0 := by omega
     have h2 : j ≠ 1 := by omega
     have h3 : ¬ (j = 2) := by omega
-    simp [quadPoly, coeff_C, coeff_X, coeff_X_pow, h1, h3]
-    intro h
-    exact absurd h (by omega : ¬ ((1 : ℕ) = j))
+    -- `coeff_X` fires in the orientation `1 = j`, so `h2` is supplied that way round
+    -- and `simp` closes the goal rather than leaving a residual for a later tactic
+    have h2' : ¬ ((1 : ℕ) = j) := fun hc => h2 hc.symm
+    simp [quadPoly, coeff_C, coeff_X, coeff_X_pow, h1, h2', h3]
   set Q := quadPoly q0 q1 q2 with hQ
   set H : ℕ → Polynomial ℂ := ftCoeffPoly Q 1 2 with hH
   have hd1 : ftDenCoeff Q 2 1 = C ((q1 : ℝ) : ℂ) := by
@@ -314,7 +315,7 @@ theorem ray_denominator_recurrence {q0 q1 q2 : ℝ} (hq0 : 0 < q0) {M : ℕ} (hM
 
 
 /-- **The closed form along the arc.**  `q_0τ^Msinθ\,H_M = sin((M+1)θ)`, the
-`r = 2` analogue of `QuadraticCase.quad_favard_on_arc`.
+`r = 2` analogue of `QuadraticWitness.quad_favard_on_arc`.
 
 Both Vieta relations turn the three-term recurrence into the Chebyshev one:
 `q_1τ = -2q_0cosθ` supplies the `2cosθ`, and `(q_2+z)τ^2 = q_0` makes the

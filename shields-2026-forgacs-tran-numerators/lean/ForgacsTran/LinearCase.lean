@@ -160,7 +160,9 @@ theorem denomConv_dlin_linCoeffPoly (R : ℂ[X]) {q0 : ℝ} (hq0 : q0 ≠ 0) (q1
   cases m with
   | zero =>
       have hq0c : (q0 : ℂ) ≠ 0 := by exact_mod_cast hq0
-      simp [denomConv, dlin, linCoeffPoly, mul_comm]
+      simp only [denomConv, zero_add, Finset.range_one, dlin, linCoeffPoly, zero_tsub,
+        pow_zero, pow_one, one_div, mul_comm, one_mul, ite_mul, zero_mul,
+        Finset.sum_singleton, ↓reduceIte]
       -- remaining goal: C q0 * (R * C q0⁻¹) = R
       rw [show C (q0 : ℂ) * (R * C ((q0 : ℂ))⁻¹)
             = (C (q0 : ℂ) * C ((q0 : ℂ))⁻¹) * R from by ring,
