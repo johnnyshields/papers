@@ -1,0 +1,1009 @@
+\documentclass[11pt,a4paper]{amsart}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage[expansion=false]{microtype}
+\usepackage{enumitem}
+\usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black]{hyperref}
+\usepackage{cleveref}
+\hypersetup{
+  pdftitle={Cofactor independence and dilation for skew Schur functions},
+  pdfauthor={John Shields},
+  pdfkeywords={skew Schur function, Jacobi--Trudi determinant, cofactor independence,
+    dilation, diagram reconstruction, beta numbers, skew-equivalence}
+}
+\pdfinfo{ /ORCID (https://orcid.org/0009-0004-3882-4571) }
+
+\numberwithin{equation}{section}
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{question}[theorem]{Question}
+
+\newcommand{\Q}{\mathbb Q}
+\newcommand{\Z}{\mathbb Z}
+\newcommand{\K}{\mathcal K}
+
+\title{Cofactor independence and dilation\\
+for skew Schur functions}
+\author{John Shields}
+\date{September 12, 2026}
+\thanks{Independent researcher, Ginza 2-15-2, KR Ginza II 5F, Chuo-ku, Tokyo, Japan 104-0061.\\
+\hspace*{\parindent}Corresponding author: \href{mailto:math@johnnyshields.com}{math@johnnyshields.com}.  ORCID: \href{https://orcid.org/0009-0004-3882-4571}{0009-0004-3882-4571}.\\
+\hspace*{\parindent}This work is archived at \href{https://doi.org/10.5281/zenodo.22732784}{doi:10.5281/zenodo.22732784}.}
+\subjclass[2020]{Primary 05E05; Secondary 15A15}
+\keywords{skew Schur function, Jacobi--Trudi determinant, cofactor independence, dilation, diagram reconstruction, beta numbers, skew-equivalence}
+
+\begin{document}
+
+\begin{abstract}
+The signed cofactors of a Jacobi--Trudi matrix with strictly positive indices are linearly independent over the rationals unless its skew diagram is fixed by rotation.  In the symmetric case, reflection gives every relation and an explicit independent half of the cofactors.  We prove this in every matrix order, by first reconstructing diagrams with nonnegative Jacobi--Trudi indices from their skew Schur functions.  We then determine how the first-variation kernel changes under integral dilation of the beta numbers.  On the nonsymmetric dense class the dilated kernel is the direct sum of the inherited kernel and an explicitly described arithmetic space supported off the original grid.  A finite-word period argument gives its dimension without determinant expansion.  On symmetric dense cores the kernel is determined outright.  The reconstruction theorem concerns diagram rigidity, the dilation formula linear restoration data; an explicit unequal pair shows why the latter must not be identified with full skew Schur equality.
+\end{abstract}
+
+\maketitle
+
+\section{Introduction}
+
+Repeated entry labels in a Jacobi--Trudi matrix are the only candidate source
+of linear relations among its cofactors.  In the all-positive case they
+produce none beyond rotation of the diagram.  This gives a criterion for
+independence in the beta lists \(A,B\) below, with no genericity assumption on
+the differences of their entries and no bound on the matrix order.
+
+Work over \(\Q[h_1,h_2,\ldots]\), with \(h_0=1\) and \(h_j=0\) for
+\(j<0\).  Let
+\[
+ A=(N=a_1>\cdots>a_n),\qquad
+ B=(b_1>\cdots>b_n=0),\qquad a_n>b_1.
+\]
+These lists specify a connected skew diagram \(C\), up to translation, whose
+Jacobi--Trudi matrix and signed cofactors are
+\[
+ M_C=(h_{a_i-b_j})_{i,j=1}^n,
+ \qquad D_{ij}=(-1)^{i+j}\det M_C(\widehat i,\widehat j).
+\]
+The condition \(a_n>b_1\) says that every index is positive; we call the
+matrix \(M_C\) and the diagram \(C\) \emph{dense}.  It is stronger than
+connectedness.  Rotation through \(180\) degrees, denoted by \(C^*\), fixes
+the translation class precisely when
+\begin{equation}\label{eq:rotation-condition}
+ a_i+b_{n+1-i}=N\qquad(1\le i\le n).
+\end{equation}
+
+\begin{theorem}[Cofactor relations]\label{thm:cofactor-relations}
+Let \(C\) have the strict normalized beta lists above, with \(n\ge2\) and
+\(a_n>b_1\).  If \(C\ne C^*\), its \(n^2\) signed cofactors are linearly
+independent over \(\Q\).  If \(C=C^*\), then
+\[
+ \left\{(c_{ij}):\sum_{i,j}c_{ij}D_{ij}=0\right\}
+ =\operatorname{span}_{\Q}
+ \{e_{ij}-e_{n+1-j,n+1-i}:1\le i,j\le n\}.
+\]
+Here \(e_{ij}\) is the coordinate vector at site \((i,j)\).  In particular,
+\[
+ \dim_{\Q}\operatorname{span}\{D_{ij}\}
+ =\begin{cases}
+ n^2,&C\ne C^*,\\
+ n(n+1)/2,&C=C^*.
+ \end{cases}
+\]
+\end{theorem}
+
+The symmetry clause concerns relations at specified matrix sites, not merely
+a rank count.  It also supplies a basis: take one cofactor from each orbit of
+\((i,j)\mapsto(n+1-j,n+1-i)\).  The nonsymmetric clause holds however
+many entry labels repeat.  A degree count separates sites with distinct
+entry labels, so only the repeated ones can carry a relation.  Both clauses
+turn on extremal monomials and private labels: a square-weight ordering makes
+the leading monomials of the symmetric cofactors distinct, and differentiating
+at a label that occurs at a single site reduces the nonsymmetric case to a
+smaller diagram.
+
+The geometric input is a rigidity theorem.  A connected skew diagram whose
+full Jacobi--Trudi matrix has no negative indices is determined, up to
+translation and rotation, by its skew Schur function
+(\Cref{thm:nonnegative-rigidity}).  A diagram with the same skew Schur
+function is not required to satisfy that index condition.  The coefficient of
+the largest label identifies a smaller diagram; the remaining polynomial
+places the two exterior beta gaps.
+
+The application of \Cref{thm:cofactor-relations} is to common beta entries.
+Removing the intersection of the two beta lists leaves a \emph{zero-free
+core}, in which no entry lies in both lists, so that no matrix entry is
+\(h_0\).
+Restoring a common entry at \(z\) contributes, to first order,
+\begin{equation}\label{eq:unit-intro}
+ U_z^C=\sum_{a_i>z>b_j}D_{ij}h_{a_i-z}h_{z-b_j}.
+\end{equation}
+Write \(\K(C)\), the \emph{first-variation kernel}, for the rational relation
+space of these polynomials, indexed by the available positions between \(0\)
+and \(N\).
+For a positive integer \(t\), dilation replaces \((A,B)\) by \((tA,tB)\).
+\Cref{thm:dilation} proves that \(\K(tC)\) splits into the old kernel on the
+positions divisible by \(t\) and an arithmetic kernel on the remaining
+positions, whenever the signed cofactors of \(C\) are independent.  By
+\Cref{thm:cofactor-relations} that holds for every nonsymmetric dense core, so
+there the formula carries no hypothesis beyond density and nonsymmetry.  The
+arithmetic part is given explicitly by odd functions on a finite residue
+group.  Thus the new relations introduced by dilation can be determined
+without knowing a formula for the entire base kernel.
+
+Skew Schur equality is a broader problem.  McNamara and van Willigenburg
+conjecture a classification by composition and reversal of factors
+\cite{McNamara2009Classification}; for ribbons, the corresponding
+classification is due to Billera, Thomas and van Willigenburg
+\cite{Billera2006DecomposableCompositions}.
+Neither a linear kernel nor a finite list of equal diagrams supplies the
+factor presentations required by the necessity direction of that
+classification.  The gap between restoration data and full equality remains
+even when the core is dense and all its cofactors are independent:
+\Cref{ex:unequal-restorations} gives two restorations whose lowest two ordinary
+homogeneous components agree but whose full functions differ.
+
+The arguments below use no finite census or rank certificate as a premise.
+The external algebraic input is irreducibility of a connected skew Schur
+function, in the corrected form proved by Barekat, Reiner and van Willigenburg
+\cite[Thm.~1]{Barekat2009CoincidencesCorrigendum}.  For the standard determinant,
+rotation, and row-overlap facts see
+\cite{Macdonald1995SymmetricFunctions,Reiner2007Coincidences}.
+Section~\ref{sec:boundary} proves the geometric rigidity theorem, and
+Section~\ref{sec:cofactors} proves \Cref{thm:cofactor-relations}.
+Section~\ref{sec:restoration} derives the first-variation polynomials.
+Section~\ref{sec:dilation} proves the dilation formula, and
+Section~\ref{sec:full-equality} explains its consequences for full equality.
+
+\section{Boundary coefficients and dense rigidity}\label{sec:boundary}
+
+A connected diagram whose Jacobi--Trudi indices are all nonnegative is
+determined, up to translation and rotation, by its skew Schur function.
+That rigidity is the geometric input
+to both \Cref{thm:cofactor-relations} and \Cref{cor:independent-restorations}.
+
+\subsection{Beta lists and polynomial readings}
+
+Use one-based row indices.  For a skew diagram \(D=\lambda/\mu\) with
+\(n\) nonempty rows, put
+\[
+ x_i=\lambda_i-i,\qquad y_i=\mu_i-i.
+\]
+A common translation of both lists changes no matrix entry.  We normalize by
+\(y_n=0\), and put \(N=x_1\).  The row lengths and adjacent overlaps minus
+one are
+\begin{equation}\label{eq:profile}
+ r_i=x_i-y_i>0,\qquad
+ s_i=x_{i+1}-y_i,\qquad
+ 0\le s_i<\min(r_i,r_{i+1}).
+\end{equation}
+The last inequalities characterize connectedness.  Conversely, any ordered
+profile satisfying \eqref{eq:profile} determines a connected diagram up to
+translation.  Starting with \(y_n=0\) and \(x_n=r_n\), recover its lists by
+\[
+ y_i=x_{i+1}-s_i,\qquad x_i=y_i+r_i
+ \qquad(i=n-1,\ldots,1).
+\]
+Rotation reverses both profile words.  On normalized beta lists it sends
+\((X,Y)\) to
+\[
+ \bigl((N-y_n,\ldots,N-y_1),
+       (N-x_n,\ldots,N-x_1)\bigr).
+\]
+Reversing rows and columns and transposing the determinant proves
+\(s_{D^*}=s_D\).
+
+The weighted degree of \(h_j\) is \(j\); its \emph{ordinary degree} is one
+for \(j>0\).  These two gradings will have different uses.  For a monomial
+\(m=\prod h_{d_i}\), its square weight is \(\sum d_i^2\).
+Zeros may be included in this sum although \(h_0=1\).
+
+\begin{lemma}\label{lem:polynomial-readings}
+Let \(P=s_D\) for a nonempty connected skew diagram with full beta lists
+\(X,Y\).  Its maximum ordinary degree is the number \(n\) of rows.  Its
+unique minimum-square monomial has coefficient one and reads the row-length
+multiset.  The largest generator index occurring in \(P\) is \(N=x_1\).
+Moreover,
+\begin{equation}\label{eq:corner-coefficient}
+ Q=(-1)^{n-1}[h_N]P
+   =\det(h_{x_{i+1}-y_j})_{i,j=1}^{n-1}\ne0.
+\end{equation}
+The unique minimum-square monomial of \(Q\), padded with zeros to length
+\(n-1\), reads the multiset of the \(s_i\).
+For \(n=1\), the determinant on the right is one.
+\end{lemma}
+
+\begin{proof}
+For a permutation \(\pi\),
+\[
+ \sum_i(x_i-y_{\pi(i)})^2
+ =\sum_i x_i^2+\sum_i y_i^2-2\sum_i x_i y_{\pi(i)}.
+\]
+Strict rearrangement makes the identity permutation the unique minimizer.
+Its diagonal indices are positive.  No other determinant term can give the
+same monomial, since it would have the same square weight.  The diagonal
+therefore survives with coefficient one and ordinary degree \(n\); no term
+has larger ordinary degree.
+
+The label \(N\) occurs at the unique site \((1,n)\).  Its complementary
+board has strict lists and nonnegative diagonal \((s_1,\ldots,s_{n-1})\).
+The same rearrangement argument proves its nonvanishing and reads that
+diagonal, allowing zeros.  Hence the corner label really occurs in \(P\),
+and no matrix label is larger.
+\end{proof}
+
+The readings in \Cref{lem:polynomial-readings} are standard consequences of
+Jacobi--Trudi; see \cite{Reiner2007Coincidences}.  They assume neither density
+nor upper Hessenberg form, so they are available on an unknown equal diagram
+before its shape has been recovered.
+
+We also use the following established fact.  A nonempty connected skew Schur
+function is irreducible in \(\Z[h_1,h_2,\ldots]\)
+\cite[Thm.~1]{Barekat2009CoincidencesCorrigendum}, hence in
+\(\Q[h_1,h_2,\ldots]\) by primitivity.  A disconnected skew diagram has
+function equal to the product of those of its nonempty connected components.
+Consequently an irreducible skew Schur function can have only connected
+realizations after empty rows are removed.  This is algebraic irreducibility,
+not irreducibility under composition.
+
+\subsection{Placing the exterior gaps}
+
+For a diagram \(T\) with strict lists \(U,V\), write
+\(T^{\mathrm{top}}(d)\) for the diagram obtained by increasing its largest
+row beta by \(d>0\), and \(T^{\mathrm{bottom}}(d)\) for the diagram obtained
+by decreasing its smallest column beta by \(d\).  These operations extend
+the first and last rows, respectively.  The \emph{maximal corner cofactor} of
+a diagram is the one at the site carrying the largest label, namely
+\((1,n)\); its lists are \((x_2,\ldots,x_n)\) and \((y_1,\ldots,y_{n-1})\),
+and its polynomial is \eqref{eq:corner-coefficient}.
+
+\begin{lemma}\label{lem:exterior-gaps}
+Let a connected diagram have \(n\ge3\) rows and a nonnegative-index
+Jacobi--Trudi matrix.  Write the strict lists of its maximal corner cofactor
+as
+\[
+ U=(u_1>\cdots>u_m),\quad V=(v_1>\cdots>v_m),
+ \qquad m=n-1.
+\]
+Its full lists have the form
+\begin{equation}\label{eq:border}
+ X=(u_1+\alpha,u_1,\ldots,u_m),\qquad
+ Y=(v_1,\ldots,v_m,v_m-\beta),\qquad \alpha,\beta>0.
+\end{equation}
+Put \(N=u_1-v_m+\alpha+\beta\).
+The largest generator index in \(s_D|_{h_N=0}\) is \(M=N-\min(\alpha,\beta)\).
+If \(\alpha<\beta\), its coefficient is
+\((-1)^n s_{T^{\mathrm{top}}(\alpha)}\); if \(\beta<\alpha\), it is
+\((-1)^n s_{T^{\mathrm{bottom}}(\beta)}\).
+If \(\alpha=\beta\), the coefficient of \(h_M^2\) is nonzero.
+\end{lemma}
+
+\begin{proof}
+Apart from the corner, the two largest possible indices occur at
+\((2,n)\) and \((1,n-1)\), with values \(N-\alpha\) and \(N-\beta\).
+If the values differ, the larger is private.  Deleting its row and column
+gives exactly the stated extension of \(T\), with sign \((-1)^n\).
+That determinant is nonzero and contains no \(h_N\), so the specialization
+at \(h_N=0\) does not remove it.
+
+If the values agree, both sites can be used simultaneously.  They are the
+only sites carrying \(M\): here \(M=x_2-y_n\), so a site \((i,j)\) carries it
+exactly when \(x_i-x_2=y_j-y_n\), which fails for \(i>2\) because the left
+side is negative and the right side is not, and for \(i=1\) forces
+\(y_j=y_n+\alpha=y_{n-1}\).  Their complementary board has row lists
+\((x_3,\ldots,x_n)\) and column lists \((y_1,\ldots,y_{n-2})\), with
+nonnegative diagonal.  Strict rearrangement proves its determinant nonzero.
+This is, up to sign, the coefficient of \(h_M^2\).  No other remaining site
+has a larger index.
+\end{proof}
+
+\begin{theorem}[Nonnegative-index rigidity]\label{thm:nonnegative-rigidity}
+Let \(D\) be connected with \(n\) nonempty rows and full beta lists \(X,Y\).
+If \(x_n\ge y_1\), then every connected diagram \(D'\) with \(s_{D'}=s_D\)
+is a translate of \(D\) or \(D^*\).
+\end{theorem}
+
+\begin{proof}
+Induct on \(n\).  One row is immediate.  In two rows, the row multiset and
+the single adjacent overlap determine the diagram up to rotation, so
+\Cref{lem:polynomial-readings} proves the assertion even without the
+nonnegative-index assumption.
+
+Suppose \(n\ge3\).  The maximal corner cofactor \(T\) of \(D\) has
+\(n-1\) positive-length rows, is connected, and has no negative indices.
+Indeed its least index is still \(x_n-y_1\ge0\); its diagonal is strictly
+positive because the full lists are strict and \(n\ge3\).
+Its polynomial is irreducible.
+
+By \Cref{lem:polynomial-readings}, \(D'\) has the same row count and the same
+signed corner coefficient \eqref{eq:corner-coefficient}.  Its padded diagonal reading
+shows that the corresponding cofactor of \(D'\) also has \(n-1\)
+positive-length rows.  Irreducibility makes it connected.  Induction therefore
+identifies it with \(T\) or \(T^*\).  Rotate and translate \(D'\) to align
+these cofactor lists.
+
+Both parents now have form \eqref{eq:border}.  In particular the least index
+of the mate is \(u_m-v_1\), the same as that of the source.  Thus it has
+entered the nonnegative-index class; this was not assumed.
+The common largest label determines \(\alpha+\beta\), and
+\Cref{lem:exterior-gaps} determines \(\min(\alpha,\beta)\).  Only interchange
+of the two margins remains.
+
+If the margins agree there is nothing to decide.  Otherwise put
+\(d=\min(\alpha,\beta)\).  An interchange preserving the full polynomial
+would give
+\[
+ s_{T^{\mathrm{top}}(d)}=s_{T^{\mathrm{bottom}}(d)}.
+\]
+Both extensions have \(n-1\) rows and remain in the nonnegative-index class.
+Induction says they agree up to translation or rotation.  They cannot be
+translates: their largest column beta agrees, forcing translation zero,
+whereas their largest row betas differ.  If they are rotations, the reflection
+constant is \(u_1+v_m\).  Undoing the two endpoint changes in their beta lists
+gives
+\(u_i+v_{m+1-i}=u_1+v_m\) for \(1\le i\le m\).
+Thus \(T=T^*\), and the two parents with interchanged margins are themselves
+rotations.  This completes the induction.
+\end{proof}
+
+\section{Linear relations among cofactors}\label{sec:cofactors}
+
+Every cofactor of a dense matrix is, up to its specified sign, the skew Schur
+function of a connected dense diagram.  In particular it is nonzero.
+Its weighted degree is
+\begin{equation}\label{eq:cofactor-degree}
+ \deg D_{ij}=|C|-(a_i-b_j),\qquad
+ |C|=\sum_i a_i-\sum_j b_j.
+\end{equation}
+A rational relation therefore splits into groups of sites carrying the same
+entry label.  Repeated labels are the only groups requiring attention.
+
+\subsection{The symmetric case}
+
+\begin{proof}[Proof of the symmetric clause of \Cref{thm:cofactor-relations}]
+Assume \eqref{eq:rotation-condition}.  Reverse the columns of \(M_C\).
+The resulting symmetric matrix is \(S_{ij}=h_{a_i+a_j-N}\).
+Put
+\[
+ d_i=2a_i-N,\qquad e_i=a_i+a_{i+1}-N.
+\]
+Density and symmetry give
+\begin{equation}\label{eq:interlaced-indices}
+ d_1>e_1>d_2>e_2>\cdots>e_{n-1}>d_n>0.
+\end{equation}
+
+For \(i\le j\), delete row \(i\) and column \(j\) from \(S\).
+Strict rearrangement now makes the \emph{maximum}-square matching unique:
+the two remaining decreasing lists of \(a\)'s are paired in the same order.
+Its monomial is
+\begin{equation}\label{eq:symmetric-leader}
+ h_{d_1}\cdots h_{d_{i-1}}
+ h_{e_i}\cdots h_{e_{j-1}}
+ h_{d_{j+1}}\cdots h_{d_n}.
+\end{equation}
+All its indices are positive, and its coefficient is a unit.
+The monomials in \eqref{eq:symmetric-leader} are distinct for distinct pairs
+\(i\le j\): the strictly interlacing list
+\eqref{eq:interlaced-indices} records exactly which consecutive string of
+\(e\)'s replaces the omitted \(d\)'s.
+
+Order monomials by square weight and then by any fixed total tie-break.
+These cofactors have distinct leading monomials, hence are independent.
+Symmetry of \(S\) identifies the cofactor at \((i,j)\) with that at
+\((j,i)\).  These are all the relations: the \(n(n+1)/2\) cofactors with
+\(i\le j\) are independent, so the relation space has dimension
+\(n^2-n(n+1)/2=n(n-1)/2\), which the differences already exhibited attain.
+Undoing the column reversal changes
+the site involution to
+\((i,j)\mapsto(n+1-j,n+1-i)\).
+\end{proof}
+
+\subsection{The nonsymmetric case}
+
+\begin{lemma}\label{lem:boundary-pair}
+Let \(C\) be nonsymmetric and dense, with normalized lists \(A,B\).
+Suppose \(j<n\), \(i>1\), and \(a_i+b_j=N\).
+Then \(D_{1j}\) and \(D_{in}\) are not proportional over \(\Q\).
+\end{lemma}
+
+\begin{proof}
+Their unsigned cofactor diagrams have lists
+\[
+ E=(A\setminus\{N\},B\setminus\{b_j\}),\qquad
+ F=(A\setminus\{a_i\},B\setminus\{0\}).
+\]
+If their polynomials are proportional, their coefficient-one
+minimum-square monomials make the unsigned scalar one.
+Both diagrams are dense and connected, so
+\Cref{thm:nonnegative-rigidity} makes them translates or rotations.
+
+For a rotation from \(E\) to \(F\), the reflection constant is \(N\),
+since the largest row beta of \(F\) is \(N\) and the smallest column beta
+of \(E\) is zero.  Restoring the omitted pair
+\(a_i=N-b_j\) then gives \(A=N-B\) as sets, contrary to nonsymmetry.
+
+For a translation from \(E\) to \(F\), comparison of extrema gives the
+positive displacement \(u=N-a_2=b_{n-1}\).
+The minimum row beta forces \(i=n\), since otherwise both row lists have
+minimum \(a_n\).  The maximum column beta similarly forces \(j=1\).
+The remaining equalities say
+\[
+ (a_2,\ldots,a_n)+u=(a_1,\ldots,a_{n-1}),\qquad
+ (b_2,\ldots,b_n)+u=(b_1,\ldots,b_{n-1}).
+\]
+All row and column gaps are \(u\), which again implies
+\eqref{eq:rotation-condition}.
+\end{proof}
+
+\begin{proof}[Proof of the nonsymmetric clause of \Cref{thm:cofactor-relations}]
+Induct on \(n\).  For \(n=2\), the four matrix labels are distinct unless
+\(a_2=N-b_1\), which is exactly symmetry.  The four cofactors are these
+four generators up to sign.
+
+Let \(n\ge3\), and suppose
+\begin{equation}\label{eq:cofactor-relation}
+ \sum_{i,j}c_{ij}D_{ij}=0,\qquad c_{ij}\in\Q.
+\end{equation}
+The label \(h_N\) is private at \((1,n)\).  Let
+\[
+ R=(A\setminus\{N\},B\setminus\{0\}).
+\]
+For \(i>1\) and \(j<n\), differentiation gives
+\begin{equation}\label{eq:private-derivative}
+ \frac{\partial D_{ij}}{\partial h_N}
+   =(-1)^{n-1}D^R_{i-1,j};
+\end{equation}
+on the first row or last column the derivative is zero.
+
+If \(R\ne R^*\), induction applied to \eqref{eq:private-derivative}
+kills all \(c_{ij}\) with \(i>1,j<n\).  Only the first row and last
+column remain.  By \eqref{eq:cofactor-degree}, each weighted-degree group
+contains at most two sites, one on each of those boundaries.
+A singleton cannot give a relation because its cofactor is nonzero;
+a pair cannot give one by \Cref{lem:boundary-pair}.  Hence every coefficient
+vanishes.
+
+Suppose instead that \(R=R^*\).  Put \(u=N-a_2\) and \(v=b_{n-1}\).
+Nonsymmetry of the parent gives \(u\ne v\).  Rotate the parent, if necessary,
+to have \(u<v\).  The label \(h_{a_2}\) is then private at \((2,n)\):
+every first-row label outside the corner is at most \(N-v<a_2\), and all
+other candidates are smaller by strictness.
+
+The complementary diagram \(Q=(A\setminus\{a_2\},B\setminus\{0\})\) is
+nonsymmetric.  Otherwise the symmetries of \(R\) and \(Q\) would have
+the same center, obtained from their common minimum row beta and maximum
+column beta, but different centers obtained from their maximum row betas
+\(a_2,N\) and common minimum column beta \(v\).
+
+Differentiate \eqref{eq:cofactor-relation} at \(h_{a_2}\).
+Independence for \(Q\), supplied by induction, kills every coefficient
+except those on row two or column \(n\).  Now differentiate at \(h_N\)
+again.  The resulting relation on the symmetric child \(R\) is supported
+in its first row.  Its relation space has already been proved to be
+antisymmetric under site reflection.  No nonzero vector in that space can
+be supported in one row: a reflected partner lies in another row unless
+the site is fixed, when its coefficient is zero.  This kills row two away
+from column \(n\).
+
+The remaining last-column cofactors have distinct weighted degrees, so their
+coefficients vanish separately.  This proves the induction.
+\end{proof}
+
+Only the scalar polynomial of each smaller diagram was used to establish
+\Cref{lem:boundary-pair}.  No step transports an indexed cofactor matrix
+between two diagrams with equal functions.
+
+\section{Common beta entries and first variations}\label{sec:restoration}
+
+\subsection{The exact path expansion}
+
+For a diagram with full beta lists \(X,Y\), set
+\[
+ Z=X\cap Y,\qquad A=X\setminus Z,\qquad B=Y\setminus Z,
+ \qquad k=|A|=|B|,
+\]
+retaining decreasing order.  The pair \(C=(A,B)\) is its zero-free core;
+\emph{zero-free} means \(A\cap B=\varnothing\), not that negative indices
+are absent.  A dense core is zero-free, since \(a_n>b_1\) forces
+\(\min A>\max B\).  The determinant still uses \(h_j=0\) for \(j<0\).
+
+Canceling common entries preserves the difference of the two endpoint
+counting functions.  For normalized connected lists this difference is at
+least one at every real point strictly between \(0\) and \(N\).
+Consequently a connected diagram has a connected residual core.
+Conversely, for a connected zero-free core and
+\[
+ \Omega_C=\{1,\ldots,N-1\}\setminus(A\cup B),
+\]
+any subset \(Z\subseteq\Omega_C\) can be restored in both lists.
+Sorting \(A\cup Z\) and \(B\cup Z\) gives a connected diagram, denoted
+by \(C[Z]\).  Its area is \(|C|\), and its row count is \(k+|Z|\).
+
+For strict lists \(U,V\), define the positive-entry matrix
+\[
+ H(U,V)_{uv}=\begin{cases}h_{u-v},&u>v,\\0,&u\le v.\end{cases}
+\]
+In this auxiliary matrix the value at equality is zero.  The original
+Jacobi--Trudi matrix, in contrast, retains its genuine units.
+
+\begin{proposition}\label{prop:path-expansion}
+Let \(S=\lambda/\mu\) have \(n\) nonempty rows and the lists above.
+Put
+\[
+ L=H(A,B),\quad P=H(A,Z),\quad Q=H(Z,B),\quad T=H(Z,Z).
+\]
+Let \(\epsilon\) be the product of the permutation signs for regrouping
+\(X\) as \((A,Z)\) and \(Y\) as \((B,Z)\).  The variable \(t\) marks ordinary
+degree, not the dilation factor of Section~\ref{sec:dilation}.
+Then
+\begin{equation}\label{eq:schur-complement}
+ s_S(th_1,th_2,\ldots)
+ =\epsilon t^k\det(L-tPQ+t^2PTQ-t^3PT^2Q+\cdots).
+\end{equation}
+The sum terminates.  Equivalently, the entry indexed by \(a\in A,b\in B\)
+of the reduced matrix is
+\begin{equation}\label{eq:path-entry}
+ \sum_{\ell\ge0}(-t)^\ell
+ \sum_{\substack{a>z_1>\cdots>z_\ell>b\\ z_i\in Z}}
+ h_{a-z_1}h_{z_1-z_2}\cdots h_{z_\ell-b},
+\end{equation}
+where the term for \(\ell=0\) is \(H(a,b)\).
+\end{proposition}
+
+\begin{proof}
+After regrouping, the scaled full matrix is
+\[
+ \begin{pmatrix}tL&tP\\tQ&I+tT\end{pmatrix}.
+\]
+The matrix \(T\) is strictly upper triangular.  Hence
+\(\det(I+tT)=1\) and
+\((I+tT)^{-1}=I-tT+t^2T^2-\cdots\).
+The block determinant identity gives \eqref{eq:schur-complement}, without
+requiring \(L\) to be invertible.  Matrix multiplication along the ordered
+common beta entries gives \eqref{eq:path-entry}.
+\end{proof}
+
+Write \([f]_d\) for the ordinary degree-\(d\) component of \(f\).
+The sorted diagonal of the residual matrix is strictly positive, so its
+determinant is nonzero by strict rearrangement.  Thus the lowest ordinary
+degree in \(s_S\) is exactly \(k\).  By \Cref{prop:path-expansion},
+\begin{equation}\label{eq:first-components}
+ [s_S]_k=\epsilon s_C,\qquad
+ [s_S]_{k+1}=-\epsilon\sum_{z\in Z}U_z^C,
+\end{equation}
+where \(U_z^C\) is given by \eqref{eq:unit-intro}.  Every \(U_z^C\)
+is homogeneous of ordinary degree \(k+1\) and weighted degree \(|C|\).
+These polynomials describe insertion of one common beta entry; they are not
+individual matrix entries equal to one.
+
+\begin{definition}
+For a connected zero-free core, its first-variation kernel is
+\[
+ \K(C)=\left\{\lambda\in\Q^{\Omega_C}:
+          \sum_{z\in\Omega_C}\lambda_zU_z^C=0\right\}.
+\]
+\end{definition}
+
+\subsection{Endpoint values}
+
+Extend the formula for \(U_z^C\) to all integer positions.
+Writing \(U_z^C=u^{\top}Dv\) with \(D=(D_{ij})\), the \emph{return vectors}
+are \(u_i=h_{a_i-z}\) and \(v_j=h_{z-b_j}\), each entry taken as zero unless
+its gap is positive.
+
+\begin{lemma}\label{lem:endpoint-cancellation}
+For every zero-free core,
+\[
+ U_z^C=0\qquad(z\in A\cup B).
+\]
+Consequently values at beta endpoints can be assigned arbitrarily in a
+coefficient vector without changing its unit relation.
+\end{lemma}
+
+\begin{proof}
+If \(z=a_\ell\), the right return vector is row \(\ell\) of \(M_C\).
+The adjugate identity gives
+\[
+ \sum_jD_{ij}(M_C)_{\ell j}=\delta_{i\ell}\det M_C.
+\]
+The \(\ell\)-th entry of the other return vector is zero, so contraction
+vanishes.  If \(z=b_\ell\), use the corresponding column identity.
+Zero-freeness ensures that these matrix rows and columns have exactly the
+strict-return convention required here.
+\end{proof}
+
+On a symmetric core the kernel is determined outright.
+
+\begin{proposition}\label{prop:symmetric-unit-kernel}
+Let \(C\) be a normalized symmetric dense core of order at least two.  Then
+\(U_z^C=U_{N-z}^C\) for every \(z\in\Omega_C\), and
+\[
+ \K(C)=\{\lambda\in\Q^{\Omega_C}:\lambda_z+\lambda_{N-z}=0\}
+       =\operatorname{span}_{\Q}\{e_z-e_{N-z}:z\in\Omega_C,\ 2z<N\},
+\]
+where \(e_z\) is the coordinate vector at \(z\).  In particular
+\(\dim_{\Q}\K(C)=\lfloor|\Omega_C|/2\rfloor\).
+\end{proposition}
+
+\begin{proof}
+Symmetry gives \(a_i=N-b_{n+1-i}\) and \(b_j=N-a_{n+1-j}\), so the substitution
+\(i'=n+1-j\), \(j'=n+1-i\) turns \(a_i>N-z>b_j\) into \(a_{i'}>z>b_{j'}\) and the
+return factors into \(h_{z-b_{j'}}h_{a_{i'}-z}\).  It is an involution, hence a
+bijection of the two summation ranges.  Its coefficient is
+\(D_{n+1-j',n+1-i'}\), which \Cref{thm:cofactor-relations} identifies with
+\(D_{i'j'}\).  Therefore \(U_{N-z}^C=U_z^C\).  Reflection preserves \(A\cup B\),
+so it preserves \(\Omega_C\), and each \(e_z-e_{N-z}\) lies in \(\K(C)\).
+
+For the reverse inclusion it suffices that \(\{U_z^C:z\in\Omega_C,\ 2z\le N\}\)
+be independent, one representative per reflection orbit.  Induct on the order.
+For a one-row core \(U_z^C=h_{N-z}h_z\), and these monomials are distinct for
+\(2z\le N\).
+
+Let \(n\ge2\) and put \(u=b_{n-1}=N-a_2\), so \(0<u<N/2\).  The lists
+\(A'_p=a_{p+1}-u\) and \(B'_q=b_q-u\) define a symmetric dense core \(C'\) of
+order \(n-1\) and span \(N'=N-2u\).  In a relation among the representatives,
+every return index is below \(N\), so differentiating at \(h_N\) acts only on the
+cofactors; by \eqref{eq:private-derivative} it sends \(D_{ij}\) to
+\((-1)^{n-1}D^{C'}_{i-1,j}\) for \(i>1\), \(j<n\), and to zero on the first row or
+last column.  Hence \(\partial U_z^C/\partial h_N\) vanishes for \(z<u\) and
+equals \((-1)^{n-1}U_{z-u}^{C'}\) for \(z>u\); the position \(u\) is a beta
+endpoint and is unavailable.  Since \(z\mapsto z-u\) carries the representatives
+above \(u\) bijectively onto those of \(C'\), the midpoint included, induction
+kills every coefficient with \(z>u\).
+
+Only \(z<u\) remains.  Every column beta other than \(b_n=0\) is at least \(u\),
+so \(U_z^C=h_z\sum_iD_{in}h_{a_i-z}\).  The generators of \(D_{in}\) have index at
+most \(N-u\), and \(a_i-z\le a_2-z<N-u\) for \(i>1\), while the term \(i=1\)
+contributes \(h_{N-z}\) with \(N-z>N-u\).  Thus
+\([h_{N-z}]U_z^C=h_zD_{1n}\ne0\).  Taking the smallest surviving \(z\), every
+other remaining unit has all generator indices below \(N-z\), so the coefficient
+of \(h_{N-z}\) in the relation is \(c_zh_zD_{1n}\), forcing \(c_z=0\).
+
+Every relation therefore satisfies \(\lambda_z+\lambda_{N-z}=0\), which at an
+available midpoint reads \(2\lambda_{N/2}=0\).  Counting one free coefficient per
+two-element orbit gives the dimension.
+\end{proof}
+
+For an extended vector \(\lambda=(\lambda_z)_{1\le z<N}\), put
+\[
+ Q_\lambda(b,a)=\sum_{b<z<a}\lambda_z h_{a-z}h_{z-b}.
+\]
+For \(a>b\), this quadratic vanishes precisely when
+\(\lambda_z=-\lambda_{a+b-z}\) for \(b<z<a\).
+The midpoint, if present, must have coefficient zero.  Indeed two positive
+gaps have the same monomial exactly when they agree as an unordered pair.
+
+\section{Integral dilation}\label{sec:dilation}
+
+\subsection{From edge reflections to a common period}
+
+For a connected normalized zero-free core of order at least two, define
+\begin{equation}\label{eq:endpoint-modulus}
+ g(C)=\gcd\bigl(\{N-a_i\}_i\cup\{b_j\}_j\bigr)>0.
+\end{equation}
+Thus all row betas are \(N\) modulo \(g(C)\), and all column betas are zero.
+If \(\phi:\Z/g(C)\Z\to\Q\) satisfies \(\phi(r)+\phi(N-r)=0\), then its
+restriction \((\phi(z\bmod g(C)))_{z\in\Omega_C}\) lies in
+\(\K(C)\).  To see this, fill in the endpoint values by the same formula,
+use \Cref{lem:endpoint-cancellation}, and pair each return position with
+\(a_i+b_j-z\).  This proves an arithmetic subspace of the kernel, not yet
+its completeness.
+
+A word \(w_1,\ldots,w_L\) has period \(p\) when
+\(w_i=w_{i+p}\) for \(1\le i\le L-p\).
+We need only the following elementary finite-word fact: periods \(p,q>0\)
+with \(p+q\le L\) imply period \(\gcd(p,q)\).
+We include the argument for completeness.  Assume \(p<q\).
+For \(i>p\), comparison through
+\(i-p\) gives period \(q-p\).  For \(i\le p\), compare through
+\(i+q\), which lies in the word because \(p+q\le L\).
+This proves period \(q-p\) throughout its permitted range.  Euclid's
+algorithm completes the argument.
+
+\begin{lemma}\label{lem:endpoint-normalization}
+Let \(C=(A,B)\) be a connected zero-free core of order \(n\ge2\), with
+\(a_1=N\) and \(b_n=0\).  A vector on \(\Omega_C\) admits endpoint values
+such that
+\begin{equation}\label{eq:all-edges}
+ Q_\lambda(b_j,a_i)=0\qquad\text{whenever }a_i>b_j
+\end{equation}
+if and only if it is the restriction of a residue function modulo \(g(C)\)
+satisfying \(\phi(r)+\phi(N-r)=0\).
+\end{lemma}
+
+\begin{proof}
+The reverse direction was proved after \eqref{eq:endpoint-modulus}.
+For the forward direction, assume \eqref{eq:all-edges} and regard the
+endpoint extension as a word of length \(N-1\).  The interval \((0,N)\) gives its odd reflection.  Comparing this
+reflection with that on \((0,a_i)\) gives period \(N-a_i\), and comparing
+with that on \((b_j,N)\) gives period \(b_j\).  All these intervals are
+positive edges: connectedness puts every row beta above zero and every column
+beta below \(N\).
+
+Start with the two positive exterior periods \(u=N-a_2\) and \(v=b_{n-1}\).
+Zero-freeness and connectedness give \(a_2>b_1\) and \(a_n>b_{n-1}\), so
+\(u+v\le N-1\).  The finite-word argument gives period \(d=\gcd(u,v)\).
+Incorporate the remaining column periods using \(d+b_j\le u+b_1\le N-1\),
+and then the remaining row periods using
+\(d+(N-a_i)\le v+N-a_n\le N-1\).
+The running gcd only decreases and still divides \(u,v\), so these bounds
+continue to hold.  The final period is \(g(C)\).  The reflection on
+\((0,N)\) gives the required oddness of the residue function.
+\end{proof}
+
+The lemma requires connectedness, not density.  It classifies vectors that
+can be made to vanish on \emph{each} positive-edge quadratic.  A vanishing
+sum of cofactor-weighted quadratics need not have that stronger property.
+The proof of \Cref{thm:dilation} supplies it, by independence over a disjoint
+polynomial alphabet.
+
+\subsection{The direct-sum formula}
+
+Let \(tC=(tA,tB)\), and write
+\(\sigma_t(h_j)=h_{tj}\).  Dilation preserves connectedness and
+zero-freeness, has span \(tN\), and has endpoint modulus \(tg(C)\).
+The map \(\sigma_t\) is injective.
+For \(\lambda\in\Q^{\Omega_C}\), define
+\[
+ (\iota_t\lambda)_{tz}=\lambda_z\quad(z\in\Omega_C),\qquad
+ (\iota_t\lambda)_w=0\quad(t\nmid w).
+\]
+These prescriptions cover \(\Omega_{tC}\).
+Define \(\mathcal A_{\mathrm{off}}(tC)\) to be the restrictions to
+\(\Omega_{tC}\) of functions \(\phi:\Z/tg(C)\Z\to\Q\) satisfying
+\begin{equation}\label{eq:offgrid-space}
+ \phi(r)+\phi(tN-r)=0,\qquad
+ \phi(r)=0\quad\text{if }t\mid r.
+\end{equation}
+
+\begin{theorem}[Dilation of the first-variation kernel]\label{thm:dilation}
+Let \(C\) be a connected zero-free core of order at least two, with
+linearly independent signed Jacobi--Trudi cofactors.  For every integer
+\(t\ge1\),
+\begin{equation}\label{eq:dilation-kernel}
+ \K(tC)=\iota_t\K(C)\oplus\mathcal A_{\mathrm{off}}(tC).
+\end{equation}
+In particular, by \Cref{thm:cofactor-relations}, the cofactor hypothesis is
+automatic for every nonsymmetric dense core.  Without that hypothesis, the
+right-hand side of \eqref{eq:dilation-kernel} is still a direct sum contained
+in \(\K(tC)\).
+\end{theorem}
+
+\begin{proof}
+Let the core order be \(n\).  At a position divisible by \(t\),
+\[
+ U_{tz}^{tC}=\sigma_t(U_z^C).
+\]
+All \(n+1\) generator factors in each monomial have indices divisible by
+\(t\).  At a position not divisible by \(t\), the \(n-1\) cofactor
+factors have divisible indices and the two return factors have nondivisible
+indices.  Grading by the number of nondivisible generator factors separates
+any relation into a grid relation and an off-grid relation.  Injectivity of
+\(\sigma_t\) identifies the first with \(\iota_t\K(C)\).
+
+For an off-grid relation, extend its vector by zero at all positions divisible
+by \(t\), including every beta endpoint.  Its full equation is
+\begin{equation}\label{eq:offgrid-relation}
+ \sum_{i,j}\sigma_t(D_{ij})
+       Q_\lambda(tb_j,ta_i)=0,
+\end{equation}
+where nonpositive intervals contribute zero.
+Each quadratic uses only generators with indices not divisible by \(t\).
+The cofactors use only generators with indices divisible by \(t\), and
+remain linearly independent over \(\Q\) by injectivity of \(\sigma_t\).
+Expanding \eqref{eq:offgrid-relation} in monomials of the nondivisible
+alphabet shows that every quadratic coefficient vanishes separately.
+
+Apply \Cref{lem:endpoint-normalization} to \(tC\).
+The full extended word is periodic modulo \(tg(C)\) and odd about \(tN\).
+Since \(g(C)\) divides \(N-a_2>0\), it is smaller than \(N\), so every
+residue of this modulus occurs in the interval
+\(1,\ldots,tN-1\).  The prescribed zero values on the grid therefore give
+exactly the second condition in \eqref{eq:offgrid-space}.
+Conversely every such function kills each edge quadratic and hence the full
+unit sum.  The two summands have disjoint supports, proving the direct sum.
+\end{proof}
+
+The hypothesis concerns cofactor independence, whereas the first summand in
+\eqref{eq:dilation-kernel} retains the \emph{entire} base unit kernel.
+\Cref{thm:dilation} therefore does not infer unit independence from cofactor
+independence.
+
+\begin{corollary}\label{cor:nullity-increment}
+Under the hypotheses of \Cref{thm:dilation}, hence for every nonsymmetric
+dense core, put \(g=g(C)\), and let
+\[
+ f(q,M)=\#\{r\in\Z/q\Z:2r=M\pmod q\}.
+\]
+Then
+\begin{equation}\label{eq:nullity-increment}
+ \dim\K(tC)-\dim\K(C)
+ =\frac{(t-1)g-f(tg,tN)+f(g,N)}2.
+\end{equation}
+If \(g=1\), this increment is \(\lfloor(t-1)/2\rfloor\).
+\end{corollary}
+
+\begin{proof}
+There are \((t-1)g\) off-grid residue classes modulo \(tg\).
+Reflection \(r\mapsto tN-r\) fixes
+\(f(tg,tN)-f(g,N)\) of them; the subtracted term counts exactly the fixed
+classes on the grid.  Each remaining two-element orbit supports one odd
+function.  The residue functions restrict injectively to the available
+positions, since every off-grid position is available and every residue
+occurs.  This proves \eqref{eq:nullity-increment}.
+For \(g=1\), the grid has one fixed residue; reflection modulo \(t\) has
+one fixed residue for odd \(t\) and two for even \(t\).
+\end{proof}
+
+\begin{example}\label{ex:dilation-ray}
+The nonsymmetric dense core \(A=(4,2)\), \(B=(1,0)\) has modulus one and one
+available position, namely \(3\).  Its unit is
+\(U_3=h_1h_2^2-h_1^2h_3\ne0\).  Thus \(\K(C)=0\), and \Cref{thm:dilation} gives the complete kernel on
+every dilation of this core.  Its basis consists of the differences of the
+indicator vectors of residue classes \(r\) and \(t-r\), for
+\(1\le r<t/2\); all positions divisible by \(t\) have coefficient zero.
+The nullity is \(\lfloor(t-1)/2\rfloor\) at every \(t\), although the
+cofactors of every dilated matrix remain independent.
+\end{example}
+
+\section{Restoration and full equality}\label{sec:full-equality}
+
+Independence of the units, rather than of the cofactors, is what converts the
+first-variation kernel into a statement about full skew Schur equality.
+
+\begin{corollary}\label{cor:independent-restorations}
+Let \(C\) be a dense zero-free core with \(\K(C)=0\).
+For every \(Z\subseteq\Omega_C\), any connected diagram \(D\) with
+\(s_D=s_{C[Z]}\) is a translate of \(C[Z]\) or its rotation.
+\end{corollary}
+
+\begin{proof}
+The lowest ordinary component identifies the residual core polynomial of
+\(D\), with its deletion sign, by \eqref{eq:first-components}.
+The residual core is connected.  Skew Schur positivity aligns the signs, and
+\Cref{thm:nonnegative-rigidity} identifies its literal core with \(C\),
+after an optional rotation and translation.  Write its common-beta set as
+\(W\).  Equality of the next components gives \(\mathbf1_Z-\mathbf1_W\in\K(C)\).
+Independence forces \(Z=W\).  No property of the unknown mate was assumed
+beyond connectedness and equality.
+\end{proof}
+
+For a nonsymmetric dense core of modulus one with independent units,
+\Cref{cor:nullity-increment} shows that its double also has independent
+units.  \Cref{cor:independent-restorations} therefore proves rigidity of
+every restoration of both cores.  At larger dilation factors the arithmetic
+summand may be nonzero; then the next component restricts possible mates but
+does not by itself determine their full functions.
+
+\begin{example}\label{ex:unequal-restorations}
+Consider the nonsymmetric dense core \(A=(20,10)\), \(B=(5,0)\) and the two
+common-beta sets
+\[
+ Z=\{1,2,6,11,16\},\qquad
+ W=\{2,4,9,14,19\}.
+\]
+This is the fivefold dilation of \Cref{ex:dilation-ray}.
+The difference \(\mathbf1_Z-\mathbf1_W\) is the arithmetic relation
+exchanging residues one and four modulo five.  Their deletion signs agree,
+so \eqref{eq:first-components} gives equal ordinary components of degrees
+two and three.  Nevertheless,
+\begin{equation}\label{eq:restoration-separator}
+ [h_2h_5h_9^2]s_{C[Z]}=-1,\qquad
+ [h_2h_5h_9^2]s_{C[W]}=0.
+\end{equation}
+
+Here is a direct coefficient calculation.  For \(Z\), the full lists are
+\[
+ X=(20,16,11,10,6,2,1),\quad
+ Y=(16,11,6,5,2,1,0).
+\]
+Set all positive-index generators except \(h_2,h_5,h_9\) to zero.
+The only surviving assignment has column word
+\((2,1,5,4,3,7,6)\), in one-based indices, and labels
+\((9,0,9,5,0,2,0)\).  Its sign is negative.
+For \(W\), the column list is \((19,14,9,5,4,2,0)\), so the first row
+of the specialized matrix is zero.  This proves
+\eqref{eq:restoration-separator} directly.
+\end{example}
+
+\section{Concluding remarks}
+
+The cofactor theorem is unconditional on the dense class, including every
+repeated-label case.  The dilation theorem carries a cofactor hypothesis that
+the first theorem supplies on the nonsymmetric dense class, so there it is
+unconditional too.  On symmetric dense cores that hypothesis does not remain
+open but fails, since \Cref{thm:cofactor-relations} gives a nonzero relation
+span there; outside the dense class it is an assumption.
+
+The symmetric dense kernel is determined instead by
+\Cref{prop:symmetric-unit-kernel}, which
+applies to every dilation as well, dilation preserving symmetry and density;
+its off-grid part is spanned by the differences \(e_w-e_{tN-w}\) over the
+positions not divisible by \(t\).  The containment of \Cref{thm:dilation} can
+therefore be strict: for \(A=(4,3)\), \(B=(1,0)\) one has
+\(\mathcal A_{\mathrm{off}}(2C)=0\) while
+\(U_1^{2C}=U_7^{2C}=h_1(h_5h_6-h_4h_7)\), a relation inherited from neither
+summand.
+
+This paper does not classify the \emph{nonsymmetric} dense cores with
+vanishing base unit kernel, the hypothesis of
+\Cref{cor:independent-restorations}, although \Cref{ex:dilation-ray} exhibits
+one; on symmetric cores \Cref{prop:symmetric-unit-kernel} settles it, the
+kernel vanishing exactly when \(|\Omega_C|\le1\).  Such a classification would
+turn the direct-sum formula into a complete numerical computation.  General
+necessity, including rigidity of composition-irreducible connected diagrams
+outside proved subclasses, remains open.
+
+\begin{question}\label{q:nondense-cores}
+Which connected cores that are not dense have no cofactor relations beyond
+those forced by rotation?  \Cref{lem:endpoint-normalization} already applies
+without density,
+so such an extension would immediately enlarge the domain of
+\Cref{thm:dilation}.
+\end{question}
+
+\begin{question}\label{q:restoration-charts}
+How can the surviving restoration ambiguities be converted into compatible
+factor-reversal presentations?  Neither the first-variation kernel nor
+\Cref{cor:independent-restorations} supplies a nontrivial composition chart.
+Which vectors \(\mathbf1_Z-\mathbf1_W\in\K(C)\) lift to genuine skew
+equivalences is the precise question, and \Cref{ex:unequal-restorations}
+supplies only its negative side.
+\end{question}
+
+\section*{Declarations}
+
+{\footnotesize
+\noindent\textbf{Funding.} This research received no external funding.
+
+\smallskip
+\noindent\textbf{Competing interests.} The author has no relevant interests to disclose.
+
+\smallskip
+\noindent\textbf{Data availability.} No datasets were generated or analyzed.
+
+\smallskip
+\noindent\textbf{Computational verification.} The proofs do not depend on numerical computation.  Scripts used for verification are available at \url{https://github.com/johnnyshields/papers}.
+
+\smallskip
+\noindent\textbf{Generative AI use.} During the preparation of this work, the author used OpenAI's ChatGPT (GPT-6 Astra, GPT-5.6 Sol) and Anthropic's Claude (Opus 5.5, Opus 5) to assist with mathematical research, manuscript drafting, and the development of auxiliary verification code.  After using these tools, the author reviewed and edited as needed.  The author takes full responsibility for the content of the work.
+\par}
+
+\begin{thebibliography}{9}
+
+\bibitem{Barekat2009CoincidencesCorrigendum}
+F. Barekat, V. Reiner and S. van Willigenburg,
+\emph{Corrigendum to ``Coincidences among skew Schur functions''},
+Adv. Math. \textbf{220} (2009), no.~5, 1655--1656,
+DOI: \href{https://doi.org/10.1016/j.aim.2008.10.010}{10.1016/\allowbreak j.aim.2008.10.010}.
+
+\bibitem{Billera2006DecomposableCompositions}
+L.~J. Billera, H.~Thomas and S.~van Willigenburg,
+\emph{Decomposable compositions, symmetric quasisymmetric functions and equality of ribbon Schur functions},
+Adv. Math. \textbf{204} (2006), no.~1, 204--240,
+DOI: \href{https://doi.org/10.1016/j.aim.2005.05.014}{10.1016/\allowbreak j.aim.2005.05.014}.
+
+\bibitem{Macdonald1995SymmetricFunctions}
+I.~G. Macdonald,
+\emph{Symmetric Functions and Hall Polynomials}, 2nd ed.,
+Oxford Mathematical Monographs, Oxford University Press, 1995,
+DOI: \href{https://doi.org/10.1093/oso/9780198534891.001.0001}{10.1093/\allowbreak oso/\allowbreak 9780198534891.001.0001}.
+
+\bibitem{McNamara2009Classification}
+P.~R.~W. McNamara and S.~van Willigenburg,
+\emph{Towards a combinatorial classification of skew Schur functions},
+Trans. Amer. Math. Soc. \textbf{361} (2009), no.~8, 4437--4470,
+DOI: \href{https://doi.org/10.1090/S0002-9947-09-04683-2}{10.1090/\allowbreak S0002-9947-09-04683-2}.
+
+\bibitem{Reiner2007Coincidences}
+V.~Reiner, K.~M. Shaw and S.~van Willigenburg,
+\emph{Coincidences among skew Schur functions},
+Adv. Math. \textbf{216} (2007), no.~1, 118--152,
+DOI: \href{https://doi.org/10.1016/j.aim.2007.05.006}{10.1016/\allowbreak j.aim.2007.05.006}.
+
+\end{thebibliography}
+
+\end{document}

@@ -66,7 +66,7 @@ noncomputable def nthOf (s : Finset ℕ) (i : ℕ) : ℕ :=
   if hi : i < s.card then s.orderEmbOfFin rfl ⟨i, hi⟩ else 0
 
 theorem nthOf_mem (s : Finset ℕ) {i : ℕ} (hi : i < s.card) : nthOf s i ∈ s := by
-  rw [nthOf, dif_pos hi]
+  rw [nthOf, dite_eq_left hi]
   exact s.orderEmbOfFin_mem rfl _
 
 /-- Reindexing an initial segment onto the set it enumerates. -/
@@ -81,7 +81,7 @@ theorem prod_range_nthOf {M : Type*} [CommMonoid M] (s : Finset ℕ) (f : ℕ �
   rw [h1, h2]
   refine Finset.prod_congr rfl fun i _ => ?_
   congr 1
-  rw [nthOf, dif_pos i.isLt]
+  rw [nthOf, dite_eq_left i.isLt]
 
 /-- **A concentric subdisk inherits the factorization.**  The roots inside the smaller circle
 stay displayed; those outside it join the cofactor, where they are legitimate because a point

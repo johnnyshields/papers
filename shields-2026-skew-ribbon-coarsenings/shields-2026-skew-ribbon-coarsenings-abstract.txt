@@ -1,0 +1,21 @@
+Title
+-----
+Short coarsenings determine ribbon Schur equivalence
+
+Keywords
+--------
+ribbon Schur function
+coarsening inventory
+composition
+factor reversal
+modular recognition
+distinguishing depth
+symmetric function
+
+Abstract (Plain)
+----------------
+A ribbon Schur equivalence class is determined by coarsening coefficients of logarithmic block depth, even when those coefficients are recorded modulo three. More precisely, unequal coarsening inventories have a distinguishing coefficient of magnitude one or two within an explicit bound depending on the divisors of the weight. The proof gives an alternative between a short distinguishing coarsening and, after reversal if needed, a literal common inner factor. A counting identity detects failures of periodicity; reflection produces positive block lengths whose sum is the weight of the given compositions. Integral substitution permits descent, yielding an independent proof of the factor-reversal classification and compatibility with composition on both sides, including arbitrary repetitions with adjacent copies joined by merging their meeting parts. Two recursive families determine the exact cumulative distinguishing depth. A parity example shows that the arithmetic cutoff does not extend unchanged to coefficients modulo two.
+
+Abstract (Rich Text)
+--------------------
+A ribbon Schur equivalence class is determined by coarsening coefficients of logarithmic block depth, even when those coefficients are recorded modulo three. More precisely, unequal coarsening inventories have a distinguishing coefficient of magnitude one or two within an explicit bound depending on the divisors of the weight. The proof gives an alternative between a short distinguishing coarsening and, after reversal if needed, a literal common inner factor. A counting identity detects failures of periodicity; reflection produces positive block lengths whose sum is the weight of the given compositions. Integral substitution permits descent, yielding an independent proof of the factor-reversal classification and compatibility with composition on both sides, including arbitrary repetitions with adjacent copies joined by merging their meeting parts. Two recursive families determine the exact cumulative distinguishing depth. A parity example shows that the arithmetic cutoff does not extend unchanged to coefficients modulo two.

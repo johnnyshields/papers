@@ -147,36 +147,36 @@ theorem coeff_toPoly {a : ℕ} (u : Fin a → K) (j : ℕ) :
   rw [toPoly, Polynomial.finsetSum_coeff]
   simp only [Polynomial.coeff_C_mul, Polynomial.coeff_X_pow, mul_ite, mul_one, mul_zero]
   by_cases h : j < a
-  · rw [dif_pos h]
+  · rw [dite_eq_left h]
     rw [Finset.sum_eq_single (⟨j, h⟩ : Fin a)]
     · simp
     · intro c _ hc
-      refine if_neg fun hj => hc ?_
+      refine ite_eq_right fun hj => hc ?_
       exact Fin.ext hj.symm
     · intro hmem
       exact absurd (Finset.mem_univ _) hmem
-  · rw [dif_neg h]
-    refine Finset.sum_eq_zero fun i _ => if_neg fun hji => h ?_
+  · rw [dite_eq_right h]
+    refine Finset.sum_eq_zero fun i _ => ite_eq_right fun hji => h ?_
     rw [hji]; exact i.isLt
 
 theorem toPoly_eq_zero_iff {a : ℕ} {u : Fin a → K} : toPoly u = 0 ↔ u = 0 := by
   refine ⟨fun h => funext fun i => ?_, fun h => by simp [toPoly, h]⟩
   have hc := coeff_toPoly u (i : ℕ)
-  rw [h, Polynomial.coeff_zero, dif_pos i.isLt] at hc
+  rw [h, Polynomial.coeff_zero, dite_eq_left i.isLt] at hc
   simpa using hc.symm
 
 theorem natDegree_toPoly_le {a : ℕ} (u : Fin a → K) : (toPoly u).natDegree ≤ a - 1 := by
   rw [Polynomial.natDegree_le_iff_coeff_eq_zero]
   intro j hj
-  rw [coeff_toPoly, dif_neg (by omega)]
+  rw [coeff_toPoly, dite_eq_right (by omega)]
 
 theorem toPoly_coeff {a : ℕ} (A : K[X]) (h : A.natDegree < a) :
     toPoly (fun i : Fin a => A.coeff (i : ℕ)) = A := by
   ext j
   rw [coeff_toPoly]
   by_cases hj : j < a
-  · rw [dif_pos hj]
-  · rw [dif_neg hj]
+  · rw [dite_eq_left hj]
+  · rw [dite_eq_right hj]
     exact (Polynomial.coeff_eq_zero_of_natDegree_lt (by omega)).symm
 
 theorem toPoly_smul {a : ℕ} (c : K) (u : Fin a → K) : toPoly (c • u) = C c * toPoly u := by
@@ -237,12 +237,12 @@ theorem isClosed_syzygyLocus {P H : Λ → ℂ[X]} {a b : ℕ}
   refine (continuous_finsetSum _ fun j _ => ?_).add (continuous_finsetSum _ fun j _ => ?_)
   · refine Continuous.mul ((continuous_apply j).comp (continuous_fst.comp hval)) ?_
     by_cases hj : (j : ℕ) ≤ i
-    · simp only [if_pos hj]; exact (hPc _).comp continuous_fst
-    · simp only [if_neg hj]; exact continuous_const
+    · simp only [ite_eq_left hj]; exact (hPc _).comp continuous_fst
+    · simp only [ite_eq_right hj]; exact continuous_const
   · refine Continuous.mul ((continuous_apply j).comp (continuous_snd.comp hval)) ?_
     by_cases hj : (j : ℕ) ≤ i
-    · simp only [if_pos hj]; exact (hHc _).comp continuous_fst
-    · simp only [if_neg hj]; exact continuous_const
+    · simp only [ite_eq_left hj]; exact (hHc _).comp continuous_fst
+    · simp only [ite_eq_right hj]; exact continuous_const
 
 omit [TopologicalSpace Λ] in
 /-- **The parameter set is the projection of the syzygy locus.**  This is the Bézout comparison

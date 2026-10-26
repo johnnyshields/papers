@@ -1,0 +1,1653 @@
+\documentclass[11pt,a4paper]{amsart}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage[expansion=false]{microtype}
+\usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black]{hyperref}
+\usepackage[nameinlink,capitalize]{cleveref}
+\hypersetup{pdftitle={Primitive period comparison and smaller skew Schur probes},pdfauthor={John Shields},pdfkeywords={skew Schur function, composition period, marked composition, ribbon Schur function, skew-equivalence, Jacobi--Trudi determinant, polynomial factorization}}
+\pdfinfo{/ORCID (https://orcid.org/0009-0004-3882-4571)}
+\numberwithin{equation}{section}
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{question}[theorem]{Question}
+\title[Primitive period comparison and smaller skew Schur probes]{Primitive period comparison\\ and smaller skew Schur probes}
+\author{John Shields}
+\date{October 9, 2026}
+\thanks{Independent researcher, Ginza 2-15-2, KR Ginza II 5F, Chuo-ku, Tokyo, Japan 104-0061.\\
+\hspace*{\parindent}Corresponding author: \href{mailto:math@johnnyshields.com}{math@johnnyshields.com}.  ORCID: \href{https://orcid.org/0009-0004-3882-4571}{0009-0004-3882-4571}.\\
+\hspace*{\parindent}This work is archived at \href{https://doi.org/10.5281/zenodo.23665232}{doi:10.5281/zenodo.23665232}.}
+\subjclass[2020]{Primary 05E05; Secondary 05A17, 15A15}
+\keywords{skew Schur function, composition period, marked composition, ribbon Schur function, skew-equivalence, Jacobi--Trudi determinant, polynomial factorization}
+\begin{document}
+\begin{abstract}
+We exclude primitive least-common-multiple comparisons of source-minimal nonline inners in empty-mark skew Schur compositions with ribbon outers.  The proof treats both orientations and recovers literal motifs in the parallel case, without lower-area induction.  Under strict discrete-interior entry hypotheses, we also construct equal proper ribbon-outer probes of strictly smaller area from positive ordinary comparison charts with a nonribbon source inner and uniform ribbon candidate inventory.  Complete signed high identities give primitive polynomial rays, and a two-window calculation recognizes actual ribbons after the required endpoint words have been identified.  Lower rooted transport converts these constructions into a conditional period obstruction.  Residue grading, Hall tails, and an imported original-determinant theorem give further scoped comparison consequences.  Chart restoration and equal-period marked-key recognition remain separate obligations.
+\end{abstract}
+\maketitle
+\section{Introduction}\label{sec:introduction}
+
+A composition chart assigns a period to a skew diagram \cite{Shields2026CornerDescent}.  Comparing two supplied charts on Schur-equal diagrams requires more than comparing their spans: a common-divisor construction on one literal parent does not apply directly across two parents.  We prove a direct exclusion for primitive least-common-multiple comparisons and construct smaller equal compositions in discrete-interior comparison cells.
+
+A chart is proper when both factors are connected and have at least two cells.  It is source-minimal when its overlap width and inner span are lexicographically minimal at its parent.  A line is a single row or column.  The first theorem concerns actual empty-mark compositions with ribbon outers, not arbitrary diagrams with a periodic span word.
+
+\begin{theorem}[Primitive period comparison]\label{thm:primitive-lcm}
+Let \(a>b\ge2\) be coprime and \(g\ge1\).  There are no Schur-equal proper source-minimal empty-mark charts
+\[
+ F=D\circ_\varnothing E,\qquad H=C\circ_\varnothing U,
+\]
+with nonline inners, ribbon outers, and
+\[
+ N_E=ag,\qquad N_U=bg,\qquad |D|=b,\qquad |C|=a.
+\]
+\end{theorem}
+
+The proof keeps both orientations.  Positive-gap blocks determine selected span inventories and maximum-window multiplicities.  Nonparallel ribbon outers are excluded by these data and their whole-transpose counterparts.  For parallel line outers, endpoint correlations recover literal repeated motifs, not just equal block functions.  The proof uses no lower-area classification.
+
+The second result constructs actual smaller probes.  In a positive ordinary comparison of area \(n\), write \(p=ad>q=bd\), \(\gcd(a,b)=1\), \(b\ge2\), and \(\ell=bp=aq\).  Suppose the source outer has \(t\ge1\) isolated interior cells, its inner \(E\) is nonribbon, and the inherited candidate component function is a ribbon function \(g=s_V\), of span \(m\ge2\).  Under the legal-chart, original minimum, strict-entry, and uniform-inventory hypotheses of \Cref{thm:ordinary-probes}, complete high identities construct ribbons \(J,B_0\) such that
+\[
+ s_{J\circ_\omega E}=s_{B_0\circ_\eta U},\qquad
+ |J|=b+1,\qquad |B_0|=a+m,
+\]
+\[
+ |J\circ_\omega E|\le n-\ell(K-1)<n,\qquad K\ge t+1\ge2.
+\]
+No lower rooted theorem is used to construct these proper connected probes.  The source-only transport lemma \Cref{lem:oo-rooted-finish} then gives \(p\mid q\) if rooted keys agree on the smaller class.  Together with the signed residue exclusions and the one-cell construction, this proves the conditional positive ordinary obstruction \Cref{thm:positive-oo}.  Both original parent minima remain in that theorem's entry; only the final uniform-probe argument dispenses with a candidate minimum.
+
+The construction uses a common high derivative of the original parent polynomial.  After cancellation of the complete signed normalizers, its two pullbacks give integral short polynomials with a primitive leading coefficient.  A two-window ribbon calculation identifies the whole polynomial, including the optional seam and the exceptional half-phase case.  The candidate's endpoint words require separate proofs: two minimal ends use a relative congruence, whereas a unique minimal end uses a comparison with the full high ray.  A positive ordinary gauge is chosen only after the signed residue reduction reaches a uniform ribbon inventory.
+
+The composition operation is due to McNamara and van Willigenburg \cite{McNamara2009Classification}, extending the ribbon constructions of Billera, Thomas, and van Willigenburg \cite{Billera2006DecomposableCompositions} and the skew amalgamations of Reiner, Shaw, and van Willigenburg \cite{Reiner2007Coincidences}.  Olson-Harris's forward identities hold under Hypotheses I--IV, without Hypothesis V \cite[Thms.~5.3.9 and~5.3.10]{OlsonHarris2024HopfApplications}.  Common-factor gluing supplies the same-parent divisor and source-minimality results \cite{Shields2026Gluing}.  Corner descent reduces a least-span unequal-period failure to a discrete larger-period outer interior \cite{Shields2026CornerDescent}.  These results explain the comparison domain considered here.
+
+The applications begin with supplied charts.  Whether an arbitrary Schur-equal realization has a corresponding chart is a separate recognition question.  When a proof uses such a realization, landing is stated explicitly and requires lower restoration as well as rooted keys.  For empty candidates, the original-determinant theorem of \cite{Shields2026CornerDescent} is used only after its literal full-window and residue hypotheses have been established, with the required finite hook support.  Its determinant machinery is not needed for the primitive comparison or the ordinary probe construction.
+
+\Cref{sec:scope} fixes the charts and imported corner data.  \Cref{sec:lcm} proves \Cref{thm:primitive-lcm}.  \Cref{sec:recovered-entry,sec:recovered-recognition,sec:older-cells,sec:positive-oo} derive the high identities, ribbon recognition, and actual probes.  \Cref{sec:parent} treats empty candidates and the determinant import; \Cref{sec:assembly} records the precise lower-area consequences.  The Hall-tail proofs are in \Cref{sec:cross}.
+
+\section{Composition and corner data}\label{sec:scope}
+
+Diagrams are connected skew Young diagrams in English coordinates, up to translation.  Put \(e=(1,1)\), \(X^- =\{x\in X:x+e\in X\}\), and write \(r_X,c_X,|X|\) for row count, column count, and area.  Then \(N_X=r_X+c_X-1\) and \(|X^-|=|X|-N_X\).  A ribbon has empty interior; a line is one row or one column.  A discrete interior consists of isolated cells, with the empty case allowed.  A row profile \((a_1,\ldots,a_s;g_1,\ldots,g_{s-1})\) has adjacent overlap \(g_i+1\), so \(N_X=\sum a_i-\sum g_i\).  If the row interval on content \(i\) is \([\ell_i,h_i]\), its boundary bits are \(A_X(i)=\ell_{i-1}-\ell_i\) and \(B_X(i)=h_{i-1}-h_i\).  Each belongs to \(\{0,1\}\); their difference is the change in diagonal height.
+
+Work in \(\mathbb Q[h_1,h_2,\ldots]\), with \(h_0=1\), \(h_j=0\) for \(j<0\), and weight \(j\) on \(h_j\).  Polynomial span means the largest occurring generator index, not weighted degree.  For a connected skew Schur function define
+\[
+ \kappa(s_X)=(-1)^{r_X-1}[h_{N_X}]s_X=K_X.
+\]
+The row count is determined by the greatest ordinary degree of \(s_X\), so this definition is independent of the chosen realization.
+
+A marked inner \(\omega\) consists of \(E\), congruent southwest and northeast marks \(W_-,W_+=W_-+v\), and their two attachment directions.  Its width and period are \(w=N_W\), \(p=v_2-v_1=N_E-w\).  Legality means Hypotheses I--IV: maximality of the common end mark on its diagonals; \(0\le w<p\); connected-skew complements after either deletion; and nonadjacency of the hatted mark and middle in the infinite amalgamation.  Ordinary attachments are \(H,H\) or \(V,V\); the other two are mixed.  Hypothesis V is not imposed.  Empty marks have horizontal and vertical readings related by antitransposition of the outer.
+
+The composition \(D\circ_\omega E\) is the I--IV operation, including its supplemental marked copies in the mixed cases, as defined in \cite{McNamara2009Classification,Shields2026Gluing}.  A proper chart has \(|D|,|E|\ge2\).  It satisfies
+\[
+ N_{D\circ_\omega E}=pN_D+w,\qquad
+ \operatorname{score}(D,E,\omega)=(w,p+w).
+\]
+A source-minimal chart has lexicographically least score among the proper charts of its literal parent.  A diagram with a proper chart is rooted.  Rotation transports the entire mark.  The legal ordinary gauge antitransposes the outer and applies the usual involution to its Schur function.
+
+For a fixed mark set \(O=E\setminus(W_-\cup W_+)\), \(\widehat O=O^-\), and
+\[
+ \widehat W=\{x\in\boldsymbol E:x+e\in W_-\}
+ \cup\{x\in W_-:x+e\in\boldsymbol E\},\qquad
+ \boldsymbol E=\bigcup_{j\in\mathbb Z}(E+jv).
+\]
+Let \(K_-\), \(K_+\) be the portions of \(E^-\) on its first and last \(w\) content bands, and put
+\[
+ A=s_W,\qquad B=s_{\widehat W},\qquad Z=s_{\widehat O},
+ \qquad\Theta=s_{K_-}s_{K_+},\qquad b_j=s_{(j)\circ_\omega E}.
+\]
+The fixed modified composition map and its complete signed normalizer are
+\begin{equation}\label{eq:modified-map}
+ \Phi_\omega(h_j)=A^{j-1}b_j,\qquad
+ \Phi_\omega(s_D)=\mathcal N_Ds_{D\circ_\omega E},\qquad
+ \mathcal N_D=\epsilon_D A^{|D|-r_D}B^{|D|-c_D}Z^{|D|-N_D}.
+\end{equation}
+Olson-Harris proves these modified composition identities in \cite[\S5.6]{OlsonHarris2024HopfApplications}.  Empty diagrams have function one.
+
+\begin{lemma}\label{lem:cofactor}
+For connected \(X\), the largest generator in \(s_X\) is \(h_{N_X}\), occurs linearly, and
+\[
+ s_X=(-1)^{r_X-1}h_{N_X}s_{X^-}+R_X,
+ \qquad R_X\in\mathbb Z[h_1,\ldots,h_{N_X-1}].
+\]
+Every skew Schur polynomial is primitive.  Every nonempty connected skew Schur polynomial is irreducible over every field.
+\end{lemma}
+\begin{proof}
+The characteristic-independent corner lemma in \cite{Shields2026CornerDescent} gives these assertions.  Its proof uses the unique highest Jacobi--Trudi generator, primitivity, and the corrected connected-skew irreducibility argument over an arbitrary field.
+\end{proof}
+
+\begin{lemma}\label{lem:finite-caps}
+For every legal marked inner,
+\[
+ \widehat W=K_-\cup(K_+-v),\quad E^-=K_-\sqcup\widehat O\sqcup K_+,
+ \quad\kappa(b_j)=\Theta Z^jB^{j-1},
+\]
+where the three pieces of \(E^-\) are nonadjacent.  Moreover
+\[
+ \operatorname{sp}A,\operatorname{sp}B\le w<p,\qquad
+ \operatorname{sp}\Theta\le\max(0,w-1),\qquad
+ \operatorname{sp}Z\le\max(0,p-w-2).
+\]
+Each connected cap component is contained, after alignment, in one hatted-mark component.
+\end{lemma}
+\begin{proof}
+These are the finite-cap and row-amalgamation formulas of \cite{Shields2026CornerDescent}.  The containment follows directly from the displayed union.  It does not assert divisibility between the functions of two contained diagrams.
+\end{proof}
+
+\begin{proposition}\label{thm:corner-transport}
+Let \(D_i\) be the nonempty components of \(D^-\), and put \(M=N_D\), \(\rho=\sum r_{D_i}\), \(\chi=\sum c_{D_i}\), \(L=\sum N_{D_i}\).  Then
+\[
+ \kappa(s_{D\circ_\omega E})=
+ \Theta A^{r_D-1-\rho}B^{c_D-1-\chi}Z^{M-L}
+ \prod_i s_{D_i\circ_\omega E}.
+\]
+The exponents are nonnegative and \(M-L\ge2\).  Every irreducible factor of span at least \(p\) is a displayed child, of span \(pN_{D_i}+w\), with its exact multiplicity.  Every proper child has smaller area than the parent.
+\end{proposition}
+\begin{proof}
+This is the corner transport theorem of \cite{Shields2026CornerDescent}, obtained by extracting the unique highest generator in \eqref{eq:modified-map}.
+\end{proof}
+
+\begin{lemma}\label{lem:outer-minimal}
+A source-minimal chart with nonline inner and period \(p\) remains source-minimal under every proper connected outer, and \(p\) divides every proper period of each resulting parent.
+\end{lemma}
+\begin{proof}
+The outer-independent minimum lemma of \cite{Shields2026CornerDescent} applies.  It uses the common-divisor and divisible-period constructions of \cite{Shields2026Gluing} on one literal parent at a time.
+\end{proof}
+
+\begin{definition}\label{def:lower-package}
+At area \(n\), the lower package means rootedness restoration, existence of a rooted member in every nonrotation connected Schur class, and source-minimal key invariance for already rooted mates, at every area strictly below \(n\).  The key consists of the marked inner and outer Schur function modulo transported rotation and legal gauge, acting on both entries.  Rooted transport uses only the last assertion and common-factor gluing.  Landing a possibly chartless realization additionally uses restoration.  \Cref{sec:assembly} gives the exact equivalences.
+\end{definition}
+
+\begin{proposition}\label{prop:beta-reduction}
+Let \(F=D\circ_\omega E\), \(H=C\circ_\eta U\) be proper source-minimal nonline charts with equal functions, \(p>q\), and nonempty discrete \(D^-\).  There is an actual component \(V\subset C^-\) such that
+\[
+ s_E=s_{V\circ_\eta U},\qquad L=N_E=p+w=mq+u,\quad m=N_V.
+\]
+At \(m=1\), \(s_E=s_U\) and \(q<p<2q\).  At \(m\ge2\), the lower package lands \(E\) in the source-minimal period-\(q\) fiber of the smaller child.  Under that package, \(q\mid p\) contradicts source-minimality.
+\end{proposition}
+\begin{proof}
+The nonempty discrete-residual extraction in \cite{Shields2026CornerDescent} supplies the actual component and its function equality, with \(p+w=mq+u\).  If \(m=1\), \(p+w=q+u<2q\).  Otherwise \(V\circ_\eta U\) is proper and has area \(|E|<|F|\); \Cref{lem:outer-minimal} preserves its source minimum.  Lower restoration gives \(E\) an actual chart, and lower key invariance places it in the prescribed smaller fiber.  For \(q\mid p\), the one-cell case is impossible and aligned reassociation through this landed chart lowers the source score.  The initial factor extraction requires none of these lower assertions.
+\end{proof}
+
+\section{Primitive least-common-multiple comparison}\label{sec:lcm}
+
+A primitive comparison means an equality
+\[
+ s_{D\circ_\varnothing E}=s_{C\circ_\varnothing U},\qquad
+ N_E=ag,\quad N_U=bg,\quad |D|=b,\quad |C|=a,
+\]
+where \(D,C\) are actual ribbons, \(E,U\) are actual connected inners, and \(a>b\ge2\) are coprime.  Both charts use empty marks.  Source-minimality and nonlinearity of both inners are assumed only for the final exclusion.  Horizontal and vertical empty readings are transported together with the outer.
+
+An atom is a maximal positive-gap block of a diagram.  A zero gap separates two atoms.  For an empty ribbon composition, its atom word is the inner atom word repeated once per outer cell, with the last and first atoms fused at a horizontal outer edge.  Fusion adds spans.  A vertical edge retains the boundary.  This follows directly from the empty-copy translations; no polynomial recognition is involved.
+
+\begin{lemma}\label{lem:atom-inventory}
+Schur equality determines the multiset of positive-block top polynomials and their spans, including singleton blocks.  It also determines the maximum sum \(M_j\) of \(j\) successive atom spans and the lexicographically smallest span-count vector among maximizing windows, together with its multiplicity.
+\end{lemma}
+\begin{proof}
+The top ordinary \(h\)-degree of a positive block is its row count.  Substitution \(h_i\mapsto h_{i-1}\) in its homogeneous top determinant gives the Schur function of its decrement; the original polynomial is recovered by homogenization.  The decrement is connected unless the block is a singleton.  Lemma~\ref{lem:cofactor} gives irreducibility and unique factorization; row degree recovers any singleton factors.  A zero-join word \(T_1\cdots T_s\) has the exact consecutive-cluster expansion
+\[
+ s_{T_1\cdots T_s}=\sum_{\pi}(-1)^{s-|\pi|}\prod_{I\in\pi}s_{\mathop{+}_{i\in I}T_i},
+\]
+where \(+\) merges incident rows.  If \(R\) is the total row count, a cluster of \(j\) atoms costs \(j-1\) ordinary degrees.  At degree \(R-j+1\), only one full maximizing \(j\)-cluster can contain \(h_{M_j}\).  Shorter clusters have smaller span; larger clusters cost too much.  With atom top polynomial \(P_i=k_i h_{s_i}+c_i\), its coefficient is
+\[
+ (-1)^{j-1}\sum_{I\text{ maximizing}}\prod_{i\in I}k_i\prod_{i\notin I}P_i.
+\]
+Order generators with larger indices first.  Every leading summand has common factor \(\prod_i\operatorname{lt}(k_i)\); what remains is \(\prod_{i\notin I}h_{s_i}\).  The largest such monomial chooses the smallest omitted span-count vector.  All its coefficients have the same sign and multiplicity, so it cannot cancel.  Alternatively, normalize \(P_i/k_i=h_{s_i}+\text{lower}\) and successively choose high generators positive; the fixed-length reciprocal products have one sign.  Thus the highest index and the selected count/multiplicity are intrinsic.  This recovers selected span inventories, not arbitrary class-window counts.
+\end{proof}
+
+For the primitive comparison take coprime \(a>b\ge2\), inner span words \(e\) and \(u\), of lengths \(A,B\), and totals \(ag,bg\).  The outer ribbon sizes are \(b,a\).  Let \(f,h\) be their numbers of horizontal edges.  The parent atom count is
+\[
+ n=bA-f=aB-h,\quad 0\le f\le b-1,\quad0\le h\le a-1.
+\]
+Whole transposition, with the empty gauge converted, gives the same comparison with horizontal counts \(f'=b-1-f\), \(h'=a-1-h\), and its own atom words and counts.  Polynomial equality is preserved by the fundamental involution.  In particular no equality of the two orientations' atom counts is assumed.
+
+\begin{lemma}\label{lem:fusion-average}
+One always has \(A\ge B\).  If \(f,h\ge1\), equality of all window maxima forces \(f\le h\).  At \(f=h\), write \(A=at\), \(B=bt\); then \(u\) is \(t\)-periodic.
+\end{lemma}
+\begin{proof}
+If \(B\ge A+1\), then \(aB-h\ge aA+1>bA-f\).  Suppose \(f\ge h\ge1\).  Then \(A>B\) and \(A\le(a-1)B\).  An \((A-1)\)-window in the source contains at most one fused atom and has maximum \(ag\).  Fix a candidate fusion at virtual boundary \(jB\).  Virtual \(A\)-entry intervals containing both entries of that pair have
+\[
+ \min(A-1,jB,(a-j)B,aB-A+1)\ge B
+\]
+consecutive starts.  Their atom closures have at most \(A-1\) atoms: completing a partial endpoint pair adds one original entry and removes its boundary, hence adds no atom.  Padding and positivity bound every cyclic \(A\)-window in \(u\) by \(ag\).  Its average is \(Abg/B\), proving \(bA\le aB\), hence \(f\le h\).  At equality all sums equal their mean, so \(u_{i+A}=u_i\).  Coprimality gives the asserted period.  Containing just one entry of the chosen fused pair would not prove the closure bound.
+\end{proof}
+
+\begin{lemma}\label{lem:equal-fusions}
+If \(f=h=m\ge1\), equality of the selected window data in Lemma~\ref{lem:atom-inventory} is impossible.
+\end{lemma}
+\begin{proof}
+The preceding lemma makes \(u\) \(t\)-periodic.  Set \(L_+=n-(A-t)\).  Every such source window contains all \(m\) fusions and has span \((b-1)ag\) plus a linear \(t\)-window of \(e\).  A candidate window expands to at most \(((b-1)a+1)t\) entries, so its span is at most \(((b-1)a+1)g\).  Thus every linear \(t\)-window of \(e\) has sum at most \(g\).  Its \(a\) aligned blocks each sum to \(g\), and their prefix sums form a decreasing chain.
+
+At length \(n-t\), all \(t+1\) candidate windows omit one motif, hence maximize with one span inventory.  The selected multiplicity forces all source windows to do the same.  Their omitted prefix/suffix sums make the first and last aligned block prefixes equal.  The decreasing chain is constant; \(e\) is \(t\)-periodic too.
+
+If \(m\ge2\), let \(\alpha,\beta\) be the smallest gaps between successive fused copy boundaries on the two sides.  For sampled lengths \(kt-1\), the first length admitting two fusions occurs at \(k=a\alpha+1\) or \(b\beta+1\).  The thresholds differ: equality would force \(b\mid\alpha\), whereas \(1\le\alpha\le b-2\).  At the earlier threshold one maximum exceeds \(kg\) and the other equals it.  If \(m=1\), the fusion's nearer-end distance is \(at\min(j,b-j)\) or \(bt\min(k,a-k)\), again different by coprimality.  A fusion-containing window of length \(kt-1\) has one fixed inventory, and its number is
+\[
+ \min(L,j_0,n+1-j_0,n-L+1),
+\]
+where \(j_0\) is the one-based fusion position.  At \(L=d+t-1\) if \(t>1\), and \(L=d+1\) if \(t=1\), with \(d\) the smaller distance, the two counts differ.  The indicated lengths lie in the parent, since both fusion distances are at most half its length.  Either contradiction proves the assertion.
+\end{proof}
+
+\begin{lemma}\label{lem:end-spread}
+Suppose \(1\le f<h\) and put \(j_0=\lceil(A+1)/B\rceil\).  The diameter \(d_H\) of the candidate horizontal-boundary set satisfies \(d_H\ge a-j_0\).  In a comparison strict in both orientations the source's first and last edges have opposite kinds, and \(a>2b\).
+\end{lemma}
+\begin{proof}
+Take \(L=n-A\).  Source windows have span at most \((b-1)ag\).  Candidate virtual intervals of length \(aB-A\) containing all \(h\) fused pairs have at least \(B\) consecutive starts if \(d_H\le a-j_0-1\); this is the minimum of their two endpoint buffers, \(aB-A-d_HB-1\), and \(A+1\).  Their average span is
+\[
+ (aB-A)bg/B=(b-1)ag+(h-f)g/B,
+\]
+a contradiction.  Also \(j_0\le\lfloor a/b\rfloor+1\).  If \(a<2b\), both orientations have \(j_0=2\); the diameter requirement puts both end edges in each of two complementary sets, impossible.  Equality \(a=2b\) is not coprime.
+
+At length \(n-A\), exactly \(A+1-\epsilon_D\) source windows omit its complete inner inventory, where \(\epsilon_D\) counts horizontal end edges.  The others omit strictly more span.  If \(\epsilon_D=0\), all candidate windows maximize and successive differences give equal prefix and suffix words, each of span \(p=ag\).  Write \(p=q_0\sigma+\theta\), \(\sigma=bg\), \(0<\theta<\sigma\).  Translation by \(a\sigma-p\) identifies their boundary sets.  The prefix residue-zero fiber has one plus the turns among the first \(q_0\) copy junctions, whereas the corresponding nonzero suffix fiber has \(q_0+1\) points.  All those junctions are turns; so are the last \(q_0\).  Therefore \(d_H\le a-2q_0-2\le a-j_0-1\), contradicting the first part.  Transposition excludes \(\epsilon_D=2\).  Thus \(\epsilon_D=1\).
+\end{proof}
+
+\begin{lemma}[Almost-border rotation]\label{lem:almost-border}
+Let a word be obtained from \(a\) copies of a positive word \(u\), of length \(B\ge2\) and total \(\sigma\), by deleting some copy-junction boundaries.  Suppose \(a>2b\), \(\gcd(a,b)=1\), \(b\ge2\).  If at least \(R\) of the \(R+1\) prefix/suffix splices omitting \(R\) atoms have one inventory of span \(a\sigma/b\), then \(b\mid B\), and the original span word has period \(B/b\).
+\end{lemma}
+\begin{proof}
+Let \(S\) be the \(B\) original boundary residues modulo \(\sigma\).  Sliding a good splice replaces one suffix atom by one prefix atom.  With no exceptional splice the two panels are identical words; with an exceptional endpoint, delete that endpoint atom and obtain identical trimmed panels; with an exceptional interior splice the two panels differ only by interchanging two adjacent unequal atoms.
+
+Put \(p=a\sigma/b\) and translate the prefix by \(a\sigma-p\).  In the first case both panels have length greater than \(2\sigma\), represent every nonzero residue, and include an exterior zero residue; hence \(S-p=S\).  In the endpoint case their common trimmed length is \(p-u_0>\sigma\), or \(p-u_{B-1}>\sigma\); the exterior endpoint ensures one panel represents all of \(S\), and cardinality then does so for the other.  Again \(S-p=S\).
+
+For an interior exception, the translated boundary sets differ by exactly one point in each direction.  Write \(p=q_0\sigma+\theta\), \(q_0\ge2\).  The residues \(\theta\) and \(\sigma-\theta\) are present because the two inner panel endpoints are actual boundaries.  At the exceptional zero-related fibers one set has \(q_0+1\) points; the one-point discrepancy forces at least \(q_0\) in the other.  Every other represented fiber already has at least \(q_0\) points because internal boundaries are never deleted.  Removing one point therefore cannot change the represented residue set.  Once more \(S-p=S\).  Translation by \(-p\) has order \(b\), acts freely, and generates translation by \(\sigma/b\).  Its orbits partition \(S\); reading consecutive gaps proves both assertions.
+\end{proof}
+
+\begin{theorem}\label{thm:nonparallel-lcm}
+In the primitive comparison, assuming the atom invariants and their whole-transpose counterparts, neither both outers can be nonlinear nor can one outer be a line of a different kind from the other.
+\end{theorem}
+\begin{proof}
+For two nonlinear outers all four horizontal counts are positive.  Lemmas~\ref{lem:fusion-average} and \ref{lem:equal-fusions} leave strict inequalities in both orientations.  Lemma~\ref{lem:end-spread} gives \(a>2b\) and opposite source end edges.  At length \(n-A\), precisely \(A\) of the \(A+1\) source splices omit the inner inventory.  The selected window multiplicity transfers exactly this statement to the candidate.  Lemma~\ref{lem:almost-border} gives \(b\mid B\), hence \(b\mid(h-f)\).  Transposition gives \(b\mid(h'-f')\).  Their sum is \(a-b\), contradicting coprimality.
+
+If the source outer is a column, every \(A\)-window has one inventory.  Equality forces all candidate \(A\)-window sums equal, so the candidate parent is a literal repeated span word.  On its boundary circle, translation by total span divided by \(b\) takes residue zero modulo \(\sigma\) to a nonzero residue.  The zero fiber has as many points as the candidate outer has rows; each nonzero available fiber has \(a\) points.  The translation is a bijection, so the candidate has \(a\) rows and is a column.  Interchanging sides proves the converse.  Transposition handles rows.
+\end{proof}
+
+\begin{lemma}\label{lem:positive-endpoints}
+For a positive-gap block of span \(g\), let its homogeneous top JT matrix have beta lists \(a_1=g>\cdots>a_r>0\), \(b_1>\cdots>b_r=0\), with every nonpositive-index entry set to zero.  Put \(P=\det M\), \(\chi=\partial_{h_g}P\), and let \(C_{ij}\) be signed cofactors.  Define
+\[
+ L_X(z)=\sum_i(-1)^{r-1}C_{ir}z^{g-a_i},\quad
+ R_X(z)=\sum_j(-1)^{r-1}C_{1j}z^{b_j}.
+\]
+For \(0\le d<g\),
+\[
+ [z^d]L_XR_X=\chi\partial_{h_{g-d}}P-P\partial_{h_{g-d}}\chi.
+\]
+Within a common top-polynomial class, two distinct literal blocks have opposite first endpoint differences at an order strictly below \(g/2\).
+\end{lemma}
+\begin{proof}
+The cofactor identity
+\(C_{ir}C_{1j}=\chi C_{ij}-P\partial_{M_{ij}}\chi\)
+follows by differentiating \(\chi=P(M^{-1})_{r1}\), then extends polynomially.  Summing over \(a_i-b_j=g-d>0\) proves the display; no frozen \(h_0\) derivative is taken.  Thus the product is common modulo \(z^g\).
+
+Every endpoint cofactor has a unique least-square monomial, up to its sign:
+\[
+ M_i^L=\prod_{k<i}h_{x_k}\prod_{k\ge i}h_{d_k},\qquad
+ M_j^R=\prod_{k<j}h_{d_k}\prod_{k>j}h_{x_k},
+\]
+where \(x_k\) are positive row lengths and \(d_k>0\) the gaps.  Strict rearrangement proves uniqueness and nonvanishing.  Consecutive left ratios recover \(h_{x_i}/h_{d_i}\), and right ratios recover suffix rows and gaps; numerator and denominator are distinct since \(x_i>d_i\).  If equal endpoint profiles below half-span had recovered only \(k\) prefix rows and \(l\) suffix rows with \(k+l\le r-2\), the next unread supports would both be at least \(g/2\).  But
+\[
+ (g-a_{k+2})+b_{r-l-1}\le g-a_{k+2}+b_{k+1}=g-d_{k+1}<g,
+\]
+a contradiction.  All gaps and all but at most one row are recovered; span recovers the last row.  Hence the blocks are literal.  Contraposition gives an early difference, and the common product with nonzero constant term makes its two signs opposite.
+\end{proof}
+
+\begin{lemma}\label{lem:parallel-class-order}
+For Schur-equal both-column primitive parents \(E^b\), \(U^a\), the inner atom words have period \(t\) in their actual top-polynomial classes, where their class inventories are \(a\mathbf m,b\mathbf m\) and \(t=\sum m_i\).  Atom spans and row counts may vary, and class functions may be algebraically dependent.
+\end{lemma}
+\begin{proof}
+Taking windows of length \(at\) in the source gives maximum \(ag\), where \(g=\sum m_i s_i\).  Every cyclic candidate start is represented in its \(a\)-fold word.  Its mean is also \(ag\), so every such window has that sum.  Sliding and coprimality force span period \(t\); interchange sides for the source.  Thus every relevant window has the correct count within each span group.
+
+Normalize the class tops as \(f_i=P_i/k_i=h_{s_i}+c_i\).  The maximum-window coefficient gives
+\[
+ \sum_{I\subset U^a,\ |I|=at}\prod_i f_i^{am_i-\nu_i(I)}=abt-at+1.
+\]
+The exponent sum is zero separately in every span group.  Order the original rational generator field successively, each \(h_j\) positive infinite over earlier generators, so every lower-span \(f_i\) is positive.  At the largest remaining span \(H\), order its distinct corrections \(c_1>\cdots>c_s\).  Distinctness follows from actual top-prime nonassociation, not independence.  If a window overcounts class one by maximum excess \(r>0\), its pole coefficient at \(h_H=-c_1\) is a positive lower-span factor times powers of negative differences \(c_j-c_1\).  Their exponent sum is \(r\), so every maximal-pole term has the same nonzero sign.  This contradicts the constant right side.  No window overcounts; the cyclic average forces equality in each.  Remove that factor from every term and repeat within the span and then downwards.  Every window has its exact class inventory.  Sliding gives class period \(t\) on both sides.
+\end{proof}
+
+\begin{lemma}\label{lem:class-correlation}
+Once those class motifs are known, the full parent polynomial determines the aggregate normalized endpoint correlation for each class separately at every motif lag \(1\le k<ab\), through all degrees below that class's span.
+\end{lemma}
+\begin{proof}
+For any actual zero-join word of total row count \(R\), inspect ordinary degree \(R-j\) at a generator above the maximum \(j\)-atom span.  Its consecutive-cluster expansion can contain that generator only in one cluster of exactly \(j+1\) atoms.  In its JT cofactor the chosen row is in the first atom and chosen column in the last; otherwise its index is at most a \(j\)-atom span.  Deleting them leaves their endpoint cofactors and the top-corner cofactors of all intervening atoms.  Summing entries therefore gives exactly the coefficient of \(L_XR_Y\) at offset equal to cluster span minus the chosen generator, times the intervening corners and external top polynomials.  All smaller or disjoint clusters are excluded by the degree budget.  This proves the full correlation identity directly from the original determinant.
+
+Take \(j=kt\).  A cluster whose endpoints are class \(\gamma\) has span \(kg+s_\gamma\), interior inventory \(k\mathbf m-\mathbf1_\gamma\), and exterior inventory \((ab-k)\mathbf m-\mathbf1_\gamma\).  Its contribution is a common product divided by \(P_\gamma k_\gamma\), times the corresponding endpoint series.  To separate classes, choose one of maximal remaining span and reduce modulo its irreducible \(P_\gamma\).  Every other contribution has one additional factor \(P_\gamma\); no corner cofactor contains its highest variable.  Its own endpoint coefficients below span also omit that variable, so a nonzero coefficient cannot be divisible by the affine prime \(P_\gamma\).  Its aggregate difference must vanish.  Remove that established class identity and descend.  Ties in span cause no exception because distinct classes are distinct primes.  Divide by the common endpoint product of Lemma~\ref{lem:positive-endpoints}, whose constant term is nonzero.  The resulting correlations are sums of ratios of normalized left profiles, with all repeated motif occurrences retained.
+\end{proof}
+
+\begin{theorem}\label{thm:parallel-lcm}
+Every parallel line-outer primitive-lcm comparison with source-minimal nonline inners is impossible.  Together with Theorem~\ref{thm:nonparallel-lcm}, this completes the primitive block at every number of zero joins.  No lower-area transport is assumed.
+\end{theorem}
+\begin{proof}
+By whole transposition it suffices to treat columns.  Lemma~\ref{lem:parallel-class-order} gives the motifs; use Lemma~\ref{lem:class-correlation} class by class.  For \(b\ge3\), let \(l_j\) be the normalized left profile of source phase \(j\), with repeated motif occurrences indexed separately, and put \(q_j=l_j/l_{j+b}\).  The two lag identities \(b,ab-b\) read
+\[
+ \sum_j(b-n_j)q_j=b(a-1)m_\gamma,\qquad
+ \sum_jn_jq_j^{-1}=bm_\gamma,
+\]
+where \(n_j=1\) on the last \(b\) phases of each motif occurrence and zero elsewhere.  The \(q_j\) multiply to one on each phase cycle.  Put \(g_j=\log q_j\).  Subtracting the two equations cancels their constant and linear terms; at the first possible varying order it gives
+\[
+ \frac12\sum_j(b-2n_j)[z^{2d}]g_j^2=0.
+\]
+All weights are at least \(b-2>0\).  Lemma~\ref{lem:positive-endpoints} makes a genuine first difference satisfy \(2d<s_\gamma\), within the available precision.  A sum of nonzero squares in the formally real coefficient field cannot vanish.  Hence every source phase is literal-constant along the step-\(b\) cycle, which is connected modulo \(a\).  The source inner repeats its first actual motif \(a\) times.
+
+For \(b=2\), \(a\) is odd.  Let the two candidate phases at each occurrence be \(P_i,Q_i\), write \(r_i=l_{P_i}/l_{Q_i}\), \(R=\sum r_i\), \(R^-=\sum r_i^{-1}\), and let \(v_i\) be the source last/first phase ratio.  Let \(T\) sum its nonwrapping adjacent ratios.  Counting the four actual lags \(1,a+1,a,2a-1\) gives
+\[
+\begin{aligned}
+ 2T+\sum_i v_i&=aR+(a-1)R^-,&T&=(a-1)m_\gamma,\\
+ am_\gamma&=\tfrac{a+1}{2}R+\tfrac{a-1}{2}R^-,&\sum_i v_i^{-1}&=R.
+\end{aligned}
+\]
+Twice the third equation minus the first and the other two give
+\(\sum_i(v_i+v_i^{-1}-2)=0\).  The same first-difference square argument forces all \(v_i=1\), then \(R=R^-=m_\gamma\).  Applying it to \(\sum_i(r_i+r_i^{-1}-2)=0\) makes the candidate phases literally equal.  Thus the candidate inner repeats its first actual motif twice; recovering all intermediate source phases is unnecessary.
+
+The repeated motif is an actual connected proper initial zero-join subword, of span \(g\).  If it were a singleton, the repeated inner would be a line, excluded.  Otherwise it gives a proper divisor-period chart on the source inner, or on the candidate inner when \(b=2\).  Aligned reassociation contradicts source-minimality by Lemma~\ref{lem:outer-minimal}.  Whole transposition transports the row case with the empty gauge, not with unchanged attachment data.  No equality of the two literal motifs across the parents is asserted.
+\end{proof}
+
+\begin{proof}[Proof of \Cref{thm:primitive-lcm}]
+The equality supplies the atom data in both orientations by \Cref{lem:atom-inventory}.  \Cref{thm:nonparallel-lcm} excludes every case except parallel line outers.  \Cref{thm:parallel-lcm} excludes those under the two source minima and nonlinearity assumptions.
+\end{proof}
+
+\section{Discrete-source entry and high identities}\label{sec:recovered-entry}
+For parent comparisons use periods \(p=ad>q=bd\), with \(\gcd(a,b)=1\), \(b\ge2\), source width \(w\), and candidate width \(u\).  Thus \(q\nmid p\).  The source chart is \(D\circ_\omega E\), the candidate chart is \(C\circ_\eta U\), and their common function is \(P\).  The source interior has \(t\ge1\) isolated cells.  When \(s_E=s_{V\circ_\eta U}\), put \(f=s_E\), \(g=s_V\), \(m=N_V\), \(L=N_E=mq+u=p+w\), and \(\ell=bp=aq\).  The one-cell case \(m=1\) will be called alpha; the case \(m\ge2\), beta.  Entry statements below retain the proper source-minimal nonline scope of \Cref{prop:beta-reduction}; any wider entry used in \Cref{thm:positive-oo} is an explicit premise there.
+
+Define Hall derivations \(\delta_s h_j=h_{j-s}\), and weighted derivations \(V_sh_j=(j-s)h_{j-s}\) for \(j>s\), zero otherwise.  They fix constants.  The Hall derivations commute; the weighted derivations need not commute.  Power sums are denoted by \(p_j\), with \(p_j=j[z^j]\log(\sum_{i\ge0}h_i z^i)\).
+
+\begin{lemma}\label{lem:corner-spacing}
+Let \(g\) be the unique maximal-span prime of a connected diagram's corner, of span \(m\) and multiplicity \(t\).  Over the field in indices below \(m\), reduce modulo \(g\), retaining its actual component occurrences and eliminating all other complete components.  After division by the nonzero removed lower factor, the determinant is a product of \(t+1\) monic triangular responses.  Their top indices are the two true cap distances and the \(t-1\) intervening selected distances plus \(m\), with multiplicity.
+
+In a strict discrete-source beta comparison, these indices and the source section areas satisfy
+\[
+ \{qj+u:j\text{ a candidate response top}\}
+ =\{p a_i+w:i=0,\ldots,t\},\qquad
+ a_i=1+bk_i,\quad j_i=m+ak_i,
+\]
+where \(p=ad,q=bd\), \(\gcd(a,b)=1\), \(b\ge2\), \(k_i\ge1\).  Every maximal candidate component lies strictly outside the two endpoint collars of width \(m\).
+\end{lemma}
+\begin{proof}
+The component-elimination lemma of \cite{Shields2026CornerDescent} applies to the original matrix, without equal-window hypotheses.  It retains the complete components, proper selected minors, and literal unit pivots.  At residue the selected subdiagonal entries vanish, leaving the product of diagonal responses.  Every response is monic in its own highest free variable and thus prime; the top indices are obtained by subtracting the retained row and column endpoints.
+
+On the discrete source, the selected prime is \(h_1\); the diagonal responses are the actual zero-gap ribbon sections, monic at their areas \(a_i\ge2\).  On the candidate, \(s_E\) is the image of \(g\) times a low unit.  Localize the common parent residue field in every original generator of index below \(L=N_E\).  Source \(h_1\) and candidate \(g\) both eliminate the same parent variable \(h_L\).  Every higher substituted generator remains triangular, with a nonzero coefficient in that common lower field.  Thus all source and candidate diagonal responses remain prime in the same ambient polynomial extension.  Parent equality identifies their multisets, after the lower normalizers are canceled.  Matching their top indices gives
+\(p(a_i-1)=q(j_i-m)\).
+Coprimality gives the displayed integers; \(a_i\ge2\) makes \(k_i>0\).
+
+The prime \(g\) is uniquely maximal because a larger candidate component would produce a parent corner prime of span greater than \(L\), and a different component of the same span would produce a different prime of span \(L\); neither exists on the discrete source.  Also \(m<a\): \(mq+u=p+w<2p\) and \(b\ge2\).  Hence each candidate cap top is at least \(m+a>2m\).  Subtracting the selected component's span puts the first and last occurrences beyond the collars, including a neighboring empty diagonal.  This is a geometric spacing conclusion from the actual retained endpoints, not from arbitrary factor degrees.  Summing the matched tops gives \(N_D=1+b\sum k_i\) and \(N_C=m+a\sum k_i\): each cap distance and each internal distance is counted exactly once, while each selected span is subtracted once.
+\end{proof}
+
+\begin{lemma}\label{lem:alpha-row-candidate}
+In the one-cell case \(s_E=s_U=f\), the smaller-period outer has all row gaps one, with exactly \(t=|D^-|\) gaps.  This conclusion needs only equality of span and corner, not landing or source-minimality.
+\end{lemma}
+\begin{proof}
+This is the one-cell candidate lemma of \cite{Shields2026CornerDescent}.  Its nonnegative valuation comparison also gives \(\operatorname{sp}\kappa(f)<u\) and \(\operatorname{sp}B_\eta<u\), which are the normalizer bounds used in regrouping.
+\end{proof}
+
+\begin{lemma}\label{lem:high-quotients}
+In the preceding mixed/mixed setting, write \(K=\sum k_i\).  Then
+\[
+ R=h_1^{-t}(pV_{b(K-1)}+\rho_\omega\delta_{b(K-1)})s_D,
+\quad
+ T=g^{-t}(qV_{a(K-1)}+\rho_\eta\delta_{a(K-1)})s_C
+\]
+are integral polynomials.  The first has weight \(b+1\), nonzero scalar top coefficient and no factor \(h_1\).  The second has exact \(g\)-valuation zero, top index \(a+m\), linearly, and its top coefficient uses only indices below \(m\).
+\end{lemma}
+\begin{proof}
+Expand the discrete source at its \(t\) positive seams.  A consecutive block of section increment total \(k\) has merged ribbon area \(1+bk\).  At shift \(b(K-1)\), only the whole merged block and a complementary block omitting one minimal endpoint section survive.  In either case every term retains all \(t\) seam factors, including the factor supplied by differentiating the complementary residual singleton.  The quotient has weight \(b+1\).  Its top coefficient, with overall corner sign removed, is one of
+\[
+ (b+1)p+(1-u_0-v_0)\rho,\quad
+ bp+(e-v_0)\rho,\quad
+ (b-1)p+(r_0+s_0-1)\rho,
+\]
+with bits in \(\{0,1\}\).  Each is positive for \(0<\rho<p\).  The case \(K=2\) retains both differentiations of the same split product.
+
+Apply mixed covariance to both parents at \(\ell(K-1)\).  All normalization factors have span below \(L\), hence are units at \(f=s_E\).  The source derivative has exact \(f\)-valuation \(t\): its quotient has a nonzero top coefficient and survives modulo \(h_1\), and the triangular residue map is injective.  The candidate substitution preserves \(g\)-orders, so its derivative has exact valuation \(t\).  Division by primitive \(g^t\) is integral by Gauss's lemma.  The highest target generator is \(h_{\ell+L}\), linear, with coefficient in indices below \(L\).  Triangularity forces the candidate top to be \(a+m\), linearly; its coefficient cannot involve \(h_m\) or higher, because their images would have top at least \(L\).  This proves every assertion.
+\end{proof}
+
+\begin{lemma}\label{lem:long-high-identity}
+For a discrete source whose sections have area at least three, let \(M=N_D\), \(t=|D^-|\), and let \(\iota_D\) count singleton endpoint rows.  For any attachment type, use its effective covariance phase \(\vartheta\), \(|\vartheta|<p\), with the ordinary vertical sign incorporated in its multiplier \(\chi\).  Then
+\[
+ \kappa(f)V_{N_F-L}s_F=\epsilon\{p+(1-\iota_D)\vartheta\}f\kappa(s_F),
+ \qquad\epsilon\in\{1,-1\}.
+\]
+Consequently, with \(k=N_C-m\),
+\[
+ \kappa(g)(qV_k+\vartheta_\eta\delta_k)s_C
+ =\epsilon'\{p+(1-\iota_D)\vartheta_\omega\}g\kappa(s_C).
+\]
+\end{lemma}
+\begin{proof}
+The source seam expansion at shift \(M-1\) leaves the whole merged ribbon and singleton endpoint omissions.  It gives
+\[
+ V_{M-1}s_D=(-1)^{r_D-1}h_1^{t+1},\qquad
+ \delta_{M-1}s_D=(-1)^{r_D-1}(1-\iota_D)h_1^{t+1}.
+\]
+No interior section has area below three, so there is no further surviving omission.  Substitute through the actual composition map and cancel its normalizer with the corner formula.  The scalar is nonzero since \(|1-\iota_D|\le1\) and \(|\vartheta|<p\).  For ordinary horizontal marks the generator covariance is \(V_{jp}\Phi=\chi^j\Phi(pV_j+\vartheta\delta_j)\); for ordinary vertical marks it has the same form after replacing the Hall multiplier by its negative and the phase by its negative.  This follows directly from the ordinary Hall shift and the weighted endpoint difference, so the involution is retained.  Pull the parent identity back through the candidate chart, use \(\Phi_\eta(g)=\mathcal N_Vf\), and take the top coefficient of that equality.  All powers and normalizers cancel; injectivity gives the second display.
+\end{proof}
+
+\begin{lemma}\label{lem:endpoint-ancestry}
+Under the candidate identity of Lemma~\ref{lem:long-high-identity}, the function \(\kappa(g)\) divides the product of whole interior-component functions meeting an endpoint collar of width \(m\).  Thus a uniform candidate interior has ribbon component function.  The mixed/mixed candidate partition is: uniform positive-gap; uniform ribbon with zero joins; heterogeneous with nonribbon maximum; or heterogeneous with ribbon maximum.
+\end{lemma}
+\begin{proof}
+For a high JT entry \(h_{X_i-Y_j}\) with \(X_i-Y_j\ge N_C-m\), compare its cofactor with the corner cofactor.  Their row intervals agree on \((Y_j,X_i]\), containing the middle band.  A whole component lying in that band with an empty neighboring diagonal on each side survives as a whole component of every such cofactor.  If the cofactor fails dominance it is zero and the same divisibility holds.  The product \(K_{\rm mid}\) divides every high derivative.  Cancel it in the candidate identity.  Since \(g\) is prime and coprime to its smaller corner, \(\kappa(g)\mid K_{\rm end}\).
+
+By Lemma~\ref{lem:corner-spacing} all occurrences of the unique maximal function are in the middle.  If those are all the components, \(K_{\rm end}=1\), hence \(\kappa(g)=1\) and \(V\) is a ribbon.  Splitting according to zero joins and the remaining component types gives exactly the asserted partition; there is no separate unresolved small-slack subcase.
+\end{proof}
+
+\begin{lemma}\label{lem:mixed-covariance}
+For a supplied case-\(V,H\) mixed mark with phases \(0\le t_0<s_0\le w<p\), put \(\rho=s_0-t_0\) and \(\chi=(-1)^{-v_1}ABZ\).  Then
+\[
+ V_{kp}\Phi_\omega(Q)=\chi^k\Phi_\omega(pV_kQ+\rho\delta_kQ).
+\]
+Every source normalizer is fixed by \(V_{kp}\).
+\end{lemma}
+\begin{proof}
+In a row power, the mixed periodic boundary makes every row-beta shift by \(-kp\) either duplicate another row or become negative.  The only surviving opposite column shifts are at the initial phase \(t_0\) and terminal phase \((j-k)p+s_0\).  Their unweighted determinants have opposite signs; their weighted difference is \(p(j-k)+\rho\).  Removing the terminal strip leaves the \((j-k)\)-row power together with \(k\) complete hat and middle factors.  Their singleton-separated bands are precisely those of Lemma~\ref{lem:finite-caps}; the crossed-column sign is \((-1)^{-kv_1}\).  Hence
+\[
+ V_{kp}b_j=(p(j-k)+\rho)(-1)^{-kv_1}(BZ)^kb_{j-k},
+\]
+including \(j=k\) with \(b_0=A\).  Multiply by \(A^{j-1}\).  This proves the displayed identity on every generator; both sides are \(\Phi_\omega\)-derivations, and the low normalizers are killed by index support.  Thus it holds on the whole algebra.  Rotation transports the opposite mixed case.
+\end{proof}
+
+\begin{proposition}\label{prop:exact-high-identity}
+Suppose the uniform-ribbon beta configuration has supplied section congruences, high quotients \(R,T\), and \(t\) ribbon components of function \(s_V\).  Retain the setup of Lemma~\ref{lem:modular-saturation}.  Then its exact marked identity follows from corner transport and mixed covariance, with no extra rational scalar:
+\[
+ \chi_\omega^b\Phi_\eta(T)
+ =\epsilon\mathcal N_V\chi_\eta^a\Phi_\omega(R),\quad\epsilon\in\{1,-1\}.
+\]
+The common contents and absolute top coefficients follow from this identity and primitive triangularity.  In the narrow nonribbon heterogeneous case the high source prefactor has exactly the power \(b(K-1)-t\) of the image of \(\kappa(s_V)\).
+\end{proposition}
+\begin{proof}
+Use the complete signed normalizers from \eqref{eq:modified-map}:
+\[
+ \Phi_\omega(s_D)=\mathcal N_D P,\qquad
+ \Phi_\eta(s_C)=\mathcal N_C P.
+\]
+Apply \(V_{\ell(K-1)}\), where \(\ell=bp=aq\), and cancel \(f^t\).  Covariance gives
+\[
+ \Phi_\eta(T)=\frac{\mathcal N_C\chi_\omega^{b(K-1)}}
+ {\mathcal N_D\chi_\eta^{a(K-1)}\mathcal N_V^t}\Phi_\omega(R).
+\]
+Multiply each parent corner by its corresponding normalizer and divide by \(f^t\).  The source expression is \(\kappa(f)\chi_\omega^{bK}\); the candidate is \(\kappa(f)\chi_\eta^{aK}\mathcal N_V^{t+1}\), up to their fixed signs.  To check the exponents, use \(|D|=1+bK+t\), \(|C|=m+aK+tm\), and \(r_V+c_V-1=m\).  Substituting their ratio yields the stated identity.
+
+Every nonzero modified generator has primitive leading coefficient \(\pm\kappa(f)\chi^{j-1}\).  Triangularity modulo each prime shows that the map preserves integer content.  Products with primitive normalizers do too; hence \(\operatorname{cont}R=\operatorname{cont}T\).  Compare the fresh generator \(h_{\ell+L}\) in the identity.  The coefficient relation \(\kappa(s_U)\chi_\eta^{m-1}=\pm\mathcal N_V\kappa(f)\), obtained by taking the top coefficient of \(\Phi_\eta(s_V)=\mathcal N_V f\), cancels every nonconstant factor and leaves equal absolute top coefficients.
+
+In the narrow heterogeneous case, candidate normalizers are low, and so are the source mark and hat.  The exponent of \(Z_\omega\) in \(\chi_\omega^{b(K-1)}/\mathcal N_D\) is \(b(K-1)-t\), because \(|D|-N_D=t\).  Its high part is exactly the actual candidate-child product corresponding to \(\kappa(s_V)\), by the inner corner identity.  This proves the asserted exponent without source ribbon recognition.  Section congruences, integral polynomiality of the two quotients, and the full candidate partition remain separate hypotheses; this calculation does not manufacture them.
+\end{proof}
+
+\section{Complete two-window ribbon recognition}\label{sec:recovered-recognition}
+For a ribbon of size \(n\) with cut set \(S\subset\{1,\ldots,n-1\}\), write
+\[
+ P_n(S)=\sum_{T\subset S}(-1)^{|T|}\prod_{x<y\text{ consecutive in }\{0\}\cup T\cup\{n\}}h_{y-x}.
+\]
+It is the ribbon Schur polynomial with its top coefficient normalized to one.
+
+\begin{lemma}\label{lem:oo-window-construction}
+Let \(Q,\theta\) be real scalars with \(0<\theta<Q\).  For \(N\ge2\), cut sets \(A,C\subset\{1,\ldots,N-1\}\), and actual flags \(U,V\in\{0,1\}\), put
+\begin{equation}\label{eq:oo-window-sum}
+ F_0=\sum_{l\le z}(-1)^{[l>0]+[z<N]}
+ \{Q(z-l)+\theta\}h_{z-l}
+ P_l(A_{<l})P_{N-z}(C_{>z}-z),
+\end{equation}
+where \(l\in\{0\}\cup A\cup\{N:U=1\}\),
+\(z\in C\cup\{N\}\cup\{0:V=1\}\), and \(P_0(\varnothing)=1\).
+In the zero-end case set \(F=F_0\).  In the minimal-end cases put
+\(N=a+m\), \(a>m\ge1\), and fix a literal ribbon word with cuts
+\(R\subset\{1,\ldots,m-1\}\).  The exact domains are:
+\begin{itemize}
+\item One minimal end, oriented first: \(U=0\), \(a\notin A\),
+\(A\cap(0,m)=R\), and
+\(A\cap(a,N)=C\cap(a,N)=a+R\).
+The starting \(m\)-word of \(C\) and its cut at \(m\) are not assumed known.
+Put \(e_0=[a\in C]\); this seam is optional.
+\item Two minimal ends: \(U=V=0\), \(a\notin A\), \(m\notin C\),
+\(A\cap(0,m)=C\cap(0,m)=R\), and
+\(A\cap(a,N)=C\cap(a,N)=a+R\).
+Put \(u=[m\in A]\), \(v=[a\in C]\).
+\end{itemize}
+The complete short polynomial and its top coefficient are
+\[
+\begin{array}{c|l|l}
+ e&F&D_0=[h_N]F\\\hline
+0&F_0&NQ+(1-U-V)\theta\\
+1&F_0-\{mQ+(1-e_0)\theta\}P_N(A)&aQ+(e_0-V)\theta\\
+2&F_0-\{mQ+(1-v)\theta\}P_N(A)
+       -\{mQ+(1-u)\theta\}P_N(C)&(a-m)Q+(u+v-1)\theta.
+\end{array}
+\]
+Every \(D_0\) is positive.  Top integrality means precisely
+\(F/D_0\in\mathbb Z[h_1,h_2,\ldots]\), not rational image membership.
+It holds if and only if
+\[
+ A=C\ (e=0),\qquad A=C\setminus\{a\}\ (e=1),\qquad
+ A\setminus\{m\}=C\setminus\{a\}\ (e=2).
+\]
+In these cases the whole polynomial is, respectively,
+\[
+ F/D_0=P_N(A),\qquad P_N(C),\qquad P_N(A\cup C).
+\]
+These primitive unit-top polynomials are realized by actual ribbons of size
+\(N\).  A unique last minimal end is included by reflection; its output is
+\(P_N(A)\) and its relation is \(C=A\setminus\{m\}\).
+
+For applicability, let an actual connected skew diagram \(X\) have \(t\ge1\)
+ribbon interior components of span \(m\), all of function \(g\).  Suppose their
+content starts are
+\(\alpha_i=a\sum_{j<i}k_j\), \(1\le i\le t\), where
+\(k_0,\ldots,k_t\ge1\), \(K=\sum k_j\), and \(a>m\).
+Its span is \(M=m+aK\), and
+\(e=[k_0=1]+[k_t=1]\) counts its minimal ends.
+When an end is minimal, require \(P_m(R)\) to be the actual monic \(g\).
+Its cutting strip follows the southeast boundary,
+except that at each exit from a doubled component interval it follows the
+northwest east step.  Use its actual first and last \(N=a+m\) windows, the
+last translated by \(L=a(K-1)\), and its actual cuts at \(N,L\) for \(U,V\).
+The displayed formulas give
+\[
+ F=(-1)^{r_X-1}g^{-t}(QV_L+\theta\delta_L)s_X
+\]
+provided the necessary boundary words in the stated domains have already
+been pinned literally.  For one minimal end this requires its complementary
+weight-\(m\) pencil to be the displayed scalar times the actual monic
+\(g\); for two minimal ends both necessary component words must already be
+pinned.  No attachment type, field enlargement, or chart of \(X\) is inferred
+from this construction.
+\end{lemma}
+\begin{proof}
+Write \(\delta_Lh_j=h_{j-L}\) and
+\(V_Lh_j=(j-L)h_{j-L}\), with \(h_0=1\) and negative indices zero.
+The derivations fix constants.  The coarsening formula for a ribbon follows
+by expanding its row Jacobi--Trudi determinant: every nonzero permutation
+merges consecutive rows, and a merge deletes one cut and changes its sign.
+Thus it gives exactly \(P_n(S)\) after removal of the top sign.
+
+Here is the original determinant calculation behind applicability.
+On a diagonal, the cells of a skew diagram form an interval.  Erosion removes
+one cell from each nonempty interval.  A ribbon erosion component therefore
+corresponds to a consecutive band of height-two diagonals; height three would
+give two cells on an eroded diagonal and a nonribbon component.  Within a
+height-two band both boundary words are the component word.  At entrance
+they have steps north and east, and at exit east and north.  The prescribed
+exit switch gives one ribbon strip \(\mathcal T\); it need not lie in \(X\).
+Put \(u_0=0,u_i=\alpha_i\),
+\(v_j=\alpha_{j+1}+m-1\) for \(j<t\), and \(v_t=M-1\).  Then the actual
+outside determinant is
+\begin{equation}\label{eq:oo-outside}
+ s_X=\det(s_{\mathcal T[u_i,v_j]})_{0\le i,j\le t}.
+\end{equation}
+An interval of length zero contributes one and a negative length contributes
+zero.  This identity can be derived from the original row Jacobi--Trudi
+paths.  Cut those paths at the entrances and exits of the height-two bands,
+and join their boundary pieces in the order prescribed by the strip.
+The resulting sources and sinks have contents \(u_i,v_j\).  Between a source
+and a sink the weak row and strict column comparisons are exactly those of
+the indicated strip ribbon, so its weight sum is that entry of the displayed
+matrix.  In the determinant expansion, choose the first intersection of a
+pair of paths, ordered first by diagonal and then by tableau level.  Exchange
+their tails there.  The edge weights, comparisons, and multiset of entries
+are unchanged; the sink permutation changes by a transposition.  This is a
+weight-preserving, sign-reversing involution on intersecting families.
+The families left over cannot exchange the boundary order.  Between two
+successive doubled bands they fill the single boundary interval; in a doubled
+band their two ordered paths fill its two intervals.  At an entrance and an
+exit the north/east choice is exactly the original row/column comparison.
+Consequently their entries are precisely the semistandard tableaux of all
+cells of \(X\), each once.  The same first-intersection involution on the
+original row paths proves their weight sum is the original Jacobi--Trudi
+determinant.  This proves the identity before any scalar normalization.
+The subdiagonal entries are the actual \(g\)'s and the farther lower entries
+vanish.  Its diagonal strip spans are \(m+ak_i\).
+
+Expanding an upper-Hessenberg determinant groups its indices into consecutive
+blocks.  A partition into blocks with \(j\) splits contributes the product
+of its merged-strip functions and the \(t-j\) retained subdiagonal functions,
+with determinant sign \((-1)^{t-j}\).  If two strip ribbons overlap in a
+component, their row counts satisfy
+\(r_1+r_2=r_{\rm merged}+r_{\rm component}\).
+The exit switches remove exactly \(t\) north steps from the southeast
+boundary, so \((-1)^{r_X-1}=(-1)^t(-1)^{r_{\mathcal T}-1}\).
+Put \(G=g/[h_m]g\).  If \(\pi\) is a consecutive-block partition with
+\(j(\pi)\) splits and \(S_I\) is the actual cut set of its merged strip
+on block \(I\), the exact normalized identity is
+\[
+ (-1)^{r_X-1}g^{-t}s_X
+ =\sum_\pi(-1)^{j(\pi)}G^{-j(\pi)}
+   \prod_{I\in\pi}P_{m+a\sum_{i\in I}k_i}(S_I).
+\]
+Thus each split has a minus sign and one denominator equal to the actual
+monic component polynomial.  Since \(L\ge a>m\), the high derivation fixes
+all those denominators.  This also retains component aliases: equal ribbon
+functions have the same row count, but their words have not been replaced.
+
+A block omitting at least two increments has span at most
+\(m+a(K-2)<L\), so none of its entries differentiates.  The only surviving
+blocks are the full strip and a block omitting a single endpoint increment
+of value one.  With \(K=2\) the single split product has two differentiating
+factors; both contributions remain.  The complementary pencil has weight
+\(m\).  If its two actual words are \(R\), the zero-end formula at size \(m\)
+proved below gives its full value, not just its top (at \(m=1\) this
+coarsening identity is the direct one-cell calculation).  At a first minimal end
+the entrance and exit cuts \(a,N\) are absent, so its scalar is
+\(mQ+(1-e_0)\theta\).  At a last minimal end the cuts \(L,L+m\) are absent,
+and its scalar is \(mQ+(1-u)\theta\).  These are exactly the two corrections
+in the statement.  The one-end complementary-pencil hypothesis supplies
+that same value when only that end is pinned.
+
+For the full strip, differentiate its coarsening sum and retain the two
+endpoints of the differentiated block.  Its length is \(L+z-l\); after the
+shift its weight is \(Q(z-l)+\theta\).  The cuts before and after it give
+the two displayed prefix/suffix polynomials.  This proves
+\eqref{eq:oo-window-sum}, including every \(l=z\) contribution
+\(\theta h_0\).  Its only linear-top terms are \((0,N)\) and the two possible
+exterior zero-length terms, giving \(NQ+(1-U-V)\theta\).
+Subtracting the actual corrections gives the other tops.  Their least bounds
+are \(NQ-\theta\), \(aQ-\theta\), and \((a-m)Q-\theta\), respectively.
+
+For necessity, take \(x+y=N\), \(x<y\), and write
+\((\alpha,\beta,\gamma,\delta)=([x\in A],[y\in A],[x\in C],[y\in C])\).
+Let \(\mu_A,\mu_C\) be the actual correction coefficients, zero when absent.
+Selecting the two-part coarsenings in the full sum gives
+\begin{align*}
+ -[h_xh_y]F={}&\{yQ+(1-U)\theta-\mu_A\}\alpha
+ +\{xQ+(1-U)\theta-\mu_A\}\beta\\
+ &+\{xQ+(1-V)\theta-\mu_C\}\gamma
+ +\{yQ+(1-V)\theta-\mu_C\}\delta
+ -\theta(\alpha\gamma+\beta\delta).
+\end{align*}
+The last products are the internal zero-length terms.  At \(x=y\) there
+are only two bits and the square coefficient is
+\[
+ \{xQ+(1-U)\theta-\mu_A\}\alpha
+ +\{xQ+(1-V)\theta-\mu_C\}\gamma-\theta\alpha\gamma.
+\]
+It is counted once.  In the minimal-end rows first take central pairs
+\(m<x<y<a\).  Zero or four selected bits give \(0,2D_0\).
+A single bit has value strictly between \(\theta\) and \(D_0\), and a triple
+has value \(2D_0+\theta\) minus its complementary single, strictly between
+\(D_0\) and \(2D_0\).  The six two-bit choices have these remainders after
+subtracting \(D_0\):
+\[
+\begin{array}{c|ccc}
+ &0&1&2\\\hline
+(\alpha,\gamma),(\beta,\delta)&0&0&0\\
+(\alpha,\beta)&(1-U+V)\theta&-mQ+(e_0+V)\theta&(1+v-u)\theta\\
+(\gamma,\delta)&(1+U-V)\theta&mQ+(2-e_0-V)\theta&(1+u-v)\theta\\
+(\alpha,\delta)&(y-x)Q+\theta&(y-x)Q+\theta&(y-x)Q+\theta\\
+(\beta,\gamma)&(x-y)Q+\theta&(x-y)Q+\theta&(x-y)Q+\theta.
+\end{array}
+\]
+For distinct central pairs \(a-m\ge3\).  This and \(0<\theta<Q\) show that
+every nonzero remainder has absolute value less than \(D_0\); the swap
+remainders cannot vanish.  The same bounds in row zero use \(x\ge1\) and
+\(y\le N-1\).  For a midpoint the two unmatched values are strictly between
+zero and \(D_0\), while the matched values are zero and \(D_0\).  This also
+handles \(N=2\) and any central interval with no distinct reflected pair.
+
+In row one take \(1\le x<m\).  Put
+\(\alpha=[x\in R]\), \(\beta=[m-x\in R]\), and let \(\gamma=[x\in C]\)
+be unknown.  The preceding coefficient is
+\[
+ D_0\beta+c_1\alpha+c_2\gamma-\theta\alpha\gamma,
+ \quad c_1=(a-x)Q+e_0\theta,\quad c_2=xQ+(1-V)\theta,
+ \quad c_1+c_2-\theta=D_0.
+\]
+At \(x=m\) its base term is \(e_0D_0\), and the two compared bits are
+\([m\in A],[m\in C]\).  A mismatch leaves \(c_1\) or \(c_2\), both strictly
+between zero and \(D_0\): the upper gaps are
+\(xQ-V\theta>0\) and \((a-x)Q+(e_0-1)\theta>0\).
+Thus integrality pins the unknown starting word and the cut at \(m\).
+It does not force the optional cut at \(a\).
+
+These calculations exhaust all sixteen distinct-pair patterns and all
+midpoint patterns.  Their only remaining mismatches are containments by
+extra distinct reflected pairs.  In row zero they occur at
+\((U,V)=(1,0)\), with \(C\subset A\), or the reflected reverse.
+In row two they occur at \((u,v)=(1,0)\), with extra central pairs in
+\(m<z<a\), or the reflected reverse.  The structural seam \(m\) is not
+itself a central mismatch.  Row one has no exception when \(m\ge2\):
+its same-side remainder could vanish only at
+\(e_0=V=1\), \(\theta=mQ/2\), outside the phase range.
+When \(m=1\), exactly this half-phase exception remains at \(\theta=Q/2\);
+\(C\setminus\{a\}\) is centrally contained in \(A\), with extra pairs
+\(1<z<a\).  No midpoint can be extra.
+
+Let \(z\) be the largest extra cut and use the finest monomial of the union
+cut set.  Every term of the finite sum retains a subset of that union.
+Dropping a cut loses a factor, even when interval lengths repeat.  To attain
+its maximal ordinary degree, a positive middle interval must be between
+consecutive union cuts, all cuts to its left must be available in \(A\),
+and all cuts to its right in \(C\).  For \(C\subset A\), precisely the
+intervals from \(z\) onward are available.  Their lengths sum to \(N-z\);
+their phase terms cancel the internal zero-length terms except for one
+\(\theta\).  In row zero the exterior \(-\theta P_N(A)\) cancels it,
+leaving absolute coefficient \((N-z)Q\), strictly between zero and
+\(D_0=NQ\).  In row two the \(A\)-correction removes \(mQ+\theta\),
+leaving \((a-z)Q\), strictly between zero and \(D_0=(a-m)Q\).
+The other correction has smaller degree.  In the row-one half-phase case
+use the union \(A\cup\{a\}\): the available intervals are exactly those
+from \(z\) to \(a\), and their absolute coefficient is
+\((a-z)Q+\theta\), strictly between zero and \(D_0=aQ\).
+Neither correction nor the exterior \(C\)-term reaches that degree.
+Reflected containments have the same coefficient.  These nonintegral
+coefficients exclude all remaining mismatches.
+
+For sufficiency group the sum by an ordered retained subset \(B\) before
+commuting its factors.  A permitted positive middle interval has sign
+\((-1)^{|B|}\), length weight \(Q(z-l)\), and phase \(\theta\).
+An internal zero-length interval has the opposite phase sign.  If
+\(A=C\), there are \(|B|+1\) positive intervals totaling \(N\),
+\(|B|\) internal cancellations, and exterior contributions
+\(-U\theta,-V\theta\).  This proves the complete row-zero identity.
+
+In row one write \(C=A\cup\{a:e_0=1\}\).
+If \(e_0=0\), the zero-end identity minus the correction gives the claimed
+answer.  If \(e_0=1\), subsets omitting \(a\) have sign-normalized coefficient
+\(NQ+(1-V)\theta\).  For subsets retaining \(a\), the prefix cannot
+retain it, so the middle intervals span only \([0,a]\); their coefficient is
+\(aQ+(1-V)\theta\).  These are precisely the coefficients of
+\[
+ F_0=\{mQ+(1-e_0)\theta\}P_N(A)
+       +\{aQ+(e_0-V)\theta\}P_N(C).
+\]
+In row two put \(S=A\setminus\{m\}=C\setminus\{a\}\).
+A retained \(m\) must occur on the prefix side and a retained \(a\) on the
+suffix side.  For each ordered subset the complete inventory is
+\[
+\begin{array}{c|c|c}
+\text{retained seams}&\text{availability}&\text{coefficient in }F_0\\\hline
+\varnothing&\text{all flags}&NQ+\theta\\
+\{m\}&u=1&aQ+\theta\\
+\{a\}&v=1&aQ+\theta\\
+\{m,a\}&u=v=1&(a-m)Q+\theta.
+\end{array}
+\]
+The corresponding intervals span \([0,N]\), \([m,N]\), \([0,a]\), and
+\([m,a]\), respectively; internal zero terms leave one phase.
+For each of the four actual flag pairs this inventory is exactly
+\[
+ F_0=\{mQ+(1-v)\theta\}P_N(A)
+ +\{mQ+(1-u)\theta\}P_N(C)+D_0P_N(A\cup C).
+\]
+An unavailable seam contributes no subset.  Subtracting the actual
+corrections proves every ordered-subset coefficient, hence the whole
+commutative polynomial with all repeated-length multiplicities.
+
+Reflection replaces \((A,C,U,V)\) by
+\((N-C,N-A,V,U)\) and \((l,z)\) by \((N-z,N-l)\).
+The finite sum is unchanged after commuting factors, and the first-end
+correction becomes the last-end correction.  Finally, starting at a
+southwest cell and taking a north step exactly at the output cuts, and an
+east step elsewhere, constructs the required actual ribbon.
+Its top-normalized function is \(P_N\) of that cut set, with content one.
+The construction asserts no root of the full diagram.
+\end{proof}
+
+\section{Residue exclusions and smaller ribbon probes}\label{sec:older-cells}
+\begin{lemma}\label{lem:triangular-residue}
+Suppose \(\Phi(x_j)=a_jh_{jq+u}+b_j\), with \(a_j\ne0\) in the lower field \(K_0=\mathbb Q(h_1,\ldots,h_{q-1})\), and \(b_j\) involving only earlier target generators.  Retain the nonpivot high generators \(Z\).  Then the target field is \(K_0(\Phi(x_1),\Phi(x_2),\ldots,Z)\), freely in these coordinates.  If a homogeneous connected outer prime \(\pi\) maps to a lower unit times a target prime \(\xi\), the residue field at \(\xi\) is a purely transcendental extension of \(\operatorname{Frac}(K_0[x]/(\pi))\).  Outer grading \(x_j\mapsto T^jx_j\) extends by fixing \(K_0,Z\), and orders along the two primes agree.
+\end{lemma}
+\begin{proof}
+Solve recursively for each pivot generator.  Any alleged algebraic relation involves finitely many coordinates, where the triangular substitution is invertible.  Quotienting first by \(\pi\), then taking fractions, proves the residue assertion.  The quotient is a domain by the monic-linear top-variable description of a connected prime over a purely transcendental field.  Factorization into powers of \(\pi\) before adjoining independent coordinates proves order preservation.  Homogeneity makes the grading descend to the quotient.
+\end{proof}
+
+\begin{lemma}\label{lem:graded-degree}
+Let a field carry a rational integer grading fixing \(K\).  If a nonzero homogeneous element of nonzero weight \(d\) satisfies \(F=LQ(v)\), with \(L\in K^*\) and \(Q\in K(X)\) nonconstant, then \(\deg Q\mid d\), where degree is rational-map degree after cancellation.
+\end{lemma}
+\begin{proof}
+Apply the grading parameter \(T\): \(Q(v(T))=(F/L)T^d\).  The right side has degree \(|d|\).  Degrees of nonconstant rational maps multiply: substituting coprime homogeneous pairs cannot create a common zero, because its image would be a common zero of the original pair.  Thus \(|d|=\deg Q\deg_Tv(T)\).  In the polynomial case the same argument is just multiplication of each pole order by \(\deg Q\).
+\end{proof}
+
+\begin{lemma}\label{lem:grading-shape}
+Under Lemma~\ref{lem:graded-degree}, in characteristic zero, the rational function \(Q\) has precisely one geometric zero and one geometric pole.  Thus
+\[
+ Q(X)=c\,M(X)^d,
+\]
+where \(M\) is a fractional linear function over \(K\), \(c\in K^*\), and \(d=\deg Q\).  In particular a polynomial \(Q\) must be \(c(X-\alpha)^d\).  A polynomial with two distinct roots is therefore excluded even when its degree divides the proposed homogeneous weight.
+\end{lemma}
+\begin{proof}
+Over an algebraic closure, every zero and pole of \(Q\) has a nonempty fiber under the nonconstant rational map \(v(T)\).  Distinct fibers are disjoint.  The composite is a nonzero monomial in \(T\), with zero/pole support only \(\{0,\infty\}\).  Thus \(Q\) has at most two distinct zero/pole points, necessarily one of each.  Each has multiplicity \(d\).  Uniqueness makes the two points rational over \(K\), and gives the displayed form.  The polynomial case has its pole at infinity.  This strengthening does not remove the requirement that the multiplier be fixed by a rational grading.
+\end{proof}
+
+\begin{lemma}\label{lem:arithmetic-transcendence}
+For an actual marked inner, put \(f=s_E\), \(M_j=\Phi_\omega(h_j)\).  Let \(\xi\) be a connected prime with
+\(\max(\operatorname{sp}A,\operatorname{sp}B)<\operatorname{sp}\xi<\operatorname{sp}f\).
+Then \(\overline{M_2}/\bar f^2\) is transcendental over \(\mathbb Q\).
+\end{lemma}
+\begin{proof}
+The two actual domino identities are \(M_2=A b_2\) and \(f^2-M_2=\pm Bc_2\), with connected \(b_2,c_2\) of span larger than \(f\).  Neither zero nor one can be the residue value.  If it were a rational \(a/b\), coprime integers \(a,b\), then the primitive \(\xi\) would divide \(bM_2-af^2\) integrally.  At least one of the nonzero integers \(a,b,b-a\) has a prime divisor.  Reduction at that prime would make the irreducible reduction of \(\xi\) divide \(f^2\), \(Ab_2\), or \(Bc_2\).  Lemma~\ref{lem:cofactor} and the span inequalities exclude every possibility, including characteristic two.  Finally the residue field at \(\xi\) is purely transcendental over \(\mathbb Q\), by elimination of its unique highest generator, so it has no new algebraic constants.
+\end{proof}
+
+\begin{lemma}\label{lem:row-collapse}
+For actual row moments \(b_j\) and \(M_j=A^{j-1}b_j\),
+\[
+ M_iM_j-fM_{i+j-1}=\pm A^{i+j-2}B^2Z\,s_{(i,j;1)\circ_\omega E}
+ \qquad(i,j\ge2).
+\]
+At a prime dividing \(BZ\) but not \(f\),
+\[
+ \bar b_j=\bar f\tau^{j-1},\qquad
+ \bar M_j=\bar f^jv^{j-1}.
+\]
+If \(R\) is homogeneous of weight \(b+1\) and \([h_{b+1}]R\ne0\), its residue is \(f^{b+1}Q_R(v)\), where \(\deg Q_R=b\).
+\end{lemma}
+\begin{proof}
+Apply the external composition identity to \(s_{(i,j;1)}=h_ih_j-h_1h_{i+j-1}\); its normalization exponents are \(i+j-2,2,1\).  Cancel the indicated power of \(A\) before residue reduction, whether or not it survives there.  Taking \(i=2\) proves the recurrences.  A weight-\(b+1\) monomial of ordinary length \(d\) specializes to \(f^{b+1}v^{b+1-d}\).  Only \(h_{b+1}\) has length one, proving the exact degree statement.
+\end{proof}
+
+\begin{theorem}\label{thm:heterogeneous-reduction}
+Consider a mixed/mixed discrete-source comparison with
+\[
+ p=ad>q=bd,\quad\gcd(a,b)=1,\quad b\ge2,\quad
+ N_E=p+w=mq+u,
+\]
+\(g=s_V\), \(\Gamma=\kappa(g)\ne1\), \(N_D=1+bK\), \(N_C=m+aK\), and \(K\ge t+1\), where \(t=|D^-|>0\).  Under the exact corner/section/high-identity inputs stated below, the comparison is impossible in both width orders.  No landing or smaller rooted-key call occurs in this implication.
+\end{theorem}
+\begin{proof}
+For \(w<q\), set \(e=b(K-1)-t\), \(r_0=1+bK-t\).  The required exact inputs are
+\[
+ \kappa(s_C)=g^t\Gamma^{r_0},\quad
+ \Phi_\eta(T_C)=L\Phi_\eta(\Gamma)^e\Phi_\omega(R_D),
+\]
+where \(L\in K_0^*\), \(R_D\) has weight \(b+1\) and nonzero top coefficient, and
+\(\operatorname{wt}T_C=a+m+r_0\deg\Gamma\).
+They are equalities of actual functions obtained from the high weighted derivative, not definitions of a new hypothesis-free class.
+
+Choose a component prime \(\pi\mid\Gamma\) and its actual candidate child \(\xi\).  The source caps, mark and hat are \(q\)-low, so \(\xi\mid Z\), and the strict span inequalities of Lemma~\ref{lem:arithmetic-transcendence} hold.  Put \(Q=T_C/\Gamma^e\), a rational outer expression; polynomiality is unnecessary.  The high identity and Lemma~\ref{lem:row-collapse} show that its image has nonzero residue.  Divide by the image of \(g^{b+1}\).  Lemma~\ref{lem:triangular-residue} gives
+\[
+ \bar Q/\bar g^{b+1}=L'Q_{R_D}(v),\qquad
+ \operatorname{wt}(Q/g^{b+1})=a-bm.
+\]
+The right polynomial has degree \(b\), while the nonzero weight is not divisible by \(b\).  Lemma~\ref{lem:graded-degree} is a contradiction.
+
+For \(w\ge q\), the connected mark prime of span \(w\) can be neither a candidate low normalizer nor a child: \(w-u=mq-p\) is not divisible by \(q\).  Its source exponent must be zero.  On a discrete source this means all row gaps are one.  Section congruences make the row lengths \(1+bk_i\).  The high row quotient is a nonzero scalar times \(h_{b+1}\); the scalar, after its overall sign, is
+\[
+ (b+1)p+\rho-j_0(p+\rho),\qquad j_0\in\{0,1,2\},\quad0<\rho<p,
+\]
+as seen by the whole-block term and the two possible minimal endpoint omissions.
+
+Let \(\theta,\Delta,\zeta\) record the candidate ancestors of the high source cap, hat and middle factors.  The exact corner equations give
+\[
+ \theta\zeta=\Gamma,\qquad
+ \kappa(s_C)=g^t\theta\Delta^{bK-2t}\zeta^{1+bK-t}.
+\]
+Cancel \(A^{-b}\) against \(\Phi_\omega(h_{b+1})=A^bs_G\) before taking residues.  Put
+\[
+ Q=T_C/(\Delta^{b(K-1)-2t}\zeta^{b(K-1)-t}).
+\]
+The required full high identity yields
+\[
+ \Phi_\eta(Q)=L_0s_G,\qquad
+ \operatorname{wt}(Q/g)=a+b\deg(\Delta\zeta).
+\]
+There is a high child \(\xi\mid BZ\): if \(\zeta\ne1\), choose it in \(Z\); otherwise \(\theta=\Gamma\ne1\), and Lemma~\ref{lem:finite-caps} puts a high cap inside a high hat component.  Its exponent \(bK-2t>0\) ensures actual candidate ancestry.  Both \(f,s_G\) survive.  Row collapse gives \(\bar s_G/\bar f=\tau^b\), so \(\bar Q/\bar g=L_1\tau^b\).  Its weight is \(a\bmod b\), impossible.  This is also the cap-only ancestry case; \(w\ge q\) never violates the mark's own inequality \(w<p\).
+\end{proof}
+
+\begin{lemma}\label{lem:modular-saturation}
+Let \(V\) be a ribbon of span \(m\), \(v_V=s_V\).  Suppose integral high quotients \(R,T\) of weights \(b+1,a+m\) have common content \(g_0\), equal absolute top coefficient \(A_0\), and the exact identity
+\[
+ \chi_\omega^b\Phi_\eta(T)
+ =\epsilon\mathcal N_V\chi_\eta^a\Phi_\omega(R).
+\]
+Assume both modified maps have primitive nonzero triangular leading coefficients in every characteristic and \(\Phi_\eta(v_V)=\mathcal N_Vf\).  Assume also that, after reduction at every prime \(\ell\), the nonzero ratio
+\[
+ \chi_\eta^a/(\chi_\omega^b\mathcal N_V^b)
+ \quad\text{belongs to}\quad\mathbb F_\ell(h_1,\ldots,h_{q-1}).
+\]
+Then \(A_0=g_0\).
+\end{lemma}
+\begin{proof}
+If a prime \(\ell\mid A_0/g_0\) existed, divide by \(g_0\) before reducing.  Both quotients and all primitive normalizers survive, but their top coefficients vanish.  A source largest index \(2\le j\le b\) must match a candidate pivot:
+\[
+ jp+w=kq+u,\quad a(j-1)=b(k-m).
+\]
+Coprimality makes \(j\equiv1\pmod b\), impossible.  Hence \(\bar R=c h_1^{b+1}\).  The candidate top is at most \(m\).  Since the ribbon \(v_V\) is monic up to sign in \(h_m\), expand \(\bar T=\sum v_V^jH_j\) in the smaller generators.  Comparing powers of the transcendental top of \(f\) leaves
+\[
+ \bar T=v_V^{b+1}H,\qquad \operatorname{wt}H=a-mb\ne0.
+\]
+If \(a-mb<0\), this is impossible for a polynomial.  If \(a-mb>0\), cancellation gives
+\[
+ \Phi_\eta(H)=\epsilon c\frac{\chi_\eta^a}
+ {\chi_\omega^b\mathcal N_V^b}\in\mathbb F_\ell(h_{<q}),
+\]
+by the specified finer-field bound.  A nonconstant \(H\) has a fresh pivot above that field.  This is again impossible.  No characteristic-free derivative-faithfulness assertion is needed: the maps, not their derivatives, remain injective.
+\end{proof}
+
+The ribbon-recognition input used here is the complete finite-window theorem \Cref{lem:oo-window-construction}, proved in \Cref{sec:recovered-recognition}.  Its scalar identity holds for arbitrary phase; its integrality criterion requires positive phase and the stated literal boundary words.
+
+\begin{lemma}\label{lem:two-window-recognition}
+Let \(D^-\) consist of \(t\ge1\) isolated cells and let its zero-gap section areas be \(1+bk_i\), \(b\ge2\), \(k_i\ge1\).  Put \(K=\sum k_i\), \(n=b+1\), \(L=b(K-1)\), and
+\[
+ F=(-1)^{r_D-1}h_1^{-t}(pV_L+\rho\delta_L)s_D,\qquad0<\rho<p.
+\]
+Its top coefficient \(A_0=[h_n]F\) is positive.  The polynomial \(F/A_0\) is integral if and only if it is an actual top-normalized size-\(n\) ribbon function.  This is a high-ray theorem, not a root theorem for \(D\).
+\end{lemma}
+\begin{proof}
+Use the original outside determinant of Lemma~\ref{lem:oo-window-construction}
+with seam \(m=1\), spacing \(a=b\), and actual component function \(g=h_1\).
+The isolated erosion cells are the doubled singleton bands, with starts
+\(\alpha_i=b\sum_{j<i}k_j\); their diagonal strip spans are exactly
+\(1+bk_i\).  Its short shift is \(b(K-1)\), and its window size is
+\(b+1\).  The actual boundary one-cell words are all the unique singleton,
+so every literal word hypothesis is automatic.  A complementary weight-one
+pencil is the displayed scalar times \(h_1\); no candidate alias or endpoint
+congruence is required on this source.
+
+The consecutive-block expansion retains the full strip and only minimal
+endpoint omissions, with both differentiated factors retained when \(K=2\).
+Its actual first/last cuts and exterior flags give precisely the zero-, one-,
+and two-end rows of that lemma with \(Q=p\), \(\theta=\rho\).
+The least top bound is \((b-1)p-\rho>0\).  Thus top normalization is defined,
+and the scalar lemma supplies the exact output cuts and the whole ribbon
+polynomial.  Its optional one-end seam, once-counted midpoint, and the
+seam-one half-phase containment are all included; no forced terminal cut
+is added.  Conversely each constructed \(P_{b+1}\) is integral with content
+one and top one.  This proves the equivalence at the stated source scope,
+without a root of \(D\).
+\end{proof}
+
+\begin{lemma}\label{lem:ribbon-end-recognition}
+Let a uniform ribbon candidate have the actual cutting-strip presentation of \Cref{lem:oo-window-construction}, empty endpoint collars, spacing \(a>m\), and an integral top-normalized high ray of weight \(a+m\).  Assume its two global end words and its necessary minimal-end component words satisfy that lemma's literal applicability conditions.  In the one-end case assume, in addition, the complementary weight-\(m\) pencil is its stated scalar times the actual monic component function.  Then the high ray is the top-normalized Schur function of an actual ribbon of size \(a+m\).
+\end{lemma}
+\begin{proof}
+The original outside determinant and its consecutive-block expansion give precisely the appropriate zero-, one-, or two-end formula of \Cref{lem:oo-window-construction}.  Its top coefficient is positive.  The integral normalization therefore forces the listed cut identities and constructs the output ribbon.  Reflection covers a unique last minimal end.  Equal component functions alone are not among the literal applicability assumptions.
+\end{proof}
+
+\begin{proposition}\label{prop:older-probe-consumers}
+Under the standing lower package, the one-cell candidate cell, every uniform positive-gap candidate cell in all attachment types (source zero joins allowed), and the uniform-ribbon zero-join mixed/mixed cell satisfying the literal endpoint and complementary-pencil hypotheses of \Cref{lem:ribbon-end-recognition} are excluded.  Their last step is always an actual smaller rooted comparison, not a root inferred from a high polynomial.
+\end{proposition}
+\begin{proof}
+In the one-cell case, Lemma~\ref{lem:alpha-row-candidate} and the section congruences give a literal candidate regrouping at \(\ell=bp=aq\), with ribbon outer of size \(K\) and coarse inner the \((a+1)\)-row power of \(U\).  In the uniform positive-gap candidate case, with no restriction on source zero joins or source attachment, ordinary-degree comparison in Lemma~\ref{lem:long-high-identity} gives \(r(V)=1\): the right side has degree \((t+1)r(V)\), while the left has degree at most \(tr(V)+1\).  Thus \(V=(m)\) and candidate rows are \(m+ak_i\).  They regroup literally with inner the \((a+m)\)-row power.  The extreme \(m\)-copy subchains give the coarse marks; full intersection, connected complements and private singletons verify I--IV, with \(a>m\).  Any necessary identification of the actual source inner with its smaller row fiber uses landing explicitly.
+
+In either case the candidate has an actual coarse ribbon chart.  Every ordered common-period derivative of total weight \(K-1\) reads a scalar times that coarse inner.  Injectivity makes the source high tail a one-dimensional line.  Its direction has unit primitive top: clear primitive normalizers in the equality with the actual coarse inner, compare integer contents, then take its unique highest-generator coefficient.  For mixed source marks use Lemma~\ref{lem:two-window-recognition}.  For ordinary sources, both common-period Hall and weighted derivatives pull back with the same normalization multiplier up to scalar signs: in the vertical case the two multipliers differ only by powers of \(-1\).  Their candidate pullbacks have weight one and therefore span the same coarse-inner line.  The source high weighted derivative is nonzero, and the joint line permits the auxiliary positive phase \(2V+\delta\), avoiding any assertion that the ordinary phase is positive.  This proves the positive-gap uniform candidate conclusion for ordinary sources even when their outer has zero joins; it is not an extrapolation of a mixed-only theorem.  The resulting source ribbon composed through the supplied fine mark and the candidate coarse inner have the same unique high connected factor.  All other factors have smaller span, so UFD and positive primitive normalization make their functions equal.
+
+In the uniform-ribbon zero-join case, Lemmas~\ref{lem:high-quotients} and \ref{lem:modular-saturation}, with Proposition~\ref{prop:exact-high-identity}, give unit primitive rays on both sides.  For \(w<q\), the source mark and hat are \(q\)-low.  The inner corner of a ribbon composition has only candidate normalizers below \(q\), so the source middle and the remaining factors are \(q\)-low too.  Their primitive reductions give the finer-field hypothesis.  For \(w\ge q\), the source mark prime is neither a fine normalizer nor a candidate child, by the strict nondividing grid.  Its source corner exponent is zero.  Thus all source row gaps are one, its rows have lengths \(1+bk_i\), and its high quotient is \(R=c h_{b+1}\), \(c\ne0\), by the whole-row expansion in \Cref{thm:heterogeneous-reduction}.  Its content equals its absolute top coefficient.  The common-content and top-coefficient identities therefore give integral normalized rays directly in this width order, without the narrower-field saturation argument.  Lemmas~\ref{lem:two-window-recognition} and \ref{lem:ribbon-end-recognition} give the two actual ribbons.  Their connected compositions are equal by the exact marked identity and high-factor comparison.
+
+Every resulting probe divides a nonzero parent derivative of weight loss \(\ell(K-1)\).  Its area is at most \(n-\ell(K-1)<n\); its supplied fine chart is proper and source-minimal by Lemma~\ref{lem:outer-minimal}.  Lower rooted-key invariance forces its two periods equal, contradicting \(p>q\).  This final lower call is indispensable in this argument.  The proof requires neither a root of the full source outer nor a general constructive root of the full candidate outer.
+\end{proof}
+
+\begin{proposition}\label{prop:heterogeneous-ribbon}
+Assume the actual proper charts and strict nondividing discrete-source entry of \Cref{sec:recovered-entry}, with mixed attachments on both sides.  A heterogeneous candidate whose maximal interior component function is a ribbon function is impossible.  This conclusion requires no candidate-root recognition or lower-area comparison.
+\end{proposition}
+\begin{proof}
+Write \(d(X)\) for the largest number of cells on a content diagonal of \(X\).  Iterated corner extraction matches every erosion component function, so this thickness is Schur-invariant.  The ribbon-outer inner corner is supported in spans at most \(R=\max(u,q-u-2)<q\).  A different candidate child of span \(qN_T+u\) can therefore come from neither source cap nor middle, and its equality with the connected source mark would force \(q\mid p\).  It is an actual source hat component \(Y\).
+
+In mixed case \(V,H\), the aligned caps on marked diagonal \(z\) have intervals
+\[
+ [a_z-\mathbf1_{z\ge s},b_z-1],\qquad
+ [a_z-\mathbf1_{z<t},b_z-1],\qquad t<s.
+\]
+They share an endpoint and are nested.  Since \(N_Y>R\), neither cap alone contains \(Y\).  Its prefix through \(s-1\) is in one cap and suffix from \(t\) in the other.  The corresponding whole connected cap components lie inside \(Y\), cover it, and overlap on at least \(s-t\) diagonals.  Thus \(N_Y+s-t\le2R<2q\), forcing \(N_T=1\) and \(s_Y=s_U\).  Both cap components have span greater than \(u\); otherwise their span sum is at most \(\max(2u,q-2)<q+u\).  They must therefore be Schur-equal to actual private components of \(U^-\).  Each has thickness at most \(d(U)-1\).  Nested intervals make the thickness of their union their maximum, contradicting \(s_Y=s_U\).  Rotation handles the other mixed case.  Ordinary caps need not obey this maximum rule and are not included.
+\end{proof}
+
+\section{Positive ordinary comparison}\label{sec:positive-oo}
+Throughout this section the supplied charts obey the I--IV composition laws.  Strict discrete entry means the function ancestry and section-grid conclusions stated in \Cref{prop:beta-reduction,lem:corner-spacing}, for the actual supplied pair, with exact corner multiplicities and fixed modified maps.  Both original charts are source-minimal.  These are retained hypotheses when the candidate inner is a line.  The theorem's lower package is used only at the strictly smaller diagrams constructed below.
+
+\begin{lemma}\label{lem:oo-covariance}
+For a supplied ordinary marked inner \(X\), put \(P=N_X-w_X\), \(O=X\setminus(W_-\cup W_+)\), and
+\[
+ \sigma=1\quad(H,H),\qquad \sigma=-1\quad(V,V),\qquad
+ \rho=P-N_O,\qquad \chi=\sigma\delta_Ps_X.
+\]
+Then \(|\rho|<P\), and its fixed modified map satisfies
+\begin{align*}
+ \delta_{jP}\Phi_X(Q)&=\sigma\chi^j\Phi_X(\delta_jQ),\\
+ V_{jP}\Phi_X(Q)&=\chi^j\Phi_X((PV_j+\rho\delta_j)Q).
+\end{align*}
+If \(\gamma_X(j)=[h_{jP+w_X}]\Phi_X(h_j)\), then
+\[
+ \gamma_X(j)=\gamma_X(1)\chi^{j-1}.
+\]
+All factors here are complete original polynomials, with their actual signs.
+\end{lemma}
+\begin{proof}
+For a horizontal ordinary row power, the surviving row and column shifts by \(jP\) have weighted difference \(P(n-j)+s-t\).  The thin tails have \(1\le s\le w_X\), \(0\le t<w_X\), and \(N_O=P+t-s\); thus \(\rho=s-t\).  Zero-index entries remain in the shifted determinant.  Antitransposition gives the vertical law: its Hall multiplier is the negative of its weighted multiplier, and its effective phase is the negative of \(V_Ps_X/\delta_Ps_X\), again \(P-N_O\).  The generator identities extend by the Leibniz rule.  For an empty mark use its horizontal reading, with \(\rho=0\).
+
+Let \(k=-v_1\).  The actual \(j\)-copy row power has \(r_X+(j-1)k\) rows and corner \(\kappa(s_X)(BZ)^{j-1}\).  Its modified image has the additional factor \(A^{j-1}\).  The signed top coefficient is therefore
+\[
+ (-1)^{r_X-1}\kappa(s_X)\{(-1)^kABZ\}^{j-1}.
+\]
+The signed period law gives \(\chi=(-1)^kABZ\).  This proves the recurrence, including the vertical gauge.  It is not permissible to preserve \(A\) when changing a mark merely because its width stays fixed.
+\end{proof}
+
+\begin{lemma}\label{lem:oo-positive-gauge}
+A nonempty ordinary mark with \(\rho\le0\) has a legal opposite ordinary mark on the same inner, with the same width and period, phase \(-\rho\), and literal placement identity
+\[
+ D\circ_{\omega_a}X=\operatorname{AT}(D)\circ_{\omega_b}X.
+\]
+Here \(\operatorname{AT}(i,j)=(-j,-i)\).  Consequently both supplied ordinary charts can be read so that the same original operator \(2V_{jP}+\delta_{jP}\) pulls back with
+\[
+ Q_X=2P,\qquad \theta_X=2\rho_X+\sigma_X,
+ \qquad 0<\theta_X<Q_X.
+\]
+The inner and literal parent are unchanged; the actual mark function need not be unchanged.
+\end{lemma}
+\begin{proof}
+Consider \(H,H\); the other case is its antitranspose.  On marked content \(z\in[0,w-1]\), the two aligned copies of the inner have intervals
+\[
+ [a_z,b_z+L_z],\qquad[a_z-U_z,b_z],\quad
+ L_z=\mathbf1_{z\ge s},\quad U_z=\mathbf1_{z<t},
+ \quad1\le s\le w,\quad0\le t<w.
+\]
+The hypothesis is \(s\le t\).  Replace the displacement \(v\) by \(v-e\), \(e=(1,1)\).  Its full intersection has intervals
+\[
+ [a_z+1-U_z,b_z+L_z].
+\]
+They are nonempty since \(L_z+U_z\ge1\), and their endpoint steps make a connected skew diagram.  Its first marked cell is the old southwest extreme and its last is the old northeast marked cell shifted by \(e\); the new displacement still sends that cell to the original northeast extreme.  Its width is \(w\).
+
+The remaining lower tail is northwest for \(z\ge t\), and the upper tail is southeast for \(z<s\).  The new indices are \(s'=t,t'=s\).  Since \(1\le t\) and \(s<w\), both deletion complements and the middle have consecutive nonempty content intervals and inherit the skew endpoint bounds.  The original endpoint constraints force north steps at the two turns, so both new attachments are vertical, including \(s=t\).  This proves the separation and complement conditions.  The private diagonals \(w,P-1\) remain singleton.  The new middle erosion lies in \([w+1,P-2]\), whereas every hatted-mark band is \([jP,jP+w-1]\).  These supports are at distance at least two, proving nonadjacency in the infinite amalgamation.
+
+For maximality, the opposite extreme diagonals \(P,w-1\) have height two: \(t\ge1\) and \(s<w\) supply their other cells.  End-pinned displacements are therefore only \(v,v-e\).  Their last extreme marked cells differ, so the other full intersection cannot contain the new one.  A partial intersection at a fixed displacement cannot exceed its full intersection.  This checks maximality as well as the other legality conditions.
+
+The affine placements are
+\[
+ L_a(i,j)=(j-i)v+ie,\qquad
+ L_b(i,j)=(j-i)(v-e)-ie.
+\]
+One has \(L_b(\operatorname{AT}(i,j))=L_a(i,j)\), proving equality cell by cell, for every outer.  The new middle span is \(P+s-t\), so its phase is \(-\rho\).  Rotation transports the construction.  At width zero the horizontal reading is available by the empty-gauge convention.
+
+Choose the positive dual at negative phase and the horizontal reading at zero.  Phases are integers with magnitude less than \(P\); hence \(0<2\rho+\sigma<2P\).  Lemma~\ref{lem:oo-covariance} gives
+\[
+ (2V_{jP}+\delta_{jP})\Phi_X(Q)
+ =\chi_X^j\Phi_X((Q_XV_j+\theta_X\delta_j)Q).
+\]
+Antitransposition transports the outer interior and its component functions; discreteness, uniformity of those functions, and the score survive.  The gauge is applied after the residue reduction reaches a uniform ribbon inventory.  In \Cref{thm:ordinary-probes}, the original response factors determine the new section and collar data.  No old ordered word or old mark function is preserved by assumption.
+\end{proof}
+
+\begin{proposition}\label{prop:oo-residue-reduction}
+In the beta case of a positive-candidate ordinary/ordinary strict nondividing comparison with nonribbon source inner and the stated ancestry and section entry, the candidate inventory is necessarily
+\[
+ f=s_E=s_{V\circ_\eta U},\qquad g=s_V,\qquad
+ m=N_V\ge2,\qquad \kappa(s_C)=g^t,
+\]
+where \(V\) is a ribbon and \(t=|D^-|\ge1\).  This reduction needs function-level ancestry and section entry, not landing of \(E\).
+\end{proposition}
+\begin{proof}
+Write \(p=ad,q=bd\), \(\gcd(a,b)=1\), \(b\ge2\), and
+\[
+ p+w=mq+u=L,\qquad N_D=1+bK,\quad N_C=m+aK,
+ \quad K\ge t+1.
+\]
+Separation gives \(m<a\).  Retain the original supplied gauges and put \(s=b(K-1),r=a(K-1),\ell=bp=aq\).  Use the original weighted operator \(V_{\ell(K-1)}\), with its signed covariance from Lemma~\ref{lem:oo-covariance}.  The source quotient is
+\[
+ R=h_1^{-t}(pV_s+\rho_\omega\delta_s)s_D.
+\]
+It is integral of weight \(b+1\), with nonzero scalar top coefficient and no factor \(h_1\), even when \(\rho_\omega\le0\).  To check this without positive-phase recognition, expand the original outside determinant at its singleton seams.  Only the full merged ribbon and a minimal endpoint omission survive the short shift.  Each term retains all \(t\) seam factors, including a differentiated complementary singleton.  The finite-sum and correction identities of Lemma~\ref{lem:oo-window-construction}, at \(m=1,a=b,Q=p,\theta=\rho_\omega\), are polynomial identities in the phase and remain valid for arbitrary \(\rho_\omega\), with their actual \(h_0\) terms.  Only the ribbon-recognition part of that lemma requires a positive phase.  After the overall corner sign is removed, its three top coefficients are
+\[
+ (b+1)p+(1-u_0-v_0)\rho_\omega,\quad
+ bp+(e_0-v_0)\rho_\omega,\quad
+ (b-1)p+(r_0+s_0-1)\rho_\omega,
+\]
+for zero, one and two minimal ends, with the actual boundary bits of that expansion.  Each has absolute value at least \((b-1)p-|\rho_\omega|>0\).  At \(K=2\) both differentiations of the same split product remain; zero-length outputs retain \(\rho_\omega h_0\).
+
+All complete normalization factors are units at \(f\).  The fixed source triangular residue map makes the original parent derivative have exact \(f\)-order \(t\); pulling that same derivative through the fixed candidate map gives exact \(g\)-order \(t\).  Thus
+\[
+ T=g^{-t}(qV_r+\rho_\eta\delta_r)s_C
+\]
+is an integral polynomial of exact \(g\)-order zero, with linear top \(a+m\) and coefficient below \(m\).  Division by primitive \(g^t\) is integral by Gauss's lemma; this does not make \(T\) a diagram.  With the complete signed normalizers, the exact pullback before any low-field cancellation is
+\[
+ \Phi_\eta(T)=
+ \frac{\mathcal N_C\chi_\omega^s}
+ {\mathcal N_D\chi_\eta^r\mathcal N_V^t}\Phi_\omega(R).
+\]
+The two ordinary signs are retained in \(\chi_\omega=\sigma_\omega\delta_pf\) and \(\chi_\eta=\sigma_\eta\delta_qs_U\); no independently chosen sign or frozen normal unit replaces them.
+
+Put \(\Gamma=\kappa(g)\), \(K_0=\mathbb Q(h_{<q})\).  For \(w<q\), source mark, hat and finite caps are \(q\)-low.  Full corner comparison, including every candidate child, gives
+\[
+ Z=L_Z\Phi_\eta(\Gamma),\qquad
+ \kappa(s_C)=g^t\Gamma^{r_0},\quad r_0=1+bK-t,
+ \qquad L_Z\in K_0^*.
+\]
+The complete high pullback has the form
+\[
+ \Phi_\eta(T)=L_1\Phi_\eta(\Gamma)^e\Phi_\omega(R),
+ \quad e=b(K-1)-t,\quad L_1\in K_0^*.
+\]
+Here the exponent of \(Z\) in the complete source prefactor is \(s-(|D|-N_D)=s-t=e\); every other remaining factor is \(q\)-low.  These are full signed normalizers, not independent ancestor tags.  If \(\Gamma\ne1\), take a component prime of \(\Gamma\) and its actual transported child \(\xi\).  Its span is strictly between \(q\) and \(L\), and it divides \(Z\).  Lemmas~\ref{lem:row-collapse} and \ref{lem:arithmetic-transcendence} give a nonzero polynomial of degree exactly \(b\) as the residue of \(\Phi_\omega(R)/f^{b+1}\): a weight-\((b+1)\) monomial of length \(d\) becomes \(f^{b+1}v^{b+1-d}\), and only the nonzero \(h_{b+1}\) term has length one.  The full corner inventory gives \(\operatorname{wt}T=a+m+(1+bK-t)\deg\Gamma\), so \(T/(\Gamma^eg^{b+1})\) has weight \(a-bm\), nonzero and not divisible by \(b\).  Its residue is that exact degree-\(b\) polynomial times a nonzero grading-fixed unit, whose scalar sign does not change rational-map degree.  Lemma~\ref{lem:graded-degree} is a contradiction.  Hence \(\Gamma=1\), and the displayed corner inventory is uniform.
+
+For \(w\ge q\), the connected source mark has span \(w\) and cannot be a fine normalizer or child, since \(w-u=mq-p\not\equiv0\pmod q\).  Its source corner exponent vanishes.  Thus all source gaps are one, its rows are \(1+bk_i\), and \(R=c h_{b+1}\), \(c\ne0\).  Let \(\vartheta,\Delta,\zeta\) be the actual ancestor products of the high finite-cap, hat and middle factors.  Full corner comparison yields
+\[
+ \vartheta\zeta=\Gamma,\qquad
+ \kappa(s_C)=g^t\vartheta\Delta^{bK-2t}\zeta^{1+bK-t}.
+\]
+Since \(|D|-r_D=bK\), \(|D|-c_D=2t\), and \(|D|-N_D=t\), the complete source prefactor has exponents \((-b,s-2t,s-t)\) on \((A,B,Z)\), up to its fixed sign.  Cancel its \(A^{-b}\) against \(\Phi_\omega(h_{b+1})=A^bs_G\), \(G=(b+1)\circ_\omega E\), before any residue or narrower-field assertion.  With
+\[
+ Q=T/(\Delta^{b(K-1)-2t}\zeta^{b(K-1)-t})
+\]
+the complete high identity becomes \(\Phi_\eta(Q)=L_2s_G\), \(L_2\in K_0^*\), and
+\[
+ \operatorname{wt}(Q/g)=a+b\deg(\Delta\zeta).
+\]
+If \(\Delta\zeta\ne1\), an actual high hat or middle child gives the residue \(L_3(s_G/f)=L_3\tau^b\ne0\).  Both connected functions survive because that child has smaller span.  The complete multiplier \(L_3\) is a nonzero grading-fixed unit; its sign does not change the degree of the nonzero \(b\)-th power.  The weight is \(a\bmod b\), contradicting the graded-degree lemma.  If \(\Gamma\ne1\), such a child exists: either \(\zeta\ne1\), or a high cap is contained in a high hat component, whose exponent \(bK-2t>0\) supplies an ancestor.  Containment here supplies existence, not divisibility of cap functions.  If \(\Gamma=1\) but the candidate is heterogeneous, the corner equation forces \(\Delta\ne1\).  Thus this case also leaves only \(\kappa(s_C)=g^t\) with ribbon \(V\).  No ordinary maximum-cap-thickness rule is used.
+\end{proof}
+
+\begin{theorem}[Smaller ordinary probes]\label{thm:ordinary-probes}
+Assume the legal I--IV composition laws and the strict discrete-source entry of \Cref{sec:recovered-entry}.  Let
+\[
+ F=D\circ_\omega E,\qquad H=C\circ_\eta U,\qquad
+ s_F=s_H,\qquad |F|=|H|=n
+\]
+be proper source-minimal ordinary charts with nonribbon \(E\), positive candidate width \(u\), and periods \(p>q\), \(q\nmid p\).  Suppose \(D^-\) consists of \(t\ge1\) isolated cells and an actual ribbon component \(V\subset C^-\) satisfies
+\[
+ f=s_E=s_{V\circ_\eta U},\qquad g=s_V,\qquad
+ m=N_V\ge2,\qquad\kappa(s_C)=g^t.
+\]
+Write \(p=ad\), \(q=bd\), \(\gcd(a,b)=1\), \(b\ge2\), \(L=p+w=mq+u\), and \(\ell=bp=aq\).  With \(N_D=1+bK\), \(N_C=m+aK\), the actual section entry gives \(K\ge t+1\).  There are actual ribbons \(J,B_0\) with
+\[
+ |J|=b+1,\qquad |B_0|=a+m,
+ \qquad s_{J\circ_\omega E}=s_{B_0\circ_\eta U},
+\]
+and both compositions are proper and connected, with
+\[
+ |J\circ_\omega E|=|B_0\circ_\eta U|
+ \le n-\ell(K-1)<n.
+\]
+The output charts can be written in the supplied ordinary gauges.  No lower-area rooted transport or landing is assumed in this construction.
+\end{theorem}
+
+\begin{proof}
+The candidate inventory is already uniform.  Choose the positive ordinary readings of \Cref{lem:oo-positive-gauge}.  The actual marks and complete maps are recomputed; their functions and areas need not agree with the original ones.  Antitransposition transports the actual inherited component and uniform inventory, and preserves discreteness and the score.  The following full-equality response calculation supplies the new section and collar data directly, without reapplying strict section entry.
+
+\emph{Original residue factors and their exact ratio.}
+Normalize the ribbon polynomial of \(g\) to \(G\), monic in \(h_m\), and write \(\Phi_\eta(G)=\nu f\), with its complete signed normalizer \(\nu\).  In the actual \(f\)-quotient eliminate \(h_L\) through its full affine equation, over \(\mathcal K=\mathbb Q(h_{<L})\), retaining every higher original generator.  All normalization factors are nonzero units there, including a wide source mark of span \(w<L\).  Source \(h_1\) and fine \(G\) vanish.  The original outside determinants therefore become products of their actual diagonal ribbon responses.  After dividing by the fixed leading coefficient, each is monic linear in its own fresh original top, hence prime in the same polynomial extension.  Full parent equality matches those factors as a multiset.  Their top indices give
+\[
+ pa_i+w=qj_i+u,\qquad a_i=1+bk_i,\quad j_i=m+ak_i.
+\]
+In their actual orders, source section increments are \(k_i\), candidate increments are \(\widetilde k_i\), and only their multisets are matched.  Summing the response spans gives their common sum \(K\), with \(K\ge t+1\).  The actual candidate component starts are \(\alpha_i=a\sum_{j<i}\widetilde k_j\), strictly beyond both endpoint collars of width \(m\).
+
+At the common pivot \(h_{\ell+L}\), Lemma~\ref{lem:oo-covariance} and \(\gamma_\eta(m)=\nu\gamma_\omega(1)\) give the exact leading ratio
+\[
+ \lambda_*=\frac{\gamma_\eta(a+m)}{\gamma_\omega(b+1)}
+           =\frac{\nu\chi_\eta^a}{\chi_\omega^b}.
+\]
+For each actual minimal candidate diagonal ribbon \(Y_i\), matching supplies an actual source section \(S_i\) of size \(b+1\), and
+\[
+ \Phi_\eta(\widehat s_{Y_i})
+ \equiv\lambda_*\Phi_\omega(\widehat s_{S_i})\pmod f,
+\]
+where hats mean scalar top normalization, not new diagrams.  The ratio is independent of the response word and retains complete units.
+
+\emph{Short and long original identities.}
+Apply \(2V_{\ell(K-1)}+\delta_{\ell(K-1)}\) to the full equality.  For this uniform recognition step redefine the rays in the new actual gauges by
+\[
+ R=h_1^{-t}(Q_\omega V_{b(K-1)}+\theta_\omega\delta_{b(K-1)})s_D,
+ \qquad
+ T=g^{-t}(Q_\eta V_{a(K-1)}+\theta_\eta\delta_{a(K-1)})s_C.
+\]
+The signed seam and exact-order proof in Proposition~\ref{prop:oo-residue-reduction}, now with \(Q_X=2P_X\) and \(0<\theta_X<Q_X\), makes these new rays integral with linear tops \(b+1,a+m\).  They are not the earlier original weighted rays.  Cancel the complete corner and composition normalizers, exactly as in Proposition~\ref{prop:exact-high-identity}; the ordinary covariance has the same common multiplier \(\chi_X^j\).  This gives
+\[
+ \chi_\omega^b\Phi_\eta(T)
+ =\epsilon\mathcal N_V\chi_\eta^a\Phi_\omega(R),
+ \qquad\epsilon\in\{1,-1\}.
+\]
+Primitive triangularity in every characteristic gives common integer content, and the common original pivot gives equal absolute top coefficients.  Consequently the top-normalized rays satisfy the exact identity
+\[
+ \Phi_\eta(\widehat T)=\lambda_*\Phi_\omega(\widehat R).
+\]
+For \(w<q\), the ribbon inner corner has only fine normalizers below \(q\).  The source middle divides that corner, so \(\chi_\omega,\chi_\eta,\nu\) are all \(q\)-low, also when \(w\ge u\).  Lemma~\ref{lem:modular-saturation} applies.  Its lowest-pivot exception is retained: reduction would give \(\bar T=G^{b+1}H\) with \(\operatorname{wt}H=a-bm\).  Negative weight is impossible, zero violates coprimality, and positive weight gives a fresh fine pivot above the required \(q\)-low field.  Thus both normalized rays are integral.
+
+For \(w\ge q\), the mark mismatch already forced all source joins one and \(R=c h_{b+1}\).  Its content equals its absolute top coefficient, so the common-content identity directly makes \(\widehat T\) integral, without narrow-field saturation.  Extracting the actual source row probe cancels \(A^b\) before any finer-field assertion.  Source factors need only their own below-\(p\) bound.  In fact a wide source cannot have both ordinary gauges: the same mark mismatch on \(D\) and \(\operatorname{AT}(D)\) would force both row and column counts to equal \(t+1\), giving \(bK=2t\), contrary to \(K\ge t+1\).  Its original phase is already positive.
+
+The long original shift \(\ell K\), using source sections of area at least three, gives a nonzero scalar times \(h_1^{t+1}\).  Pulling back through the fine map gives a scalar times \(g^{t+1}\): after canceling the complete corners, compare the unique pivot of \(f\), then use fixed-map injectivity.  Its scalar is nonzero because the source coefficient is \(Q_\omega+(1-\iota_D)\theta_\omega\), with \(|1-\iota_D|\le1\).
+
+\emph{Actual candidate end words.}
+The actual starts \(\alpha_i\), ribbon component functions \(g\), and strict collars satisfy the outside-determinant applicability of Lemma~\ref{lem:oo-window-construction}.  Its construction gives the original determinant \eqref{eq:oo-outside} for \(C\), with actual subdiagonal entries \(s_{V_i}=g\) and zero farther lower entries.  It uses an abstract cutting strip, not a subset or a root of \(C\).  At shift \(aK\) only the full strip survives; the long identity is its zero-end two-window pencil of size \(m\).  The row-zero calculation of Lemma~\ref{lem:oo-window-construction}, which also works at this window size, makes the two actual end words one ribbon \(R_0\) with function \(g\).  At \(m=2\) use its single midpoint test.  This does not identify internal ribbon aliases.
+
+If both ends are minimal, subtract their two actual minimal-response congruences directly, with the same complete leading ratio:
+\[
+ \Phi_\eta(\widehat s_{Y_L}-\widehat s_{Y_R})
+ \equiv\lambda_*\Phi_\omega(\widehat s_{S_L}-\widehat s_{S_R})\pmod f.
+\]
+The source sections have weight \(b+1\) and monic tops, so their \(h_{b+1}\) terms cancel.  Modulo \(h_1\), the only possible \(h_b\) term, \(h_bh_1\), also vanishes.  A nonzero source remainder therefore has largest index \(2\le j\le b-1\) and fresh original pivot \(h_{jp+w}\), above \(L\).  At \(b=2\) the interval is empty.  Reduction of the candidate difference by monic \(G\) introduces only outer indices below \(m\); its remainder has either no pivot above \(L\) or a highest one \(h_{kq+u}\), \(k>m\).  The multiplier \(\lambda_*\) has no generator above \(L\).  Matching highest original pivots would require
+\[
+ jp+w=kq+u,\qquad a(j-1)=b(k-m),
+\]
+hence \(j\equiv1\pmod b\), impossible.  Thus the source difference vanishes modulo \(h_1\).
+
+For the fixed fine map this forces the relative congruence without using primitive-ray saturation:
+\[
+ \widehat s_{Y_L}-\widehat s_{Y_R}\in(g).
+\]
+To justify faithfulness, over \(K_0=\mathbb Q(h_{<q})\) solve the triangular fine pivot equations recursively, retaining the nonpivot original generators as additional variables.  Their leading coefficients are nonzero units in \(K_0\), so this is an invertible polynomial coordinate change on every finite set of indices.  Quotient first by the monic outer \(G\): its image is \(\nu f\), with \(\nu\in K_0^*\), and the quotient remains a polynomial domain.  The kernel of the fixed fine map into the actual \(f\)-quotient is exactly \((G)\).  Every nonzero original polynomial in indices below \(L\) remains nonzero there, since the full affine equation of \(f\) eliminates only \(h_L\).  Localization in those elements is injective.  No independence over \(\mathcal K\) of dependent fine low images is asserted.  This transfer subtracts the two original response factors, not a normalized full short ray.
+
+Their actual ends are \((R_0,V_L)\) and \((V_R,R_0)\), in the common southwest-to-northeast orientation.  Put \(N=a+m>2m\).  A multiple of \(g\) of weight \(N\) has quotient weight \(a\), so neither factor can contain \(h_{N-x}\) for \(0<x<m\).  The protected quadratic coefficient therefore gives
+\[
+ c_{R_0}(x)+c_{V_L}(m-x)
+ =c_{V_R}(x)+c_{R_0}(m-x).
+\]
+For \(x\ne m-x\), the coefficient of \(h_xh_{m-x}\) in a top-normalized size-\(m\) ribbon is minus its reflected cut-bit sum.  At the midpoint it is minus its single cut bit, counted once.  Equality of the size-\(m\) functions fixes these sums and the midpoint bit.  Write \(e_L(x)=c_{V_L}(x)-c_{R_0}(x)\), \(e_R(x)=c_{V_R}(x)-c_{R_0}(x)\).  The reflected sums give \(e_L(m-x)=-e_L(x)\); the protected equation gives \(e_L(x)+e_R(x)=0\).  Both errors lie in \(\{0,1\}\) when the reference bit is zero and in \(\{0,-1\}\) when it is one, so both vanish.  The midpoint was already fixed, including the sole bit at \(m=2\).  Both necessary endpoint component words are literally \(R_0\), even for nonrotation aliases.  Internal aliases remain allowed, and reflection interchanges the two ends without changing the argument.
+
+For a unique minimal end, retain the separate full-ray transfer.  Subtract its minimal-response congruence from the normalized full short identity.  Source tops cancel; modulo \(h_1\), its highest possible remaining outer index lies in \(2\le j\le b-1\), since \(h_bh_1\) vanishes.  A nonzero source residue at such an index has fresh original pivot \(jp+w>L\).  A candidate residue, reduced by monic \(G\), has either no pivot above \(L\) or a highest one \(kq+u\).  Matching requires \(j\equiv1\pmod b\), impossible, with the empty interval at \(b=2\) immediate.  Thus the source difference vanishes, and the fixed fine-map quotient faithfulness just proved gives
+\[
+ \widehat T\equiv\widehat s_Y\pmod g.
+\]
+Polynomiality of \(T\) makes its complementary weight-\(m\) pencil divisible by \(g\): the accompanying minimal diagonal response has a fresh top and survives modulo \(g\).  It is a scalar times \(g\), and the zero-end pencil pins that component word.  The other initially unknown boundary word is pinned by the row-one boundary test of Lemma~\ref{lem:oo-window-construction}.
+
+\emph{Actual ribbon outputs and the area bound.}
+All candidate window hypotheses have now been proved.  Lemma~\ref{lem:oo-window-construction} constructs \(B_0\), \(|B_0|=a+m\), with \(T=c_Ts_{B_0}\).  Apply the same full outside calculation to the source with \(m=1,a=b\), retaining its optional seams and half-phase exception.  It constructs \(J\), \(|J|=b+1\), with \(R=c_Rs_J\).  In the wide case \(J=(b+1)\).  These are new ribbons, not roots of \(D\) or \(C\).
+
+Construct \(G_\omega=J\circ_\omega E\) and \(G_\eta=B_0\circ_\eta U\) by the original legal forward composition.  Both are connected and proper.  Their common span is \(\ell+L\).  Substitute their actual functions in the exact high identity.  Every other factor has smaller generator span, so connected irreducibility matches the unique high primes.  Primitivity and Schur positivity give \(s_{G_\omega}=s_{G_\eta}\).
+
+The source probe prime divides the nonzero original derivative
+\( (2V_{\ell(K-1)}+\delta_{\ell(K-1)})P\).
+Indeed clear the complete normalization denominator first; that prime cannot divide the clearing multiplier, whose span is smaller.  UFD therefore puts it in the original derivative polynomial, of weight \(n-\ell(K-1)\).  Hence
+\[
+ |G_\omega|=|G_\eta|\le n-\ell(K-1)<n,
+ \qquad K\ge t+1\ge2.
+\]
+These constructions were written in positive ordinary gauges.  Converting each output back to its supplied gauge only antitransposes its ribbon outer, by the literal placement identity in \Cref{lem:oo-positive-gauge}.  This preserves the output diagram, outer size, and area, so it gives the asserted probes through the supplied marks.
+\end{proof}
+
+\begin{lemma}\label{lem:oo-rooted-finish}
+Assume the legal supplied-chart laws, same-parent minimum/divisibility, source-minimal domination and the component-key criterion of common-factor gluing.  Suppose \(F=D\circ_\omega E\) is proper and source-minimal, \(E\) is nonline, its period is \(p\), and \(|F|=n\).  Let actual proper legal probes be constructed as
+\[
+ X=J\circ_\omega E,\qquad Y=B_0\circ_\eta U,
+ \qquad |J|,|B_0|,|E|,|U|\ge2,
+\]
+with second period \(q\), \(s_X=s_Y\), and \(|X|=|Y|<n\).  If lower rooted source-fiber transport holds on this smaller class, then \(p\mid q\).  In particular \(p>q\) is impossible.  No candidate source minimum or nonlinearity of \(U\) is required.
+\end{lemma}
+\begin{proof}
+Lemma~\ref{lem:outer-minimal} first makes the actual \(J\)-chart source-minimal, because it uses the same nonline \(E\) and an actual connected outer of at least two cells.  Both probes are already rooted and have proved strictly smaller area before the lower call.
+
+The exact lower statement needed is rooted-key invariance, together with the source-minimal domination and component-key criterion of the common-factor gluing theorem.  Here a fiber \(\mathcal F(\omega,s_J)\) consists of actual proper compositions through \(\omega\), up to transported rotation and ordinary gauge, with outer function \(s_J\); the gauge also applies the usual involution to the outer function.  The marked key is the source-minimal marked inner and outer function modulo these transports.  The component-key criterion says that equal keys of already-rooted mates identify their common-factor components.  Source-minimal domination identifies that component with the fiber of every prescribed source-minimal chart at its source.
+
+Thus lower key invariance puts \(Y\) in the prescribed source fiber at \(X\).  This membership supplies an actual proper period-\(p\) chart of the literal \(Y\), with inner \(E\) up to rotation and gauge, hence still nonline.  Its outer has the same area as \(J\), because equality or involution of outer Schur functions preserves homogeneous degree.  No chart is restored on an arbitrary, possibly chartless, mate.
+
+For exact minimum transport, choose a source-minimal chart \(\tau\) of the already-rooted \(Y\).  This does not assume that its constructed \(q\)-chart is minimal.  Domination at \(Y\) puts \(X\) in the fiber of \(\tau\).  Both fiber presentations preserve scores, so the source minima give
+\[
+ \operatorname{score}(J,E,\omega)
+ \le\operatorname{score}(\tau)
+ \le\operatorname{score}(J,E,\omega).
+\]
+The transferred period-\(p\) chart on \(Y\) is therefore source-minimal with nonline inner.  Its period is the least proper period by Lemma~\ref{lem:outer-minimal}.  Same-parent proper-period divisibility now applies to it and the already constructed proper \(q\)-chart of that same literal \(Y\), giving \(p\mid q\).  A positive multiple of \(p\) cannot be smaller than \(p\).  Neither lower restoration nor existence nor full-class landing was used.
+\end{proof}
+
+\begin{theorem}[Positive ordinary comparison]\label{thm:positive-oo}
+Assume the legal supplied-chart composition laws, strict discrete-source ancestry/section entry, same-parent minimum/divisibility, and the lower package strictly below \(n\).  There are no proper source-minimal equal connected parents
+\[
+ F=D\circ_\omega E,\qquad H=C\circ_\eta U,\qquad |F|=|H|=n,
+\]
+with nonempty discrete \(D^-\), nonribbon \(E\), ordinary marks, \(p>q\), \(q\nmid p\), and positive candidate width \(u\).  In the uniform-ribbon beta cell the proof constructs actual equal probes
+\[
+ J\circ_\omega E\sim B_0\circ_\eta U,
+ \quad |J|=b+1,\quad |B_0|=a+m,
+ \quad |J\circ_\omega E|\le n-\ell(K-1)<n.
+\]
+No literal root of the original \(C\) is required.  A line candidate inner is permitted.  Once these actual smaller probes exist, their uniform beta finish uses only the source minimum and lower rooted source-fiber transport, by Lemma~\ref{lem:oo-rooted-finish}.  Candidate source-minimality remains a premise of the full theorem's imported entry scope.
+\end{theorem}
+\begin{proof}
+The one-cell case uses \Cref{prop:older-probe-consumers} in the supplied gauges.  In the beta case, \Cref{prop:oo-residue-reduction} applies the original signed covariance before any positive-gauge normalization and leaves \(\kappa(s_C)=g^t\), with ribbon \(V\).  \Cref{thm:ordinary-probes} then constructs actual proper connected equal probes and proves their strict area bound.  Only now does \Cref{lem:oo-rooted-finish} use the source minimum and lower rooted transport to obtain \(p\mid q\), contrary to \(p>q\).  The candidate minimum remains part of the original entry, not a hypothesis on the constructed probe.
+\end{proof}
+
+\section{Empty candidates and transfer to parents}\label{sec:parent}
+For an empty candidate inner \(U\), put \(K=s_{U^-}\), \(q=N_U\), \(\beta_j=s_{(j)\circ_\varnothing U}\),
+\(\Phi(h_j)=\beta_j\), and \(\Psi(h_j)=\beta_j/K^j\).  The empty composition law gives
+\[
+ s_{X\circ_\varnothing U}=K^{N_X}\Psi(s_X),\qquad
+ \kappa(s_{X\circ_\varnothing U})=K^{N_X}\Psi(\kappa(s_X)).
+\]
+The normalized generators are triangular, \(\Psi(h_j)=\epsilon^jh_{jq}+\text{earlier terms}\), with lower denominators.
+
+\begin{lemma}\label{lem:polynomialization}
+Let an actual connected function \(S\) have span \(qJ\), corner \(K^J\eta\), with \(\eta\) a nonzero rational function of indices below \(q\).  If \(S/\kappa(S)\in\operatorname{Frac}\Psi(\mathbb Q[h])\), then a homogeneous polynomial \(P\) of weight \(J\) satisfies \(\Phi(P)=S/\eta\).  The reduced numerator of \(\eta\) must be constant.
+\end{lemma}
+\begin{proof}
+Adjoin unused nonpivot generators to the low coefficient field.  Triangular substitution is a polynomial coordinate change on the pivot generators; \(S/(K^J\eta)\) is polynomial in them over that field.  Its rational preimage over \(\mathbb Q\) is therefore polynomial, by intersection with the enlarged-field polynomial ring.  The graded injective map forces weight \(J\); multiply by \(K^J\).  If \(\eta=N/D\) is reduced, polynomiality forces \(N\mid S\).  A nonconstant low factor cannot divide the irreducible connected \(S\), whose span exceeds \(q\).
+\end{proof}
+
+\begin{lemma}\label{lem:two-layers}
+Let \(f=s_U\) and \(K=s_{U^-}\ne1\), with the empty composition map \(\Phi\) fixed above.  For any symmetric polynomial \(P\), not necessarily homogeneous,
+\[
+ K\mid\Phi(P)\quad\Longleftrightarrow\quad
+ [s_\lambda]P=0\text{ whenever }|\lambda^-|=0,
+\]
+\[
+ K^2\mid\Phi(P)\quad\Longleftrightarrow\quad
+ [s_\lambda]P=0\text{ whenever }|\lambda^-|<2.
+\]
+The empty partition is included.  Thus the first condition kills the constant term as well as the hook part; omitting the constant term would be false for \(P=1\).
+\end{lemma}
+\begin{proof}
+The empty composition map multiplies weighted degree by \(|U|\), since its row powers contain disjoint copies of \(U\).  The ideals \((K)\) and \((K^2)\) are homogeneous.  Therefore divisibility of \(\Phi(P)\) is equivalent to divisibility of each image of a weighted-homogeneous component of \(P\).  The constant component survives unless it is zero, because \(\Phi(1)=1\) and \(K\) has positive degree.  It remains to consider positive degree \(J\).
+
+At any corner prime, actual two-row identities give
+\(\beta_j=f^ju^{j-1}\pmod K\), \(u=\beta_2/f^2\).  This is the one-positive/one-negative alphabet with complete generating function \((1+yT)/(1-xT)\), where \(x=fu,y=f(1-u)\).  A hook of size \(J\) and leg \(l\) evaluates to \(f^Ju^{J-l-1}(1-u)^l\); nonhooks vanish.  These \(J\) Bernstein polynomials are independent, because \(u\) is transcendental by Lemma~\ref{lem:arithmetic-transcendence} with empty normalizers.  Thus a nonzero hook combination survives at every corner prime, proving the first assertion.
+
+For the second, put \(a_j=\beta_j/f^j\), \(\varepsilon=a_3-u^2=-K s_{(2,2;1)\circ U}/f^4\).  Its valuation at each corner prime is exactly that of \(K\), since the connected square child survives.  The actual \((3,j;2)\) identities yield
+\[
+ a_j=u^{j-1}+(j-2)u^{j-3}\varepsilon\pmod {K^2},\qquad j\ge2.
+\]
+Here \(a_1=1\) exactly.  The displayed recurrence follows by the recurrence \(u^2c_j+u^{j-1}c_3-u c_{j+1}=0\) on the first correction; equivalently substitute \(a_3=u^2+\varepsilon\) in its geometric tail.  In the Jacobi--Trudi determinant of \((a,2,1^l)\), the coefficient of \(\varepsilon\) is, up to a nonzero sign, \(u^{a-2}(1-u)^l\).  One can obtain it by selecting the unique perturbed row in the rank-one specialization and expanding the remaining hook minor.  Here \(a+l=J-2\), so these are the full Bernstein basis of degree \(J-4\).  Shapes with at least two interior cells have images divisible by \(K^2\) directly from the composition law.  Therefore a hook-free \(P\) survives after division by \(K\) unless all its one-interior-cell Schur coefficients vanish.  This proves the second assertion at each prime with its exact multiplicity, hence for \(K^2\).
+\end{proof}
+
+\begin{lemma}\label{lem:empty-nonribbon}
+Suppose \(s_E=s_{V\circ_\varnothing U}\), \(V\) is connected nonribbon, \(0<w<q\), \(q=bd,w=vd\), \(\gcd(b,v)=1\), \(0<v<b\).  If \(G=(b+1)\circ_\omega E\), then
+\(s_G/\kappa(s_G)\notin\operatorname{Frac}\Psi(\mathbb Q[h])\).
+This requires only the function equality and the supplied source mark, not landing of \(E\).
+\end{lemma}
+\begin{proof}
+Put \(g=s_V\), \(\Gamma=\kappa(g)\), \(m=N_V\), \(I=|V^-|\), \(J=(b+1)m-v\), and \(S=s_G\).  Corner identities give
+\[
+ \kappa(S)=K^J\eta\Psi(\Gamma^{b+1}),\qquad
+ \eta=K^v(B/\Theta)^b.
+\]
+A hypothetical homogeneous rational preimage \(R\) of \(S/\kappa(S)\) has outer weight \(J\).  Set \(H=R\Gamma^{b+1}/g\), of weight \(b|V|-v\).  Its image is a lower unit times \(S/f\), \(f=s_E\).
+
+Any component prime of \(\Gamma\) supplies an actual candidate child \(\xi\) of span between \(q\) and \(N_E\).  It divides the source middle factor, since the caps are low.  Row collapse gives \(\bar S/\bar f=\tau^b\ne0\).  Triangular residue coordinates then give \(\bar H=L\tau^b\), with grading-fixed \(L\), contradicting the weight \(b|V|-v\not\equiv0\pmod b\).  For wide marks the same proof requires the full-parent ancestry equations: the rational weight becomes \(bm-v+b\deg(\Delta\zeta)\), and cap-to-hat supplies a modulus when all ancestry is in the caps.  It is still not divisible by \(b\).  No polynomial-to-diagram recognition enters.
+\end{proof}
+
+\begin{lemma}\label{lem:wide-ordinary}
+Let \(E=V\circ_\varnothing U\) literally, \(q=N_U\), and let \(E\) have an ordinary mark of period \(p>q\), \(q\nmid p\), width \(w\ge q\).  If \(d=\gcd(p,q)\), then \(U\) is an actual \(q/d\)-copy empty row or column composition over its first \(d\) content diagonals.  At \(d=1\) it is a line.
+\end{lemma}
+\begin{proof}
+Let \(A_X,B_X\) be the two boundary bits.  Ordinary thin-tail geometry gives at most one strict comparison in each of
+\[
+ A_E(i)-A_E(p+i)\in\{0,1\},\quad
+ B_E(i)-B_E(p+i)\in\{0,-1\},\qquad1\le i<w.
+\]
+Off residue zero modulo \(q\), the empty composition repeats the bits of \(U\).  Since \(w\ge q\), addition by \(p\) compares each complete nonzero residue cycle modulo \(d\); monotonicity forces its bits constant.  Write \(q=bd\), \(a=(p/d)\bmod b\).  On the remaining zero-residue path \(a,2a,\ldots,(b-1)a\), let \(A\)'s initial run of ones have length \(u\) and \(B\)'s final run length \(b-1-v\).  The total height drift is \(bD+u+v-(b-1)=0\); its last term has absolute value less than \(b\), hence \(D=0\) and \(u+v=b-1\).
+
+If \(0<u<b-1\), put \(t=ua\bmod b\).  Counting residues below \(a\) and above \(b-a\) gives height at content \(ad-1\) equal to \(1-\mathbf1_{t>b-a}\).  Positivity gives \(t<b-a\); equality would mean \(u=b-1\).  But \(w=N_E-p\ge q\) implies \(w\ge2q-ad\), and both \(td\) and \(td+q\) lie strictly between zero and \(w\).  They produce two strict \(A\)-comparisons, a contradiction.  Thus \(u=0\) or \(b-1\).  All nonzero \(d\)-residues are periodic, and joining bits are uniformly \((0,0)\) or \((1,1)\).  The first \(d\) diagonals form a connected skew board ending at height one, and the literal boundary words reconstruct its row or column repetition.
+\end{proof}
+
+\subsection{The original determinant and actual hook support}\label{subsec:determinant-import}
+
+The following determinant input is independent of lower-area transport.  Let connected \(U,W\) have literally equal complete first and last windows, of spans \(q=b\delta\) and \(w=v\delta\).  Require matching ordinary private-cut directions, their singleton boundary diagonals, and actual connected overlap and edge chains, including the prefixes and suffixes used in elimination.  Suppose
+\[
+ K_U=\Lambda^b,\qquad K_W=\Lambda^v,\qquad
+ b\ge3,\quad1\le v\le b-2,\quad\gcd(b,v)=1.
+\]
+Choose a connected prime \(\psi\) of maximal generator span in \(\Lambda\), with multiplicity \(r\); ties are allowed.  Put \(f=s_U\), \(E_2=s_{U\amalg_WU}\), \(\beta=s_{UHU}\).  If exact residue matching gives
+\[
+ \overline{f^v/s_W^b}=\rho(\overline{\beta/f^2}),\qquad \rho\in\mathbb Q(X),
+\]
+define
+\begin{equation}\label{eq:imported-defect}
+ \Theta_U=f^v(E_2/f^2)^b-\rho(\beta/f^2).
+\end{equation}
+Residues are taken at the actual prime \(\psi\), after elimination of its affine top generator.
+
+\begin{proposition}\label{prop:determinant-import}
+Under these hypotheses, either \(\operatorname{ord}_\psi\Theta_U\le r(b-v)\), or \(U\) is a literal empty row or column composition of \(b\) copies of an inner of span \(\delta\).  At least two active residue classes improve the bound to \(r(b-v)-1\); the pure inventory \(\Lambda=\psi\) improves the bound to \(b-v-1\).  The alternatives need not be exclusive.  At \(v=b-1\), matching complete ordinary windows force the specified literal root without residue matching.
+\end{proposition}
+\begin{proof}
+The determinant defect or literal repetition theorem and the full-window boundary lemma in \cite{Shields2026CornerDescent} give these conclusions.  Its active classes are the factors with nonzero exponent in the rational residue function, obtained from the actual eliminated response word.  The bound retains both caps and complete normal-dependent unit blocks; neither a smaller-prime extension nor a root theorem from merely equal window functions is used.
+\end{proof}
+
+The common-core identity proved in the same reference supplies, for actual opposite content-end extensions,
+\begin{equation}\label{eq:shared-core-import}
+ K_U\mid s_{ULR}s_U-s_{UL}s_{UR}.
+\end{equation}
+Its full determinant divisibility preserves every prime multiplicity.  Here \(UL\), \(UR\), and \(ULR\) denote the actual one- and two-end extensions with the same central copy of \(U\).  The transfer below uses this identity, not a scalar approximation to the overlap determinant.
+
+\begin{theorem}\label{thm:chain-transfer}
+For an actual connected-skew chain of \(m\) copies of \(U\), joined by horizontal, vertical, or full-window overlap edges, put
+\[
+ u_H=s_{UHU}/f^2,\quad u_V=1-u_H,\quad
+ u_\varepsilon=s_{U\amalg_WU}/f^2.
+\]
+In the localization at any corner prime,
+\[
+ s_X\equiv f^m\prod_j u_{\xi_j}\pmod {K_U}.
+\]
+For the parent consequence, let \(E=V\circ_\varnothing U\) literally, where \(V\) is an actual ribbon with \(H\) horizontal and \(Z\) vertical edges and \(m=H+Z+1\).  Suppose the actual probe \(X=(b+1)\circ_\omega E\) has the chain realization used above, with \(b\) complete-window overlap edges.  Put \(J=(b+1)m-v\), \(d=b-v\).  An admitted hook template consists of finitely many coefficients \(c_\lambda\in\mathbb Q\) satisfying
+\[
+ \rho(u)=\sum_\lambda c_\lambda u^{d-\lambda}(1-u)^\lambda,
+ \qquad 0\le (b+1)Z+\lambda\le J-1.
+\]
+Set \(l_\lambda=(b+1)Z+\lambda\),
+\[
+ H_V=\sum_\lambda c_\lambda s_{(J-l_\lambda,1^{l_\lambda})},
+ \qquad\Delta_V=s_X-\Phi(H_V).
+\]
+Then
+\[
+ \Delta_V\equiv f^J u_H^{(b+1)H}(1-u_H)^{(b+1)Z}\Theta_U\pmod {K_U}.
+\]
+The prefactor is a unit at every corner prime.  A comparison of two ribbons requires that both actual hook ranges admit the same uniquely forced coefficients.
+\end{theorem}
+\begin{proof}
+In appending a copy, use the penultimate copy in the common-core identity \eqref{eq:shared-core-import}.  The old and new additions lie on opposite content ends; complete equal windows ensure this even when two adjacent overlaps overlap each other.  The recurrence is \(f s_{X_m}\equiv s_{X_{m-1}}s_{U\xi U}\).  Connectedness and span separate \(f\) from the corner prime, so division is legitimate.  Induct.  The sum rule for the two empty joins gives \(u_H+u_V=1\).
+
+The actual probe has \((b+1)H\) horizontal, \((b+1)Z\) vertical, and \(b\) overlap edges.  A hook of size \(J\) and leg \((b+1)Z+\lambda\) has first exponent
+\[
+ J-1-((b+1)Z+\lambda)=(b+1)H+d-\lambda.
+\]
+Its normalized image is therefore \(u_H^{(b+1)H+d-\lambda}(1-u_H)^{(b+1)Z+\lambda}\).  Subtract its finite forced linear combination and factor, giving the display.  The hooked polynomial basis is independent by transcendence, but its allowed finite range depends on the ribbon: uniqueness is not universal support admission.  The connected two-copy functions have span larger than every corner prime, making all front factors units.
+
+Applying the shared-core identity with common shape \(W\) gives only
+\(u_\varepsilon\equiv1/s_W\pmod {K_W}\).
+Since \(\operatorname{ord}_\psi K_W=rv<rb\), this shorter bridge cannot replace the actual overlap at full parent precision.
+\end{proof}
+
+\begin{proposition}\label{prop:empty-parent-entry}
+For an ordinary-source, empty-candidate beta comparison, section congruences and corner equality construct an actual source row probe \(G=(b+1)\circ_\omega E\), with
+\[
+ s_G/\kappa(s_G)\in\operatorname{Frac}\Psi_U(\mathbb Q[h]).
+\]
+For a ribbon inherited \(V\), nonsquare ordinary caps are impossible.  Square caps force complete literal end windows and \(K_U=\Lambda^b\), \(K_W=\Lambda^v\), so the imported determinant theorem applies after landing and exact residue matching.  An empty ribbon candidate inner instead gives an actual smaller rooted mate by the skew quotient projection.
+\end{proposition}
+\begin{proof}
+First the source has no zero joins.  Its connected mark prime \(A\) has span \(w\not\equiv0\pmod q\).  If \(w\ge q\), no candidate factor has that span.  If \(w<q\), it divides neither the source finite caps nor its hat.  For the latter, the actual identity \(f^2-Ab_2=\pm Bc_2\) shows that a prime dividing both \(A\) and \(B\) would divide \(f\), impossible by connected irreducibility and their different spans.  Let \(\alpha=\operatorname{ord}_A K_U\), and let \(z_r(D)=r_D-1-t\) count the zero row gaps of the discrete source.  Matching high child spans in the two corners gives
+\[
+ \alpha(N_C-mN_D)=z_r(D).
+\]
+Here \(N_C-mN_D=-w(N_D-1)/q<0\); both sides have nonnegative valuations, forcing \(\alpha=z_r(D)=0\).
+
+Thus rows have lengths \(1+bk_i\), and literal row regrouping gives \(F=R\circ_\Omega G\), with ribbon \(R\) of size \(K=\sum k_i\ge2\), period \(\ell=bp\), and coarse width \(N_E\).  The coarse mark consists of the two extreme copies of \(E\); their full intersection, private singleton and connected-complement checks give I--IV.  Lemma~\ref{lem:long-high-identity} on this ribbon chart gives
+\(\kappa(s_G)V_{\ell(K-1)}P=\lambda s_G\kappa(P)\), \(\lambda\ne0\).
+On the empty candidate, \(P=K_U^{N_C}\Psi_U(s_C)\) and its corner has the same prefactor.  Empty covariance keeps the indicated derivative in that image field, giving the required membership.
+
+Let \(\Theta,B\) be the source finite-cap and hat factors.  Corner matching gives
+\[
+ \Theta^{bK-t}=B^{bK-2t}K_U^{vK},\qquad
+ \operatorname{ord}_\pi\eta=\frac tK(2\operatorname{ord}_\pi B-\operatorname{ord}_\pi\Theta),\quad
+ \eta=K_U^v(B/\Theta)^b.
+\]
+For ordinary caps, the aligned sets \(X,Y\) have intersection \(W^-\), union \(\widehat W\), and each difference from their intersection is one connected ribbon fringe or empty.  This follows from their opposite justified thin tails, whose new eroded cells follow consecutive boundary steps.  If total fringe area is \(f_0\), then \(2\deg B-\deg\Theta=f_0\).  For ribbon \(V\), \(\kappa(s_G)=K_U^J\eta\); polynomialization makes the reduced numerator of \(\eta\) constant.  But if \(f_0>0\), its weight is \((t/K)f_0>0\), impossible.  Hence both fringes are empty, \(X=Y=W^-=\widehat W\), and the middle contributes no tail inside either mark band.  Each mark is therefore the complete end band.  Now \(\Theta=B^2\) in the prime balance gives \(K_U^v=B^b\); coprimality yields \(K_U=\Lambda^b,B=\Lambda^v\).  After landing the actual nesting, the full source windows lie in the extreme copies of \(U\); hence they are its complete equal windows and \(B=K_W\).  The boundary \(v=b-1\) is the full-window boundary lemma of \cite{Shields2026CornerDescent}; for \(1\le v\le b-2\), \Cref{prop:determinant-import} applies once exact residue matching has also been supplied.  Wide marks are already handled by the literal theorem after landing, and nonribbon \(V\) by Lemma~\ref{lem:empty-nonribbon}.
+
+If \(U\) is ribbon, \(K_U=1\), and \(\Phi_U(h_j)=\pm h_{jq}+\text{lower}\).  Its image is factorially closed because the ambient ring is a polynomial extension by the nonpivot generators.  The coarse high identity and \(\kappa(s_G)\mid\kappa(P)\) thus give \(s_G\in\operatorname{Im}\Phi_U\).  Apply the skew quotient projection \(h_i\mapsto0\) unless \(q\mid i\), \(h_{jq}\mapsto\epsilon^jh_j\).  The classical skew quotient determinant, obtained by sorting JT beta lists by residues, is zero if the residue counts differ, otherwise a signed product of actual quotient skew functions.  It is nonzero here and is a left inverse of \(\Phi_U\).  Mapping back and using irreducibility of \(s_G\) leaves exactly one connected nonempty quotient component \(B_0\).  Thus \(s_G=s_{B_0\circ U}\), not necessarily a literal chart on \(G\).  Both probes are proper: the quotient has span \(J=(b+1)m-v\ge2\), and the source outer has size \(b+1\).  The connected source probe divides the original nonzero high derivative after the lower-span normalizers are cleared, so its area is at most \(n-\ell(K-1)<n\).  Both probes are therefore actual smaller rooted diagrams.  The lower rooted-key theorem and \Cref{lem:oo-rooted-finish} give the contradiction.  The final call is distinct from the algebraic image recognition.
+\end{proof}
+
+\section{Rooted transport and conditional comparison}\label{sec:assembly}
+
+For connected classes of area at most \(n\), let \(\mathrm{TR}_{\le n}\) denote terminal rigidity (TR) \cite{Shields2026Gluing}: a chartless \(F\) has class \(\{F,F^*\}\).  Let \(\mathrm K_{\le n}\) denote rooted-key invariance (RI): already rooted Schur mates have the same source-minimal key.  Let \(\mathrm{Restore}_{\le n}\) mean that a class with a rooted member consists of rooted members, and \(\mathrm{Exists}_{\le n}\) that every nonrotation class has a rooted member.  A nonrotation class contains two diagrams not related by rotation.  These assertions have different domains.
+
+For a prescribed source-minimal chart \(\chi=(D,E,\omega)\) of rooted \(F\), its component key is \([(\omega,s_D)]\), modulo translations, transported rotation, and the legal ordinary gauge \((\omega_a,Q)\sim(\omega_b,\iota Q)\) \cite{Shields2026Gluing}.  Its fiber \(\mathcal F_\chi\) consists of actual proper compositions with those marked data and outer function, including the permitted transported rotations.  The key is not the class by definition.  The source-minimal domination theorem and component-key criterion identify \(\mathcal F_\chi\) with the rooted common-factor component.
+
+\begin{proposition}\label{prop:rooted-interface}
+On any fixed connected class universe closed under Schur equality and rotation,
+\[
+ \mathrm{TR}\ \Longleftrightarrow\ \mathrm{Restore}\land\mathrm{Exists}.
+\]
+For every rooted \(F\) and every prescribed source-minimal chart \(\chi\), the identities
+\[
+ [F]_{\mathrm{rooted}}=\mathcal F_\chi,
+ \qquad [F]=\mathcal F_\chi
+\]
+are equivalent, respectively, to \(\mathrm K\) and to \(\mathrm{Restore}\land\mathrm K\), when quantified over all rooted sources in that universe.
+\end{proposition}
+\begin{proof}
+Rotation preserves rootedness.  Under (TR) a chartless member cannot have a rooted mate, and a nonrotation class cannot consist entirely of chartless members.  Thus restoration and existence hold.  Conversely, if \(F\) is chartless and its class contains a nonrotation mate, existence gives a rooted member and restoration makes \(F\) rooted, a contradiction.
+
+By source-minimal domination, \(\mathcal F_\chi\) is exactly the common-factor component of \(F\).  By the component-key criterion, two rooted members belong to that component exactly when their keys agree.  Thus (RI) is equivalent to the rooted fiber identity.  Since every member of a proper fiber is rooted, the full-class identity implies restoration; restoration together with the rooted identity gives the full-class identity.
+\end{proof}
+
+\begin{proposition}\label{prop:conditional-coverage}
+Assume the legal composition laws and same-parent gluing.  At area \(n\), the following scoped implications hold.
+\begin{enumerate}
+\item The actual-window theorem imported in \Cref{prop:determinant-import} and the primitive comparison \Cref{thm:nonparallel-lcm,thm:parallel-lcm} require no lower-area transport.
+\item Actual proper equal probes \(J\circ_\omega E\), \(B_0\circ_\eta U\) of area below \(n\), with the source chart inherited from a source-minimal nonline inner, imply \(p\mid q\) under \(\mathrm K_{\le n-1}\), the lower-area form of (RI).  This is the uniform finish of \Cref{thm:positive-oo}; the full theorem retains its legal-chart, original minima, strict-entry, and lower-package premises.
+\item The alpha and uniform positive-gap constructions in \Cref{prop:older-probe-consumers}, and its mixed uniform-ribbon construction with the stated actual endpoint applicability, give a contradiction under the lower package.  Each lower call follows construction of equal proper probes and the bound \(|G|\le n-\ell(K-1)<n\).
+\item The heterogeneous mixed residue obstruction, mixed cap-thickness obstruction, and Hall obstruction for a mixed source and ordinary candidate require no additional lower call after their exact function-level entry.  The opposite Hall ordering requires an actual smaller mixed chart on the inner.  Landing this chart on an arbitrary equal realization uses lower restoration and keys.
+\item The wide ordinary conclusion requires literal nesting.  The square-cap parent application requires landing, actual full windows, and the finite hook-template support on both sides of \Cref{thm:chain-transfer}.  Empty-ribbon image recognition supplies an actual smaller rooted mate; its comparison still uses lower rooted transport, and does not itself put a chart on the source probe.
+\end{enumerate}
+\end{proposition}
+\begin{proof}
+The first assertion follows from \cite{Shields2026CornerDescent} and \Cref{sec:lcm}.  The second is \Cref{lem:oo-rooted-finish}, with \Cref{prop:rooted-interface} identifying its precise lower hypothesis.  The third is the area estimate and actual constructions of \Cref{prop:older-probe-consumers}.  The fourth follows from \Cref{thm:heterogeneous-reduction,prop:heterogeneous-ribbon,cor:cross-type,prop:empty-mo}; the effective coefficient field in the opposite Hall ordering uses the actual mixed chart in \Cref{lem:ordinary-transfer}.  The fifth combines \Cref{lem:wide-ordinary,prop:empty-parent-entry,thm:chain-transfer}.  Whenever landing is invoked, the inherited child has area \(|E|<n\); restoration first makes its mate rooted, and key invariance then transfers the prescribed smaller fiber by \Cref{prop:rooted-interface}.
+\end{proof}
+
+The primitive comparison is excluded without lower-area transport.  Under the stated entry hypotheses, \Cref{thm:ordinary-probes} constructs actual proper connected Schur-equal probes of strictly smaller area.  For these probes, the lower-area form of (RI) gives \(p\mid q\) by \Cref{lem:oo-rooted-finish}, without restoration or existence in that final step.  These results do not cover arbitrary ribbon-outer comparisons, identify marked keys from equality of periods alone, or establish current-area restoration and existence from the lower package alone.  The connectivity reduction of \cite{Shields2026Gluing} identifies (TR) and (RI) jointly with connectedness of the rotation-augmented common-factor graph of each class.  Its reduction of composition necessity requires both assertions in every connected Schur class.  No such global conclusion is proved or used here.
+
+\appendix
+\section{Hall tails and cross-type comparison}\label{sec:cross}
+\begin{lemma}\label{lem:active-descent}
+If a supplied ordinary parent function is annihilated by every \(\delta_{ks}\), then its inner and all its normalization factors are annihilated, and every active modified power-sum image is annihilated.  This includes the empty mark.
+\end{lemma}
+\begin{proof}
+Let the outer have area \(a\).  Ordinary composition covariance gives terminal derivatives
+\[
+ T=\delta_p^aP=c A^{r_D}B^{c_D}Z^{N_D},\qquad
+ U=\delta_p^{a-1}P=T f/\Xi,\quad\Xi=\pm ABZ,
+\]
+with \(c\ne0\).  Every foreign Hall derivation commutes with \(\delta_p\), so kills \(T,U\).  Its kernel is factorially closed: local nilpotence makes derivation-degree additive on a product in characteristic zero.  All exponents in \(T\) are positive; hence \(A,B,Z\) are fixed, and then \(U\) makes \(f\) fixed.
+
+For an active index \(j\), choose a power-sum derivative \(\delta_\nu Q\) of the effective outer polynomial with weight \(j\) and nonzero coefficient of \(p_j\).  Write it as \(c_jp_j+R_j(p_1,\ldots,p_{j-1})\).  Differentiation cannot introduce an inactive index.  Composition covariance expresses its image as a fixed normalization times \(\delta_{p\nu}P\).  Induct on active indices: all smaller images and the right side are fixed, so \(\Phi(p_j)\) is fixed.  Vertical ordinary charts use the effective involuted outer and its signed covariance; activity is unchanged.  This proves the precise active-mode descent, without a chart converse.
+\end{proof}
+
+\begin{lemma}\label{lem:mixed-width}
+An inner with an actual mixed period-\(q\) chart has no ordinary mark of width \(w\ge q\).  Its ordinary normalizers are already killed by every \(\delta_{kq}\).
+\end{lemma}
+\begin{proof}
+Rotate the mixed chart so its southeast boundary is a complete periodic bit word \(T\) of period \(q\), including residue zero with \(T_0=0\).  The ordinary cap comparison gives \(T_i\le T_{i+p}\) for \(1\le i<w\).  If \(w\ge q\), every nonzero residue is compared, and the zero-residue inequality also holds because \(T_0=0\).  Summing around each residue cycle makes every inequality an equality.  The row-beta set is therefore downward \(p\)-closed, including the terminal residue, and its Hall derivative \(\delta_pf\) vanishes by duplicate/negative rows.  This contradicts ordinary covariance \(\delta_pf=\pm ABZ\ne0\).  Finally commute each mixed Hall annihilator of \(f\) with \(\delta_p\); factorial closure of its kernel fixes each of \(A,B,Z\).
+\end{proof}
+
+\begin{lemma}\label{lem:bell}
+In characteristic \(\ell\), if \(D\) is a derivation, \(R\) is invertible and \(G=DR/R\), then
+\[
+ \frac{D^{\ell^e}R}{R}=
+ \sum_{i=0}^e\left(D^{\ell^i-1}G\right)^{\ell^{e-i}}.
+\]
+Moreover \(\delta_s^{\ell^e}=\delta_{\ell^es}\) on the full complete-function ring.
+\end{lemma}
+\begin{proof}
+For a prime, the Bell expansion has only two terms modulo \(\ell\): all intermediate set-partition coefficients are divisible by \(\ell\).  Thus \(D^\ell R/R=D^{\ell-1}G+G^\ell\).  Every \(\ell\)-power iterate is again a derivation by the binomial Leibniz formula.  Induct on \(e\); derivatives kill all proper Frobenius powers, leaving exactly the displayed terms.  The Hall iterate and \(\delta_{\ell^es}\) agree on each generator and both are derivations, proving their equality.
+\end{proof}
+
+\begin{lemma}\label{lem:ordinary-transfer}
+An actual ordinary row-power series \(F(z)=A+\sum_{j\ge1}b_jz^j\), of period \(P\), is a rational function of the independent residue series
+\[
+ H_i(t)=\sum_{n\ge0}h_{nP+i}t^n,\quad0\le i<P,\quad t=\theta z,
+\]
+with coefficients in \(\mathbb Q(h_1,\ldots,h_{P-1})(t)\), and actual integral denominators with nonzero constant terms modulo every prime.  If a smaller actual mixed \(q\)-chart is present on the same inner, the final private cut gives a smaller effective coefficient field fixed by every \(\delta_{kq}\).  In either ordinary attachment case,
+\[
+ \delta_{kP}F/F=\epsilon t^k,\qquad\epsilon=1\ (H,H),\quad\epsilon=-1\ (V,V).
+\]
+\end{lemma}
+\begin{proof}[Determinant derivation and the geometric input]
+At a private singleton cut, the increasing beta lists split into balanced periodic blocks and two rectangular caps.  The left cap has size \(v\times(v+1)\), and the right cap has size \((z+1)\times z\).  Let \(\lambda,\rho\) be their signed maximal-minor vectors.  The original board is
+\[
+ \begin{pmatrix}L&0&0\\ \mathcal P&T_N&0\\ C_N&\mathcal Q&R\end{pmatrix},
+\]
+where \(T_N\) is lower block Toeplitz.  Eliminating only \(T_N\) gives
+\[
+ b_{N+1}=\{(-1)^r\det M_0\}^N
+ \rho^T(C_N-\mathcal Q T_N^{-1}\mathcal P)\lambda.
+\]
+Set \(\theta=(-1)^r\det M_0\).  The inverse symbol \(M(t)^{-1}\) sums its convolution, yielding
+\[
+ F(z)=A+z\rho^T\{C(t)-Q(t)M(t)^{-1}P(t)\}\lambda.
+\]
+Every entry series is one \(H_i\) times a power of \(t\), with at most an initial low term subtracted.  The cap vectors are integer minors; all denominators are powers of \(t\) and actual nonzero skew determinants.  Lemma~\ref{lem:cofactor} makes their reductions nonzero in every characteristic.  The residue series are algebraically independent: any purported finite polynomial relation can be tested after retaining one sufficiently fresh independent generator in each residue class, giving an invertible affine substitution over the low field with \(t\) adjoined.
+
+The last identity is ordinary composition covariance, including the case-\(V,V\) involution sign.  In the presence of a smaller mixed chart, its actual row-beta set is downward \(q\)-closed.  Choose the last private cut \(P-1\).  Every left-cap cofactor is killed by a mixed Hall shift, which replaces a row by a duplicate or a negative row; the right cap has indices at most the mark width \(w<q\).  The only possibly larger finite correction is \(V_{x,y}=h_{x-P-y}\) from the incoming cap series.  If \(x>P+w\), its contraction with \(\lambda\) is zero because it is an existing cap row.  Otherwise its indices are at most \(w\).  Thus all effective coefficients are mixed-fixed.  This argument consumes the actual beta coding, private-cut lemma, and width bound; Hall annihilation of the inner's function alone does not supply that geometric coding.
+\end{proof}
+
+\begin{theorem}\label{thm:hall-tail}
+Suppose the effective coefficients and \(t\) in Lemma~\ref{lem:ordinary-transfer} are fixed by \(D=\delta_s\), and \(L=\ell^e\ge2\) satisfies \(Ls=aP\), \(\ell\nmid a\).  Put \(u=\lfloor s/P\rfloor\).  Then
+\[
+ \delta_s\Phi(p_j)\ne0\qquad(j\ge a-u+1).
+\]
+\end{theorem}
+\begin{proof}
+Reduce the integral presentation modulo \(\ell\).  Ordinary covariance and \Cref{lem:bell} give
+\[
+ D^LF/F=\epsilon t^a.
+\]
+The proper Frobenius terms in the Bell identity have zero coefficient at \(t^a\).  Hence
+\[
+ [t^a]D^{L-1}(DF/F)=\epsilon\ne0.
+\]
+Since \(D\) fixes \(t\), it does not decrease actual series order.  Thus \(\operatorname{ord}_tD(DF/F)\le a\).
+
+Write \(G=DF/F\) in the residue variables.  The complete chain rule gives \(DG=\sum_iJ_iDH_i\).  Each \(DH_i\) has order at least \(u\).  Some Jacobian \(J_i\) therefore has Laurent order \(v\le a-u\), with nonzero leading coefficient \(c\).  For \(j\ge v+1\), the fresh generator \(h_{P(j-v)+i}\) occurs only in \(H_i\), with coefficient \(t^{j-v}\).  Thus
+\[
+ \partial_{h_{P(j-v)+i}}[t^j]G=c\ne0.
+\]
+Finally \(\delta_s\Phi(p_j)/j=A^j\theta^j[t^j]G\).  This quotient by \(j\) is formed integrally before reduction by expanding \(F^{-1}\delta_sF\); no division by an integer divisible by \(\ell\) is made in the prime field.  Its nonzero reduction proves characteristic-zero nonvanishing.
+\end{proof}
+
+\begin{corollary}\label{cor:cross-type}
+For a positive ordinary candidate of period \(q\) and a mixed source of period \(p>q\), \(q\nmid p\), put \(p=ad,q=bd\).  For any prime \(\ell\mid b\), the harmonic \(s=(b/\ell)p\) leaks in every ordinary mode
+\[
+ j\ge a-\lfloor a/\ell\rfloor+1\le a.
+\]
+For a larger ordinary period \(P=bd\) on an inner which also has an actual smaller mixed period \(q=ad\), any prime power \(L\mid b\) gives leakage for the mixed harmonic \(s=(b/L)q\), in every mode \(j\ge a-\lfloor a/L\rfloor+1\le a+1\).
+\end{corollary}
+\begin{proof}
+In the first case \(s>q\), so the whole low field is fixed, and Theorem~\ref{thm:hall-tail} applies with ordinary period \(q\).  In the second, use the mixed-fixed effective field from the actual smaller chart.  Coprimality makes \(\ell\nmid a\) in both cases.
+
+For parent exclusion one additionally uses ordinary active-mode annihilator descent: mixed-reduced parent and fixed ordinary normalizers force every active \(\Phi(p_j)\) to be mixed-reduced.  The largest outer mode is active by the corner coefficient.  Span equality alone gives \(N_C=m+aK\) in the first case and \(N_D=1+aK\) in the second, so it reaches the cutoff.  In the first case even \(m\ge1\) suffices; no literal landing is consumed by this arithmetic.  In the second, the mixed chart on the source inner must be landed before using the cap argument.  The active-mode descent and geometric width/beta-coding inputs remain explicitly external to the Bell algebra.
+\end{proof}
+
+\begin{proposition}\label{prop:empty-mo}
+The mixed/ordinary exclusion of Corollary~\ref{cor:cross-type} also holds for an empty ordinary candidate mark.  Thus every mixed-source/ordinary-candidate strict nondividing discrete comparison is excluded by the same Hall-tail argument, using function-level beta span data and no landing.
+\end{proposition}
+\begin{proof}
+In the ordinary transfer put \(A=1\), \(w=0\).  The final private cut is still a singleton, the finite cap construction and imbalance-one elimination still apply, and the series has constant term one.  Its only nonconstant normalization is \(K_U\), of span below \(q\).  The foreign harmonic \(s=(b/\ell)p>q\) therefore fixes all effective coefficients exactly as in the positive-mark case.  Primitive denominators survive, so Theorem~\ref{thm:hall-tail} applies unchanged.  The largest candidate outer mode reaches the cutoff by \(N_C=m+aK\), even with \(m=1\).  Lemma~\ref{lem:active-descent} contradicts the mixed source annihilator.  No division by a nonempty mark was used; positivity of the mark was not used in this direction.
+\end{proof}
+
+\begin{proposition}\label{prop:prime-power-mo}
+The mixed/ordinary harmonic theorem also permits any prime power \(L\mid b=q/\gcd(p,q)\), not only a prime.  Its harmonic is \(s=(b/L)p\), with cutoff \(a-\lfloor a/L\rfloor+1\), where \(a=p/\gcd(p,q)>b\).  The smallest prime divisor of \(b\) minimizes this displayed cutoff; the largest prime-power divisor minimizes the displayed harmonic.  These are different optimization objectives.
+\end{proposition}
+\begin{proof}
+Since \(a>b\ge L\), \(s=aq/L>q\) fixes the entire low field.  Theorem~\ref{thm:hall-tail} applies unchanged with that prime power.  The cutoff is nondecreasing in \(L\), and the harmonic is decreasing in \(L\), proving the two optimization statements.  They concern sufficient cutoffs, not the exact first active mode.
+\end{proof}
+
+\section*{Declarations}
+{\footnotesize
+\noindent\textbf{Funding.} This research received no external funding.
+
+\smallskip
+\noindent\textbf{Competing interests.} The author has no relevant interests to disclose.
+
+\smallskip
+\noindent\textbf{Data availability.} No datasets were generated or analyzed.
+
+\smallskip
+\noindent\textbf{Computational verification.} The proofs do not depend on numerical computation.  Scripts used for verification and figures are available at \url{https://github.com/johnnyshields/papers}.
+
+\smallskip
+\noindent\textbf{Generative AI use.} During the preparation of this work, the author used OpenAI's ChatGPT (GPT-6 Astra, GPT-6.1 Sol) and Anthropic's Claude (Opus 5.5, Sonnet 5.5) to assist with mathematical research, manuscript drafting, and the development of auxiliary verification code.  After using these tools, the author reviewed and edited as needed.  The author takes full responsibility for the content of the work.\par}
+
+\begin{thebibliography}{9}
+\bibitem{Billera2006DecomposableCompositions}
+L.~J.~Billera, H.~Thomas, and S.~van Willigenburg,
+\emph{Decomposable compositions, symmetric quasisymmetric functions and equality of ribbon Schur functions},
+Adv.  Math. \textbf{204} (2006), no.~1, 204--240,
+DOI: \href{https://doi.org/10.1016/j.aim.2005.05.014}{10.1016/\allowbreak j.aim.2005.05.014}.
+
+\bibitem{McNamara2009Classification}
+P.~R.~W.~McNamara and S.~van Willigenburg,
+\emph{Towards a combinatorial classification of skew Schur functions},
+Trans.  Amer.  Math.  Soc. \textbf{361} (2009), no.~8, 4437--4470,
+DOI: \href{https://doi.org/10.1090/S0002-9947-09-04683-2}{10.1090/\allowbreak S0002-9947-09-04683-2}.
+
+\bibitem{OlsonHarris2024HopfApplications}
+N.~Olson-Harris,
+\emph{Some applications of combinatorial Hopf algebras to integro-differential equations and symmetric function identities},
+Ph.D. thesis, University of Waterloo, 2024,
+\url{https://hdl.handle.net/10012/20710}.
+
+\bibitem{Reiner2007Coincidences}
+V.~Reiner, K.~M.~Shaw, and S.~van Willigenburg,
+\emph{Coincidences among skew Schur functions},
+Adv.  Math. \textbf{216} (2007), no.~1, 118--152,
+DOI: \href{https://doi.org/10.1016/j.aim.2007.05.006}{10.1016/\allowbreak j.aim.2007.05.006}.
+
+\bibitem{Shields2026Gluing}
+J.~Shields,
+\emph{Local common-factor gluing and reduction of composition necessity for skew Schur functions},
+preprint, 2026,
+DOI: \href{https://doi.org/10.5281/zenodo.23133702}{10.5281/\allowbreak zenodo.23133702}.
+
+\bibitem{Shields2026CornerDescent}
+J.~Shields,
+\emph{Corner descent and repeated inners in skew Schur compositions},
+preprint, 2026,
+DOI: \href{https://doi.org/10.5281/zenodo.23133721}{10.5281/\allowbreak zenodo.23133721}.
+
+\end{thebibliography}
+\end{document}

@@ -6,7 +6,7 @@ Authors: Johnny Shields
 import Mathlib.Algebra.Order.BigOperators.Group.Finset
 import Mathlib.Analysis.Complex.Basic
 import Mathlib.Analysis.RCLike.Basic
-import Mathlib.Data.Complex.BigOperators
+import Mathlib.Basic.Complex.BigOperators
 
 /-!
 # The equality case of the triangle inequality over `ℂ`

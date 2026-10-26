@@ -1,0 +1,1620 @@
+\documentclass[11pt,a4paper]{amsart}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage[expansion=false]{microtype}
+\usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black]{hyperref}
+\usepackage[nameinlink,capitalize]{cleveref}
+
+\hypersetup{
+  pdftitle={Class recovery and inflation for repeated-block skew diagrams},
+  pdfauthor={John Shields},
+  pdfkeywords={skew Schur function, skew-equivalence, repeated-block diagram,
+    ribbon Schur function, profile inflation, marked composition, class recovery}
+}
+\pdfinfo{ /ORCID (https://orcid.org/0009-0004-3882-4571) }
+
+\numberwithin{equation}{section}
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{question}[theorem]{Question}
+
+\title[Repeated-block classes and inflation]
+{Class recovery and inflation\\
+for repeated-block skew diagrams}
+\author{John Shields}
+\date{October 4, 2026}
+\thanks{Independent researcher, Ginza 2-15-2, KR Ginza II 5F, Chuo-ku, Tokyo, Japan 104-0061.\\
+\hspace*{\parindent}Corresponding author: \href{mailto:math@johnnyshields.com}{math@johnnyshields.com}.  ORCID: \href{https://orcid.org/0009-0004-3882-4571}{0009-0004-3882-4571}.\\
+\hspace*{\parindent}This work is archived at \href{https://doi.org/10.5281/zenodo.23133727}{doi:10.5281/zenodo.23133727}.}
+\subjclass[2020]{Primary 05E05; Secondary 05A17, 15A15}
+\keywords{skew Schur function, skew-equivalence, repeated-block diagram,
+ribbon Schur function, profile inflation, marked composition, class recovery}
+
+\begin{document}
+
+\begin{abstract}
+We recover complete connected skew Schur classes for two specified repeated-block constructions.  For separated constant-gap inners repeated at least twice, every mate comes from the outer ribbon class and global rotation, without assuming that the inner diagram is rigid.  Symmetric inners remove the otherwise separate orientation copy.  For an asymmetric two-row inner, adding the same nonnegative integer to every row length and adjacent overlap-minus-one preserves the full class below the shorter row's excess over the inner gap.  At that exact threshold, and at every larger inflation, only rotation remains.  Inflation is injective: the images of formerly equal diagrams split into distinct classes.  Total contraction proves the first inverse; a lowest-degree boundary determinant with private column residues proves the second.  Both theorems quantify over arbitrary connected mates.
+\end{abstract}
+
+\maketitle
+
+\section{Introduction}\label{sec:introduction}
+
+A repeated context can determine its inner blocks even when their individual
+skew Schur functions do not.  We prove this for a separated constant-gap
+construction, recovering every connected mate from an outer ribbon class.
+For a different construction with a two-row inner, we determine exactly how
+long that outer ambiguity survives additive inflation of the profile.
+
+Diagrams are identified up to translation.  Write \(D^*\) for rotation
+through \(180\) degrees and
+\[
+ \operatorname{Cl}(D)=\{H:H\text{ is connected and }s_H=s_D\}.
+\]
+A profile \((r_1,\ldots,r_n;g_1,\ldots,g_{n-1})\) records row lengths
+from top to bottom and adjacent overlaps minus one.  The join
+\(P\cdot_d Q\) concatenates the row words with joining gap \(d\).
+The merger \(P\odot_d Q\) replaces the two adjoining endpoint rows
+of lengths \(u,v\) by one row of length \(u+v-d\), retaining the
+other rows and gaps.  These are profile operations, distinct from marked
+composition.  They are used only when their profiles define connected
+skew diagrams.  A superscript on a number or a word inside a profile
+denotes repetition.
+
+For a positive composition \(\alpha\), let \(r_\alpha\) be its ribbon
+Schur function, indexing the ribbon's rows from top to bottom, and put
+\[
+ \mathcal R(\alpha)=\{\beta:r_\beta=r_\alpha\}.
+\]
+The classification of these classes by reversal of composition factors
+is stated in \cite[Cor.~4.2]{Billera2006DecomposableCompositions},
+with the necessity direction supplied by
+\cite{Shields2026Coarsenings}.
+Both papers read ribbon rows from bottom to top.  Our convention reverses
+those diagrams and leaves \(r_\alpha\) unchanged; all literal marked
+presentations below use the top-to-bottom convention.
+
+Fix integers \(k\ge2\) and \(0\le c<d\), and a constant-gap inner
+\begin{equation}\label{eq:saturation-domain}
+ \begin{gathered}
+ A=(a,I,b;c^{k-1}),\\
+ a,b>c+d,\qquad
+ I=(a_2,\ldots,a_{k-1}),\qquad
+ a_i>\max(2c,d)\quad(2\le i\le k-1).
+ \end{gathered}
+\end{equation}
+The word \(I\) is empty when \(k=2\).  Set \(z=a+b-d\) and
+\begin{equation}\label{eq:repeated-blocks}
+ A_m=(a,I,(z,I)^{m-1},b;c^{m(k-1)}),\qquad
+ F_\alpha=A_{\alpha_1}\cdot_d\cdots\cdot_d A_{\alpha_\ell}.
+\end{equation}
+Thus \(A_m=A^{\odot_d m}\).
+
+\begin{theorem}[Repeated-block saturation]\label{thm:repeated-block-saturation}
+Under \eqref{eq:saturation-domain}, let \(\alpha\) be a positive
+composition with \(M=|\alpha|\ge2\).  Then
+\begin{equation}\label{eq:saturation-class}
+ \operatorname{Cl}(F_\alpha)
+ =\{F_\beta,F_\beta^*: \beta\in\mathcal R(\alpha)\}.
+\end{equation}
+Its cardinality is
+\begin{equation}\label{eq:saturation-cardinality}
+ |\operatorname{Cl}(F_\alpha)|=
+ \begin{cases}
+ |\mathcal R(\alpha)|,&A=A^*,\\
+ 2|\mathcal R(\alpha)|,&A\ne A^*.
+ \end{cases}
+\end{equation}
+After at most one global rotation, every member has the literal
+case-(a) marked presentation \(\beta\circ_{(d)}A\), with
+\(\beta\in\mathcal R(\alpha)\) and both end-row marks of length
+\(d\).  These charts satisfy Hypotheses I--IV of
+\cite{McNamara2009Classification}.  No rigidity assumption is imposed on
+\(A\).
+\end{theorem}
+
+Cutting the larger seams recovers the component functions and their row
+counts.  It does not recover a component consisting of one nonrigid copy
+of \(A\).  Contracting all those seams instead gives \(A_M\), which
+is rigid for \(M\ge2\).  The recovered component sizes locate the cuts
+in its ordered row word, and the unordered endpoint pairs determine their
+splits.  This recovers even the one-copy components literally.
+
+The inflation theorem has a different domain.  Fix integers
+\(1\le c<a<b\), and put
+\begin{equation}\label{eq:thin-domain}
+ \begin{gathered}
+ p=a-c,\qquad q=a+b-c,\\
+ E_m=(a,(a+b)^{m-1},b;c^m),\qquad
+ G_\alpha=E_{\alpha_1}\cdot_0\cdots\cdot_0 E_{\alpha_\ell}.
+ \end{gathered}
+\end{equation}
+For an integer \(t\ge0\), define profile inflation by
+\begin{equation}\label{eq:inflation}
+ I_t(r;g)=(r_1+t,\ldots,r_n+t;g_1+t,\ldots,g_{n-1}+t).
+\end{equation}
+
+\begin{theorem}[Sharp inflation threshold]\label{thm:sharp-inflation}
+Under \eqref{eq:thin-domain}, for every nonempty composition \(\alpha\)
+and every integer \(t\ge0\),
+\begin{equation}\label{eq:inflation-class}
+ \operatorname{Cl}(I_tG_\alpha)=
+ \begin{cases}
+ I_t\bigl(\operatorname{Cl}(G_\alpha)\bigr)
+ =\{I_tG_\beta,(I_tG_\beta)^*: \beta\in\mathcal R(\alpha)\},
+       &0\le t<p,\\[2mm]
+ \{I_tG_\alpha,(I_tG_\alpha)^*\},&t\ge p.
+ \end{cases}
+\end{equation}
+The respective cardinalities are \(2|\mathcal R(\alpha)|\) and two.
+For \(0<t<p\), the first class has legal presentations
+\(\beta\circ_{(t)}E(t)\), where \(E(t)=(a+t,b+t;c+t)\).
+At \(t=0\), use the horizontal empty-overlap convention.
+For \(0\le t<p\), ribbon factor reversals and global rotation generate
+every member of the first class
+\cite{Shields2026Coarsenings}.
+\end{theorem}
+
+Inflation is injective on profiles and commutes with rotation.  At the
+threshold, it does not identify previously distinct diagrams: their images
+cease to have equal Schur functions and split into rotation classes.
+There is an actual decrease in class size only when
+\(|\mathcal R(\alpha)|>1\).  Neither main theorem is a special case
+of the other, and no commutation statement between their constructions
+is asserted.
+General inflation gives only one-sided no-escape; erosion of a connected
+zero-free nonline diagram instead gives an exact class bijection, with
+legal charts transported by the alternatives in \Cref{lem:inflate-chart}.
+
+The two main theorems give the separated repeated-block inverse without
+inner rigidity and the exact threshold for additive profile inflation.
+The latter is not the multiplication of beta
+numbers studied in the cofactor companion \cite{Shields2026Cofactor}.
+The overlap invariants used below belong to Reiner, Shaw and van
+Willigenburg \cite{Reiner2007Coincidences}.  The Toeplitz-minor
+correspondence and its row/column reversal interpretation are due to
+Garc\'ia-Garc\'ia and Tierz \cite{GarciaGarcia2020ToeplitzMinors}.
+
+\Cref{sec:preliminaries} recalls the coefficient readings and fixes the
+composition conventions.  \Cref{sec:profile-transport} proves erosion,
+filtered lowering and exact transport on zero-free classes.
+\Cref{sec:overlap-powers} proves rigidity of the total contractions, and
+\Cref{sec:saturation-proof} reconstructs the literal blocks.
+\Cref{sec:thin-and-lowering} gives the two-row class inverse.
+\Cref{sec:inflation-proof} recovers outer cuts at the first boundary and
+proves the threshold theorem.
+\Cref{sec:examples} records examples and the scope of the auxiliary checks.
+
+\section{Profiles, cuts, and ribbon substitution}\label{sec:preliminaries}
+
+Work in \(\Lambda=\mathbb Q[h_1,h_2,\ldots]\), with \(h_0=1\)
+and \(h_j=0\) for \(j<0\).  Weighted degree assigns \(h_j\) degree
+\(j\); ordinary degree assigns every positive-index generator degree one.
+For a diagram with \(n\) nonempty rows, normalize its strict beta lists
+\[
+ X=(x_1>\cdots>x_n),\qquad Y=(y_1>\cdots>y_n=0).
+\]
+Then
+\begin{equation}\label{eq:beta-profile}
+ s_D=\det(h_{x_i-y_j}),\qquad
+ r_i=x_i-y_i,\qquad g_i=x_{i+1}-y_i.
+\end{equation}
+The exact profile inequalities are
+\begin{equation}\label{eq:profile-validity}
+ r_i>0,\qquad 0\le g_i<\min(r_i,r_{i+1}).
+\end{equation}
+They characterize connected skew diagrams up to translation.  The lists
+are recovered recursively from \(x_n=r_n\), \(y_n=0\), and
+\(y_i=x_{i+1}-g_i\), \(x_i=y_i+r_i\).  In particular,
+\begin{equation}\label{eq:content-span}
+ N_D=x_1=\sum_i r_i-\sum_i g_i.
+\end{equation}
+All beta lists in this paper are full lists: common entries are not
+canceled unless a deletion is explicitly specified.  A diagram is
+zero-free when its beta lists are disjoint, so its Jacobi--Trudi matrix
+has no unit entry.  Rotation reverses both profile words and preserves
+the Schur function.
+
+\subsection{Readings on an arbitrary mate}\label{subsec:readings}
+
+The polynomial-readings lemma of \cite{Shields2026Cofactor} applies to
+any connected diagram, before a Hessenberg condition has been established.
+It says that \(s_D\) determines the row count as its maximum ordinary
+degree, and the row multiset as the indices of its unique minimum-square
+monomial, with coefficient one.  Here the square weight of
+\(\prod h_{j_i}\) is \(\sum j_i^2\).  It also reads the largest
+generator index \(N_D\) and its signed coefficient
+\begin{equation}\label{eq:maximal-cofactor}
+ (-1)^{n-1}[h_{N_D}]s_D
+ =\det(h_{x_{i+1}-y_j})_{i,j=1}^{n-1}\ne0.
+\end{equation}
+The minimum-square monomial of this cofactor, padded with zeros to length
+\(n-1\), reads the gap multiset.  These are polynomial forms of the
+row-overlap data of \cite{Reiner2007Coincidences}.
+
+\begin{lemma}\label{lem:hessenberg-membership}
+Let \(D\) be a connected diagram with \(n\) rows and beta lists as in
+\eqref{eq:beta-profile}.  Its signed maximal-label coefficient is a
+monomial if and only if its full Jacobi--Trudi board is upper Hessenberg:
+\begin{equation}\label{eq:hessenberg-membership}
+ \begin{gathered}
+ (-1)^{n-1}[h_{N_D}]s_D\text{ is a monomial}\\
+ \Longleftrightarrow\quad
+ x_i-y_j<0\text{ for }i\ge j+2
+ \quad\Longleftrightarrow\quad
+ r_i>g_{i-1}+g_i\quad(2\le i\le n-1).
+ \end{gathered}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+The entries of the full board below its first subdiagonal are the entries
+of the cofactor in \eqref{eq:maximal-cofactor} on and below its own first
+subdiagonal.  That subdiagonal has indices
+\(x_{i+2}-y_i=g_i+g_{i+1}-r_{i+1}\), and indices strictly decrease down
+each column, so the last two conditions in \eqref{eq:hessenberg-membership}
+agree.  Split the cofactor at the negative entries of its first
+subdiagonal; strictness makes the full lower-left rectangles zero.  A zero
+diagonal contributes an isolated unit.  Each remaining block of order at
+least two has its distinct nonzero diagonal monomial and a term containing
+its private largest label, whose coefficient is nonzero by strict
+rearrangement.  It cannot be a monomial.  A product of nonzero polynomials
+can be a monomial only if every factor is.  Thus all cofactor blocks must
+be singleton, precisely the stated inequalities.
+\end{proof}
+
+Thus equality with a Hessenberg source forces Hessenberg form, as well
+as the same row and gap multisets.  The cofactor in that case is
+\(\prod_i h_{g_i}\).  Its omitted zero factors are recovered from the
+row count.
+
+A nonempty connected skew Schur polynomial is irreducible in \(\Lambda\).
+We use the corrected irreducibility theorem
+\cite{Barekat2009CoincidencesCorrigendum}, rather than an assertion that
+specialization preserves irreducibility.  Consequently a product of
+functions of connected cut components determines their functions with
+multiplicity.  The minimum-square monomial, whose coefficient is one,
+removes any scalar ambiguity between associated factors.
+
+The other reconstruction input is the theorem on two boundary observations
+in \cite{Shields2026SkewSchur}.  If \(D,H\) are connected and
+\(\overline D,\overline H\) are obtained by deleting their entire first
+rows, then
+\begin{equation}\label{eq:boundary-reconstruction-input}
+ s_D=s_H,\qquad s_{\overline D}=s_{\overline H}
+ \quad\Longrightarrow\quad D=H.
+\end{equation}
+The conclusion is equality up to translation with the displayed orientation;
+\(s_\varnothing=1\).  Its proof is not repeated here.
+
+\subsection{Seam coefficients}\label{subsec:seam-coefficients}
+
+For an upper-Hessenberg profile, the interval expansion of
+\cite{Shields2026NegativeCount} is
+\begin{equation}\label{eq:interval-expansion}
+ s_D=\sum_{T\subseteq\{1,\ldots,n-1\}}
+ (-1)^{|T|}\prod_{i\in T}h_{g_i}
+ \prod_{J\in\pi(T)}h_{R_J},\qquad
+ R_J=\sum_{j\in J}r_j-\sum_{j,j+1\in J}g_j.
+\end{equation}
+Here \(\pi(T)\) is the interval partition obtained by contracting the
+seams indexed by \(T\).  Every interval label \(R_J\) is positive
+and exceeds every row length in \(J\) when \(|J|>1\).  The strict
+increase follows by extending an interval one row at a time and using
+\eqref{eq:profile-validity}.
+
+\begin{lemma}\label{lem:seam-coefficients}
+Let \(D\) be connected and upper Hessenberg, and let \(d>0\) be an
+integer.  Suppose every row exceeds \(d\) and exactly \(s\) gaps equal
+\(d\).  Cut those seams to obtain \(D_1,\ldots,D_{s+1}\), and
+contract them all to obtain \(C\).  Then these profiles are connected
+and upper Hessenberg, and
+\begin{equation}\label{eq:seam-extremes}
+ [h_d^0]s_D=\prod_j s_{D_j},\qquad
+ [h_d^s]s_D=(-1)^s s_C.
+\end{equation}
+None of the polynomials on the right involves \(h_d\).
+
+For an arbitrary connected upper-Hessenberg \(D\), set
+\begin{equation}\label{eq:unit-homogenization}
+ \widehat s_D(u)=u^n s_D(h_1/u,h_2/u,\ldots).
+\end{equation}
+If \(s\) gaps are zero, cutting or contracting all zero seams gives
+\begin{equation}\label{eq:unit-extremes}
+ [u^0]\widehat s_D(u)=\prod_j s_{D_j},\qquad
+ [u^s]\widehat s_D(u)=(-1)^s s_C.
+\end{equation}
+Here the cut components and the total contraction have no zero gaps.
+\end{lemma}
+
+\begin{proof}
+Every interval label exceeds \(d\), so \(h_d\) occurs in
+\eqref{eq:interval-expansion} only at the specified seams.  Its constant
+and highest coefficients respectively cut and contract all those seams,
+giving \eqref{eq:seam-extremes}.  This is the safe-cut argument of
+\cite{Shields2026NegativeCount}; only separation from the interval labels
+is needed, and other gaps may lie on either side of \(d\).
+
+Cutting removes an incident gap.  At a contraction with endpoint rows
+\(v,w\) and exterior gaps \(e,f\), the inequalities
+\(v>e+d\), \(w>d+f\) give \(v+w-d>e+f\); an absent exterior
+gap is zero.  Thus the contracted profile remains connected and
+Hessenberg.  Its new row exceeds \(d\), so no new \(h_d\) occurs.
+
+Homogenization in \eqref{eq:unit-homogenization} replaces \(h_0\)
+by \(u\), leaving positive entries unchanged and negative entries zero.
+The only units on a Hessenberg board are its zero-gap subdiagonal
+entries.  The same seam selection, with these units retained, gives
+\eqref{eq:unit-extremes}; the contraction calculation also applies at \(d=0\).
+\end{proof}
+
+For later use, the cut--merge identity on this domain is
+\begin{equation}\label{eq:cut-merge}
+ s_{P\cdot_d Q}=s_Ps_Q-h_ds_{P\odot_d Q}.
+\end{equation}
+When the incident interior gaps are \(e,f\), the positive-gap version
+requires endpoint lengths \(v>e+d\) and \(w>d+f\), in addition to
+Hessenberg form inside the two pieces.  Connectedness of the join alone
+is not sufficient.  Equation~\eqref{eq:cut-merge} is the corresponding
+case of the same interval expansion.
+
+\subsection{Ribbon substitution}\label{subsec:ribbon-substitution}
+
+If \(\gamma\) is obtained from \(\alpha\) by merging adjacent
+parts, write \(\gamma\succeq\alpha\).  The classical ribbon formula is
+\begin{equation}\label{eq:ribbon-coarsening}
+ r_\alpha=\sum_{\gamma\succeq\alpha}
+ (-1)^{\ell(\alpha)-\ell(\gamma)}
+ h_{\gamma_1}\cdots h_{\gamma_{\ell(\gamma)}}.
+\end{equation}
+We use it together with the factor-reversal classification in
+\cite{Shields2026Coarsenings}.  For compositions, ordinary
+near-concatenation \(\rho\odot\sigma\) merges the last and first
+parts by addition, and
+\begin{equation}\label{eq:ribbon-composition}
+ \gamma\circ\rho
+ =\rho^{\odot\gamma_1}\cdot\ldots\cdot
+   \rho^{\odot\gamma_{\ell(\gamma)}}.
+\end{equation}
+Two ribbon functions are equal precisely when their compositions admit
+factorizations whose corresponding factors agree up to reversal.
+In particular, equality preserves the number of parts and their multiset;
+this also follows from the maximum ordinary-degree term in
+\eqref{eq:ribbon-coarsening}.
+
+\begin{lemma}\label{lem:triangular-substitution}
+Let \(K\) be a field, and let \(B_m\) be polynomials in independent
+variables \(z_1,z_2,\ldots\) over \(K\).  Suppose
+\[
+ B_m=c_m z_{N_m}+d_m,\qquad
+ 0<N_1<N_2<\cdots,
+\]
+where \(c_m,d_m\in K[z_1,\ldots,z_{N_m-1}]\) with \(c_m\ne0\); the
+case \(d_m=0\) is allowed.  Then substitution \(H_m\mapsto B_m\) defines an
+injective homomorphism \(K[H_1,H_2,\ldots]\to K[z_1,z_2,\ldots]\).
+\end{lemma}
+
+\begin{proof}
+Take a nonzero relation with largest index \(m\), and expand it as a
+polynomial in \(B_m\).  By induction, its leading coefficient, a
+nonzero polynomial in \(B_1,\ldots,B_{m-1}\), is nonzero.  The highest
+power of \(z_{N_m}\) has that coefficient multiplied by a power of
+\(c_m\), and cannot vanish in the polynomial domain.
+\end{proof}
+
+For a constant-gap Hessenberg profile \(D=(r_1,\ldots,r_n;c^{n-1})\),
+put \(\rho=(r_1-c,\ldots,r_n-c)\).  Equation~\eqref{eq:interval-expansion}
+gives
+\begin{equation}\label{eq:constant-gap-substitution}
+ s_D=h_c^n\,
+ r_\rho\left(\frac{h_{c+1}}{h_c},
+             \frac{h_{c+2}}{h_c},\ldots\right).
+\end{equation}
+For \(c>0\), this is read in the localization at \(h_c\), and its
+substitution is injective because the generators \(h_{c+j}\) are
+independent.  For \(c=0\), it is the ordinary ribbon formula.
+This faithful substitution compares diagrams already known to have
+constant gap.  It does not by itself expose an arbitrary mate.
+
+\subsection{Marked geometry}\label{subsec:marked-geometry}
+
+We use the full marked geometry of \cite{Shields2026Gluing}, following
+McNamara and van Willigenburg \cite{McNamara2009Classification}.
+A marked inner \(\omega\) consists of a connected diagram \(E\),
+two congruent connected end copies \(W_-=W_{\mathrm{sw}}\) and
+\(W_+=W_{\mathrm{ne}}=W_-+v\), and their attachment case.
+The lower copy contains the southwest cell of \(E\), and the upper
+copy contains its northeast cell.  Put
+\[
+ O=E\setminus(W_-\cup W_+),\qquad w=N_W,\qquad q=N_E-w=c(v),
+ \qquad e=(1,1),
+\]
+where \(c(i,j)=j-i\), rows increase downward and columns to the right.
+The four cases, in lower/upper order, are
+\[
+ \begin{array}{c|cccc}
+ \text{case}&(a)&(b)&(c)&(d)\\ \hline
+ \text{attachments}&(H,H)&(V,V)&(H,V)&(V,H).
+ \end{array}
+\]
+A horizontal lower attachment uses the western neighbor of the
+southwest middle cell, and a vertical one its southern neighbor.
+The upper attachment uses the eastern or northern neighbor of the
+northeast middle cell.  Cases \((a),(b)\) are ordinary and
+\((c),(d)\) are mixed.
+
+The mark is legal under Hypotheses I--IV:
+\begin{enumerate}
+\item[(I)] No strictly larger skew diagram containing \(W_-\), on the
+ same content diagonals, has translated copies at both ends of \(E\).
+\item[(II)] An occupied diagonal meets neither marked copy: \(0\le w<q\).
+\item[(III)] Removing either marked copy leaves a connected skew diagram.
+\item[(IV)] In \(\boldsymbol E=\bigcup_{k\in\mathbb Z}(E+kv)\), no
+ hatted-middle copy is adjacent to a hatted-mark copy.  For copies
+ \(O_1,W_1\), these are
+ \[
+ \widehat O_1=\{x\in O_1:x+e\in O_1\},\qquad
+ \widehat W_1=\{x\in\boldsymbol E:x+e\in W_1\}
+       \cup\{x\in W_1:x+e\in\boldsymbol E\}.
+ \]
+\end{enumerate}
+Adjacency means sharing an edge.  The notation \(\overline O,\overline W\)
+for these strips is also used in the repeated-block arguments below.
+At \(w=0\) the marks are the west edge of the southwest cell and the east
+edge of the northeast cell, with horizontal displacement
+\[
+ v_H=\operatorname{ne}(E)-\operatorname{sw}(E)+(0,1).
+\]
+The vertical edge reading has \(v_V=v_H-e\).  Conversion to the
+horizontal reading antitransposes the outer:
+\(D\circ_{\varnothing,V}E=\operatorname{AT}(D)\circ_{\varnothing,H}E\),
+where \(\operatorname{AT}(i,j)=(-j,-i)\).
+More generally, when both ordinary marks exist, \(v_a-v_b=e\) and
+\(D\circ_{\omega_a}E=\operatorname{AT}(D)\circ_{\omega_b}E\).
+The usual symmetric-function involution acts on the outer function at
+the same time.  A proper chart \(D\circ_\omega E\) has connected factors
+with \(|D|,|E|\ge2\).  Rotation transports both marks and their attachments;
+it is not an arbitrary Schur-equal replacement of the inner.
+
+For \(d=(i,i+j)\in D\), write \([\ell_j^D,h_j^D]\) for the
+content-\(j\) row interval of the outer.  The copy of \(E\) indexed by
+\(d\) has origin
+\[
+ L_\omega(d)=
+ \begin{cases}
+ jv+ie,&(a),\\
+ jv-ie,&(b),\\
+ jv+(i-\ell_j^D)e,&(c),\\
+ jv-(h_j^D-i)e,&(d).
+ \end{cases}
+\]
+In the mixed cases, a vertical pair on the same northwest, respectively
+southeast, boundary ribbon contributes
+\(W_++L_\omega(d)+e\), respectively \(W_++L_\omega(d)-e\),
+with \(d\) the lower cell.  The ribbon ranks are
+\(i-\ell_j^D+1\) and \(h_j^D-i+1\).  These supplemental copies belong
+to the actual cell union.
+
+Here are the local geometry and coding facts from
+\cite[local geometry and coding lemmas]{Shields2026Gluing} used in
+chart transport.  Normalize the southwest cell to \((0,0)\).
+For the interval \([\ell_k,h_k]\) on diagonal \(k\), set
+\[
+ A_k=\ell_{k-1}-\ell_k,\qquad B_k=h_{k-1}-h_k,\qquad
+ H_k=h_k-\ell_k+1.
+\]
+The internal steps \(1\le k<N_E\) are binary and
+\(H_k-H_{k-1}=A_k-B_k\).  Conversely positive interval heights,
+binary endpoint steps and singleton end diagonals characterize a
+connected skew diagram.  In the beta normalization
+\eqref{eq:beta-profile}, the full membership words are
+\(A_E(j)=\mathbf1_{j\in Y}\), \(B_E(j)=\mathbf1_{j\in X}\);
+they agree with the internal steps and are defined for every integer.
+Their heights are
+\(H_E(j)=\#\{y\in Y:y\le j\}-\#\{x\in X:x\le j\}\).
+
+For a legal positive mark, \(W_-=E\cap(E-v)\).  The middle is thin
+on the marked diagonals, and the private diagonals \(w,q-1\) are
+singletons.  Its content interval is \([\sigma,q+\tau-1]\), where
+\[
+ 1\le\sigma\le w,\qquad 0\le\tau<w,
+ \qquad \tau<\sigma\quad\text{in the mixed cases}.
+\]
+Thus \(\tau,\sigma\) are the upper and lower middle phases, not
+inflation parameters.  In case \((d)\) both marks are
+southeast-justified, and in case \((c)\) northwest-justified.
+If \(N_D=M\), the composite has span \(N=Mq+w\); its first and
+last \(q\) diagonals are translated end windows of \(E\), whose
+private overlap reconstructs \(E\).
+
+The boundary words are \(q\)-periodic except at the slots shown below,
+whose interior values hold for \(1\le j<M\):
+\[
+ \begin{array}{c|ll}
+ &\text{first slot}&\text{second slot}\\ \hline
+ (a)&A_{jq+\tau}=A_j^D&B_{jq+\sigma}=B_j^D\\
+ (b)&B_{jq+\tau}=1-A_j^D&A_{jq+\sigma}=1-B_j^D\\
+ (c)&B_{jq+\tau}=1-A_j^D&B_{jq+\sigma}=B_j^D\\
+ (d)&A_{jq+\tau}=A_j^D&A_{jq+\sigma}=1-B_j^D
+ \end{array}
+\]
+The true initial and terminal values are
+\[
+ \begin{array}{c|l|l}
+ &\text{initial}&\text{terminal}\\ \hline
+ (a)&A_\tau=1,\ B_\sigma=0&A_{N-w+\tau}=0,\ B_{N-w+\sigma}=1\\
+ (b)&B_\tau=0,\ A_\sigma=1&B_{N-w+\tau}=1,\ A_{N-w+\sigma}=0\\
+ (c)&B_\tau=B_\sigma=0&B_{N-w+\tau}=B_{N-w+\sigma}=1\\
+ (d)&A_\tau=A_\sigma=1&A_{N-w+\tau}=A_{N-w+\sigma}=0.
+ \end{array}
+\]
+Steps at \(0,N\) are omitted in this table.  Case \((d)\) has
+\(B_w=1,B_q=0\), and case \((c)\) has \(A_w=0,A_q=1\).
+At empty width the only exceptional residue is zero.
+
+In the two repeated-block families of
+\eqref{eq:saturation-domain} and \eqref{eq:thin-domain}, every nonempty mark is a
+horizontal row with two horizontal attachments, hence case \((a)\).
+An east outer step amalgamates marks; a north step places the next lower
+mark one position northwest of the preceding upper mark.  Those family
+charts also satisfy Hypothesis V: a marked copy has just one cell
+adjacent to the middle.  V and the horizontal-row restriction are not
+imposed on the general transport results.
+
+\section{Profile transport}\label{sec:profile-transport}
+
+\subsection{Erosion and filtered lowering}
+
+Let \(\mathcal E(S)=\{(i,j)\in S:(i,j+1)\in S\}\), retaining
+the original row coordinates before translation.  Empty rows may occur,
+and the result may disconnect.  Write \(r(S)\) for the number of
+nonempty rows and call a row or a column a line.  One-step inflation is
+\(\mathcal I=I_1\) from \eqref{eq:inflation}: it increases every row
+length and adjacent overlap-minus-one by one, or sends the full beta
+lists \((X,Y)\) to \((X+1,Y)\).
+
+\begin{lemma}[Erosion]\label{lem:erosion}
+If \(S\) has \(r\) rows, take the ordinary-degree-\(r\) part of \(s_S\) and substitute
+\(h_j\mapsto h_{j-1}\), including \(h_1\mapsto1\).  The result is
+\(s_{\mathcal E(S)}\).  Thus erosion preserves whole Schur equality, and
+\(|\mathcal E(S)|=|S|-r\).
+\end{lemma}
+\begin{proof}
+The selected degree keeps precisely permutations using no old unit entry.
+After the shift their entries are the physical entries of \((X-1,Y)\).
+An old unit becomes a negative zero, and a newly produced index zero remains
+one.  This is exactly the determinant of the eroded diagram, including empty
+rows.  All other permutations were excluded by their ordinary degree.
+\end{proof}
+
+This is a maximum ordinary-degree projection.  It is not a
+minimum-degree core extraction, and its substitution \(h_1\mapsto1\)
+retains newly empty rows.  The following lowering map instead filters
+both the number of positive factors and every positive index.
+
+\begin{lemma}\label{lem:inflation-lowering}
+For a connected \(n\)-row diagram \(D\) and an integer \(t\ge1\),
+define a linear map on \(\Lambda\) by
+\begin{equation}\label{eq:lowering-map}
+ \mathcal L_{t,n}\!\left(\sum_\lambda c_\lambda h_\lambda\right)
+ =\sum_{\substack{\ell(\lambda)=n\\ \lambda_i\ge t\text{ for all }i}}
+ c_\lambda\prod_{i=1}^n h_{\lambda_i-t}.
+\end{equation}
+Then
+\begin{equation}\label{eq:lowering-identity}
+ \mathcal L_{t,n}(s_{I_tD})=s_D.
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Inflation shifts every Jacobi--Trudi index by \(t\).  A term with
+all original indices nonnegative then has \(n\) positive factors of
+indices at least \(t\), and lowering recovers it, including \(h_0=1\).
+If an original negative index becomes positive, it lies in
+\(\{1,\ldots,t-1\}\) and fails the index filter; if it becomes a unit,
+the term has fewer than \(n\) positive factors.  An index remaining
+negative contributes zero.  Thus the filters retain exactly the
+original feasible terms, with their signs, proving
+\eqref{eq:lowering-identity}.
+\end{proof}
+
+\begin{corollary}\label{cor:inflation-no-escape}
+For every connected \(D\) and every integer \(t\ge0\), each
+connected mate of \(I_tD\) has a connected deflation, and
+\begin{equation}\label{eq:no-escape}
+ I_{-t}\operatorname{Cl}(I_tD)\subseteq\operatorname{Cl}(D).
+\end{equation}
+Consequently an equality lost under inflation cannot return at a later
+integer inflation.
+\end{corollary}
+
+\begin{proof}
+The assertion is immediate at \(t=0\).  For \(t>0\), a connected
+mate \(H\) has the same row and gap multisets as \(I_tD\).
+Its rows exceed \(t\), and its gaps are at least \(t\).
+Subtracting \(t\) preserves
+\(0\le g_i-t<\min(r_i-t,r_{i+1}-t)\), so \(I_{-t}H\) is
+connected.  The common row count is \(n\); apply
+\Cref{lem:inflation-lowering} to both equal functions.
+For permanence, an equality at a later parameter lowers to an equality
+at every earlier nonnegative parameter.
+\end{proof}
+
+The inclusion in \eqref{eq:no-escape} is one-sided.  It does not assert
+that inflation preserves every skew Schur equality.
+
+\subsection{Zero-free classes and legal charts}
+
+A connected zero-free nonline diagram has every row and every adjacent overlap
+of length at least two.  Thus its erosion is connected, no row disappears,
+and \(\mathcal I\mathcal E(S)=S\).  Connectedness of erosion alone would not
+suffice for that last equality on a general unit-bearing diagram.
+
+\begin{lemma}[Zero-free class transport]\label{lem:zero-free-bijection}
+If \(S\) is connected, zero-free and not a line, erosion and inflation are
+inverse bijections between \(\operatorname{Cl}(S)\) and
+\(\operatorname{Cl}(\mathcal E(S))\).
+\end{lemma}
+\begin{proof}
+Write a diagram as \(\lambda/\mu\).  The number of indices equal to
+\(-1\) in its Jacobi--Trudi matrix is a Schur invariant on actual
+connected diagrams.  For \(i=j+k-1\) such an entry says
+\(\lambda_i-\mu_j=k-2\).  Diagonal and upper entries are positive,
+and adjacent rows have positive overlap, so \(k=2\) cannot contribute.
+For \(k\ge3\), this is a positive \(k\)-row overlap, whose multiplicity
+is read from the overlap multiset \cite{Reiner2007Coincidences}.  Therefore
+\[
+ \#\{\text{index }-1\}
+ =\sum_{k\ge3}\operatorname{mult}_{k-2}
+   (\text{positive \(k\)-row overlaps}).
+\]
+The erosion of \(S\) has no \(-1\) entry, since \(S\) has no unit.  Neither
+does any of its actual mates.  They also have the same row count, read
+as the maximum ordinary degree.  On precisely this no-\(-1\) domain,
+inflation is the whole homogeneous shift
+\[
+ s_{\mathcal I(T)}=h_1^{r(T)}s_T(h_j\mapsto h_{j+1}/h_1).
+\]
+Old units become \(h_1\), old negative indices are at most \(-2\) and remain
+negative, and no new unit is omitted.  Conversely every mate of \(S\) is
+zero-free, since a common beta would produce a lower ordinary-degree core
+term, whereas \(s_S\) is homogeneous in ordinary degree.  Erosion and inflation
+are inverse on the actual row profiles, and commute with rotation.
+Together with \Cref{lem:erosion}, the raising identity gives both
+directions on the entire classes, not just the one-sided inclusion
+of \Cref{cor:inflation-no-escape}.
+\end{proof}
+
+\begin{lemma}[Inflation of legal charts]\label{lem:inflate-chart}
+Suppose \(T=C\circ_\mu V\) is an actual proper chart, \(C\) is not a row, and
+\(\mathcal I(T)\) is zero-free.  Write \(q,w\) for its period and width, with the
+empty mark read horizontally.  Then \(\mathcal I(T)\) has an actual period-\(q\)
+chart as follows:
+\begin{enumerate}
+\item for \(0<w<q-1\), use inner \(\mathcal I(V)\) and mark \(\mathcal I(W)\),
+ with the same outer, displacement and attachment;
+\item for \(w=0\), use inner \(\mathcal I(V)\) with its singleton \((a)\) end mark
+ and the same outer;
+\item for \(w=q-1\), the original inner is the \((H,H)\) one-middle-cell atom
+ \(\mathcal A(W)\), and
+ \(\mathcal I(T)=\mathcal I(C)\circ_{\varnothing}\mathcal I(W)\).
+\end{enumerate}
+\end{lemma}
+\begin{proof}
+Zero-freeness of \(\mathcal I(T)\) says that \(T\) has no index \(-1\), equivalently
+\(B_T(j)A_T(j+1)=0\).  Inflation acts by
+\(A_{\mathcal I(T)}(j)=A_T(j)\),
+\(B_{\mathcal I(T)}(j)=B_T(j-1)\) and
+\(H_{\mathcal I(T)}(j)=H_T(j)+B_T(j)\).
+For \(0<w<q-1\) the required new private heights are
+\(1+A_V(w+1)\) and \(1+B_V(q-1)\).  A vertical attachment or nonempty tail forces
+the neighboring original bit, so the no-\(-1\) condition makes each of these
+heights one.  The only exceptions are a horizontal lower attachment with
+\(\sigma=w\) and a horizontal upper attachment with \(\tau=0\).  Their free interior
+bits are \(B_C(j)\) and \(A_C(j)\); since a nonrow connected outer has a one in
+each word, the same no-\(-1\) condition supplies the two missing pinches.
+At \(w=0\), the joining slots read \(A_C(j),B_C(j)\).
+Their nonzero occurrences force \(A_V(1)=B_V(q-1)=0\) by the
+same no-\(-1\) condition.  The inflated inner therefore has horizontal
+singleton marks at \(\operatorname{sw}(V)\) and
+\(\operatorname{ne}(V)+(0,1)\), with the original displacement \(v_H\)
+and new phases \((0,1)\).
+
+At positive width, inflation commutes with the full intersection on the marked row range:
+all those row intersections are nonempty, and their interval endpoints are
+shifted by the same unit.  The new phases are
+\((\tau,\sigma+1),(\tau+1,\sigma),(\tau+1,\sigma+1),(\tau,\sigma)\)
+in cases \((a),(b),(c),(d)\).  In both positive and empty width,
+the private pinches, thin marked tails and diagonal criterion prove
+connected complements.  The hatted middle
+remains two contents away from the periodic hatted mark.  Maximality follows
+from the full intersection and the same extreme-displacement test.  Inflation
+distributes over the complete copy union and, in the mixed cases, over every
+supplemental copy.  This proves the first two assertions.
+
+At \(w=q-1\) there is one private diagonal.  Unless both neighboring slots are
+free, the no-\(-1\) condition either fails or forces an entire outer word to
+zero, making \(C\) a row.  Thus \(\tau=0,\sigma=w\) and both attachments are horizontal.
+The atom consists of \(W\), a translate of \(W\), and the single joining middle
+cell.  If \(\mathcal A(W)\) denotes this atom, its displacement is
+\(\operatorname{ne}(W)-\operatorname{sw}(W)+(0,2)\) and direct copy union gives
+\[
+ \mathcal I(C\circ_W\mathcal A(W))
+   =\mathcal I(C)\circ_\varnothing\mathcal I(W).
+\]
+One can check the union by its copy origins; the row intervals
+\(\mathcal E(A)\) and \(\mathcal E(A)+(0,1)\) cover \(A\) when every row survives.
+The private singleton and empty middle hat prove all four legality clauses
+for the atom.  The remaining no-\(-1\) conditions also make \(\mathcal I(C)\)
+zero-free.
+The inner \(\mathcal I(W)\) has span \(q\), and its horizontal
+edge displacement is the displayed atom displacement, so the right-hand
+side is a genuine legal empty-mark chart of period \(q\).
+\end{proof}
+
+\section{Rigidity of overlapped powers}\label{sec:overlap-powers}
+
+Let \(\rho=(x_1,\ldots,x_k)\) be a positive composition with
+\(k\ge2\), and let \(\delta\) be an integer satisfying
+\(0<\delta<\min(x_1,x_k)\).  For integers \(m\ge1\), define
+\[
+ \rho^{\odot_\delta m}
+ =(x_1,x_2,\ldots,x_{k-1},
+   (x_1+x_k-\delta,x_2,\ldots,x_{k-1})^{m-1},x_k).
+\]
+Thus adjoining endpoint parts are merged with overlap \(\delta\),
+not by the ordinary near-concatenation in \eqref{eq:ribbon-composition}.
+
+\begin{lemma}\label{lem:overlap-power-rigidity}
+For \(m\ge2\), the composition
+\(\theta=\rho^{\odot_\delta m}\) has no factorization
+\(\theta=\gamma\circ\beta\) with \(|\gamma|\ge2\) and
+\(\ell(\beta)\ge2\).  Consequently
+\[
+ \mathcal R(\theta)=\{\theta,\theta^*\},
+\]
+with repetitions removed.
+\end{lemma}
+
+\begin{proof}
+Put \(W=|\rho|\), \(Q=W-\delta\), and
+\(T=|\theta|=mQ+\delta\).  If \(C\) is the proper cut set of
+\(\rho\), the endpoint inequalities give
+\begin{equation}\label{eq:overlap-cut-set}
+ C\subseteq\{\delta+1,\ldots,Q-1\},\qquad
+ C(\theta)=\bigcup_{j=0}^{m-1}(jQ+C).
+\end{equation}
+Let \(f\) be the cut indicator on the integers in \([0,T]\), with
+\(f(0)=f(T)=0\).  It is \(Q\)-periodic wherever both positions are
+in this interval, and
+\begin{equation}\label{eq:initial-zero-interval}
+ f(x)=0\qquad(0\le x\le\delta).
+\end{equation}
+
+Suppose \(\theta=\gamma\circ\beta\) as in the statement, and put
+\(q=|\beta|\).  Then \(q\mid T\) and \(q\le T/2\).
+Away from multiples of \(q\), the cut word repeats the internal cut
+word of \(\beta\).  There are therefore
+\(t_1,\ldots,t_{q-1}\in\{0,1\}\) such that
+\[
+ f(x)=t_{x\bmod q}\qquad(q\nmid x).
+\]
+If \(q\le\delta\), \eqref{eq:initial-zero-interval} makes every
+\(t_r\) zero, contrary to \(\ell(\beta)\ge2\).  Hence
+\(q>\delta\).
+
+Set \(h=\gcd(Q,q)\).  Since \(q\mid mQ+\delta\),
+\begin{equation}\label{eq:period-gcd}
+ h\mid\delta,\qquad h\le\delta<q.
+\end{equation}
+Also \(Q<T/2\), so \(Q+q\le T\).  For each
+\(1\le r<q\) with \(r+Q\not\equiv0\pmod q\), the two
+available positions \(r,r+Q\) give
+\begin{equation}\label{eq:cut-period-comparison}
+ t_r=t_{r+Q\bmod q}.
+\end{equation}
+The cycles of addition by \(Q\) modulo \(q\) are the residue
+classes modulo \(h\).  Removing the vertex zero leaves every other
+cycle connected and the zero-residue cycle a connected path.
+Thus \eqref{eq:cut-period-comparison} makes the indicators constant on
+each such class, with zero omitted.  The initial zero positions
+\(1,\ldots,h\) meet every class, including the zero class at
+\(h<q\).  Every indicator is zero, again a contradiction.
+
+By the ribbon factor-reversal classification, a nonrotation ribbon mate
+would require a proper multipart right factor.  The obstruction just
+proved excludes it.  Any remaining one-part factors only scale the parts
+and introduce no additional reversal choice.
+\end{proof}
+
+\begin{lemma}\label{lem:merged-block-rigidity}
+Under \eqref{eq:saturation-domain}, for every \(m\ge2\),
+\[
+ \operatorname{Cl}(A_m)=\{A_m,A_m^*\}.
+\]
+No conclusion about rigidity of \(A_1\) is asserted.
+\end{lemma}
+
+\begin{proof}
+Every internal row of \(A_m\) exceeds \(2c\).  For a merged row
+this follows from \(a+b-d>2c\); for an original internal row it is
+one of \eqref{eq:saturation-domain}.  Hence \(A_m\) is Hessenberg.
+Its signed maximal cofactor is \(h_c^{m(k-1)}\).
+By \eqref{eq:hessenberg-membership} and the polynomial readings, any
+connected mate is also Hessenberg, has \(m(k-1)+1\) rows, and has
+constant gap \(c\), including when \(c=0\).
+
+Subtract \(c\) from each row of \(A\), and put
+\[
+ \rho=(a-c,a_2-c,\ldots,a_{k-1}-c,b-c),\qquad \delta=d-c.
+\]
+Then the row word of \(A_m\), minus \(c\) in each position, is
+\(\rho^{\odot_\delta m}\), and
+\(0<\delta<\min(a-c,b-c)\).  Equality of the constant-gap functions
+is therefore ribbon equality by \eqref{eq:constant-gap-substitution}.
+\Cref{lem:overlap-power-rigidity} gives precisely the two displayed
+orientations.
+\end{proof}
+
+\section{The repeated-block inverse}\label{sec:saturation-proof}
+
+Under \eqref{eq:saturation-domain}, put
+\(K=k-1\) and \(Q=|A|-Kc-d\).  The construction has
+\begin{equation}\label{eq:saturation-readings}
+ \begin{aligned}
+ n&=MK+\ell,&
+ |F_\alpha|&=M|A|-(M-\ell)d,\\
+ N_{F_\alpha}&=MQ+d,&
+ (-1)^{n-1}[h_{MQ+d}]s_{F_\alpha}
+   &=h_c^{MK}h_d^{\ell-1}.
+ \end{aligned}
+\end{equation}
+The strict endpoint inequalities give \(Q>0\).
+All source rows exceed \(d\).  At an endpoint adjoining a larger seam,
+its incident gaps have sum \(c+d\), and at every other internal row
+they have sum \(2c\).  Thus the source is Hessenberg.
+
+\begin{lemma}\label{lem:ribbon-endpoints}
+Ribbon Schur equality preserves the unordered pair of endpoint parts.
+Consequently every connected mate of \(A_j\), including \(j=1\),
+has unordered endpoint-row pair \(\{a,b\}\).
+\end{lemma}
+
+\begin{proof}
+In a composition factorization, the rightmost factor with at least two
+parts supplies the endpoint parts.  Any one-part factors to its right
+scale both.  Reversing factors preserves or exchanges this pair.
+The ribbon classification therefore proves its invariance.
+
+The maximal cofactor of \(A_j\) forces every mate to have constant
+gap \(c\) and Hessenberg form, just as in
+\Cref{lem:merged-block-rigidity}.  Apply
+\eqref{eq:constant-gap-substitution} and add \(c\) back to the
+endpoint parts.  This determines their unordered pair, not the interior
+of a one-copy component.
+\end{proof}
+
+\begin{lemma}\label{lem:total-contraction-inverse}
+Let \(H\) be any connected mate of \(F_\alpha\), with
+\(M\ge2\).  After at most one global rotation, cutting its larger
+seams gives the literal ordered components
+\(A_{\beta_1},\ldots,A_{\beta_\ell}\), where \(\beta\) is a
+permutation of the parts of \(\alpha\).
+\end{lemma}
+
+\begin{proof}
+By \eqref{eq:saturation-readings} and the polynomial readings, \(H\)
+is Hessenberg with \(MK\) gaps \(c\), \(\ell-1\) gaps \(d\),
+and the source's row multiset.  When \(c=0\), the row count supplies
+its multiplicity.  Every row therefore exceeds \(d\), as required by
+\Cref{lem:seam-coefficients}.
+
+Put \(B_j=s_{A_j}\).  Cutting all larger seams in both diagrams and
+using \Cref{lem:seam-coefficients} gives
+\begin{equation}\label{eq:cut-components}
+ \prod_{i=1}^{\ell}s_{H_i}
+ =[h_d^0]s_H
+ =\prod_{i=1}^{\ell}B_{\alpha_i}.
+\end{equation}
+Connected irreducibility matches the component functions with
+multiplicity.  A component with function \(B_j\) has \(jK+1\)
+rows, identifying \(j\); in their actual order these indices form a
+permutation \(\beta\) of the parts of \(\alpha\).
+Every \(H_i\) has endpoint pair \(\{a,b\}\) by
+\Cref{lem:ribbon-endpoints}, but a one-copy component may still be
+any mate of \(A\).
+
+Contract all larger seams of \(H\), obtaining \(C\).  The other
+extreme coefficient is
+\begin{equation}\label{eq:total-contraction}
+ [h_d^{\ell-1}]s_H=(-1)^{\ell-1}s_C
+ =(-1)^{\ell-1}B_M.
+\end{equation}
+By \Cref{lem:merged-block-rigidity}, \(C=A_M\) or \(A_M^*\).
+Rotate \(H\) once if necessary, and henceforth fix the literal
+ordered word
+\[
+ C=A_M=(a,I,(z,I)^{M-1},b;c^{MK}).
+\]
+
+For \(1\le j<\ell\), put \(s_j=\beta_1+\cdots+\beta_j\).
+The \(j\)-th contracted seam occupies the row position
+\begin{equation}\label{eq:split-positions}
+ 1+Ks_j
+\end{equation}
+in \(C\): the first \(j\) components had \(Ks_j+j\) rows, and
+the \(j-1\) preceding contractions leave \(Ks_j+1\).
+Each component has at least two rows, so distinct seams share no
+endpoint row.  At every position \eqref{eq:split-positions}, the
+contracted row has length \(z=a+b-d\).
+
+Starting with the exterior row \(a\), the endpoint pair forces the
+first component to end with \(b\), and
+\[
+ b+v-d=z=a+b-d\quad\Longrightarrow\quad v=a
+\]
+forces the next component to start with \(a\).  Induction fixes every
+split, including when \(a=b\).  The unmerged rows retain their
+positions in \(C=A_M\), so the pieces are exactly \(A_{\beta_i}\),
+with every remaining gap equal to \(c\).
+
+The reconstruction uses positions, not distinct row lengths: it allows
+\(z\) or the endpoints to repeat among internal rows and does not
+require one-copy rigidity.  For \(\ell=1\), there is no split and
+\eqref{eq:total-contraction} gives the conclusion.
+\end{proof}
+
+\begin{proof}[Proof of \Cref{thm:repeated-block-saturation}]
+By \Cref{lem:total-contraction-inverse}, an arbitrary mate is
+\(F_\beta\) or \(F_\beta^*\), with the same multiset of outer
+parts.  It remains to determine which orders are equal.
+The largest generator in \(B_m=s_{A_m}\) is private and satisfies
+\begin{equation}\label{eq:private-saturation-corner}
+ B_m=(-1)^{mK}h_c^{mK}h_{mQ+d}+R_m,\qquad
+ R_m\in\mathbb Q[h_1,\ldots,h_{mQ+d-1}].
+\end{equation}
+No \(B_m\) involves \(h_d\).  After localization at \(h_d\),
+\Cref{lem:triangular-substitution} shows that
+\(H_m\mapsto B_m/h_d\) is injective over \(\mathbb Q(h_d)\).
+The seam expansion gives
+\begin{equation}\label{eq:saturation-substitution}
+ s_{F_\beta}=h_d^{\ell(\beta)}
+ r_\beta(B_1/h_d,B_2/h_d,\ldots).
+\end{equation}
+Since the outer lengths agree, equality with the source is equivalent to
+\(r_\beta=r_\alpha\).  Conversely every such ribbon equality
+gives equality in \eqref{eq:saturation-substitution}, and rotation
+preserves it.  This proves \eqref{eq:saturation-class}.
+
+The gaps \(d>c\) uniquely parse \(F_\beta\) into blocks, and a
+block's row count recovers its index.  Thus \(\beta\mapsto F_\beta\)
+is injective.  If \(A=A^*\), then
+\(F_\beta^*=F_{\beta^*}\), and the two sets in
+\eqref{eq:saturation-class} coincide.  If an \(A_j\) were symmetric,
+its endpoints would give \(a=b\), and its first and last internal
+segments would give \(I=I^*\); hence \(A=A^*\).
+When \(A\ne A^*\), parsing therefore shows that the two orientation
+sets are disjoint.  This proves \eqref{eq:saturation-cardinality}.
+The literal legal presentations are established next.
+\end{proof}
+
+\begin{proposition}\label{prop:saturation-chart}
+Under \eqref{eq:saturation-domain}, the case-(a) chart with end-row
+marks of length \(d\) satisfies Hypotheses I--V and gives
+\(F_\alpha=\alpha\circ_{(d)}A\) literally, up to translation.
+\end{proposition}
+
+\begin{proof}
+Normalize the southwest cell of \(A\) to \((k-1,0)\), put
+\(S_A=|A|-(k-1)c\), and set \(T=S_A-k\).  The northeast cell
+is \((0,T)\).  Use the marks
+\begin{equation}\label{eq:saturation-marks}
+ \begin{aligned}
+ W_{\mathrm{sw}}&=\{(k-1,j):0\le j<d\},\\
+ W_{\mathrm{ne}}&=\{(0,j):T-d+1\le j\le T\}.
+ \end{aligned}
+\end{equation}
+Starting from a lower copy, the translations for an east step and a north
+step of the outer ribbon are respectively
+\begin{equation}\label{eq:saturation-translations}
+ \Delta=(-k+1,T-d+1),\qquad
+ \Delta-(1,1)=(-k,T-d).
+\end{equation}
+The first identifies the marks and merges two endpoint rows into
+\(a+b-d\); the second leaves the rows separate with gap \(d\).
+Following the ribbon row by row therefore gives exactly
+\eqref{eq:repeated-blocks}.
+
+The inequalities \(a-d>c\) and \(b-d>c\) put both marks in the
+terminal free portions of their rows.  Removing either shortens that
+row by \(d\), leaves its overlap with the adjacent row intact, and
+preserves the weak orders of both row boundaries.  The complement is
+therefore a connected skew diagram.  The marked content diagonals are
+single-cell terminal diagonals, so neither placement admits a larger
+copy on the same diagonals.  Their content intervals are
+\([1-k,d-k]\) and \([T-d+1,T]\).  Since \(S_A>2d\), at least
+one content diagonal separates them.
+
+In the infinite amalgamated chain, the same endpoint inequalities leave
+no northwest or southeast diagonal neighbor of a marked cell.  Thus
+\(\overline W=\varnothing\), which gives Hypothesis IV.  Both
+marks attach to the middle through one horizontal adjacency, giving
+case (a) and Hypothesis V.  The original internal inequalities
+\(a_i>2c\) keep the adjoining internal overlap strips apart throughout
+the chain.  These observations verify I--V on the full parameter domain.
+\end{proof}
+
+\begin{remark}\label{rem:saturation-boundaries}
+Both \(M\ge2\) and strict seam separation matter.  Consider
+\begin{equation}\label{eq:ambiguous-inners}
+ \begin{aligned}
+ A^{(0)}&=(4,7,4,10,7;1^4),\\
+ A^{(1)}&=(4,10,7,4,7;1^4).
+ \end{aligned}
+\end{equation}
+After subtracting one from each row, these are three times the ribbon
+compositions \((1,2)\circ(1,2)\) and \((2,1)\circ(1,2)\).
+They are nonrotation-equal by factor reversal and
+\eqref{eq:constant-gap-substitution}.  At \(M=1\), the proposed
+conclusion would incorrectly assert rigidity of the inner itself.
+
+At \(d=c=1\), the two parents
+\(A^{(0)}\cdot_1 A^{(0)}\) and
+\(A^{(1)}\cdot_1 A^{(1)}\) remain nonrotation-equal.  The same
+substitution gives the ribbon compositions
+\((1,1)\circ(3,6,3,9,6)\) and
+\((1,1)\circ(3,9,6,3,6)\), still related by factor reversal.
+At \(d=2\), both inners satisfy \eqref{eq:saturation-domain}; the
+outer class of \((1,1)\) is a singleton, so each parent is
+rotation-rigid.  The two parents are distinct and are not rotations,
+hence their functions differ.  This does not assert that every equal-gap
+context preserves ambiguity.
+\end{remark}
+
+\section{The thin two-row class}\label{sec:thin-and-lowering}
+
+Throughout this section, \(1\le c<a<b\), and the profiles
+\(E_m,G_\alpha\) are those of \eqref{eq:thin-domain}.  Their parameters
+are
+\begin{equation}\label{eq:thin-readings}
+ n=M+\ell,\qquad |G_\alpha|=M(a+b),\qquad N_{G_\alpha}=Mq,
+ \qquad
+ (-1)^{n-1}[h_{Mq}]s_{G_\alpha}=h_c^M.
+\end{equation}
+In particular, the maximal cofactor suppresses exactly \(\ell-1\)
+zero gaps, whose number is recovered from \(n\).
+
+\begin{lemma}\label{lem:two-row-power-rigidity}
+For every \(m\ge1\),
+\[
+ \operatorname{Cl}(E_m)=\{E_m,E_m^*\}.
+\]
+\end{lemma}
+
+\begin{proof}
+The profile \(E_m=(a,(a+b)^{m-1},b;c^m)\) is Hessenberg, since
+\(a+b>2c\).  Its maximal cofactor is \(h_c^m\).
+An arbitrary connected mate is therefore Hessenberg with the same row
+multiset and constant gap \(c\).  The row of length \(a\) is its
+unique shortest row.
+
+The variable \(h_a\) occurs only at the corresponding diagonal
+position.  It is not a gap variable, and every nontrivial interval label
+exceeds the rows it contains.  In the source,
+\begin{equation}\label{eq:short-row-coefficient}
+ [h_a]s_{E_m}=s_{\overline E_m}.
+\end{equation}
+The connected tail makes this coefficient irreducible.  At an internal
+\(a\)-row of a mate, deleting the corresponding row and column leaves
+two nonempty connected diagonal blocks with zero lower-left block.
+Its \(h_a\)-coefficient would therefore be reducible, a contradiction.
+Rotate so that the \(a\)-row is first.  Equality of the full functions
+and of their \(h_a\)-coefficients now gives both observations in
+\eqref{eq:boundary-reconstruction-input}, which recovers \(E_m\)
+literally.
+\end{proof}
+
+\begin{theorem}\label{thm:two-row-thin-class}
+For every nonempty composition \(\alpha\),
+\begin{equation}\label{eq:thin-class}
+ \operatorname{Cl}(G_\alpha)
+ =\{G_\beta,G_\beta^*: \beta\in\mathcal R(\alpha)\}.
+\end{equation}
+The two orientation sets are disjoint, and the class has
+\(2|\mathcal R(\alpha)|\) members.
+\end{theorem}
+
+\begin{proof}
+By \eqref{eq:thin-readings}, an arbitrary connected mate \(H\)
+is Hessenberg with \(M\) gaps \(c\) and \(\ell-1\) zero gaps.
+Cut the zero seams into \(H_1,\ldots,H_\ell\), and contract them
+all to \(C\).  With \(B_m=s_{E_m}\), \eqref{eq:unit-extremes} gives
+\[
+ \begin{aligned}
+ [u^0]\widehat s_H(u)&=\prod_i s_{H_i}
+                     =\prod_i B_{\alpha_i},\\
+ [u^{\ell-1}]\widehat s_H(u)&=(-1)^{\ell-1}s_C
+                     =(-1)^{\ell-1}B_M.
+ \end{aligned}
+\]
+Connected irreducibility and \Cref{lem:two-row-power-rigidity} give
+\(H_i=E_{\beta_i}\) or \(E_{\beta_i}^*\), where the row counts
+\(\beta_i+1\) identify a permutation \(\beta\) of the parts of
+\(\alpha\).  The row multiset of \(C\) is
+\(\{a,b\}\cup\{a+b\}^{M-1}\).
+Call the two component orientations positive and negative, according
+as their endpoint pair is \((a,b)\) or \((b,a)\).  Removing the common
+\(M-\ell\) internal rows of length \(a+b\), the remaining multiset is
+\begin{equation}\label{eq:orientation-multiset}
+ \{a,b\}\cup\{a+b\}^{\ell-1}.
+\end{equation}
+A positive-to-negative transition would create a row \(2b>a+b\).
+Without such a transition, mixed signs form a negative string followed
+by a positive string: both exterior rows are \(b\), and every junction
+is \(2a\) or \(a+b\).  Either case contradicts
+\eqref{eq:orientation-multiset}, the latter because no row is \(a\).
+Thus one global rotation gives \(H=G_\beta\).
+
+The corner in \(B_m\) is
+\[
+ B_m=(-1)^m h_c^m h_{mq}+R_m,\qquad
+ R_m\in\mathbb Q[h_1,\ldots,h_{mq-1}].
+\]
+Thus \(H_m\mapsto B_m\) is injective by
+\Cref{lem:triangular-substitution}.  Repeated use of
+\eqref{eq:cut-merge} at zero joins gives
+\begin{equation}\label{eq:thin-substitution}
+ s_{G_\beta}=r_\beta(B_1,B_2,\ldots).
+\end{equation}
+Equality is therefore equivalent to \(\beta\in\mathcal R(\alpha)\).
+Zero seams uniquely parse the blocks, so this parametrization is
+injective.  Every \(G_\beta\) starts with \(a\) and ends with
+\(b\), while its rotation starts with \(b\).  Since \(a<b\), the
+orientation sets are disjoint.
+\end{proof}
+
+The proof used zero seams and a private shortest row.  It did not set
+\(d=0\) in \Cref{thm:repeated-block-saturation}, whose domain requires
+\(d>c\).
+
+
+\section{The exact inflation threshold}\label{sec:inflation-proof}
+
+\begin{lemma}\label{lem:subthreshold-transport}
+Under \eqref{eq:thin-domain}, for \(0\le t<p\),
+\[
+ \operatorname{Cl}(I_tG_\alpha)
+ =I_t\bigl(\operatorname{Cl}(G_\alpha)\bigr).
+\]
+For \(0<t<p\), the literal chart
+\(I_tG_\alpha=\alpha\circ_{(t)}E(t)\) satisfies Hypotheses I--V.
+\end{lemma}
+
+\begin{proof}
+A second-subdiagonal index of \(G_\alpha\) has negative depth among
+\[
+ a-c=p,\qquad b-c,\qquad a+b-2c.
+\]
+The first two occur beside zero joins, and the third inside an \(E_m\).
+Entries farther below the diagonal are strictly smaller.  Therefore no
+negative entry opens for \(0\le t<p\).  When \(\ell\ge2\), the
+first depth occurs at every first row following a zero join, so \(p\)
+is exactly the first opening parameter.  For \(\ell=1\), that
+particular depth need not occur.
+
+For \(0<t<p\), retaining the homogeneous units gives
+\begin{equation}\label{eq:subthreshold-shift}
+ s_{I_tG_\alpha}
+ =h_t^n s_{G_\alpha}
+ \left(h_j=\frac{h_{j+t}}{h_t}\ (j\ge1)\right).
+\end{equation}
+All members of the class in \Cref{thm:two-row-thin-class} have the
+same row count and satisfy the same negative-depth bound.  Thus every
+original equality survives.  \Cref{cor:inflation-no-escape} gives the
+reverse inclusion, proving the asserted set equality.  At \(t=0\)
+it is the identity.
+
+For the chart, realize \(E(t)=(a+t,b+t;c+t)\) as
+\begin{equation}\label{eq:inflation-inner-cells}
+ \{(0,j):b-c-1\le j\le q+t-2\}
+ \cup\{(1,j):0\le j\le b+t-1\},
+\end{equation}
+with marks
+\begin{equation}\label{eq:inflation-marks}
+ \begin{aligned}
+ W_{\mathrm{sw}}&=\{(1,j):0\le j<t\},\\
+ W_{\mathrm{ne}}&=\{(0,j):q-1\le j\le q+t-2\}.
+ \end{aligned}
+\end{equation}
+An east step uses translation \((-1,q-1)\), and a north step uses
+\((-2,q-2)\).  Amalgamation merges endpoint rows into
+\((a+t)+(b+t)-t=a+b+t\); a north step gives gap \(t\).
+The resulting profile is exactly \(I_tG_\alpha\).
+
+Since \(t<a-c<b-c\), both marks lie in terminal free portions.
+Their deletion preserves the weak orders of the row boundaries and
+leaves the overlap unchanged.  Their content diagonals are terminal
+single-cell diagonals and have an intervening diagonal, proving I--III.
+In the infinite amalgamated chain the marked cells have no northwest or
+southeast diagonal neighbors, so \(\overline W=\varnothing\) and
+IV holds.  Each mark attaches horizontally through one cell, giving
+case (a) and V.  At \(t=0\), the horizontal empty-overlap convention
+gives \(G_\alpha\) directly.  Together with the factor-reversal
+classification recalled in \Cref{subsec:ribbon-substitution}, the class
+identity already proved gives every subthreshold mate up to global rotation.
+\end{proof}
+
+For a composition \(\alpha\) of \(M\), define its proper suffix-sum
+set
+\begin{equation}\label{eq:suffix-set}
+ T_\alpha=\{\alpha_\ell,\alpha_{\ell-1}+\alpha_\ell,
+          \ldots,\alpha_2+\cdots+\alpha_\ell\}
+ \subseteq\{1,\ldots,M-1\}.
+\end{equation}
+It has \(\ell-1\) members and determines \(\alpha\).  For
+\(\ell=1\) it is empty.
+
+\begin{lemma}\label{lem:boundary-core}
+Let \(P_\alpha=s_{I_pG_\alpha}\).  Its lowest ordinary-degree
+component has degree \(M+1\) and equals the function of a connected,
+zero-free Hessenberg diagram \(C_\alpha=(U_\alpha;V_M)\), where
+\begin{equation}\label{eq:boundary-core-lists}
+ \begin{aligned}
+ U_\alpha={}&\{qk:1\le k\le M,\ k\notin T_\alpha\}
+       \cup\{qk+p:k\in T_\alpha\cup\{M\}\},\\
+ V_M={}&\{qj-a:1\le j\le M\}\cup\{0\}.
+ \end{aligned}
+\end{equation}
+Each union is sorted decreasingly.  In particular, the column-beta list
+is independent of \(\alpha\).
+\end{lemma}
+
+\begin{proof}
+The beta lists of a single block are
+\[
+ X(E_m)=\{mq\}\cup\{b+jq:0\le j<m\},\qquad
+ Y(E_m)=\{b-c+jq:0\le j<m\}\cup\{0\}.
+\]
+In a zero join the preceding block's lists are translated by the span
+of all subsequent blocks.  Thus
+\begin{equation}\label{eq:thin-beta-lists}
+ \begin{aligned}
+ X(G_\alpha)&=\{b+jq:0\le j<M\}
+       \cup\{qs:s\in T_\alpha\cup\{M\}\},\\
+ Y(G_\alpha)&=\{b-c+jq:0\le j<M\}
+       \cup\{qs:s\in T_\alpha\cup\{0\}\}.
+ \end{aligned}
+\end{equation}
+At \(t=p=a-c\), the identity \(b+p=q\) gives
+\begin{equation}\label{eq:boundary-beta-lists}
+ \begin{aligned}
+ X(I_pG_\alpha)&=\{q,2q,\ldots,Mq\}
+       \cup\{qs+p:s\in T_\alpha\cup\{M\}\},\\
+ Y(I_pG_\alpha)&=\{qj-a:1\le j\le M\}
+       \cup\{qs:s\in T_\alpha\cup\{0\}\}.
+ \end{aligned}
+\end{equation}
+The inequalities
+\begin{equation}\label{eq:boundary-residue-separation}
+ 0<p<a<a+p<q
+\end{equation}
+imply that the common betas are exactly \(qT_\alpha\).
+Indeed the row residues are \(0,p\), while the nonzero column
+residue is \(-a\); neither \(p\) nor \(-a\) is zero, and they
+are distinct modulo \(q\).
+
+Delete every common beta from both lists.  The retained lists are
+\eqref{eq:boundary-core-lists}.  Writing
+\(\varepsilon_k=\mathbf1_{k\in T_\alpha}\), their order is
+\begin{equation}\label{eq:boundary-core-ordered}
+ \begin{aligned}
+ U_\alpha&=(Mq+p,\ Mq,\ (M-1)q+p\varepsilon_{M-1},
+                  \ldots,q+p\varepsilon_1),\\
+ V_M&=(Mq-a,\ (M-1)q-a,\ldots,q-a,\ 0).
+ \end{aligned}
+\end{equation}
+At \(M=1\), the row list is simply \((q+p,q)\).
+The sorted diagonal indices are positive, and the subdiagonal indices
+are \(a\) or \(a+p\).  All second-subdiagonal indices are at most
+\(a+p-q=a-b<0\).  The lists are disjoint by
+\eqref{eq:boundary-residue-separation}.  Thus the residual diagram is
+connected, zero-free, and Hessenberg.
+
+The parent has \(M+\ell\) rows and exactly \(\ell-1\) unit
+entries.  For \(s\in T_\alpha\), let \(j\) be the number of
+suffix sums larger than \(s\).  In \eqref{eq:boundary-beta-lists},
+the row and column positions of \(qs\) are
+\[
+ M-s+j+3\quad\hbox{and}\quad M-s+j+1.
+\]
+Their difference is two.  Selecting all the unit entries therefore has
+positive simultaneous deletion sign: the common entries have the same
+relative order, and the sum of the row-column differences is even.
+Its residual determinant is \(s_{C_\alpha}\), which is nonzero.
+Every term selecting fewer units has larger ordinary degree.  Hence
+\begin{equation}\label{eq:boundary-lowest-degree}
+ P_\alpha^{[M+1]}=s_{C_\alpha},\qquad
+ \min\deg_h P_\alpha=M+1,
+\end{equation}
+where the superscript denotes an ordinary homogeneous component.
+\end{proof}
+
+\begin{lemma}\label{lem:private-residue-column}
+Fix a positive integer modulus \(q\), residue sets \(R,S\), and a
+strict column-beta list \(V_1>\cdots>V_m=0\).  Suppose a connected
+diagram \(C=(U;V)\) has all row-beta residues in \(R\), all
+nonterminal column-beta residues in \(S\), and
+\begin{equation}\label{eq:private-residue-condition}
+ R\cap(R-S)=\varnothing\pmod q.
+\end{equation}
+Then the positive-index generators in \(s_C\) with residues in
+\(R\) are exactly
+\(h_{U_1},\ldots,h_{U_m}\).  Among diagrams with these fixed residue
+constraints and column list, \(s_C\) therefore determines the entire
+row-beta list.
+\end{lemma}
+
+\begin{proof}
+The residue condition makes each \(h_{U_i}\) private to its
+last-column position and excludes every other generator of residue
+in \(R\).  Its coefficient is the signed cofactor obtained by
+deleting row \(i\) and the last column.  That minor's sorted diagonal
+has positive indices \(U_j-V_j\) for \(j<i\) and nonnegative
+indices \(U_{j+1}-V_j\) for \(j\ge i\).
+The strict sorted-diagonal reading used in
+\eqref{eq:maximal-cofactor} therefore gives a unique minimum-square
+monomial, so the coefficient is nonzero.  The support in residues
+\(R\) consequently recovers every row beta.
+\end{proof}
+
+\begin{proof}[Proof of \Cref{thm:sharp-inflation}]
+\Cref{thm:two-row-thin-class,lem:subthreshold-transport} prove the
+first line of \eqref{eq:inflation-class}, including its geometric
+presentations.  For \(C_\alpha\) at the boundary, take
+\[
+ R=\{0,p\},\qquad S=\{-a\},\qquad R-S=\{a,a+p\}.
+\]
+These residue sets are disjoint as required by
+\eqref{eq:boundary-residue-separation}.  Therefore
+\Cref{lem:private-residue-column} reads the suffix set directly:
+\begin{equation}\label{eq:suffix-support-recovery}
+ T_\alpha=
+ \{k:1\le k<M,\ h_{qk+p}\text{ occurs in }s_{C_\alpha}\}.
+\end{equation}
+For fixed \(a,b,c,M\), equality of two boundary-core functions forces
+equality of their suffix sets and hence of their compositions.
+
+By \Cref{cor:inflation-no-escape}, an arbitrary connected mate of
+\(I_pG_\alpha\), after at most one rotation, is \(I_pG_\beta\)
+for some \(\beta\in\mathcal R(\alpha)\).
+Equality of their lowest ordinary-degree components gives
+\(s_{C_\alpha}=s_{C_\beta}\), so
+\eqref{eq:suffix-support-recovery} forces \(\beta=\alpha\).
+This proves the boundary rotation orbit.  Applying
+\Cref{cor:inflation-no-escape} to \(I_pG_\alpha\) with increment
+\(t-p\) extends the conclusion to \(t>p\), since inflation is
+injective and commutes with rotation.
+
+Parsing and the two different endpoint lengths give
+\(2|\mathcal R(\alpha)|\) members below the threshold and exactly
+two above it.  For \(\ell=1\), the original ribbon class is already
+a singleton; the proof still applies, with empty suffix set and no
+common-beta deletion.  Thus the theorem includes that case without
+asserting a decrease in its class size.
+\end{proof}
+
+\begin{remark}\label{rem:chart-boundary}
+The displayed subthreshold chart fails at \(t=p\).  Removing
+\(W_{\mathrm{ne}}\) from \eqref{eq:inflation-inner-cells} leaves a
+top row ending at \(q-2\), while the bottom row ends at
+\(b+p-1=q-1\).  The complement is no longer a skew diagram.
+This explains the geometric location of the boundary, but does not
+prove rigidity.  The coefficient identity
+\eqref{eq:boundary-lowest-degree} and support reconstruction
+\eqref{eq:suffix-support-recovery} exclude arbitrary mates, including
+ones that might admit a different chart.
+\end{remark}
+
+\section{Examples and verification scope}\label{sec:examples}
+
+For saturation with \(c=1\), \(d=2\), and \(\alpha=(1,2)\),
+the asymmetric inner \((4,5;1)\) gives four class members, while the
+symmetric inner \((4,4;1)\) gives two.  The outer ribbon class is
+\(\{(1,2),(2,1)\}\) in both cases.  Equal endpoints alone do not
+imply the second count: an inner with \(a=b\) but \(I\ne I^*\)
+still has the separate orientation copy.  Nor need the merger length
+be new.  For example, \(A=(4,7,5;1,1)\), \(d=2\), has
+\(z=7\) equal to its internal row length; the cut positions in
+\eqref{eq:split-positions} still determine every split.
+
+The nonrigid inners \eqref{eq:ambiguous-inners} illustrate a different
+point.  Their equal-gap ambiguity and its separation at \(d=2\)
+are consequences of the two arguments in
+\Cref{rem:saturation-boundaries}.  An independent exact check enumerates
+all \(28{,}350\) orders of the row and gap multisets of
+\(A^{(0)}\cdot_2 A^{(0)}\) and finds precisely its two rotations.
+This is a complete-class check at one nonrigid-inner instance, not a
+proof for arbitrary inner order.  The same witness at \(d=3\)
+would have \(a=c+d\), outside the strict endpoint hypothesis of
+\Cref{thm:repeated-block-saturation}; no further instance is inferred
+from it here.
+
+For inflation, \(E=(2,3;1)\) has threshold one.  The first inflations
+of \(G_{(1,2)}\) and \(G_{(2,1)}\) are
+\begin{equation}\label{eq:first-boundary-example}
+ \begin{aligned}
+ P&=(3,4,3,6,4;2,1,2,2),\\
+ Q&=(3,6,4,3,4;2,2,1,2).
+ \end{aligned}
+\end{equation}
+Deleting their respective common betas gives
+\[
+ C_P=((13,12,9,4);(10,6,2,0)),\qquad
+ C_Q=((13,12,8,5);(10,6,2,0)).
+\]
+The last-column variable \(h_9\) occurs in the first core with
+coefficient \(-h_2(h_3h_6-h_2h_7)\), and does not occur in the
+second.  The lowest ordinary-degree components already distinguish the
+two parents.  By contrast, \(E=(3,4;1)\) has threshold two:
+the four-member class for \(\alpha=(1,2)\) survives at both
+\(t=0\) and \(t=1\), then its images split into two rotation
+classes at \(t=2\).  The threshold is not universally one.
+
+\begin{corollary}\label{cor:unbounded-class-splitting}
+There are connected skew Schur classes of arbitrarily large cardinality
+whose images under \(I_1\) split into rotation classes only.
+\end{corollary}
+
+\begin{proof}
+Let \(\alpha_e\) be the composition of \(e\ge1\) copies of
+\((1,2)\) under \(\circ\).  Classical ribbon factorization gives
+\(|\mathcal R(\alpha_e)|=2^e\).
+For \(E=(2,3;1)\), \Cref{thm:sharp-inflation} gives
+\[
+ |\operatorname{Cl}(G_{\alpha_e})|=2^{e+1},\qquad
+ |\operatorname{Cl}(I_tG_{\alpha_e})|=2\quad(t\ge1).
+\]
+Injectivity of \(I_1\) leaves all \(2^{e+1}\) images distinct,
+partitioned into \(2^e\) rotation classes.
+\end{proof}
+
+The theorems are proved for all parameters satisfying their hypotheses.
+The paper-local script \texttt{check\_ref1\_class\_inflation\_exact.py}
+checks the displayed examples directly from Jacobi--Trudi determinants.
+For the complete-class checks, row and adjacent-overlap multisets bound
+all possible connected mates.  Every ordering is considered; integer
+determinant evaluations only reject unequal candidates, and every
+remaining candidate is compared as an exact polynomial.  The checked
+saturation cases include zero inner gaps, symmetric inners, a merger
+length equal to an internal row, equal endpoints with a nonpalindromic
+interior, and the nonrigid inner above.
+
+The script also checks the boundary beta lists, common-beta deletion sign,
+private-column support, and lowering on all compositions of total size
+at most five for four specified parameter triples.  Complete-class
+inflation checks cover the threshold-one and threshold-two examples.
+For \(e=2\) in \Cref{cor:unbounded-class-splitting}, it verifies that
+the eight constructed members become four distinct rotation pairs;
+it does not independently enumerate all fourteen-row mates.  None of
+these finite checks proves an unbounded assertion.
+
+\section{Concluding remarks}\label{sec:conclusion}
+
+Cutting a repeated-block diagram determines functions, while total
+contraction and positional splitting can determine its literal blocks.
+This distinction permits \Cref{thm:repeated-block-saturation} to retain
+nonrigid inners.  Repetition and strict seam separation supply different
+parts of that argument, as their respective boundary examples show.
+
+Additive inflation has a different effect.  On the two-row family it
+transports the entire class below the threshold and separates its
+nonrotation members at the threshold.  It remains injective throughout,
+so it does not universally define an operation on the quotient by skew
+Schur equality.
+The exact bijection in \Cref{lem:zero-free-bijection} applies to the
+erosion class of a connected zero-free nonline diagram; it does not
+remove this boundary for general Schur classes.
+
+\begin{question}\label{prob:nonconstant-inners}
+Which nonconstant-gap inner diagrams admit a repeated-block inverse
+without an inner-rigidity hypothesis?  The present proof needs both a
+rigid total contraction and a way to locate its cuts from the recovered
+component sizes.
+\end{question}
+
+\begin{question}\label{prob:inflation-survivors}
+Which repeated-block classes have a nontrivial proper subset of their
+original nonrotation mates surviving an inflation boundary?  The two-row
+theorem gives complete survival or rotation alone; its fixed-column
+boundary inverse is not supplied here for arbitrary inners.
+\end{question}
+
+\section*{Declarations}
+
+{\footnotesize
+\noindent\textbf{Funding.} This research received no external funding.
+
+\smallskip
+\noindent\textbf{Competing interests.} The author has no relevant interests to disclose.
+
+\smallskip
+\noindent\textbf{Data availability.} No datasets were generated or analyzed.
+
+\smallskip
+\noindent\textbf{Computational verification.} The proofs do not depend on numerical computation.  Scripts used for verification are available at \url{https://github.com/johnnyshields/papers}.
+
+\smallskip
+\noindent\textbf{Generative AI use.} During the preparation of this work, the author used OpenAI's ChatGPT (GPT-6 Astra, GPT-5.6 Sol) and Anthropic's Claude (Opus 5.5, Opus 5) to assist with mathematical research, manuscript drafting, and the development of auxiliary verification code.  After using these tools, the author reviewed and edited as needed.  The author takes full responsibility for the content of the work.
+\par}
+
+\begin{thebibliography}{99}
+
+\bibitem{Barekat2009CoincidencesCorrigendum}
+F. Barekat, V. Reiner and S. van Willigenburg,
+\emph{Corrigendum to ``Coincidences among skew Schur functions''},
+Adv. Math. \textbf{220} (2009), no.~5, 1655--1656,
+DOI: \href{https://doi.org/10.1016/j.aim.2008.10.010}{10.1016/\allowbreak j.aim.2008.10.010}.
+
+\bibitem{Billera2006DecomposableCompositions}
+L.~J. Billera, H.~Thomas and S.~van Willigenburg,
+\emph{Decomposable compositions, symmetric quasisymmetric functions and equality of ribbon Schur functions},
+Adv. Math. \textbf{204} (2006), no.~1, 204--240,
+DOI: \href{https://doi.org/10.1016/j.aim.2005.05.014}{10.1016/\allowbreak j.aim.2005.05.014}.
+
+\bibitem{GarciaGarcia2020ToeplitzMinors}
+D.~Garc\'ia-Garc\'ia and M.~Tierz,
+\emph{Toeplitz minors and specializations of skew Schur polynomials},
+J. Combin. Theory Ser. A \textbf{172} (2020), 105201,
+DOI: \href{https://doi.org/10.1016/j.jcta.2019.105201}{10.1016/\allowbreak j.jcta.2019.105201}.
+
+\bibitem{McNamara2009Classification}
+P.~R.~W. McNamara and S.~van Willigenburg,
+\emph{Towards a combinatorial classification of skew Schur functions},
+Trans. Amer. Math. Soc. \textbf{361} (2009), no.~8, 4437--4470,
+DOI: \href{https://doi.org/10.1090/S0002-9947-09-04683-2}{10.1090/\allowbreak S0002-9947-09-04683-2}.
+
+\bibitem{Reiner2007Coincidences}
+V.~Reiner, K.~M. Shaw and S.~van Willigenburg,
+\emph{Coincidences among skew Schur functions},
+Adv. Math. \textbf{216} (2007), no.~1, 118--152,
+DOI: \href{https://doi.org/10.1016/j.aim.2007.05.006}{10.1016/\allowbreak j.aim.2007.05.006}.
+
+\bibitem{Shields2026SkewSchur}
+J.~Shields,
+\emph{Boundary reconstruction and cofactor rigidity for skew Schur functions},
+preprint, 2026,
+DOI: \href{https://doi.org/10.5281/zenodo.22723463}{10.5281/\allowbreak zenodo.22723463}.
+
+\bibitem{Shields2026Cofactor}
+J.~Shields,
+\emph{Cofactor independence and dilation for skew Schur functions},
+preprint, 2026,
+DOI: \href{https://doi.org/10.5281/zenodo.22732784}{10.5281/\allowbreak zenodo.22732784}.
+
+\bibitem{Shields2026Gluing}
+J.~Shields,
+\emph{Local common-factor gluing and reduction of composition necessity for skew Schur functions},
+preprint, 2026,
+DOI: \href{https://doi.org/10.5281/zenodo.23133702}{10.5281/\allowbreak zenodo.23133702}.
+
+\bibitem{Shields2026Coarsenings}
+J.~Shields,
+\emph{Short coarsenings determine ribbon Schur equivalence},
+preprint, 2026,
+DOI: \href{https://doi.org/10.5281/zenodo.23644543}{10.5281/\allowbreak zenodo.\allowbreak 23644543}.
+
+\bibitem{Shields2026NegativeCount}
+J.~Shields,
+\emph{Skew Schur equivalence by Jacobi--Trudi negative count},
+preprint, 2026,
+DOI: \href{https://doi.org/10.5281/zenodo.23133741}{10.5281/\allowbreak zenodo.23133741}.
+\end{thebibliography}
+
+\end{document}

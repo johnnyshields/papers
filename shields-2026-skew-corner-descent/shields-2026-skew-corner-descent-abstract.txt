@@ -1,0 +1,21 @@
+Title
+-----
+Corner descent and repeated inners in skew Schur compositions
+
+Keywords
+--------
+skew Schur function
+marked composition
+Jacobi–Trudi determinant
+corner cofactor
+composition period
+repeated inner
+skew-equivalence
+
+Abstract (Plain)
+----------------
+We prove exact corner transport for marked skew Schur compositions under Hypotheses I–IV of McNamara and van Willigenburg, using Olson-Harris's composition homomorphism. Generator-span separation identifies transported child functions with their multiplicities and reduces source-minimal period comparison to discrete outer interiors. One-cell occurrences do not provide proper child charts. On the separately specified ordinary complete-window domain, exact rational residue matching forces either a bounded-order defect of the original Jacobi–Trudi determinant or a literal repeated inner with a specified copy number and span. The bound records the selected maximal-span prime's multiplicity and the reduced window deficit; multiple active classes and pure inventories give stronger bounds. Complete component elimination retains both end caps and normal-dependent inverse units, while endpoint profiles recover literal row and column lists. Function extraction alone supplies neither the complete windows nor residue matching. General period invariance and chart recognition remain open.
+
+Abstract (Rich Text)
+--------------------
+We prove exact corner transport for marked skew Schur compositions under Hypotheses I–IV of McNamara and van Willigenburg, using Olson-Harris's composition homomorphism. Generator-span separation identifies transported child functions with their multiplicities and reduces source-minimal period comparison to discrete outer interiors. One-cell occurrences do not provide proper child charts. On the separately specified ordinary complete-window domain, exact rational residue matching forces either a bounded-order defect of the original Jacobi–Trudi determinant or a literal repeated inner with a specified copy number and span. The bound records the selected maximal-span prime's multiplicity and the reduced window deficit; multiple active classes and pure inventories give stronger bounds. Complete component elimination retains both end caps and normal-dependent inverse units, while endpoint profiles recover literal row and column lists. Function extraction alone supplies neither the complete windows nor residue matching. General period invariance and chart recognition remain open.

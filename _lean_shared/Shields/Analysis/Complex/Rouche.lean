@@ -8,7 +8,7 @@ import Shields.Analysis.Complex.ArgumentPrinciple.Analytic
 /-!
 # Rouché's theorem for analytic functions
 
-Mathlib has the argument principle for meromorphic functions but no Rouché, and the
+Mathlib has neither Rouché nor the argument principle at revision `8e45b05`, and the
 counting form Rouché needs is a statement about a *displayed* factorization rather than
 about a divisor: `Shields.FactoredOn F c R n a G` says `F z = (∏_{j<n} (z - a j)) * G z`
 at every `z`, with `G` analytic and nowhere zero on the closed disc and every `a j`
@@ -168,9 +168,9 @@ theorem prod_range_add_pow (n k : ℕ) (b : ℕ → ℂ) (w z : ℂ) :
   induction k with
   | zero =>
     simp only [Nat.add_zero, pow_zero, mul_one]
-    exact Finset.prod_congr rfl fun j hj => by rw [if_pos (Finset.mem_range.mp hj)]
+    exact Finset.prod_congr rfl fun j hj => by rw [ite_eq_left (Finset.mem_range.mp hj)]
   | succ k ih =>
-    rw [← Nat.add_assoc, Finset.prod_range_succ, ih, if_neg (by omega)]
+    rw [← Nat.add_assoc, Finset.prod_range_succ, ih, ite_eq_right (by omega)]
     ring
 
 /-- The recursion behind `exists_factoredOn`, with the number of *distinct* zeros

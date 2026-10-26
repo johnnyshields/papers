@@ -8,7 +8,10 @@ import Shields.Analysis.Fredholm.HSDeterminant
 /-!
 # The Hilbert--Schmidt norm of a kernel, and convergence in it
 
-Mathlib carries no Schatten class, no Hilbert--Schmidt norm and no trace norm, so the
+Mathlib carries no Schatten class, no Hilbert--Schmidt norm and no trace norm at revision
+`8e45b05`; a Hilbert--Schmidt inner product and norm are in flight upstream as
+`feat(Analysis/InnerProductSpace): add Hilbert-Schmidt inner product and norm` (#41477), and
+there is still no Schatten class or trace norm.  So the
 sentence "the factors converge in Hilbert--Schmidt norm, hence their product converges in
 trace norm, where `det(Id + ·)` is continuous" has no vocabulary to be stated in.  What it
 *says* about a kernel on a countable index set is elementary, and that is what is proved

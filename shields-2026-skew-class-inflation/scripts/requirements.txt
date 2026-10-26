@@ -1,0 +1,3 @@
+# Optional repository-standard environment; the current check uses the standard library.
+sympy==1.14.0
+mpmath==1.3.0

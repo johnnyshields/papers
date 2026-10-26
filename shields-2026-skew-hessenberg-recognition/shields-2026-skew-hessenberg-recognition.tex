@@ -1,0 +1,1266 @@
+\documentclass[11pt,a4paper]{amsart}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage[expansion=false]{microtype}
+\usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black]{hyperref}
+\usepackage[nameinlink,capitalize]{cleveref}
+\hypersetup{
+  pdftitle={Polynomial recognition and inflation of Hessenberg skew Schur classes},
+  pdfauthor={John Shields},
+  pdfkeywords={skew Schur function, skew-equivalence, power rigidity,
+    Hessenberg determinant, cut-set reconstruction, profile inflation,
+    ribbon Schur function}}
+\pdfinfo{/ORCID (https://orcid.org/0009-0004-3882-4571)}
+\numberwithin{equation}{section}
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{question}[theorem]{Question}
+\newcommand{\R}{\mathbb R}
+\newcommand{\C}{\mathbb C}
+\newcommand{\N}{\mathbb N}
+\newcommand{\dd}{\,\mathrm d}
+
+\title[Polynomial recognition and inflation of Hessenberg skew Schur classes]
+{Polynomial recognition and inflation\\
+of Hessenberg skew Schur classes}
+\author{John Shields}
+\date{October 4, 2026}
+\thanks{Independent researcher, Ginza 2-15-2, KR Ginza II 5F, Chuo-ku, Tokyo, Japan 104-0061.\\
+\hspace*{\parindent}Corresponding author: \href{mailto:math@johnnyshields.com}{math@johnnyshields.com}.  ORCID: \href{https://orcid.org/0009-0004-3882-4571}{0009-0004-3882-4571}.\\
+\hspace*{\parindent}This work is archived at \href{https://doi.org/10.5281/zenodo.23137873}{doi:10.5281/zenodo.23137873}.}
+\subjclass[2020]{Primary 05E05; Secondary 05A17, 15A15}
+\keywords{skew Schur function, skew-equivalence, power rigidity,
+Hessenberg determinant, cut-set reconstruction, profile inflation,
+ribbon Schur function}
+
+\begin{document}
+\begin{abstract}
+We recover the connected skew Schur class of every ribbon composite over a zero-free inner whose near-concatenation powers are rigid up to rotation.  For three zero-free blocks with a rigid total merger, the connected class has one, two, or four members; commuting blocks admit legal factor-reversal presentations without individual block rigidity.  Recognition of constant-gap Hessenberg powers is complete through five rows.  At a balanced Hessenberg inflation threshold, the lowest component determines the outer cuts up to reflection, and every inner with at most four rows admits a complete orientation argument.  Consequently positive constant-gap Hessenberg inners through four rows have complete inflation classes and legal generation at every nonnegative time.  Further criteria apply at unbounded height and beyond Hessenberg matrices.  Higher-row orientation and general three-block legal generation remain open.
+\end{abstract}
+\maketitle
+
+\section{Introduction}\label{sec:introduction}
+
+A skew Schur function need not determine its diagram.  For repeated diagrams, a more specific question is whether its polynomial determines where the copies were joined.  Forward composition identities produce many equal functions, but do not exclude additional connected diagrams with the same function.  We prove a positional inverse for connected zero-free inners and give power-recognition tests that make it a complete class description.  For zero joins of different zero-free blocks, rigidity of the total merger gives a finite positional inverse.  With three zero-free blocks it bounds the entire connected class by four, even when the gap supports overlap.
+
+Ribbon equality is classified by reversal of irreducible composition factors, by Billera, Thomas and van Willigenburg \cite[Thm.~4.1]{Billera2006DecomposableCompositions}.  Composition equalities for skew diagrams and the resulting power-of-two families are part of the theory of McNamara and van Willigenburg \cite[Thm.~5.3]{McNamara2009Classification}.  The reversal symmetry and factor-count formulas are not new.  The arbitrary-mate bounds below do not assume that every equality already has a composition presentation.  The question is when those constructions account for all connected mates, and which positions their common polynomial determines.
+
+For the balanced cut-set inverse, the nearest prior result is Chen and Yang's theorem on unmatched content sets \cite[Thm.~3.5]{Chen2008ZrankConjecture}.  They prove that the two unmatched content sets are independent of the border strip decomposition, and hence determined by the supplied skew shape.  In the row decomposition of an inflated diagram, these are, up to a common translation, the two beta lists remaining after common entries are removed.  With the inner diagram fixed, we recover the varying outer cut set from the polynomial of this residual diagram, up to reflection.  Thus the direction of determination changes from a supplied shape to its polynomial.  The outside-decomposition determinants of Hamel and Goulden \cite{Hamel1995PlanarDecompositions} and the bottom-component construction of Clifford and Stanley \cite{Clifford2004BottomSchur} provide the determinant setting, not this inverse.
+
+Write \(E_m=E^{\odot m}\) for a near-concatenation power, and join these powers at zero gaps to form \(F_\alpha(E)\), where \(\alpha\) is a positive composition.  A zero gap means that successive rows overlap in one cell.  Let \(I_t\) add the nonnegative integer \(t\) to every row length and every overlap-minus-one.  A zero-free inner has no zero index in its full Jacobi--Trudi matrix.  For such an inner with at least two rows, let \(p\) be the smaller terminal excess.  The class-recovery theorem, \Cref{thm:main}, gives
+\[
+ \operatorname{Cl}(I_tF_\alpha(E))=
+ \begin{cases}
+ \{I_tF_\beta(E),(I_tF_\beta(E))^*:r_\beta=r_\alpha\},&0\le t<p,\\
+ \{I_tF_\alpha(E),(I_tF_\alpha(E))^*\},&t\ge p,
+ \end{cases}
+\]
+provided every power of \(E\) has only its rotation as a mate.  The first case requires no Hessenberg assumption.  The second holds for unequal terminal excesses, or for a balanced Hessenberg inner satisfying one of the stated orientation criteria.  All classes here consist of connected diagrams up to translation, and \(*\) denotes rotation through \(180\) degrees.  \Cref{thm:legal-generation} gives composition-and-reversal necessity on these domains: every mate has a common legal factor-reversal presentation.  Its terminal marks are verified for a general connected inner, with the horizontal empty-overlap convention at zero inflation.
+
+The power hypothesis has explicit recognition tests.  One uses a private endpoint variable and an arithmetic test on interval spans.  For constant gaps, either a missing endpoint-sum label or a missing adjacent reversed endpoint pair suffices; a separate multiplicity test counts the merger rows in every power.  These tests yield a complete classification through five rows (\Cref{thm:five-row-classification}).  The only failures are
+\[
+ (a,b,a,a+b-c,b;c^4),\qquad
+ (a,a+b-c,b,a,b;c^4),\qquad a\ne b.
+\]
+Every positive constant-gap Hessenberg inner through four rows satisfies the full inflation and legal-generation theorem at every nonnegative time (\Cref{cor:four-row-inflation}).  The balanced five-row cases \(a=b\) also satisfy the full inflation theorem (\Cref{cor:balanced-five-row-wall}).  The multiplicity test also recognizes
+\[
+ (3,(4,3,6)^r,5,4;1^{3r+2}),\qquad r\ge1,
+\]
+with threshold two, for every height and every outer word (\Cref{cor:unbounded-family}).  A private-endpoint argument recognizes powers beyond Hessenberg matrices.  When the inner is zero-free, the same exposure theorem applies; \Cref{cor:non-hessenberg-family} gives an explicit non-Hessenberg family.
+
+The exposure inverse, \Cref{thm:exposure}, distinguishes seam positions even when their row labels coincide with ordinary internal labels.  The same block-function reading proves \Cref{thm:separated-support} for disjoint supports and \Cref{thm:three-block-classes} for three blocks with arbitrary supports and a rigid total merger.  In the latter case the class has one, two, or four members.  Commuting blocks admit common legal presentations under this single merger-rigidity hypothesis (\Cref{thm:commuting-three-blocks}); their individual functions need not be rigid.  At a balanced Hessenberg threshold, two families of boundary coefficients recover the cut set up to reflection (\Cref{thm:cut-set-inverse}).  Positive minors, selected coefficients, and valid deletions orient it for every inner through four rows (\Cref{thm:three-row-wall,thm:four-row-wall}).  Higher-row orientation and legal generation for general noncommuting blocks remain open.
+
+\Cref{sec:profiles} fixes the profile conventions and polynomial inputs.  \Cref{sec:exposure} proves the block readings, the exposure equivalence, and the three-block class and generation theorems.  \Cref{sec:recognition} gives the recognition criteria and five-row classification.  \Cref{sec:balanced} recovers the balanced cut set.  \Cref{sec:orientation,sec:reductions} determine orientation on the stated domains, including all balanced inners through four rows.  \Cref{sec:inflation} assembles the inflation classes, their legal generation, and the mixed-zero recoding extension.
+
+\section{Profiles and polynomial data}\label{sec:profiles}
+
+Work in \(\Lambda=\mathbb Z[h_1,h_2,\ldots]\), with \(h_0=1\) and \(h_j=0\) for \(j<0\).  Profile parameters and inflation times are integers.  A connected skew diagram with nonempty rows is represented, up to translation, by its row lengths and adjacent overlaps-minus-one:
+\begin{equation}\label{eq:profile}
+ E=(r_1,\ldots,r_n;g_1,\ldots,g_{n-1}),\qquad
+ 0\le g_i<\min(r_i,r_{i+1}).
+\end{equation}
+Its decreasing normalized beta lists \(X=(x_1,\ldots,x_n)\), \(Y=(y_1,\ldots,y_n)\) satisfy
+\begin{equation}\label{eq:beta}
+ y_n=0,\quad x_n=r_n,\quad y_i=x_{i+1}-g_i,\quad
+ x_i=y_i+r_i,\qquad s_E=\det(h_{x_i-y_j}).
+\end{equation}
+The span is \(S=x_1=\sum r_i-\sum g_i\).  The full lists are retained until an explicit deletion is made.  The diagram is zero-free when \(X\cap Y=\varnothing\).
+
+In \Cref{sec:recognition,sec:balanced,sec:orientation,sec:reductions}, except where a larger domain is stated, inners have \(n\ge2\), positive gaps, and satisfy
+\begin{equation}\label{eq:hessenberg}
+ r_i>g_{i-1}+g_i\qquad(2\le i\le n-1).
+\end{equation}
+This says that every entry strictly below the first subdiagonal of the Jacobi--Trudi matrix is zero.  For any connected inner with \(n\ge2\), put
+\begin{equation}\label{eq:terminal}
+ d=n-1,\qquad u=r_1-g_1=S-x_2,\qquad
+ v=r_n-g_{n-1}=y_{n-1},\qquad p=\min(u,v).
+\end{equation}
+The terminal excesses are \(u\) and \(v\), and the inner is balanced when \(u=v=p\).  It has constant excess \(p\) when, on putting \(g_0=g_n=0\),
+\(r_i=g_{i-1}+g_i+p\) for every \(i\).
+
+Near-concatenation \(P\odot Q\) adds the touching terminal row lengths and retains the two gap words.  The zero join \(P\cdot_0Q\) retains both row words and inserts a zero gap.  Define
+\begin{equation}\label{eq:composite}
+ E_m=E^{\odot m},\qquad
+ F_\alpha(E)=E_{\alpha_1}\cdot_0\cdots\cdot_0E_{\alpha_\ell},
+ \qquad M=|\alpha|.
+\end{equation}
+A mate of a diagram \(D\) is a diagram \(H\) with \(s_H=s_D\), and \(\operatorname{Cl}(D)\), the connected skew Schur class of \(D\), is the set of its connected mates.  A connected diagram is rotation-rigid when its class is \(\{D,D^*\}\), with repetitions removed.  The all-power property is
+\begin{equation}\label{eq:power-property}
+ \mathsf P(E):\qquad
+ \operatorname{Cl}(E_m)=\{E_m,E_m^*\}\quad\text{for every }m\ge1.
+\end{equation}
+Inflation \(I_t\) adds \(t\) to every row and gap; in beta lists it replaces \((X,Y)\) by \((X+t,Y)\).  The inflation time \(t=p\) is the threshold, also called the wall, and times \(t<p\) and \(t\ge p\) are pre-wall and post-wall.
+
+For compositions, \(\rho\cdot\sigma\) is concatenation and \(\rho\odot\sigma\) adds the touching parts.  Their composition is
+\[
+ \gamma\circ\eta=
+ \eta^{\odot\gamma_1}\cdot\cdots\cdot\eta^{\odot\gamma_{\ell(\gamma)}}.
+\]
+If \(\rho\succeq\alpha\) means that \(\rho\) is obtained by merging adjacent parts, then
+\begin{equation}\label{eq:ribbon}
+ r_\alpha=\sum_{\rho\succeq\alpha}
+ (-1)^{\ell(\alpha)-\ell(\rho)}\prod_i h_{\rho_i}.
+\end{equation}
+The irreducible composition factorization and its reversal classification are those of \cite{Billera2006DecomposableCompositions}.  A factor is symmetric when it equals its reversal.  A ribbon class is its reversal orbit whenever its irreducible factorization has at most one nonsymmetric factor.
+
+We use the following polynomial readings in their arbitrary-mate form.  Here ordinary degree assigns degree one to every \(h_j\) with \(j>0\), while \(h_0=1\) has degree zero.  The maximum ordinary degree of \(s_D\) is the row count.  Its unique minimum-square monomial has coefficient one and records the row multiset, where the square weight of \(\prod h_{j_i}\) is \(\sum j_i^2\).  The largest generator index is the span, and
+\begin{equation}\label{eq:maximal-cofactor}
+ (-1)^{n-1}[h_S]s_D
+ =\det(h_{x_{i+1}-y_j})_{i,j=1}^{n-1}\ne0.
+\end{equation}
+The minimum-square monomial of this cofactor, padded with zeros to length \(n-1\), reads the gap multiset.  These readings are proved in the polynomial-readings lemma of \cite{Shields2026Cofactor}; the overlap invariants originate in \cite{Reiner2007Coincidences}.
+
+\begin{lemma}\label{lem:hessenberg-membership}
+For every connected diagram, the signed cofactor in \eqref{eq:maximal-cofactor} is a monomial if and only if its Jacobi--Trudi matrix is upper Hessenberg.  Equivalently, \(r_i>g_{i-1}+g_i\) for \(2\le i\le n-1\).
+\end{lemma}
+\begin{proof}
+The first subdiagonal of the cofactor in \eqref{eq:maximal-cofactor} has indices \(g_i+g_{i+1}-r_{i+1}\).  Split at its negative entries; the strict decrease of \(X\) and \(Y\) makes the full lower-left rectangles zero.  A zero diagonal contributes an isolated unit.  Each remaining block of order at least two has its distinct nonzero diagonal monomial and a term containing its private largest label, whose coefficient is nonzero by strict rearrangement.  It cannot be a monomial.  A product of nonzero polynomials can be a monomial only if every factor is.  Thus all cofactor blocks must be singleton, precisely the stated inequalities.
+\end{proof}
+
+When \eqref{eq:hessenberg} holds, every block in this proof is a singleton, so the cofactor is triangular and equals \(\prod_i h_{g_i}\).  Thus every connected mate of a Hessenberg source is Hessenberg, including when zero gaps occur.
+
+A nonempty connected skew Schur polynomial is irreducible in \(\Lambda\), by the corrected theorem of Barekat, Reiner and van Willigenburg \cite{Barekat2009CoincidencesCorrigendum}.  The theorem on two boundary observations in \cite{Shields2026SkewSchur} gives
+\begin{equation}\label{eq:boundary-input}
+ s_D=s_H,\qquad s_{\bar D}=s_{\bar H}
+ \quad\Longrightarrow\quad D=H,
+\end{equation}
+where bars delete the entire first row and the conclusion preserves orientation.  Both diagrams are connected, and \(s_\varnothing=1\).
+
+The interval expansion for a Hessenberg profile is
+\begin{equation}\label{eq:interval}
+ s_D=\sum_\pi(-1)^{n-|\pi|}
+ \prod_{J\in\pi}h_{R_J}
+ \prod_{i:\ i,i+1\text{ in one block of }\pi}h_{g_i},\qquad
+ R_J=\sum_{j\in J}r_j-\sum_{j,j+1\in J}g_j.
+\end{equation}
+Here \(\pi\) ranges over interval partitions.  It follows by grouping the feasible determinant permutations into consecutive interval cycles.  Extending an interval increases its span by a positive row-minus-gap difference; a nontrivial span therefore exceeds every row it contains.  The seam-coefficient identities used below are the corresponding coefficients of this expansion, as in \cite{Shields2026Inflation}.
+
+\section{Positional exposure}\label{sec:exposure}
+
+\subsection{Zero-cut blocks}
+
+Cutting every zero gap of a connected diagram gives its maximal zero-cut blocks.  A block may be a single row; otherwise all its internal gaps are positive.  Write \([f]_j\) for the ordinary degree-\(j\) component of a polynomial, and \(\min\deg_h(f)\) for the least occurring ordinary degree when \(f\ne0\).
+
+\begin{lemma}\label{lem:zero-cut-data}
+Let \(D\) be nonempty and connected, with \(n\) rows, full beta lists \(X,Y\), and maximal zero-cut blocks \(B_1,\ldots,B_k\).  Then
+\begin{equation}\label{eq:block-expansion}
+ s_D=\sum_\pi(-1)^{k-|\pi|}
+       \prod_{J\in\pi}s_{\bigodot_{i\in J}B_i},
+\end{equation}
+where \(\pi\) ranges over interval partitions of the ordered block list.  The nonnegative integer
+\begin{equation}\label{eq:internal-units}
+ \iota(D)=|X\cap Y|-(k-1)
+         =n-\min\deg_h(s_D)-(k-1)
+\end{equation}
+is a Schur invariant and vanishes exactly when every block is zero-free.  In that case, for \(C=B_1\odot\cdots\odot B_k\),
+\begin{equation}\label{eq:zero-cut-extremes}
+ [s_D]_n=\prod_i s_{B_i},\qquad
+ [s_D]_{n-k+1}=(-1)^{k-1}s_C.
+\end{equation}
+Consequently the multiset of full block Schur functions and the total-merger function are determined by \(s_D\) whenever \(\iota(D)=0\).
+\end{lemma}
+\begin{proof}
+At a zero gap between rows \(i\) and \(i+1\), the lower-left Jacobi--Trudi block has exactly one nonzero entry, the unit at \((i+1,i)\).  Avoiding it splits the determinant into a product; selecting it deletes its row and column with a minus sign and merges the two boundary rows by addition.  Thus, for arbitrary connected profiles,
+\[
+ s_{P\cdot_0Q}=s_Ps_Q-s_{P\odot Q}.
+\]
+Both profiles on the right are connected skew diagrams.  Iteration proves \eqref{eq:block-expansion}.  Every unit other than the \(k-1\) cut units lies within a block.  Hence \(\iota(D)\) counts the internal common betas.
+
+The common-beta path expansion of \cite{Shields2026Cofactor} identifies the lowest ordinary component as a signed nonzero residual skew Schur determinant, of degree \(n-|X\cap Y|\).  The row count and the number of zero gaps are also polynomial readings.  This proves \eqref{eq:internal-units} and its invariance, so a mate of a source with zero-free blocks has zero-free blocks as well.
+
+Near-concatenation preserves zero-freeness.  With normalized lists and \(q\) the span of \(Q\),
+\[
+ \begin{aligned}
+ X(P\odot Q)&=(X(P)+q)\cup(X(Q)\setminus\{q\}),\\
+ Y(P\odot Q)&=((Y(P)\setminus\{0\})+q)\cup Y(Q).
+ \end{aligned}
+\]
+The two endpoint intervals are disjoint, and no new common beta appears.  If all blocks are zero-free, a term contracting \(j\) cuts in \eqref{eq:block-expansion} therefore has ordinary degree \(n-j\).  The two extremes give \eqref{eq:zero-cut-extremes}.  Each block is nonempty and connected, so its Schur polynomial is irreducible.  Unique factorization recovers their multiset; the coefficient-one minimum-square monomial fixes each scalar unit.
+\end{proof}
+
+Encode a profile of area \(a\) by a word of length \(a\), placing its gap labels at the internal cumulative row sums and blanks elsewhere, including the last position.  A blank is distinct from every gap label.  This encoding is injective, and near-concatenation is word concatenation.
+
+\begin{lemma}\label{lem:area-cuts}
+Let the maximal zero-cut blocks of \(D\) be zero-free, and suppose their total merger \(C\) is rotation-rigid.  Every connected mate is obtained by cutting the area word of \(C\) or \(C^*\) at partial sums of an ordering of the block areas, then inserting zero joins.  A candidate is a mate exactly when its pieces are legal zero-free profiles, its block-function multiset agrees with that of \(D\), and all intermediate homogeneous components in \eqref{eq:block-expansion} agree.
+\end{lemma}
+\begin{proof}
+\Cref{lem:zero-cut-data} recovers the block functions, hence their areas, and the total-merger function.  Rotate a mate to align its merger literally with \(C\).  Each area order has at most one split of the fixed word.  Conversely, the matched block functions and merger fix the two extreme components; equality of the remaining components is equality of the full expansion.
+\end{proof}
+
+With \(k\) blocks and area multiplicities \(m_a\), this gives at most \(2k!/\prod_a m_a!\) candidates.  Cuts ending on a gap marker are inadmissible.  The reduction does not assume rigidity of any individual block, and is not by itself a legal-composition theorem.
+
+\begin{remark}\label{rem:internal-unit-obstruction}
+The zero-free condition in the block-function conclusion of \Cref{lem:zero-cut-data} cannot be dropped.  The profiles
+\[
+ \begin{aligned}
+ F&=(4,5,4,3,2,1;2,3,2,1,0),\\
+ H&=(1,2,3,4,4,5;0,1,2,2,3)
+ \end{aligned}
+\]
+have equal Schur functions, which their Jacobi--Trudi determinants confirm.  They are not rotations of each other.  Cutting at zero leaves a one-cell block and a five-row block in each.  For the five-row blocks \(Q\) of \(F\) and \(R\) of \(H\), common-beta deletion has positive sign and leaves beta pairs \(((10,8,4),(3,1,0))\) and \(((10,9,5),(4,2,0))\), respectively.  The first residual diagonal contributes \(h_4h_7^2\) uniquely; the second matrix has no \(h_4\)-entry.  Thus
+\[
+ [h_4h_7^2]s_Q=1,\qquad [h_4h_7^2]s_R=0.
+\]
+Their block functions differ, and \(\iota(F)=\iota(H)=2\).  This equality has legal nonempty-overlap reversal charts; it is not a counterexample to composition-and-reversal necessity.
+\end{remark}
+
+\subsection{Repeated inners}
+
+\begin{theorem}[Positional exposure]\label{thm:exposure}
+For every nonempty connected zero-free inner \(E\), property \(\mathsf P(E)\) is equivalent to
+\begin{equation}\label{eq:exposure}
+ \operatorname{Cl}(F_\alpha(E))
+ =\{F_\beta(E),F_\beta(E)^*:r_\beta=r_\alpha\}
+\end{equation}
+for every nonempty positive composition \(\alpha\).
+\end{theorem}
+A positive-gap Hessenberg inner is included: its diagonal indices are positive row lengths, its first subdiagonal contains positive gaps, indices above the diagonal exceed a row length, and indices below the first subdiagonal are negative.
+\begin{proof}
+If \(E\) is a row of length \(e\), every power is a row and is rigid.  Every mate of \(F_\alpha(E)\) is a ribbon by its gap multiset, with row lengths \(e\beta_i\), where \(\beta\) permutes the parts of \(\alpha\).  The substitution \(h_j\mapsto h_{ej}\) in the ribbon formula is injective, proving \eqref{eq:exposure} in this case.  Henceforth let \(E\) have \(n\ge2\) rows and put \(d=n-1\).
+
+By \Cref{lem:zero-cut-data}, every power \(E_m\) is zero-free.  The source \(F_\alpha(E)\) has \(N=Md+\ell\) rows and \(\ell-1\) zero gaps, and its maximal zero-cut blocks are the \(E_{\alpha_i}\).  Thus \(\iota(F_\alpha(E))=0\).  Every connected mate \(H\) has the same number of rows and zero gaps and has \(\iota(H)=0\).  Cut it into zero-free blocks \(H_1,\ldots,H_\ell\), and contract those cuts to obtain \(C\).
+
+Set \(\widehat s_H(z)=z^Ns_H(h_1/z,h_2/z,\ldots)\).  The two readings in \eqref{eq:zero-cut-extremes} give
+\begin{equation}\label{eq:exposure-coefficients}
+ \begin{aligned}
+ [z^0]\widehat s_H&=\prod_j s_{H_j}=\prod_i s_{E_{\alpha_i}},\\
+ [z^{\ell-1}]\widehat s_H&=(-1)^{\ell-1}s_C
+                         =(-1)^{\ell-1}s_{E_M}.
+ \end{aligned}
+\end{equation}
+All cut factors are nonempty and connected.  Unique factorization and connected irreducibility match their polynomials with multiplicity; the coefficient-one minimum-square monomials remove scalar units.  Under \(\mathsf P(E)\), each \(H_j\) is a power \(E_{\beta_j}\) or its rotation.  Its row count \(d\beta_j+1\) recovers \(\beta_j\); these indices permute the parts of \(\alpha\).  The second equality identifies \(C\) with a rotation of \(E_M\).  Rotate \(H\) so that \(C=E_M\).
+
+Put \(a=r_1\), \(b=r_n\), \(I=(r_2,\ldots,r_{n-1})\).  The ordered row word of \(C\) is \((a,I,(a+b,I)^{M-1},b)\).  The seam after the first \(j\) components lies at row
+\begin{equation}\label{eq:seam-position}
+ 1+d(\beta_1+\cdots+\beta_j)
+\end{equation}
+of \(C\): sum their row counts and subtract the preceding \(j-1\) contractions.  This locates seams by counts, even when a merger row has the same label as an ordinary internal row.
+
+Each component has endpoint pair \(\{a,b\}\).  Its first exterior row is \(a\).  If \(a\ne b\), its last row is \(b\); splitting the next contracted row gives \(b+c=a+b\), so the next component begins with \(a\).  Induction fixes every split as \((b,a)\).  If \(a=b\), every split is already \((a,a)\).  Between successive positions \eqref{eq:seam-position}, all untouched rows and gaps retain their ordered positions in \(C\).  They are exactly the internal rows and gaps of the corresponding power.  Thus every component is literally \(E_{\beta_j}\), and \(H=F_\beta(E)\).  In particular, equal endpoints and a palindromic gap word cause no ambiguity: the ordered internal row segments are retained too.
+
+The block expansion \eqref{eq:block-expansion} gives
+\[
+ s_{F_\beta(E)}=r_\beta(s_{E_1},s_{E_2},\ldots).
+\]
+The polynomial \(s_{E_m}\) is linear in its largest generator \(h_{mS}\), with nonzero coefficient by \eqref{eq:maximal-cofactor}, and has no larger generator.  This substitution is injective by the triangular-substitution lemma of \cite{Shields2026Inflation}: in a nonzero relation, the highest power of the largest substituted generator has nonzero leading coefficient, inductively.  Hence equality is exactly \(r_\beta=r_\alpha\).  Conversely, take \(\alpha=(m)\) in \eqref{eq:exposure}.  Its ribbon class consists only of \((m)\), so \(\mathsf P(E)\) follows.
+\end{proof}
+
+\subsection{Disjoint gap supports}
+
+\begin{theorem}\label{thm:separated-support}
+Let a connected diagram \(D\) have maximal zero-cut decomposition \(D=B_1\cdot_0\cdots\cdot_0B_k\), with \(k\ge2\).  Suppose every \(B_i\) is zero-free and has at least two rows, and the nonempty supports of their internal gap multisets are pairwise disjoint.  If \(C=B_1\odot\cdots\odot B_k\) is rotation-rigid against arbitrary connected mates, then \(D\) is rotation-rigid against arbitrary connected mates.  Rigidity of the individual blocks is not assumed.
+\end{theorem}
+\begin{proof}
+\Cref{lem:zero-cut-data} recovers the multiset of full block functions of any mate \(H\).  Match these functions to the source blocks.  Their gap multisets and areas are polynomial readings, so their nonempty gap supports and areas match as well, even if a block has nonrotation mates.
+
+The total-merger functions agree.  Rotate \(H\), if necessary, so that its total merger is literally \(C\).  The gap word of \(C\) concatenates the positive gap words of its blocks.  Since the supports are nonempty and pairwise disjoint, each maximal consecutive run belonging to one support identifies exactly one block.  This fixes their order.
+
+The fixed area word and the successive block areas now recover every block literally, as in \Cref{lem:area-cuts}.  Reinserting the zero joins gives \(H=D\).  Undoing the optional rotation proves the assertion.
+\end{proof}
+
+For example, take
+\[
+ B_1=(13,10,5;4,4),\qquad B_2=(5,7;2),\qquad
+ B_3=(13,14,14;6,6).
+\]
+The source has eight rows and zero-free blocks with disjoint gap supports.  Both of its endpoint labels repeat, so the private-endpoint test does not apply directly.  Its total merger is
+\[
+ C=(13,10,10,20,14,14;4,4,2,6,6).
+\]
+The first endpoint 13 is unique, exceeds twice the greatest gap six, and is odd, whereas all other rows and gaps are even.  \Cref{prop:general-private-endpoint} proves its rigidity, and \Cref{thm:separated-support} proves rigidity of the source.
+
+\subsection{Three blocks}
+
+For zero-free maximal blocks \(B_1,B_2,B_3\) and \(C_1,C_2,C_3\) with the same block-function multiset and total-merger function, \eqref{eq:block-expansion} reduces equality of the zero joins to
+\begin{equation}\label{eq:three-block-sum}
+ s_{B_1\odot B_2}s_{B_3}+s_{B_1}s_{B_2\odot B_3}
+ =s_{C_1\odot C_2}s_{C_3}+s_{C_1}s_{C_2\odot C_3}.
+\end{equation}
+This is an equality of collected sums, not of matched summands.
+
+\begin{lemma}\label{lem:retained-end-area}
+Suppose the two zero joins above are Schur-equal and their total mergers agree literally.  If \(|B_1|=|C_1|\) or \(|B_3|=|C_3|\), then \(B_i=C_i\) for every \(i\).
+\end{lemma}
+\begin{proof}
+A first-area match cuts the same prefix of the merger word, so \(C_1=B_1\) and \(C_2\odot C_3=B_2\odot B_3\).  Cancel the corresponding terms in \eqref{eq:three-block-sum} to obtain
+\[
+ s_{B_1\odot C_2}s_{C_3}=s_{B_1\odot B_2}s_{B_3}.
+\]
+Connected irreducibility makes \(s_{C_3}\) one of the two factors on the right; their coefficient-one minimum-square monomials remove scalar units.  The remaining block inventory gives \(|C_3|\in\{|B_2|,|B_3|\}\).  Since \(|B_1|+|B_2|>|B_2|\), either factor choice forces \(|C_3|=|B_3|\).  The fixed suffix then gives \(C_3=B_3\), and the middle block follows.  Reflect for the other end.
+\end{proof}
+
+\begin{corollary}\label{cor:three-block-rigidity}
+Let \(D=B_1\cdot_0B_2\cdot_0B_3\) have zero-free maximal blocks and a rotation-rigid total merger \(C\).  Each of the following implies rotation rigidity of \(D\):
+\begin{enumerate}
+\item \(|B_1|=|B_3|\);
+\item \(C=C^*\);
+\item every block is multirow, and all blocks whose gap support contains the first gap of \(C\) have area \(|B_1|\), or the corresponding last-gap condition holds with area \(|B_3|\).
+\end{enumerate}
+\end{corollary}
+\begin{proof}
+Align a mate's merger with \(C\).  Every permutation of \((a,b,a)\) retains an exterior area, so the first assertion follows from \Cref{lem:retained-end-area}.  If \(C=C^*\), both orientations of the mate have the same merger.  A mate different from \(D,D^*\) would therefore have both exterior areas outside \(\{|B_1|,|B_3|\}\).  The recovered three-entry multiset has only one remaining entry, which cannot occupy both ends.  For the third assertion, a multirow first block contains the first merger gap.  Its recovered function determines its gap support and hence its area under the hypothesis.  Apply \Cref{lem:retained-end-area}; the last-gap case is symmetric.
+\end{proof}
+
+For example, the blocks
+\[
+ (11,4;2),\qquad(4,5;2),\qquad(9,6,6;4,4)
+\]
+are zero-free, have overlapping supports, and give a non-Hessenberg seven-row source.  Its merger \((11,8,14,6,6;2,2,4,4)\) is rigid by \Cref{prop:general-private-endpoint}: the unique odd endpoint 11 exceeds twice the greatest gap, and every competing span is even.  Only the last block contains gap four, so \Cref{cor:three-block-rigidity} proves source rigidity.
+
+\begin{theorem}[Three-block classes]\label{thm:three-block-classes}
+If a connected diagram has three zero-free maximal zero-cut blocks and a rotation-rigid total merger, its connected class has one, two, or four members.  No individual block rigidity is required.
+\end{theorem}
+\begin{proof}
+For a connected profile \(P\) of span \(S_P\), put \(L(P)=[h_{S_P}]s_P\ne0\).  The beta-list formula in the proof of \Cref{lem:zero-cut-data} makes the maximal cofactor of \(P\odot Q\) block upper triangular, with diagonal blocks the maximal cofactors of \(P,Q\).  Its lower-left indices are \(x_Q-y_P-S_Q<0\).  Empty blocks cover one-row factors, and the signs multiply because the merger has \(n(P)+n(Q)-1\) rows.  Thus
+\begin{equation}\label{eq:leading-product}
+ L(P\odot Q)=L(P)L(Q).
+\end{equation}
+Each \(L(P)\) is independent of \(h_{S_P}\) and contains no larger generator.
+
+Suppose three distinct mates have their mergers aligned literally.  By \Cref{lem:retained-end-area}, their first areas are pairwise different, as are their last areas.  The three block areas are therefore distinct, and their orders are the three cyclic orders, up to a common relabeling.  Write their matched functions as \(f_i\), spans as \(s_i\), and leading coefficients as \(l_i\).  Every block occurs in the middle once.
+
+Let \(U=\max_{i\ne j}(s_i+s_j)\), which exceeds every individual span.  By \eqref{eq:leading-product}, the coefficient of \(h_U\) in a middle sum has contribution \(X_i=f_i l_jl_k\) precisely when block \(i\) is exterior and its complementary pair has span \(U\).  If the smallest span is unique, placing it in the middle removes the only contribution; another cyclic order has its nonzero \(X_i\).  If exactly two smallest spans tie, one order has coefficient \(X_1+X_2\) and another \(X_1\), whose difference is nonzero.  If all spans equal \(s\), equality forces \(X_1=X_2=X_3\), hence \(f_i l_j=f_j l_i\).  The irreducible \(f_i\) depends on \(h_s\), whereas \(l_i\) does not.  It divides \(f_j\), so normalization gives \(f_i=f_j\), contradicting their distinct areas.
+
+There are at most two mates per merger orientation.  An asymmetric merger gives disjoint two-element rotation orbits, hence class size two or four.  For a symmetric merger, \Cref{cor:three-block-rigidity} gives one or two.
+\end{proof}
+
+\begin{theorem}\label{thm:commuting-three-blocks}
+Let \(D=B_1\cdot_0B_2\cdot_0B_3\) have zero-free multirow maximal blocks which commute pairwise under \(\odot\), and a rotation-rigid total merger.  Then there are a connected zero-free multirow \(E\) and positive integers \(a,b,c\) with \(B_1=E_a,B_2=E_b,B_3=E_c\), and
+\begin{equation}\label{eq:commuting-three-class}
+ \operatorname{Cl}(D)=
+ \{F_{(a,b,c)}(E),F_{(c,b,a)}(E),F_{(a,b,c)}(E)^*,F_{(c,b,a)}(E)^*\}.
+\end{equation}
+Every mate has a common legal factor-reversal presentation with \(D\).  Only the total power \(E_{a+b+c}\) is assumed rigid.
+\end{theorem}
+\begin{proof}
+Commuting nonempty words are powers of one primitive word: cancel the shorter prefix repeatedly to obtain the common root.  Applying this to the area words gives \(E,a,b,c\).  The root ends in a blank.  Its first and last row lengths are inherited from a power, and its internal rows and gaps occur unchanged there, so it is a legal connected profile.  It is multirow, and a common beta would persist in a power by the merger-list formula; hence it is zero-free.
+
+The three-block expansion gives equality under \((a,b,c)\mapsto(c,b,a)\).  If \(a=c\), or if \(E=E^*\), \Cref{cor:three-block-rigidity} exhausts the displayed set.  Otherwise its four members are distinct.  Unequal exterior indices give different zero cuts, and equality with a global rotation would make a positive power of \(E\) symmetric.  Comparing equal-length repeated words would then give \(E=E^*\).  \Cref{thm:three-block-classes} proves exhaustion.
+
+The zero-time case of \Cref{lem:prewall-chart} gives the common literal presentation
+\[
+ F_{(a,b,c)}(E)=\operatorname{rib}(a,b,c)\circ_{\varnothing}E.
+\]
+Its overlap has the horizontal edge marks and satisfies I--IV.  Reversing the ribbon factor gives \(F_{(c,b,a)}(E)\); rotating both factors and their marks gives the other two members.  No part-power rigidity or reassociation is used.
+\end{proof}
+
+The weakening from all-power rigidity is strict.  Set \(E=(3,4,3,6,4;1,1,1,1)\).  Its first power has the nonrotation mate \((3,6,4,3,4;1,1,1,1)\), as in \Cref{thm:five-row-classification}.  Nevertheless \(E_m\) is rigid whenever \(\gcd(m-1,15)=1\).  Indeed, \Cref{lem:constant-gap-substitution} gives a shifted ribbon of size \(16m-1\), endpoints two and three, and part six with multiplicity \(m-1\).  At a split between two nonsymmetric composition factors, the outer size divides both that size and that multiplicity: near-concatenation changes only the endpoints and their sum five.  This contradicts \(\gcd(16m-1,m-1)=\gcd(15,m-1)=1\).  Ribbon classification and faithful substitution prove the assertion.  Thus \(F_{(1,1,m-2)}(E)\), for \(m\ge4\) with this gcd equal to one, has four legally generated mates despite two nonrigid blocks.  The indices \(m=15t+2\), \(t\ge1\), give an unbounded-height family.
+
+\section{Recognition of rigid powers}\label{sec:recognition}
+
+\subsection{A private endpoint}
+
+\begin{proposition}\label{prop:arithmetic-recognition}
+Choose an endpoint label \(a\) occurring exactly once among the rows of \(E\) and not among its gaps.  Let \(b\) be the other endpoint.  Permit arbitrary repetitions of internal row labels smaller than \(a\), at most one occurrence of \(b<a\) when it is not an internal label, and arbitrary repetitions of the original positive gap labels.  If no legal positive-gap Hessenberg interval of at least two rows formed from these allowances has span \(a\), then \(\mathsf P(E)\) holds.  The test is finite.
+\end{proposition}
+\begin{proof}
+The private-endpoint argument extends the two-row power-rigidity lemma of \cite{Shields2026Inflation}, with the interval exclusion replacing its shortest-row condition.  Orient the chosen endpoint first.  In every power, \(a\) occurs once.  Internal rows are original internal rows or merger rows \(a+b>a\); the opposite endpoint occurs once unless its label is already internal.  A nontrivial interval of span \(a\) can contain only smaller rows, so the stated allowances contain every possibility in every power.
+
+A connected mate has the same row and gap multisets and is Hessenberg.  The interval test excludes strictly upper-triangular occurrences of \(h_a\), and gap privacy excludes subdiagonal occurrences.  Hence \(h_a\) occurs only at the unique \(a\)-diagonal site, in both diagrams.  In the source, its coefficient is the Schur function of the nonempty connected first-row deletion, and is irreducible.  If the distinguished row were internal in a mate, deleting its diagonal site would leave two nonempty diagonal blocks and a zero lower-left block between them.  Its cofactor would be a product of two nonconstant connected skew Schur polynomials, contradicting irreducibility.  The row is therefore exterior.  Orient it first; equality of the full polynomials and their \(h_a\)-coefficients gives \eqref{eq:boundary-input}.  This identifies every mate of every power.
+
+A positive-gap interval starts with a row of length at least two, and every added row increases its span by at least one.  Span \(a\) therefore permits at most \(a-1\) rows, proving finiteness.
+\end{proof}
+
+\begin{corollary}\label{cor:arithmetic-tests}
+Retain uniqueness and gap privacy of \(a\).  Each of the following implies \(\mathsf P(E)\): every internal row exceeds \(a\); or \(a<2b_0-G\), where \(b_0\) is the smallest other row and \(G\) the greatest gap; or every other row and every gap is divisible by an integer \(q>1\), whereas \(a\) is not.
+\end{corollary}
+\begin{proof}
+In the first case the allowances leave at most the one opposite endpoint, so no interval of two rows exists.  In the second, every competing two-row span is at least \(2b_0-G>a\), and extending it increases the span.  In the third, every competing span is divisible by \(q\).  Each case supplies the interval exclusion in \Cref{prop:arithmetic-recognition}.
+\end{proof}
+
+\begin{corollary}\label{cor:stretched-strip}
+Let \(c,p,r>0\), put \(G=c+p\), and let \(1\le e<G\).  Start with the constant-excess profile with gap word \((c,G^r,c)\), and add \(e\) to its final row only.  The resulting profile satisfies \(\mathsf P\), with terminal excesses \(p,p+e\).
+\end{corollary}
+\begin{proof}
+The new endpoint \(G+e\) occurs once, exceeds every gap, and is smaller than every internal row, which is at least \(2G\).  The opposite endpoint is \(G\).  Apply \Cref{cor:arithmetic-tests}.  Adding \(e\) to the final row changes only its terminal excess, from \(p\) to \(p+e\).  No assertion for \(e\ge G\) follows from this test.
+\end{proof}
+
+\subsection{Constant gaps and composition factors}
+
+\begin{lemma}\label{lem:constant-gap-substitution}
+For a constant-gap Hessenberg profile \(D=(r_1,\ldots,r_N;c^{N-1})\), with \(c>0\), put \(\delta_i=r_i-c\).  Then
+\begin{equation}\label{eq:constant-gap-substitution}
+ s_D=h_c^N r_\delta(h_j\mapsto h_{j+c}/h_c).
+\end{equation}
+This substitution is faithful.  Every connected mate of \(D\) has the same constant gap and row count, and its shifted row composition has ribbon function \(r_\delta\).
+\end{lemma}
+\begin{proof}
+For an interval \(J\), its span is \(c+\sum_{j\in J}\delta_j\).  Each adjacent pair of rows inside it contributes \(h_c\).  Comparing \eqref{eq:interval} with \eqref{eq:ribbon} proves \eqref{eq:constant-gap-substitution}, the constant-gap substitution of \cite{Shields2026Inflation}.  All \(\delta_i\) are positive.  In the localization at \(h_c\), the generators \(h_{j+c}\), \(j>0\), are algebraically independent over \(\mathbb Z[h_c,h_c^{-1}]\), so the substitution is injective.  The row count, gap multiset, and Hessenberg membership pass to every connected mate.  Applying the same substitution to that mate proves the last assertion.
+\end{proof}
+
+\begin{proposition}\label{prop:constant-gap-recognition}
+Let \(E=(a,I,b;c^{n-1})\) satisfy \eqref{eq:hessenberg}, with \(c>0\).  If \(a+b-c\) is absent from \(I\) and at least one of \(a,b\) is absent from \(I\), then \(\mathsf P(E)\) holds.
+\end{proposition}
+\begin{proof}
+Let \(\delta\) be a shifted row composition, with endpoints \(x,y\).  In a factorization \(\delta=\gamma\circ\eta\), with \(|\gamma|\ge2\) and \(\ell(\eta)\ge2\), the endpoints of \(\eta\) are \(x,y\).  A part of \(\gamma\) exceeding one creates an internal part \(x+y\) by near-concatenation.  If every part is one, concatenation places both endpoint labels internally.  The two exclusions prevent such a factorization.  In particular, there cannot be two nonsymmetric irreducible factors, and ribbon classification leaves only reversal.
+
+For a power of \(E\), the shifted endpoints are \(x=a-c\), \(y=b-c\).  Its original internal rows exclude \(x+y\); a merger row shifts to \(a+b-c=x+y+c\), not \(x+y\), and is larger than both endpoints.  The missing endpoint stays missing internally.  Thus the exclusions persist in every shifted power.  \Cref{lem:constant-gap-substitution} proves \(\mathsf P(E)\).
+\end{proof}
+
+\begin{proposition}\label{prop:pattern-recognition}
+For the same constant-gap inner, either of the conditions
+\begin{equation}\label{eq:pattern-test}
+ a+b-c\text{ is absent from }I,
+ \qquad\text{or}\qquad
+ (b,a)\text{ is absent as an adjacent ordered pair within }I
+\end{equation}
+suffices for \(\mathsf P(E)\).  In particular, absence of either endpoint label alone suffices.
+\end{proposition}
+\begin{proof}
+Suppose a positive composition \(\delta\), with endpoints \(x,y\), has two nonsymmetric irreducible factors.  Split between two of them as \(\delta=\gamma\circ\eta\), with a nonsymmetric factor on each side.  Composition cannot turn a multipart factor into one part or remove all parts exceeding one from a factor that has such a part.  Consequently \(\gamma\) has at least two parts and some part exceeding one, and \(\eta\) has at least two parts.  Its endpoints are \(x,y\).
+
+A part of \(\gamma\) exceeding one produces an internal part \(x+y\).  A boundary between two parts of \(\gamma\) concatenates powers of \(\eta\), producing the consecutive pair \((y,x)\) strictly internally, since each adjoining power has at least two parts.  Thus a class larger than the reversal orbit requires both patterns.  If either is absent, at most one nonsymmetric factor remains.  Reversing that factor reverses the whole composition; symmetric factors add no choices.  This is a direct consequence of the classical factor-reversal theorem.
+
+In the shifted word of \(E_m\), copies of \(I-c\) are separated by merger labels \(x+y+c\).  Since \(c>0\), this label is neither \(x+y\) nor either endpoint.  It can neither fill a missing sum nor create \((y,x)\) across a join.  Either exclusion in \eqref{eq:pattern-test} therefore persists in every power.  Apply \Cref{lem:constant-gap-substitution}.
+\end{proof}
+
+The alternatives in \eqref{eq:pattern-test} recognize every constant-row inner \((a^n;c^{n-1})\), \(n\ge3\), \(a>2c>0\), and every word over \(\{a,b\}\) with endpoints \(a,b>2c\).  The inner \((5,3,7,3;1,1,1)\) contains the sum label seven and fails arithmetic privacy at five because \(3+3-1=5\), but excludes the adjacent pair \((3,5)\).  The inner \((3,3,4,6,4;1,1,1,1)\) contains both endpoints and the sum internally, but not the pair \((4,3)\).
+
+Both forbidden patterns occur in the classical example
+\[
+ (1,2,1,3,2)=(1,2)\circ(1,2),\qquad
+ (1,3,2,1,2)=(2,1)\circ(1,2).
+\]
+Its ribbon class is
+\[
+ \{(1,2,1,3,2),(1,3,2,1,2),(2,1,2,3,1),(2,3,1,2,1)\}.
+\]
+This is Billera--Thomas--van Willigenburg's Example~4.1 \cite{Billera2006DecomposableCompositions}; the four-member count is their factor-reversal count with two nonsymmetric factors.  The criterion excludes this example rather than supplying a new explanation of its equality.
+
+\begin{proposition}\label{prop:multiplicity-recognition}
+Let \(k_r\) count occurrences of row label \(r\) in \(I\).  Put
+\[
+ d_0=\gcd\{k_r:k_r>0,\ r\notin\{a,b,a+b-c,a+b\}\},\qquad
+ z_0=k_{a+b}+1,
+\]
+with the gcd of the empty set equal to zero.  If \(d_0>0\) and every prime divisor of \(d_0\) divides \(z_0\), then \(\mathsf P(E)\).  In particular, an internal label occurring once and outside the four exceptional labels suffices.
+\end{proposition}
+\begin{proof}
+Put \(x=a-c\), \(y=b-c\).  In the shifted word of \(E_m\), each nonexceptional label \(r-c\) occurs \(mk_r\) times.  The merger label \(z=x+y+c\), distinct from \(x,y,x+y\), occurs \(mk_{a+b}+(m-1)=mz_0-1\) times.  Suppose this word factors as \(\gamma\circ\eta\), with \(L=|\gamma|\ge2\) and \(\ell(\eta)\ge2\).  The endpoints of \(\eta\) are \(x,y\).  The multiplicity of every label other than \(x,y,x+y\) is multiplied by \(L\): concatenation copies it, and near-concatenation only removes endpoints and creates \(x+y\).  Therefore
+\[
+ L\mid mk_r\quad\text{for each nonexceptional }r,
+ \qquad L\mid mz_0-1.
+\]
+The latter implies \(\gcd(L,m)=1\), so the former gives \(L\mid d_0\).  A prime dividing \(L\) must divide \(z_0\), contrary to \(L\mid mz_0-1\).  No such factorization exists; in particular, two nonsymmetric factors cannot occur.  Ribbon classification and \Cref{lem:constant-gap-substitution} prove rigidity for every power.
+\end{proof}
+
+This test uses multiplicities of specified row labels, not a gcd of their values.  The term \(m-1\) contributed by merger rows is essential.  The condition is sufficient, not necessary.
+
+\begin{proposition}\label{prop:boundary-runs}
+Let \(E=(a,I,a;c^{n-1})\) satisfy \eqref{eq:hessenberg}, with \(c>0\), and suppose \(I\) contains a label other than \(a\).  Let \(L\) be one plus the length of its initial run of \(a\)'s, \(R\) one plus the length of its final run, and \(H\) the longest run of \(a\)'s anywhere in \(I\), with \(H=0\) when \(a\) is absent.  If \(H<L+R\), then \(\mathsf P(E)\).
+\end{proposition}
+\begin{proof}
+Put \(x=a-c\).  Every shifted power starts and ends with runs of \(x\) of lengths \(L,R\).  Runs inside copies of \(I-c\) have length at most \(H\), and the copies are separated by the merger label \(2a-c\ne x\).  The two exterior runs also have length less than \(L+R\).  Thus no run has length \(L+R\).
+
+If two nonsymmetric factors occurred, split between them as \(\gamma\circ\eta\), with a nonsymmetric factor on each side.  The composition \(\gamma\) has at least two parts.  The endpoints of \(\eta\) are \(x,x\), and \(\eta\) is not constant: a constant word \((x^j)=(1^j)\circ(x)\) has only symmetric irreducible factors.  Near-concatenating its copies preserves the exterior runs, which must consequently have lengths \(L,R\).  A concatenation between two parts of \(\gamma\) creates a run of length \(R+L\), a contradiction.  At most one nonsymmetric factor remains, so ribbon classification and \Cref{lem:constant-gap-substitution} apply to every power.
+\end{proof}
+
+\begin{theorem}[Constant-gap classification through five rows]\label{thm:five-row-classification}
+Every positive-gap constant-gap Hessenberg inner with at most four rows satisfies \(\mathsf P\).  At five rows, \(\mathsf P\) fails exactly on
+\begin{equation}\label{eq:five-row-failures}
+ (a,b,a,a+b-c,b;c^4),\qquad
+ (a,a+b-c,b,a,b;c^4),\qquad a\ne b.
+\end{equation}
+Their legality entails \(a,b>2c>0\).  All other legal five-row constant-gap inners satisfy \(\mathsf P\).
+\end{theorem}
+\begin{proof}
+With at most four rows the internal word has length at most two.  If it contains \((b,a)\), there is no place for the distinct larger label \(a+b-c>\max(a,b)\).  Hence \Cref{prop:pattern-recognition} applies.
+
+At five rows the internal word has length three.  If both exclusions fail, it contains \((b,a)\) and \(a+b-c\), and is therefore exactly \((b,a,a+b-c)\) or \((a+b-c,b,a)\).  If \(a=b\), these are rotations of each other.  For the first, \(I=(a,a,2a-c)\), so \Cref{prop:boundary-runs} applies with \(L=3,R=1,H=2\).
+
+If \(a\ne b\), put \(x=a-c,y=b-c\).  The shifted words in \eqref{eq:five-row-failures} are
+\[
+ (x,y,x,x+y,y)=(1,2)\circ(x,y),\qquad
+ (x,x+y,y,x,y)=(2,1)\circ(x,y).
+\]
+They have equal ribbon functions.  The two profiles are distinct, have the same ordered unequal endpoints, and are not rotations.  Faithful substitution gives an extra mate at the first power.  Legality forces both \(a\) and \(b\), which occur internally, to exceed \(2c\).  This exhausts every case not recognized by \Cref{prop:pattern-recognition}.
+\end{proof}
+
+\subsection{Recognition beyond Hessenberg matrices}
+
+\begin{proposition}\label{prop:general-private-endpoint}
+Let \(E\) be any connected profile with nonnegative gaps and at least two rows, and let \(G\) be its greatest gap.  Choose an endpoint label \(a\) occurring exactly once, with \(a>2G\).  Use the smaller-row allowances of \Cref{prop:arithmetic-recognition}, but test all legal connected intervals, not only Hessenberg intervals.  If none of at least two rows has span \(a\), then \(\mathsf P(E)\).  This test is finite and requires neither zero-freeness nor a Hessenberg hypothesis.
+\end{proposition}
+\begin{proof}
+The powers retain the same gap alphabet and the unique \(a\)-row; merger rows have length \(a+b>a\).  Row and gap invariants hold without a Hessenberg assumption.  The interval test excludes every strictly upper-triangular \(h_a\)-site in any connected mate.  Every strictly lower-triangular index is at most an adjacent gap: moving down decreases a row beta and moving left increases a column beta.  Such an index is at most \(G<a\).  Thus \(h_a\) has only its diagonal site.
+
+If that row is internal at position \(i\), the nearest entry crossing its deleted position from lower rows to upper columns has index \(x_{i+1}-y_{i-1}=g_{i-1}+g_i-a<0\).  All farther crossing entries are smaller.  Its diagonal cofactor therefore splits into two nonempty connected side blocks, although these blocks need not be Hessenberg.  Connected irreducibility of the source boundary deletion forces the distinguished row to be exterior.  Orient it first and apply \eqref{eq:boundary-input}, proving rigidity for every power.  Finally, a connected interval of \(t\) rows has span at least \(t\), since every extension adds at least one.  Only \(t\le a\) need be tested.
+\end{proof}
+
+For \(E=(11,6,8;4,4)\), the second lower diagonal has index \(4+4-6=2>0\), so \(E\) is not Hessenberg.  Nevertheless \(11>2\cdot4\), and every competing span made from the smaller even rows and even gaps is even.  \Cref{prop:general-private-endpoint} proves \(\mathsf P(E)\).  Its disjoint beta lists \((17,10,8)\) and \((6,4,0)\) also permit \Cref{thm:exposure}.  The endpoint bound has a distinct role: at \((5,3,5;2,2)\), the private internal \(h_3\)-site has cofactor \(h_5^2-h_1h_9\), not the product of its two one-row side blocks.
+
+\begin{corollary}\label{cor:non-hessenberg-family}
+For every even integer \(g\ge4\), the inner
+\[
+ E_g=(2g+1,g+2,g+2;g,g)
+\]
+is zero-free and non-Hessenberg, satisfies \(\mathsf P(E_g)\), and has the class description \eqref{eq:exposure} for every outer composition.  It also satisfies \eqref{eq:prewall-class} and \eqref{eq:postwall-class}, with legal generation as in \Cref{thm:legal-generation}, at threshold \(p=2\).
+\end{corollary}
+\begin{proof}
+The beta lists are \((2g+5,g+4,g+2)\) and \((4,2,0)\), so the inner is zero-free.  Its second-subdiagonal index is \(g-2>0\).  The endpoint \(2g+1\) is unique and exceeds \(2g\); every smaller competing row and every gap is even.  No competing interval has its odd span, so \Cref{prop:general-private-endpoint} proves \(\mathsf P(E_g)\).  Apply \Cref{thm:exposure}.  The terminal excesses are \(g+1\) and two, so the unequal-terminal cases of \Cref{thm:main,thm:legal-generation} give the inflation and marked conclusions.
+\end{proof}
+
+\section{The balanced cut-set inverse}\label{sec:balanced}
+
+Assume \(u=v=p\).  In the inner beta lists put
+\begin{equation}\label{eq:balanced-data}
+ \begin{gathered}
+ A=(X\setminus\{S,S-p\})+p,\qquad B=Y\setminus\{p,0\},\\
+ J=A\cap B,\qquad P=A\setminus J,\qquad Q=B\setminus J.
+ \end{gathered}
+\end{equation}
+Then \(|P|=|Q|=q\), \(P\subset(2p,S)\), \(Q\subset(p,S-p)\), and \(P\cap Q=\varnothing\).  For an outer composition \(\alpha\) of size \(M\), define
+\begin{equation}\label{eq:cuts}
+ T=\{\alpha_{i+1}+\cdots+\alpha_\ell:1\le i<\ell\},\qquad
+ K=\{1,\ldots,M-1\}\setminus T.
+\end{equation}
+The suffix set \(T\) is the outer cut set: each zero join of \(F_\alpha(E)\) contributes the number of copies of \(E\) following it.  The set \(T\), and hence its complement \(K\), determines the ordered composition.  Reversal sends \(K\) to \(M-K=\{M-k:k\in K\}\).
+
+\begin{lemma}\label{lem:wall-lists}
+The complete common-beta set of \(I_pF_\alpha(E)\) is
+\[
+ Z=\bigcup_{0\le j<M}(jS+J)\ \cup\ ST\ \cup\ (ST+p).
+\]
+Deleting its row and column entries leaves the decreasing lists
+\begin{equation}\label{eq:core-lists}
+ \begin{aligned}
+ U_K&=\{MS+p,MS\}\cup SK\cup\bigcup_{0\le j<M}(jS+P),\\
+ V_K&=\{0,p\}\cup(SK+p)\cup\bigcup_{0\le j<M}(jS+Q).
+ \end{aligned}
+\end{equation}
+They define a connected zero-free skew diagram, the core, with polynomial \(f_{E,K}=\det(h_{U_i-V_j})\).  The lowest ordinary-degree component of the parent \(I_pF_\alpha(E)\) is \(\varepsilon_\alpha f_{E,K}\), where
+\begin{equation}\label{eq:contact-sign}
+ \varepsilon_\alpha=(-1)^{\sum_{z\in Z}
+ (\operatorname{pos}_{X_F+p}z+\operatorname{pos}_{Y_F}z)}.
+\end{equation}
+Positions are one-based in the full decreasing lists.
+\end{lemma}
+\begin{proof}
+Before inflation the complete repeated lists are
+\begin{equation}\label{eq:full-repeated-lists}
+ \begin{aligned}
+ X_F&=\{MS\}\cup\bigcup_{j=0}^{M-1}(jS+(X\setminus\{S\}))\cup ST,\\
+ Y_F&=\{0\}\cup\bigcup_{j=0}^{M-1}(jS+(Y\setminus\{0\}))\cup ST.
+ \end{aligned}
+\end{equation}
+The beta recursion \eqref{eq:beta} gives these lists at each join: near-concatenation identifies the touching row, and restoring a zero seam inserts the common boundary beta.  Inflation shifts only the first list.  The identities \(x_2=S-p\), \(y_{n-1}=p\) give contacts at \(kS,kS+p\) exactly for \(k\in T\).  The remaining inner residues lie strictly between the endpoint residues as in \eqref{eq:balanced-data}; their intersections are exactly \(jS+J\) within one period.  These strict ranges exclude cross-period coincidences.  Deleting all contacts therefore gives \eqref{eq:core-lists}.
+
+For strict lists define their counting height, away from their entries, by
+\begin{equation}\label{eq:height}
+ H(z)=\#\{x>z\}-\#\{y>z\}.
+\end{equation}
+The inflated parent has positive adjacent gaps \(g_i+p\), including its inflated outer seams.  Consequently \(H(z)\ge1\) between its extreme beta entries.  Removing an equal row and column beta does not change \(H\).  The remaining lists are disjoint, have positive diagonal indices and positive adjacent gaps, and define a connected zero-free diagram.
+
+Every determinant term of ordinary degree equal to the residual order must select every unit.  Unit sites have distinct rows and columns and order-preserving pairing.  Laplace expansion gives exactly \eqref{eq:contact-sign}, with no positivity assumption on that sign.  The residual determinant is nonzero: its sorted diagonal is positive and uniquely minimizes the sum of squared indices, by strict rearrangement.  Thus no lower ordinary-degree component occurs.  This is common-unit deletion with its actual sign retained, as required in the bottom-component construction \cite{Clifford2004BottomSchur}.
+\end{proof}
+
+For the row outside decomposition of a parent of order \(N\), the initial contents are \(Y_F+1-N\), and the terminal contents plus one are \(X_F+p+1-N\).  The unmatched content sets of Chen and Yang \cite{Chen2008ZrankConjecture} are therefore \(V_K+1-N\) and \(U_K+1-N\).  Our inverse varies \(K\) with \(E,M\) fixed; it does not recover arbitrary unmatched content sets from arbitrary skew Schur polynomials.
+
+\begin{lemma}\label{lem:boundary-minors}
+Write \(b_i=h_{iS}\).  Its only sites in \eqref{eq:core-lists} are
+\begin{equation}\label{eq:boundary-arms}
+ (iS,0)\quad(i\in K\cup\{M\}),\qquad
+ (MS+p,(M-i)S+p)\quad(M-i\in K\cup\{0\}).
+\end{equation}
+Every single boundary-site cofactor is nonzero.  If \(i,j>0\), \(i+j\le M\), \(i\in K\), and \(M-j\in K\), selecting both sites \((iS,0)\) and \((MS+p,(M-j)S+p)\) also leaves a nonzero minor.
+\end{lemma}
+\begin{proof}
+A multiple of \(S\) requires equal row and column residues.  Since \(P\cap Q=\varnothing\) and both sets avoid the endpoint residues \(0,p\), the sites are precisely \eqref{eq:boundary-arms}.
+
+For a single bottom-arm deletion, the height \eqref{eq:height} decreases by one only between \(0\) and \(iS\), so remains nonnegative.  For a double deletion, first remove the largest row \(MS+p\) and smallest column \(0\), lowering the height by one.  The other removed row \(iS\) is smaller than the other removed column \((M-j)S+p\), because \(i+j\le M\).  Removing this pair raises the height between them.  The remaining lists therefore admit their sorted positive matching; their disjointness excludes zero diagonal differences.  Strict rearrangement makes the diagonal monomial the unique minimum-square monomial, excluding cancellation.  Reflecting the lists proves the single top-arm assertion as well.
+\end{proof}
+
+\begin{theorem}[Polynomial cut-set inverse]\label{thm:cut-set-inverse}
+For fixed \(E,M\), the lowest wall component determines \(K\) up to \(K\mapsto M-K\), for every outer composition.
+\end{theorem}
+\begin{proof}
+The sign in \eqref{eq:contact-sign} does not affect supports.  If \(K=\varnothing\), no \(b_i\) with \(1\le i<M\) occurs.  Otherwise put \(d_L=\min K\), \(d_R=M-\max K\).  By \Cref{lem:boundary-minors}, the smallest occurring boundary index below \(M\) is \(d=\min(d_L,d_R)\).
+
+If \(d_L<d_R\), the variable \(b_d\) has only its bottom-arm site.  After its selection, all remaining boundary variables lie in the top row.  For every \(k\in K\), selecting \(b_{M-k}\) there leaves a nonzero minor by \Cref{lem:boundary-minors}, since \(d\le k\).  No other index strictly between zero and \(M\) occurs.  Hence
+\begin{equation}\label{eq:unequal-arm-decoder}
+ K=\{M-j:1\le j<M,\ b_j\text{ occurs in }[b_d]f_{E,K}\}.
+\end{equation}
+If \(d_R<d_L\), the same reading gives \(M-K\).  Occurrences of \(b_M\) are intentionally ignored.  If \(d_L=d_R=d\), the square coefficient \([b_d^2]f_{E,K}\) is nonzero by \Cref{lem:boundary-minors}.  It vanishes in the unequal-end cases, so those cases cannot be confused.
+
+Suppose now \(d_L=d_R=d\).  For \(1\le i\le\lfloor M/2\rfloor\), the coefficient \([b_i^2]f_{E,K}\) is nonzero exactly when both \(i,M-i\) belong to \(K\).  There is a unique two-arm assignment, and the double-minor assertion applies because \(2i\le M\).  If this square vanishes and \(i\ne M-i\), then \([b_db_i]f_{E,K}\ne0\) exactly when one of \(i,M-i\) belongs to \(K\).  In the affirmative case \(b_i\) has one arm site, forcing the other selected site; also \(d\le i\) and \(d+i\le M\).  Thus the same nonvanishing assertion applies.  The case \(i=d\) has already been decided by its square.
+
+For distinct \(i,j<M/2\) with single memberships, \([b_ib_j]f_{E,K}\ne0\) exactly when they use opposite arms.  A same-arm assignment repeats a row or a column; an opposite-arm assignment is unique, satisfies \(i+j<M\), and leaves a nonzero minor.  Orient one single membership arbitrarily.  These tests orient all the others, with the two choices related by global reflection.  If there are no single memberships, the set is reflection invariant.  At the midpoint, the square test decides membership.  This reconstructs all of \(K\).
+\end{proof}
+
+When \(E=E^*\), reversal of the outer word is global rotation, so \Cref{thm:cut-set-inverse} already gives the complete within-image balanced wall.  An arbitrary-mate conclusion additionally requires \(\mathsf P(E)\).
+
+\section{Oriented boundary coefficients}\label{sec:orientation}
+
+Reflection of the inner sends
+\begin{equation}\label{eq:reflection}
+ (P,Q,J)\longmapsto(S+p-Q,S+p-P,S+p-J).
+\end{equation}
+Rotation of the residual diagram identifies \(f_{E,M-K}\) with \(f_{E^*,K}\).  Once \Cref{thm:cut-set-inverse} has been applied, a nonsymmetric balanced inner therefore requires only the comparison with the reversed outer word.  When \(K\ne M-K\), fix \(k\in K\setminus(M-K)\); then \(b_k\) has exactly its bottom-arm site.  Write
+\[
+ \mathcal U=\{0,p\}\cup P,\qquad \mathcal V=\{0,p\}\cup Q.
+\]
+An oriented core criterion means that, for this fixed inner, the core polynomial determines \(K\), not just its reflection orbit.  A whole-parent criterion may use higher ordinary-degree components as well.
+
+\begin{proposition}\label{prop:private-residue}
+Suppose some \(a\in P\) satisfies
+\begin{equation}\label{eq:private-residue}
+ \{(u,v)\in\mathcal U\times\mathcal V:u-v\equiv a\pmod S\}
+ =\{(a,0)\}.
+\end{equation}
+Then the core recovers the oriented \(K\).  Either orientation of the inner may be used.
+\end{proposition}
+\begin{proof}
+The residue condition and \(0<a<S\) make \((a,0)\) the unique actual \(h_a\)-site in every core.  In its coefficient, all residue-zero variables lie in the top row.  For \(k\in K\), selecting the site in column \(kS+p\) leaves a positive matching: remove the largest row and smallest column first, then the row \(a\) and column \(kS+p>a\), exactly as in the height proof of \Cref{lem:boundary-minors}.  Therefore
+\[
+ K=\{M-j:1\le j<M,\ h_{jS}\text{ occurs in }[h_a]f_{E,K}\}.
+\]
+Reflection permits either orientation of the inner.
+\end{proof}
+
+\begin{proposition}\label{prop:direct-cofactor}
+List \(P,Q\) increasingly.  If \(q\ge2\) and \(P_1+Q_q\ne S+p\), then the core separates every nonpalindromic outer word from its reversal.
+\end{proposition}
+\begin{proof}
+Select the unique \(b_k\)-site fixed above.  Its cofactor has a positive sorted matching by \Cref{lem:boundary-minors}; let \(R_E\) be that matching's diagonal monomial.  Comparing the increasing lists for \(E\) and \(E^*\) gives
+\begin{equation}\label{eq:direct-ratio}
+ \frac{R_E}{R_{E^*}}
+ =\frac{h_{P_1-p}h_{S+p-Q_q}}{h_{S-Q_q}h_{P_1}}.
+\end{equation}
+Here the quotient is read as a difference of monomial exponent vectors.  The factors can be checked period by period.  Before the removed row, according as the boundary row is absent or present, an ordinary period contributes
+\[
+ h_{S+P_1-Q_q}\prod_{i=1}^{q-1}h_{P_{i+1}-Q_i},\qquad
+ h_{S-Q_q}h_{P_1-p}\prod_{i=1}^{q-1}h_{P_{i+1}-Q_i}.
+\]
+After the removed row, the corresponding factors are
+\[
+ \begin{aligned}
+ &h_{S+P_1-Q_{q-1}}h_{S+P_2-Q_q}
+       \prod_{i=1}^{q-2}h_{P_{i+2}-Q_i},\\
+ &h_{S-Q_{q-1}}h_{S+P_1-Q_q}h_{P_2-p}
+       \prod_{i=1}^{q-2}h_{P_{i+2}-Q_i}.
+ \end{aligned}
+\]
+Substitute \(P_i^*=S+p-Q_{q+1-i}\), \(Q_i^*=S+p-P_{q+1-i}\).  Each ordinary-period product is unchanged, with its internal factors reversed in order.  The initial, removed-row, and final factors then leave \eqref{eq:direct-ratio}.  Empty products for \(q=2\) and adjacent boundary periods obey the same displayed products.
+
+All matching indices are positive.  As \(p>0\), the two multisets in \eqref{eq:direct-ratio} agree only if \(P_1+Q_q=S+p\): uncrossed pairing would give \(p=0\), and crossed pairing gives this sum.  The cofactors thus have different unique minimum-square monomials and cannot agree even up to sign.  \Cref{thm:cut-set-inverse} had left only the reversal alternative, so it is excluded.
+\end{proof}
+
+\begin{proposition}\label{prop:wrapped-selection}
+Suppose \(P_1+Q_q=S+p\), and put \(c=P_1-p=S-Q_q\).  Suppose the pairs in \(\mathcal U\times\mathcal V\) of difference congruent to \(c\) modulo \(S\) are exactly
+\begin{equation}\label{eq:wrapped-sites}
+ \{(p+c,p),(0,S-c)\}\cup R,\qquad
+ R=\{(a,b)\in P\times Q:a-b=c\}.
+\end{equation}
+Delete \(p+c\) and the row residues of \(R\) from \(P\), giving \(A_0\); delete \(S-c\) and the column residues of \(R\) from \(Q\), giving \(B_0\).  Require that these sets are nonempty and, in increasing order, \((A_0)_i>(B_0)_i\).  If
+\[
+ a=\min A_0\ne b=S+p-\max B_0,
+\]
+then the core separates every nonpalindromic outer word from its reversal.
+\end{proposition}
+\begin{proof}
+The actual boundary sites of \(h_c\) are
+\[
+ (jS,(j-1)S+S-c)\quad(j\in K\cup\{M\}),\qquad
+ (jS+p+c,jS+p)\quad(j\in K\cup\{0\}).
+\]
+The internal sites are \((jS+a,jS+b)\), for \((a,b)\in R\) and \(0\le j<M\).  In particular, the pair \((0,S-c)\) has difference \(c-S\) in one residue block; its actual \(h_c\)-site crosses a period.  All these sites are disjoint, and their number is \(N=|R|M+2(|K|+1)\).  Selecting all of them leaves, up to the deletion sign, the lists
+\begin{equation}\label{eq:wrapped-deletion}
+ \begin{aligned}
+ U'&=\{MS+p\}\cup(ST+p+c)\cup\bigcup_j(jS+A_0),\\
+ V'&=\{0\}\cup(ST-c)\cup\bigcup_j(jS+B_0).
+ \end{aligned}
+\end{equation}
+
+For the oriented extraction, first select \(b_k\), then \(h_c^{N-1}\).  Deleting the row \(kS\) removes exactly its wrapped site, and deleting column zero removes none of the \(h_c\)-sites.  The residual rows are \(U'\), and the residual columns are
+\((V'\setminus\{0\})\cup\{kS-c\}\).  Thus the entire cofactor, rather than only its order, is known.
+
+Pair these lists increasingly, period by period.  Before the exceptional column, internal differences are \((A_0)_i-(B_0)_i>0\).  After it, the matching shifts to larger rows; cross-period differences are positive since all residues lie between zero and \(S\).  At each boundary insertion, the difference includes \(p+c>0\) or an additional positive multiple of \(S\); the initial and final differences are positive by the displayed residue ranges.  Reflection reverses the ordinary internal factors.  The exceptional column and the final row contribute the only uncanceled factors, giving
+\begin{equation}\label{eq:wrapped-ratio}
+ \frac{R_E}{R_{E^*}}=\frac{h_{a+c}h_b}{h_{b+c}h_a}.
+\end{equation}
+Because \(c>0\), this ratio is one only if \(a=b\).  The unique minimum-square monomials are different, so the selected coefficients separate the orientations.  The positive-matching assumption is used before this comparison; disjoint wrapped sites alone do not guarantee a nonzero residual minor.
+\end{proof}
+
+\begin{proposition}\label{prop:contact-orientation}
+Suppose \((P,Q)=(S+p-Q,S+p-P)\).  Put \(J^*=S+p-J\), and
+\[
+ W=\{u-v\bmod S:u\in\mathcal U,\ v\in\mathcal V\}.
+\]
+If positive residues \(r,s<S\) lie outside \(W\), and the numbers of \(t\) satisfying \(\{t,S-t\}=\{r,s\}\) differ between \(J\) and \(J^*\), then the full parents separate every nonpalindromic outer word from its reversal.
+\end{proposition}
+\begin{proof}
+Use the restored-contact argument in the balanced-wall lemma of \cite{Shields2026PowerRigidity}, with the full residue alphabet \(W\) replacing \(\{0,p,-p\}\).  If the lowest components have different signs, their nonzero common core already separates the parents.  Otherwise group the unit sites first in both row and column orders.  Selecting every unit has the common sign \(\varepsilon_\alpha\).  In the next ordinary degree exactly one contact \(z\) is not selected.  Set its diagonal entry to zero for this coefficient.  Bordered expansion contributes
+\begin{equation}\label{eq:restored-contact}
+ -\varepsilon_\alpha\sum_{u,v}D_{uv}\,h_{u-z}h_{z-v},
+\end{equation}
+where \(D_{uv}\) is the signed cofactor of the core.  The relative minus sign is independent of the restored contact.  Off-diagonal contact-to-contact terms are impossible with all but one unit selected.
+
+The core and outer-seam contacts agree in the two orientations, so their contributions cancel.  Unequal contact counts imply \(r+s=S\).  Extract \(h_rh_{(k-1)S+s}\) from the remaining periodic internal-contact contribution.  Neither variable can occur in a core cofactor, since its residue lies outside \(W\).  The two indices sum to \(kS\), forcing the replaced entry to be \(b_k\), whose bottom-arm site is unique.  Every contact with the prescribed unordered pair contributes the same nonzero cofactor, with the sign in \eqref{eq:restored-contact}.  Its multiplicity is one, except that it is two when \(r=s\) and \(k>1\).  The unequal counts therefore leave a nonzero difference.  Nonvanishing is \Cref{lem:boundary-minors}.
+\end{proof}
+
+\section{Selected coefficients and reductions}\label{sec:reductions}
+
+For sites using row-position set \(I\), column-position set \(J_0\), and matching permutation \(\pi\) in their inherited orders, the deletion sign is
+\begin{equation}\label{eq:deletion-sign}
+ (-1)^{\sum I+\sum J_0}\operatorname{sgn}(\pi).
+\end{equation}
+Sites with a common actual difference have order-preserving matching.  A residue condition by itself proves neither that the actual labels agree nor that deleting their sites leaves a positive matching.
+
+\subsection{Deleting internal sites}
+
+\begin{proposition}\label{prop:internal-deletion}
+Suppose a residue \(0<c<S\) has only sites \((a,b)\in P\times Q\) in \(\mathcal U\times\mathcal V\), all of actual difference \(a-b=c\), with distinct rows and columns.  Delete the corresponding inner row betas \(a-p\) and column betas \(b\), and require that the result is a positive-gap balanced Hessenberg inner \(E'\).  If there are \(q_0>0\) sites per period, then
+\begin{equation}\label{eq:internal-deletion}
+ [h_c^{q_0M}]f_{E,K}=\eta_K f_{E',K},
+\end{equation}
+where \(\eta_K\) is the sign in \eqref{eq:deletion-sign}.
+\end{proposition}
+\begin{proof}
+The residue and actual-difference conditions give exactly the sites \((jS+a,jS+b)\) in one period, with no wrapped or boundary contribution to \(h_c\).  These \(q_0M\) sites are disjoint.  The highest coefficient selects all of them, and Laplace expansion gives the stated sign.  The residual lists are exactly \eqref{eq:core-lists} for \(E'\): its span and terminal excess remain \(S,p\), and no contact in \(J\) was removed.  Geometric validity of \(E'\) is an explicit hypothesis, not a consequence of the residue test.  This proves \eqref{eq:internal-deletion}.
+\end{proof}
+
+Repeated valid core deletions strictly decrease the row count and transfer an oriented core theorem.  They may end at \Cref{prop:private-residue,prop:direct-cofactor,prop:wrapped-selection} or another oriented core result below.  A whole-parent theorem is not a valid terminal unless its core is separately oriented.  Deletion signs cause no ambiguity: opposite signs of two nonzero skew Schur determinants cannot give equality, by specialization to sufficiently many positive variables.
+
+\begin{proposition}\label{prop:mixed-deletion}
+Suppose a residue \(c\in P\) has exactly the boundary pair \((c,0)\) and \(q_0\) internal pairs of actual difference \(c\).  If deleting the internal pairs gives a positive-gap balanced Hessenberg inner \(E'\), then
+\[
+ [h_c^{q_0M+1}]f_{E,K}=\eta_K[h_c]f_{E',K}.
+\]
+The core recovers the oriented \(K\).  The case \(q_0=0\) is allowed.
+\end{proposition}
+\begin{proof}
+The \(q_0M\) internal sites and the single boundary site are disjoint.  The highest coefficient selects every one.  Deleting only the internal sites first leaves the core for \(E'\), where the sole remaining residue-\(c\) pair is \((c,0)\).  This gives the displayed identity with its Laplace sign.  The coefficient reading in \Cref{prop:private-residue} then recovers the oriented \(K\), also when no internal deletion was needed.
+\end{proof}
+
+\begin{proposition}\label{prop:parent-deletion}
+Use the full residue alphabets \(\{0,p\}\cup A\) and \(\{0,p\}\cup B\), with \(A,B\) from \eqref{eq:balanced-data}.  Suppose residue \(c\), \(0<c<S\), has only internal pairs in \(A\times B\), all of actual difference \(c\).  Require that deleting their inner row betas \(a-p\) and column betas \(b\) gives a positive-gap balanced Hessenberg inner \(E'\).  If there are \(q_0>0\) pairs, then
+\begin{equation}\label{eq:parent-deletion}
+ [h_c^{q_0M}]s_{I_pF_\alpha(E)}
+ =\eta_\alpha s_{I_pF_\alpha(E')}.
+\end{equation}
+Here \(\eta_\alpha\) is the deletion sign.
+\end{proposition}
+\begin{proof}
+Apply the full-alphabet residue test to \eqref{eq:full-repeated-lists} after shifting the row list by \(p\).  The only actual \(h_c\)-sites are the \(q_0M\) specified internal sites, all of difference \(c\) within one period.  They are disjoint because equal positive differences pair strictly ordered lists.  Selecting all of them leaves exactly the inflated repeated lists of \(E'\), with the same outer composition.  Laplace expansion proves \eqref{eq:parent-deletion} with \eqref{eq:deletion-sign}.
+\end{proof}
+
+The full alphabets in \Cref{prop:parent-deletion} include contacts; using only \(P,Q\) would not exclude their contribution.  The identity preserves every parent layer and may be iterated to a nonsymmetric whole-parent terminal, including the constant-excess balanced-wall lemma of \cite{Shields2026PowerRigidity}.  Decreasing row count proves termination of a chosen valid chain, not existence of such a chain for every inner.
+
+\subsection{Restored sites and explicit inners}
+
+\begin{proposition}\label{prop:restored-site}
+Suppose \(P=Q+c\) for \(c>0\), and the residue-\(c\) pairs in \(\mathcal U\times\mathcal V\) are exactly \((a,a-c)\), \(a\in P\).  For an unordered positive residue pair \(\{r,s\}\), count the sites whose return pair equals \(\{r,s\}\) in the two lists of return pairs
+\begin{equation}\label{eq:return-pairs}
+ \{a,S-b\},\qquad \{a-p,S+p-b\},\qquad b=a-c.
+\end{equation}
+If the two multiplicities differ and \(r,s\notin\{0,p,S-p\}\), the core separates every nonpalindromic outer word from its reversal.
+\end{proposition}
+\begin{proof}
+Put \(q=|P|\).  Selecting all \(qM\) internal \(h_c\)-sites leaves the boundary matrix with lists
+\begin{equation}\label{eq:boundary-matrix}
+ L_K:\qquad \{MS+p,MS\}\cup SK,\qquad
+ \{0,p\}\cup(SK+p).
+\end{equation}
+Selecting exactly \(qM-1\) restores one internal row-column pair.  Set its diagonal \(h_c\)-entry to zero to take that exact coefficient.  The bordered expansion, apart from the common deletion sign, is
+\begin{equation}\label{eq:restored-internal}
+ -\sum_{j=0}^{M-1}\sum_{(a,b)}\sum_{u,v}
+ D_{uv}\,h_{u-jS-b}h_{jS+a-v},
+\end{equation}
+where \(D_{uv}\) is a signed cofactor of \(L_K\).  This expansion does not invert an internal block.
+
+Boundary cofactor indices have residues only \(0,p,-p\).  Hence neither prescribed return variable can occur in \(D_{uv}\).  For a counted pair, \(r+s=S+c\), so extracting \(h_rh_{(k-1)S+s}\) forces \(u-v=kS\).  Only the bottom arm is present.  For this arm the unordered residues are \(\{a,S-b\}\); reflection changes them to \(\{a-p,S+p-b\}\).  The extraction thus gives the difference of the two multiplicities times the nonzero bottom-arm cofactor.  As in \Cref{prop:contact-orientation}, the multiplicity factor is one except for equal return residues and \(k>1\), when it is two.  The cofactor is nonzero by the height argument of \Cref{lem:boundary-minors}, now on \(L_K\).  If the leading deletion signs differ, the highest coefficient already separates the cores; otherwise \eqref{eq:restored-internal} gives the claimed nonzero difference.
+\end{proof}
+
+\begin{theorem}\label{thm:three-row-wall}
+Every three-row positive-gap Hessenberg balanced inner has the within-image wall theorem: for outer compositions of the same size,
+\[
+ s_{I_pF_\alpha(E)}=s_{I_pF_\beta(E)}
+ \quad\Longleftrightarrow\quad
+ \begin{cases}
+ \beta=\alpha,&E\ne E^*,\\
+ \beta\in\{\alpha,\alpha^{\mathrm{rev}}\},&E=E^*.
+ \end{cases}
+\]
+This statement does not assume or assert \(\mathsf P(E)\).
+\end{theorem}
+\begin{proof}
+Write
+\[
+ E=(a+p,a+b+e,b+p;a,b),\qquad a,b,e,p>0.
+\]
+If \(a=b\), symmetry and \Cref{thm:cut-set-inverse} apply.  If \(e=p\), the inner has constant excess, so use the balanced-wall lemma of \cite{Shields2026PowerRigidity}, which permits every positive gap word on that domain.  Otherwise
+\[
+ S=a+b+e+2p,\qquad P=\{b+2p\},\qquad Q=\{b+e+p\}.
+\]
+There are nine pairs in \(\{0,p,b+2p\}\times\{0,p,b+e+p\}\).  Comparing their differences modulo \(S\) with \(b+2p\), the pair \((b+2p,0)\) is private unless \(a+e=p\) or \(a=b+p\).  Indeed, the only other possibilities are \((0,p)\), giving \(a+e=p\), and \((0,b+e+p)\), giving \(a=b+p\); the pair \((p,b+e+p)\) would give \(a=b\), already treated.  The remaining differences cannot agree in the stated positive ranges.
+
+Apply the test also after interchanging \(a,b\).  When \(a\ne b\), simultaneous failure leaves exactly
+\[
+ \{a,b\}=\{p-e,2p-e\},\qquad 0<e<p.
+\]
+Orient this case as \((a,b)=(p-e,2p-e)\).  Put \(c=p-e\), \(B_0=3p-e\), so \(S=5p-e\).  The residual pair is \((P,Q)=(\{4p-e\},\{3p\})\); reflection gives \((\{3p-e\},\{2p\})\).  In either orientation residue \(c\) has exactly its one internal site of actual difference \(c\).  The two return pairs in \eqref{eq:return-pairs} are
+\[
+ \{4p-e,2p-e\},\qquad \{B_0,B_0\}.
+\]
+Since \(B_0\notin\{0,p,S-p\}\), the second pair has unequal multiplicities, differing by one.  \Cref{prop:restored-site} orients this exceptional core.  All nonsymmetric cases have now been separated from outer reversal, the only alternative left by \Cref{thm:cut-set-inverse}.
+\end{proof}
+
+\begin{lemma}\label{lem:four-row-return}
+Let
+\[
+ E=(a+p,2a+e,2a+f,a+p;a,a,a),\qquad a,e,f,p>0,
+\]
+with \(e\ne f\), \(e,f\ne p\), and \(a+e+f\ne p\).  Put \(S=3a+e+f+2p\), \(d=a+p\), and use the outer sets \(T,K\) of \eqref{eq:cuts}.  If \(k\in T\setminus(M-T)\), set
+\[
+ N=M+2(|K|+1),\qquad u_f=2a+f+2p,\qquad z_f=kS+p-f.
+\]
+Let \(D_k\) be the signed cofactor of the entry \((kS+p+d,0)\) in the matrix with decreasing beta lists
+\begin{equation}\label{eq:four-row-return-lists}
+ L=\{MS+p\}\cup(ST+p+d),\qquad V=\{0\}\cup(ST-d).
+\end{equation}
+Then \(D_k\ne0\), and for a sign \(\eta\in\{1,-1\}\),
+\begin{equation}\label{eq:four-row-return}
+ \begin{aligned}
+ [h_d^{N-1}h_{u_f}h_{z_f}]f_{E,K}&=\eta\nu D_k,\\
+ [h_d^{N-1}h_{u_f}h_{z_f}]f_{E^*,K}&=0,\\
+ \nu&=\begin{cases}2,&f=a+e+p\text{ and }k>1,\\1,&\text{otherwise}.\end{cases}
+ \end{aligned}
+\end{equation}
+If \(u_f=z_f\), the bracket extracts their square and \(\nu=1\).
+\end{lemma}
+\begin{proof}
+There are no internal contacts.  In \eqref{eq:core-lists}, the actual \(h_d\)-sites are
+\[
+ \begin{gathered}
+ (jS,jS-d)\quad(j\in K\cup\{M\}),\qquad
+ (jS+p+d,jS+p)\quad(j\in K\cup\{0\}),\\
+ (jS+u_f,jS+a+f+p)\quad(0\le j<M).
+ \end{gathered}
+\]
+Their \(N\) rows and columns are distinct, and their matching is order preserving.  Selecting them all leaves \eqref{eq:four-row-return-lists}, in either orientation.  The entry of index \(kS+p+d\) has only its bottom-arm site: a top-arm alternative would require \(M-k\in T\).  In its cofactor, increasing matching has differences \(p+2d\) below the deleted row and positive differences crossing a period above it.  The final difference is positive as well.  Strict rearrangement gives a unique minimum-square monomial, proving \(D_k\ne0\).
+
+The residual entry residues lie in \(W=\{p,p+d,p+2d\}\pmod S\).  Both \(u_f,z_f\) are positive and have residues outside \(W\cup\{0,d\}\).  Here \(f\ne p\) excludes the only possible contact congruence; the other equalities would require a sum of positive parameters to vanish.
+
+Selecting exactly \(N-1\) sites restores one row-column pair, with its diagonal suppressed.  A boundary restoration contributes only residues in \(W\cup\{0,d\}\), so cannot contribute the prescribed return variables.  For an internal restoration in period \(j\), neither return variable occurs in a cofactor of the residual matrix.  Their sum therefore forces the underlying entry to have index
+\[
+ u_f+z_f-d=kS+p+d,
+\]
+whose site is unique.  Period zero gives the two labels.  The swapped assignment solves
+\[
+ (k-j)S=2a+2f+p.
+\]
+The right side lies strictly between zero and \(2S\), and equals \(S\) exactly when \(f=a+e+p\).  This gives the second period \(j=k-1\) if \(k>1\).  At \(k=1\), the two labels coincide in the same restoration and are counted once.  The order-preserving selected matching gives the same relative bordered minus sign for every restoration, proving the first identity with the stated multiplicity.
+
+At the forced underlying entry, the reflected internal returns have residues \(u_e=2a+e+2p\) and \(p-e\).  Neither equals \(u_f\pmod S\): the first equality would give \(e=f\), and the difference from the second is \(S-d\), strictly between zero and \(S\).  This proves the vanishing reflected coefficient.  The nonzero-versus-zero comparison is independent of all overall deletion signs.
+\end{proof}
+
+\begin{theorem}[Balanced four-row wall]\label{thm:four-row-wall}
+Every balanced positive-gap Hessenberg inner with four rows can be written
+\begin{equation}\label{eq:four-row-parameters}
+ E=(a+p,a+b+e,b+c+f,c+p;a,b,c),\qquad a,b,c,e,f,p>0.
+\end{equation}
+For every pair of outer compositions of the same size and every integer \(t\ge p\),
+\begin{equation}\label{eq:four-row-wall}
+ s_{I_tF_\alpha(E)}=s_{I_tF_\beta(E)}
+ \quad\Longleftrightarrow\quad
+ \begin{cases}
+ \beta=\alpha,&E\ne E^*,\\
+ \beta\in\{\alpha,\alpha^{\mathrm{rev}}\},&E=E^*.
+ \end{cases}
+\end{equation}
+No power-rigidity hypothesis is required for this within-image assertion.
+\end{theorem}
+\begin{proof}
+The positive parameters in \eqref{eq:four-row-parameters} are unique.  The span and shifted internal lists are
+\begin{equation}\label{eq:four-row-data}
+ \begin{aligned}
+ S&=a+b+c+e+f+2p,\\
+ A&=\{c+2p,b+c+f+2p\},\\
+ B&=\{c+f+p,b+c+e+f+p\}.
+ \end{aligned}
+\end{equation}
+The differences between their entries, in the displayed orders, form
+\[
+ \begin{pmatrix}p-f&p-b-e-f\\b+p&p-e\end{pmatrix}.
+\]
+Thus the only contacts are \(f=p\), \(e=p\), and \(b+e+f=p\).  The cross contact excludes the other two, and two contacts mean constant excess.  These exhaust residual orders two, one and zero.
+
+By \Cref{thm:cut-set-inverse}, only outer reversal remains at \(p\).  It is global rotation when \(a=c,e=f\).  If \(e=f=p\), use the balanced-wall lemma of \cite{Shields2026PowerRigidity}, which permits every positive gap word.  Exclude these cases below and compare the two inner orientations at a fixed nonpalindromic outer word.
+
+If there are two residual pairs, \(J=\varnothing\) and
+\(P_1+Q_2-(S+p)=c-a\).  When \(a\ne c\), \Cref{prop:direct-cofactor} applies.  Otherwise \(a=c\) and \(e\ne f\).  For \(d=a+p\), comparison of all residue pairs gives
+\[
+ \{(p+d,p),(0,S-d)\}
+ \ \cup\ 
+ \begin{cases}
+ \varnothing,&b\ne a,\\
+ \{(2a+f+2p,a+f+p)\},&b=a.
+ \end{cases}
+\]
+For \(b\ne a\), wrapped deletion leaves \(A_0=\{a+b+f+2p\}\), \(B_0=\{a+f+p\}\).  Their matching difference is \(b+p>0\), and their orientation difference is \(f-e\ne0\); apply \Cref{prop:wrapped-selection}.  For \(b=a\), both lists are empty.  Its nonempty-residual hypothesis is unavailable, but \Cref{lem:four-row-return} separates the cores even up to sign.  \Cref{lem:wall-lists} transfers this to the parents.
+
+Suppose there is one residual pair, \(P=\{x\},Q=\{y\}\).  Here \(2p<x<S\) and \(p<y<S-p\).  The private test for \(x\) fails exactly when
+\[
+ x=S-p,\qquad x+y=S,\qquad\text{or}\qquad x+y=S+p.
+\]
+Outside the symmetric-core case \(x+y=S+p\), simultaneous failure in the two orientations leaves, after reflection,
+\((x,y)=(S-p,3p)\), with \(S>4p\).  For a terminal contact, substitution into \eqref{eq:four-row-data} gives \(S=5p-f'\), where \(f'>0\) is the remaining internal excess.  For the cross contact it gives \(S=b+5p\).  Hence \(S\ne5p\).  For \(d_0=S-4p\), the sole residue-\(d_0\) pair is \((x,y)\); the only possible additional pair \((p,0)\) would require \(S=5p\).  The return pairs are
+\[
+ \{S-p,S-3p\},\qquad\{S-2p,S-2p\}.
+\]
+The latter has unequal multiplicities and avoids \(\{0,p,S-p\}\), so \Cref{prop:restored-site} applies.  All other nonsymmetric one-pair cores have a private residue in one orientation.
+
+It remains to treat \(x+y=S+p\) using the full-parent contact criterion.  If \(e=p\), then \(f\ne p\), \(c=a+b+p\), and
+\[
+ S=2c+f+2p,\quad J=\{S-a-p\},\quad J^*=\{a+2p\}.
+\]
+The full core residue alphabet is
+\[
+ W=\{0,p,S-p,c+p,c+2p,(p-f)\bmod S\}.
+\]
+The pair \(\{S-a-p,a+p\}\) avoids \(W\) unless \(f=a+2p\); in that case \(\{a+2p,S-a-2p\}\) avoids \(W\).  The contacts are neither equal nor complementary, so the pair has unequal multiplicities.  Apply \Cref{prop:contact-orientation}.  The case \(f=p\) follows by reflection.
+
+For the cross contact \(b+e+f=p\), core symmetry gives \(a-c=f-e\), and
+\[
+ \begin{gathered}
+ S=a+c+3p,\qquad J=\{c+2p\},\qquad J^*=\{a+2p\},\\
+ W=\{0,p,S-p,c+3p-e,c+2p-e,b+p\}.
+ \end{gathered}
+\]
+The pair \(\{c+2p,a+p\}\) avoids \(W\) unless \(a=b\); the reflected pair avoids it unless \(c=b\).  Both exceptions together force \(a=c,e=f\), already excluded.  Again the contacts are neither equal nor complementary, and \Cref{prop:contact-orientation} applies.
+
+This exhausts the parameters and proves orientation at \(p\).  The inflation-lowering lemma of \cite{Shields2026Inflation} transfers separation to every larger integer time.  Equality and global rotation supply the reverse implications.
+\end{proof}
+
+\begin{proposition}\label{prop:four-inners}
+Each of the following inners has the within-image wall theorem for every outer word:
+\[
+ \begin{gathered}
+ (2,4,5,6,2;1,1,1,1),\qquad(2,4,6,5,2;1,1,1,1),\\
+ (2,5,5,6,5,2;1,2,1,2,1),\qquad
+ (2,5,6,7,5,2;1,2,2,2,1).
+ \end{gathered}
+\]
+In these nonsymmetric cases, equality within the same-inner image at \(p=1\) forces equality of the outer words.
+\end{proposition}
+\begin{proof}
+In the displayed order the spans are \(15,15,18,19\).  All four have \(p=1,c=2\) and the wrapped pattern \eqref{eq:wrapped-sites}.  Put \(N=|R|M+2(|K|+1)\).  The additional selections described below leave the common boundary matrix
+\begin{equation}\label{eq:fixed-boundary-matrix}
+ L_T:\qquad U_0=\{MS+1\}\cup(ST+3),\qquad
+ V_0=\{0\}\cup(ST-2).
+\end{equation}
+Its entry residues belong to \(\{1,3,5\}\).  If the outer word is not palindromic, choose \(k\in T\setminus(M-T)\).  The entry of index \(kS+3\) then has only its bottom-arm site.  Its cofactor is nonzero: the increasing matching below the removed row has difference five; above it the differences cross periods and are positive, ending at the top row.
+
+For the first inner, select \([h_2^{N-1}]\).  The restored internal pairs are \((8,6),(12,10)\), while in the reflected inner they are \((6,4),(10,8)\).  The return pair \(\{8,12\}\) has multiplicity difference two.  For the second inner the same selection restores \((7,5),(12,10)\), versus \((6,4),(11,9)\).  The return pair \(\{7,13\}\) has multiplicity difference one.  In both cases the restored boundary-site contributions agree under reflection and cancel.
+
+For the third inner, extract \([h_3^{2M}][h_2^{N-1}]\).  After the wrapped deletion, the common internal lists are \(\{7,15\}\) and \(\{4,12\}\).  Restoring \((11,9)\), versus \((10,8)\), gives return pair \(\{11,12\}\) with multiplicity difference one.  These restorations create no additional \(h_3\)-site.  For the restored row, compare against \(\{0,S-2,4,12\}\); for the restored column, compare against \(\{1,3,7,15\}\).  Neither restored choice has difference three, within its period or an adjacent one.  The \(2M\) internal \(h_3\)-selections therefore remain forced in these internal restorations.  If a boundary \(h_2\)-site is restored instead, the orientation-specific internal \(h_2\)-sites have all been deleted.  The two residual matrices then agree: the shifts \((11,9)\mapsto(10,8)\) preserve every row and column rank, so their deletion signs agree as well.  Thus every boundary-restoration contribution cancels in the comparison, including those with additional \(h_3\)-sites.
+
+For the fourth inner, extract \([h_3^{3M-1}][h_2^N]\).  The internal lists after wrapped deletion are
+\[
+ A_0=\{7,12,16\},\qquad B_0=\{4,9,13\}=A_0-3.
+\]
+The middle pair \((12,9)\), versus \((11,8)\), gives return pair \(\{12,13\}\) with multiplicity difference one.  The apparent boundary residue-three sites would require \(0\) or \(M\) in \(T\), which never occurs.  Thus the actual \(h_3\)-sites are exactly these \(3M\) internal diagonals, and the selection restores precisely one.
+
+For a restored pair \((a,b)\) of difference \(\ell>0\), the bottom return residues over \eqref{eq:fixed-boundary-matrix} are \(\{a,S+3-b\}\).  Each pair just listed avoids \(\{1,3,5\}\); its variables cannot occur in a boundary cofactor.  Their indices sum to \(kS+3+\ell\), forcing the unique bottom-arm entry of index \(kS+3\).  Bordered expansion, as in \eqref{eq:restored-internal}, gives the stated nonzero multiplicity times its cofactor.  All selections above were obtained by exhausting the finite inner residue alphabets; the period index and the outer set remain arbitrary.  Their signs are \eqref{eq:deletion-sign}.  Unequal leading signs separate already, and otherwise the common relative minus sign of bordered expansion yields the nonzero difference.  This proves the result for every \(M,T\), not only for fixed outer sizes.
+\end{proof}
+
+\begin{corollary}\label{cor:balanced-five-row-wall}
+For every \(a>2c>0\), the inner
+\[
+ E=(a,a,a,2a-c,a;c^4)
+\]
+and its rotation satisfy \(\mathsf P\) and have an oriented core at \(p=a-c\).  They therefore satisfy the full arbitrary-mate inflation theorem, \Cref{thm:main}, at this threshold.
+\end{corollary}
+\begin{proof}
+\Cref{thm:five-row-classification} gives \(\mathsf P\).  The balanced data are
+\[
+ \begin{gathered}
+ S=6a-5c,\qquad p=a-c,\qquad J=\varnothing,\\
+ P=\{2a-c,4a-3c,5a-4c\},\qquad
+ Q=\{3a-3c,4a-4c,5a-5c\}.
+ \end{gathered}
+\]
+The residue-\(c\) sites are exactly
+\[
+ (4a-3c,4a-4c),\qquad(5a-4c,5a-5c).
+\]
+Both actual differences are \(c\).  The other positive internal differences are \(a\) and \(2a-c\); negative internal differences wrap to \(3a-c,4a-2c,5a-3c\).  Every nonzero boundary residue lies in
+\[
+ \{a-c,a,2a-c,3a-2c,4a-3c,5a-4c\}.
+\]
+All these values exceed \(c\), because \(a>2c\), so the list of sites is exhaustive.
+
+Deleting their row betas and column betas gives \(E'=(3a-2c,4a-3c,a;2a-c,c)\).  The gaps are positive, the middle row exceeds their sum, and both terminal excesses are \(a-c\).  Thus this is a legal balanced positive-gap Hessenberg inner.  Its residual lists are \(P'=\{2a-c\}\), \(Q'=\{3a-3c\}\), with the same \(S,p\).  Of the nine residue pairs, only \((2a-c,0)\) has residue \(2a-c\).  The other residues belong to \(\{0,a-c,a,3a-2c,4a-3c,5a-4c,5a-3c\}\), none of which equals \(2a-c\) when \(a>2c\).  \Cref{prop:private-residue} orients this core.  \Cref{prop:internal-deletion}, selecting \(h_c^{2M}\), transfers the decoder to \(E\).  Together with \(\mathsf P\), this supplies the hypotheses of \Cref{thm:main}.
+\end{proof}
+
+\section{Inflation and legal generation}\label{sec:inflation}
+
+Call a balanced positive-gap Hessenberg inner \emph{wall-recognized} if it is symmetric, has constant excess, has at most four rows, satisfies one of \Cref{prop:private-residue,prop:direct-cofactor,prop:wrapped-selection,prop:contact-orientation,prop:mixed-deletion,prop:restored-site} in either orientation, is one of the four inners of \Cref{prop:four-inners}, or admits a finite valid deletion chain of \Cref{prop:internal-deletion,prop:parent-deletion} to an applicable oriented terminal theorem.  A chain using a core deletion must continue with core identities and end at an oriented core theorem.  A chain of full-parent deletions may end at a whole-parent theorem, including the constant-excess balanced-wall lemma of \cite{Shields2026PowerRigidity}.  A nonsymmetric chain must end at a nonsymmetric oriented terminal.  All residue, actual-difference, and geometric conditions in these statements are part of this definition.
+
+\begin{theorem}[Scalar class recovery under inflation]\label{thm:main}
+Let \(E\) be connected and zero-free with at least two rows, and suppose \(\mathsf P(E)\).  For every nonempty positive composition \(\alpha\) and integer \(0\le t<p\),
+\begin{equation}\label{eq:prewall-class}
+ \operatorname{Cl}(I_tF_\alpha(E))
+ =\{I_tF_\beta(E),(I_tF_\beta(E))^*:r_\beta=r_\alpha\}.
+\end{equation}
+If \(u\ne v\), or if \(u=v\), \(E\) satisfies \eqref{eq:hessenberg}, and \(E\) is wall-recognized, then for every integer \(t\ge p\),
+\begin{equation}\label{eq:postwall-class}
+ \operatorname{Cl}(I_tF_\alpha(E))
+ =\{I_tF_\alpha(E),(I_tF_\alpha(E))^*\}.
+\end{equation}
+The power hypothesis is discharged on the respective domains of \Cref{prop:arithmetic-recognition,prop:pattern-recognition,prop:multiplicity-recognition,prop:boundary-runs,prop:general-private-endpoint}, in the rigid cases of \Cref{thm:five-row-classification}, and on the strip of \Cref{cor:stretched-strip}.
+\end{theorem}
+\begin{proof}
+\Cref{thm:exposure} gives the arbitrary-mate class at zero.  The no-escape inclusion of \cite{Shields2026Inflation} lowers every mate at time \(t\) into that class.  Its hypotheses hold for every connected diagram: the common row and gap multisets permit subtraction of \(t\), and the inflation-lowering operator recovers the old determinant.
+
+For \(0\le t<p\), the pre-wall lemma of \cite{Shields2026PowerRigidity} gives
+\begin{equation}\label{eq:prewall-substitution}
+ s_{I_tF_\alpha(E)}
+ =\sum_{\rho\succeq\alpha}(-h_t)^{\ell(\alpha)-\ell(\rho)}
+       \prod_i s_{I_tE_{\rho_i}}.
+\end{equation}
+Its hypotheses are connectedness and zero-freeness of \(E\), not a restriction on internal activation depths.  Across any outer cut the only available lower-left entry is \(h_t\); the other indices are at most \(t-u\) or \(t-v\), both negative.  Internal entries that activate earlier remain in the power polynomials in \eqref{eq:prewall-substitution}.  Ribbon equality preserves the number of parts and gives equality of this homogenized substitution.  Conversely, lowering recovers equality at zero.  With the no-escape inclusion, this proves \eqref{eq:prewall-class}.
+
+At \(t=p\), unequal-terminal separation in \cite{Shields2026PowerRigidity} distinguishes distinct outer words within the image of every fixed zero-free inner with \(u\ne v\).  In the balanced case the retained Hessenberg hypothesis permits \Cref{thm:cut-set-inverse}, leaving only outer reversal.  Symmetry makes this a global rotation.  For a nonsymmetric wall-recognized inner, the relevant coefficient criterion or valid deletion chain excludes the reversed nonpalindromic word.  Constant excess uses the balanced-wall lemma of \cite{Shields2026PowerRigidity}; the three-row, four-row and fixed-inner cases were proved in \Cref{thm:three-row-wall,thm:four-row-wall,prop:four-inners}.  A palindromic outer word supplies no second alternative.
+
+The no-escape inclusion now gives \eqref{eq:postwall-class} against arbitrary connected mates at \(p\).  Lowering from a larger time to \(p\) proves permanence.  Rotation always preserves the polynomial, which supplies the reverse inclusions.  The final assertion lists the results proving the all-power hypothesis; it does not remove their stated geometric or arithmetic assumptions.
+\end{proof}
+
+A legal marked composition \(D\circ_W B\) retains the two placements of \(W\) and satisfies Hypotheses I--IV of McNamara and van Willigenburg \cite{McNamara2009Classification}.  A factor reversal rotates the factor together with its marks.  The horizontal row marks in the two-row inflation theorem of \cite{Shields2026Inflation} admit the following verification for an arbitrary connected inner.
+
+\begin{lemma}\label{lem:prewall-chart}
+Let \(E\) be any connected profile with nonnegative gaps and \(n\ge2\), and let \(S,u,v,p\) be as in \eqref{eq:terminal}.  Normalize the southwest cell of \(I_tE\) to \((n-1,0)\), with rows increasing downward and columns rightward.  For \(0<t<p\), the marks
+\begin{equation}\label{eq:terminal-marks}
+ \begin{aligned}
+ W_{\mathrm{sw}}&=\{(n-1,j):0\le j<t\},\\
+ W_{\mathrm{ne}}&=\{(0,j):S-n+1\le j\le S-n+t\}
+ \end{aligned}
+\end{equation}
+satisfy Hypotheses I--V, with both attachments horizontal.  For every nonempty positive composition \(\alpha\),
+\begin{equation}\label{eq:prewall-chart}
+ I_tF_\alpha(E)=\alpha\circ_{W_t}I_tE\qquad(0\le t<p),
+ \qquad
+ W_t=\begin{cases}(t),&t>0,\\\varnothing,&t=0.\end{cases}
+\end{equation}
+At \(t=0\), the marks are the west edge of the southwest cell and the east edge of the northeast cell, under the horizontal empty-overlap convention, and satisfy I--IV.  At \(t=p\), the same end-row cell marks \eqref{eq:terminal-marks} fail Hypothesis III.
+\end{lemma}
+\begin{proof}
+Inflation leaves the left row endpoints fixed and adds \(t\) to the right endpoints.  The northeast cell is \((0,S-n+t)\).  The row preceding the bottom one starts at column \(v-1\), and the second row ends at column \(S-n+t-u+1\).  Since \(t<v,u\), the marked content diagonals are terminal single-cell diagonals; neither occurrence can be enlarged on the same diagonals.  This proves I.  Their content intervals are \([1-n,t-n]\) and \([S-n+1,S-n+t]\).  Since \(S\ge u+v>2t\), there are \(S-t>0\) intervening diagonals, proving II.
+
+Deleting the southwest mark moves the bottom left endpoint to \(t\le v-1\).  Deleting the northeast mark moves the top right endpoint to \(S-n\), still at least the second right endpoint.  Both weak boundary orders survive, and neither deletion changes an adjacent-row overlap.  Each complement is therefore connected and skew, proving III.  Removing both marks also leaves a nonempty connected middle \(O\).  Each mark meets \(O\) through exactly one horizontal edge, proving the attachment case and V.
+
+Amalgamation identifies the marks with displacement
+\begin{equation}\label{eq:chart-translations}
+ \Delta=(1-n,S-n+1);
+ \qquad\text{a north step uses }\Delta-(1,1)=(-n,S-n).
+\end{equation}
+In the bi-infinite amalgamation, take a seam mark in row \(n-1\), columns \(0,\ldots,t-1\).  The preceding row starts at \(v-1\), and the following row ends at \(t-u\).  No marked cell has a northwest or southeast diagonal neighbor in this chain.  In the notation of \cite{McNamara2009Classification},
+\[
+ \overline W_1=
+ \{z\in\mathcal E:z+(1,1)\in W_1\}
+ \cup\{z\in W_1:z+(1,1)\in\mathcal E\}
+ =\varnothing,
+\]
+where \(\mathcal E\) is the bi-infinite amalgamation.  Thus its barred overlap cannot be adjacent to any barred middle copy, proving IV.
+
+An east step merges endpoint rows into length \((r_n+t)+(r_1+t)-t=r_n+r_1+t\).  A north step leaves them separate with overlap \(t+1\), hence gap \(t\).  Nonconsecutive copies along the outer ribbon have disjoint row ranges.  These two operations prove the literal identity \eqref{eq:prewall-chart} for positive \(t\).
+
+At zero, identifying the two marked edges gives the same displacement \(\Delta\); the northwest shift gives the same north step.  The operations become row merger by addition and a one-cell overlap.  This is precisely the empty-overlap convention of \cite[Exs.~3.7 and 3.13]{McNamara2009Classification}.  I is automatic for the empty diagonal set, the nonempty inner separates the two edge marks for II, III is connectedness of \(E\), and the barred overlap is empty for IV.  This proves \eqref{eq:prewall-chart} also at zero, without asserting V for an empty set of cells.
+
+Finally, if \(u=p=t\), deleting the northeast mark leaves the first right endpoint \(S-n\) but the second \(S-n+1\).  If \(v=p=t\), deleting the southwest mark leaves bottom left endpoint \(p\) but preceding left endpoint \(p-1\).  Either violates the skew boundary order, proving the last assertion.  It concerns these marks only, not every possible presentation at the threshold.
+\end{proof}
+
+\begin{theorem}[Legal generation]\label{thm:legal-generation}
+Let \(E\) be connected and zero-free with at least two rows, and suppose \(\mathsf P(E)\).  For every nonempty positive composition \(\alpha\) and integer \(0\le t<p\), every connected mate of \(I_tF_\alpha(E)\) is obtained by factor reversals in a common legal left-associated composition presentation and global rotation.  After at most one global rotation, the last factor is the same marked \(I_tE\) from \Cref{lem:prewall-chart}.  If \(u\ne v\), or if \(u=v\), \(E\) satisfies \eqref{eq:hessenberg}, and \(E\) is wall-recognized, then for every integer \(t\ge p\) the class is generated by global rotation alone.
+\end{theorem}
+\begin{proof}
+By \Cref{thm:main}, every pre-wall mate, after at most one global rotation, is \(I_tF_\beta(E)\) with \(r_\beta=r_\alpha\).  Choose the irreducible composition factorization \(\alpha=A_1\circ\cdots\circ A_k\).  The ribbon classification \cite[Thm.~4.1]{Billera2006DecomposableCompositions} says that every such \(\beta\) is obtained by independently reversing these factors.  With ribbon rows read from top to bottom, a reversal is rotation of the corresponding diagram.
+
+Use the legal presentation
+\begin{equation}\label{eq:reversal-tower}
+ \bigl(\cdots((A_1\circ_{\varnothing}A_2)
+       \circ_{\varnothing}A_3)\cdots
+       \circ_{\varnothing}A_k\bigr)\circ_{W_t}I_tE.
+\end{equation}
+All empty overlaps have the horizontal edge marks, every intermediate product is a ribbon, and the last marks are \eqref{eq:terminal-marks} or their empty-edge counterparts.  \Cref{lem:prewall-chart} identifies this presentation with \(I_tF_\alpha(E)\).  Reversing the chosen \(A_i\), with their marks, gives the same presentation for \(I_tF_\beta(E)\).  Equality is transported through the remaining fixed factors by the composition theorem \cite[Thm.~3.31]{McNamara2009Classification}; at an empty overlap, use its ordinary ribbon-composition specialization \cite[Rem.~3.29]{McNamara2009Classification}, not the cell wording of Hypothesis V.  The last factor and its marks stay fixed, and no reassociation across its overlap is used.  Identity factors may be omitted; when \(|\alpha|=1\), \Cref{thm:main} already gives a rotation orbit.
+
+Rotating every factor and both placements of every mark rotates the whole presentation, by \cite[Lem.~3.19(ii)]{McNamara2009Classification}.  This supplies the other orientation of each mate.  Under the stated post-wall condition, \Cref{thm:main} leaves only the source and its global rotation.  No proper chart is needed in that regime.
+\end{proof}
+
+\begin{corollary}\label{cor:four-row-inflation}
+Every positive constant-gap Hessenberg inner with two, three, or four rows satisfies \eqref{eq:prewall-class} and \eqref{eq:postwall-class} for every outer composition and every nonnegative integer inflation time.  All these classes have the legal generation stated in \Cref{thm:legal-generation}.
+\end{corollary}
+\begin{proof}
+\Cref{thm:five-row-classification} supplies \(\mathsf P(E)\).  Unequal terminal excesses use \Cref{thm:main}.  A balanced two-row inner is symmetric; three and four rows are covered by \Cref{thm:three-row-wall,thm:four-row-wall}.  Thus every case is wall-recognized.  Apply \Cref{thm:main,thm:legal-generation}.
+\end{proof}
+
+\begin{corollary}\label{cor:unbounded-family}
+For every \(r\ge1\), the inner
+\[
+ E_r=(3,(4,3,6)^r,5,4;1^{3r+2})
+\]
+satisfies \eqref{eq:prewall-class} and \eqref{eq:postwall-class} for every outer composition and every nonnegative integer inflation time, with \(p=2\).  These classes are generated by legal factor reversals and global rotation.
+\end{corollary}
+\begin{proof}
+Every internal row exceeds two, so \eqref{eq:hessenberg} holds.  Both endpoint labels recur internally, the sum label six occurs, and the adjacent pair \((4,3)\) occurs.  Thus neither the endpoint test nor \Cref{prop:pattern-recognition} recognizes this family.  The label five occurs exactly once and lies outside \(\{3,4,6,7\}\), so \(d_0=1\) in \Cref{prop:multiplicity-recognition}.  This proves \(\mathsf P(E_r)\).  The terminal excesses are two and three; apply the unequal-terminal cases of \Cref{thm:main,thm:legal-generation}.
+\end{proof}
+
+\begin{theorem}[Mixed-zero recoding]\label{thm:mixed-zero}
+Let \(D\) be a connected zero-free inner satisfying the hypotheses of \Cref{thm:main}, including its post-wall condition.  Let \(\gamma\) be a nonempty positive composition whose ribbon class is either the singleton \(\{\gamma\}\), or \(\{\gamma,\gamma^{\mathrm{rev}}\}\) with \(D=D^*\).  Set \(E=F_\gamma(D)\).  Then \(\mathsf P(E)\) holds, and both \eqref{eq:prewall-class} and \eqref{eq:postwall-class} hold for \(E\), with the same threshold as for \(D\).  These classes are generated by legal factor reversals and global rotation.  Zero internal gaps in \(E\) are allowed.
+\end{theorem}
+\begin{proof}
+Associativity of row merging and zero joining gives the profile identity
+\begin{equation}\label{eq:recoding}
+ F_\alpha(F_\gamma(D))=F_{\alpha\circ\gamma}(D).
+\end{equation}
+The first and last rows and gaps of \(D\) are unchanged at the exterior of \(E\), so its terminal excesses and threshold are the same.  Apply \Cref{thm:main} to the right side.  Its pre-wall class consists of the diagrams \(I_tF_\eta(D)\) and their rotations with \(r_\eta=r_{\alpha\circ\gamma}\).
+
+By \cite[Cor.~4.2 and Thm.~4.5]{Billera2006DecomposableCompositions}, every such \(\eta\) factors as \(\beta\circ\gamma'\), where \(r_\beta=r_\alpha\) and \(r_{\gamma'}=r_\gamma\).  In the singleton case, \(\gamma'=\gamma\), and \eqref{eq:recoding} gives the asserted pre-wall class.  In the second case the only additional choice is \(\gamma'=\gamma^{\mathrm{rev}}\).  Since \(D=D^*\),
+\[
+ F_{\beta\circ\gamma^{\mathrm{rev}}}(D)
+ =F_{\beta^{\mathrm{rev}}\circ\gamma}(D)^*
+ =F_{\beta^{\mathrm{rev}}}(E)^*.
+\]
+This is already included because \(r_{\beta^{\mathrm{rev}}}=r_\beta\).  At and above \(p\), \Cref{thm:main} for \(D\) gives the source rotation orbit directly.  Finally take \(\alpha=(m)\) at zero.  Its ribbon class is a singleton, so the pre-wall formula proves \(\mathsf P(E)\).  The connected inner \(E\) satisfies \Cref{lem:prewall-chart}, including when its gaps vanish.  Applying the ribbon-prefix construction \eqref{eq:reversal-tower} to its recovered classes proves legal generation below the threshold; at and above it only global rotation remains.
+\end{proof}
+
+For example, \(D=(3,4;1)\) and \(\gamma=(1,1)\) give \(E=(3,4,3,4;1,0,1)\), a nonsymmetric mixed-zero inner with the full theorem at threshold two.  The restriction on \(\gamma\) cannot simply be dropped: for the same \(D\), the equal composites \(F_{(1,2)}(D)\) and \(F_{(2,1)}(D)\) are distinct and are not rotations, since they have the same ordered unequal endpoints.  Their zero seams are in different positions.  Thus \(E=F_{(1,2)}(D)\) already fails \(\mathsf P(E)\) at its first power.  The recoding and legal-generation conclusions retain the stated restriction on \(\gamma\); neither extends the class description to arbitrary mixed-zero inners.
+
+\section{Concluding remarks}\label{sec:conclusion}
+
+The exposure equivalence reduces arbitrary connected mates to a positional splitting problem for zero-free inners whose powers are rigid.  With three zero-free blocks, rigidity of the total merger bounds the entire class by four without individual block rigidity.  Commuting blocks already admit legal generation under that single hypothesis.  The balanced Hessenberg inverse recovers the outer cuts from the polynomial, and orientation is complete through four rows.  Together with the power classification, this gives the full inflation and legal-generation theorem for every positive constant-gap Hessenberg inner through four rows.  Higher-row recognition and orientation remain incomplete.
+
+Orienting the residual core first and, when \((P,Q)=(S+p-Q,S+p-P)\), seeking a return pair outside its full residue alphabet as in \Cref{prop:contact-orientation} does not reach every nonsymmetric balanced inner.  Consider
+\begin{equation}\label{eq:orientation-obstruction}
+ E=(4,8,9,10,9,6,3,2;3,3,3,3,3,1,1).
+\end{equation}
+It satisfies \eqref{eq:hessenberg}, has \(S=34,p=1\), and gives
+\[
+ P=\{5,10,16,23,29\},\quad
+ Q=\{6,12,19,25,30\},\quad J=\{3\}.
+\]
+Here \((P,Q)=(35-Q,35-P)\), so the two inner orientations give identical residual core polynomials for every outer cut set.  The reflected contact set is \(J^*=\{32\}\); the asymmetric return pairs are \(\{3,31\}\) and \(\{2,32\}\).  The residue alphabet is
+\[
+ W=\{0,1,4,5,9,10,11,14,15,16,17,19,20,22,23,25,27,28,29,31,32,33\}.
+\]
+Each candidate pair contains an element of \(W\), so \Cref{prop:contact-orientation} supplies neither.  These parameters refute completeness of this particular reduction from full-core residue exclusion alone.  They do not refute orientation, do not exclude a selected-layer or full-parent deletion argument for this inner, and are not asserted to evade every criterion in this paper.  No wall counterexample is claimed.
+
+\begin{question}\label{q:orientation}
+Does every nonsymmetric balanced positive-gap Hessenberg inner with at least five rows admit a terminating orientation reduction using coefficient extraction and geometrically valid deletion?  \Cref{thm:three-row-wall,thm:four-row-wall} settle all smaller heights.  What remains is an existence theorem for the next valid step: a nontrivial cofactor ratio, a selection with a nonzero residual matching and an asymmetric return coefficient, or a full-parent reduction to a smaller nonsymmetric inner.  Row count decreases under the last operation, but this does not ensure that an admissible first step exists.  The core-or-symmetric-contact alternative fails at \eqref{eq:orientation-obstruction}; higher-row balanced orientation remains open.
+\end{question}
+
+\begin{question}\label{q:overlapping-supports}
+Does every equality of zero joins of three connected zero-free multirow blocks admit a common legal factor-reversal presentation?  Their block-function multisets and total-merger functions agree by \Cref{lem:zero-cut-data}, and the remaining condition is the collected identity \eqref{eq:three-block-sum}, not termwise matching.  When the total merger is rigid, \Cref{thm:three-block-classes} leaves at most one extra rotation orbit, and \Cref{thm:commuting-three-blocks} generates it for commuting blocks.  The general noncommuting case still requires literal common marks satisfying I--IV; the four-member bound does not provide them.  The question also includes nonrigid total mergers.  Nonempty overlaps are allowed, and no prescribed chart or coefficientwise matching of boundary responses is assumed.
+\end{question}
+
+\section*{Declarations}
+{\footnotesize
+\noindent\textbf{Funding.} This research received no external funding.
+
+\smallskip
+\noindent\textbf{Competing interests.} The author has no relevant interests to disclose.
+
+\smallskip
+\noindent\textbf{Data availability.} No datasets were generated or analyzed.
+
+\smallskip
+\noindent\textbf{Computational verification.} The proofs do not depend on numerical computation.  Scripts used for verification and figures are available at \url{https://github.com/johnnyshields/papers}.
+
+\smallskip
+\noindent\textbf{Generative AI use.} During the preparation of this work, the author used OpenAI's ChatGPT (GPT-6 Astra, GPT-5.6 Sol) and Anthropic's Claude (Opus 5.5, Opus 5) to assist with mathematical research, manuscript drafting, and the development of auxiliary verification code.  After using these tools, the author reviewed and edited as needed.  The author takes full responsibility for the content of the work.\par}
+
+\begin{thebibliography}{99}
+
+\bibitem{Barekat2009CoincidencesCorrigendum}
+F.~Barekat, V.~Reiner and S.~van Willigenburg,
+\emph{Corrigendum to ``Coincidences among skew Schur functions''},
+Adv. Math. \textbf{220} (2009), no.~5, 1655--1656,
+DOI: \href{https://doi.org/10.1016/j.aim.2008.10.010}{10.1016/\allowbreak j.aim.2008.10.010}.
+
+\bibitem{Billera2006DecomposableCompositions}
+L.~J. Billera, H.~Thomas and S.~van Willigenburg,
+\emph{Decomposable compositions, symmetric quasisymmetric functions and equality of ribbon Schur functions},
+Adv. Math. \textbf{204} (2006), no.~1, 204--240,
+DOI: \href{https://doi.org/10.1016/j.aim.2005.05.014}{10.1016/\allowbreak j.aim.2005.05.014}.
+
+\bibitem{Chen2008ZrankConjecture}
+W.~Y.~C. Chen and A.~L.~B. Yang,
+\emph{Stanley's zrank conjecture on skew partitions},
+Trans. Amer. Math. Soc. \textbf{360} (2008), no.~6, 3121--3131,
+DOI: \href{https://doi.org/10.1090/S0002-9947-08-04342-0}{10.1090/\allowbreak S0002-9947-08-04342-0}.
+
+\bibitem{Clifford2004BottomSchur}
+P.~Clifford and R.~P. Stanley,
+\emph{Bottom Schur functions},
+Electron. J. Combin. \textbf{11} (2004), no.~1, Research Paper 67,
+DOI: \href{https://doi.org/10.37236/1820}{10.37236/\allowbreak 1820}.
+
+\bibitem{Hamel1995PlanarDecompositions}
+A.~M. Hamel and I.~P. Goulden,
+\emph{Planar decompositions of tableaux and Schur function determinants},
+European J. Combin. \textbf{16} (1995), no.~5, 461--477,
+DOI: \href{https://doi.org/10.1016/0195-6698(95)90002-0}{10.1016/\allowbreak 0195-6698(95)90002-0}.
+
+\bibitem{McNamara2009Classification}
+P.~R.~W. McNamara and S.~van Willigenburg,
+\emph{Towards a combinatorial classification of skew Schur functions},
+Trans. Amer. Math. Soc. \textbf{361} (2009), no.~8, 4437--4470,
+DOI: \href{https://doi.org/10.1090/S0002-9947-09-04683-2}{10.1090/\allowbreak S0002-9947-09-04683-2}.
+
+\bibitem{Reiner2007Coincidences}
+V.~Reiner, K.~M. Shaw and S.~van Willigenburg,
+\emph{Coincidences among skew Schur functions},
+Adv. Math. \textbf{216} (2007), no.~1, 118--152,
+DOI: \href{https://doi.org/10.1016/j.aim.2007.05.006}{10.1016/\allowbreak j.aim.2007.05.006}.
+
+\bibitem{Shields2026SkewSchur}
+J.~Shields,
+\emph{Boundary reconstruction and cofactor rigidity for skew Schur functions},
+preprint, 2026,
+DOI: \href{https://doi.org/10.5281/zenodo.22723463}{10.5281/\allowbreak zenodo.22723463}.
+
+\bibitem{Shields2026Inflation}
+J.~Shields,
+\emph{Class recovery and inflation for repeated-block skew diagrams},
+preprint, 2026,
+DOI: \href{https://doi.org/10.5281/zenodo.23133727}{10.5281/\allowbreak zenodo.23133727}.
+\bibitem{Shields2026Cofactor}
+J.~Shields,
+\emph{Cofactor independence and dilation for skew Schur functions},
+preprint, 2026,
+DOI: \href{https://doi.org/10.5281/zenodo.22732784}{10.5281/\allowbreak zenodo.22732784}.
+
+\bibitem{Shields2026PowerRigidity}
+J.~Shields,
+\emph{Power rigidity and inflation for constant-excess skew diagrams},
+preprint, 2026,
+DOI: \href{https://doi.org/10.5281/zenodo.23133759}{10.5281/\allowbreak zenodo.23133759}.
+\end{thebibliography}
+\end{document}

@@ -5,7 +5,7 @@ Authors: Johnny Shields
 -/
 import Mathlib.Algebra.Order.BigOperators.Ring.Finset
 import Mathlib.Algebra.Polynomial.Derivative
-import Mathlib.Data.Real.Basic
+import Mathlib.Basic.Real.Basic
 import Mathlib.Tactic.FieldSimp
 import Mathlib.Tactic.LinearCombination
 import Mathlib.Tactic.Linarith
@@ -280,9 +280,9 @@ theorem isPF2_deltaZero : IsPF2 (fun j : ℤ => if j = 0 then (1 : ℝ) else 0) 
     intro n; split <;> norm_num
   by_cases h1 : i - 1 = 0
   · have hj : j + 1 ≠ 0 := by omega
-    simp only [hj, if_false, mul_zero]
+    simp only [hj, ite_false, mul_zero]
     exact mul_nonneg (hnn i) (hnn j)
-  · simp only [h1, if_false, zero_mul]
+  · simp only [h1, ite_false, zero_mul]
     exact mul_nonneg (hnn i) (hnn j)
 
 /-- **`IsPF2` is closed under convolution with a two-point law.**
@@ -352,11 +352,11 @@ theorem pbPoly_empty (p : ι → ℝ) : pbPoly (∅ : Finset ι) p = 1 := by
 theorem pbPmf_empty (p : ι → ℝ) (j : ℤ) :
     pbPmf (∅ : Finset ι) p j = if j = 0 then (1 : ℝ) else 0 := by
   rcases lt_or_ge j 0 with hj | hj
-  · rw [pbPmf_of_neg _ _ hj, if_neg (by omega)]
+  · rw [pbPmf_of_neg _ _ hj, ite_eq_right (by omega)]
   · rw [pbPmf_eq_coeff _ _ hj, pbPoly_empty, Polynomial.coeff_one]
     by_cases h : j = 0
     · simp [h]
-    · rw [if_neg h, if_neg (by omega : ¬ j.toNat = 0)]
+    · rw [ite_eq_right h, ite_eq_right (by omega : ¬ j.toNat = 0)]
 
 /-- **The generating polynomial of a disjoint union.**  Two independent Bernoulli families
 side by side have the product of their generating polynomials, which is the polynomial form of

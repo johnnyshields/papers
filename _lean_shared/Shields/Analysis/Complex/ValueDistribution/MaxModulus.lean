@@ -86,7 +86,8 @@ theorem re_le_circleAverage_posPart (hg : Differentiable ℂ g) {r R : ℝ} (hrR
   -- the kernel is continuous on the circle
   have hker : ContinuousOn (poissonKernel 0 w) (sphere (0 : ℂ) |R|) := by
     rw [poissonKernel_eq_re_herglotzRieszKernel]
-    exact Complex.continuous_re.comp_continuousOn (continuousOn_herglotzRieszKernel_sphere hwball)
+    exact Complex.continuous_re.comp_continuousOn (continuousOn_herglotzRieszKernel_sphere
+      (by rw [hRabs]; exact fun h ↦ (mem_ball.1 hwball).ne (mem_sphere.1 h)))
   -- the Poisson formula for the harmonic function `\Re g`
   have hpoisson : circleAverage (fun z ↦ poissonKernel 0 w z * (g z).re) 0 R = (g w).re :=
     InnerProductSpace.HarmonicOnNhd.circleAverage_poissonKernel_smul

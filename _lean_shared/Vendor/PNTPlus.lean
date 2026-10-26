@@ -22,8 +22,8 @@ proceed while it is not in Mathlib and has no pull request open.
   `ValueDistribution/LogCounting/Basic.lean` is Stefan Kebekus's with Matteo Cipollina.
 * **Licence:** Apache 2.0, as all of Mathlib.  Each file's copyright and `Authors:` line are
   upstream's and are preserved deliberately.
-* **Upstream pin:** Lean `v4.32.2`, Mathlib `905b95818e`.  Copied here against Lean
-  `v4.33.0-rc1`, Mathlib `8e45b0548034eeda677a64e1e0b07837390835b6`.
+* **Upstream pin:** Lean `v4.32.2`, Mathlib `905b95818e`.  Built here against Lean
+  `v4.34.1`, Mathlib `v4.34.1` (`d13f23b723b8a846827a245b89c10fc7d3f11612`).
 
 ## What it provides
 
@@ -61,7 +61,11 @@ Read against this pin, not against the upstream CI.
   Every binder on every headline theorem is an ordinary mathematical hypothesis (`0 ≤ ρ`, `f` not
   identically zero, `EntireOfOrderAtMost ρ f`, the last being a *definition* of finite order), and
   every instance binder is a standard Mathlib typeclass.  The results are unconditional.
-* **Builds clean at our pin, with zero warnings**, as part of the shared `Vendor` library.
+* **Builds clean at our pin**, as part of the shared `Vendor` library.  The only warnings are
+  style-linter output: twelve `Try this` suggestions and four lines over 100 characters.
+* **Renames applied for the pin:** `if_neg` → `ite_eq_right` (deprecated in core) in
+  `CartanMajorantBound.lean`, and `Finset.prod_le_prod` → `Finset.prod_le_prod₀` (Mathlib #39692)
+  in `CartanProductBound.lean`.  The other changes are proof adaptations, each marked inline.
 * **Namespace hygiene is good.**  `Complex.Hadamard` 160 declarations, `Complex` 77, `Metric` 70,
   `Complex.CartanBound` 38, `Real` 35, `Function.locallyFinsuppWithin` 10,
   `Complex.Hadamard.EntireOfOrderAtMost` 7, `MeromorphicOn` 6.  Six sit in the root namespace, and

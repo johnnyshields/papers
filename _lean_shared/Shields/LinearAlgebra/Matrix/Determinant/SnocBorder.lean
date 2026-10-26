@@ -110,7 +110,7 @@ theorem det_submatrix_border {n : ℕ} {A : Matrix ℕ ℕ R} {c : ℕ}
     simp only [Matrix.submatrix_apply, Fin.snoc_last]
     rcases eq_or_ne k (Fin.last n) with rfl | hk
     · simp [hc, hdiag]
-    · rw [if_neg hk]
+    · rw [ite_eq_right hk]
       obtain ⟨j, rfl⟩ := Fin.exists_castSucc_eq.mpr hk
       exact hlow _ _ (hν j)
   rw [det_of_basis_column _ (Fin.last n) (Fin.last n) hcol]

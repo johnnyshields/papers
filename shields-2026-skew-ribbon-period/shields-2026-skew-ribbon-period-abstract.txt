@@ -1,0 +1,21 @@
+Title
+-----
+Minimal-period rigidity for ribbon-outer skew Schur compositions
+
+Keywords
+--------
+skew Schur function
+marked composition
+source-minimal period
+boundary synchronization
+Jacobi–Trudi determinant
+ribbon outer
+composition necessity
+
+Abstract (Plain)
+----------------
+We prove that minimal factorizations of Schur-equal connected skew diagrams have the same period (the content shift in the defining translation between inner copies) when the larger-period outer is a ribbon. At each diagram, the overlap's diagonal span is minimized first, then the inner diagram's. At every strictly smaller area, we assume that every connected Schur class containing diagrams unrelated by rotation admits a nontrivial composition, and that Schur equality preserves the existence of nontrivial compositions and, for minimal factorizations, the marked inner together with the outer Schur function, modulo the permitted identifications. The compositions satisfy Hypotheses I–IV of McNamara and van Willigenburg, with an arbitrary competing outer; we exclude classes containing a nontrivial composition whose inner is a row or column. Jacobi–Trudi determinant identities synchronize both diagram boundaries and yield a legal composition on the original diagram contradicting minimality; equal-period factor identification remains separate.
+
+Abstract (Rich Text)
+--------------------
+We prove that minimal factorizations of Schur-equal connected skew diagrams have the same period (the content shift in the defining translation between inner copies) when the larger-period outer is a ribbon. At each diagram, the overlap's diagonal span is minimized first, then the inner diagram's. At every strictly smaller area, we assume that every connected Schur class containing diagrams unrelated by rotation admits a nontrivial composition, and that Schur equality preserves the existence of nontrivial compositions and, for minimal factorizations, the marked inner together with the outer Schur function, modulo the permitted identifications. The compositions satisfy Hypotheses I–IV of McNamara and van Willigenburg, with an arbitrary competing outer; we exclude classes containing a nontrivial composition whose inner is a row or column. Jacobi–Trudi determinant identities synchronize both diagram boundaries and yield a legal composition on the original diagram contradicting minimality; equal-period factor identification remains separate.

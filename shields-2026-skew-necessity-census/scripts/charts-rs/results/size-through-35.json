@@ -1,0 +1,274 @@
+{
+  "compositions": 151426495,
+  "generation_seconds": 314.043548912,
+  "marked_inners": 4865884,
+  "max": 35,
+  "non_skew": 0,
+  "size_rows": [
+    {
+      "area": 4,
+      "irreducible_factorizations": 4,
+      "longest": 2,
+      "variants_composed": 16,
+      "with_chart": 4
+    },
+    {
+      "area": 5,
+      "irreducible_factorizations": 4,
+      "longest": 2,
+      "variants_composed": 16,
+      "with_chart": 4
+    },
+    {
+      "area": 6,
+      "irreducible_factorizations": 18,
+      "longest": 2,
+      "variants_composed": 72,
+      "with_chart": 18
+    },
+    {
+      "area": 7,
+      "irreducible_factorizations": 10,
+      "longest": 2,
+      "variants_composed": 40,
+      "with_chart": 10
+    },
+    {
+      "area": 8,
+      "irreducible_factorizations": 50,
+      "longest": 3,
+      "variants_composed": 232,
+      "with_chart": 50
+    },
+    {
+      "area": 9,
+      "irreducible_factorizations": 34,
+      "longest": 3,
+      "variants_composed": 144,
+      "with_chart": 34
+    },
+    {
+      "area": 10,
+      "irreducible_factorizations": 136,
+      "longest": 3,
+      "variants_composed": 592,
+      "with_chart": 136
+    },
+    {
+      "area": 11,
+      "irreducible_factorizations": 88,
+      "longest": 3,
+      "variants_composed": 384,
+      "with_chart": 88
+    },
+    {
+      "area": 12,
+      "irreducible_factorizations": 334,
+      "longest": 3,
+      "variants_composed": 1544,
+      "with_chart": 332
+    },
+    {
+      "area": 13,
+      "irreducible_factorizations": 194,
+      "longest": 3,
+      "variants_composed": 848,
+      "with_chart": 194
+    },
+    {
+      "area": 14,
+      "irreducible_factorizations": 784,
+      "longest": 3,
+      "variants_composed": 3328,
+      "with_chart": 780
+    },
+    {
+      "area": 15,
+      "irreducible_factorizations": 605,
+      "longest": 3,
+      "variants_composed": 2620,
+      "with_chart": 605
+    },
+    {
+      "area": 16,
+      "irreducible_factorizations": 1756,
+      "longest": 4,
+      "variants_composed": 7776,
+      "with_chart": 1748
+    },
+    {
+      "area": 17,
+      "irreducible_factorizations": 1164,
+      "longest": 4,
+      "variants_composed": 4872,
+      "with_chart": 1152
+    },
+    {
+      "area": 18,
+      "irreducible_factorizations": 4442,
+      "longest": 4,
+      "variants_composed": 18720,
+      "with_chart": 4422
+    },
+    {
+      "area": 19,
+      "irreducible_factorizations": 2622,
+      "longest": 4,
+      "variants_composed": 10896,
+      "with_chart": 2604
+    },
+    {
+      "area": 20,
+      "irreducible_factorizations": 9644,
+      "longest": 4,
+      "variants_composed": 40784,
+      "with_chart": 9591
+    },
+    {
+      "area": 21,
+      "irreducible_factorizations": 6630,
+      "longest": 4,
+      "variants_composed": 27376,
+      "with_chart": 6594
+    },
+    {
+      "area": 22,
+      "irreducible_factorizations": 22212,
+      "longest": 4,
+      "variants_composed": 90896,
+      "with_chart": 22084
+    },
+    {
+      "area": 23,
+      "irreducible_factorizations": 13792,
+      "longest": 4,
+      "variants_composed": 56560,
+      "with_chart": 13688
+    },
+    {
+      "area": 24,
+      "irreducible_factorizations": 52386,
+      "longest": 4,
+      "variants_composed": 216096,
+      "with_chart": 52080
+    },
+    {
+      "area": 25,
+      "irreducible_factorizations": 31100,
+      "longest": 4,
+      "variants_composed": 126184,
+      "with_chart": 30896
+    },
+    {
+      "area": 26,
+      "irreducible_factorizations": 117108,
+      "longest": 4,
+      "variants_composed": 473208,
+      "with_chart": 116408
+    },
+    {
+      "area": 27,
+      "irreducible_factorizations": 74508,
+      "longest": 4,
+      "variants_composed": 302048,
+      "with_chart": 73942
+    },
+    {
+      "area": 28,
+      "irreducible_factorizations": 268606,
+      "longest": 4,
+      "variants_composed": 1087592,
+      "with_chart": 267078
+    },
+    {
+      "area": 29,
+      "irreducible_factorizations": 161050,
+      "longest": 4,
+      "variants_composed": 648776,
+      "with_chart": 159764
+    },
+    {
+      "area": 30,
+      "irreducible_factorizations": 625892,
+      "longest": 4,
+      "variants_composed": 2519096,
+      "with_chart": 622302
+    },
+    {
+      "area": 31,
+      "irreducible_factorizations": 366694,
+      "longest": 4,
+      "variants_composed": 1473192,
+      "with_chart": 363891
+    },
+    {
+      "area": 32,
+      "irreducible_factorizations": 1419966,
+      "longest": 5,
+      "variants_composed": 5710920,
+      "with_chart": 1411508
+    },
+    {
+      "area": 33,
+      "irreducible_factorizations": 857604,
+      "longest": 5,
+      "variants_composed": 3443416,
+      "with_chart": 851095
+    },
+    {
+      "area": 34,
+      "irreducible_factorizations": 3263180,
+      "longest": 5,
+      "variants_composed": 13078072,
+      "with_chart": 3244110
+    },
+    {
+      "area": 35,
+      "irreducible_factorizations": 1923290,
+      "longest": 5,
+      "variants_composed": 7710496,
+      "with_chart": 1908096
+    }
+  ],
+  "size_seconds": 12.625285795,
+  "threads": 8,
+  "with_chart": [
+    0,
+    0,
+    0,
+    0,
+    4,
+    4,
+    18,
+    10,
+    50,
+    34,
+    136,
+    88,
+    332,
+    194,
+    780,
+    605,
+    1748,
+    1152,
+    4422,
+    2604,
+    9591,
+    6594,
+    22084,
+    13688,
+    52080,
+    30896,
+    116408,
+    73942,
+    267078,
+    159764,
+    622302,
+    363891,
+    1411508,
+    851095,
+    3244110,
+    1908096
+  ],
+  "with_chart_total": 9165308
+}

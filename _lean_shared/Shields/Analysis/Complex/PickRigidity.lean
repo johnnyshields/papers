@@ -69,8 +69,9 @@ trigonometry enters.
 ## References
 
 The Pick, Herglotz or Nevanlinna class and its rigidity are classical; see Donoghue, *Monotone
-Matrix Functions and Analytic Continuation*, Ch. II.  Mathlib carries no Pick class -- its
-`Nevanlinna` files are value-distribution theory, a different subject.
+Matrix Functions and Analytic Continuation*, Ch. II.  Mathlib carries no Pick class at revision
+`8e45b05` -- every `Nevanlinna` there is in `Analysis/Complex/ValueDistribution`, a different
+subject.
 
 ## Tags
 
@@ -361,7 +362,7 @@ theorem logDeriv_numerA {z : ℂ} (hA : numerA γ α z ≠ 0) :
     rw [← Finset.sum_neg_distrib]
     exact Finset.sum_congr rfl fun i _ => by rw [logDeriv_one_sub]; ring
   rw [hmul, logDeriv_exp_linear,
-    logDeriv_prod (fun i _ => hzα i)
+    logDeriv_fun_prod (fun i _ => hzα i)
       (fun i _ => (differentiableAt_const _).sub (differentiableAt_id.const_mul _)), hsum]
   ring
 
@@ -369,7 +370,7 @@ theorem logDeriv_denomC {z : ℂ} (hC : denomC β z ≠ 0) :
     logDeriv (denomC β) z = ∑ j, (β j : ℂ) / (1 + (β j : ℂ) * z) := by
   have hzβ := one_add_ne_zero_of_denomC hC
   rw [show (denomC β) = (fun w : ℂ => ∏ j, (1 + (β j : ℂ) * w)) from rfl,
-    logDeriv_prod (fun j _ => hzβ j)
+    logDeriv_fun_prod (fun j _ => hzβ j)
       (fun j _ => (differentiableAt_const _).add (differentiableAt_id.const_mul _))]
   exact Finset.sum_congr rfl fun j _ => logDeriv_one_add (β j)
 
@@ -378,7 +379,7 @@ theorem logDeriv_denomC {z : ℂ} (hC : denomC β z ≠ 0) :
 theorem logDeriv_symbolF {z : ℂ} (hA : numerA γ α z ≠ 0) (hC : denomC β z ≠ 0) :
     logDeriv (symbolF γ α β) z = logDerivF γ α β z := by
   rw [show (symbolF γ α β) = (fun w : ℂ => numerA γ α w / denomC β w) from rfl,
-    logDeriv_div z hA hC (differentiable_numerA z) (differentiable_denomC z),
+    logDeriv_fun_div z hA hC (differentiable_numerA z) (differentiable_denomC z),
     logDeriv_numerA hA, logDeriv_denomC hC, logDerivF]
 
 /-- `f' = f · (f'/f)` in the form used to differentiate a second time. -/
@@ -706,9 +707,9 @@ theorem numerSq_mul_denomSq_lt (hγ : 0 ≤ γ) (hα : ∀ i, 0 < α i) (hβ : �
   have hNXpos : 0 < numerSq γ α r x := mul_pos (Real.exp_pos _) hPXpos
   -- termwise monotonicity, strict in each individual factor
   have hPle : PY ≤ PX :=
-    Finset.prod_le_prod (fun i _ => (hNy i).le) fun i _ => by nlinarith [hα i]
+    Finset.prod_le_prod₀ (fun i _ => (hNy i).le) fun i _ => by nlinarith [hα i]
   have hQle : denomSq β r x ≤ denomSq β r y :=
-    Finset.prod_le_prod (fun j _ => (hQx j).le) fun j _ => by nlinarith [hβ j]
+    Finset.prod_le_prod₀ (fun j _ => (hQx j).le) fun j _ => by nlinarith [hβ j]
   have hexple : Real.exp (-(2 * γ * y)) ≤ Real.exp (-(2 * γ * x)) :=
     Real.exp_le_exp.2 (by nlinarith)
   have hNle : numerSq γ α r y ≤ numerSq γ α r x :=
@@ -718,12 +719,12 @@ theorem numerSq_mul_denomSq_lt (hγ : 0 ≤ γ) (hα : ∀ i, 0 < α i) (hβ : �
     rcases hnd with hg | ha | hb
     · exact Or.inl ((mul_lt_mul_of_pos_right (Real.exp_lt_exp.2 (by nlinarith)) hPYpos).trans_le
         (mul_le_mul_of_nonneg_left hPle (Real.exp_pos _).le))
-    · have hPlt : PY < PX := Finset.prod_lt_prod_of_nonempty (fun i _ => hNy i)
+    · have hPlt : PY < PX := Finset.prod_lt_prod_of_nonempty₀ (fun i _ => hNy i)
         (fun i _ => by nlinarith [hα i])
         (Finset.univ_nonempty_iff.2 (Fin.pos_iff_nonempty.1 (Nat.pos_of_ne_zero ha)))
       exact Or.inl ((mul_le_mul_of_nonneg_right hexple hPYpos.le).trans_lt
         (mul_lt_mul_of_pos_left hPlt (Real.exp_pos _)))
-    · exact Or.inr (Finset.prod_lt_prod_of_nonempty (fun j _ => hQx j)
+    · exact Or.inr (Finset.prod_lt_prod_of_nonempty₀ (fun j _ => hQx j)
         (fun j _ => by nlinarith [hβ j])
         (Finset.univ_nonempty_iff.2 (Fin.pos_iff_nonempty.1 (Nat.pos_of_ne_zero hb))))
   rcases key with h | h

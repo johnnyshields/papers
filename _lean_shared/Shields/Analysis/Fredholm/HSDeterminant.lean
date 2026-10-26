@@ -70,11 +70,11 @@ noncomputable def minorDet (C : ι → κ → ℂ) (S : Finset ι) (T : Finset �
   else 0
 
 theorem minorDet_of_card_ne {C : ι → κ → ℂ} {S : Finset ι} {T : Finset κ}
-    (h : T.card ≠ S.card) : minorDet C S T = 0 := dif_neg h
+    (h : T.card ≠ S.card) : minorDet C S T = 0 := dite_eq_right h
 
 @[simp] theorem minorDet_empty (C : ι → κ → ℂ) :
     minorDet C (∅ : Finset ι) (∅ : Finset κ) = 1 := by
-  rw [minorDet, dif_pos (by simp)]
+  rw [minorDet, dite_eq_left (by simp)]
   haveI : IsEmpty (Fin (∅ : Finset ι).card) := by
     simp only [Finset.card_empty]; exact Fin.isEmpty'
   exact Matrix.det_isEmpty
@@ -86,7 +86,7 @@ theorem minorDet_eq_det {r : ℕ} (C : ι → κ → ℂ) {S : Finset ι} {T : F
       = (Matrix.of fun x y : Fin r =>
           C (S.orderEmbOfFin hS x) (T.orderEmbOfFin hT y)).det := by
   subst hS
-  rw [minorDet, dif_pos hT]
+  rw [minorDet, dite_eq_left hT]
 
 /-- **A minor of the transposed kernel is the minor of the kernel.**  Swapping the two index
 sets along with the kernel transposes the submatrix, and a determinant is transpose-invariant.
@@ -120,7 +120,7 @@ theorem sum_orderEmbOfFin {M : Type*} [AddCommMonoid M] (S : Finset ι) {r : ℕ
 theorem normSq_minorDet_le_rows (C : ι → κ → ℂ) (S : Finset ι) (T : Finset κ) :
     ‖minorDet C S T‖ ^ 2 ≤ ∏ i ∈ S, ∑ j ∈ T, ‖C i j‖ ^ 2 := by
   by_cases hcard : T.card = S.card
-  · rw [minorDet, dif_pos hcard]
+  · rw [minorDet, dite_eq_left hcard]
     refine (Shields.normSq_det_le_prod_row_energy _).trans (le_of_eq ?_)
     rw [← prod_orderEmbOfFin S rfl (fun i => ∑ j ∈ T, ‖C i j‖ ^ 2)]
     refine Finset.prod_congr rfl fun x _ => ?_
@@ -151,7 +151,7 @@ theorem prod_sum_le_of_le_mul {X Y : Type*} {g : X → Y → ℝ} {u : X → ℝ
     rw [← Finset.mul_sum]
     exact mul_le_mul_of_nonneg_left hB (hu0 i)
   calc (∏ i ∈ S, ∑ j ∈ T, g i j) ≤ ∏ i ∈ S, (u i * B) :=
-        Finset.prod_le_prod (fun i _ => Finset.sum_nonneg fun j _ => hg0 i j) hstep
+        Finset.prod_le_prod₀ (fun i _ => Finset.sum_nonneg fun j _ => hg0 i j) hstep
     _ = (∏ i ∈ S, u i) * B ^ S.card := by
         rw [Finset.prod_mul_distrib, Finset.prod_const]
 
@@ -277,7 +277,7 @@ theorem tendsto_minorDet {α : Type*} {l : Filter α} (F : α → ι → κ → 
     (S : Finset ι) (T : Finset κ) :
     Tendsto (fun n => minorDet (F n) S T) l (𝓝 (minorDet C S T)) := by
   by_cases hcard : T.card = S.card
-  · simp only [minorDet, dif_pos hcard]
+  · simp only [minorDet, dite_eq_left hcard]
     have hentries : Tendsto
         (fun n => (Matrix.of fun x y : Fin S.card =>
           F n (S.orderEmbOfFin rfl x) (T.orderEmbOfFin hcard y))) l
@@ -320,7 +320,7 @@ theorem tendsto_fredholmDet {α : Type*} {l : Filter α} (F : α → ι → κ �
 theorem minorDet_eq_zero_of_row {C : ι → κ → ℂ} {S : Finset ι} {T : Finset κ} {i : ι}
     (hi : i ∈ S) (hrow : ∀ j, C i j = 0) : minorDet C S T = 0 := by
   by_cases hcard : T.card = S.card
-  · rw [minorDet, dif_pos hcard]
+  · rw [minorDet, dite_eq_left hcard]
     obtain ⟨x, hx⟩ : ∃ x : Fin S.card, S.orderEmbOfFin rfl x = i := by
       have hrange := Finset.range_orderEmbOfFin S (rfl : S.card = S.card)
       have hmem : i ∈ Set.range (S.orderEmbOfFin rfl) := by

@@ -1,0 +1,1112 @@
+\documentclass[11pt,a4paper]{amsart}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage[expansion=false]{microtype}
+\usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black]{hyperref}
+\usepackage[nameinlink,capitalize]{cleveref}
+
+\hypersetup{
+  pdftitle={Power rigidity and inflation for constant-excess skew diagrams},
+  pdfauthor={John Shields},
+  pdfkeywords={skew Schur function, power rigidity, skew-equivalence,
+    profile inflation, ribbon Schur function, boundary reconstruction,
+    Jacobi-Trudi determinant}
+}
+\pdfinfo{ /ORCID (https://orcid.org/0009-0004-3882-4571) }
+
+\numberwithin{equation}{section}
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{question}[theorem]{Question}
+
+\title[Power rigidity and inflation]
+{Power rigidity and inflation\\
+for constant-excess skew diagrams}
+\author{John Shields}
+\date{October 4, 2026}
+\thanks{Independent researcher, Ginza 2-15-2, KR Ginza II 5F, Chuo-ku, Tokyo, Japan 104-0061.\\
+\hspace*{\parindent}Corresponding author: \href{mailto:math@johnnyshields.com}{math@johnnyshields.com}.  ORCID: \href{https://orcid.org/0009-0004-3882-4571}{0009-0004-3882-4571}.\\
+\hspace*{\parindent}This work is archived at \href{https://doi.org/10.5281/zenodo.23133759}{doi:10.5281/zenodo.23133759}.}
+\subjclass[2020]{Primary 05E05; Secondary 05A17, 15A15}
+\keywords{skew Schur function, power rigidity, skew-equivalence,
+profile inflation, ribbon Schur function, boundary reconstruction,
+Jacobi--Trudi determinant}
+
+\begin{document}
+
+\begin{abstract}
+We classify all connected skew Schur mates of repeated constant-excess diagrams under profile inflation when the inner gap word has unequal endpoints, is symmetric, or satisfies a specified balanced-prefix condition.  These domains include every constant-excess inner with at most six rows.  Below the common terminal beta gap, the full class consists of the outer ribbon class and global rotations; at and above that gap, only the rotation orbit remains.  The proof reconstructs arbitrary mates from reduced rational boundary fractions, then recovers literal blocks by cutting and contracting zero seams.  At the balanced wall, a two-alphabet determinant and its first correction determine the outer word and its orientation.  A complementary theorem recovers outer cuts for fixed inners with unequal terminal beta gaps.  Additional balanced-prefix exchanges remain outside the classification.
+\end{abstract}
+
+\maketitle
+
+\section{Introduction}\label{sec:introduction}
+
+When does a repeated skew diagram have no Schur-equivalent diagrams beyond
+its outer ribbon class and rotation?  A composition identity supplies
+known mates; it does not recognize an arbitrary mate.  Inflation adds the
+same integer to every row length and adjacent overlap minus one.
+
+\label{sec:status}
+\Cref{thm:main} classifies the full connected inflation classes of a
+constant-excess family on three explicit gap-word domains.  The result is
+unconditional, permits repeated labels and coincident row and gap labels,
+and uses no general terminal-rigidity theorem.  High-index derivatives
+recover boundary fractions; their reduced denominators recover the order.
+For nonsymmetric equal-endpoint words, the balanced-prefix hypothesis
+excludes secondary exchanges between the two boundaries.
+
+The sharp threshold theorem of \cite{Shields2026Inflation} treats
+asymmetric two-row inners against arbitrary connected mates.  Its general
+lowering and no-escape results are reused here.  Our main family instead
+has equal terminal beta gaps.  The complementary
+\Cref{thm:asymmetric-wall} has unequal terminal gaps but compares only
+diagrams built from the same literal inner.  These domains are disjoint.
+
+Ribbon factorization and factor-reversal equality are due to Billera,
+Thomas and van Willigenburg \cite{Billera2006DecomposableCompositions}.
+The overlap invariants and homogenized amalgamated substitution of
+Reiner, Shaw and van Willigenburg \cite{Reiner2007Coincidences},
+extended by McNamara and van Willigenburg
+\cite{McNamara2009Classification}, supply the pre-wall machinery.
+Olson-Harris \cite{OlsonHarris2024HopfApplications} already proves
+marked-composition sufficiency under Hypotheses I--IV without V.
+
+Garc\'ia-Garc\'ia and Tierz \cite{GarciaGarcia2020ToeplitzMinors}
+treat the Toeplitz-minor interpretation and reversal.
+Connected-polynomial irreducibility is supplied by
+\cite{Barekat2009CoincidencesCorrigendum}.  It does not assert rotation
+rigidity for composition-irreducible diagrams.  Jin and Li
+\cite{Jin2024ThickenedRibbon} classify a single inclusion-maximal
+rectangular-block domain; the repeated inners here permit several
+nontrivial overlaps.
+
+Context dependence is already established.  In
+\cite[Example~7.8]{Reiner2007Coincidences}, the diagrams
+\((4,3,2,1)/(1,1)\) and \((4,3,2,1)/(2)\) have equal Schur
+functions but cease to agree in the displayed ribbon-composition context.  Our contributions are the
+arbitrary-mate boundary inverse on the stated constant-excess domains and
+the unequal-terminal-gap cut decoder, not a new filtration or substitution
+principle.
+
+\Cref{sec:main} fixes the profiles and states the main theorem.
+\Cref{sec:inputs} gives the polynomial inputs.
+\Cref{sec:powers} proves power rigidity and literal class exposure;
+\Cref{sec:balanced-wall} proves the balanced boundary inverse and
+assembles the main theorem.
+\Cref{sec:asymmetric-wall} proves the complementary within-image
+separator.  \Cref{sec:limitation} derives the arbitrary-mate limitation
+from the existing four-row classification.
+
+\section{Profiles and the main theorem}\label{sec:main}
+
+Work in \(\Lambda=\mathbb Q[h_1,h_2,\ldots]\), with \(h_0=1\)
+and \(h_j=0\) for \(j<0\).  Diagrams are identified up to
+translation.  Write \(D^*\) for rotation through \(180\) degrees and
+\[
+ \operatorname{Cl}(D)=\{H:H\text{ is connected and }s_H=s_D\}.
+\]
+A profile \((\rho_1,\ldots,\rho_n;q_1,\ldots,q_{n-1})\)
+records row lengths from top to bottom and adjacent overlaps \emph{minus
+one}.  In particular, a zero gap is a one-cell overlap, not a
+disconnection.  The exact connectedness conditions are
+\[
+ \rho_i>0,\qquad 0\le q_i<\min(\rho_i,\rho_{i+1}).
+\]
+Normalized beta lists and the Schur function satisfy
+\begin{equation}\label{eq:betas}
+ \begin{gathered}
+ X=(x_1>\cdots>x_n),\qquad Y=(y_1>\cdots>y_n=0),\\
+ \rho_i=x_i-y_i,\qquad q_i=x_{i+1}-y_i,
+ \qquad s_D=\det(h_{x_i-y_j}),\\
+ N_D=x_1=\sum_i\rho_i-\sum_iq_i.
+ \end{gathered}
+\end{equation}
+The recursion starts with \(x_n=\rho_n\) and continues with
+\(y_i=x_{i+1}-q_i\), \(x_i=y_i+\rho_i\).
+The diagram is \emph{zero-free} if \(X\cap Y=\varnothing\).
+Its full Jacobi--Trudi board is upper Hessenberg if all indices strictly
+below the first subdiagonal are negative.  For a profile with at least
+two rows, an endpoint row's excess is its length minus its adjacent gap;
+an internal row's excess subtracts both adjacent gaps.
+
+The operation \(P\cdot_0 Q\) joins two row words with gap zero.
+The operation \(P\odot Q\) merges the adjoining endpoint rows by
+adding their lengths and retains the other rows and gaps.  Set
+\[
+ E_m=E^{\odot m},\qquad
+ F_\alpha(E)=E_{\alpha_1}\cdot_0\cdots\cdot_0E_{\alpha_\ell}
+\]
+for a positive composition \(\alpha=(\alpha_1,\ldots,\alpha_\ell)\).
+Write \(|\alpha|=\sum_i\alpha_i\), \(\ell(\alpha)=\ell\),
+and \(\alpha^{\mathrm{rev}}=(\alpha_\ell,\ldots,\alpha_1)\).
+The ribbon Schur function in the top-to-bottom convention is
+\begin{equation}\label{eq:ribbon}
+ r_\alpha=\sum_{\gamma\succeq\alpha}
+ (-1)^{\ell(\alpha)-\ell(\gamma)}\prod_{a\in\gamma}h_a,
+\end{equation}
+where \(\gamma\succeq\alpha\) means that adjacent parts of
+\(\alpha\) have been merged.  This reverses the diagram convention
+of \cite{Billera2006DecomposableCompositions}, without changing the
+function.  For an integer \(t\ge0\), define
+\begin{equation}\label{eq:inflation}
+ I_t(\rho;q)=(\rho_1+t,\ldots,\rho_n+t;q_1+t,\ldots,q_{n-1}+t).
+\end{equation}
+In beta coordinates this sends \((X,Y)\) to \((X+t,Y)\).
+
+Fix positive integers \(p,g_1,\ldots,g_K\), with \(K\ge1\), and put
+\begin{equation}\label{eq:constant-excess}
+ E(g,p)=(g_1+p,\ g_1+g_2+p,\ldots,
+ g_{K-1}+g_K+p,\ g_K+p;\ g_1,\ldots,g_K).
+\end{equation}
+At \(K=1\) the row word is \((g_1+p,g_1+p)\).
+For \(E=E(g,p)\), write
+\[
+ S=N_E=\sum_{i=1}^K g_i+(K+1)p.
+\]
+For a nonsymmetric equal-endpoint word, let
+\(d=\min\{i:g_i\ne g_{K+1-i}\}\).
+The three domains are
+\begin{align}
+ &g_1\ne g_K;\label{eq:unequal-ends}\\
+ &g=g^{\mathrm{rev}};\label{eq:symmetric-word}\\
+ &g_1=g_K,\quad g\ne g^{\mathrm{rev}},\quad
+ \left\{\begin{array}{@{}l@{}}s:0\le s<K,\\[-1mm]
+ \{g_1,\ldots,g_s\}_{\mathrm{multi}}
+ =\{g_{K-s+1},\ldots,g_K\}_{\mathrm{multi}},\\[-1mm]
+ g_{s+1}\ne g_{K-s}
+ \end{array}\right\}=\{d-1\}.
+ \label{eq:first-asymmetry}
+\end{align}
+Empty prefix and suffix multisets are permitted.  Condition
+\eqref{eq:first-asymmetry} requires that the only unequal next choice
+following equal prefix and suffix multisets occur at the first asymmetric
+position.
+
+\begin{lemma}\label{lem:balanced-geometry}
+The profile \(E(g,p)\) is connected, zero-free, and upper Hessenberg.
+Its terminal beta gaps satisfy
+\(S-x_2=y_K=p\), and every internal second-subdiagonal index equals
+\(-p\).  Its power \(E_m\) has \(mK+1\) rows, span \(mS\),
+and gap word \(g^m\).  Its row excesses are \(p\), except at the
+\(m-1\) merger rows, where they are \(2p\); this excess vector is
+palindromic.
+\end{lemma}
+
+\begin{proof}
+Each gap is smaller than both adjoining rows.  The endpoint identities
+are \(S-x_2=\rho_1-g_1=p\) and
+\(y_K=\rho_{K+1}-g_K=p\).  For an internal row,
+\[
+ x_{i+1}-y_{i-1}=g_{i-1}+g_i-\rho_i=-p.
+\]
+Strictness of the beta lists makes every deeper index negative.  The
+diagonal and first subdiagonal indices are positive, as are all indices
+above the diagonal, so no index is zero.  Merging copies preserves the
+gap word and replaces two endpoint excesses \(p\) by one excess
+\(2p\).  The merger rows occur at positions \(1+jK\),
+\(1\le j<m\), which are paired by reversal.  Row count and span
+follow by addition.
+\end{proof}
+
+\begin{theorem}[Complete inflation classes]\label{thm:main}
+For every inner \(E=E(g,p)\) satisfying one of
+\eqref{eq:unequal-ends}, \eqref{eq:symmetric-word}, or
+\eqref{eq:first-asymmetry}, every nonempty positive composition
+\(\alpha\), and every integer \(t\ge0\),
+\begin{equation}\label{eq:main-class}
+ \operatorname{Cl}(I_tF_\alpha(E))=
+ \begin{cases}
+ \{I_tF_\beta(E),(I_tF_\beta(E))^*:r_\beta=r_\alpha\},
+       &0\le t<p,\\[1mm]
+ \{I_tF_\alpha(E),(I_tF_\alpha(E))^*\},&t\ge p.
+ \end{cases}
+\end{equation}
+\end{theorem}
+
+The equality is against arbitrary connected mates.  The right sides are
+sets, so coincident rotations are counted once; no strict class-size
+decrease is asserted for every source.  Inflation remains injective.
+
+The domain contains \(E=(2,5,6,3;1,3,2)\), obtained from
+\(g=(1,3,2)\), \(p=1\).  Its normalized lists are
+\(X=(10,9,7,3)\), \(Y=(8,4,1,0)\).  The gap word is
+nonconstant, its first row length equals an internal gap label, and all
+gap labels recur in powers.  These coincidences are allowed in
+\Cref{thm:main}.  Every word with \(K\le5\) satisfies one of the
+three conditions: for equal endpoints and \(K=4,5\), the only
+possible first asymmetric pair is the second pair, and any later
+balanced-prefix unequal choice would force that pair to be equal.
+This covers inners in \eqref{eq:constant-excess} through six rows,
+not arbitrary six-row skew diagrams.
+
+\section{Polynomial inputs}\label{sec:inputs}
+
+Ordinary degree assigns every positive-index \(h_j\) degree one;
+weighted degree assigns it degree \(j\).  Write \([f]_k\) for the
+ordinary degree-\(k\) component.  The row and overlap invariants of
+\cite{Reiner2007Coincidences} recover row and gap multisets from
+\(s_D\).  The \emph{maximal cofactor} of a connected \(n\)-row diagram
+\(D\) is \((-1)^{n-1}[h_{N_D}]s_D\).
+
+\begin{lemma}\label{lem:hessenberg-membership}
+For every connected diagram \(D\) with \(n\) rows, its maximal cofactor
+is a monomial if and only if its full Jacobi--Trudi board is upper
+Hessenberg.  Equivalently,
+\begin{equation}\label{eq:hessenberg-input}
+ (-1)^{n-1}[h_{N_D}]s_D\text{ is a monomial}
+ \quad\Longleftrightarrow\quad
+ \rho_i>q_{i-1}+q_i\quad(2\le i<n).
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+The generator \(h_{N_D}\) occurs in the full board only at position
+\((1,n)\), since \(x_1>x_i\) for \(i>1\) and \(y_j>y_n=0\) for
+\(j<n\).  Expanding there gives
+\[
+ (-1)^{n-1}[h_{N_D}]s_D=\det(h_{x_{i+1}-y_j})_{i,j=1}^{n-1}.
+\]
+The first subdiagonal of this cofactor has indices
+\(x_{i+2}-y_i=q_i+q_{i+1}-\rho_{i+1}\).  Split at its negative
+entries; strictness of the beta lists makes the full lower-left
+rectangles zero.  A block of order one is \(h_{q_i}\), and a zero
+diagonal index contributes the unit \(h_0=1\).  Each block of order at
+least two has its distinct nonzero diagonal monomial and a term
+containing its private largest label, whose coefficient is nonzero by
+strict rearrangement.  It cannot be a monomial.  A product of nonzero
+polynomials can be a monomial only if every factor is.  Thus all blocks
+must be singletons, which is precisely \(\rho_i>q_{i-1}+q_i\) for
+\(2\le i<n\).  These indices form the second subdiagonal of the full
+board, and strictness makes every deeper index negative once they are,
+so the same inequalities say that the full board is upper Hessenberg.
+\end{proof}
+
+\Cref{lem:hessenberg-membership} forces Hessenberg form on an arbitrary
+mate of a Hessenberg source; it is not a hypothesis imposed on that mate.
+
+\begin{lemma}\label{lem:lowering}
+For every connected diagram \(D\) and integer \(t\ge0\), every
+connected mate of \(I_tD\) has a connected deflation, and
+\[
+ I_{-t}\operatorname{Cl}(I_tD)\subseteq\operatorname{Cl}(D).
+\]
+An equality lost under inflation cannot return at a later integer
+inflation.
+\end{lemma}
+
+\begin{proof}
+This is the inflation-lowering lemma and no-escape corollary of
+\cite{Shields2026Inflation}.  To check their application, an arbitrary
+mate has the same row count and row and gap multisets as \(I_tD\).
+Its rows exceed \(t\), and its gaps are at least \(t\), so
+subtracting \(t\) gives a connected profile.  For \(t>0\), retain
+only ordinary degree-\(n\) monomials whose indices are all at least
+\(t\), then lower every index by \(t\).  The operation takes
+\(s_{I_tD}\) to \(s_D\): an originally negative matrix entry
+either remains zero, becomes a unit and loses ordinary degree, or becomes
+an index below \(t\).  Precisely the originally nonnegative determinant
+terms survive.  The case \(t=0\) is immediate.  Applying the same
+operation between two inflation parameters proves permanence of
+separation.
+\end{proof}
+
+\begin{lemma}\label{lem:prewall}
+Let \(E\) be connected and zero-free with \(r\ge2\) rows and
+normalized beta lists \(X,Y\).  Set
+\[
+ S=x_1,\qquad u=S-x_2,\qquad v=y_{r-1},\qquad p=\min(u,v),
+ \qquad G_m(t)=s_{I_tE_m}.
+\]
+For \(0\le t<p\),
+\begin{equation}\label{eq:prewall-coarsening}
+ s_{I_tF_\alpha(E)}=
+ \sum_{\gamma\succeq\alpha}(-h_t)^{\ell(\alpha)-\ell(\gamma)}
+                 \prod_{a\in\gamma}G_a(t)
+ =h_t^{\ell(\alpha)}
+ r_\alpha\bigl(G_1(t)/h_t,G_2(t)/h_t,\ldots\bigr).
+\end{equation}
+The last expression is in \(\Lambda[h_t^{-1}]\), with \(h_0=1\).
+For compositions \(\alpha,\beta\) of equal size,
+\begin{equation}\label{eq:prewall-equality}
+ s_{I_tF_\alpha(E)}=s_{I_tF_\beta(E)}
+ \quad\Longleftrightarrow\quad r_\alpha=r_\beta
+ \qquad(0\le t<p).
+\end{equation}
+No Hessenberg hypothesis on the inner is required.
+\end{lemma}
+
+\begin{proof}
+Across an outer cut, the lower-left Jacobi--Trudi block has only the
+entry \(h_t\) available: every other index there is at most
+\(t-u\) or \(t-v\), hence negative.  Setting that entry to zero
+cuts the determinant into a product; selecting it gives minus the
+contracted determinant.  Thus
+\[
+ s_{I_t(P\cdot_0Q)}=s_{I_tP}s_{I_tQ}-h_t s_{I_t(P\odot Q)}
+\]
+for successive blocks of powers of this inner.  Iterating over the outer
+cuts proves \eqref{eq:prewall-coarsening}.  Internal entries that become
+nonzero before \(p\) are retained inside \(G_m(t)\).
+
+At zero, \(G_m(0)\) is linear in its unique largest generator
+\(h_{mS}\), with a nonzero corner-cofactor coefficient, and involves
+no larger generator.  Induction on the largest substituted index shows
+that \(h_m\mapsto G_m(0)\) is injective.  This is the triangular
+substitution argument in \cite{Shields2026Inflation}.
+Consequently equality at zero is exactly ribbon equality.  Ribbon equality
+also gives equal lengths, by maximum ordinary degree in
+\eqref{eq:ribbon}; its homogenization proves equality throughout the
+pre-wall range.  Conversely, \Cref{lem:lowering} takes any positive-time
+equality to zero.
+\end{proof}
+
+This verifies the established homogenized substitution for these profiles,
+not literal marked charts under Hypotheses I--IV.  Formula
+\eqref{eq:prewall-coarsening} is not asserted at \(t=p\).
+
+For common-beta deletion, let \(Z=X\cap Y\),
+\(A=X\setminus Z\), \(B=Y\setminus Z\), and
+\(\kappa=|A|=|B|\).  Define
+\(H(U,V)_{uv}=h_{u-v}\) for \(u>v\), and zero otherwise.
+In particular this auxiliary matrix replaces units by zero.  Put
+\[
+ L=H(A,B),\quad P=H(A,Z),\quad Q=H(Z,B),\quad T=H(Z,Z).
+\]
+The path-expansion proposition of \cite{Shields2026Cofactor} gives
+\begin{equation}\label{eq:path-input}
+ s_D(zh_1,zh_2,\ldots)
+ =\epsilon z^\kappa\det(L-zPQ+z^2PTQ-\cdots),
+\end{equation}
+where \(\epsilon\) is the product of the two regrouping signs.
+The sum is finite.  If \(C=(A;B)\) is the residual core and
+\(C_{ij}\) is the signed cofactor of \(L_{ij}\), its first two
+components are
+\begin{equation}\label{eq:first-correction}
+ [s_D]_\kappa=\epsilon s_C,\qquad
+ [s_D]_{\kappa+1}=-\epsilon\sum_{z\in Z}U_z^C,
+ \qquad
+ U_z^C=\sum_{a_i>z>b_j}C_{ij}h_{a_i-z}h_{z-b_j}.
+\end{equation}
+All common entries must be deleted; retaining only the visible outer
+contacts need not give the lowest component.
+
+\section{Power rigidity and literal class exposure}\label{sec:powers}
+
+\subsection{Recovering an arbitrary mate}\label{subsec:power-structure}
+
+\begin{lemma}\label{lem:power-rigidity}
+For \(E=E(g,p)\) in any of the three domains of \Cref{thm:main}
+and every integer \(m\ge1\),
+\[
+ \operatorname{Cl}(E_m)=\{E_m,E_m^*\}.
+\]
+If \(g=g^{\mathrm{rev}}\), this set is a singleton.
+\end{lemma}
+
+\begin{proof}
+The maximal cofactor of \(E_m\) is
+\((\prod_{a=1}^K h_{g_a})^m\).  By \eqref{eq:hessenberg-input}
+and the overlap invariants, every connected mate is Hessenberg with the
+same positive gap multiset and row multiset.  Only the source's excess
+vector is prescribed.
+
+For any positive-gap Hessenberg profile \(D=(\rho;q)\), let
+\(n\) be its row count, \(e_i\) its positive row excesses, and
+\(G_D=\prod_{a=1}^{n-1}h_{q_a}\).  Write \(D_{\le i}\) and
+\(D_{\ge n-j+1}\) for its first \(i\) and last \(j\) rows.
+For \(0\le i,j<n\), set
+\[
+ \begin{aligned}
+ A_i&=\sum_{a=1}^{i}(\rho_a-q_a),&
+ L_i&=\frac{(-1)^i s_{D_{\le i}}}{\prod_{a=1}^{i}h_{q_a}},\\
+ B_j&=\sum_{a=n-j+1}^{n}(\rho_a-q_{a-1}),&
+ R_j&=\frac{(-1)^j s_{D_{\ge n-j+1}}}
+                         {\prod_{a=n-j}^{n-1}h_{q_a}},
+ \end{aligned}
+\]
+where \(A_0=B_0=0\), \(L_0=R_0=1\).  Differentiating at
+all positions with a given label gives
+\begin{equation}\label{eq:high-derivative}
+ \frac{(-1)^{n-1}}{G_D}\frac{\partial s_D}{\partial h_{N_D-v}}
+ =\sum_{\substack{i,j\ge0,\ i+j\le n-1\\ A_i+B_j=v}}L_iR_j,
+ \qquad 0\le v<N_D-\max_aq_a.
+\end{equation}
+Indeed, the indicated label occurs only on or above the diagonal.
+At position \((i+1,n-j)\), its cofactor splits into the first
+\(i\) rows, the last \(j\) rows, and the intervening gap
+product.  Its index is \(N_D-A_i-B_j\); the cofactor sign after
+division by \((-1)^{n-1}G_D\) is \((-1)^{i+j}\).
+This proves the identity, including repeated labels.
+
+Read rows and outgoing gaps successively from both ends.  Subtract the
+products in \eqref{eq:high-derivative} involving already read fractions.
+At the first remaining deficit \(v\), only one new fraction or two
+new fractions can appear: a mixed term with an unread positive deficit
+has larger deficit.  If the next positions are \(l,r\) and
+\(l+r\le n\), then \(\min(A_l,B_r)<N_D-\max_aq_a\).
+Indeed, \(N_D=\sum e_i+\sum q_i\).
+The two partial sums use disjoint sets of gaps and each omits positive
+excess.  One omits a largest gap.  Thus the next event is always in the
+range of \eqref{eq:high-derivative}, until at most one row remains.
+
+At deficit \(v\), the already read left rows determine a base
+\(Q_L\) of span \(v\) and row count \(l\): its final row
+is the next row with its outgoing gap removed.  A choice \(a\)
+for that gap gives
+\[
+ F_L(a)=\frac{(-1)^l s_{Q_L^{\downarrow a}}}{D_Lh_a}
+       =-\frac{h_{v+a}}{h_a}+\text{terms with smaller indices},
+\]
+where \(D_L\) is the product of the preceding gaps and
+\(Q_L^{\downarrow a}\) increases the final row by \(a\).
+Define \(F_R\), \(Q_R\), and \(D_R\) from the other end.
+Every valid choice gives a connected positive-gap Hessenberg prefix.
+Its numerator is irreducible by
+\cite{Barekat2009CoincidencesCorrigendum}, and for \(l>1\)
+has ordinary degree \(l>1\); for \(l=1\) it is
+\(h_{v+a}\).  Since every preceding gap is smaller than \(v\),
+the displayed fractions are reduced in either case.  Their largest
+generator reads the largest new gap and whether it occurs once or twice.
+In particular an event cannot disappear by cancellation.
+
+For \(G>H>0\), define
+\[
+ J(Q;H,G)=(q_1,\ldots,q_{l-1},q_l+H,G;
+                         d_1,\ldots,d_{l-1},H)
+\]
+when \(Q=(q_1,\ldots,q_l;d_1,\ldots,d_{l-1})\).
+Expansion at the last row gives the reduced fraction
+\begin{equation}\label{eq:cap-difference}
+ F_L(G)-F_L(H)
+ =\frac{(-1)^{l+1}s_{J(Q_L;H,G)}}{D_Lh_Gh_H}.
+\end{equation}
+The cap is connected and Hessenberg: its last excess is \(G-H>0\),
+and its other excesses are those of the base.  Its numerator is
+irreducible of ordinary degree \(l+1\).
+
+Compare source and mate at their first unequal reconstruction step.
+The source excess vector is palindromic; with \(W(l)\) its first
+\(l\) excesses summed, its next deficits are
+\[
+ A_l=\deg_{\rm wt}D_L+W(l),\qquad
+ B_r=\deg_{\rm wt}D_R+W(r).
+\]
+A single term cannot move to the opposite end: equality of reduced
+fractions forces \(l=r\), the same new gap, and \(D_L=D_R\).
+The source deficits would then coincide, contradicting a one-sided event.
+A one-term source event could become two only in the form
+\(F_L(G)-F_L(H)=F_R(G)\), with \(G>H\).
+Equation \eqref{eq:cap-difference} and reduced denominators force
+\(r=l+1\), \(D_R=D_Lh_H\).  The candidate's new right
+excess would be
+\[
+ v-\deg_{\rm wt}D_R-W(r-1)=-H<0.
+\]
+Here \(W(r-1)\) is known from the matching history, not assumed
+for the unread part of the mate.  Conversely, a two-term source event
+becoming one forces \(l=r+1\), \(D_L=D_Rh_H\).
+Equality of its two source deficits would give
+\(H+W(r+1)=W(r)\), impossible.
+
+For two terms on each side, keeping the largest gap at the same end fixes
+its fraction and then the other.  Otherwise write the source gaps as
+\(G>H\) and the candidate gaps, in opposite order, as \(G>H'\).
+The equality is
+\(F_L(G)-F_L(H')=F_R(G)-F_R(H)\).
+Reduced denominators and numerator degrees give
+\(l=r\), \(D_Lh_{H'}=D_Rh_H\).  The tied source deficits
+give equal weighted degrees of \(D_L,D_R\), so \(H'=H\).
+Thus every nontrivial ambiguity exchanges two distinct gaps and requires
+\begin{equation}\label{eq:exchange-condition}
+ l=r,\qquad D_L=D_R,\qquad
+ s_{J(Q_L;H,G)}=s_{J(Q_R;H,G)}.
+\end{equation}
+Once the new gap and its end are fixed, the deficit fixes the new row.
+If only one seam remains, both observations refer to that same gap;
+if only one row remains, the row multiset fixes it.
+
+For the source \(E_m\),
+\(W(l)=p(l+\lfloor(l-1)/K\rfloor)\), \(1\le l<mK+1\).
+When \(g_1\ne g_K\), the first event, at deficit \(p\),
+reads the unordered endpoint gaps and chooses a global orientation.
+At any later exchange, \(l\ge2\).  The two caps have top
+excess \(p\), bottom excess \(G-H\), and next bottom
+deficit \(G+e_l>p\).  Their second top deficits exceed \(p\).
+The derivative at \(h_{N_J-p}\) is in the safe range, since
+\(N_J-p=\sum_{a<l}q_a+W(l)+G-p\) exceeds every cap gap.
+Equation \eqref{eq:high-derivative} therefore reads, up to a common
+sign, respectively
+\[
+ \frac{h_{g_1+p}}{h_{g_1}}
+ +\mathbf1_{\{G-H=p\}}\frac{h_G}{h_H},\qquad
+ \frac{h_{g_K+p}}{h_{g_K}}
+ +\mathbf1_{\{G-H=p\}}\frac{h_G}{h_H}.
+\]
+These differ when \(g_1\ne g_K\), excluding the exchange.
+If \(g=g^{\rm rev}\), the histories agree at every step and
+the next source gaps coincide.  The leading coefficient \(-2/h_a\)
+forces that same gap at both ends of the mate; no exchange is possible.
+
+Finally assume \eqref{eq:first-asymmetry}.  In
+\eqref{eq:exchange-condition}, complete copies of the gap word cancel
+from \(D_L=D_R\), so unequal choices can occur only at
+\(l=r=jK+d\).  At \(j=0\) the two histories agree and the
+choice fixes global orientation.  For \(j\ge1\), put
+\(\zeta=\sum_{i<d}g_i+dp\),
+\(G=\max(g_d,g_{K+1-d})\), \(H=\min(g_d,g_{K+1-d})\).
+The caps \(J_L,J_R\) have span \(jS+\zeta+G\) and common
+gap product \(\Gamma\).  Their top fractions agree through
+length \(d-1\), but the length-\(d\) fractions differ:
+they have the same base and distinct outgoing gaps.  From below, their
+first \(d\) rows and outgoing gaps agree.  The next bottom deficit
+is \(\zeta+G+p\), because row \(jK+1\) has excess \(2p\).
+Applying \eqref{eq:high-derivative} at deficit \(\zeta\) gives
+\begin{equation}\label{eq:prefix-cap-target}
+ \frac{(-1)^l}{\Gamma}
+ \frac{\partial(s_{J_L}-s_{J_R})}{\partial h_{jS+G}}
+ =L_d^{(L)}-L_d^{(R)}\ne0.
+\end{equation}
+Indeed \(jS+G\) exceeds every cap gap; all earlier top and bottom
+terms, including mixed terms, cancel, and later bottom terms have not
+appeared.  This excludes every later exchange.  The reconstruction is
+therefore unique after its initial choice of global orientation in all
+three domains.
+\end{proof}
+
+\subsection{From powers to the full class}\label{subsec:exposure}
+
+\begin{lemma}\label{lem:class-exposure}
+Fix any \(E=E(g,p)\), without imposing one of the three domain
+conditions.  Suppose every \(E_m\), \(m\ge1\), is rigid against
+arbitrary connected mates up to rotation.  Then, for every nonempty
+composition \(\alpha\),
+\[
+ \operatorname{Cl}(F_\alpha(E))
+ =\{F_\beta(E),F_\beta(E)^*:r_\beta=r_\alpha\}.
+\]
+\end{lemma}
+
+\begin{proof}
+Let \(H\) be an arbitrary connected mate and \(M=|\alpha|\).
+Equation \eqref{eq:hessenberg-input} makes \(H\) Hessenberg;
+the overlap invariants give exactly \(\ell(\alpha)-1\) zero gaps.
+For an \(n\)-row Hessenberg diagram, set
+\(\widehat s_D(z)=z^n s_D(h_1/z,h_2/z,\ldots)\).
+The seam-coefficients lemma of \cite{Shields2026Inflation} gives
+\begin{equation}\label{eq:cut-contract}
+ [z^0]\widehat s_H(z)=\prod_j s_{H_j}
+                  =\prod_i s_{E_{\alpha_i}},\qquad
+ [z^{\ell(\alpha)-1}]\widehat s_H(z)
+                  =(-1)^{\ell(\alpha)-1}s_{E_M}.
+\end{equation}
+Here \(H_j\) are the zero-seam cut components, and the last
+coefficient is the signed function of the total contraction.
+
+Connected-polynomial irreducibility
+\cite{Barekat2009CoincidencesCorrigendum} matches the component
+functions with multiplicity.  The assumed power rigidity makes each
+\(H_j\) a literal \(E_{\beta_j}\) or its rotation;
+its row count \(K\beta_j+1\) determines \(\beta_j\).
+The total contraction is connected, so the same rigidity permits a
+single rotation of \(H\) after which its contraction is \(E_M\).
+Its \(j\)-th contracted seam occupies row
+\(1+K(\beta_1+\cdots+\beta_j)\): each preceding component
+contributes its row count minus one.  Thus the ordered gap segment of
+\(H_j\) is exactly \(g^{\beta_j}\).  A rotated power would
+have gap segment \((g^{\rm rev})^{\beta_j}\), which agrees
+only if \(g=g^{\rm rev}\); in that case \(E=E^*\).
+Every component therefore has the required orientation, and
+\(H=F_\beta(E)\).  This uses positions and gap words, not distinct
+endpoint or merger-row lengths.
+
+The injective substitution in \Cref{lem:prewall} now gives
+\(r_\beta=r_\alpha\).  The same substitution and rotation
+invariance give the reverse inclusion.
+\end{proof}
+
+\section{The balanced wall}\label{sec:balanced-wall}
+
+\subsection{An inverse for the boundary word}\label{subsec:word-inverse}
+
+For a composition \(\delta=(\delta_1,\ldots,\delta_L)\) of
+\(M\), let \(\xi_i=\delta_1+\cdots+\delta_i\), \(\xi_0=0\).
+In independent variables \(a_1,\ldots,a_M,b_1,\ldots,b_M,c\),
+define \(\mathcal P_\delta\) as the determinant whose first row is
+\((b_{\xi_1},\ldots,b_{\xi_L},c)\), whose row \(i+1\)
+\((1\le i\le L)\), column \(1\le j\le L\) entry is
+\(a_{\xi_j-\xi_{i-1}}\) for \(j\ge i\) and zero otherwise,
+and whose last-column entry in that row is \(b_{M-\xi_{i-1}}\).
+Put \(\mathcal P_\varnothing=c\).
+
+\begin{lemma}\label{lem:word-inverse}
+For positive compositions \(\delta,\eta\) of the same integer,
+\begin{equation}\label{eq:word-inverse}
+ \mathcal P_\delta=\mathcal P_\eta
+ \quad\Longleftrightarrow\quad
+ \eta\in\{\delta,\delta^{\mathrm{rev}}\}.
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+Anti-diagonal transposition gives reversal invariance.  Also,
+\([c]\mathcal P_\delta=(-1)^L\prod_i a_{\delta_i}\)
+reads the length and part multiset.  The smallest occurring \(b\)-index
+is \(d=\min(\delta_1,\delta_L)\), of degree one if the
+endpoints differ and degree two if they agree.  These occurrences cannot
+cancel: in the unequal case the endpoint variable is private with a
+nonzero cofactor; in the equal case its square coefficient has the
+sorted-diagonal monomial \(\prod_{i<L}a_{\delta_i+\delta_{i+1}}\).
+The corresponding row and column parameters are strictly ordered, so
+strict rearrangement makes this the unique minimum-square monomial.
+For \(L=1\), the square coefficient is one.
+
+If the endpoints differ, orient so that \(\delta_1=d<\delta_L\).
+Differentiation in the private top-left variable \(b_d\) leaves a
+minor whose only \(b\)-variables lie in its last column, with indices
+\[
+ M,\quad M-\delta_1,\quad M-\delta_1-\delta_2,\quad\ldots,
+ \quad\delta_L.
+\]
+Each coefficient is nonzero: deleting row \(i\) and that column
+leaves the unique minimum-square monomial
+\(\prod_{j<i}a_{\delta_j+\delta_{j+1}}
+  \prod_{j>i}a_{\delta_j}\).
+The ordered support and its successive differences recover the word.
+
+If both endpoints equal \(d\) and \(L\ge2\), write
+\(\delta=(d,\gamma,d)\).  Eliminating the two exterior rows
+and columns, whose block is
+\(\left(\begin{smallmatrix}b_d&c\\0&b_d\end{smallmatrix}\right)\), gives
+\[
+ \begin{gathered}
+ \mathcal P_{(d,\gamma,d)}=b_d^2\mathcal P_\gamma(a,b';c'),\qquad
+ \mu=a_d/b_d,\\
+ b'_j=a_{d+j}-\mu b_{d+j},\qquad
+ c'=a_M-2\mu b_M+\mu^2c.
+ \end{gathered}
+\]
+Over the field generated by the \(a\)'s, \(b_d\), and \(b_M\),
+the variables \(b_{d+j}\), \(1\le j\le M-2d\), and
+\(c\) are independent.  The substitution is invertible:
+\[
+ b_{d+j}=(a_{d+j}-b'_j)/\mu,\qquad
+ c=(c'-a_M+2\mu b_M)/\mu^2.
+\]
+It therefore transfers equality to the shorter words without losing
+information.  Induction ends at an empty word, a single part, or unequal
+endpoints.  Restoring equal endpoint pairs leaves only global reversal.
+\end{proof}
+
+\subsection{The first correction and orientation}\label{subsec:orientation}
+
+\begin{lemma}\label{lem:balanced-wall}
+Let \(E=E(g,p)\) for any positive gap word.  For compositions
+\(\alpha,\beta\) of the same size and every integer \(t\ge p\),
+\[
+ s_{I_tF_\alpha(E)}=s_{I_tF_\beta(E)}
+ \quad\Longleftrightarrow\quad
+ \begin{cases}
+ \beta=\alpha,&E\ne E^*,\\
+ \beta\in\{\alpha,\alpha^{\mathrm{rev}}\},&E=E^*.
+ \end{cases}
+\]
+\end{lemma}
+
+\begin{proof}
+It suffices to invert at \(t=p\), by \Cref{lem:lowering}.
+Equal functions have the same row count, hence the same outer length.
+Write \(M=|\alpha|\), and set
+\begin{equation}\label{eq:balanced-sets}
+ \begin{gathered}
+ T_\alpha=\{\alpha_i+\cdots+\alpha_\ell:2\le i\le\ell\},
+ \qquad K_\alpha=\{1,\ldots,M-1\}\setminus T_\alpha,\\
+ J=(X\setminus\{S,S-p\})+p=Y\setminus\{p,0\},
+ \qquad J^*=\{S+p-j:j\in J\}.
+ \end{gathered}
+\end{equation}
+The internal second-subdiagonal identities give the equality defining
+\(J\); also \(2p<j<S-p\) for \(j\in J\).
+Rotation replaces \(J\) by \(J^*\), so \(E=E^*\) exactly
+when \(J=J^*\).  Each copied inner contributes its translated
+internal contacts.  A retained zero seam contributes contacts at both
+\(kS\) and \(kS+p\); a merged seam contributes neither.
+Thus the complete common-beta and residual lists at the wall are
+\begin{equation}\label{eq:balanced-deletion}
+ \begin{aligned}
+ Z_\alpha&=\bigcup_{a=0}^{M-1}(aS+J)
+                 \ \cup\ ST_\alpha\ \cup\ (ST_\alpha+p),\\
+ U_\alpha&=\{MS+p,MS\}\cup SK_\alpha,\\
+ V_\alpha&=\{0,p\}\cup(SK_\alpha+p),
+ \qquad \kappa=M-\ell(\alpha)+2.
+ \end{aligned}
+\end{equation}
+Here \(ST=\{Sk:k\in T\}\), and beta lists are decreasing.
+These formulas also follow directly from
+\eqref{eq:full-repeated-betas}.  Every contact is on the second
+subdiagonal: unmerged internal excesses are \(p\), merged excesses
+are \(2p\), and deeper indices remain negative at \(p\).
+Its row and column positions have even sum, so simultaneous deletion
+has sign \(+1\).  With \(C_\alpha=(U_\alpha;V_\alpha)\),
+\eqref{eq:first-correction} gives
+\([s_{I_pF_\alpha(E)}]_\kappa=s_{C_\alpha}\).
+
+Write \(0=k_0<\cdots<k_L=M\) for
+\(\{0\}\cup K_\alpha\cup\{M\}\), and put
+\(\delta_\alpha=(k_L-k_{L-1},\ldots,k_1-k_0)\).
+Subtracting the displayed beta lists entry by entry gives
+\begin{equation}\label{eq:balanced-word}
+ s_{C_\alpha}=
+ \mathcal P_{\delta_\alpha}
+       (a_j=h_{jS-p},\ b_j=h_{jS};\ c=h_{MS+p}).
+\end{equation}
+Since \(S>2p\), the substituted variables are distinct.
+\Cref{lem:word-inverse} recovers \(K_\alpha\), hence its
+complementary suffix set and \(\alpha\), up to reversal.
+
+It remains to exclude outer reversal when both inner and outer are
+asymmetric.  In that case set
+\[
+ \begin{gathered}
+ \lambda(j)=\mathbf1_J(j)-\mathbf1_{J^*}(j),\qquad
+ a=\min(J\mathbin{\triangle}J^*),\qquad
+ k\in K_\alpha\setminus(M-K_\alpha),\\
+ A=a-p,\qquad B=kS+p-a,
+ \end{gathered}
+\]
+where \(M-K_\alpha=\{M-j:j\in K_\alpha\}\).
+Both choices exist: the contact sets differ, and nonreversal-invariance
+of \(\alpha\) is equivalent to \(K_\alpha\ne M-K_\alpha\).
+Minimality gives \(\lambda(a-p)=0\), while reflection gives
+\(\lambda(S+p-a)=-\lambda(a)\) and \(a<(S+p)/2\).
+In particular \(0<A<B\).
+Let \(D_k\) be the signed cofactor at row beta \(kS\),
+column beta zero of \(C_\alpha\).  Then
+\begin{equation}\label{eq:orientation-coefficient}
+ [h_Ah_B]\,[s_{I_pF_\alpha(E)}
+             -s_{I_pF_{\alpha^{\mathrm{rev}}}(E)}]_{\kappa+1}
+       =\lambda(a)D_k\ne0.
+\end{equation}
+Here the coefficient is a polynomial in the remaining generators.
+To prove the identity, rotate the second parent into \(F_\alpha(E^*)\).
+The literal cores now agree, their outer contacts agree, and the internal
+contact difference is the periodic function \(\lambda\).
+All core indices have residues \(0,p,-p\) modulo \(S\).
+The inequalities for \(J\) show that
+\(A,B\) have none of these residues.  Both factors must therefore
+come from the return factors in \eqref{eq:first-correction}, not a
+core cofactor.  Since \(A+B=kS\), their core entry can occur
+only at \((kS,0)\) or \((MS+p,(M-k)S+p)\).
+The latter position is absent by the choice of \(k\).
+At the two possible intermediate sites \(A\) and
+\(B=(k-1)S+(S+p-a)\), the contact differences are respectively
+zero and \(-\lambda(a)\).  The minus sign in
+\eqref{eq:first-correction} proves the asserted sign.
+
+Finally \(D_k\ne0\).  The residual core is connected and
+zero-free.  After deleting this row and the last column, its sorted
+diagonal consists of positive row indices before the deletion and
+positive adjacent-overlap indices afterward.  Strict rearrangement
+makes the resulting minimum-square monomial unique, so it cannot cancel.
+This proves \eqref{eq:orientation-coefficient}.  If the inner is
+symmetric, outer reversal is global rotation; all remaining reverse
+implications follow from equality or rotation.  Lowering excludes any
+later return.
+\end{proof}
+
+\subsection{Assembly of the main theorem}\label{subsec:assembly}
+
+\begin{proof}[Proof of \Cref{thm:main}]
+\Cref{lem:power-rigidity,lem:class-exposure} give
+\eqref{eq:main-class} at zero.  \Cref{lem:prewall} transports every
+member through \(0\le t<p\), and \Cref{lem:lowering} excludes
+new arbitrary connected mates.  At \(p\), lowering again places
+every mate in this image after at most one global rotation.
+\Cref{lem:balanced-wall} leaves only the source rotation orbit.
+Lowering by \(t-p\) proves the same assertion for \(t>p\).
+\end{proof}
+
+\section{Unequal terminal beta gaps}\label{sec:asymmetric-wall}
+
+\begin{theorem}[Within-image wall separation]\label{thm:asymmetric-wall}
+Let \(E\) be any connected zero-free inner with \(r\ge2\)
+rows and normalized beta lists \(X,Y\).  Set
+\[
+ S=x_1,\qquad u=S-x_2,\qquad v=y_{r-1},\qquad
+ p=\min(u,v),\qquad u\ne v.
+\]
+For compositions \(\alpha,\beta\) of equal size and integer
+\(t\ge0\),
+\[
+ s_{I_tF_\alpha(E)}=s_{I_tF_\beta(E)}
+ \quad\Longleftrightarrow\quad
+ \begin{cases}
+ r_\alpha=r_\beta,&0\le t<p,\\
+ \alpha=\beta,&t\ge p.
+ \end{cases}
+\]
+The comparison is within the image of the same literal inner.  There
+is no restriction on the row count, on internal support activations
+before \(p\), or on the number of internal contacts at \(p\).
+\end{theorem}
+
+\begin{proof}
+The pre-wall assertion is \Cref{lem:prewall}.  For the wall, assume
+\(u<v\), so \(p=u\); otherwise rotate the inner and reverse both
+outer words.  Write \(M=|\alpha|\), use the suffix set
+\(T_\alpha\) of \eqref{eq:balanced-sets}, and put
+\(X^\circ=X\setminus\{S\}\), \(Y^\circ=Y\setminus\{0\}\).
+The full beta sets before inflation are
+\begin{equation}\label{eq:full-repeated-betas}
+ \begin{aligned}
+ X_\alpha&=\bigcup_{j=0}^{M-1}(X^\circ+jS)
+                   \ \cup\ S(T_\alpha\cup\{M\}),\\
+ Y_\alpha&=\bigcup_{j=0}^{M-1}(Y^\circ+jS)
+                   \ \cup\ S(T_\alpha\cup\{0\}).
+ \end{aligned}
+\end{equation}
+Indeed, merging copies removes the intervening common endpoints, whereas
+an outer zero seam retains the endpoint in both lists.  This proves the
+formula by induction on copies.
+
+Set
+\[
+ J=\{x_i+p:3\le i\le r\}\cap Y^\circ,\quad
+ P=\{x_i+p:3\le i\le r\}\setminus J,\quad
+ Q=Y^\circ\setminus J.
+\]
+Because \(x_2+p=S\) and \(p<v\), the entire common-beta set
+at the wall is
+\begin{equation}\label{eq:asymmetric-contacts}
+ Z_\alpha=ST_\alpha\ \cup\ \bigcup_{j=0}^{M-1}(J+jS).
+\end{equation}
+Thus every internal contact is included.  Define
+\[
+ \begin{split}
+ V_M&=\{0\}\cup\bigcup_{j=0}^{M-1}(Q+jS),\\
+ U_0&=\{MS+p\}\cup\{S,2S,\ldots,MS\}
+                 \cup\bigcup_{j=0}^{M-1}(P+jS).
+ \end{split}
+\]
+After deleting \eqref{eq:asymmetric-contacts}, the residual lists are
+\begin{equation}\label{eq:asymmetric-core}
+ U_\alpha=(U_0\setminus ST_\alpha)\cup(ST_\alpha+p),
+ \qquad V_M.
+\end{equation}
+Their common order is \(\kappa=M(r-1-|J|)+1\), independent
+of \(\alpha\).  Common-beta deletion preserves connectedness,
+as in the path-expansion proposition of \cite{Shields2026Cofactor}.
+The residual core is zero-free, and \eqref{eq:first-correction} gives
+\[
+ [s_{I_pF_\alpha(E)}]_\kappa
+   =\epsilon_\alpha\det(h_{U_{\alpha,i}-V_{M,j}}),\qquad
+ \epsilon_\alpha=(-1)^{\sum_{z\in Z_\alpha}
+  (\operatorname{pos}_{X_\alpha+p}(z)+\operatorname{pos}_{Y_\alpha}(z))}.
+\]
+Positions are one-based in decreasing lists.  The signs need not be
+identified to compare supports.
+
+Every residual row-beta residue is \(x+p\pmod S\) for an
+\(x\in X\); every nonterminal column-beta residue is an
+\(y\in Y^\circ\).  An entry outside the last column could have
+index congruent to \(p\) only if \(x\equiv y\pmod S\).
+Since \(0<x\le S\) and \(0<y<S\), this would give
+\(x=y\), contrary to zero-freeness.  The last-column generators
+of that residue are exactly \(h_{MS+p}\) and
+\(h_{kS+p}\), \(k\in T_\alpha\).
+
+Each of these generators occurs at a unique matrix position with a
+nonzero cofactor.  After its row and the last column are removed, the
+sorted diagonal has positive row indices before the deleted row and
+positive adjacent-overlap indices afterward.  Positivity of the latter
+uses connectedness and zero-freeness of the residual core.  Strict
+rearrangement gives this matching a unique minimum-square monomial,
+so its cofactor cannot vanish.  Consequently
+\begin{equation}\label{eq:asymmetric-decoder}
+ T_\alpha=\{k:1\le k<M,\ h_{kS+p}\text{ occurs in }
+                           [s_{I_pF_\alpha(E)}]_\kappa\}.
+\end{equation}
+Equality at the wall recovers the same suffix set and hence the same
+composition.  Equality at a later time lowers to the wall by
+\Cref{lem:lowering}.  The reverse implications are immediate.
+\end{proof}
+
+Only residue \(p\) is private in \eqref{eq:asymmetric-decoder},
+which recovers outer cuts.  The private-residue-column lemma of
+\cite{Shields2026Inflation} recovers all row betas under stronger
+separation.  By \Cref{lem:balanced-geometry}, no \(E(g,p)\)
+satisfies this theorem's unequal-terminal-gap hypothesis.
+
+\section{A limitation on arbitrary-mate separation}\label{sec:limitation}
+
+For initially equal diagrams, let
+\(\tau(D,H)=\min\{t\in\mathbb Z_{\ge0}:s_{I_tD}\ne s_{I_tH}\}\),
+with \(\tau=\infty\) if the set is empty.  Let \(\nu(D)\) count
+negative indices in the full Jacobi--Trudi board and put
+\(Z(D)=X\cap Y\).  For at least two rows, put
+\(p(D)=\min(x_1-x_2,y_{n-1})\), and let \(Q(D)\) be the greatest
+common divisor of all successive differences within the two normalized
+beta lists.
+
+\begin{proposition}\label{prop:limitation}
+For every integer \(b\ge5\), the profiles
+\[
+ E_b=(2,b,b,b+1;1,1,2),\qquad
+ H_b=(2,b,b+1,b;1,2,1)
+\]
+are distinct nonrotational connected mates with
+\[
+ (\text{rows},\nu,|Z|,p,Q)=(4,3,0,1,1),\qquad
+ \tau(E_b,H_b)=b-3.
+\]
+Hence a bound on arbitrary-mate separation time is ruled out from this
+five-tuple alone.
+\end{proposition}
+
+\begin{proof}
+The exceptional family in the four-row classification of
+\cite{Shields2026NegativeCount}, with parameters
+\((c,w,B)=(1,2,b)\), gives the displayed pair.  Inflation replaces
+these parameters by \((1+t,2+t,b+t)\), and its defining inequality
+\(B>c+w\) becomes
+\[
+ b+t>(1+t)+(2+t)\quad\Longleftrightarrow\quad t<b-3.
+\]
+The repeated row length and the smaller endpoint row force these
+parameters in any exceptional presentation, up to rotation.  At
+\(t=b-3\) the inequality fails and the two profiles are still
+nonrotational, so the complete classification excludes equality.
+\Cref{lem:lowering} excludes later return.
+
+For the uninflated pair, direct recursion gives
+\[
+ \begin{aligned}
+ X(E_b)&=(3b-1,3b-2,2b-1,b+1),\\
+ X(H_b)&=(3b-1,3b-2,2b,b),\\
+ Y(E_b)&=Y(H_b)=(3b-3,2b-2,b-1,0).
+ \end{aligned}
+\]
+Both lists are disjoint.  The negative positions are exactly
+\((3,1),(4,1),(4,2)\); the terminal gaps are \(1,b-1\).
+The first successive row-beta difference is one, so \(Q=1\).
+The profiles are distinct and neither is the reversal of the other.
+These identities prove the stated five-tuple and separation time
+uniformly in \(b\).
+\end{proof}
+
+This consequence of the four-row theorem has outer composition
+\(\alpha=(1)\); it does not address \(\ell(\alpha)\ge2\),
+nor establish sharpness for \Cref{thm:main}.  Requiring
+\(|\alpha|\ge2\) would still allow one-part powers.
+
+\section{Concluding remarks}\label{sec:conclusion}
+
+Additional unequal choices after balanced prefix multisets require a
+global compatibility argument beyond the cap comparison.  The present
+results imply neither general terminal rigidity nor a general
+reducible-source inverse.  Literal pre-wall marked charts are not asserted.
+
+\begin{question}\label{q:multiple-parts}
+For which connected zero-free inners \(E\) with unequal terminal beta
+gaps and without \(\mathsf P(E)\) is \(I_pF_\alpha(E)\) rigid up to
+rotation against arbitrary connected mates for every \(\alpha\) with
+\(\ell(\alpha)\ge2\), where \(p\) is the smaller gap?
+Here \(\mathsf P(E)\) is the sufficient condition that every
+\(E_m\), \(m\ge1\), is rigid up to rotation.  Under this condition,
+the scalar class recovery under inflation theorem of
+\cite{Shields2026HessenbergRecognition} gives rotation rigidity of
+\(I_tF_\alpha(E)\) for every nonempty \(\alpha\) and integer \(t\ge p\).
+\end{question}
+
+\section*{Declarations}
+{\footnotesize
+
+\noindent\textbf{Funding.} This research received no external funding.
+
+\smallskip
+\noindent\textbf{Competing interests.} The author has no relevant interests to disclose.
+
+\smallskip
+\noindent\textbf{Data availability.} No datasets were generated or analyzed.
+
+\smallskip
+\noindent\textbf{Computational verification.} The proofs do not depend on numerical computation.  Scripts used for verification and figures are available at \url{https://github.com/johnnyshields/papers}.
+
+\smallskip
+\noindent\textbf{Generative AI use.} During the preparation of this work, the author used OpenAI's ChatGPT (GPT-6 Astra) and Anthropic's Claude (Opus 5.5) to assist with mathematical research, manuscript drafting, and the development of auxiliary verification code.  After using these tools, the author reviewed and edited as needed.  The author takes full responsibility for the content of the work.\par}
+
+\begin{thebibliography}{99}
+
+\bibitem{Barekat2009CoincidencesCorrigendum}
+F. Barekat, V. Reiner and S. van Willigenburg,
+\emph{Corrigendum to ``Coincidences among skew Schur functions''},
+Adv. Math. \textbf{220} (2009), no.~5, 1655--1656,
+DOI: \href{https://doi.org/10.1016/j.aim.2008.10.010}{10.1016/\allowbreak j.aim.2008.10.010}.
+
+\bibitem{Billera2006DecomposableCompositions}
+L.~J. Billera, H.~Thomas and S.~van Willigenburg,
+\emph{Decomposable compositions, symmetric quasisymmetric functions and equality of ribbon Schur functions},
+Adv. Math. \textbf{204} (2006), no.~1, 204--240,
+DOI: \href{https://doi.org/10.1016/j.aim.2005.05.014}{10.1016/\allowbreak j.aim.2005.05.014}.
+
+\bibitem{GarciaGarcia2020ToeplitzMinors}
+D.~Garc\'ia-Garc\'ia and M.~Tierz,
+\emph{Toeplitz minors and specializations of skew Schur polynomials},
+J. Combin. Theory Ser. A \textbf{172} (2020), 105201,
+DOI: \href{https://doi.org/10.1016/j.jcta.2019.105201}{10.1016/\allowbreak j.jcta.2019.105201}.
+
+\bibitem{Jin2024ThickenedRibbon}
+E.~Y. Jin and S.~X. Li,
+\emph{Towards equivalent thickened ribbon Schur functions},
+preprint, 2024,
+DOI: \href{https://doi.org/10.48550/arXiv.2403.01843}{10.48550/\allowbreak arXiv.2403.01843}.
+
+\bibitem{McNamara2009Classification}
+P.~R.~W. McNamara and S.~van Willigenburg,
+\emph{Towards a combinatorial classification of skew Schur functions},
+Trans. Amer. Math. Soc. \textbf{361} (2009), no.~8, 4437--4470,
+DOI: \href{https://doi.org/10.1090/S0002-9947-09-04683-2}{10.1090/\allowbreak S0002-9947-09-04683-2}.
+
+\bibitem{OlsonHarris2024HopfApplications}
+N.~Olson-Harris,
+\emph{Some applications of combinatorial Hopf algebras to integro-differential equations and symmetric function identities},
+Ph.D.\ thesis, University of Waterloo, 2024.
+\url{https://hdl.handle.net/10012/20710}.
+
+\bibitem{Reiner2007Coincidences}
+V.~Reiner, K.~M. Shaw and S.~van Willigenburg,
+\emph{Coincidences among skew Schur functions},
+Adv. Math. \textbf{216} (2007), no.~1, 118--152,
+DOI: \href{https://doi.org/10.1016/j.aim.2007.05.006}{10.1016/\allowbreak j.aim.2007.05.006}.
+
+\bibitem{Shields2026Inflation}
+J.~Shields,
+\emph{Class recovery and inflation for repeated-block skew diagrams},
+preprint, 2026,
+DOI: \href{https://doi.org/10.5281/zenodo.23133727}{10.5281/\allowbreak zenodo.23133727}.
+\bibitem{Shields2026Cofactor}
+J.~Shields,
+\emph{Cofactor independence and dilation for skew Schur functions},
+preprint, 2026,
+DOI: \href{https://doi.org/10.5281/zenodo.22732784}{10.5281/\allowbreak zenodo.22732784}.
+
+\bibitem{Shields2026HessenbergRecognition}
+J.~Shields,
+\emph{Polynomial recognition and inflation of Hessenberg skew Schur classes},
+preprint, 2026,
+DOI: \href{https://doi.org/10.5281/zenodo.23137873}{10.5281/\allowbreak zenodo.23137873}.
+\bibitem{Shields2026NegativeCount}
+J.~Shields,
+\emph{Skew Schur equivalence by Jacobi--Trudi negative count},
+preprint, 2026,
+DOI: \href{https://doi.org/10.5281/zenodo.23133741}{10.5281/\allowbreak zenodo.23133741}.
+\end{thebibliography}
+
+\end{document}

@@ -115,7 +115,7 @@ theorem lt_belowCount_iff {I : Finset ℕ} {v y : ℕ} (hv : v < I.card) :
   have hcount : Nat.count (· ∈ I) (nthElem I v) = v :=
     Nat.count_nth_of_lt_card_finite hfin hcard
   have hmono := Nat.count_monotone (· ∈ I) (show nthElem I v + 1 ≤ y by omega)
-  rw [Nat.count_succ, hcount, if_pos hmem] at hmono
+  rw [Nat.count_succ, hcount, ite_eq_left hmem] at hmono
   omega
 
 /-! ## Row lengths read off the shape
@@ -337,7 +337,7 @@ def translateBwd (S : BoundedSkewSSYT lam' mu' n) : BoundedSkewSSYT lam mu n :=
        obtain ⟨hc1, hc2⟩ := mem_skewCells_of_row hj hlam hmu
        obtain ⟨hi, hj₁⟩ := hlow i j₁ hc1
        obtain ⟨-, hj₂⟩ := hlow i j₂ hc2
-       rw [if_pos ⟨hi, hj₁⟩, if_pos ⟨hi, hj₂⟩]
+       rw [ite_eq_left ⟨hi, hj₁⟩, ite_eq_left ⟨hi, hj₂⟩]
        exact S.1.row_weak (by omega)
          (mem_skewCells.mp (mem_skewCells_sub h hlow hc2)).1
          (mem_skewCells.mp (mem_skewCells_sub h hlow hc1)).2
@@ -346,7 +346,7 @@ def translateBwd (S : BoundedSkewSSYT lam' mu' n) : BoundedSkewSSYT lam mu n :=
        obtain ⟨hc1, hc2⟩ := mem_skewCells_of_col hi hlam hmu
        obtain ⟨hi₁, hj⟩ := hlow i₁ j hc1
        obtain ⟨hi₂, -⟩ := hlow i₂ j hc2
-       rw [if_pos ⟨hi₁, hj⟩, if_pos ⟨hi₂, hj⟩]
+       rw [ite_eq_left ⟨hi₁, hj⟩, ite_eq_left ⟨hi₂, hj⟩]
        exact S.1.col_strict (by omega)
          (mem_skewCells.mp (mem_skewCells_sub h hlow hc2)).1
          (mem_skewCells.mp (mem_skewCells_sub h hlow hc1)).2
@@ -360,7 +360,7 @@ def translateBwd (S : BoundedSkewSSYT lam' mu' n) : BoundedSkewSSYT lam mu n :=
    by
      intro i j hc
      change (if di ≤ i ∧ dj ≤ j then S (i - di) (j - dj) else 0) < n
-     rw [if_pos (hlow i j hc)]
+     rw [ite_eq_left (hlow i j hc)]
      exact S.2 _ _ (mem_skewCells_sub h hlow hc)⟩
 
 include h hlow in
@@ -377,7 +377,7 @@ def translateEquiv : BoundedSkewSSYT lam mu n ≃ BoundedSkewSSYT lam' mu' n whe
   right_inv S := by
     refine BoundedSkewSSYT.ext fun i j => ?_
     change (if di ≤ i + di ∧ dj ≤ j + dj then S (i + di - di) (j + dj - dj) else 0) = S i j
-    rw [if_pos ⟨Nat.le_add_left _ _, Nat.le_add_left _ _⟩, Nat.add_sub_cancel,
+    rw [ite_eq_left ⟨Nat.le_add_left _ _, Nat.le_add_left _ _⟩, Nat.add_sub_cancel,
       Nat.add_sub_cancel]
 
 include h hlow in
@@ -582,7 +582,7 @@ theorem jacobiTrudiDet_eq_superSkewSchur_of_le_one {d : ℕ → R} {b a : ℕ} {
     have htl : mu.rowLen 0 ≤ lam.rowLen 0 := rowLen_mono hmu 0
     calc jacobiTrudiDet d lam mu 1
         = superHom b a (lam.rowLen 0 - mu.rowLen 0) β α := by
-          rw [jacobiTrudiDet_one, jtCoeff, if_pos htl, hd]
+          rw [jacobiTrudiDet_one, jtCoeff, ite_eq_left htl, hd]
       _ = superSkewSchur (rect 1 (lam.rowLen 0)) (rect 1 (mu.rowLen 0)) b a β α :=
           (superSkewSchur_rect_row htl β α).symm
       _ = superSkewSchur lam mu b a β α := by rw [← hlam, ← hmu2]
@@ -616,7 +616,7 @@ theorem nthElem_singleton (i : ℕ) : nthElem {i} 0 = i := by
 `1 × 1` minor on rows `{i}` and columns `{j}` is `d_{k + j - i}`. -/
 theorem toeplitzMinor_singleton (d : ℕ → R) (k i j : ℕ) (hij : i ≤ k + j) :
     toeplitzMinor d k 1 {i} {j} = d (k + j - i) := by
-  rw [toeplitzMinor_one, nthElem_singleton, nthElem_singleton, shiftedCoeff, if_pos hij]
+  rw [toeplitzMinor_one, nthElem_singleton, nthElem_singleton, shiftedCoeff, ite_eq_left hij]
 
 
 /-! ### Axiom footprint -/

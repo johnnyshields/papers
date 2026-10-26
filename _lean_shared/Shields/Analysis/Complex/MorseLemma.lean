@@ -7,6 +7,8 @@ import Mathlib.Analysis.Analytic.IsolatedZeros
 import Mathlib.Analysis.Calculus.InverseFunctionTheorem.FDeriv
 import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
 import Mathlib.Analysis.SpecialFunctions.Complex.Log
+import Mathlib.Analysis.Analytic.Order
+import Mathlib.Analysis.Calculus.InverseFunctionTheorem.Analytic
 
 /-!
 # The analytic Morse lemma in one complex variable

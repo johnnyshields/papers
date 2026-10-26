@@ -76,7 +76,7 @@ def quadCoeff (p q : R) (m : ℕ) : R :=
 @[simp] theorem quadCoeff_two (p q : R) : quadCoeff p q 2 = q := rfl
 
 theorem quadCoeff_eq_zero (p q : R) {m : ℕ} (hm : 3 ≤ m) : quadCoeff p q m = 0 := by
-  rw [quadCoeff, if_neg (by omega), if_neg (by omega), if_neg (by omega)]
+  rw [quadCoeff, ite_eq_right (by omega), ite_eq_right (by omega), ite_eq_right (by omega)]
 
 /-- A linear symbol `1 + y t` has vanishing coefficients from degree two on. -/
 theorem quadCoeff_zero_eq_zero (y : R) {m : ℕ} (hm : 2 ≤ m) : quadCoeff y 0 m = 0 := by
@@ -146,7 +146,7 @@ theorem convCoeff_quadCoeff_quadInvCoeff (p q : R) :
       have e2 : k + 2 - k = 2 := by omega
       have e1 : k + 2 - (k + 1) = 1 := by omega
       have e0 : k + 2 - (k + 2) = 0 := by omega
-      rw [if_neg (by omega), show k + 2 + 1 = k + 3 from rfl, Finset.sum_range_succ,
+      rw [ite_eq_right (by omega), show k + 2 + 1 = k + 3 from rfl, Finset.sum_range_succ,
         Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_eq_zero hz, e2, e1, e0,
         quadCoeff_zero, quadCoeff_one, quadCoeff_two, quadInvCoeff_add_two]
       ring

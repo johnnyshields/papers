@@ -150,7 +150,7 @@ private theorem prod_Ioi_lower (h : BlockMono k ρ) {i : Fin N} (hi : (i : ℕ) 
       if ρ i < ρ j then (1 : ℤˣ) else -1) = 1 := by
     refine Finset.prod_eq_one fun j hj => ?_
     rw [Finset.mem_filter, Finset.mem_Ioi] at hj
-    rw [if_pos (h.lower i j hj.1 hj.2)]
+    rw [ite_eq_left (h.lower i j hj.1 hj.2)]
   rw [hone, one_mul]
   have hfil : (Finset.Ioi i).filter (fun j : Fin N => ¬ (j : ℕ) < k)
       = univ.filter (fun j : Fin N => k ≤ (j : ℕ)) := by
@@ -185,7 +185,7 @@ theorem sign (h : BlockMono k ρ) :
     rw [Finset.mem_filter, not_lt] at hi
     refine Finset.prod_eq_one fun j hj => ?_
     rw [Finset.mem_Ioi] at hj
-    rw [if_pos (h.upper i j hj hi.2)]
+    rw [ite_eq_left (h.upper i j hj hi.2)]
   rw [hupper, mul_one, ← Finset.prod_pow_eq_pow_sum]
   refine Finset.prod_congr rfl fun i hi => ?_
   rw [Finset.mem_filter] at hi

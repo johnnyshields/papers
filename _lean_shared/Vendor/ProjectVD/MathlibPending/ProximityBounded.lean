@@ -352,9 +352,7 @@ lemma proximity_isBigO_log_of_polynomial (p : Polynomial ℂ) :
   rw [mem_sphere_zero_iff_norm, habs] at hx
   calc log⁺ ‖p.eval x‖
       ≤ log⁺ (C * r ^ p.natDegree) :=
-        -- Adapted to the pinned revision: the pinned `posLog_le_posLog` takes `0 ≤ x`, where
-        -- upstream (Mathlib PR #42000) takes `-1 ≤ x`; the wrapper is dropped.
-        posLog_le_posLog ((norm_nonneg _))
+        posLog_le_posLog (neg_one_lt_zero.le.trans (norm_nonneg _))
           (by have := hC x (hx ▸ hr); rwa [hx] at this)
     _ ≤ log⁺ C + log⁺ (r ^ p.natDegree) := posLog_mul
     _ = log⁺ C + (p.natDegree : ℝ) * log⁺ r := by rw [posLog_pow]

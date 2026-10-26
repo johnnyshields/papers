@@ -24,8 +24,13 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import Vendor.MathlibPR.PR42227.CodiscreteAPI
-import Vendor.MathlibPR.PR40957.LogCountingFiniteSupport
+import Mathlib.Topology.DiscreteSubset
+import Mathlib.Topology.Algebra.Polynomial
+import Mathlib.Analysis.Calculus.FDeriv.Congr
+import Mathlib.Analysis.Calculus.Deriv.Basic
+import Mathlib.Algebra.Polynomial.Roots
+import Mathlib.Analysis.Complex.ValueDistribution.LogCounting.Asymptotic
+import Mathlib.Topology.LocallyFinsupp
 import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
 import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
 import Mathlib.Algebra.Polynomial.Eval.Defs

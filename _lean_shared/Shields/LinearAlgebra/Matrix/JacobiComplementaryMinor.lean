@@ -3,7 +3,7 @@ Copyright (c) 2026 Johnny Shields. All rights reserved.
 Released under the MIT license as described in the file LICENSE.txt.
 Authors: Johnny Shields
 -/
-import Mathlib.Data.Real.Basic
+import Mathlib.Basic.Real.Basic
 import Mathlib.LinearAlgebra.Matrix.Charpoly.Basic
 import Shields.LinearAlgebra.Matrix.BlockMono
 import Shields.LinearAlgebra.Matrix.TotallyNonneg.Basic
@@ -35,7 +35,7 @@ the similar name: it relates `det A` to its corner minors, not a minor of `A⁻�
 
 ## References
 
-* [S. M. Fallat and C. R. Johnson, *Totally Nonnegative Matrices*][Fallat2011], Thm. 1.3.3
+* [S. M. Fallat and C. R. Johnson, *Totally Nonnegative Matrices*][Fallat2011TotallyNonnegative], Thm. 1.3.3
 
 ## Tags
 
@@ -265,7 +265,7 @@ theorem det_submatrix_sigmaConj {n r : ℕ} (M : Matrix (Fin n) (Fin n) ℝ)
   simp only [pow_add, Finset.prod_mul_distrib]
   ring
 
-/-- **`Σ A⁻¹ Σ` is totally nonnegative.**  This is Thm. 1.3.3 of [Fallat2011].
+/-- **`Σ A⁻¹ Σ` is totally nonnegative.**  This is Thm. 1.3.3 of [Fallat2011TotallyNonnegative].
 Jacobi's identity turns a
 minor of `A⁻¹` into a complementary minor of `A` divided by `det A`, and the
 checkerboard sign it carries is exactly the one `Σ` removes. -/

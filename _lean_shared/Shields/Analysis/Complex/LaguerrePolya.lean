@@ -44,8 +44,8 @@ zeta. `HasRealCoeffs` is likewise local.
 
 ## References
 
-* [G. Pólya and J. Schur, *Über zwei Arten von Faktorenfolgen in der Theorie der algebraischen
-  Gleichungen*][PolyaSchur1914]
+* [G. Pólya and I. Schur, *Über zwei Arten von Faktorenfolgen in der Theorie der algebraischen
+  Gleichungen*][PolyaSchur1914Faktorenfolgen]
 
 ## Tags
 

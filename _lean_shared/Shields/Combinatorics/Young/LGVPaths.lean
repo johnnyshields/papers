@@ -340,20 +340,20 @@ noncomputable def wordOfPath (b s m : ℕ) (q : ℕ → ℕ) (hq : q ∈ hPaths 
      row_weak' := by
        intro i j₁ j₂ hj hcell
        obtain ⟨hi, hj₂⟩ := mem_rect.mp hcell
-       rw [if_pos ⟨by omega, by omega⟩, if_pos ⟨by omega, hj₂⟩]
+       rw [ite_eq_left ⟨by omega, by omega⟩, ite_eq_left ⟨by omega, hj₂⟩]
        exact pathLetter_mono b s q hj.le
      col_strict' := by
        intro i₁ i₂ j hi hcell
        exact absurd (mem_rect.mp hcell).1 (by omega)
      zeros' := by
        intro i j hcell
-       refine if_neg fun hc => hcell (mem_rect.mpr ⟨by omega, hc.2⟩)
+       refine ite_eq_right fun hc => hcell (mem_rect.mpr ⟨by omega, hc.2⟩)
    },
    by
      intro i j hcell
      obtain ⟨hi, hj⟩ := mem_rect.mp hcell
      change (if i = 0 ∧ j < m then pathLetter b s q j else 0) < b
-     rw [if_pos ⟨by omega, hj⟩]
+     rw [ite_eq_left ⟨by omega, hj⟩]
      exact pathLetter_lt_height hq (by omega)⟩
 
 theorem wordOfPath_apply {b s m : ℕ} {q : ℕ → ℕ} (hq : q ∈ hPaths b s (s + m)) (i j : ℕ) :
@@ -390,7 +390,7 @@ theorem pathOfWord_mem (b s m : ℕ) (T : BoundedSSYT (rect 1 m) b) :
 
 theorem pathOfWord_wordOfPath {b s m : ℕ} {q : ℕ → ℕ} (hq : q ∈ hPaths b s (s + m)) :
     pathOfWord b s m (wordOfPath b s m q hq) = q :=
-  wordProfile_of_pathLetter hq fun j hj => by rw [wordOfPath_apply, if_pos ⟨rfl, hj⟩]
+  wordProfile_of_pathLetter hq fun j hj => by rw [wordOfPath_apply, ite_eq_left ⟨rfl, hj⟩]
 
 /-- A one-row word whose letters are those of a path traces that path back. -/
 theorem pathOfWord_eq_of_entry {b s m : ℕ} {q : ℕ → ℕ} (hq : q ∈ hPaths b s (s + m))
@@ -405,11 +405,11 @@ theorem pathOfWord_eq_of_entry {b s m : ℕ} {q : ℕ → ℕ} (hq : q ∈ hPath
     constructor
     · rintro ⟨hj, hlt⟩
       refine ⟨hj, ?_⟩
-      rw [wordOfPath_apply hq, if_pos ⟨rfl, Finset.mem_range.mp hj⟩,
+      rw [wordOfPath_apply hq, ite_eq_left ⟨rfl, Finset.mem_range.mp hj⟩,
         ← h j (Finset.mem_range.mp hj)]
       exact hlt
     · rintro ⟨hj, hlt⟩
-      rw [wordOfPath_apply hq, if_pos ⟨rfl, Finset.mem_range.mp hj⟩] at hlt
+      rw [wordOfPath_apply hq, ite_eq_left ⟨rfl, Finset.mem_range.mp hj⟩] at hlt
       refine ⟨hj, ?_⟩
       rw [h j (Finset.mem_range.mp hj)]
       exact hlt
@@ -430,8 +430,8 @@ theorem wordOfPath_pathOfWord {b s m : ℕ} (T : BoundedSSYT (rect 1 m) b) :
   rw [wordOfPath_apply]
   by_cases hc : i = 0 ∧ j < m
   · obtain ⟨rfl, hj⟩ := hc
-    rw [if_pos ⟨rfl, hj⟩, pathLetter_pathOfWord T hj]
-  · rw [if_neg hc]
+    rw [ite_eq_left ⟨rfl, hj⟩, pathLetter_pathOfWord T hj]
+  · rw [ite_eq_right hc]
     exact (T.zeros fun h => hc ⟨by have := (mem_rect.mp h).1; omega,
       (mem_rect.mp h).2⟩).symm
 
@@ -482,7 +482,7 @@ theorem hPaths_sum_eq_completeHom (b s m : ℕ) (β : ℕ → R) :
     (fun q hq => ?_)
   rw [pathWeight_eq_prod_letters hq, cells_rect, Finset.prod_product, Finset.prod_range_one]
   refine Finset.prod_congr rfl fun j hj => ?_
-  rw [wordOfPath_apply, if_pos ⟨rfl, Finset.mem_range.mp hj⟩]
+  rw [wordOfPath_apply, ite_eq_left ⟨rfl, Finset.mem_range.mp hj⟩]
 
 end PathSum
 
@@ -524,7 +524,7 @@ noncomputable def crossHeight (b : ℕ) (q r : ℕ → ℕ) : ℕ :=
 
 theorem crossHeight_mem {b : ℕ} {q r : ℕ → ℕ} (h : Crosses b q r) :
     crossHeight b q r ∈ crossSet b q r := by
-  rw [crossHeight, dif_pos h]
+  rw [crossHeight, dite_eq_left h]
   exact Finset.min'_mem _ h
 
 theorem crossHeight_lt {b : ℕ} {q r : ℕ → ℕ} (h : Crosses b q r) : crossHeight b q r < b :=
@@ -532,7 +532,7 @@ theorem crossHeight_lt {b : ℕ} {q r : ℕ → ℕ} (h : Crosses b q r) : cross
 
 theorem crossHeight_le {b : ℕ} {q r : ℕ → ℕ} (h : Crosses b q r) {k : ℕ}
     (hk : k ∈ crossSet b q r) : crossHeight b q r ≤ k := by
-  rw [crossHeight, dif_pos h]
+  rw [crossHeight, dite_eq_left h]
   exact Finset.min'_le _ _ hk
 
 /-- The profile that follows `q` up to height `i` and `r` from height `i+1` on. -/
@@ -540,11 +540,11 @@ def spliceAt (i : ℕ) (q r : ℕ → ℕ) (k : ℕ) : ℕ := if k ≤ i then q 
 
 @[simp]
 theorem spliceAt_of_le {i : ℕ} (q r : ℕ → ℕ) {k : ℕ} (hk : k ≤ i) : spliceAt i q r k = q k :=
-  if_pos hk
+  ite_eq_left hk
 
 @[simp]
 theorem spliceAt_of_gt {i : ℕ} (q r : ℕ → ℕ) {k : ℕ} (hk : i < k) : spliceAt i q r k = r k :=
-  if_neg (by omega)
+  ite_eq_right (by omega)
 
 /-- Splicing twice at the same height gives back the first path: the two spliced
 profiles agree with `q` below `i` and above it respectively. -/
@@ -670,8 +670,8 @@ theorem edgeSum_eq_jtCoeff (b : ℕ) (β : ℕ → R) (s e : ℕ) :
   rw [jtCoeff]
   rcases le_or_gt s e with h | h
   · obtain ⟨m, rfl⟩ : ∃ m, e = s + m := ⟨e - s, by omega⟩
-    rw [if_pos h, edgeSum, hPaths_sum_eq_completeHom, Nat.add_sub_cancel_left]
-  · rw [if_neg (by omega), edgeSum, hPaths_eq_empty_of_lt h, Finset.sum_empty]
+    rw [ite_eq_left h, edgeSum, hPaths_sum_eq_completeHom, Nat.add_sub_cancel_left]
+  · rw [ite_eq_right (by omega), edgeSum, hPaths_eq_empty_of_lt h, Finset.sum_empty]
 
 /-- Shifting both indices of a Jacobi--Trudi entry leaves it unchanged: only the
 difference of the two is read. -/

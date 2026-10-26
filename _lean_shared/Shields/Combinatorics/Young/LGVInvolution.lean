@@ -104,7 +104,7 @@ def famPath (F : Fin m → ℕ → ℕ) (n : ℕ) : ℕ → ℕ :=
 
 /-- In range, the family read at a natural-number index is the path at that index. -/
 theorem famPath_of_lt (F : Fin m → ℕ → ℕ) {n : ℕ} (h : n < m) : famPath F n = F ⟨n, h⟩ :=
-  dif_pos h
+  dite_eq_left h
 
 @[simp]
 theorem famPath_val (F : Fin m → ℕ → ℕ) (w : Fin m) : famPath F (w : ℕ) = F w :=
@@ -236,17 +236,18 @@ theorem famSplice_apply (i u v : ℕ) (F : Fin m → ℕ → ℕ) (w : Fin m) :
 variable {i : ℕ} {F : Fin m → ℕ → ℕ} {u v : Fin m}
 
 theorem famSplice_left : famSplice i (u : ℕ) (v : ℕ) F u = spliceAt i (F u) (F v) := by
-  rw [famSplice_apply, if_pos rfl, famPath_val]
+  rw [famSplice_apply, ite_eq_left rfl, famPath_val]
 
 theorem famSplice_right (huv : u ≠ v) :
     famSplice i (u : ℕ) (v : ℕ) F v = spliceAt i (F v) (F u) := by
-  rw [famSplice_apply, if_neg fun hc => huv ((Fin.val_eq_val v u).mp hc).symm, if_pos rfl,
+  rw [famSplice_apply, ite_eq_right fun hc => huv ((Fin.val_eq_val v u).mp hc).symm,
+    ite_eq_left rfl,
     famPath_val]
 
 theorem famSplice_other {w : Fin m} (h1 : w ≠ u) (h2 : w ≠ v) :
     famSplice i (u : ℕ) (v : ℕ) F w = F w := by
-  rw [famSplice_apply, if_neg fun hc => h1 ((Fin.val_eq_val w u).mp hc),
-    if_neg fun hc => h2 ((Fin.val_eq_val w v).mp hc)]
+  rw [famSplice_apply, ite_eq_right fun hc => h1 ((Fin.val_eq_val w u).mp hc),
+    ite_eq_right fun hc => h2 ((Fin.val_eq_val w v).mp hc)]
 
 /-- Below the splice height nothing moves. -/
 theorem famSplice_apply_of_le {w : Fin m} {k : ℕ} (hk : k ≤ i) :
@@ -385,7 +386,7 @@ noncomputable def natSwap (m u v : ℕ) : Equiv.Perm (Fin m) :=
   if h : u < m ∧ v < m then Equiv.swap ⟨u, h.1⟩ ⟨v, h.2⟩ else 1
 
 theorem natSwap_val (u v : Fin m) : natSwap m (u : ℕ) (v : ℕ) = Equiv.swap u v := by
-  rw [natSwap, dif_pos ⟨u.isLt, v.isLt⟩]
+  rw [natSwap, dite_eq_left ⟨u.isLt, v.isLt⟩]
 
 theorem natSwap_mul_self (m u v : ℕ) : natSwap m u v * natSwap m u v = 1 := by
   rw [natSwap]

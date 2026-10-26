@@ -39,10 +39,12 @@ positive and produce a strictly larger admissible `s`.
 **Algebraic simplicity -- multiplicity one in the characteristic polynomial -- is not proved.**
 
 Mathlib has the irreducibility and primitivity *definitions* (`Matrix.IsIrreducible`,
-`Matrix.IsPrimitive`) but no Perron--Frobenius theorem. The theorems are in flight as a PR chain --
-#39919 (Collatz--Wielandt function and Perron root bounds, the same route taken here), #39920
-(primitive matrices), #39921 (uniqueness of the Perron eigenvector), #39922 (irreducible matrices),
-#39925 (simplicity of the Perron root) -- every link of which is labeled `blocked-by-other-PR`.
+`Matrix.IsPrimitive`) but no Perron--Frobenius theorem at revision `8e45b05`. The theorems are in
+flight as the open PR chain #39919--#39925 -- #39919 (Collatz--Wielandt function and Perron root
+bounds, the same route taken here), #39920 (primitive matrices), #39921 (uniqueness of the Perron
+eigenvector), #39922 (irreducible matrices), #39923 and #39924 (spectral dominance for irreducible
+and for primitive matrices), #39925 (simplicity of the Perron root). Every link after the head is
+labeled `blocked-by-other-PR`; #39919 itself is not.
 Every matrix this is applied to is entrywise positive, hence primitive, so that chain would subsume
 this module.
 
@@ -489,7 +491,7 @@ theorem eq_perronRoot_of_norm_eq [Nonempty ι] {A : Matrix ι ι ℝ} (hA : ∀ 
 
 /-! ### The compound matrix of a totally positive matrix
 
-The reality half of `\cite[Cor.~5.5]{Pinkus2010}` applies Perron–Frobenius to
+The reality half of `\cite[Cor.~5.5]{Pinkus2010TotallyPositive}` applies Perron–Frobenius to
 each compound `∧^r A`.  With the compound built in `TotallyNonneg` and the Perron
 root built above, that step is now available; what the argument additionally
 needs, and what is still missing, is **simplicity and strict dominance** of the

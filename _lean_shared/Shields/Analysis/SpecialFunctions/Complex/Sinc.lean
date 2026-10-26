@@ -76,9 +76,9 @@ theorem sinc_pi_mul_congr_sq {s t : ℝ} (h : s ^ 2 = t ^ 2) :
 origin.  Mathlib has `Real.sinc` but no complex counterpart. -/
 noncomputable def csinc (z : ℂ) : ℂ := if z = 0 then 1 else Complex.sin z / z
 
-@[simp] theorem csinc_zero : csinc 0 = 1 := if_pos rfl
+@[simp] theorem csinc_zero : csinc 0 = 1 := ite_eq_left rfl
 
-theorem csinc_of_ne_zero {z : ℂ} (hz : z ≠ 0) : csinc z = Complex.sin z / z := if_neg hz
+theorem csinc_of_ne_zero {z : ℂ} (hz : z ≠ 0) : csinc z = Complex.sin z / z := ite_eq_right hz
 
 /-- `csinc` restricted to the reals is `Real.sinc`. -/
 theorem csinc_ofReal (x : ℝ) : csinc (x : ℂ) = (Real.sinc x : ℂ) := by

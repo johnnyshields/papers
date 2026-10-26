@@ -51,13 +51,13 @@ variable {A : Type*} [CommRing A] {u v : A⟦X⟧}
 for the power-series derivation, restated with the product written out and the square on the
 side the residue identities use it from. -/
 theorem sq_mul_derivative_of_mul_eq_one (huv : u * v = 1) :
-    v ^ 2 * d⁄dX A u = -d⁄dX A v := by
-  have h := (derivative A).leibniz_of_mul_eq_one (by rw [mul_comm]; exact huv : v * u = 1)
+    v ^ 2 * d⁄dX u = -d⁄dX v := by
+  have h := (derivative (R := A)).leibniz_of_mul_eq_one (by rw [mul_comm]; exact huv : v * u = 1)
   simp only [smul_eq_mul] at h
   rw [h]; ring
 
 /-- `(X u)' = u + X u'`. -/
-theorem derivative_X_mul (u : A⟦X⟧) : d⁄dX A (X * u) = u + X * d⁄dX A u := by
+theorem derivative_X_mul (u : A⟦X⟧) : d⁄dX (X * u) = u + X * d⁄dX u := by
   rw [Derivation.leibniz]
   simp [smul_eq_mul, add_comm]
 
@@ -74,18 +74,18 @@ theorem subst_C_mul_X_pow (u : A⟦X⟧) (a : A) (k : ℕ) :
 
 /-- The `j = 0` case of the residue identity. -/
 theorem coeff_zero_inv_mul_derivative (huv : u * v = 1) :
-    coeff 0 (v * d⁄dX A (X * u)) = 1 := by
-  have h : v * d⁄dX A (X * u) = 1 + X * (v * d⁄dX A u) := by
+    coeff 0 (v * d⁄dX (X * u)) = 1 := by
+  have h : v * d⁄dX (X * u) = 1 + X * (v * d⁄dX u) := by
     rw [derivative_X_mul]; linear_combination huv
   rw [h]; simp
 
 /-- The residue identity cleared of its denominator: `j [w^j](v^{j+1}(Xu)') = 0` for
 `j ≥ 1`.  This is `res(dF) = 0` with the Laurent series eliminated. -/
 theorem nsmul_coeff_succ_inv_pow_mul_derivative (huv : u * v = 1) (i : ℕ) :
-    (i + 1) • coeff (i + 1) (v ^ (i + 1 + 1) * d⁄dX A (X * u)) = 0 := by
+    (i + 1) • coeff (i + 1) (v ^ (i + 1 + 1) * d⁄dX (X * u)) = 0 := by
   have hs := sq_mul_derivative_of_mul_eq_one huv
-  have key : (i + 1) • (v ^ (i + 1 + 1) * d⁄dX A (X * u))
-      = (i + 1) • v ^ (i + 1) - X * d⁄dX A (v ^ (i + 1)) := by
+  have key : (i + 1) • (v ^ (i + 1 + 1) * d⁄dX (X * u))
+      = (i + 1) • v ^ (i + 1) - X * d⁄dX (v ^ (i + 1)) := by
     rw [derivative_pow, derivative_X_mul]
     simp only [nsmul_eq_mul, Nat.add_sub_cancel]
     push_cast
@@ -101,10 +101,10 @@ theorem nsmul_coeff_succ_inv_pow_mul_derivative (huv : u * v = 1) (i : ℕ) :
 This is what change of variables in the formal residue reduces to once the Laurent
 series are cleared. -/
 theorem coeff_inv_pow_mul_derivative [IsAddTorsionFree A] (huv : u * v = 1) (j : ℕ) :
-    coeff j (v ^ (j + 1) * d⁄dX A (X * u)) = if j = 0 then 1 else 0 := by
+    coeff j (v ^ (j + 1) * d⁄dX (X * u)) = if j = 0 then 1 else 0 := by
   obtain _ | i := j
   · simpa using coeff_zero_inv_mul_derivative huv
-  · rw [if_neg (Nat.succ_ne_zero i)]
+  · rw [ite_eq_right (Nat.succ_ne_zero i)]
     refine IsAddTorsionFree.nsmul_right_injective (n := i + 1) (by omega) ?_
     simpa using nsmul_coeff_succ_inv_pow_mul_derivative huv i
 
@@ -116,14 +116,14 @@ variable {A : Type*} [CommRing A] [IsAddTorsionFree A] {u v : A⟦X⟧}
 
 /-- Change of variables on the monomials `C a * X^k`. -/
 private theorem coeff_cov_monomial (huv : u * v = 1) (a : A) (k m : ℕ) :
-    coeff m ((C a * X ^ k : A⟦X⟧).subst (X * u) * v ^ (m + 1) * d⁄dX A (X * u))
+    coeff m ((C a * X ^ k : A⟦X⟧).subst (X * u) * v ^ (m + 1) * d⁄dX (X * u))
       = coeff m (C a * X ^ k : A⟦X⟧) := by
   rw [subst_C_mul_X_pow, mul_pow,
-    show (C a * (X ^ k * u ^ k) * v ^ (m + 1) * d⁄dX A (X * u) : A⟦X⟧)
-      = C a * (X ^ k * (u ^ k * v ^ (m + 1) * d⁄dX A (X * u))) by ring,
+    show (C a * (X ^ k * u ^ k) * v ^ (m + 1) * d⁄dX (X * u) : A⟦X⟧)
+      = C a * (X ^ k * (u ^ k * v ^ (m + 1) * d⁄dX (X * u))) by ring,
     coeff_C_mul, coeff_C_mul_X_pow, coeff_X_pow_mul']
   rcases le_or_gt k m with hk | hk
-  · rw [if_pos hk]
+  · rw [ite_eq_left hk]
     obtain ⟨j, rfl⟩ : ∃ j, m = k + j := ⟨m - k, by omega⟩
     have hsplit : u ^ k * v ^ (k + j + 1) = v ^ (j + 1) := by
       rw [show v ^ (k + j + 1) = v ^ k * v ^ (j + 1) by ring, ← mul_assoc, ← mul_pow, huv,
@@ -131,12 +131,12 @@ private theorem coeff_cov_monomial (huv : u * v = 1) (a : A) (k m : ℕ) :
     rw [show k + j - k = j by omega, hsplit, coeff_inv_pow_mul_derivative huv j]
     rcases Nat.eq_zero_or_pos j with rfl | hj
     · simp
-    · rw [if_neg (by omega), if_neg (by omega), mul_zero]
-  · rw [if_neg (by omega), if_neg (by omega), mul_zero]
+    · rw [ite_eq_right (by omega), ite_eq_right (by omega), mul_zero]
+  · rw [ite_eq_right (by omega), ite_eq_right (by omega), mul_zero]
 
 /-- Change of variables on polynomials. -/
 private theorem coeff_cov_poly (huv : u * v = 1) (p : Polynomial A) (m : ℕ) :
-    coeff m ((p : A⟦X⟧).subst (X * u) * v ^ (m + 1) * d⁄dX A (X * u))
+    coeff m ((p : A⟦X⟧).subst (X * u) * v ^ (m + 1) * d⁄dX (X * u))
       = coeff m (p : A⟦X⟧) := by
   induction p using Polynomial.induction_on' with
   | add p q hp hq =>
@@ -156,7 +156,7 @@ private theorem coeff_cov_poly (huv : u * v = 1) (p : Polynomial A) (m : ℕ) :
 In residue notation this is `res(H(f) f') = res(H)` for `H = F · w^{-(m+1)}`; the factor
 `w^{-(m+1)}` has been cleared, which is why only power series appear. -/
 theorem coeff_subst_mul_inv_pow_mul_derivative (huv : u * v = 1) (F : A⟦X⟧) (m : ℕ) :
-    coeff m (F.subst (X * u) * v ^ (m + 1) * d⁄dX A (X * u)) = coeff m F := by
+    coeff m (F.subst (X * u) * v ^ (m + 1) * d⁄dX (X * u)) = coeff m F := by
   have hf := hasSubst_X_mul u
   obtain ⟨G, hG⟩ : (X : A⟦X⟧) ^ (m + 1) ∣ F - ((trunc (m + 1) F : Polynomial A) : A⟦X⟧) := by
     rw [X_pow_dvd_iff]
@@ -165,11 +165,11 @@ theorem coeff_subst_mul_inv_pow_mul_derivative (huv : u * v = 1) (F : A⟦X⟧) 
   have hFsplit : F = ((trunc (m + 1) F : Polynomial A) : A⟦X⟧) + X ^ (m + 1) * G := by
     rw [← hG]; ring
   have hvanish : ∀ Q : A⟦X⟧, coeff m ((X : A⟦X⟧) ^ (m + 1) * Q) = 0 := fun Q => by
-    rw [coeff_X_pow_mul', if_neg (by omega)]
+    rw [coeff_X_pow_mul', ite_eq_right (by omega)]
   rw [hFsplit, subst_add hf, subst_mul hf, subst_pow hf, subst_X hf, add_mul, add_mul,
     map_add, map_add, coeff_cov_poly huv,
-    show ((X * u : A⟦X⟧) ^ (m + 1) * G.subst (X * u) * v ^ (m + 1) * d⁄dX A (X * u))
-      = X ^ (m + 1) * (u ^ (m + 1) * G.subst (X * u) * v ^ (m + 1) * d⁄dX A (X * u)) by ring,
+    show ((X * u : A⟦X⟧) ^ (m + 1) * G.subst (X * u) * v ^ (m + 1) * d⁄dX (X * u))
+      = X ^ (m + 1) * (u ^ (m + 1) * G.subst (X * u) * v ^ (m + 1) * d⁄dX (X * u)) by ring,
     hvanish, hvanish, add_zero]
 
 end ChangeOfVariables
@@ -187,18 +187,18 @@ or, in classical notation, `n [w^n] H(g(w)) = [t^{n-1}](H'(t) (t/f(t))^n)`, the 
 quotient `t/f(t)` being the power series `v`. -/
 theorem lagrange_burmann (huv : u * v = 1) (hg0 : constantCoeff g = 0)
     (hg : g.subst (X * u) = X) (H : A⟦X⟧) (m : ℕ) :
-    (m + 1) • coeff (m + 1) (H.subst g) = coeff m (d⁄dX A H * v ^ (m + 1)) := by
+    (m + 1) • coeff (m + 1) (H.subst g) = coeff m (d⁄dX H * v ^ (m + 1)) := by
   have hf := hasSubst_X_mul u
   have hgs : HasSubst g := HasSubst.of_constantCoeff_zero' hg0
   -- `(g' ∘ f) · f' = (g ∘ f)' = 1`
-  have hchain : (d⁄dX A g).subst (X * u) * d⁄dX A (X * u) = 1 := by
+  have hchain : (d⁄dX g).subst (X * u) * d⁄dX (X * u) = 1 := by
     rw [← derivative_subst hf, hg, derivative_X]
   -- the derivative of `H ∘ g`, pushed through change of variables
   have hcov := coeff_subst_mul_inv_pow_mul_derivative huv
-    ((d⁄dX A H).subst g * d⁄dX A g) m
+    ((d⁄dX H).subst g * d⁄dX g) m
   rw [subst_mul hf, subst_comp_subst_apply hgs hf, hg, X_subst,
-    show ((d⁄dX A H) * (d⁄dX A g).subst (X * u) * v ^ (m + 1) * d⁄dX A (X * u) : A⟦X⟧)
-      = d⁄dX A H * v ^ (m + 1) * ((d⁄dX A g).subst (X * u) * d⁄dX A (X * u)) by ring,
+    show ((d⁄dX H) * (d⁄dX g).subst (X * u) * v ^ (m + 1) * d⁄dX (X * u) : A⟦X⟧)
+      = d⁄dX H * v ^ (m + 1) * ((d⁄dX g).subst (X * u) * d⁄dX (X * u)) by ring,
     hchain, mul_one] at hcov
   rw [hcov, ← derivative_subst hgs, coeff_derivative, nsmul_eq_mul]
   push_cast
@@ -261,7 +261,7 @@ theorem constantCoeff_expOf (hc : constantCoeff c = 0) : constantCoeff (expOf c)
 
 /-- `(e^c)' = e^c c'`. -/
 theorem derivative_expOf (hc : constantCoeff c = 0) :
-    d⁄dX A (expOf c) = expOf c * d⁄dX A c := by
+    d⁄dX (expOf c) = expOf c * d⁄dX c := by
   rw [expOf, derivative_subst (HasSubst.of_constantCoeff_zero' hc), derivative_exp]
 
 variable [IsAddTorsionFree A]
@@ -433,21 +433,21 @@ theorem inv_eq_of_C_mul {c c' : A} (hc : c * c' = 1) {qf qg pf pg : A⟦X⟧}
 `C c'` on `p` cancel outright, so `(cq)'(cq)^{-1} = q'q^{-1}` exactly. -/
 theorem logDeriv_eq_of_C_mul {c c' : A} (hc : c * c' = 1) {qf qg pf pg : A⟦X⟧}
     (hqf : qf * pf = 1) (hqg : qg * pg = 1) (hq : qg = C c * qf) :
-    d⁄dX A qg * pg = d⁄dX A qf * pf := by
+    d⁄dX qg * pg = d⁄dX qf * pf := by
   have hp := inv_eq_of_C_mul hc hqf hqg hq
-  have hd : d⁄dX A qg = C c * d⁄dX A qf := by
+  have hd : d⁄dX qg = C c * d⁄dX qf := by
     rw [hq, Derivation.leibniz]
     simp
   rw [hd, hp]
-  calc C c * d⁄dX A qf * (C c' * pf) = (C c * C c') * (d⁄dX A qf * pf) := by ring
-    _ = d⁄dX A qf * pf := by rw [← map_mul, hc, map_one, one_mul]
+  calc C c * d⁄dX qf * (C c' * pf) = (C c * C c') * (d⁄dX qf * pf) := by ring
+    _ = d⁄dX qf * pf := by rw [← map_mul, hc, map_one, one_mul]
 
 variable [IsAddTorsionFree A]
 
 /-- Over a torsion-free ring a formal power series with vanishing derivative is its own constant
 term.  Both sides have derivative zero and the same constant term, which is what
 `PowerSeries.derivative.ext` asks for. -/
-theorem eq_C_of_derivative_eq_zero {F : A⟦X⟧} (h : d⁄dX A F = 0) : F = C (constantCoeff F) :=
+theorem eq_C_of_derivative_eq_zero {F : A⟦X⟧} (h : d⁄dX F = 0) : F = C (constantCoeff F) :=
   PowerSeries.derivative.ext (by simp [h]) (by simp)
 
 /-- **Conversely, equal logarithmic derivatives force a constant factor.**  The quotient
@@ -457,23 +457,23 @@ theorem eq_C_of_derivative_eq_zero {F : A⟦X⟧} (h : d⁄dX A F = 0) : F = C (
 The leading capital is `PowerSeries.C`, the constant-coefficient embedding, exactly as in
 Mathlib's own `PowerSeries.C_eq_zero` and `Polynomial.C_mul`. -/
 theorem C_mul_of_logDeriv_eq {qf qg pf pg : A⟦X⟧} (hqf : qf * pf = 1) (hqg : qg * pg = 1)
-    (hlog : d⁄dX A qg * pg = d⁄dX A qf * pf) :
+    (hlog : d⁄dX qg * pg = d⁄dX qf * pf) :
     qg = C (constantCoeff (qg * pf)) * qf := by
-  have hpf : d⁄dX A pf = -(d⁄dX A qf * pf * pf) := by
-    have h0 : d⁄dX A (qf * pf) = 0 := by rw [hqf]; simp
+  have hpf : d⁄dX pf = -(d⁄dX qf * pf * pf) := by
+    have h0 : d⁄dX (qf * pf) = 0 := by rw [hqf]; simp
     rw [Derivation.leibniz] at h0
     simp only [smul_eq_mul] at h0
     have := congrArg (fun z => z * pf) h0
     simp only [zero_mul] at this
-    have hcancel : qf * d⁄dX A pf * pf = d⁄dX A pf := by
-      calc qf * d⁄dX A pf * pf = (qf * pf) * d⁄dX A pf := by ring
-        _ = d⁄dX A pf := by rw [hqf, one_mul]
+    have hcancel : qf * d⁄dX pf * pf = d⁄dX pf := by
+      calc qf * d⁄dX pf * pf = (qf * pf) * d⁄dX pf := by ring
+        _ = d⁄dX pf := by rw [hqf, one_mul]
     linear_combination this - hcancel
-  have hqg' : d⁄dX A qg = d⁄dX A qf * pf * qg := by
-    calc d⁄dX A qg = d⁄dX A qg * (qg * pg) := by rw [hqg, mul_one]
-      _ = (d⁄dX A qg * pg) * qg := by ring
-      _ = d⁄dX A qf * pf * qg := by rw [hlog]
-  have hF : d⁄dX A (qg * pf) = 0 := by
+  have hqg' : d⁄dX qg = d⁄dX qf * pf * qg := by
+    calc d⁄dX qg = d⁄dX qg * (qg * pg) := by rw [hqg, mul_one]
+      _ = (d⁄dX qg * pg) * qg := by ring
+      _ = d⁄dX qf * pf * qg := by rw [hlog]
+  have hF : d⁄dX (qg * pf) = 0 := by
     rw [Derivation.leibniz]
     simp only [smul_eq_mul]
     rw [hpf, hqg']

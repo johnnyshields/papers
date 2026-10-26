@@ -24,7 +24,9 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import Vendor.MathlibPR.PR42570.FunPropTags
+import Mathlib.Analysis.Meromorphic.Basic
+import Mathlib.Analysis.Meromorphic.Complex
+import Mathlib.Analysis.Analytic.Constructions
 import Mathlib.Analysis.Meromorphic.Order
 import Vendor.ProjectVD.MathlibSubmitted.TruncatedCounting
 

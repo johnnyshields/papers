@@ -118,7 +118,7 @@ theorem logDeriv_zeroFactor {s : Multiset ℂ} {z : ℂ} (hz : ∀ u ∈ s, z �
       funext fun w => zeroFactor_cons u s w
     have hd1 : DifferentiableAt ℂ (fun w : ℂ => w - u) z :=
       (differentiable_id.sub_const u).differentiableAt
-    have hmul := logDeriv_mul (f := fun w : ℂ => w - u) (g := zeroFactor s) z
+    have hmul := logDeriv_fun_mul (f := fun w : ℂ => w - u) (g := zeroFactor s) z
       (sub_ne_zero.mpr hzu) (zeroFactor_ne_zero hrest) hd1 ((differentiable_zeroFactor s) z)
     have h1 : logDeriv (fun w : ℂ => w - u) z = (z - u)⁻¹ := by
       simp [logDeriv_apply, one_div]
@@ -141,7 +141,7 @@ theorem logDeriv_prod_sub_mul {ι : Type*} {s : Finset ι} {a : ι → ℂ} {f G
     rw [hf]
     exact logDeriv_mul z hPz hG hPd hGd
   have hprod : logDeriv (fun w => ∏ j ∈ s, (w - a j)) z = ∑ j ∈ s, (z - a j)⁻¹ := by
-    rw [logDeriv_prod (f := fun j w => w - a j) hsub fun j _ => by fun_prop]
+    rw [logDeriv_fun_prod (f := fun j w => w - a j) hsub fun j _ => by fun_prop]
     exact Finset.sum_congr rfl fun j _ => by simp [logDeriv_apply]
   rw [hprod] at hmul
   simpa only [logDeriv_apply] using hmul
@@ -419,7 +419,7 @@ theorem circleIntegral_logDeriv {f : ℂ → ℂ} {c : ℂ} {R : ℝ} (hR : 0 < 
     intro z hz
     have hzc : z ∈ closedBall c R := sphere_subset_closedBall hz
     have hdg : DifferentiableAt ℂ g z := (hg z hzc).differentiableAt
-    have hsplit := logDeriv_mul (f := zeroFactor s) (g := g) z
+    have hsplit := logDeriv_fun_mul (f := zeroFactor s) (g := g) z
       (zeroFactor_ne_zero (hsphne z hz)) (hgne z hzc) ((differentiable_zeroFactor s) z) hdg
     rw [logDeriv_zeroFactor (hsphne z hz)] at hsplit
     change logDeriv f z = _

@@ -1,0 +1,678 @@
+\documentclass[11pt,a4paper]{amsart}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage[expansion=false]{microtype}
+\usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black]{hyperref}
+\usepackage[nameinlink,capitalize]{cleveref}
+
+\hypersetup{
+  pdftitle={Factor Schur functions of marked compositions from differential operators},
+  pdfauthor={John Shields},
+  pdfkeywords={skew Schur function, marked composition, power-sum adjoint, factor recovery, skew-equivalence, Murnaghan--Nakayama rule, symmetric function}
+}
+\pdfinfo{
+  /ORCID (https://orcid.org/0009-0004-3882-4571)
+}
+
+\numberwithin{equation}{section}
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{question}[theorem]{Question}
+
+\newcommand{\Lam}{\Lambda}
+\newcommand{\Q}{\mathbb Q}
+\newcommand{\Z}{\mathbb Z}
+
+\title[Factor Schur functions from differential operators]{Factor Schur functions of marked compositions\\ from differential operators}
+\author{John Shields}
+\date{October 22, 2026}
+\thanks{Independent researcher, Ginza 2-15-2, KR Ginza II 5F, Chuo-ku, Tokyo, Japan 104-0061.\\
+\hspace*{\parindent}Corresponding author: \href{mailto:math@johnnyshields.com}{math@johnnyshields.com}.  ORCID: \href{https://orcid.org/0009-0004-3882-4571}{0009-0004-3882-4571}.\\
+\hspace*{\parindent}This work is archived at \href{https://doi.org/10.5281/zenodo.23665183}{doi:10.5281/zenodo.23665183}.}
+\subjclass[2020]{Primary 05E05; Secondary 05A17}
+\keywords{skew Schur function, marked composition, power-sum adjoint, factor recovery, skew-equivalence, Murnaghan--Nakayama rule, symmetric function}
+
+\begin{document}
+
+\begin{abstract}
+We recover the factor Schur functions of a legal marked composition from its parent function and a supplied period.  Ordinary compositions admit arbitrary connected outer diagrams; for mixed compositions the outer is required to be a ribbon.  In the ordinary case, Olson-Harris's power-sum action gives the terminal derivative order, a reduced-numerator formula for the inner function, and normalized character values for the outer, with the attachment-dependent involution.  Mixed compositions are annihilated by those Hall adjoints.  A weighted derivation instead gives a nonzero terminal ribbon evaluation at a fractional alphabet size and a triangular system recovering the genuine outer function.  In both cases the last two nonzero outputs cancel the entire composition normalization, so its exponents are not inputs.  These inverses recover functions, not arbitrary marked realizations, and do not select an unsupplied period.
+\end{abstract}
+
+\maketitle
+
+\section{Introduction}\label{sec:introduction}
+
+A marked composition constructs a skew diagram from an outer diagram and overlapping translates of an inner diagram.  Its Schur function need not determine either diagram.  This paper gives a more limited inverse: from the parent function and a supplied period it recovers both factor \emph{functions}.  Ordinary compositions (whose two end attachments are both horizontal or both vertical) admit arbitrary connected outers.  Mixed compositions (whose attachments are one horizontal and one vertical) are treated when the outer is a ribbon.  No sizes or normalization exponents are required as additional input.
+
+The composition-and-reversal description of ribbon Schur equality is due to Billera, Thomas, and van Willigenburg \cite{Billera2006DecomposableCompositions}.  Reiner, Shaw, and van Willigenburg developed constructions and necessary invariants for general skew Schur equality \cite{Reiner2007Coincidences}.  McNamara and van Willigenburg introduced the marked composition used here and conjectured a corresponding general classification \cite{McNamara2009Classification}.  The forward composition theory and the inverse question are different: constructing equal functions from prescribed factors does not recover factors from an equality.
+
+The ordinary differential input is Olson-Harris's power-sum action on modified compositions \cite[Lem.~5.4.7 and Thms.~5.4.8--5.4.9]{OlsonHarris2024HopfApplications}, developed from the key-ribbon method of Yeats \cite{Yeats2017HopfSchur}.  These operators are the standard power-sum adjoints \cite[Ch.~I, \S5, Ex.~3]{Macdonald1995SymmetricFunctions}.  The ordinary extraction formulas are consequences of that action and connected-skew irreducibility \cite{Barekat2009CoincidencesCorrigendum}: terminal derivatives remove the unknown normalization, and irreducibility identifies the reduced numerator.  The attributed key-ribbon proof in \Cref{sec:action} specifies the normalization and empty-outer convention.  For mixed compositions all period-multiple Hall adjoints vanish, so their inverse requires a different operator.
+
+Write \(P=s_F\), and suppose \(F=D\circ_\eta E\) is an ordinary composition with period \(p\).  Put \(\delta_k=p_k^\perp\).  If \(a\) is the largest integer with \(\delta_p^aP\ne0\), then \Cref{thm:extraction} gives
+\[
+ |D|=a,\qquad
+ s_E=\operatorname{prim}\!\left(
+ \frac{\delta_p^{a-1}P}{\gcd(\delta_p^{a-1}P,\delta_p^aP)}\right).
+\]
+Here \(\operatorname{prim}\) removes a nonzero rational scalar by the canonical integral normalization described below.  Derivatives indexed by partitions of \(a\), divided by \(\delta_p^aP\), recover the normalized outer character.  They recover \(s_D\) for horizontal attachment and \(\omega(s_D)\) for vertical attachment.
+
+For a mixed chart, \Cref{rt:mixed-readout} replaces the Hall adjoints by the weighted derivations \(V_k=\sum_{j\ge1}j h_j\,\partial/\partial h_{j+k}\).  These are not Hall adjoints.  A nonzero ribbon specialization at a fractional alphabet size makes the terminal weighted output nonzero.  The reduced numerator again recovers the inner; its first weighted derivative recovers the positive phase difference, after which an ordered triangular system gives the genuine outer function.
+
+When an ordinary inner function determines its connected diagram up to rotation, the inverse identifies the marked final factor of a Schur-equal diagram that already has a chart of the same period; see \Cref{thm:transport}.  Two-row inners satisfy this hypothesis (\Cref{cor:two-row}), so for them the parent's connected outer is unrestricted.  The mate's chart need not initially be ordinary: mixed charts are excluded by Hall vanishing.  No corresponding marked-realization conclusion is inferred from mixed factor-function recovery alone.
+
+\Cref{sec:action} fixes the geometric conventions and proves the ordinary power-sum action.  \Cref{sec:weighted-action} gives the weighted covariance, including its mixed strip calculation.  \Cref{sec:extraction,sec:mixed-extraction} recover the ordinary and mixed factors on their respective domains.  \Cref{sec:transport} proves the ordinary common-period comparison, and \Cref{sec:examples} gives ordinary nonribbon and mixed ribbon examples.
+
+\section{Marked composition and the power-sum action}\label{sec:action}
+
+\subsection{Symmetric functions and diagrams}
+
+Work in \(\Lam=\Q[h_1,h_2,\ldots]=\Q[p_1,p_2,\ldots]\), with \(h_0=1\) and \(h_j=0\) for \(j<0\).  Both \(h_j\) and \(p_j\) have weight \(j\).  For a skew Young diagram \(D=\lambda/\mu\), in English notation,
+\begin{equation}\label{eq:jt}
+ s_D=\det(h_{\lambda_i-\mu_j-i+j})_{1\le i,j\le n}.
+\end{equation}
+Diagrams are identified up to translation.  Connected means nonempty and edge-connected.  Write \(D^*\), \(D^{\mathsf t}\), and \(\operatorname{AT}(D)\) for rotation through \(180\) degrees, transpose, and antitranspose.  Then \(s_{D^*}=s_D\) and \(s_{\operatorname{AT}(D)}=\omega(s_D)\), where \(\omega(p_j)=(-1)^{j-1}p_j\).
+
+The Hall adjoint of multiplication by \(p_k\) is
+\begin{equation}\label{eq:delta}
+ \delta_k=p_k^\perp
+ =k\frac{\partial}{\partial p_k}
+ =\sum_{j\ge k}h_{j-k}\frac{\partial}{\partial h_j}.
+\end{equation}
+The last identity in \eqref{eq:delta} follows by applying the adjoint to
+\(\sum_{j\ge0}h_jt^j=\exp(\sum_{k\ge1}p_kt^k/k)\).
+The \(\delta_k\) are commuting derivations.  If \(R\) is a ribbon, its height is its number of rows minus one.  The Murnaghan--Nakayama rule gives
+\begin{equation}\label{eq:mn}
+ \delta_k s_D=\sum_R(-1)^{\operatorname{ht}(R)}s_{D\setminus R},
+\end{equation}
+where the sum is over southeast-removable ribbons of \(k\) cells: for \(D=\lambda/\mu\), these are \(R=\lambda/\nu\) with \(\mu\subseteq\nu\subseteq\lambda\).  The northwest-removal version gives the same symmetric function.
+
+For a diagram \(D\), let \(r(D)\), \(c(D)\), and \(N_D\) denote the numbers of nonempty rows, columns, and content diagonals.  The content of \((i,j)\) is \(j-i\).  Southwest normalization places the southwest cell at \((0,0)\), so a connected diagram occupies contents \(0,\ldots,N_D-1\).  Put \(e=(1,1)\).
+
+\subsection{Legal marks}
+
+A marked inner \(\eta\) consists of a connected diagram \(E\), congruent connected end diagrams \(W_-\) and \(W_+=W_-+v\), and their attachments to the middle
+\(O=E\setminus(W_-\cup W_+)\).
+The lower copy contains the southwest cell of \(E\), and the upper copy contains its northeast cell.  The width and period are
+\begin{equation}\label{eq:period}
+ w=N_W,\qquad p=c(v)=N_E-w.
+\end{equation}
+Legality means Hypotheses I--IV of McNamara and van Willigenburg \cite{McNamara2009Classification}:
+\begin{enumerate}
+\item[(I)] The end copies are maximal on their content diagonals: no larger common end diagram on the same diagonals contains them.
+\item[(II)] At least one occupied diagonal lies between the copies and meets neither; thus \(0\le w<p\).
+\item[(III)] Deleting either end copy leaves a connected skew diagram.  The middle \(O\) is a connected skew diagram.
+\item[(IV)] In \(\boldsymbol E=\bigcup_{j\in\Z}(E+jv)\), no hatted mark is edge-adjacent to a hatted middle, where
+\begin{equation}\label{eq:hats}
+ \widehat O=\{x\in O:x+e\in O\},\qquad
+ \widehat W=\{x\in\boldsymbol E:x+e\in W_-\}
+       \cup\{x\in W_-:x+e\in\boldsymbol E\}.
+\end{equation}
+\end{enumerate}
+The condition on the middle in (III) is the equivalent middle formulation of the usual deletion condition.  The hatted diagrams may be empty or disconnected; their Schur functions are nonzero, with \(s_\varnothing=1\).  Hypothesis V is not imposed.
+
+A horizontal lower attachment places a cell of \(W_-\) immediately west of the southwest cell of \(O\); a vertical lower attachment places it immediately south.  At the upper end the corresponding neighbors are east and north.  Cases \(\mathrm{(a)}=(H,H)\) and \(\mathrm{(b)}=(V,V)\) are \emph{ordinary}; cases \(\mathrm{(c)}=(H,V)\) and \(\mathrm{(d)}=(V,H)\) are \emph{mixed}.  The empty mark is ordinary: its horizontal edge reading has
+\(v_H=\operatorname{ne}(E)-\operatorname{sw}(E)+(0,1)\),
+and its vertical edge reading has \(v_V=v_H-e\).
+
+For a southwest-normalized outer diagram \(D\), an ordinary composition is the union of copies \(E+L_\eta(i,j)\), one for each \((i,j)\in D\), with
+\begin{equation}\label{eq:ordinary-offsets}
+ L_\eta(i,j)=
+ \begin{cases}
+ (j-i)v+ie,&\mathrm{(a)},\\
+ (j-i)v-ie,&\mathrm{(b)}.
+ \end{cases}
+\end{equation}
+This is the ordinary case of the marked composition in \cite{McNamara2009Classification}.  For the mixed cases, if the content-\(t\) diagonal of \(D\) has row interval \([\ell_t,h_t]\), the origins are
+\((j-i)v+(i-\ell_{j-i})e\) in case (c) and
+\((j-i)v+(i-h_{j-i})e\) in case (d).  A vertical neighboring pair in one northwest, respectively southeast, boundary ribbon also contributes the copy of \(W_+\) based at the lower cell's origin plus \(e\), respectively minus \(e\).  These supplemental copies are part of the mixed composition.
+
+A chart \(F=D\circ_\eta E\) is \emph{proper} if \(D,E\) are connected and \(|D|,|E|\ge2\).  This use of proper is separate from Olson-Harris's ``proper'' marked inner, which means Hypothesis IV.  The span formula is
+\begin{equation}\label{eq:span}
+ N_F=pN_D+w.
+\end{equation}
+Indeed the copy on outer content \(t\) occupies \([tp,tp+p+w-1]\); neighboring bands overlap only on marked diagonals.  The supplemental mixed copies lie in those overlaps.
+
+\subsection{Ribbon deletion}\label{subsec:ribbon-action}
+
+Fix a legal case-(a) marked inner \(\eta\) on \(E\), with period \(p\), mark \(W\), and hatted diagrams as in \eqref{eq:hats}.  Put
+\begin{equation}\label{eq:normalizers}
+ A=s_W,\qquad B=s_{\widehat W},\qquad C=s_{\widehat O}.
+\end{equation}
+The southeast boundary of a diagram \(X\) consists of the cells \(x\) for which \(x+e\notin X\); its northwest boundary is defined with \(x-e\).  The \emph{bottom key ribbon} of \(E\) is the segment of its southeast boundary starting at the first cell of the southeast boundary of \(O\) and ending one content before the corresponding translated starting position.  It has \(p\) cells.  Equivalently, its complement is the disjoint union of \(W_-\), \(\widehat O\), and the copy of \(\widehat W\) at the upper mark.  The top key ribbon is defined on the northwest boundary.  Translation of the end copies shows that the two key ribbons have the same height \(b\).  Set \(\sigma=(-1)^b\).
+
+The next lemma is the geometric form of the ordinary power-sum action.  It is due to Olson-Harris, building on Yeats's key ribbons; the proof is included to specify the deletion and normalization used here.
+
+\begin{lemma}\label{lem:ribbon-deletion}
+For a legal case-(a) inner and any skew outer \(D\), the following hold.
+\begin{enumerate}
+\item Neither \(W\), \(\widehat W\), nor \(\widehat O\) has a removable ribbon of positive length divisible by \(p\).
+\item Southeast-removable ribbons of \(kp\) cells in \(D\circ_\eta E\) correspond to southeast-removable ribbons \(R\) of \(k\) cells in \(D\).  The corresponding ribbon has height \(kb+\operatorname{ht}(R)\).
+\item Writing \(D'=D\setminus R\), its deletion leaves a disjoint union with Schur function
+\begin{equation}\label{eq:ribbon-remainder}
+ A^{r(D)-r(D')}B^{c(D)-c(D')}C^{N_D-N_{D'}}J_{D'},
+\end{equation}
+where \(J_{D'}=s_{D'\circ_\eta E}\) for \(D'\ne\varnothing\), and \(J_\varnothing=1\).
+\end{enumerate}
+\end{lemma}
+\begin{proof}
+A boundary segment of length \(p\) has endpoints on consecutive translates of the same content position.  A removable segment extending before the top key ribbon would start at a cell \(a\in W_-\).  Write \(a'=a+v\).  Removability gives no western neighbor at \(a\) and no northern neighbor at the segment's last cell \(z\).  Since \(a\) precedes the top key ribbon, the definitions of the key ribbon and the hatted mark give \(a'-e\in O\).  The cell \(c=a'-(0,1)\) also lies in \(O\) and has a northern neighbor, so \(c\ne z\).  The cells \(c,z\) have the same content, with \(z\) northwest of \(c\).  Skewness of \(O\) gives \(c-e\in O\).  Thus \(c-e\in\widehat O\), whereas its eastern neighbor \(a'-e\) belongs to the hatted upper mark.  This contradicts (IV).  Rotation gives the corresponding exclusion at the other end.  These are precisely the possible loose boundary segments outside the key ribbons.
+
+The northwest boundary of \(D\circ_\eta E\) is obtained by replacing each cell of the northwest boundary of \(D\) by a top key ribbon, with only end segments added at the two extremes.  This follows from the copy origins \eqref{eq:ordinary-offsets}: a horizontal outer step changes the origin by \(v\), and a vertical step changes it by \(v-e\).  A length-\(p\) segment beginning at an interior phase of a key ribbon has translated boundary steps at its two ends, whereas removability requires opposite turns.  It cannot be removed.  The end segments were excluded in the preceding paragraph.  Consequently the removable length-\(p\) segments are exactly the key copies belonging to removable outer cells.  The southeast statement follows by rotation.
+
+Deleting a key copy at a southeast-removable cell \(d\) leaves the composition with \(d\) deleted, together with the following pieces whenever the indicated neighbor is absent:
+\begin{equation*}
+ \begin{array}{c|c}
+ \text{neighbor of }d\text{ absent in the current outer}&\text{remaining piece}\\ \hline
+ \text{west}&W\\
+ \text{north}&\widehat W\\
+ \text{northwest}&\widehat O.
+ \end{array}
+\end{equation*}
+To check this directly, decompose the copy at \(d\) into its bottom key ribbon, lower mark, hatted upper mark, and hatted middle.  The west, north, and northwest copies cover the last three pieces respectively.  If the northwest copy is present, the north and west copies are present as well, and all three pieces are covered.  Otherwise exactly the uncovered pieces in the table remain.  Condition (IV) separates them by edges.  This also proves the table when deletion exhausts the outer.
+
+Deleting the bottom key ribbon from \(E\) leaves the three pieces in (i) as a northwest-removable union.  A northwest-removable \(p\)-ribbon in one of these pieces would be removable in \(E\), but cannot be its top key ribbon.  The length-\(p\) exclusion proves that none exists.  A removable ribbon of \(kp\) cells can be split after \(p\) cells.  According to the direction of the joining step, either its first \(p\) cells or its last \((k-1)p\) cells are removable first.  Induction excludes all multiples in these three pieces.
+
+Apply the same splitting to a removable \(kp\)-ribbon in the composition.  One of its two parts is removable first.  The preceding paragraph prevents a later part from entering an uncovered normalization piece, so induction and the one-cell calculation show that all its key copies project to one removable outer ribbon.  Conversely, those copies form a removable ribbon for every removable outer ribbon.  Each key copy contributes height \(b\), and the vertical joins contribute \(\operatorname{ht}(R)\), proving (ii).  Along the deletions, the numbers of exposed lower marks, hatted marks, and hatted middles are the numbers of rows, columns, and diagonals that disappear.  The exponents telescope to \eqref{eq:ribbon-remainder}.
+\end{proof}
+
+Use formal symbols \([D]\) for skew diagrams and define \(\partial_k[D]\) by the signed ribbon-deletion sum in \eqref{eq:mn}.  Linear extension is on this formal space; no linear independence of skew Schur functions is assumed.  For a fixed case-(a) inner, define
+\begin{equation}\label{eq:modified}
+ \mathcal M([D])=A^{|D|-r(D)}B^{|D|-c(D)}C^{|D|-N_D}J_D,
+ \qquad \mathcal M([\varnothing])=1.
+\end{equation}
+All exponents are nonnegative.  The value on the empty symbol is algebraic.  It is not the Schur function of the geometric convention \(\varnothing\circ_\eta E=W\).
+
+\begin{lemma}[Ordinary power-sum action]\label{lem:action}
+Let \(\Xi=\sigma ABC\).  For every \(k\ge1\),
+\begin{equation}\label{eq:action}
+ \delta_{kp}\mathcal M([D])=\Xi^k\mathcal M(\partial_k[D]),
+ \qquad \delta_{kp}A=\delta_{kp}B=\delta_{kp}C=0.
+\end{equation}
+In particular, \(\delta_p s_E=\Xi\ne0\) and \(\deg\Xi=|E|-p\).
+\end{lemma}
+\begin{proof}
+The vanishing follows from \Cref{lem:ribbon-deletion}(i) and \eqref{eq:mn}.  By (ii)--(iii),
+\begin{equation*}
+ \delta_{kp}J_D
+ =\sigma^k\sum_R(-1)^{\operatorname{ht}(R)}
+ A^{r(D)-r(D')}B^{c(D)-c(D')}C^{N_D-N_{D'}}J_{D'}.
+\end{equation*}
+Multiply by the normalization in \eqref{eq:modified}.  Since \(|D'|=|D|-k\), each exponent is \(k\) plus its exponent in \(\mathcal M([D'])\).  This proves \eqref{eq:action}.  A one-cell outer gives \(\delta_p s_E=\sigma ABC\); homogeneity gives its degree.  This is the symmetric-function specialization of the action in \cite[Lem.~5.4.7]{OlsonHarris2024HopfApplications}.
+\end{proof}
+
+For case (b), transpose the inner and the parent.  The copy formulas give
+\((D\circ_\eta E)^{\mathsf t}=D^*\circ_{\eta^{\mathsf t}}E^{\mathsf t}\),
+where the transposed inner is of case (a).  Also
+\(\delta_j\omega=(-1)^{j-1}\omega\delta_j\).
+Thus the action of \(\delta_{kp}\) has the additional outer sign \((-1)^{k-1}\), after its one-cell sign is absorbed in \(\Xi=\delta_p s_E\).  This proves the vertical version rather than imposing a horizontal convention on it; it agrees with \cite[Thm.~5.4.9]{OlsonHarris2024HopfApplications}.  The same calculation works for both empty-edge readings.
+
+\section{Weighted composition covariance}\label{sec:weighted-action}
+
+The Hall action distinguishes ordinary charts from mixed charts, but cannot recover mixed factors.  The vanishing holds for arbitrary connected mixed outers, not only ribbons.
+
+\begin{lemma}\label{lem:mixed-vanishing}
+If a connected diagram \(F\) has a mixed legal chart of period \(p\), then
+\[
+ \delta_{kp}s_F=0\quad(k\ge1).
+\]
+Consequently no Schur-equal diagram has an ordinary chart of period divisible by \(p\).
+\end{lemma}
+\begin{proof}
+Rotate the chart to case (d).  Write \(h_t\) for the bottom row of the content-\(t\) diagonal of \(F\), and \(B_t=h_{t-1}-h_t\) for its southeast boundary steps.  The case-(d) copy origins give
+\begin{equation}\label{eq:mixed-boundary}
+ B_{t+p}=B_t\quad(1\le t,t+p<N_F),\qquad
+ B_p=0,\quad B_w=1,\quad N_F=pN_D+w,
+\end{equation}
+with \(0<w<p\).  On each outer diagonal the bottom copy has displacement \(tv\); the other copies and the supplemental marks are northwest of it.  On a marked band, the two bottom marked intervals are translates because both end marks are southeast-justified in case (d).  Thus the bottom endpoint repeats after \(p\) contents.  At the first private diagonal the lower vertical attachment gives an upward step, \(B_w=1\); at the upper horizontal attachment there is no upward step, \(B_p=0\).  If a middle tail is present, skewness of the middle and of the whole inner imposes the same steps.  Hypothesis IV prevents a second cell on either private interface diagonal.  This proves \eqref{eq:mixed-boundary}, including the first and last bands.
+
+Write \(F=\lambda/\mu\) canonically, with \(n\) nonempty rows and \(\mu_n=0\).  Its outer beta set
+\begin{equation*}
+ X=\{\lambda_i+n-i:1\le i\le n\}
+\end{equation*}
+is the set of positions \(t\) with \(B_t=1\), together with \(N_F\).  By \eqref{eq:mixed-boundary}, \(x\in X\) and \(x-p\ge0\) imply \(x-p\in X\): the interior positions use periodicity; \(p\notin X\); and the terminal position descends through \((N_D-1)p+w,\ldots,w\).  In other words, \(\lambda\) is a \(p\)-core.
+
+Put \(Y=\{\mu_j+n-j:1\le j\le n\}\).  The Jacobi--Trudi rows are \((h_{x-y})_{y\in Y}\), indexed by \(x\in X\).  Applying \(\delta_{kp}\) replaces one row index \(x\) by \(x-kp\).  If the new index is nonnegative, it already lies in \(X\); otherwise the row is zero, since \(Y\subseteq\Z_{\ge0}\).  Each determinant vanishes.  Rotation preserves the Schur function, so the result holds in both mixed cases.  The last assertion follows from the nonzero ordinary terminal derivative in \Cref{thm:extraction}.
+\end{proof}
+
+\subsection{The algebra map and the weighted operator}
+
+For any legal marked inner put \(A=s_W\), \(B=s_{\widehat W}\), and \(C=s_{\widehat O}\), extending \eqref{eq:normalizers} to all four attachment cases.  Write \(\operatorname{Row}_j\) for a row of \(j\) cells.  The modified composition algebra map is defined on the free complete generators by
+\begin{equation}\label{eq:algebra-map}
+ \Psi_\eta(h_j)=A^{j-1}b_j,\qquad
+ b_j=s_{\operatorname{Row}_j\circ_\eta E}\quad(j\ge1),
+ \qquad \Psi_\eta(1)=1.
+\end{equation}
+The all-type modified-composition theorem of Olson-Harris \cite{OlsonHarris2024HopfApplications} gives
+\begin{equation}\label{eq:full-normalization}
+ \Psi_\eta(s_D)=\mathcal N_\eta(D)s_{D\circ_\eta E},\qquad
+ \mathcal N_\eta(D)=\varepsilon_\eta(D)
+ A^{|D|-r(D)}B^{|D|-c(D)}C^{|D|-N_D}.
+\end{equation}
+Here \(\varepsilon_\eta(D)=1\) in the ordinary cases.  In the mixed cases it is \((-1)^{n(D)}\), where \(n(D)\) is the sum of the heights of the ribbons in the successive northwest-boundary decomposition of \(D\).  The southeast decomposition has the same height sum.  In particular, for a ribbon \(\varepsilon_\eta(D)=(-1)^{r(D)-1}\).  The entire normalizer is retained, including this sign; identities with Laurent monomials are read in the fraction field.
+
+The map \(\Psi_\eta\) is not the formal-diagram map \(\mathcal M\) of \eqref{eq:modified}.  In case (a) their values meet at
+\(\Psi_\eta(s_D)=\mathcal M([D])\), by \eqref{eq:full-normalization}; for a row this says \(\mathcal M([\operatorname{Row}_j])=A^{j-1}b_j\).  Thus \Cref{lem:action} passes to the algebra map without assuming that the symbols \([D]\), or the functions \(s_D\), are linearly independent.
+
+For a positive mark, southwest-normalize \(E\).  Its middle occupies contents \([s,p+t-1]\), where \(1\le s\le w\) and \(0\le t<w\); a mixed mark has \(t<s\).  The local geometry also gives singleton private diagonals \(w,p-1\), at most one middle cell on each marked diagonal, and generator span less than \(p\) for \(A,B,C\).  These are the local-geometry and boundary-coding statements of \cite{Shields2026Gluing}.  For an empty mark put \(s=t=0\) and \(A=1\).
+
+Define the weighted derivations
+\begin{equation}\label{eq:weighted-operator}
+ V_k=\sum_{j\ge1}j h_j\frac{\partial}{\partial h_{j+k}}
+ \quad(k\ge1).
+\end{equation}
+Unlike \(\delta_k\), this operator kills \(h_k\).  Both operators kill \(A,B,C\) at indices divisible by \(p\).  For ordered full beta lists \(X,Y\) of equal length, put \(\operatorname{JT}_{X,Y}=(h_{x-y})_{x\in X,y\in Y}\) and \(s_{X/Y}=\det\operatorname{JT}_{X,Y}\).  Differentiating each entry and splitting \(x-y-r=(x-r)-y\) gives
+\begin{equation}\label{eq:weighted-beta-moves}
+ V_r s_{X/Y}=
+ \sum_{x\in X}(x-r)\det\operatorname{JT}_{X:x\mapsto x-r,Y}
+ -\sum_{y\in Y}y\det\operatorname{JT}_{X,Y:y\mapsto y+r}.
+\end{equation}
+Every replacement stays in its original position; sorting afterward contributes its determinant sign.  The identity includes zero and negative entry indices: \(h_0=1\), \(h_j=0\) for \(j<0\), and the coefficient of a newly created \(h_0\) is zero for \(V_r\).  An existing unit is never differentiated as an independent entry.
+
+\begin{lemma}[Mixed weighted covariance]\label{rt:mixed-covariance}
+Let \(\eta\) be a legal mixed mark, normalized by whole rotation to case (d), with period \(p\), width \(w\), displacement \(v=(v_1,v_2)\), and phases \(0\le t<s\le w<p\).  Put
+\[
+ \rho=s-t,\qquad \chi=(-1)^{-v_1}ABC,\qquad \Phi=\Psi_\eta.
+\]
+Then, for \(f\in\Lam\) and \(k\ge1\),
+\begin{equation}\label{rt:mixed-intertwining}
+ V_{kp}\Phi(f)=\chi^k\Phi\bigl((pV_k+\rho\delta_k)f\bigr),
+ \qquad V_p s_E=\rho\chi.
+\end{equation}
+This identity acts on a whole composite with the full normalization \eqref{eq:full-normalization}.
+\end{lemma}
+\begin{proof}
+On the row power \(\operatorname{Row}_m\circ_\eta E\), the fixed boundary word makes every row move by \(-kp\) zero.  For \(1\le k\le m\), the only nonzero column moves are at \(t\) and \((m-k)p+s\).  Their determinants are opposites because their sum is \(\delta_{kp}b_m=0\).  Moving the second column removes the northwest-most cell on each content in \([(m-k)p+s,mp+s-1]\).  The remaining cell set is
+\begin{equation}\label{eq:mixed-strip-remainder}
+ (\operatorname{Row}_{m-k}\circ_\eta E)\ \sqcup\!
+ \bigsqcup_{j=m-k}^{m-1}(\widehat O+jv+e)
+ \ \sqcup\!
+ \bigsqcup_{j=m-k+1}^{m}(\widehat W+jv+e).
+\end{equation}
+For this remainder only, the first term at \(m=k\) means \(W\); thus \(b_0=A\), whereas the algebraic value \(\Phi(1)\) is one.
+
+Write the marked row interval on residue \(a\) as \([a_a,b_a]\).  On an interior marked band the composite interval is \([a_a-\theta_a,b_a]\), where \(\theta_a=\mathbf1_{\{a<t\text{ or }a\ge s\}}\).  The hatted mark has interval \([a_a-\theta_a,b_a-1]\); deleting the northwest cell leaves exactly its translate by \(e\).  On a private diagonal the same deletion gives \(\widehat O+e\).  The partial end bands are the last band of the remaining row power and the last translated hatted mark.  Hypothesis IV and the two private singletons separate all the components of \eqref{eq:mixed-strip-remainder}.  This checks every content, including \(t=0\), \(s=w\), and exhaustion.
+
+The \(k(-v_1)-1\) column crossings give determinant
+\(-(-1)^{-kv_1}(BC)^k b_{m-k}\).  The weights in \eqref{eq:weighted-beta-moves} give
+\[
+ V_{kp}b_m=(p(m-k)+\rho)(-1)^{-kv_1}(BC)^k b_{m-k}.
+\]
+Multiplying by \(A^{m-1}\) proves \eqref{rt:mixed-intertwining} on \(h_m\).  When \(m=k\), the factor is \(A^{m-1}b_0=A^m\), exactly the factor required by \(\Phi(1)=1\).  When \(k>m\), the row-composite span \(mp+w<kp\) makes the left side zero, and the coarse weight makes the right side zero.  Both sides are \(\Phi\)-derivations, so the identity holds on \(\Lam\).  Taking \(m=k=1\) gives \(V_p s_E=\rho\chi\).  All factors of \(\mathcal N_\eta(D)\) have generator span below \(p\), so every high derivation fixes the entire normalizer.
+\end{proof}
+
+\begin{lemma}[Composition covariance]\label{lem:covariance}
+For an ordinary chart use the read-outer convention
+\[
+ (\Phi,Q)=
+ \begin{cases}
+  (\Psi_\eta,s_D),&\mathrm{(a)},\\
+  (\Psi_\eta\circ\omega,\omega(s_D)),&\mathrm{(b)}.
+ \end{cases}
+\]
+Then \(\Phi(Q)=\mathcal N_\eta(D)s_{D\circ_\eta E}\).  With
+\(\xi=\delta_p s_E\ne0\) and \(\theta=V_p s_E/\xi\), the offset is an integer with \(|\theta|<p\), and
+\begin{equation}\label{eq:ordinary-covariance}
+ \delta_{kp}\Phi=\xi^k\Phi\delta_k,\qquad
+ V_{kp}\Phi=\xi^k\Phi(pV_k+\theta\delta_k).
+\end{equation}
+In case (a), \(\xi=\sigma ABC\) and \(\theta=s-t\).  At a genuine empty edge \(\theta=0\).  For a mixed chart in the positive-phase convention of \Cref{rt:mixed-covariance},
+\begin{equation}\label{eq:mixed-covariance}
+ \delta_{kp}\Phi=0,\qquad
+ V_{kp}\Phi=\chi^k\Phi(pV_k+\rho\delta_k).
+\end{equation}
+All identities include their full local normalizers and physical involution signs.
+\end{lemma}
+\begin{proof}
+The ordinary Hall identity follows from \Cref{lem:action} and the bridge \(\Psi_\eta(s_D)=\mathcal M([D])\) in case (a).  To compute its weighted companion, take the actual row power with \(m\ge k\).  Its only nonzero row replacement has original label \(mp+s\), and its only nonzero column replacement has original label \(t\).  Every other replacement is a duplicate, a negative row, or a column beyond the horizon.  In the original matrix orders both surviving determinants are
+\[
+ \mathcal R_{mp+s}=\mathcal C_t=\sigma^k(BC)^k b_{m-k}.
+\]
+Each deleted period leaves its full hatted-mark and hatted-middle blocks; their separating negative entries give \(BC\), and the remaining piece is the \(m-k\) copy union, or \(W\) when exhausted.  The row crosses the same native records once per period, giving the sign \(\sigma^k\).  Thus \eqref{eq:weighted-beta-moves} gives
+\[
+ V_{kp}b_m=(p(m-k)+s-t)\delta_{kp}b_m.
+\]
+The modifier \(A^{m-1}\) yields \eqref{eq:ordinary-covariance}, including \(m=k\), since \(b_0=A\) and \(\Phi(1)=1\).  For \(k>m\), both sides vanish by span and weight.  At an empty edge \(s=t=0,A=1\), so exhaustion has zero weighted output but the correct nonzero Hall output.  Multiplicativity proves the identities on the algebra.
+
+For physical antitransposition,
+\begin{equation}\label{eq:physical-operator-transport}
+ \delta_j\omega=(-1)^{j-1}\omega\delta_j,\qquad
+ V_j\omega=(-1)^j\omega V_j.
+\end{equation}
+These follow on complete and elementary generating series and then on products.  Antitransposing a case-(a) inner gives case (b), with
+\(\Phi_b=\omega\Phi_a\omega\),
+\(\xi_b=(-1)^{p-1}\omega(\xi_a)\), and
+\(\theta_b=-\theta_a\).  Substitution into \eqref{eq:physical-operator-transport} proves \eqref{eq:ordinary-covariance} in the actual case-(b) convention.  This also covers the vertical empty edge.  An outer-only ordinary gauge instead exchanges \(Q\) and its involution together with the map, leaving \(\Phi(Q)\) and the actual parent unchanged.
+
+For mixed charts, Hall vanishing is \Cref{lem:mixed-vanishing} and the weighted identity is \Cref{rt:mixed-covariance}.  Whole rotation changes case (c) to case (d) and preserves both factor functions.  Under physical antitransposition the two mixed maps satisfy \(\Phi_c=\omega\Phi_d\), with \(\chi_c=(-1)^p\omega(\chi_d)\) and unchanged \(\rho\); the same identities transport the full action.  In every case the normalizer in \eqref{eq:full-normalization} is rebuilt for the actual chart, not replaced by an unsigned local factor.
+\end{proof}
+
+For \(j\ge k\), the complete and elementary generator formulas are
+\[
+ (pV_k+\rho\delta_k)h_j=(p(j-k)+\rho)h_{j-k},\qquad
+ (pV_k+\rho\delta_k)e_j=(-1)^{k-1}(\rho-p(j-k))e_{j-k}.
+\]
+Both sides vanish for \(j<k\).  At \(j=k\) these are scalar outputs in the algebra, not Schur functions assigned to a proper empty chart.
+
+\section{Recovering ordinary factors}\label{sec:extraction}
+
+For an ordinary marked inner, the action \eqref{eq:action} has a nonzero factor \(\Xi\) annihilated by every \(\delta_{kp}\), with \(\mathcal M([\square])=s_E\) and \(\mathcal M([\varnothing])=1\).  Together with connected-skew irreducibility, these are the composition facts used in the recovery theorem.  No minimality assumption on the chart is needed.
+
+For a nonzero rational multiple \(Q\) of a skew Schur function, let \(\operatorname{prim}(Q)\) clear denominators, divide the integer coefficients by their common divisor, and choose the sign for which the \(h\)-monomial of least sum of squared subscripts has positive coefficient.
+
+\begin{lemma}\label{lem:primitive}
+The row-length monomial of \(s_D\) has coefficient \(+1\) and is its unique monomial of least sum of squared subscripts.  Consequently \(\operatorname{prim}(q s_D)=s_D\) for every nonzero \(q\in\Q\).
+\end{lemma}
+\begin{proof}
+Put \(\alpha_i=\lambda_i-i\) and \(\beta_i=\mu_i-i\).  Both sequences strictly decrease.  The term for a permutation \(\tau\) in \eqref{eq:jt} has square sum
+\begin{equation*}
+ \sum_i(\alpha_i-\beta_{\tau(i)})^2
+ =\sum_i\alpha_i^2+\sum_i\beta_i^2-2\sum_i\alpha_i\beta_{\tau(i)}.
+\end{equation*}
+Strict rearrangement makes the identity permutation the unique minimum.  Its subscripts are the nonempty row lengths and its sign is positive.  Terms containing a negative subscript vanish and do not affect the minimum; a zero subscript contributes zero.  No other term can cancel the minimum monomial.  This is also a consequence of the stronger dominance statement in \cite[Prop.~6.2(ii)]{Reiner2007Coincidences}.
+\end{proof}
+
+For a partition \(\nu\), put \(p_\nu=\prod_i p_{\nu_i}\),
+\(\delta_{p\nu}=\prod_i\delta_{p\nu_i}\), and
+\(z_\nu=\prod_{j\ge1}j^{m_j(\nu)}m_j(\nu)!\).
+Let \(f^D\) be the number of standard tableaux of \(D\), and let \(\chi^D\) be its skew character, so
+\begin{equation}\label{eq:character}
+ s_D=\sum_{\nu\vdash |D|}\frac{\chi^D(\nu)}{z_\nu}p_\nu,
+ \qquad f^D=\chi^D(1^{|D|})>0.
+\end{equation}
+
+\begin{theorem}[Factor recovery at a prescribed period]\label{thm:extraction}
+Let \(F=D\circ_\eta E\) be a proper ordinary legal chart of period \(p\), and put \(P=s_F\).  Define
+\begin{equation}\label{eq:terminal}
+ a=\max\{j\ge0:\delta_p^jP\ne0\},\qquad
+ T=\delta_p^aP,\qquad U=\delta_p^{a-1}P.
+\end{equation}
+Then \(a=|D|\), and
+\begin{equation}\label{eq:inner-recovery}
+ s_E=\operatorname{prim}\!\left(\frac{U}{\gcd(U,T)}\right).
+\end{equation}
+For every \(\nu\vdash a\), the quotient
+\(q_\nu=\delta_{p\nu}P/T\) is rational.  Moreover,
+\begin{equation}\label{eq:outer-recovery}
+ \mathcal Q_p(P):=\sum_{\nu\vdash a}q_\nu\frac{p_\nu}{z_\nu}
+ =\begin{cases}
+ s_D/f^D,&\mathrm{(a)},\\
+ \omega(s_D)/f^D,&\mathrm{(b)}.
+ \end{cases}
+\end{equation}
+In particular, \(\operatorname{prim}\mathcal Q_p(P)\) recovers the outer function in the indicated convention.
+\end{theorem}
+\begin{proof}
+First take case (a), and set \(a_0=|D|\), \(r=r(D)\), \(c=c(D)\), and \(M=N_D\).  On formal diagrams,
+\begin{equation*}
+ \partial_1^{a_0-1}[D]=f^D[\square],\qquad
+ \partial_1^{a_0}[D]=f^D[\varnothing],\qquad
+ \partial_1^{a_0+1}[D]=0.
+\end{equation*}
+These identities count the successive possible largest entries of a standard tableau.  Iterating \Cref{lem:action} is legitimate because every normalization factor, and hence \(\Xi\), is annihilated by \(\delta_p\).  Dividing out the fixed normalization of \(D\) gives
+\begin{align}
+ \delta_p^{a_0-1}P
+ &=\sigma^{a_0-1}f^D A^{r-1}B^{c-1}C^{M-1}s_E,
+ \label{eq:penultimate}\\
+ \delta_p^{a_0}P
+ &=\sigma^{a_0}f^D A^rB^cC^M\ne0,
+ \qquad \delta_p^{a_0+1}P=0.
+ \label{eq:last}
+\end{align}
+This proves \(a=a_0\) and
+\begin{equation}\label{eq:ratio}
+ \frac UT=\frac{s_E}{\Xi}.
+\end{equation}
+The function \(s_E\) is irreducible over \(\Q[h_1,h_2,\ldots]\), by connectedness and \cite[Thm.~1]{Barekat2009CoincidencesCorrigendum}.  Since \(\deg\Xi=|E|-p<|E|\), it is coprime to \(\Xi\).  Thus the reduced numerator of \eqref{eq:ratio} is \(s_E\) up to a nonzero rational scalar.  \Cref{lem:primitive} gives \eqref{eq:inner-recovery}.
+
+For \(\nu\vdash a\), repeated ribbon deletion gives
+\(\partial_{\nu_1}\cdots\partial_{\nu_\ell}[D]=\chi^D(\nu)[\varnothing]\).
+The total power of \(\Xi\) in \eqref{eq:action} is \(|\nu|=a\), regardless of the number of parts.  Hence
+\[
+ \delta_{p\nu}P=\sigma^a A^rB^cC^M\chi^D(\nu),
+ \qquad q_\nu=\frac{\chi^D(\nu)}{f^D}.
+\]
+The expansion \eqref{eq:character} proves \eqref{eq:outer-recovery} in case (a).
+
+For case (b), apply the case-(a) result to the transposed parent and inner, with outer \(D^*\).  The signs in moving \(\omega\) past the numerator and denominator of \(q_\nu\) have quotient
+\((-1)^{pa-\ell(\nu)-a(p-1)}=(-1)^{a-\ell(\nu)}\).
+Thus \(q_\nu=(-1)^{a-\ell(\nu)}\chi^D(\nu)/f^D\), which is precisely the character of \(\omega(s_D)/f^D\).  The terminal order is unchanged.  Applying \(\omega\) to the reduced ratio recovers \(s_E\), since it is a ring automorphism and preserves coprimeness.  This proves all claims in both cases.
+\end{proof}
+
+Only \(P\) and \(p\) enter \eqref{eq:terminal}--\eqref{eq:outer-recovery}.  The intermediate factors \(A,B,C\), their exponents, and the tableau number \(f^D\) are proof quantities, not inputs to the inverse.  The result recovers functions, not arbitrary marked realizations of those functions.
+
+\begin{corollary}\label{cor:period-test}
+Suppose a nonzero skew Schur function \(P\) and an integer \(p\ge1\) are given.  If \(\delta_pP=0\), or if one of the quotients \(\delta_{p\nu}P/\delta_p^aP\), with \(a=\max\{j:\delta_p^jP\ne0\}\) and \(\nu\vdash a\), is not rational, then \(P\) has no proper ordinary chart of period \(p\).
+\end{corollary}
+\begin{proof}
+Both conditions contradict \Cref{thm:extraction}.
+\end{proof}
+
+Passing this test is not asserted to construct a chart.  In particular, the proof does not identify a distinguished period among the integers that pass.
+
+\section{Recovering mixed ribbon factors}\label{sec:mixed-extraction}
+
+For a mixed chart use the positive-phase convention of \Cref{rt:mixed-covariance}.  Set \(\mathcal B_k=pV_k+\rho\delta_k\).  The operators need not commute, so their order is part of the readout.
+
+\begin{proposition}[Mixed ribbon factor recovery]\label{rt:mixed-readout}
+Let \(F=D\circ_\eta E\) be a legal mixed chart of period \(p\), with connected inner \(E\) and nonempty ribbon outer \(D\), and put \(P=s_F\).  The pair \((P,p)\) determines \(s_E\) and the genuine outer function \(s_D\), with no normalization exponents or phase data supplied.
+\end{proposition}
+\begin{proof}
+Write \(m=|D|\).  For any homogeneous \(Q\) of weight \(m\),
+\begin{equation}\label{eq:mixed-terminal-evaluation}
+ \mathcal B_1^mQ=m!p^m Q(1^{\rho/p}),
+\end{equation}
+where \(Q(1^x)\) means the specialization \(p_j\mapsto x\).  Indeed,
+\(\mathcal B_1h_j=(p(j-1)+\rho)h_{j-1}\), so the constant term of
+\(\exp(z\mathcal B_1)h_j\) is \(p^j(\rho/p)_jz^j/j!\), with \((x)_j=x(x+1)\cdots(x+j-1)\).  The exponential of a derivation is multiplicative; taking the constant term proves \eqref{eq:mixed-terminal-evaluation}.
+
+For a ribbon \(D\) and \(0<x<1\), \(s_D(1^x)\ne0\).  To see this, use
+\(s_D(1^x)=(-1)^m s_{D^{\mathsf t}}(1^{-x})\).  Every positive complete function \(h_j(1^{-x})=(-x)_j/j!\) is negative.  In the interval-coarsening expansion of the transposed ribbon, a coarsening into \(k\) parts has sign \((-1)^{r(D^{\mathsf t})-k}\), while its product of complete functions has sign \((-1)^k\).  All terms therefore have the same nonzero sign.
+
+Apply the covariance to
+\(\Phi(s_D)=\mathcal N_\eta(D)P\).  Its full normalizer and \(\chi\) are fixed by every high operator.  Since \(\mathcal B_1^{m-1}s_D\) has weight one and \(\mathcal B_1h_1=\rho\), the nonzero terminal evaluation gives
+\begin{equation}\label{eq:mixed-terminal-ratio}
+ m=\max\{j\ge0:V_p^jP\ne0\},\qquad
+ \frac{V_p^{m-1}P}{V_p^mP}=\frac{s_E}{\rho\chi}.
+\end{equation}
+Connected irreducibility and \(\deg(\rho\chi)=|E|-p<|E|\) make \(s_E\) coprime to \(\rho\chi\).  Thus primitive normalization of the reduced numerator recovers \(s_E\), by \Cref{lem:primitive}.  Each of \(A,B,C\) is primitive integral, including the value one for an empty hatted diagram; Gauss's lemma makes \(ABC\) primitive.  Consequently the positive integer content of \(V_p s_E=\rho\chi\) is exactly \(\rho\), and \(\chi=(V_p s_E)/\rho\).  Neither quantity is an extra input.
+
+For a partition \(\nu=(\nu_1,\ldots,\nu_\ell)\) in nonincreasing order define
+\(V_{p\nu}=V_{p\nu_\ell}\cdots V_{p\nu_1}\) and
+\(\mathcal B_\nu=\mathcal B_{\nu_\ell}\cdots\mathcal B_{\nu_1}\); thus \(\nu_1\) acts first in both words.  Covariance gives
+\begin{equation}\label{rt:outer-triangle}
+ \frac{V_{p\nu}P}{V_p^mP}
+ =\frac{\mathcal B_\nu s_D}{\mathcal B_1^m s_D}
+ \qquad(\nu\vdash m).
+\end{equation}
+On power sums, \(\mathcal B_kp_j=pj\,p_{j-k}\) for \(j>k\),
+\(\mathcal B_kp_k=\rho k\), and the other values are zero.  A scalar
+\(\mathcal B_\nu p_\lambda\) requires that the parts of \(\nu\) can be grouped to give the parts of \(\lambda\): each original power-sum factor must be exhausted by its assigned operators.  Hence \(\nu\) refines \(\lambda\).  At equal lengths only \(\nu=\lambda\) survives, with coefficient
+\(\rho^{\ell(\lambda)}z_\lambda\ne0\).  Ordered by length, the system \eqref{rt:outer-triangle} is triangular and recovers every power-sum coefficient of \(s_D/(\mathcal B_1^m s_D)\).  Multiplication by \(z_\lambda\) gives the corresponding normalized character value.  Primitivity then fixes the common scalar and recovers \(s_D\).  Whole rotation carries case (c) to case (d) without changing either factor function.
+\end{proof}
+
+\begin{corollary}[Terminal readout]\label{lem:terminal-readout}
+Let \(F=D\circ_\eta E\) be a legal chart of period \(p\), with connected inner \(E\) and ribbon outer of \(M\ge2\) cells.  For an ordinary chart, with its actual \(\xi=\delta_p s_E\),
+\begin{equation}\label{eq:ordinary-readout}
+ \frac{\delta_p^{M-1}s_F}{\delta_p^M s_F}=\frac{s_E}{\xi}.
+\end{equation}
+For a mixed chart, in the positive-phase convention,
+\begin{equation}\label{eq:mixed-readout}
+ \frac{V_p^{M-1}s_F}{V_p^M s_F}=\frac{s_E}{\rho\chi}.
+\end{equation}
+Both denominators are nonzero.  The normalizers cancel as entire functions.
+\end{corollary}
+\begin{proof}
+The ordinary clause follows from the terminal calculation \eqref{eq:penultimate}--\eqref{eq:ratio} and its physical transport in \Cref{thm:extraction}; this calculation also applies to a one-cell inner, since it uses only the action and the positive tableau count.  The mixed clause and its nonzero denominator are \eqref{eq:mixed-terminal-ratio}.  Both apply the full normalization \eqref{eq:full-normalization}, not a selected factor of it.
+\end{proof}
+
+\section{Equal functions at a common period}\label{sec:transport}
+
+Suppose the ordinary inverse at a supplied period recovers the inner function and the outer function with its attachment-dependent involution, as in \Cref{thm:extraction}.  A comparison of marked charts also needs the mixed-chart exclusion of \Cref{lem:mixed-vanishing} and uniqueness of the ordinary mark up to the gauge.  The latter is proved below; no equality of periods is inferred.
+
+
+For a fixed marked inner \(\eta\), a \emph{marked fiber} consists of compositions with that inner or its transported rotation and with one prescribed outer Schur function.  The ordinary change of attachment uses antitransposition, not literal transposition:
+\begin{equation}\label{eq:gauge}
+ D\circ_{\eta_a}E=\operatorname{AT}(D)\circ_{\eta_b}E
+ \quad\text{when }v_a-v_b=e.
+\end{equation}
+Indeed, for \(\operatorname{AT}(i,j)=(-j,-i)\), the case-(b) origin is
+\((j-i)v_b+je=(j-i)v_a+ie\).
+The same formula applies to the two empty-edge readings.  This is the ordinary gauge used in \cite{Shields2026Gluing}.
+
+\begin{lemma}\label{lem:mark-atlas}
+On a fixed connected inner and at a fixed period, there is at most one ordinary mark of each attachment type.  If both types occur, their displacements differ by \(e\) and their compositions are related by \eqref{eq:gauge}.
+\end{lemma}
+\begin{proof}
+The width is \(w=N_E-p\).  By (I), a nonempty lower mark with displacement \(v\) is \(E\cap(E-v)\).  Both \(E\setminus W_-\) and \(E\setminus W_+\) must be skew.  Hence the translate of the southwest cell must be an endpoint of the content-\(p\) interval, and the inverse translate of the northeast cell must be an endpoint of the content-\(w-1\) interval.  On either marked diagonal the middle has at most one cell: the first thick middle diagonal would create adjacent hatted-middle and hatted-mark cells, contrary to (IV).  The endpoint alternatives therefore differ by at most \(e\).  Choosing the southeast alternative at the upper end forces the northwest alternative at the lower end by noncrossing of the two skew boundaries.  These are the horizontal attachments; the other choice gives the vertical attachments.  Maximality fixes the corresponding marks.  Formula \eqref{eq:gauge} proves the assertion about compositions.  At width zero the two explicitly defined edge displacements give the same conclusion.  This is the endpoint argument underlying the equal-period lemma in \cite{Shields2026Gluing}; it uses the inner alone, not equality of the literal parents.
+\end{proof}
+
+\begin{theorem}[Common-period comparison]\label{thm:transport}
+Let \(F=D\circ_\eta E\) be a proper ordinary legal chart of period \(p\).  Suppose every connected diagram with Schur function \(s_E\) is a translate of \(E\) or \(E^*\).  If \(H\) is connected, \(s_H=s_F\), and \(H\) has a proper legal chart of period \(p\), then \(F,H\) belong to the same marked fiber, up to transported rotation and the ordinary gauge.
+\end{theorem}
+\begin{proof}
+Write the supplied chart as \(H=C\circ_\theta U\).  By \Cref{lem:mixed-vanishing} and the nonzero ordinary derivative, \(\theta\) is ordinary.  The two instances of \eqref{eq:inner-recovery} use the same \((P,p)\), so \(s_U=s_E\).  Rotate the marked inner of one chart if necessary to identify \(U\) with \(E\).  By \Cref{lem:mark-atlas}, the marks coincide or are the ordinary pair.  Formula \eqref{eq:outer-recovery} gives equality of the outer functions in exactly the convention required by \eqref{eq:gauge}.  This is membership in one marked fiber.
+\end{proof}
+
+\begin{corollary}\label{cor:two-row}
+The conclusion of \Cref{thm:transport} holds whenever its ordinary inner has two rows.  The connected outer is unrestricted.
+\end{corollary}
+\begin{proof}
+Use the profile \((x,y;d)\), where the two row lengths are \(x,y\) and their overlap is \(d+1\).  Then
+\[
+ s_{(x,y;d)}=h_xh_y-h_dh_{x+y-d},\qquad 0\le d<\min(x,y).
+\]
+The minimum-square monomial identifies the row-length multiset and hence the number of rows of any Schur-equal connected diagram.  The remaining term identifies \(d\): for \(d>0\), it is the smaller of its two subscripts, and \(d=0\) is the single-generator case.  Only interchange of \(x,y\), which rotates the diagram, remains.  Apply \Cref{thm:transport}.
+\end{proof}
+
+\section{Explicit formulas and examples}\label{sec:examples}
+
+In a profile \((r_1,\ldots,r_n;g_1,\ldots,g_{n-1})\), \(r_i\) is the length of row \(i\), and \(g_i+1\) is the overlap of rows \(i,i+1\).  Thus \(0\le g_i<\min(r_i,r_{i+1})\).  Consider the two-row inner
+\begin{equation}\label{eq:two-row-mark}
+ E=(x,y;d),\qquad x,y\ge d+w+1,\qquad p=x+y-d-w.
+\end{equation}
+Its case-(a) end mark is a row of length \(w\), with \(w=0\) interpreted as the horizontal empty edge.  The end rows have enough space for the two marks and a private diagonal; deleting either leaves a connected diagram.  The hatted mark is empty, the hatted middle is a row of length \(d\), and (IV) follows.  Thus
+\(A=h_w\), \(B=1\), \(C=h_d\), and \(\sigma=-1\).
+For an arbitrary connected outer with area \(a\), row count \(r\), and span \(M\), \eqref{eq:penultimate}--\eqref{eq:last} give
+\begin{align}
+ \delta_p^a P&=(-1)^a f^D h_d^M h_w^r,
+ \label{eq:two-row-last}\\
+ \delta_p^{a-1}P&=(-1)^{a-1}f^D h_d^{M-1}h_w^{r-1}
+             (h_xh_y-h_dh_{x+y-d}).
+ \label{eq:two-row-previous}
+\end{align}
+These include \(d=0\), \(w=0\), and \(d=w\), with \(h_0=1\).
+
+Take \(E=(4,5;1)\), \(w=2\), \(p=6\), and \(D=(3,2,2;1,1)\).  The compositions with \(D\) and \(D^*\) have profiles
+\begin{align*}
+ F&=(4,7,7,8,7,8,7,5;\ 1,1,4,5,4,5,1),\\
+ H&=(4,7,8,7,8,7,7,5;\ 1,4,5,4,5,1,1).
+\end{align*}
+They have \(53\) cells and are neither translates nor rotations.  This mark meets the middle along one row at each end, so it satisfies Hypothesis V as well.  The composition theorem of McNamara and van Willigenburg gives \(s_F=s_H\) \cite[Thm.~3.31]{McNamara2009Classification}; the equality can also be checked directly by \eqref{eq:jt}.  Here \(a=7\), \(M=5\), \(r=3\), and \(f^D=21\).  The last two derivatives are
+\begin{equation}\label{eq:example-tail}
+ T=-21h_1^5h_2^3,\qquad
+ U=21h_1^4h_2^2(h_4h_5-h_1h_8).
+\end{equation}
+The reduced numerator gives \(s_E=h_4h_5-h_1h_8\).  The complete character ratios give
+\begin{equation}\label{eq:example-outer}
+ \mathcal Q_6(P)=\frac{h_3h_2^2-h_3^2h_1-h_4h_2h_1+h_4h_3+h_5h_1^2-h_5h_2}{21}.
+\end{equation}
+Both the outer and the parents contain \(2\times2\) blocks, so this is not a ribbon-only example.
+
+The ordinary involution cannot be dropped.  For \(E=(2,1;0)\) with empty overlap, the horizontal displacement is \((-1,2)\) and the vertical displacement is \((-2,1)\), both of period \(3\).  The horizontal composition with the two-cell row equals the vertical composition with its antitranspose, a two-cell column.  The common polynomial recovers \(h_2\); in the vertical reading this is \(\omega(e_2)\), not \(e_2\).
+
+For a mixed example take the ordinary partition \(E=(2,1)\) as a cell diagram, with cells \((0,0),(0,1),(1,0)\).  Mark \(W_-=\{(1,0)\}\) and \(W_+=\{(0,1)\}\).  Their displacement is \(v=(-1,1)\), the middle is \(\{(0,0)\}\), and the attachments are vertical below and horizontal above.  Each end deletion is a domino; the two singleton marks are maximal on their diagonals and have one private diagonal between them.  The periodic union has one cell on each content, so both hats are empty and Hypothesis IV holds.  After southwest normalization the phases are \(t=0,s=1\).  Thus
+\[
+ p=2,\quad w=1,\quad \rho=1,\quad A=h_1,\quad B=C=1,\quad
+ \chi=-h_1,\quad s_E=h_1h_2-h_3.
+\]
+For \(D=\operatorname{Row}_2\), the union of \(E\) and \(E+v\) is the skew diagram \((3,2,1)/(1)\), with no supplemental copy.  Its Jacobi--Trudi determinant and weighted tail are
+\begin{equation}\label{eq:mixed-example}
+ \begin{aligned}
+ P&=h_1h_2^2-h_2h_3-h_1h_4+h_5,\\
+ V_2P&=-3(h_1h_2-h_3),&
+ V_2^2P&=3h_1,& V_2^3P&=0,& V_4P&=h_1.
+ \end{aligned}
+\end{equation}
+The terminal quotient is \(-s_E/h_1\), and the integer content of \(V_2s_E=-h_1\) gives \(\rho=1\).  The ratios indexed by \((1,1)\) and \((2)\) are \(1\) and \(1/3\).  Since \(\mathcal B_1^2h_2=3\) and \(\mathcal B_2h_2=1\), the triangular readout returns \(h_2\).  The full modifier is \(\Phi(h_2)=h_1P\).  For the column domino the supplemental singleton fills the missing cell of \((3,2,1)/(1)\), and the signed normalization is
+\(\Phi(e_2)=-s_{(3,2,1)}\), not \(s_{(3,2,1)}\).
+
+\section{Concluding remarks}\label{sec:conclusion}
+
+At a supplied period, terminal outputs remove the entire composition normalization.  Olson-Harris's power-sum action recovers both factor functions for ordinary charts with arbitrary connected outers; weighted operators do so for mixed charts with ribbon outers.  The formulas use orders as large as the outer area, not a bounded initial collection of derivatives.  Selecting a period without a supplied chart and identifying a marked inner among multiple realizations of its function remain different tasks.
+
+\section*{Declarations}
+{\footnotesize
+
+\noindent\textbf{Funding.} This research received no external funding.
+
+\smallskip
+\noindent\textbf{Competing interests.} The author has no relevant interests to disclose.
+
+\smallskip
+\noindent\textbf{Data availability.} No datasets were generated or analyzed.
+
+\smallskip
+\noindent\textbf{Computational verification.} The proofs do not depend on numerical computation.  Scripts used for verification and figures are available at \url{https://github.com/johnnyshields/papers}.
+
+\smallskip
+\noindent\textbf{Generative AI use.} During the preparation of this work, the author used OpenAI's ChatGPT (GPT-6 Astra) and Anthropic's Claude (Opus 5.5) to assist with mathematical research, manuscript drafting, and the development of auxiliary verification code.  After using these tools, the author reviewed and edited as needed.  The author takes full responsibility for the content of the work.\par}
+
+\begin{thebibliography}{10}
+
+\bibitem{Barekat2009CoincidencesCorrigendum}
+F.~Barekat, V.~Reiner and S.~van Willigenburg,
+\emph{Corrigendum to ``Coincidences among skew Schur functions''},
+Adv. Math. \textbf{220} (2009), no.~5, 1655--1656,
+DOI: \href{https://doi.org/10.1016/j.aim.2008.10.010}{10.1016/\allowbreak j.aim.2008.10.010}.
+
+\bibitem{Billera2006DecomposableCompositions}
+L.~J. Billera, H.~Thomas and S.~van Willigenburg,
+\emph{Decomposable compositions, symmetric quasisymmetric functions and equality of ribbon Schur functions},
+Adv. Math. \textbf{204} (2006), no.~1, 204--240,
+DOI: \href{https://doi.org/10.1016/j.aim.2005.05.014}{10.1016/\allowbreak j.aim.2005.05.014}.
+
+\bibitem{Macdonald1995SymmetricFunctions}
+I.~G. Macdonald,
+\emph{Symmetric Functions and Hall Polynomials}, 2nd ed.,
+Oxford Mathematical Monographs, Oxford University Press, 1995,
+DOI: \href{https://doi.org/10.1093/oso/9780198534891.001.0001}{10.1093/\allowbreak oso/\allowbreak 9780198534891.001.0001}.
+
+\bibitem{McNamara2009Classification}
+P.~R.~W. McNamara and S.~van Willigenburg,
+\emph{Towards a combinatorial classification of skew Schur functions},
+Trans. Amer. Math. Soc. \textbf{361} (2009), no.~8, 4437--4470,
+DOI: \href{https://doi.org/10.1090/S0002-9947-09-04683-2}{10.1090/\allowbreak S0002-9947-09-04683-2}.
+
+\bibitem{OlsonHarris2024HopfApplications}
+N.~Olson-Harris,
+\emph{Some applications of combinatorial Hopf algebras to integro-differential equations and symmetric function identities},
+Ph.D.\ thesis, University of Waterloo, 2024.
+\url{https://hdl.handle.net/10012/20710}.
+
+\bibitem{Reiner2007Coincidences}
+V.~Reiner, K.~M. Shaw and S.~van Willigenburg,
+\emph{Coincidences among skew Schur functions},
+Adv. Math. \textbf{216} (2007), no.~1, 118--152,
+DOI: \href{https://doi.org/10.1016/j.aim.2007.05.006}{10.1016/\allowbreak j.aim.2007.05.006}.
+
+\bibitem{Shields2026Gluing}
+J.~Shields,
+\emph{Local common-factor gluing and reduction of composition necessity for skew Schur functions},
+preprint, 2026,
+DOI: \href{https://doi.org/10.5281/zenodo.23133702}{10.5281/\allowbreak zenodo.23133702}.
+
+\bibitem{Yeats2017HopfSchur}
+K.~Yeats,
+\emph{A Hopf algebraic approach to Schur function identities},
+Electron. J. Combin. \textbf{24} (2017), no.~3, \#P3.10,
+DOI: \href{https://doi.org/10.37236/5741}{10.37236/\allowbreak 5741}.
+
+\end{thebibliography}
+\end{document}

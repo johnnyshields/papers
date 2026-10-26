@@ -1,0 +1,74 @@
+/-
+Copyright (c) 2026 Johnny Shields. All rights reserved.
+Released under the MIT license as described in the file LICENSE.txt.
+Authors: Johnny Shields
+-/
+import SkewSchurReconstruction.CompleteRing
+import SkewSchurReconstruction.Diagrams
+import SkewSchurReconstruction.MaximalCofactors
+import SkewSchurReconstruction.ConvexWeights
+import SkewSchurReconstruction.SymmetricSpecialization
+import SkewSchurReconstruction.BoundaryOperations
+import SkewSchurReconstruction.CappedDiagrams
+import SkewSchurReconstruction.CappedExtensions
+import SkewSchurReconstruction.CofactorSchur
+import SkewSchurReconstruction.WeightedPolynomials
+import SkewSchurReconstruction.MongeAssignments
+import SkewSchurReconstruction.GeneratorProducts
+import SkewSchurReconstruction.MongeMinors
+import SkewSchurReconstruction.RowMultisets
+import SkewSchurReconstruction.ScalarRecovery
+import SkewSchurReconstruction.MinimizerChains
+import SkewSchurReconstruction.PassiveMatrices
+import SkewSchurReconstruction.PrefixMinors
+import SkewSchurReconstruction.TableauBridge
+import SkewSchurReconstruction.YoungShapes
+import SkewSchurReconstruction.CofactorShapes
+import SkewSchurReconstruction.CofactorActions
+import SkewSchurReconstruction.CofactorMoments
+import SkewSchurReconstruction.GeneratorMonomials
+import SkewSchurReconstruction.MongeInitialCoefficients
+import SkewSchurReconstruction.FirstSplit
+import SkewSchurReconstruction.CapFixedRigidity
+import SkewSchurReconstruction.EqualPairRigidity
+import SkewSchurReconstruction.EqualityNormalization
+import SkewSchurReconstruction.ValuedMonge
+import SkewSchurReconstruction.CapGridVectors
+import SkewSchurReconstruction.PrefixReconstruction
+import SkewSchurReconstruction.PolynomialValuation
+import SkewSchurReconstruction.BoundaryReconstruction
+import SkewSchurReconstruction.RatioNormalization
+import SkewSchurReconstruction.ConvexMongeFamily
+import SkewSchurReconstruction.NoBackflowMargin
+import SkewSchurReconstruction.Majorization
+import SkewSchurReconstruction.MonomialPrefix
+import SkewSchurReconstruction.BoundarySeparation
+import SkewSchurReconstruction.PassiveTail
+import SkewSchurReconstruction.RatioRigidity
+import SkewSchurReconstruction.LaplaceFloor
+import SkewSchurReconstruction.CaterpillarMinors
+import SkewSchurReconstruction.ElbowVectors
+import SkewSchurReconstruction.ElbowWitness
+import SkewSchurReconstruction.TwoCapExclusion
+import SkewSchurReconstruction.TwoSeriesReversal
+import SkewSchurReconstruction.FactorwiseWitness
+import SkewSchurReconstruction.ShiftedFloor
+import SkewSchurReconstruction.AxiomCheck
+import SkewSchurReconstruction.BoundaryWitnesses
+import SkewSchurReconstruction.StaircaseReversal
+import SkewSchurReconstruction.LocusFamily
+import SkewSchurReconstruction.MajorizationWitnesses
+import SkewSchurReconstruction.AbstractFamilyWitness
+import SkewSchurReconstruction.RadixSeparation
+import SkewSchurReconstruction.FactorwiseCensus
+import SkewSchurReconstruction.ScopeWitnesses
+import SkewSchurReconstruction.StaircaseBoundary
+import SkewSchurReconstruction.StaircasePairCount
+import SkewSchurReconstruction.StaircaseBoundaryWitness
+
+/-!
+# Boundary reconstruction and cofactor rigidity
+
+Public entry point for the manuscript's diagram reconstruction, cofactor
+rigidity, representation bridges, and scope witnesses.
+-/

@@ -25,12 +25,12 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.Complex.ValueDistribution.Cartan
-import Vendor.MathlibPR.PR42000.PosLogEstimates
+import Mathlib.Analysis.SpecialFunctions.Log.PosLog
 import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
 import Vendor.ProjectVD.LLD.CircleAverageEstimates
 import Vendor.ProjectVD.LLD.PoissonJensenDeriv
 import Vendor.ProjectVD.MathlibPending.CharacteristicMoebius
-import Vendor.ProjectVD.MathlibSubmitted.CountingEstimate
+import Mathlib.Analysis.Complex.ValueDistribution.LogCounting.Basic
 
 /-!
 ## Elementary Helper
@@ -291,9 +291,7 @@ private lemma proximity_logDeriv_le {f : ℂ → ℂ} {r ρ : ℝ} (hf : Meromor
       _ = 2 * log⁺ (√‖logDeriv f w‖) := by rw [posLog_pow]; norm_num
       _ ≤ 2 * log⁺ (g w) := by
           apply mul_le_mul_of_nonneg_left _ (by norm_num)
-          -- Adapted to the pinned revision: the pinned `posLog_le_posLog` takes `0 ≤ x`, where
-          -- upstream (Mathlib PR #42000) takes `-1 ≤ x`; the wrapper is dropped.
-          exact posLog_le_posLog ((Real.sqrt_nonneg _)) hsq
+          exact posLog_le_posLog (neg_one_lt_zero.le.trans (Real.sqrt_nonneg _)) hsq
   -- Integrability of the functions involved
   have hld : Meromorphic (logDeriv f) := fun x ↦ (hf x).logDeriv
   have int_lhs : CircleIntegrable (fun w ↦ log⁺ ‖logDeriv f w‖) 0 r :=
@@ -371,9 +369,7 @@ private lemma proximity_logDeriv_le {f : ℂ → ℂ} {r ρ : ℝ} (hf : Meromor
       ≤ log⁺ (circleAverage g 0 r) + Real.log 2 :=
     Real.circleAverage_posLog_le_posLog_circleAverage (fun z _ ↦ hg₀ z) int_g
   have havg₀ : 0 ≤ circleAverage g 0 r := circleAverage_nonneg_of_nonneg fun z _ ↦ hg₀ z
-  -- Adapted to the pinned revision: the pinned `posLog_le_posLog` takes `0 ≤ x`, where
-  -- upstream (Mathlib PR #42000) takes `-1 ≤ x`; the wrapper is dropped.
-  have hmono := posLog_le_posLog (havg₀) step4
+  have hmono := posLog_le_posLog (neg_one_lt_zero.le.trans havg₀) step4
   calc proximity (logDeriv f) ⊤ r
       ≤ 2 * circleAverage (fun w ↦ log⁺ (g w)) 0 r := step3
     _ ≤ 2 * (log⁺ (circleAverage g 0 r) + Real.log 2) := by linarith
@@ -616,9 +612,7 @@ theorem ValueDistribution.exists_proximity_logDeriv_le {f : ℂ → ℂ} (hf : M
               rw [posLog_eq_log (by norm_num)]
               refine add_le_add le_rfl ?_
               calc log⁺ ρ ≤ log⁺ R :=
-                    -- Adapted to the pinned revision: the pinned `posLog_le_posLog` takes `0 ≤ x`, where
-                    -- upstream (Mathlib PR #42000) takes `-1 ≤ x`; the wrapper is dropped.
-                    posLog_le_posLog (hρ₀.le) (by linarith)
+                    posLog_le_posLog (neg_one_lt_zero.le.trans hρ₀.le) (by linarith)
                 _ = Real.log R := posLog_eq_log (by rw [abs_of_pos hR₀]; linarith)
       have h₅ : log⁺ (((ρ - r)⁻¹) ^ 2) = 2 * log⁺ ((ρ - r)⁻¹) := by
         rw [posLog_pow]
@@ -631,9 +625,7 @@ theorem ValueDistribution.exists_proximity_logDeriv_le {f : ℂ → ℂ} (hf : M
             linarith [hpos_inv]
     have h₆ : log⁺ A ≤ 2 * Real.log 2 + log⁺ T + log⁺ c_f := by
       calc log⁺ A ≤ log⁺ (2 * T + c_f) :=
-            -- Adapted to the pinned revision: the pinned `posLog_le_posLog` takes `0 ≤ x`, where
-            -- upstream (Mathlib PR #42000) takes `-1 ≤ x`; the wrapper is dropped.
-            posLog_le_posLog (hA₀) hA_le
+            posLog_le_posLog (neg_one_lt_zero.le.trans hA₀) hA_le
         _ ≤ Real.log 2 + log⁺ (2 * T) + log⁺ c_f := posLog_add
         _ ≤ Real.log 2 + (log⁺ 2 + log⁺ T) + log⁺ c_f := by
             linarith [posLog_mul (x := (2:ℝ)) (y := T)]
@@ -662,9 +654,7 @@ theorem ValueDistribution.exists_proximity_logDeriv_le {f : ℂ → ℂ} (hf : M
       apply le_of_eq
       field_simp
     calc log⁺ N ≤ log⁺ ((2 * T + c_f) * (2 * R * (R - r)⁻¹)) :=
-          -- Adapted to the pinned revision: the pinned `posLog_le_posLog` takes `0 ≤ x`, where
-          -- upstream (Mathlib PR #42000) takes `-1 ≤ x`; the wrapper is dropped.
-          posLog_le_posLog (hN₀) hN_bound
+          posLog_le_posLog (neg_one_lt_zero.le.trans hN₀) hN_bound
       _ ≤ log⁺ (2 * T + c_f) + log⁺ (2 * R * (R - r)⁻¹) := posLog_mul
       _ ≤ (Real.log 2 + log⁺ (2 * T) + log⁺ c_f)
           + (log⁺ (2 * R) + log⁺ (R - r)⁻¹) := by

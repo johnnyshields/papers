@@ -12,9 +12,9 @@ import Mathlib.Topology.Order.OrderClosed
 # The residue of a Pick function at a real point
 
 A *Pick* (or *Herglotz*, or *Nevanlinna*) function maps the open upper half-plane into its
-closure.  Mathlib carries no such class: its `Nevanlinna` files are value-distribution theory,
-a different subject.  This supplies the one local fact about them that needs no representation
-theorem.
+closure.  Mathlib carries no such class at revision `8e45b05`: every `Nevanlinna` there is in
+`Analysis/Complex/ValueDistribution`, a different subject.  This supplies the one local fact about
+them that needs no representation theorem.
 
 ## Main statements
 

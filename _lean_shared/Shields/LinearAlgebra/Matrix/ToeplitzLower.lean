@@ -96,7 +96,7 @@ theorem toeplitzLower_mul (a b : ℕ → R) (n : ℕ) :
     exact Finset.sum_congr rfl fun k _ => by simp [toeplitzLower_apply]
   rw [hrange, toeplitzLower_apply]
   by_cases hji : (j : ℕ) ≤ (i : ℕ)
-  · rw [if_pos hji, convCoeff]
+  · rw [ite_eq_left hji, convCoeff]
     -- Cut `range n` down to the support `[j, i]`, then shift `k = j + m`.
     have hsub : Finset.Ico (j : ℕ) ((i : ℕ) + 1) ⊆ Finset.range n := by
       intro k hk
@@ -108,19 +108,19 @@ theorem toeplitzLower_mul (a b : ℕ → R) (n : ℕ) :
         show (i : ℕ) + 1 - (j : ℕ) = (i : ℕ) - (j : ℕ) + 1 from by omega]
       refine Finset.sum_congr rfl fun m hm => ?_
       simp only [Finset.mem_range] at hm
-      rw [if_pos (by omega : (j : ℕ) + m ≤ (i : ℕ)),
-        if_pos (by omega : (j : ℕ) ≤ (j : ℕ) + m)]
+      rw [ite_eq_left (by omega : (j : ℕ) + m ≤ (i : ℕ)),
+        ite_eq_left (by omega : (j : ℕ) ≤ (j : ℕ) + m)]
       congr 2 <;> omega
     · intro k _ hk
       simp only [Finset.mem_Ico, not_and_or, not_le, not_lt] at hk
       by_cases h : (j : ℕ) ≤ k
-      · rw [if_neg (by omega : ¬ k ≤ (i : ℕ)), zero_mul]
-      · rw [if_neg h, mul_zero]
-  · rw [if_neg hji]
+      · rw [ite_eq_right (by omega : ¬ k ≤ (i : ℕ)), zero_mul]
+      · rw [ite_eq_right h, mul_zero]
+  · rw [ite_eq_right hji]
     refine Finset.sum_eq_zero fun k _ => ?_
     by_cases h : (j : ℕ) ≤ k
-    · rw [if_neg (by omega : ¬ k ≤ (i : ℕ)), zero_mul]
-    · rw [if_neg h, mul_zero]
+    · rw [ite_eq_right (by omega : ¬ k ≤ (i : ℕ)), zero_mul]
+    · rw [ite_eq_right h, mul_zero]
 
 /-- The Toeplitz matrix of the single factor `1 + x t` is the bidiagonal root
 factor of `Bidiagonal`: its coefficient sequence is `1, x, 0, 0, …`. -/

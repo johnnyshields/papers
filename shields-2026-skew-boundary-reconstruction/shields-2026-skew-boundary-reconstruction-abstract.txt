@@ -1,0 +1,21 @@
+Title
+-----
+Boundary reconstruction and cofactor rigidity for skew Schur functions
+
+Keywords
+--------
+skew Schur function
+skew-equivalence
+skew diagram reconstruction
+Jacobi–Trudi determinant
+Monge matrix
+convex valuation
+McNamara–van Willigenburg conjecture
+
+Abstract (Plain)
+----------------
+Two boundary observations determine a connected skew diagram up to translation, with neither boundary prescribed: its skew Schur function together with that of its first-row deletion, or of a northeast row extension of any positive length. Two extensions of distinct positive lengths also suffice, with neither the lengths nor the diagram's own function supplied. Strict convexity makes the Jacobi–Trudi staircase strictly Monge, so every minor an increasing matching can fill has a unique leading term; successive prefix minors eliminate cofactor coordinates, and the quotients of their leading monomials return the row and column parameters one row at a time. For equal diagrams with a common inner boundary the cofactor difference has a rigid adjacent-edge fingerprint, whose supported prefix has single-monomial initial forms that do not move with the valuation, for every admissible strictly convex weight and with no bound on the number of changed rows or supported shifts. That chain has the local adjacency pattern of McNamara–van Willigenburg composition, with factor reversal the orientation freedom that pattern would leave; no factorization is claimed.
+
+Abstract (Rich Text)
+--------------------
+Two boundary observations determine a connected skew diagram up to translation, with neither boundary prescribed: its skew Schur function together with that of its first-row deletion, or of a northeast row extension of any positive length. Two extensions of distinct positive lengths also suffice, with neither the lengths nor the diagram's own function supplied. Strict convexity makes the Jacobi–Trudi staircase strictly Monge, so every minor an increasing matching can fill has a unique leading term; successive prefix minors eliminate cofactor coordinates, and the quotients of their leading monomials return the row and column parameters one row at a time. For equal diagrams with a common inner boundary the cofactor difference has a rigid adjacent-edge fingerprint, whose supported prefix has single-monomial initial forms that do not move with the valuation, for every admissible strictly convex weight and with no bound on the number of changed rows or supported shifts. That chain has the local adjacency pattern of McNamara–van Willigenburg composition, with factor reversal the orientation freedom that pattern would leave; no factorization is claimed.

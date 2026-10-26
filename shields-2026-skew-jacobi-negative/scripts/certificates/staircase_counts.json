@@ -1,0 +1,2872 @@
+{
+  "tasks": 308,
+  "totals": {
+    "identity": 5038,
+    "family": 26,
+    "reversal": 1119
+  },
+  "nodes": 183367,
+  "spaces": 6183,
+  "empty_matching_tasks": 27,
+  "exact_calls": {
+    "fourier_motzkin": 174492
+  },
+  "strata": {
+    "S1": {
+      "identity": 623,
+      "family": 6
+    },
+    "S2": {
+      "identity": 303
+    },
+    "S3": {
+      "identity": 1943,
+      "family": 20
+    },
+    "S4": {
+      "identity": 2169,
+      "reversal": 1119
+    }
+  },
+  "records": [
+    {
+      "stratum": "S1",
+      "permutation": 0,
+      "nodes": 916,
+      "spaces": 73,
+      "verdicts": {
+        "identity": 73
+      }
+    },
+    {
+      "stratum": "S1",
+      "permutation": 1,
+      "nodes": 454,
+      "spaces": 69,
+      "verdicts": {
+        "identity": 69
+      }
+    },
+    {
+      "stratum": "S1",
+      "permutation": 2,
+      "nodes": 1009,
+      "spaces": 55,
+      "verdicts": {
+        "identity": 55
+      }
+    },
+    {
+      "stratum": "S1",
+      "permutation": 3,
+      "nodes": 1242,
+      "spaces": 169,
+      "verdicts": {
+        "identity": 169
+      }
+    },
+    {
+      "stratum": "S1",
+      "permutation": 4,
+      "nodes": 1413,
+      "spaces": 72,
+      "verdicts": {
+        "identity": 72
+      }
+    },
+    {
+      "stratum": "S1",
+      "permutation": 5,
+      "nodes": 818,
+      "spaces": 41,
+      "verdicts": {
+        "identity": 40,
+        "family": 1
+      }
+    },
+    {
+      "stratum": "S1",
+      "permutation": 6,
+      "nodes": 1059,
+      "spaces": 13,
+      "verdicts": {
+        "identity": 11,
+        "family": 2
+      }
+    },
+    {
+      "stratum": "S1",
+      "permutation": 7,
+      "nodes": 843,
+      "spaces": 41,
+      "verdicts": {
+        "identity": 40,
+        "family": 1
+      }
+    },
+    {
+      "stratum": "S1",
+      "permutation": 8,
+      "nodes": 1563,
+      "spaces": 13,
+      "verdicts": {
+        "identity": 11,
+        "family": 2
+      }
+    },
+    {
+      "stratum": "S1",
+      "permutation": 9,
+      "nodes": 447,
+      "spaces": 64,
+      "verdicts": {
+        "identity": 64
+      }
+    },
+    {
+      "stratum": "S1",
+      "permutation": 10,
+      "nodes": 392,
+      "spaces": 19,
+      "verdicts": {
+        "identity": 19
+      }
+    },
+    {
+      "stratum": "S2",
+      "permutation": 0,
+      "nodes": 1488,
+      "spaces": 92,
+      "verdicts": {
+        "identity": 92
+      }
+    },
+    {
+      "stratum": "S2",
+      "permutation": 1,
+      "nodes": 648,
+      "spaces": 19,
+      "verdicts": {
+        "identity": 19
+      }
+    },
+    {
+      "stratum": "S2",
+      "permutation": 2,
+      "nodes": 1515,
+      "spaces": 20,
+      "verdicts": {
+        "identity": 20
+      }
+    },
+    {
+      "stratum": "S2",
+      "permutation": 3,
+      "nodes": 279,
+      "spaces": 57,
+      "verdicts": {
+        "identity": 57
+      }
+    },
+    {
+      "stratum": "S2",
+      "permutation": 4,
+      "nodes": 1031,
+      "spaces": 59,
+      "verdicts": {
+        "identity": 59
+      }
+    },
+    {
+      "stratum": "S2",
+      "permutation": 5,
+      "nodes": 580,
+      "spaces": 17,
+      "verdicts": {
+        "identity": 17
+      }
+    },
+    {
+      "stratum": "S2",
+      "permutation": 6,
+      "nodes": 847,
+      "spaces": 5,
+      "verdicts": {
+        "identity": 5
+      }
+    },
+    {
+      "stratum": "S2",
+      "permutation": 7,
+      "nodes": 705,
+      "spaces": 16,
+      "verdicts": {
+        "identity": 16
+      }
+    },
+    {
+      "stratum": "S2",
+      "permutation": 8,
+      "nodes": 980,
+      "spaces": 5,
+      "verdicts": {
+        "identity": 5
+      }
+    },
+    {
+      "stratum": "S2",
+      "permutation": 9,
+      "nodes": 370,
+      "spaces": 8,
+      "verdicts": {
+        "identity": 8
+      }
+    },
+    {
+      "stratum": "S2",
+      "permutation": 10,
+      "nodes": 441,
+      "spaces": 5,
+      "verdicts": {
+        "identity": 5
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 0,
+      "nodes": 22,
+      "spaces": 8,
+      "verdicts": {
+        "identity": 8
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 1,
+      "nodes": 122,
+      "spaces": 20,
+      "verdicts": {
+        "identity": 20
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 2,
+      "nodes": 91,
+      "spaces": 4,
+      "verdicts": {
+        "identity": 4
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 3,
+      "nodes": 57,
+      "spaces": 4,
+      "verdicts": {
+        "identity": 4
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 4,
+      "nodes": 19,
+      "spaces": 7,
+      "verdicts": {
+        "identity": 7
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 5,
+      "nodes": 317,
+      "spaces": 15,
+      "verdicts": {
+        "identity": 15
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 6,
+      "nodes": 316,
+      "spaces": 11,
+      "verdicts": {
+        "identity": 11
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 7,
+      "nodes": 285,
+      "spaces": 17,
+      "verdicts": {
+        "identity": 17
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 8,
+      "nodes": 276,
+      "spaces": 4,
+      "verdicts": {
+        "identity": 4
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 9,
+      "nodes": 326,
+      "spaces": 4,
+      "verdicts": {
+        "identity": 4
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 10,
+      "nodes": 348,
+      "spaces": 10,
+      "verdicts": {
+        "identity": 10
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 11,
+      "nodes": 3577,
+      "spaces": 231,
+      "verdicts": {
+        "identity": 231
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 12,
+      "nodes": 1216,
+      "spaces": 60,
+      "verdicts": {
+        "identity": 60
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 13,
+      "nodes": 1270,
+      "spaces": 73,
+      "verdicts": {
+        "identity": 73
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 14,
+      "nodes": 915,
+      "spaces": 36,
+      "verdicts": {
+        "identity": 36
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 15,
+      "nodes": 878,
+      "spaces": 36,
+      "verdicts": {
+        "identity": 36
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 16,
+      "nodes": 2272,
+      "spaces": 95,
+      "verdicts": {
+        "identity": 95
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 17,
+      "nodes": 2056,
+      "spaces": 51,
+      "verdicts": {
+        "identity": 51
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 18,
+      "nodes": 857,
+      "spaces": 10,
+      "verdicts": {
+        "identity": 10
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 19,
+      "nodes": 863,
+      "spaces": 13,
+      "verdicts": {
+        "identity": 13
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 20,
+      "nodes": 632,
+      "spaces": 4,
+      "verdicts": {
+        "family": 1,
+        "identity": 3
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 21,
+      "nodes": 647,
+      "spaces": 3,
+      "verdicts": {
+        "identity": 3
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 22,
+      "nodes": 1277,
+      "spaces": 15,
+      "verdicts": {
+        "identity": 14,
+        "family": 1
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 23,
+      "nodes": 1537,
+      "spaces": 51,
+      "verdicts": {
+        "identity": 51
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 24,
+      "nodes": 817,
+      "spaces": 10,
+      "verdicts": {
+        "identity": 10
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 25,
+      "nodes": 694,
+      "spaces": 13,
+      "verdicts": {
+        "identity": 13
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 26,
+      "nodes": 570,
+      "spaces": 3,
+      "verdicts": {
+        "identity": 3
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 27,
+      "nodes": 632,
+      "spaces": 4,
+      "verdicts": {
+        "identity": 3,
+        "family": 1
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 28,
+      "nodes": 1038,
+      "spaces": 15,
+      "verdicts": {
+        "identity": 14,
+        "family": 1
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 29,
+      "nodes": 267,
+      "spaces": 13,
+      "verdicts": {
+        "identity": 13
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 30,
+      "nodes": 307,
+      "spaces": 9,
+      "verdicts": {
+        "identity": 9
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 31,
+      "nodes": 279,
+      "spaces": 12,
+      "verdicts": {
+        "identity": 12
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 32,
+      "nodes": 396,
+      "spaces": 5,
+      "verdicts": {
+        "identity": 4,
+        "family": 1
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 33,
+      "nodes": 371,
+      "spaces": 5,
+      "verdicts": {
+        "identity": 4,
+        "family": 1
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 34,
+      "nodes": 505,
+      "spaces": 12,
+      "verdicts": {
+        "identity": 10,
+        "family": 2
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 35,
+      "nodes": 703,
+      "spaces": 64,
+      "verdicts": {
+        "identity": 64
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 36,
+      "nodes": 326,
+      "spaces": 20,
+      "verdicts": {
+        "identity": 20
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 37,
+      "nodes": 298,
+      "spaces": 17,
+      "verdicts": {
+        "identity": 17
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 38,
+      "nodes": 213,
+      "spaces": 4,
+      "verdicts": {
+        "identity": 4
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 39,
+      "nodes": 164,
+      "spaces": 4,
+      "verdicts": {
+        "identity": 4
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 40,
+      "nodes": 306,
+      "spaces": 10,
+      "verdicts": {
+        "identity": 10
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 41,
+      "nodes": 845,
+      "spaces": 48,
+      "verdicts": {
+        "identity": 48
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 42,
+      "nodes": 585,
+      "spaces": 12,
+      "verdicts": {
+        "identity": 12
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 43,
+      "nodes": 433,
+      "spaces": 13,
+      "verdicts": {
+        "identity": 13
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 44,
+      "nodes": 376,
+      "spaces": 2,
+      "verdicts": {
+        "identity": 2
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 45,
+      "nodes": 386,
+      "spaces": 2,
+      "verdicts": {
+        "identity": 2
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 46,
+      "nodes": 469,
+      "spaces": 5,
+      "verdicts": {
+        "identity": 5
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 47,
+      "nodes": 2390,
+      "spaces": 86,
+      "verdicts": {
+        "identity": 86
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 48,
+      "nodes": 911,
+      "spaces": 24,
+      "verdicts": {
+        "identity": 24
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 49,
+      "nodes": 1001,
+      "spaces": 22,
+      "verdicts": {
+        "identity": 22
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 50,
+      "nodes": 703,
+      "spaces": 10,
+      "verdicts": {
+        "identity": 10
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 51,
+      "nodes": 612,
+      "spaces": 10,
+      "verdicts": {
+        "identity": 10
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 52,
+      "nodes": 1402,
+      "spaces": 31,
+      "verdicts": {
+        "identity": 31
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 53,
+      "nodes": 598,
+      "spaces": 16,
+      "verdicts": {
+        "identity": 16
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 54,
+      "nodes": 314,
+      "spaces": 4,
+      "verdicts": {
+        "identity": 4
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 55,
+      "nodes": 350,
+      "spaces": 4,
+      "verdicts": {
+        "identity": 4
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 56,
+      "nodes": 236,
+      "spaces": 0,
+      "verdicts": {}
+    },
+    {
+      "stratum": "S3",
+      "permutation": 57,
+      "nodes": 258,
+      "spaces": 0,
+      "verdicts": {}
+    },
+    {
+      "stratum": "S3",
+      "permutation": 58,
+      "nodes": 321,
+      "spaces": 0,
+      "verdicts": {}
+    },
+    {
+      "stratum": "S3",
+      "permutation": 59,
+      "nodes": 1076,
+      "spaces": 16,
+      "verdicts": {
+        "identity": 16
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 60,
+      "nodes": 543,
+      "spaces": 4,
+      "verdicts": {
+        "identity": 4
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 61,
+      "nodes": 582,
+      "spaces": 4,
+      "verdicts": {
+        "identity": 4
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 62,
+      "nodes": 420,
+      "spaces": 0,
+      "verdicts": {}
+    },
+    {
+      "stratum": "S3",
+      "permutation": 63,
+      "nodes": 430,
+      "spaces": 0,
+      "verdicts": {}
+    },
+    {
+      "stratum": "S3",
+      "permutation": 64,
+      "nodes": 615,
+      "spaces": 0,
+      "verdicts": {}
+    },
+    {
+      "stratum": "S3",
+      "permutation": 65,
+      "nodes": 354,
+      "spaces": 20,
+      "verdicts": {
+        "identity": 20
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 66,
+      "nodes": 310,
+      "spaces": 6,
+      "verdicts": {
+        "identity": 6
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 67,
+      "nodes": 282,
+      "spaces": 6,
+      "verdicts": {
+        "identity": 6
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 68,
+      "nodes": 289,
+      "spaces": 0,
+      "verdicts": {}
+    },
+    {
+      "stratum": "S3",
+      "permutation": 69,
+      "nodes": 249,
+      "spaces": 0,
+      "verdicts": {}
+    },
+    {
+      "stratum": "S3",
+      "permutation": 70,
+      "nodes": 284,
+      "spaces": 0,
+      "verdicts": {}
+    },
+    {
+      "stratum": "S3",
+      "permutation": 71,
+      "nodes": 2105,
+      "spaces": 86,
+      "verdicts": {
+        "identity": 86
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 72,
+      "nodes": 851,
+      "spaces": 24,
+      "verdicts": {
+        "identity": 24
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 73,
+      "nodes": 795,
+      "spaces": 22,
+      "verdicts": {
+        "identity": 22
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 74,
+      "nodes": 555,
+      "spaces": 10,
+      "verdicts": {
+        "identity": 10
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 75,
+      "nodes": 522,
+      "spaces": 10,
+      "verdicts": {
+        "identity": 10
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 76,
+      "nodes": 1139,
+      "spaces": 31,
+      "verdicts": {
+        "identity": 31
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 77,
+      "nodes": 1438,
+      "spaces": 16,
+      "verdicts": {
+        "identity": 16
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 78,
+      "nodes": 714,
+      "spaces": 4,
+      "verdicts": {
+        "identity": 4
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 79,
+      "nodes": 643,
+      "spaces": 4,
+      "verdicts": {
+        "identity": 4
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 80,
+      "nodes": 495,
+      "spaces": 1,
+      "verdicts": {
+        "family": 1
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 81,
+      "nodes": 518,
+      "spaces": 0,
+      "verdicts": {}
+    },
+    {
+      "stratum": "S3",
+      "permutation": 82,
+      "nodes": 850,
+      "spaces": 1,
+      "verdicts": {
+        "family": 1
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 83,
+      "nodes": 476,
+      "spaces": 47,
+      "verdicts": {
+        "identity": 47
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 84,
+      "nodes": 245,
+      "spaces": 16,
+      "verdicts": {
+        "identity": 16
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 85,
+      "nodes": 426,
+      "spaces": 15,
+      "verdicts": {
+        "identity": 15
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 86,
+      "nodes": 283,
+      "spaces": 4,
+      "verdicts": {
+        "identity": 4
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 87,
+      "nodes": 233,
+      "spaces": 4,
+      "verdicts": {
+        "identity": 4
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 88,
+      "nodes": 297,
+      "spaces": 10,
+      "verdicts": {
+        "identity": 10
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 89,
+      "nodes": 347,
+      "spaces": 18,
+      "verdicts": {
+        "identity": 18
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 90,
+      "nodes": 231,
+      "spaces": 6,
+      "verdicts": {
+        "identity": 6
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 91,
+      "nodes": 306,
+      "spaces": 6,
+      "verdicts": {
+        "identity": 6
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 92,
+      "nodes": 213,
+      "spaces": 0,
+      "verdicts": {}
+    },
+    {
+      "stratum": "S3",
+      "permutation": 93,
+      "nodes": 274,
+      "spaces": 0,
+      "verdicts": {}
+    },
+    {
+      "stratum": "S3",
+      "permutation": 94,
+      "nodes": 313,
+      "spaces": 0,
+      "verdicts": {}
+    },
+    {
+      "stratum": "S3",
+      "permutation": 95,
+      "nodes": 290,
+      "spaces": 23,
+      "verdicts": {
+        "identity": 23
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 96,
+      "nodes": 267,
+      "spaces": 8,
+      "verdicts": {
+        "identity": 8
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 97,
+      "nodes": 360,
+      "spaces": 8,
+      "verdicts": {
+        "identity": 8
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 98,
+      "nodes": 331,
+      "spaces": 3,
+      "verdicts": {
+        "family": 1,
+        "identity": 2
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 99,
+      "nodes": 376,
+      "spaces": 2,
+      "verdicts": {
+        "identity": 2
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 100,
+      "nodes": 361,
+      "spaces": 6,
+      "verdicts": {
+        "identity": 5,
+        "family": 1
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 101,
+      "nodes": 559,
+      "spaces": 16,
+      "verdicts": {
+        "identity": 16
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 102,
+      "nodes": 366,
+      "spaces": 4,
+      "verdicts": {
+        "identity": 4
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 103,
+      "nodes": 344,
+      "spaces": 4,
+      "verdicts": {
+        "identity": 4
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 104,
+      "nodes": 282,
+      "spaces": 0,
+      "verdicts": {}
+    },
+    {
+      "stratum": "S3",
+      "permutation": 105,
+      "nodes": 305,
+      "spaces": 0,
+      "verdicts": {}
+    },
+    {
+      "stratum": "S3",
+      "permutation": 106,
+      "nodes": 322,
+      "spaces": 0,
+      "verdicts": {}
+    },
+    {
+      "stratum": "S3",
+      "permutation": 107,
+      "nodes": 676,
+      "spaces": 16,
+      "verdicts": {
+        "identity": 16
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 108,
+      "nodes": 542,
+      "spaces": 4,
+      "verdicts": {
+        "identity": 4
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 109,
+      "nodes": 443,
+      "spaces": 4,
+      "verdicts": {
+        "identity": 4
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 110,
+      "nodes": 376,
+      "spaces": 0,
+      "verdicts": {}
+    },
+    {
+      "stratum": "S3",
+      "permutation": 111,
+      "nodes": 402,
+      "spaces": 1,
+      "verdicts": {
+        "family": 1
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 112,
+      "nodes": 391,
+      "spaces": 1,
+      "verdicts": {
+        "family": 1
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 113,
+      "nodes": 381,
+      "spaces": 20,
+      "verdicts": {
+        "identity": 20
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 114,
+      "nodes": 393,
+      "spaces": 6,
+      "verdicts": {
+        "identity": 6
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 115,
+      "nodes": 361,
+      "spaces": 6,
+      "verdicts": {
+        "identity": 6
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 116,
+      "nodes": 381,
+      "spaces": 1,
+      "verdicts": {
+        "family": 1
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 117,
+      "nodes": 388,
+      "spaces": 1,
+      "verdicts": {
+        "family": 1
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 118,
+      "nodes": 405,
+      "spaces": 2,
+      "verdicts": {
+        "family": 2
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 119,
+      "nodes": 284,
+      "spaces": 18,
+      "verdicts": {
+        "identity": 18
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 120,
+      "nodes": 270,
+      "spaces": 6,
+      "verdicts": {
+        "identity": 6
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 121,
+      "nodes": 307,
+      "spaces": 6,
+      "verdicts": {
+        "identity": 6
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 122,
+      "nodes": 232,
+      "spaces": 0,
+      "verdicts": {}
+    },
+    {
+      "stratum": "S3",
+      "permutation": 123,
+      "nodes": 291,
+      "spaces": 0,
+      "verdicts": {}
+    },
+    {
+      "stratum": "S3",
+      "permutation": 124,
+      "nodes": 238,
+      "spaces": 0,
+      "verdicts": {}
+    },
+    {
+      "stratum": "S3",
+      "permutation": 125,
+      "nodes": 185,
+      "spaces": 11,
+      "verdicts": {
+        "identity": 11
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 126,
+      "nodes": 214,
+      "spaces": 3,
+      "verdicts": {
+        "identity": 3
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 127,
+      "nodes": 215,
+      "spaces": 6,
+      "verdicts": {
+        "identity": 6
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 128,
+      "nodes": 222,
+      "spaces": 0,
+      "verdicts": {}
+    },
+    {
+      "stratum": "S3",
+      "permutation": 129,
+      "nodes": 210,
+      "spaces": 0,
+      "verdicts": {}
+    },
+    {
+      "stratum": "S3",
+      "permutation": 130,
+      "nodes": 193,
+      "spaces": 0,
+      "verdicts": {}
+    },
+    {
+      "stratum": "S3",
+      "permutation": 131,
+      "nodes": 493,
+      "spaces": 16,
+      "verdicts": {
+        "identity": 16
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 132,
+      "nodes": 306,
+      "spaces": 4,
+      "verdicts": {
+        "identity": 4
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 133,
+      "nodes": 334,
+      "spaces": 4,
+      "verdicts": {
+        "identity": 4
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 134,
+      "nodes": 235,
+      "spaces": 1,
+      "verdicts": {
+        "family": 1
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 135,
+      "nodes": 269,
+      "spaces": 0,
+      "verdicts": {}
+    },
+    {
+      "stratum": "S3",
+      "permutation": 136,
+      "nodes": 255,
+      "spaces": 1,
+      "verdicts": {
+        "family": 1
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 137,
+      "nodes": 554,
+      "spaces": 47,
+      "verdicts": {
+        "identity": 47
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 138,
+      "nodes": 316,
+      "spaces": 9,
+      "verdicts": {
+        "identity": 9
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 139,
+      "nodes": 298,
+      "spaces": 13,
+      "verdicts": {
+        "identity": 13
+      }
+    },
+    {
+      "stratum": "S3",
+      "permutation": 140,
+      "nodes": 230,
+      "spaces": 0,
+      "verdicts": {}
+    },
+    {
+      "stratum": "S3",
+      "permutation": 141,
+      "nodes": 218,
+      "spaces": 0,
+      "verdicts": {}
+    },
+    {
+      "stratum": "S3",
+      "permutation": 142,
+      "nodes": 209,
+      "spaces": 0,
+      "verdicts": {}
+    },
+    {
+      "stratum": "S4",
+      "permutation": 0,
+      "nodes": 30,
+      "spaces": 10,
+      "verdicts": {
+        "identity": 10
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 1,
+      "nodes": 929,
+      "spaces": 66,
+      "verdicts": {
+        "identity": 55,
+        "reversal": 11
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 2,
+      "nodes": 321,
+      "spaces": 19,
+      "verdicts": {
+        "identity": 16,
+        "reversal": 3
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 3,
+      "nodes": 252,
+      "spaces": 17,
+      "verdicts": {
+        "identity": 14,
+        "reversal": 3
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 4,
+      "nodes": 33,
+      "spaces": 10,
+      "verdicts": {
+        "identity": 10
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 5,
+      "nodes": 167,
+      "spaces": 17,
+      "verdicts": {
+        "identity": 17
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 6,
+      "nodes": 211,
+      "spaces": 15,
+      "verdicts": {
+        "identity": 15
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 7,
+      "nodes": 448,
+      "spaces": 29,
+      "verdicts": {
+        "identity": 26,
+        "reversal": 3
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 8,
+      "nodes": 320,
+      "spaces": 10,
+      "verdicts": {
+        "identity": 9,
+        "reversal": 1
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 9,
+      "nodes": 301,
+      "spaces": 9,
+      "verdicts": {
+        "reversal": 1,
+        "identity": 8
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 10,
+      "nodes": 166,
+      "spaces": 10,
+      "verdicts": {
+        "identity": 10
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 11,
+      "nodes": 639,
+      "spaces": 66,
+      "verdicts": {
+        "identity": 66
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 12,
+      "nodes": 397,
+      "spaces": 26,
+      "verdicts": {
+        "identity": 26
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 13,
+      "nodes": 1199,
+      "spaces": 48,
+      "verdicts": {
+        "reversal": 10,
+        "identity": 38
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 14,
+      "nodes": 470,
+      "spaces": 15,
+      "verdicts": {
+        "identity": 12,
+        "reversal": 3
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 15,
+      "nodes": 380,
+      "spaces": 15,
+      "verdicts": {
+        "identity": 12,
+        "reversal": 3
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 16,
+      "nodes": 240,
+      "spaces": 20,
+      "verdicts": {
+        "identity": 20
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 17,
+      "nodes": 510,
+      "spaces": 31,
+      "verdicts": {
+        "identity": 31
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 18,
+      "nodes": 457,
+      "spaces": 13,
+      "verdicts": {
+        "identity": 13
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 19,
+      "nodes": 623,
+      "spaces": 20,
+      "verdicts": {
+        "identity": 17,
+        "reversal": 3
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 20,
+      "nodes": 435,
+      "spaces": 9,
+      "verdicts": {
+        "identity": 8,
+        "reversal": 1
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 21,
+      "nodes": 448,
+      "spaces": 9,
+      "verdicts": {
+        "identity": 8,
+        "reversal": 1
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 22,
+      "nodes": 407,
+      "spaces": 15,
+      "verdicts": {
+        "identity": 15
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 23,
+      "nodes": 293,
+      "spaces": 29,
+      "verdicts": {
+        "identity": 29
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 24,
+      "nodes": 255,
+      "spaces": 11,
+      "verdicts": {
+        "identity": 11
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 25,
+      "nodes": 499,
+      "spaces": 20,
+      "verdicts": {
+        "identity": 17,
+        "reversal": 3
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 26,
+      "nodes": 375,
+      "spaces": 9,
+      "verdicts": {
+        "identity": 8,
+        "reversal": 1
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 27,
+      "nodes": 345,
+      "spaces": 8,
+      "verdicts": {
+        "identity": 7,
+        "reversal": 1
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 28,
+      "nodes": 395,
+      "spaces": 14,
+      "verdicts": {
+        "identity": 14
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 29,
+      "nodes": 133,
+      "spaces": 12,
+      "verdicts": {
+        "identity": 12
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 30,
+      "nodes": 243,
+      "spaces": 10,
+      "verdicts": {
+        "identity": 10
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 31,
+      "nodes": 542,
+      "spaces": 40,
+      "verdicts": {
+        "identity": 34,
+        "reversal": 6
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 32,
+      "nodes": 399,
+      "spaces": 17,
+      "verdicts": {
+        "identity": 15,
+        "reversal": 2
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 33,
+      "nodes": 441,
+      "spaces": 16,
+      "verdicts": {
+        "identity": 14,
+        "reversal": 2
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 34,
+      "nodes": 317,
+      "spaces": 12,
+      "verdicts": {
+        "identity": 12
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 35,
+      "nodes": 1456,
+      "spaces": 157,
+      "verdicts": {
+        "identity": 157
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 36,
+      "nodes": 497,
+      "spaces": 40,
+      "verdicts": {
+        "identity": 40
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 37,
+      "nodes": 1675,
+      "spaces": 70,
+      "verdicts": {
+        "reversal": 11,
+        "identity": 59
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 38,
+      "nodes": 577,
+      "spaces": 18,
+      "verdicts": {
+        "identity": 14,
+        "reversal": 4
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 39,
+      "nodes": 532,
+      "spaces": 17,
+      "verdicts": {
+        "identity": 14,
+        "reversal": 3
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 40,
+      "nodes": 484,
+      "spaces": 35,
+      "verdicts": {
+        "identity": 35
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 41,
+      "nodes": 955,
+      "spaces": 88,
+      "verdicts": {
+        "identity": 88
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 42,
+      "nodes": 576,
+      "spaces": 25,
+      "verdicts": {
+        "identity": 25
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 43,
+      "nodes": 798,
+      "spaces": 34,
+      "verdicts": {
+        "identity": 31,
+        "reversal": 3
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 44,
+      "nodes": 456,
+      "spaces": 9,
+      "verdicts": {
+        "reversal": 1,
+        "identity": 8
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 45,
+      "nodes": 443,
+      "spaces": 9,
+      "verdicts": {
+        "identity": 8,
+        "reversal": 1
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 46,
+      "nodes": 427,
+      "spaces": 17,
+      "verdicts": {
+        "identity": 17
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 47,
+      "nodes": 1252,
+      "spaces": 67,
+      "verdicts": {
+        "identity": 54,
+        "reversal": 13
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 48,
+      "nodes": 471,
+      "spaces": 20,
+      "verdicts": {
+        "reversal": 5,
+        "identity": 15
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 49,
+      "nodes": 2502,
+      "spaces": 64,
+      "verdicts": {
+        "reversal": 41,
+        "identity": 23
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 50,
+      "nodes": 751,
+      "spaces": 20,
+      "verdicts": {
+        "reversal": 14,
+        "identity": 6
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 51,
+      "nodes": 772,
+      "spaces": 19,
+      "verdicts": {
+        "reversal": 13,
+        "identity": 6
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 52,
+      "nodes": 446,
+      "spaces": 18,
+      "verdicts": {
+        "identity": 13,
+        "reversal": 5
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 53,
+      "nodes": 706,
+      "spaces": 23,
+      "verdicts": {
+        "identity": 17,
+        "reversal": 6
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 54,
+      "nodes": 439,
+      "spaces": 8,
+      "verdicts": {
+        "reversal": 3,
+        "identity": 5
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 55,
+      "nodes": 1183,
+      "spaces": 27,
+      "verdicts": {
+        "identity": 7,
+        "reversal": 20
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 56,
+      "nodes": 613,
+      "spaces": 11,
+      "verdicts": {
+        "reversal": 9,
+        "identity": 2
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 57,
+      "nodes": 536,
+      "spaces": 8,
+      "verdicts": {
+        "reversal": 6,
+        "identity": 2
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 58,
+      "nodes": 439,
+      "spaces": 8,
+      "verdicts": {
+        "reversal": 3,
+        "identity": 5
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 59,
+      "nodes": 687,
+      "spaces": 21,
+      "verdicts": {
+        "identity": 17,
+        "reversal": 4
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 60,
+      "nodes": 431,
+      "spaces": 7,
+      "verdicts": {
+        "identity": 5,
+        "reversal": 2
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 61,
+      "nodes": 1051,
+      "spaces": 17,
+      "verdicts": {
+        "reversal": 10,
+        "identity": 7
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 62,
+      "nodes": 591,
+      "spaces": 6,
+      "verdicts": {
+        "identity": 2,
+        "reversal": 4
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 63,
+      "nodes": 559,
+      "spaces": 6,
+      "verdicts": {
+        "reversal": 4,
+        "identity": 2
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 64,
+      "nodes": 565,
+      "spaces": 7,
+      "verdicts": {
+        "identity": 5,
+        "reversal": 2
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 65,
+      "nodes": 662,
+      "spaces": 35,
+      "verdicts": {
+        "identity": 35
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 66,
+      "nodes": 460,
+      "spaces": 12,
+      "verdicts": {
+        "identity": 12
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 67,
+      "nodes": 705,
+      "spaces": 20,
+      "verdicts": {
+        "identity": 17,
+        "reversal": 3
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 68,
+      "nodes": 427,
+      "spaces": 7,
+      "verdicts": {
+        "identity": 6,
+        "reversal": 1
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 69,
+      "nodes": 549,
+      "spaces": 7,
+      "verdicts": {
+        "identity": 6,
+        "reversal": 1
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 70,
+      "nodes": 479,
+      "spaces": 12,
+      "verdicts": {
+        "identity": 12
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 71,
+      "nodes": 1421,
+      "spaces": 76,
+      "verdicts": {
+        "identity": 55,
+        "reversal": 21
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 72,
+      "nodes": 537,
+      "spaces": 22,
+      "verdicts": {
+        "reversal": 8,
+        "identity": 14
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 73,
+      "nodes": 3067,
+      "spaces": 95,
+      "verdicts": {
+        "reversal": 72,
+        "identity": 23
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 74,
+      "nodes": 910,
+      "spaces": 28,
+      "verdicts": {
+        "reversal": 22,
+        "identity": 6
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 75,
+      "nodes": 863,
+      "spaces": 31,
+      "verdicts": {
+        "reversal": 25,
+        "identity": 6
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 76,
+      "nodes": 484,
+      "spaces": 22,
+      "verdicts": {
+        "identity": 14,
+        "reversal": 8
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 77,
+      "nodes": 700,
+      "spaces": 24,
+      "verdicts": {
+        "reversal": 7,
+        "identity": 17
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 78,
+      "nodes": 439,
+      "spaces": 8,
+      "verdicts": {
+        "reversal": 3,
+        "identity": 5
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 79,
+      "nodes": 1163,
+      "spaces": 28,
+      "verdicts": {
+        "reversal": 21,
+        "identity": 7
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 80,
+      "nodes": 583,
+      "spaces": 9,
+      "verdicts": {
+        "reversal": 7,
+        "identity": 2
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 81,
+      "nodes": 605,
+      "spaces": 10,
+      "verdicts": {
+        "reversal": 8,
+        "identity": 2
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 82,
+      "nodes": 449,
+      "spaces": 8,
+      "verdicts": {
+        "reversal": 3,
+        "identity": 5
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 83,
+      "nodes": 1127,
+      "spaces": 83,
+      "verdicts": {
+        "identity": 50,
+        "reversal": 33
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 84,
+      "nodes": 397,
+      "spaces": 26,
+      "verdicts": {
+        "identity": 13,
+        "reversal": 13
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 85,
+      "nodes": 3882,
+      "spaces": 151,
+      "verdicts": {
+        "identity": 26,
+        "reversal": 125
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 86,
+      "nodes": 914,
+      "spaces": 45,
+      "verdicts": {
+        "reversal": 38,
+        "identity": 7
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 87,
+      "nodes": 1002,
+      "spaces": 45,
+      "verdicts": {
+        "reversal": 39,
+        "identity": 6
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 88,
+      "nodes": 391,
+      "spaces": 26,
+      "verdicts": {
+        "identity": 13,
+        "reversal": 13
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 89,
+      "nodes": 612,
+      "spaces": 30,
+      "verdicts": {
+        "identity": 16,
+        "reversal": 14
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 90,
+      "nodes": 384,
+      "spaces": 12,
+      "verdicts": {
+        "identity": 5,
+        "reversal": 7
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 91,
+      "nodes": 1477,
+      "spaces": 62,
+      "verdicts": {
+        "identity": 8,
+        "reversal": 54
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 92,
+      "nodes": 608,
+      "spaces": 25,
+      "verdicts": {
+        "reversal": 22,
+        "identity": 3
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 93,
+      "nodes": 562,
+      "spaces": 18,
+      "verdicts": {
+        "reversal": 16,
+        "identity": 2
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 94,
+      "nodes": 381,
+      "spaces": 12,
+      "verdicts": {
+        "identity": 5,
+        "reversal": 7
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 95,
+      "nodes": 665,
+      "spaces": 41,
+      "verdicts": {
+        "reversal": 14,
+        "identity": 27
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 96,
+      "nodes": 420,
+      "spaces": 16,
+      "verdicts": {
+        "reversal": 7,
+        "identity": 9
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 97,
+      "nodes": 1578,
+      "spaces": 54,
+      "verdicts": {
+        "reversal": 37,
+        "identity": 17
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 98,
+      "nodes": 712,
+      "spaces": 18,
+      "verdicts": {
+        "reversal": 13,
+        "identity": 5
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 99,
+      "nodes": 780,
+      "spaces": 20,
+      "verdicts": {
+        "reversal": 15,
+        "identity": 5
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 100,
+      "nodes": 535,
+      "spaces": 16,
+      "verdicts": {
+        "identity": 9,
+        "reversal": 7
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 101,
+      "nodes": 574,
+      "spaces": 24,
+      "verdicts": {
+        "reversal": 7,
+        "identity": 17
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 102,
+      "nodes": 378,
+      "spaces": 8,
+      "verdicts": {
+        "reversal": 3,
+        "identity": 5
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 103,
+      "nodes": 1032,
+      "spaces": 28,
+      "verdicts": {
+        "reversal": 21,
+        "identity": 7
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 104,
+      "nodes": 449,
+      "spaces": 9,
+      "verdicts": {
+        "reversal": 7,
+        "identity": 2
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 105,
+      "nodes": 618,
+      "spaces": 10,
+      "verdicts": {
+        "reversal": 8,
+        "identity": 2
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 106,
+      "nodes": 397,
+      "spaces": 8,
+      "verdicts": {
+        "reversal": 3,
+        "identity": 5
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 107,
+      "nodes": 509,
+      "spaces": 21,
+      "verdicts": {
+        "identity": 17,
+        "reversal": 4
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 108,
+      "nodes": 325,
+      "spaces": 7,
+      "verdicts": {
+        "identity": 5,
+        "reversal": 2
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 109,
+      "nodes": 1033,
+      "spaces": 22,
+      "verdicts": {
+        "reversal": 15,
+        "identity": 7
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 110,
+      "nodes": 412,
+      "spaces": 6,
+      "verdicts": {
+        "reversal": 4,
+        "identity": 2
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 111,
+      "nodes": 559,
+      "spaces": 9,
+      "verdicts": {
+        "reversal": 7,
+        "identity": 2
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 112,
+      "nodes": 366,
+      "spaces": 7,
+      "verdicts": {
+        "identity": 5,
+        "reversal": 2
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 113,
+      "nodes": 551,
+      "spaces": 35,
+      "verdicts": {
+        "identity": 35
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 114,
+      "nodes": 424,
+      "spaces": 12,
+      "verdicts": {
+        "identity": 12
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 115,
+      "nodes": 609,
+      "spaces": 20,
+      "verdicts": {
+        "identity": 17,
+        "reversal": 3
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 116,
+      "nodes": 406,
+      "spaces": 7,
+      "verdicts": {
+        "identity": 6,
+        "reversal": 1
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 117,
+      "nodes": 486,
+      "spaces": 7,
+      "verdicts": {
+        "identity": 6,
+        "reversal": 1
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 118,
+      "nodes": 478,
+      "spaces": 12,
+      "verdicts": {
+        "identity": 12
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 119,
+      "nodes": 543,
+      "spaces": 23,
+      "verdicts": {
+        "identity": 15,
+        "reversal": 8
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 120,
+      "nodes": 367,
+      "spaces": 9,
+      "verdicts": {
+        "identity": 5,
+        "reversal": 4
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 121,
+      "nodes": 1423,
+      "spaces": 36,
+      "verdicts": {
+        "identity": 7,
+        "reversal": 29
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 122,
+      "nodes": 500,
+      "spaces": 10,
+      "verdicts": {
+        "identity": 2,
+        "reversal": 8
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 123,
+      "nodes": 722,
+      "spaces": 15,
+      "verdicts": {
+        "identity": 2,
+        "reversal": 13
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 124,
+      "nodes": 432,
+      "spaces": 9,
+      "verdicts": {
+        "identity": 5,
+        "reversal": 4
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 125,
+      "nodes": 147,
+      "spaces": 14,
+      "verdicts": {
+        "identity": 14
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 126,
+      "nodes": 206,
+      "spaces": 8,
+      "verdicts": {
+        "identity": 8
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 127,
+      "nodes": 417,
+      "spaces": 19,
+      "verdicts": {
+        "identity": 16,
+        "reversal": 3
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 128,
+      "nodes": 337,
+      "spaces": 8,
+      "verdicts": {
+        "identity": 7,
+        "reversal": 1
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 129,
+      "nodes": 397,
+      "spaces": 8,
+      "verdicts": {
+        "identity": 7,
+        "reversal": 1
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 130,
+      "nodes": 327,
+      "spaces": 16,
+      "verdicts": {
+        "identity": 16
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 131,
+      "nodes": 577,
+      "spaces": 21,
+      "verdicts": {
+        "identity": 17,
+        "reversal": 4
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 132,
+      "nodes": 402,
+      "spaces": 7,
+      "verdicts": {
+        "identity": 5,
+        "reversal": 2
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 133,
+      "nodes": 939,
+      "spaces": 17,
+      "verdicts": {
+        "reversal": 10,
+        "identity": 7
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 134,
+      "nodes": 560,
+      "spaces": 6,
+      "verdicts": {
+        "identity": 2,
+        "reversal": 4
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 135,
+      "nodes": 605,
+      "spaces": 6,
+      "verdicts": {
+        "reversal": 4,
+        "identity": 2
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 136,
+      "nodes": 524,
+      "spaces": 7,
+      "verdicts": {
+        "identity": 5,
+        "reversal": 2
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 137,
+      "nodes": 279,
+      "spaces": 23,
+      "verdicts": {
+        "identity": 23
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 138,
+      "nodes": 240,
+      "spaces": 7,
+      "verdicts": {
+        "identity": 7
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 139,
+      "nodes": 473,
+      "spaces": 15,
+      "verdicts": {
+        "identity": 12,
+        "reversal": 3
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 140,
+      "nodes": 315,
+      "spaces": 6,
+      "verdicts": {
+        "identity": 5,
+        "reversal": 1
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 141,
+      "nodes": 377,
+      "spaces": 6,
+      "verdicts": {
+        "identity": 5,
+        "reversal": 1
+      }
+    },
+    {
+      "stratum": "S4",
+      "permutation": 142,
+      "nodes": 357,
+      "spaces": 13,
+      "verdicts": {
+        "identity": 13
+      }
+    }
+  ]
+}

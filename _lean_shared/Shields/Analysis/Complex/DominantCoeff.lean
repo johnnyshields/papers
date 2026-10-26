@@ -208,9 +208,9 @@ theorem tsum_ite_le_of_geometric {c : ℕ → ℝ} {R θ : ℝ} {k : ℕ}
   have hhead : ∑ i ∈ Finset.range (k + 1), g i = ∑ i ∈ Finset.range k, c i * R ^ i := by
     rw [Finset.sum_range_succ, hgk, add_zero]
     refine Finset.sum_congr rfl fun i hi => ?_
-    rw [hg]; dsimp only; rw [if_neg (Finset.mem_range.mp hi).ne]
+    rw [hg]; dsimp only; rw [ite_eq_right (Finset.mem_range.mp hi).ne]
   have htail : ∀ n : ℕ, g (n + (k + 1)) = c (n + (k + 1)) * R ^ (n + (k + 1)) := by
-    intro n; rw [hg]; dsimp only; rw [if_neg (by omega)]
+    intro n; rw [hg]; dsimp only; rw [ite_eq_right (by omega)]
   have hdecomp : ∑' n, g n = (∑ i ∈ Finset.range (k + 1), g i) + ∑' n, g (n + (k + 1)) :=
     (hgsum.sum_add_tsum_nat_add (k + 1)).symm
   have hsplit : 2 * θ / (1 - θ) * (c k * R ^ k)

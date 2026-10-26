@@ -9,7 +9,7 @@ import Mathlib.Tactic.Ring
 import Mathlib.Order.Lattice.Nat
 import Mathlib.Order.Interval.Finset.Nat
 import Mathlib.Data.Finset.Card
-import Mathlib.Data.Real.Basic
+import Mathlib.Basic.Real.Basic
 import Mathlib.Data.Fin.Tuple.Basic
 import Mathlib.Data.Nat.Find
 import Mathlib.Order.Interval.Finset.Fin
@@ -61,7 +61,7 @@ variable {n : ℕ}
 noncomputable def vecExt {n : ℕ} (x : Fin n → ℝ) (p : ℕ) : ℝ :=
   if h : p < n then x ⟨p, h⟩ else 0
 
-theorem vecExt_of_lt {x : Fin n → ℝ} {p : ℕ} (h : p < n) : vecExt x p = x ⟨p, h⟩ := dif_pos h
+theorem vecExt_of_lt {x : Fin n → ℝ} {p : ℕ} (h : p < n) : vecExt x p = x ⟨p, h⟩ := dite_eq_left h
 
 @[simp] theorem vecExt_coe (x : Fin n → ℝ) (j : Fin n) : vecExt x (j : ℕ) = x j := by
   rw [vecExt_of_lt j.isLt]
@@ -83,8 +83,8 @@ theorem jumpCount_succ (u : ℕ → ℝ) (j : ℕ) :
     jumpCount u (j + 1) = jumpCount u j + if u j * u (j + 1) < 0 then 1 else 0 := by
   rw [jumpCount, jumpCount, Finset.range_add_one, Finset.filter_insert]
   by_cases h : u j * u (j + 1) < 0
-  · rw [if_pos h, if_pos h, Finset.card_insert_of_notMem (by simp)]
-  · rw [if_neg h, if_neg h, add_zero]
+  · rw [ite_eq_left h, ite_eq_left h, Finset.card_insert_of_notMem (by simp)]
+  · rw [ite_eq_right h, ite_eq_right h, add_zero]
 
 theorem monotone_jumpCount (u : ℕ → ℝ) : Monotone (jumpCount u) :=
   monotone_nat_of_le_succ fun j => by rw [jumpCount_succ]; split <;> omega
@@ -108,9 +108,9 @@ theorem jumpCount_parity {u : ℕ → ℝ} {N : ℕ} (hu : ∀ p ≤ N, u p ≠ 
       have hsq : 0 < u j * u j := mul_self_pos.mpr (hu j hjN)
       rw [jumpCount_succ]
       by_cases h : u j * u (j + 1) < 0
-      · rw [if_pos h, pow_add, pow_one]
+      · rw [ite_eq_left h, pow_add, pow_one]
         nlinarith [mul_pos hprev (neg_pos.mpr h)]
-      · rw [if_neg h, add_zero]
+      · rw [ite_eq_right h, add_zero]
         have h' : 0 < u j * u (j + 1) :=
           lt_of_le_of_ne (not_lt.mp h)
             (Ne.symm (mul_ne_zero (hu j hjN) (hu (j + 1) hj)))

@@ -54,14 +54,14 @@ identity absorbs exactly that.
 Indices are `ℕ`-valued families `Fin k → ℕ` on a matrix indexed by `ℕ`, rather than `Fin n`
 selections, because the induction changes the ambient size.
 
-Mathlib has no total-positivity criterion of any kind at the pinned revision, and no Neville
-elimination or bidiagonal factorization; a totally-nonnegative class is in flight as
-`feat(LinearAlgebra): totally nonnegative matrices` (#41813), with none of these results.
+Mathlib has no total-positivity criterion of any kind at revision `8e45b05`, and no Neville
+elimination or bidiagonal factorization. `feat(LinearAlgebra): totally nonnegative matrices`
+(#41813) has since merged upstream, adding the class and a basic API and none of these results.
 
 ## References
 
-* [A. Pinkus, *Totally Positive Matrices*][Pinkus2010], Thm. 2.8
-* [S. M. Fallat and C. R. Johnson, *Totally Nonnegative Matrices*][Fallat2011], Lem. 3.3.4
+* [A. Pinkus, *Totally Positive Matrices*][Pinkus2010TotallyPositive], Thm. 2.8
+* [S. M. Fallat and C. R. Johnson, *Totally Nonnegative Matrices*][Fallat2011TotallyNonnegative], Lem. 3.3.4
 
 ## Tags
 
@@ -246,7 +246,7 @@ theorem det_detT (A : Matrix ℕ ℕ R) {n k : ℕ} (C : Fin k → ℕ) (Rw : Fi
     ext a b
     have h1 : ¬ (n + C a = Rw b) := by have := hRw b; omega
     have h2 : n ≤ n + C a ∧ Rw b < n := ⟨Nat.le_add_right _ _, hRw b⟩
-    simp only [Matrix.submatrix_apply, detT, Matrix.of_apply, if_neg h1, if_pos h2,
+    simp only [Matrix.submatrix_apply, detT, Matrix.of_apply, ite_eq_right h1, ite_eq_left h2,
       Matrix.transpose_apply, Nat.add_sub_cancel_left]
   rw [hEq, Matrix.det_transpose]
 

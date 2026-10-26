@@ -141,7 +141,7 @@ theorem circleIntegral_prod_inv_eq_zero {S : Finset ℕ} {a : ℕ → ℂ} {c : 
       have hlow : T ^ (2 : ℕ) ≤ ‖∏ i ∈ S, (z - a i)‖ := by
         refine (pow_le_pow_right₀ hT1 hcard).trans ?_
         rw [norm_prod, ← Finset.prod_const]
-        exact Finset.prod_le_prod (fun i _ => by linarith) hfac
+        exact Finset.prod_le_prod₀ (fun i _ => by linarith) hfac
       have hppos : (0 : ℝ) < T ^ (2 : ℕ) := by positivity
       rw [norm_inv, inv_le_inv₀ (lt_of_lt_of_le hppos hlow) hppos]
       exact hlow
@@ -188,11 +188,11 @@ theorem circleIntegral_newton_term {S : Finset ℕ} {a : ℕ → ℂ} {c : ℂ} 
     (hcard : 1 ≤ S.card) (h : ∀ i ∈ S, a i ∈ ball c s) :
     (∮ z in C(c, s), (∏ i ∈ S, (z - a i))⁻¹) = if S.card = 1 then 2 * π * I else 0 := by
   rcases eq_or_lt_of_le hcard with hone | htwo
-  · rw [if_pos hone.symm]
+  · rw [ite_eq_left hone.symm]
     obtain ⟨i₀, hi₀⟩ := Finset.card_eq_one.mp hone.symm
     exact circleIntegral_prod_inv_of_card_one hi₀
       (h i₀ (by rw [hi₀]; exact Finset.mem_singleton_self _))
-  · rw [if_neg (by omega)]
+  · rw [ite_eq_right (by omega)]
     exact circleIntegral_prod_inv_eq_zero_of_mem hs (by omega) h
 
 /-- The decomposition of the integral over one circle avoiding the nodes: the Newton terms with
@@ -256,11 +256,11 @@ private theorem circleIntegral_div_prod_enclosed {k : ℕ} {a : ℕ → ℂ} {h 
     rw [circleIntegral_newton_term hs hcard (fun i _ => hn i), Nat.card_Ico]
     by_cases hje : j = k - 1
     · subst hje
-      rw [if_pos (by omega), if_pos rfl]
+      rw [ite_eq_left (by omega), ite_eq_left rfl]
       ring
-    · rw [if_neg (by omega), if_neg hje, mul_zero]
+    · rw [ite_eq_right (by omega), ite_eq_right hje, mul_zero]
   rw [Finset.sum_congr rfl hterm, Finset.sum_ite_eq' (Finset.range k) (k - 1),
-    if_pos (Finset.mem_range.mpr (by omega))]
+    ite_eq_left (Finset.mem_range.mpr (by omega))]
 
 /-- **Deforming a circle outward past a cluster of poles.**  Let `h` be analytic on an open set
 covering the closed annulus `ρ ≤ |z| ≤ R`, let every node lie in a disc `closedBall τ rr`

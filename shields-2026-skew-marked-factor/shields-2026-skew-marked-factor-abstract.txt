@@ -1,0 +1,21 @@
+Title
+-----
+Factor Schur functions of marked compositions from differential operators
+
+Keywords
+--------
+skew Schur function
+marked composition
+power-sum adjoint
+factor recovery
+skew-equivalence
+Murnaghan–Nakayama rule
+symmetric function
+
+Abstract (Plain)
+----------------
+We recover the factor Schur functions of a legal marked composition from its parent function and a supplied period. Ordinary compositions admit arbitrary connected outer diagrams; for mixed compositions the outer is required to be a ribbon. In the ordinary case, Olson-Harris's power-sum action gives the terminal derivative order, a reduced-numerator formula for the inner function, and normalized character values for the outer, with the attachment-dependent involution. Mixed compositions are annihilated by those Hall adjoints. A weighted derivation instead gives a nonzero terminal ribbon evaluation at a fractional alphabet size and a triangular system recovering the genuine outer function. In both cases the last two nonzero outputs cancel the entire composition normalization, so its exponents are not inputs. These inverses recover functions, not arbitrary marked realizations, and do not select an unsupplied period.
+
+Abstract (Rich Text)
+--------------------
+We recover the factor Schur functions of a legal marked composition from its parent function and a supplied period. Ordinary compositions admit arbitrary connected outer diagrams; for mixed compositions the outer is required to be a ribbon. In the ordinary case, Olson-Harris's power-sum action gives the terminal derivative order, a reduced-numerator formula for the inner function, and normalized character values for the outer, with the attachment-dependent involution. Mixed compositions are annihilated by those Hall adjoints. A weighted derivation instead gives a nonzero terminal ribbon evaluation at a fractional alphabet size and a triangular system recovering the genuine outer function. In both cases the last two nonzero outputs cancel the entire composition normalization, so its exponents are not inputs. These inverses recover functions, not arbitrary marked realizations, and do not select an unsupplied period.

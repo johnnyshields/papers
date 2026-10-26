@@ -1,0 +1,21 @@
+Title
+-----
+Cofactor independence and dilation for skew Schur functions
+
+Keywords
+--------
+skew Schur function
+Jacobi–Trudi determinant
+cofactor independence
+dilation
+diagram reconstruction
+beta numbers
+skew-equivalence
+
+Abstract (Plain)
+----------------
+The signed cofactors of a Jacobi–Trudi matrix with strictly positive indices are linearly independent over the rationals unless its skew diagram is fixed by rotation. In the symmetric case, reflection gives every relation and an explicit independent half of the cofactors. We prove this in every matrix order, by first reconstructing diagrams with nonnegative Jacobi–Trudi indices from their skew Schur functions. We then determine how the first-variation kernel changes under integral dilation of the beta numbers. On the nonsymmetric dense class the dilated kernel is the direct sum of the inherited kernel and an explicitly described arithmetic space supported off the original grid. A finite-word period argument gives its dimension without determinant expansion. On symmetric dense cores the kernel is determined outright. The reconstruction theorem concerns diagram rigidity, the dilation formula linear restoration data; an explicit unequal pair shows why the latter must not be identified with full skew Schur equality.
+
+Abstract (Rich Text)
+--------------------
+The signed cofactors of a Jacobi–Trudi matrix with strictly positive indices are linearly independent over the rationals unless its skew diagram is fixed by rotation. In the symmetric case, reflection gives every relation and an explicit independent half of the cofactors. We prove this in every matrix order, by first reconstructing diagrams with nonnegative Jacobi–Trudi indices from their skew Schur functions. We then determine how the first-variation kernel changes under integral dilation of the beta numbers. On the nonsymmetric dense class the dilated kernel is the direct sum of the inherited kernel and an explicitly described arithmetic space supported off the original grid. A finite-word period argument gives its dimension without determinant expansion. On symmetric dense cores the kernel is determined outright. The reconstruction theorem concerns diagram rigidity, the dilation formula linear restoration data; an explicit unequal pair shows why the latter must not be identified with full skew Schur equality.

@@ -24,11 +24,13 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import Vendor.MathlibPR.PR42570.FunPropTags
-import Vendor.MathlibPR.PR42490.LogDerivToFun
+import Mathlib.Analysis.Meromorphic.Basic
+import Mathlib.Analysis.Meromorphic.Complex
+import Mathlib.Analysis.Analytic.Constructions
+import Mathlib.Analysis.Calculus.LogDeriv
 import Mathlib.Analysis.Complex.HasPrimitives
 import Mathlib.Analysis.Complex.OpenMapping
-import Vendor.ProjectVD.MathlibSubmitted.CauchyIntegralDeriv
+import Mathlib.Analysis.Complex.CauchyIntegral
 import Vendor.ProjectVD.MathlibPending.PoissonJensen
 
 /-!
@@ -151,11 +153,17 @@ theorem MeromorphicOn.logDeriv_eq_circleAverage {h : ℂ → ℂ} {R : ℝ} {w :
   set F : ℂ → ℂ :=
     fun w ↦ circleAverage (fun ζ ↦ herglotzRieszKernel 0 w ζ • (Real.log ‖h ζ‖ : ℂ)) 0 R
     with hF_def
+  -- ADAPTED TO PIN (v4.34.1): the Herglotz–Riesz lemmas now take `z ∉ sphere 0 |R|` in place
+  -- of `z ∈ ball 0 R`, and give analyticity off the sphere; `hns` supplies the former.
+  have hns : ∀ z ∈ ball (0 : ℂ) R, z ∉ sphere (0 : ℂ) |R| := fun z hz hs ↦ by
+    rw [mem_sphere_zero_iff_norm] at hs
+    rw [mem_ball_zero_iff] at hz
+    linarith [le_abs_self R]
   have hF_deriv : ∀ z ∈ ball 0 R, HasDerivAt F
       (circleAverage (fun ζ ↦ (2 * ζ / (ζ - z) ^ 2) • (Real.log ‖h ζ‖ : ℂ)) 0 R) z :=
-    fun z hz ↦ hasDerivAt_circleAverage_herglotzRieszKernel_smul hgC hz
+    fun z hz ↦ hasDerivAt_circleAverage_herglotzRieszKernel_smul hgC (hns z hz)
   have hF_an : AnalyticOnNhd ℂ F (ball 0 R) :=
-    analyticOnNhd_circleAverage_herglotzRieszKernel_smul hgC
+    (analyticOnNhd_circleAverage_herglotzRieszKernel_smul hgC).mono fun z hz ↦ hns z hz
   -- The real part of `F` is `log ‖h ·‖`, by Poisson–Jensen
   have horder : ∀ z ∈ ball 0 R, meromorphicOrderAt h z = 0 := by
     intro z hz
@@ -171,7 +179,7 @@ theorem MeromorphicOn.logDeriv_eq_circleAverage {h : ℂ → ℂ} {R : ℝ} {w :
   have hRe : ∀ z ∈ ball 0 R, (F z).re = Real.log ‖h z‖ := by
     intro z hz
     rw [hF_def]
-    rw [re_circleAverage_herglotzRieszKernel_smul hgR hz]
+    rw [re_circleAverage_herglotzRieszKernel_smul hgR (hns z hz)]
     have hPJ := h₁.log_norm_meromorphicTrailingCoeffAt hz (horder z hz)
     rw [(h₂ z hz).meromorphicTrailingCoeffAt_of_ne_zero (h₃ z hz)] at hPJ
     have hsum : (∑ᶠ i, ((divisor h (ball 0 R)) i)

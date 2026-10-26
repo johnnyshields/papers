@@ -24,11 +24,19 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import Vendor.MathlibPR.PR42227.CodiscreteAPI
-import Vendor.MathlibPR.PR40957.LogCountingFiniteSupport
+import Mathlib.Topology.DiscreteSubset
+import Mathlib.Topology.Algebra.Polynomial
+import Mathlib.Analysis.Calculus.FDeriv.Congr
+import Mathlib.Analysis.Calculus.Deriv.Basic
+import Mathlib.Algebra.Polynomial.Roots
+import Mathlib.Analysis.Complex.ValueDistribution.LogCounting.Asymptotic
+import Mathlib.Topology.LocallyFinsupp
 import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
 import Mathlib.Analysis.Meromorphic.IsolatedZeros
-import Vendor.ProjectVD.MathlibSubmitted.Scaling
+import Mathlib.Analysis.Meromorphic.NormalForm
+import Mathlib.Analysis.Meromorphic.Divisor
+import Mathlib.Analysis.Meromorphic.Order
+import Mathlib.Analysis.Meromorphic.RCLike
 
 /-!
 # Invariance of the Characteristic Function under Automorphisms of the Projective Line
@@ -222,9 +230,8 @@ theorem Meromorphic.exists_meromorphicOrderAt_eq_top_iff_eventually_zero {f : �
 
 @[simp] theorem characteristic_zero :
     characteristic (0 : ℂ → ℂ) ⊤ = fun _ ↦ 0 := by
-  convert characteristic_const (c := 0)
-  · simp
-  · simp
+  -- ADAPTED TO PIN (v4.34.1): `convert` closes the side goals, so the bullets are dropped.
+  convert characteristic_const (c := 0) <;> simp
 
 /- Private transitivity lemma, used in the proof of
 `isBigO_characteristic_sub_characteristic_moebius`. -/
@@ -232,9 +239,8 @@ private lemma transitivity₁ {f₁ f₃ : ℝ → ℝ} (f₂ : ℂ → ℂ)
     (h₂₃ : (characteristic f₂ ⊤ - f₃) =O[atTop] (1 : ℝ → ℝ))
     (h₁₂ : (f₁ - characteristic f₂ ⊤) =O[atTop] (1 : ℝ → ℝ)) :
     (f₁ - f₃) =O[atTop] (1 : ℝ → ℝ) := by
-  convert h₁₂.add h₂₃
-  · exact (congrArg Norm.mk ∘ fun a ↦ a) rfl
-  · simp
+  -- ADAPTED TO PIN (v4.34.1): `convert` splits the goal pointwise; close it by cancellation.
+  exact (h₁₂.add h₂₃).congr_left fun x ↦ by simp
 
 /- Private transitivity lemma, used in the proof of
 `isBigO_characteristic_sub_characteristic_moebius`. -/
@@ -274,14 +280,14 @@ theorem isBigO_characteristic_sub_characteristic_moebius {a b c d : ℂ}
       simp only [Pi.div_apply, Pi.smul_apply, smul_eq_mul]
       field
     apply transitivity₁ (a * f ·)
-    · convert isBigO_characteristic_sub_characteristic_shift (a₀ := -b) (f := a • f)
-        (by fun_prop)
-      · rfl
+    · -- ADAPTED TO PIN (v4.34.1): the pointwise side goal is no longer closed by `rfl`.
+      convert isBigO_characteristic_sub_characteristic_shift (a₀ := -b) (f := a • f)
+        (by fun_prop) using 3
       simp
     apply transitivity₁ f
-    · convert isBigO_characteristic_sub_characteristic_const_mul (s := a) (f := f)
+    · -- ADAPTED TO PIN (v4.34.1): `convert` closes the side goal at v4.34.1.
+      convert isBigO_characteristic_sub_characteristic_const_mul (s := a) (f := f)
         (by fun_prop) (by aesop)
-      simp
     simp [IsBigO.of_norm_le]
   · -- Case `c ≠ 0`.
     by_cases hord : ∀ z, meromorphicOrderAt (c * f · + d) z ≠ ⊤

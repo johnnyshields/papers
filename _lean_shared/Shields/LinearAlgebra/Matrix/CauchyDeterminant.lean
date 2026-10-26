@@ -103,7 +103,7 @@ theorem eval_cauchyPoly_neg (y : Fin n → K) (i j : Fin n) :
     show -(y i) + y l = y l - y i from by ring]
   by_cases hij : i = j
   · subst hij; simp
-  · rw [if_neg hij]
+  · rw [ite_eq_right hij]
     refine Finset.prod_eq_zero (Finset.mem_erase.mpr ⟨hij, Finset.mem_univ i⟩) ?_
     ring
 

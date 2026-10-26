@@ -45,8 +45,8 @@ by letting `n` grow.
 ## References
 
 * [M. Aissen, I. J. Schoenberg and A. M. Whitney, *On the generating functions of totally positive
-  sequences I*, J. Analyze Math. **2** (1952), 93--103][Aissen1952GeneratingFunctions], Lem. 1
-* [S. M. Fallat and C. R. Johnson, *Totally Nonnegative Matrices*][Fallat2011], Thm. 1.3.3
+  sequences I*, J. Analyse Math. **2** (1952), 93--103][Aissen1952GeneratingFunctions], Lem. 1
+* [S. M. Fallat and C. R. Johnson, *Totally Nonnegative Matrices*][Fallat2011TotallyNonnegative], Thm. 1.3.3
 
 ## Tags
 
@@ -77,9 +77,9 @@ def altSeq (b : ℕ → R) (m : ℕ) : R := (-1) ^ m * b m
 /-- A lower-triangular Toeplitz matrix has constant diagonal `a_0`, so its determinant is
 `a_0^n`. -/
 theorem det_toeplitzLower (a : ℕ → R) (n : ℕ) : (toeplitzLower a n).det = a 0 ^ n := by
-  rw [Matrix.det_of_lowerTriangular _ (fun i j hij => ?_)]
+  rw [Matrix.det_of_isLowerTriangular _ (fun i j hij => ?_)]
   · simp [toeplitzLower_apply]
-  · rw [toeplitzLower_apply, if_neg (by exact_mod_cast Nat.not_le.mpr hij)]
+  · rw [toeplitzLower_apply, ite_eq_right (by exact_mod_cast Nat.not_le.mpr hij)]
 
 /-- **The inverse of a lower-triangular Toeplitz matrix is the Toeplitz matrix of the reciprocal
 sequence.**  `a \mapsto T_n(a)` carries Cauchy convolution to matrix multiplication, so a
@@ -133,11 +133,11 @@ theorem sigmaConj_toeplitzLower (b : ℕ → ℝ) (n : ℕ) :
   ext i j
   rw [sigmaConj_apply, toeplitzLower_apply, toeplitzLower_apply]
   by_cases h : (j : ℕ) ≤ (i : ℕ)
-  · rw [if_pos h, if_pos h, altSeq_apply]
+  · rw [ite_eq_left h, ite_eq_left h, altSeq_apply]
     congr 1
     rw [show (i : ℕ) + (j : ℕ) = ((i : ℕ) - (j : ℕ)) + 2 * (j : ℕ) by omega, pow_add, pow_mul]
     simp
-  · rw [if_neg h, if_neg h, mul_zero]
+  · rw [ite_eq_right h, ite_eq_right h, mul_zero]
 
 /-- **The reciprocal of a totally nonnegative sequence is totally nonnegative.**  For a normalized
 `a` with `T_n(a)` totally nonnegative and `b` its convolution inverse, the Toeplitz matrix of
@@ -161,7 +161,7 @@ theorem coeff_nonneg_of_minorsNonneg {a : ℕ → ℝ}
     exact absurd (Subsingleton.elim x y) (ne_of_lt hxy)
   have h := hA (k + 1) (fun _ => ⟨k, Nat.lt_succ_self k⟩) (fun _ => ⟨0, Nat.succ_pos k⟩)
     (mem_increasingSelections.mpr (hmono _)) (mem_increasingSelections.mpr (hmono _))
-  rwa [Matrix.det_fin_one, Matrix.submatrix_apply, toeplitzLower_apply, if_pos (Nat.zero_le k),
+  rwa [Matrix.det_fin_one, Matrix.submatrix_apply, toeplitzLower_apply, ite_eq_left (Nat.zero_le k),
     Nat.sub_zero] at h
 
 /-- The coefficients of the reciprocal series at `-t` are nonnegative.  This is the `1 \times 1`

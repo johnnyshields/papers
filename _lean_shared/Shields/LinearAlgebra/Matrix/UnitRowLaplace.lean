@@ -66,9 +66,9 @@ theorem det_of_row_eq_single {n : ℕ} (M : Matrix (Fin (n + 1)) (Fin (n + 1)) R
     (i j : Fin (n + 1)) (hrow : ∀ k, M i k = if k = j then 1 else 0) :
     M.det = (-1) ^ ((i : ℕ) + (j : ℕ)) * (M.submatrix i.succAbove j.succAbove).det := by
   rw [Matrix.det_succ_row M i, Finset.sum_eq_single j]
-  · rw [hrow j, if_pos rfl, mul_one]
+  · rw [hrow j, ite_eq_left rfl, mul_one]
   · intro b _ hb
-    rw [hrow b, if_neg hb, mul_zero, zero_mul]
+    rw [hrow b, ite_eq_right hb, mul_zero, zero_mul]
   · intro h
     exact absurd (Finset.mem_univ j) h
 
@@ -83,8 +83,8 @@ theorem submatrix_succAbove_row_eq_single {N : ℕ} (M : Matrix (Fin (N + 1)) (F
     (M.submatrix p.succAbove q.succAbove) a k = if k = b then 1 else 0 := by
   rw [Matrix.submatrix_apply, ha, hrow]
   by_cases hk : k = b
-  · rw [if_pos hk, hk, hb, if_pos rfl]
-  · refine (if_neg ?_).trans (if_neg hk).symm
+  · rw [ite_eq_left hk, hk, hb, ite_eq_left rfl]
+  · refine (ite_eq_right ?_).trans (ite_eq_right hk).symm
     intro hc
     exact hk (Fin.succAbove_right_inj.mp (hc.trans hb.symm))
 

@@ -1,0 +1,21 @@
+Title
+-----
+Skew Schur equivalence by Jacobi–Trudi negative count
+
+Keywords
+--------
+skew Schur function
+skew-equivalence
+Jacobi–Trudi determinant
+negative index
+rotation rigidity
+row overlap
+Toeplitz minor
+
+Abstract (Plain)
+----------------
+We classify connected skew diagrams with at most six negative indices in their full row Jacobi–Trudi board, against arbitrary skew diagrams with the same Schur function. Seven parameter families give all exceptional classes, each with four members; every other source is determined up to rotation. When the negative pattern requires at least seven rows to realize, nine negatives force rigidity. At ten negatives under the same minimum-row condition, exactly two seven-row quartet families are nonrigid, and every higher-row source is rigid. Their complete classes have legal marked-composition presentations. Classical overlap invariants recover negative count and minimum realizing row count. Boundary coefficients identify cofactor components, and endpoint comparisons determine their placements. A saturated first negative column with at most two negatives elsewhere forces rotation rigidity in at least six rows, without a bound on negative count. Six-row quartets and non-dense placement resonances remain outside the classification.
+
+Abstract (Rich Text)
+--------------------
+We classify connected skew diagrams with at most six negative indices in their full row Jacobi–Trudi board, against arbitrary skew diagrams with the same Schur function. Seven parameter families give all exceptional classes, each with four members; every other source is determined up to rotation. When the negative pattern requires at least seven rows to realize, nine negatives force rigidity. At ten negatives under the same minimum-row condition, exactly two seven-row quartet families are nonrigid, and every higher-row source is rigid. Their complete classes have legal marked-composition presentations. Classical overlap invariants recover negative count and minimum realizing row count. Boundary coefficients identify cofactor components, and endpoint comparisons determine their placements. A saturated first negative column with at most two negatives elsewhere forces rotation rigidity in at least six rows, without a bound on negative count. Six-row quartets and non-dense placement resonances remain outside the classification.

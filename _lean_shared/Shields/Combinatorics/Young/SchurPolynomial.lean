@@ -6,7 +6,7 @@ Authors: Johnny Shields
 import Mathlib
 import Mathlib.Combinatorics.Young.SemistandardTableau
 import Mathlib.Algebra.Order.BigOperators.Ring.Finset
-import Mathlib.Data.Real.Basic
+import Mathlib.Basic.Real.Basic
 import Mathlib.Data.Fintype.Pi
 
 /-!
@@ -166,7 +166,7 @@ def highestWeight (μ : YoungDiagram) (n : ℕ) (h : ∀ j, μ.colLen j ≤ n) :
     BoundedSSYT μ n :=
   ⟨SemistandardYoungTableau.highestWeight μ, by
     intro i j hij
-    rw [SemistandardYoungTableau.highestWeight_apply, if_pos hij]
+    rw [SemistandardYoungTableau.highestWeight_apply, ite_eq_left hij]
     exact lt_of_lt_of_le (YoungDiagram.mem_iff_lt_colLen.mp hij) (h j)⟩
 
 @[simp]

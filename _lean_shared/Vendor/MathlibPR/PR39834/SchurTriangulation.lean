@@ -30,17 +30,22 @@ PR merges.
   (`feat(LinearAlgebra): Schur triangulation`), and it subsumes part 1/3,
   <https://github.com/leanprover-community/mathlib4/pull/39829>
   (`feat(LinearAlgebra): basis flag lemmas and genEigenspace map`), whose
-  additions to `Eigenspace/Basic.lean` and `Basis/Flag.lean` appear below.
+  additions to `Eigenspace/Basic.lean` and `Basis/Flag.lean` are in the pinned Mathlib.
   Part 3/3, <https://github.com/leanprover-community/mathlib4/pull/39837>, adds
-  the *unitary* Gram-Schmidt refinement and is deliberately **not** vendored:
-  nothing here needs orthonormality.
+  the *unitary* Gram-Schmidt refinement; it is vendored separately, in
+  `../PR39837/MatrixSchurTriangulation.lean`, which imports this file.
 * **Licence:** Apache 2.0, as all of Mathlib.  The copyright and `Authors:` line
   above are upstream's and are preserved deliberately.
 
 Upstream modifies three existing Mathlib files.  We cannot, so their new
 declarations are collected here -- **only those absent from the pinned
 Mathlib** -- carrying upstream's own section and `variable` scaffolding, in
-upstream's namespaces (`Module.Basis`, `Module.End`) and under upstream's names.
+upstream's namespace (`Module.End`) and under upstream's names.  At the pin
+(`v4.34.1`) the additions to `Basis/Flag.lean` and `Eigenspace/Basic.lean` are all
+upstream already (`flag_map`, `span_singleton_le_mkFinCons_flag_succ`,
+`map_flag_le_mkFinCons_flag_succ`, `mem_flag_iff_repr_eq_zero`, `map_genEigenspace_le`,
+`mapsTo_genEigenspace_of_comp`), so what remains is the `Eigenspace/Triangularizable.lean`
+part.
 Consuming code is therefore written exactly as it will be against a merged
 Mathlib.
 
@@ -58,180 +63,6 @@ a basis in which its matrix is `Matrix.BlockTriangular id`.
 -/
 
 @[expose] public section
-
-/-! ### From `Mathlib/LinearAlgebra/Basis/Flag.lean` -/
-
-open Set Submodule
-
-namespace Module.Basis
-
-section Semiring
-
-variable {R M : Type*} [Semiring R] [AddCommMonoid M] [Module R M] {n : ℕ} {b : Basis (Fin n) R M}
-  {i j : Fin (n + 1)}
-
-
-
-theorem flag_map {M₂ : Type*} [AddCommMonoid M₂] [Module R M₂]
-    (b : Basis (Fin n) R M) (e : M ≃ₗ[R] M₂) (k : Fin (n + 1)) :
-    (b.map e).flag k = (b.flag k).map (e : M →ₗ[R] M₂) := by
-  -- ADAPTED to the pinned Mathlib: upstream's `simp` set leaves
-  -- `span R (⇑(b.map e) '' S) = span R ((fun i => e (b i)) '' S)`, closed here by
-  -- rewriting the coercion of `Basis.map` pointwise.
-  simp only [flag, Submodule.map_span, Set.image_image]
-  congr 1
-
-
-end Semiring
-
-section Ring
-
-variable {R M : Type*} [Ring R] [AddCommGroup M] [Module R M] {n : ℕ}
-
-/-- The span of the new head vector lies in the successor flag of `Basis.mkFinCons`. -/
-theorem span_singleton_le_mkFinCons_flag_succ {v : M} {W : Submodule R M}
-    {bW : Basis (Fin n) R W} {hli hsp} (k : Fin (n + 1)) :
-    R ∙ v ≤ (Basis.mkFinCons v bW hli hsp).flag k.succ := by
-  rw [Submodule.span_singleton_le_iff_mem]
-  convert (Basis.mkFinCons v bW hli hsp).self_mem_flag (i := 0) (k := k.succ) ?_
-  · simp [coe_mkFinCons, Fin.cons_zero]
-  · simp
-
-theorem map_flag_le_mkFinCons_flag_succ {v : M} {W : Submodule R M}
-    {bW : Basis (Fin n) R W} {hli hsp} (k : Fin (n + 1)) :
-    (bW.flag k).map W.subtype ≤ (Basis.mkFinCons v bW hli hsp).flag k.succ := by
-  rw [Submodule.map_le_iff_le_comap]
-  exact bW.flag_le_iff.2 fun i hi => by
-    convert (Basis.mkFinCons v bW hli hsp).self_mem_flag (i := i.succ) (k := k.succ)
-      (Fin.succ_lt_succ_iff.mpr hi) using 1
-    · simp [coe_mkFinCons, Fin.cons_succ]
-
-end Ring
-
-section CommRing
-
-variable {R M : Type*} [CommRing R] [AddCommGroup M] [Module R M] {n : ℕ}
-
-/-- `x ∈ b.flag k` iff `b.repr x i = 0` for `k ≤ i.castSucc`. -/
-theorem mem_flag_iff_repr_eq_zero [Nontrivial R] (b : Basis (Fin n) R M) {k : Fin (n + 1)} {x : M} :
-    x ∈ b.flag k ↔ ∀ i : Fin n, k ≤ i.castSucc → b.repr x i = 0 := by
-  constructor
-  · intro hx i hi
-    have hmem : x ∈ LinearMap.ker (b.coord i) := b.flag_le_ker_coord hi hx
-    simpa [Module.Basis.coord_apply] using (LinearMap.mem_ker.mp hmem)
-  · intro h
-    rw [← b.sum_repr x]
-    exact Submodule.sum_mem _ fun i _ => by
-      by_cases hi : i.castSucc < k
-      · exact Submodule.smul_mem _ _ (b.self_mem_flag hi)
-      · rw [h i (le_of_not_gt hi), zero_smul]
-        exact Submodule.zero_mem _
-
-end CommRing
-
-section DivisionRing
-
-variable {K V : Type*} [DivisionRing K] [AddCommGroup V] [Module K V] {n : ℕ}
-
-
-
-
-end DivisionRing
-
-end Module.Basis
-
-/-! ### From `Mathlib/LinearAlgebra/Eigenspace/Basic.lean` -/
-
-namespace Module
-
-namespace End
-
-open Module Set
-
-variable {K R : Type*} {V M : Type*} [CommRing R] [AddCommGroup M] [Module R M] [Field K]
-  [AddCommGroup V] [Module K V]
-
-
-
-
-lemma map_genEigenspace_le {N : Type*} [AddCommGroup N] [Module R N]
-    {f : End R M} {g : End R N} (φ : M →ₗ[R] N) (hφ : g.comp φ = φ.comp f)
-    (μ : R) (k : ℕ∞) :
-    (f.genEigenspace μ k).map φ ≤ g.genEigenspace μ k := by
-  rintro y ⟨x, hx, rfl⟩
-  obtain ⟨l, hl, hx⟩ := (mem_genEigenspace (f := f) (μ := μ) (k := k)).mp hx
-  apply (mem_genEigenspace (f := g) (μ := μ) (k := k)).mpr
-  refine ⟨l, hl, ?_⟩
-  rw [LinearMap.mem_ker] at hx ⊢
-  have hsub (x : M) : (g - μ • 1) (φ x) = φ ((f - μ • 1) x) := by
-    have hfg : g (φ x) = φ (f x) := LinearMap.congr_fun hφ x
-    simp [LinearMap.sub_apply, hfg]
-  have hpow (l : ℕ) (x : M) :
-      ((g - μ • 1) ^ l) (φ x) = φ (((f - μ • 1) ^ l) x) := by
-    induction l with
-    | zero => simp
-    | succ l ih =>
-        rw [pow_succ', pow_succ', Module.End.mul_apply, Module.End.mul_apply, ih, hsub]
-  rw [hpow, hx, map_zero]
-
-/-- `map_genEigenspace_le` as `MapsTo`. -/
-lemma mapsTo_genEigenspace_of_comp {N : Type*} [AddCommGroup N] [Module R N]
-    {f : End R M} {g : End R N} (φ : M →ₗ[R] N) (hφ : g.comp φ = φ.comp f) (μ : R) (k : ℕ∞) :
-    MapsTo φ (f.genEigenspace μ k) (g.genEigenspace μ k) := by
-  intro x hx
-  exact mem_of_le_of_mem (map_genEigenspace_le (φ := φ) hφ μ k) (Submodule.mem_map_of_mem hx)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-end End
-
-end Module
 
 /-! ### From `Mathlib/LinearAlgebra/Eigenspace/Triangularizable.lean` -/
 
@@ -293,7 +124,7 @@ private theorem charpoly_splits_of_forall_flag_mem_invtSubmodule [FiniteDimensio
     (hb : ∀ k : Fin (n + 1), b.flag k ∈ f.invtSubmodule) :
     f.charpoly.Splits := by
   rw [← LinearMap.charpoly_toMatrix (f := f) b]
-  rw [Matrix.charpoly_of_upperTriangular _
+  rw [Matrix.charpoly_of_isUpperTriangular _
     (forall_flag_mem_invtSubmodule_iff_blockTriangular_toMatrix.mp hb)]
   exact Polynomial.Splits.prod fun i _ => by
     simpa [sub_eq_add_neg] using Polynomial.Splits.X_add_C (-(LinearMap.toMatrix b b f i i))

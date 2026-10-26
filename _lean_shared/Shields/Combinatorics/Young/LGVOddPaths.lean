@@ -65,9 +65,9 @@ No Cauchy--Binet is used, and none is available: Mathlib has none at the pinned 
 
 ## References
 
-* [I. Gessel and G. Viennot, *Binomial determinants, paths, and hook length formulae*][gessel1985]
+* [I. Gessel and G. Viennot, *Binomial determinants, paths, and hook length formulae*][GesselViennot1985BinomialDeterminants]
 * [A. Berele and A. Regev, *Hook Young diagrams with applications to combinatorics and to
-  representations of Lie superalgebras*][berele1987]
+  representations of Lie superalgebras*][Berele1987HookYoung]
 
 ## Tags
 
@@ -175,17 +175,17 @@ noncomputable def eWordOfPath (a s m : ℕ) (q : ℕ → ℕ) (hq : q ∈ ePaths
      col_strict' := by
        intro i₁ i₂ j hi hcell
        obtain ⟨hi₂, hj⟩ := mem_rect.mp hcell
-       rw [if_pos ⟨by omega, by omega⟩, if_pos ⟨by omega, hi₂⟩]
+       rw [ite_eq_left ⟨by omega, by omega⟩, ite_eq_left ⟨by omega, hi₂⟩]
        exact pathLetter_strictMono hq hi hi₂
      zeros' := by
        intro i j hcell
-       exact if_neg fun hc => hcell (mem_rect.mpr ⟨hc.2, by omega⟩)
+       exact ite_eq_right fun hc => hcell (mem_rect.mpr ⟨hc.2, by omega⟩)
    },
    by
      intro i j hcell
      obtain ⟨hi, hj⟩ := mem_rect.mp hcell
      change (if j = 0 ∧ i < m then pathLetter a s q i else 0) < a
-     rw [if_pos ⟨by omega, hi⟩]
+     rw [ite_eq_left ⟨by omega, hi⟩]
      exact pathLetter_lt_height (ePaths_mem hq) (by omega)⟩
 
 theorem eWordOfPath_apply {a s m : ℕ} {q : ℕ → ℕ} (hq : q ∈ ePaths a s (s + m)) (i j : ℕ) :
@@ -256,7 +256,7 @@ theorem pathLetter_ePathOfWord {a s m : ℕ} (T : BoundedSSYT (rect m 1) a) {j :
 theorem ePathOfWord_eWordOfPath {a s m : ℕ} {q : ℕ → ℕ} (hq : q ∈ ePaths a s (s + m)) :
     ePathOfWord a s m (eWordOfPath a s m q hq) = q :=
   wordProfile_of_pathLetter (ePaths_mem hq) fun j hj => by
-    rw [eWordOfPath_apply, if_pos ⟨rfl, hj⟩]
+    rw [eWordOfPath_apply, ite_eq_left ⟨rfl, hj⟩]
 
 theorem eWordOfPath_ePathOfWord {a s m : ℕ} (T : BoundedSSYT (rect m 1) a) :
     eWordOfPath a s m (ePathOfWord a s m T) (ePathOfWord_mem a s m T) = T := by
@@ -264,8 +264,8 @@ theorem eWordOfPath_ePathOfWord {a s m : ℕ} (T : BoundedSSYT (rect m 1) a) :
   rw [eWordOfPath_apply]
   by_cases hc : j = 0 ∧ i < m
   · obtain ⟨rfl, hi⟩ := hc
-    rw [if_pos ⟨rfl, hi⟩, pathLetter_ePathOfWord T hi]
-  · rw [if_neg hc]
+    rw [ite_eq_left ⟨rfl, hi⟩, pathLetter_ePathOfWord T hi]
+  · rw [ite_eq_right hc]
     exact (T.zeros fun h => hc ⟨by have := (mem_rect.mp h).2; omega,
       (mem_rect.mp h).1⟩).symm
 
@@ -293,7 +293,7 @@ theorem ePathOfWord_eq_of_entry {a s m : ℕ} {q : ℕ → ℕ} (hq : q ∈ ePat
     ePathOfWord a s m T = q := by
   rw [← ePathOfWord_eWordOfPath hq]
   exact ePathOfWord_congr T _ fun j hj => by
-    rw [h j hj, eWordOfPath_apply, if_pos ⟨rfl, hj⟩]
+    rw [h j hj, eWordOfPath_apply, ite_eq_left ⟨rfl, hj⟩]
 
 /-- **The odd alphabet.**  The odd paths from `s` to `s + m` across `a` heights
 carry total weight `e_m(α_0, …, α_{a-1})`, the `elemHom` of
@@ -312,7 +312,7 @@ theorem ePaths_sum_eq_elemHom (a s m : ℕ) (α : ℕ → R) :
   rw [pathWeight_eq_prod_letters (ePaths_mem hq), cells_rect, Finset.prod_product]
   simp only [Finset.prod_range_one]
   refine Finset.prod_congr rfl fun j hj => ?_
-  rw [eWordOfPath_apply, if_pos ⟨rfl, Finset.mem_range.mp hj⟩]
+  rw [eWordOfPath_apply, ite_eq_left ⟨rfl, Finset.mem_range.mp hj⟩]
 
 end OddPathSum
 
@@ -350,12 +350,12 @@ def glueAt (b : ℕ) (q₁ q₂ : ℕ → ℕ) (k : ℕ) : ℕ := if k ≤ b the
 @[simp]
 theorem glueAt_of_le {b : ℕ} (q₁ q₂ : ℕ → ℕ) {k : ℕ} (hk : k ≤ b) :
     glueAt b q₁ q₂ k = q₁ k :=
-  if_pos hk
+  ite_eq_left hk
 
 @[simp]
 theorem glueAt_of_gt {b : ℕ} (q₁ q₂ : ℕ → ℕ) {k : ℕ} (hk : b < k) :
     glueAt b q₁ q₂ k = q₂ (k - b) :=
-  if_neg (by omega)
+  ite_eq_right (by omega)
 
 theorem truncAt_mem {b a s e : ℕ} {q : ℕ → ℕ} (hq : q ∈ mixedPaths b a s e) :
     truncAt b q ∈ hPaths b s (q b) := by
@@ -705,7 +705,7 @@ noncomputable def eMeetHeight (a : ℕ) (q r : ℕ → ℕ) : ℕ :=
 
 theorem eMeetHeight_mem {a : ℕ} {q r : ℕ → ℕ} (h : EMeets a q r) :
     eMeetHeight a q r ∈ eMeetSet a q r := by
-  rw [eMeetHeight, dif_pos h]
+  rw [eMeetHeight, dite_eq_left h]
   exact Finset.min'_mem _ h
 
 theorem eMeetHeight_le_height {a : ℕ} {q r : ℕ → ℕ} (h : EMeets a q r) : eMeetHeight a q r ≤ a :=
@@ -717,7 +717,7 @@ theorem eMeetHeight_spec {a : ℕ} {q r : ℕ → ℕ} (h : EMeets a q r) :
 
 theorem eMeetHeight_le {a : ℕ} {q r : ℕ → ℕ} (h : EMeets a q r) {k : ℕ}
     (hk : k ∈ eMeetSet a q r) : eMeetHeight a q r ≤ k := by
-  rw [eMeetHeight, dif_pos h]
+  rw [eMeetHeight, dite_eq_left h]
   exact Finset.min'_le _ _ hk
 
 /-- The profile that follows `q` below height `i` and `r` from height `i` on.
@@ -727,11 +727,11 @@ def eSpliceAt (i : ℕ) (q r : ℕ → ℕ) (k : ℕ) : ℕ := if k < i then q k
 
 @[simp]
 theorem eSpliceAt_of_lt {i : ℕ} (q r : ℕ → ℕ) {k : ℕ} (hk : k < i) : eSpliceAt i q r k = q k :=
-  if_pos hk
+  ite_eq_left hk
 
 @[simp]
 theorem eSpliceAt_of_ge {i : ℕ} (q r : ℕ → ℕ) {k : ℕ} (hk : i ≤ k) : eSpliceAt i q r k = r k :=
-  if_neg (by omega)
+  ite_eq_right (by omega)
 
 theorem eSpliceAt_eSpliceAt (i : ℕ) (q r : ℕ → ℕ) :
     eSpliceAt i (eSpliceAt i q r) (eSpliceAt i r q) = q := by
@@ -901,8 +901,8 @@ theorem eEdgeSum_eq_jtCoeff (a : ℕ) (α : ℕ → R) (s e : ℕ) :
   rw [jtCoeff]
   rcases le_or_gt s e with h | h
   · obtain ⟨m, rfl⟩ : ∃ m, e = s + m := ⟨e - s, by omega⟩
-    rw [if_pos h, eEdgeSum, ePaths_sum_eq_elemHom, Nat.add_sub_cancel_left]
-  · rw [if_neg (by omega), eEdgeSum, ePaths_eq_empty_of_lt h, Finset.sum_empty]
+    rw [ite_eq_left h, eEdgeSum, ePaths_sum_eq_elemHom, Nat.add_sub_cancel_left]
+  · rw [ite_eq_right (by omega), eEdgeSum, ePaths_eq_empty_of_lt h, Finset.sum_empty]
 
 /-- The `2 × 2` determinant over the odd alphabet as path sums. -/
 theorem elemDet_two_eq_eEdgeSum {a : ℕ} (α : ℕ → R) (lam mu : YoungDiagram) :

@@ -26,8 +26,7 @@ Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.Complex.CanonicalDecomposition
 import Mathlib.Analysis.Complex.JensenFormula
-import Vendor.MathlibPR.PR41225.CircleIntegrableFunProp
-import Vendor.MathlibPR.PR41496.ECanonicalDecomp
+import Mathlib.MeasureTheory.Integral.CircleIntegral
 
 /-!
 # The Poisson–Jensen Formula

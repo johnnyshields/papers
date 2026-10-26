@@ -7,7 +7,7 @@ import Mathlib.Algebra.Polynomial.CoeffList
 import Mathlib.Algebra.Polynomial.RuleOfSigns
 import Mathlib.Data.List.Destutter
 import Mathlib.LinearAlgebra.Vandermonde
-import Shields.LinearAlgebra.Matrix.PerronFrobenius
+import Shields.LinearAlgebra.Matrix.TotallyNonneg.Basic
 
 /-!
 # Generalized Vandermonde determinants are positive
@@ -72,7 +72,7 @@ theorem signVariations_lt_card_support {P : Polynomial ℝ} (hP : P ≠ 0) :
   have hdest := (List.destutter_sublist (· ≠ ·)
       (((P.coeffList).map SignType.sign).filter (· ≠ 0))).length_le
   have hpos : 0 < P.support.card := Finset.card_pos.mpr (Polynomial.support_nonempty.mpr hP)
-  simp only [signVariations]
+  simp only [signVariations, List.signVariations]
   omega
 
 variable {m : ℕ}
@@ -89,7 +89,7 @@ theorem expPoly_coeff (c : Fin m → ℝ) {k : Fin m → ℕ} (hk : Function.Inj
   rw [Finset.sum_eq_single j]
   · simp
   · intro b _ hb
-    rw [Polynomial.coeff_C_mul, Polynomial.coeff_X_pow, if_neg (hk.ne hb).symm, mul_zero]
+    rw [Polynomial.coeff_C_mul, Polynomial.coeff_X_pow, ite_eq_right (hk.ne hb).symm, mul_zero]
   · intro h; exact absurd (Finset.mem_univ _) h
 
 theorem expPoly_support (c : Fin m → ℝ) (k : Fin m → ℕ) :
@@ -101,7 +101,7 @@ theorem expPoly_support (c : Fin m → ℝ) (k : Fin m → ℕ) :
   rw [expPoly, Polynomial.finsetSum_coeff]
   refine Finset.sum_eq_zero fun j _ => ?_
   have : k j ≠ N := fun h => hc (h ▸ Finset.mem_image_of_mem k (Finset.mem_univ j))
-  rw [Polynomial.coeff_C_mul, Polynomial.coeff_X_pow, if_neg (Ne.symm this), mul_zero]
+  rw [Polynomial.coeff_C_mul, Polynomial.coeff_X_pow, ite_eq_right (Ne.symm this), mul_zero]
 
 theorem expPoly_eval (c : Fin m → ℝ) (k : Fin m → ℕ) (y : ℝ) :
     (expPoly c k).eval y = ∑ j, c j * y ^ (k j) := by
@@ -269,10 +269,8 @@ Vandermonde determinant — restricting to increasing rows and columns just
 restricts the nodes and the exponents, and both stay strictly monotone.  So
 positivity of the determinant upgrades at once to **total positivity**.
 
-This is the first strictly totally positive family in the development, and it is
-what makes `PerronFrobenius.MinorsPos` and `exists_perron_compound` non-vacuous:
-their hypotheses are satisfiable, so the results about them are not statements
-about an empty class. -/
+This is the first strictly totally positive family in the development, so it is
+what the results about `MinorsPos` and `MinorsNonneg` are instantiated on. -/
 
 /-- A minor of a generalized Vandermonde matrix, on increasing rows and columns,
 is the generalized Vandermonde matrix of the restricted nodes and exponents. -/
@@ -295,21 +293,6 @@ theorem minorsNonneg_genVandermonde {x : Fin m → ℝ} {k : Fin m → ℕ}
     (hx : StrictMono x) (hxpos : ∀ i, 0 < x i) (hk : StrictMono k) (r : ℕ) :
     MinorsNonneg r (genVandermonde x k) :=
   fun f g hf hg => (minorsPos_genVandermonde hx hxpos hk r f g hf hg).le
-
-/-- **The totally positive machinery is non-vacuous.**  On a generalized
-Vandermonde matrix: every compound has a strictly positive Perron root, and every
-real eigenvalue of the matrix itself is nonnegative.
-
-This matters for the same reason `sincInputsWitness` does.  `MinorsPos`,
-`exists_perron_compound` and `charpoly_roots_nonneg` are statements *about* a
-class, and without an inhabitant they would be statements about an empty one. -/
-theorem genVandermonde_perron_nonvacuous {r : ℕ} (hrm : r ≤ m) {x : Fin m → ℝ}
-    {k : Fin m → ℕ} (hx : StrictMono x) (hxpos : ∀ i, 0 < x i) (hk : StrictMono k) :
-    0 < perronRoot (compound r (genVandermonde x k)) ∧
-      ∀ lam ∈ (genVandermonde x k).charpoly.roots, 0 ≤ lam := by
-  refine ⟨(exists_perron_compound hrm _ (minorsPos_genVandermonde hx hxpos hk r)).1,
-    fun lam hlam => ?_⟩
-  exact charpoly_roots_nonneg (fun j => minorsNonneg_genVandermonde hx hxpos hk j) hlam
 
 
 /-! ### Axiom footprint -/

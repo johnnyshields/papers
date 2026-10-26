@@ -1,0 +1,63 @@
+/-
+Copyright (c) 2026 John Shields. All rights reserved.
+Released under the MIT license as described in the file LICENSE.txt.
+Authors: John Shields
+-/
+import SkewMarkedFactor.Gluing
+import SkewMarkedFactor.MarkedCharts
+import SkewMarkedFactor.StandardTableaux
+import SkewMarkedFactor.TableauDeletion
+import SkewMarkedFactor.PrimitiveNormalization
+import SkewMarkedFactor.SchurPrimitive
+import SkewMarkedFactor.PowerCoordinates
+import SkewMarkedFactor.CharacterExpansion
+import SkewMarkedFactor.RibbonDeletion
+import SkewMarkedFactor.OrdinaryAction
+import SkewMarkedFactor.RibbonWordEvaluation
+import SkewMarkedFactor.ReducedNumerator
+import SkewMarkedFactor.TerminalOrder
+import SkewMarkedFactor.CanonicalReadout
+import SkewMarkedFactor.MarkAtlas
+import SkewMarkedFactor.MixedVanishing
+import SkewMarkedFactor.MixedBoundary
+import SkewMarkedFactor.FactorRecovery
+import SkewMarkedFactor.PeriodTest
+import SkewMarkedFactor.TwoRowRigidity
+import SkewMarkedFactor.MarkTransport
+import SkewMarkedFactor.CommonPeriodTransport
+import SkewMarkedFactor.ReadoutExamples
+import SkewMarkedFactor.Gluing.OlsonHarris.Plan.OrdinaryAssemble
+import SkewMarkedFactor.TwoRowFamily
+import SkewMarkedFactor.TwoRowFormulas
+import SkewMarkedFactor.ExampleConsequences
+import SkewMarkedFactor.WeightedOperator
+import SkewMarkedFactor.MixedTerminal
+import SkewMarkedFactor.RibbonNonvanishing
+import SkewMarkedFactor.MixedExample
+import SkewMarkedFactor.WeightedJacobiTrudi
+import SkewMarkedFactor.ModifiedMap
+import SkewMarkedFactor.MixedExampleMap
+import SkewMarkedFactor.GeneratorSpan
+import SkewMarkedFactor.TriangularReadout
+import SkewMarkedFactor.JtRotation
+import SkewMarkedFactor.WeightedMN
+import SkewMarkedFactor.CaseDNorthwest
+import SkewMarkedFactor.CaseDRemainder
+import SkewMarkedFactor.CaseDWeighted
+import SkewMarkedFactor.RowUnions
+import SkewMarkedFactor.MixedCovariance
+import SkewMarkedFactor.AllTypeNormalization
+import SkewMarkedFactor.WeightedHomogeneity
+import SkewMarkedFactor.MixedChain
+import SkewMarkedFactor.MixedReadout
+import SkewMarkedFactor.TwoSidedWeighted
+import SkewMarkedFactor.OrdinaryWeighted
+import SkewMarkedFactor.Covariance
+import SkewMarkedFactor.AxiomCheck
+
+/-!
+# Factor Schur functions of marked compositions from differential operators
+
+Public entry point for `shields-2026-skew-marked-factor.tex`.
+The copied gluing substrate provides actual cell diagrams and symmetric functions.
+-/

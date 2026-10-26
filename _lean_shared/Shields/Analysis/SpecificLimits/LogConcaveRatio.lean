@@ -57,8 +57,10 @@ has to vanish for the divided recursion to survive in the limit.
 
 ## References
 
-* [Pringsheim, *Über Functionen, welche in gewissen Punkten endliche Differentialquotienten
-  besitzen*][Pringsheim1894] for the classical singularity statement this replaces.
+* [A. Pringsheim, *Ueber Functionen, welche in gewissen Punkten endliche Differentialquotienten
+  jeder endlichen Ordnung, aber keine Taylor'sche Reihenentwickelung besitzen*, Math. Ann. **44**
+  (1894), 41--56][Pringsheim1894Differentialquotienten], p. 42, for the classical singularity
+  statement this replaces.
 
 ## Papers depending on this file
 

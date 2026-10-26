@@ -1,0 +1,21 @@
+Title
+-----
+Coframe rigidity and finite stationary separation for skew Schur functions
+
+Keywords
+--------
+skew Schur function
+Jacobi–Trudi coframe
+fixed-cap rigidity
+finite stationary identity
+unit restoration
+boundary reconstruction
+determinant
+
+Abstract (Plain)
+----------------
+The skew Schur function of a connected diagram, together with the function obtained by splicing the same fixed connected cap to it, determines the diagram up to translation. We prove this using complete rational Jacobi–Trudi coframes, retaining every unit and inverse pole. For zero-free diagrams and caps, a separate linearized theorem detects every nonzero constant-weight combination of vacancy restorations from the two observations. These results imply finite stationary separation: a shifted positive-power identity with a fixed rational potential forces two equal-function connected diagrams to coincide. Its precision is fixed by the supplied span and includes the terminal coefficient. We also treat a whole moving potential by field descent and prove an unshifted exclusion for opposite ends of one diagram. A weak-cap theorem recovers absolute flags, including units, from the complete rational coframe.
+
+Abstract (Rich Text)
+--------------------
+The skew Schur function of a connected diagram, together with the function obtained by splicing the same fixed connected cap to it, determines the diagram up to translation. We prove this using complete rational Jacobi–Trudi coframes, retaining every unit and inverse pole. For zero-free diagrams and caps, a separate linearized theorem detects every nonzero constant-weight combination of vacancy restorations from the two observations. These results imply finite stationary separation: a shifted positive-power identity with a fixed rational potential forces two equal-function connected diagrams to coincide. Its precision is fixed by the supplied span and includes the terminal coefficient. We also treat a whole moving potential by field descent and prove an unshifted exclusion for opposite ends of one diagram. A weak-cap theorem recovers absolute flags, including units, from the complete rational coframe.

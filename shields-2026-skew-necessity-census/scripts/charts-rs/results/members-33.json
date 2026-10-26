@@ -1,0 +1,92 @@
+{
+  "all_chart_key_classes_split": 197,
+  "area": 33,
+  "band_seconds": 72.03549313100054,
+  "chart_seconds": 401.862870246,
+  "charts": 40128,
+  "charts_by_case": {
+    "a": 13356,
+    "b": 1604,
+    "c": 12584,
+    "d": 12584
+  },
+  "classes": 9742,
+  "classes_of_size_4": 9737,
+  "classes_of_size_8": 5,
+  "corrupted_key_classes_split": 7066,
+  "factor_reversals": 120384,
+  "irreducible_factorizations": 39076,
+  "largest_outer": 15,
+  "longest_factorization": 4,
+  "members": 38988,
+  "members_by_charts": {
+    "1": 37900,
+    "2": 1040,
+    "3": 44,
+    "4+": 4
+  },
+  "members_with_two_or_more_periods": 1000,
+  "minimal_period_classes": [
+    [
+      2,
+      4919
+    ],
+    [
+      3,
+      1823
+    ],
+    [
+      4,
+      132
+    ],
+    [
+      5,
+      264
+    ],
+    [
+      6,
+      132
+    ],
+    [
+      7,
+      350
+    ],
+    [
+      8,
+      324
+    ],
+    [
+      9,
+      790
+    ],
+    [
+      10,
+      512
+    ],
+    [
+      11,
+      496
+    ]
+  ],
+  "one_factor_pairs": 77976,
+  "ordered_pairs": 156112,
+  "presentation_lengths": [
+    [
+      1,
+      77976
+    ],
+    [
+      2,
+      77896
+    ],
+    [
+      3,
+      240
+    ]
+  ],
+  "rooted": 38988,
+  "search_s_on_every_member": true,
+  "seconds": 402.027150374,
+  "subdiagram_seconds": 3123.5820115820015,
+  "threads": 8
+}

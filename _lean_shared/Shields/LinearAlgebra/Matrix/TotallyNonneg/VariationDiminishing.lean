@@ -321,7 +321,7 @@ theorem det_pattern_nonneg {r n q : ℕ} {φ : Fin n → ℕ} (hφ : Monotone φ
       have hall : ∀ a, φ (h (σ a)) = (g a : ℕ) := fun a => by
         by_contra hca
         exact hc (Finset.prod_eq_zero (Finset.mem_univ a)
-          (by dsimp only [Matrix.of_apply]; rw [if_neg hca]))
+          (by dsimp only [Matrix.of_apply]; rw [ite_eq_right hca]))
       have hψmono : Monotone fun a => φ (h a) := hφ.comp hh.monotone
       have hσmono : StrictMono σ := by
         intro a b hab
@@ -401,7 +401,7 @@ theorem blockMatrix_mulVec {n : ℕ} {x : Fin n → ℝ} (hx : ∀ j, x j ≠ 0)
     exact abs_mul_pow_sign hp
   · intro t _ hne
     simp only [blockMatrix, Matrix.of_apply]
-    rw [if_neg (fun hc => hne (Fin.ext hc.symm)), zero_mul]
+    rw [ite_eq_right (fun hc => hne (Fin.ext hc.symm)), zero_mul]
   · intro hc; exact absurd (Finset.mem_univ _) hc
 
 /-! ### Variation diminution -/

@@ -120,7 +120,7 @@ theorem prod_le_prod_topSel {n r : ℕ} (hrn : r ≤ n) {a : Fin n → ℝ}
     (hnn : ∀ c, 0 ≤ a c) (hanti : ∀ c d : Fin n, c ≤ d → a d ≤ a c)
     {g : Fin r → Fin n} (hg : StrictMono g) :
     ∏ x, a (g x) ≤ ∏ x, a (topSel hrn x) := by
-  refine Finset.prod_le_prod (fun x _ => hnn _) fun x _ => ?_
+  refine Finset.prod_le_prod₀ (fun x _ => hnn _) fun x _ => ?_
   refine hanti _ _ ?_
   rw [Fin.le_def]
   simpa [topSel] using val_le_val_of_strictMono hg x

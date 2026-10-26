@@ -1,0 +1,504 @@
+\documentclass[11pt,a4paper]{amsart}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage[expansion=false]{microtype}
+\usepackage{booktabs}
+\usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black]{hyperref}
+\usepackage[nameinlink,capitalize]{cleveref}
+
+\hypersetup{
+  pdftitle={Skew Schur classes through thirty-five cells and composition necessity},
+  pdfauthor={John Shields},
+  pdfkeywords={skew Schur function, skew-equivalence, McNamara--van Willigenburg conjecture, computer-assisted proof,
+    marked composition, exact enumeration, Jacobi--Trudi determinant}
+}
+\pdfinfo{
+  /ORCID (https://orcid.org/0009-0004-3882-4571)
+}
+
+\numberwithin{equation}{section}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{conjecture}[theorem]{Conjecture}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\Lam}{\Lambda}
+\newcommand{\Z}{\mathbb Z}
+
+\title[Skew Schur classes through thirty-five cells]
+{Skew Schur classes through thirty-five cells\\
+and composition necessity}
+
+\author{John Shields}
+\date{October 9, 2026}
+\thanks{Independent researcher, Ginza 2-15-2, KR Ginza II 5F, Chuo-ku, Tokyo, Japan 104-0061.\\
+\hspace*{\parindent}Corresponding author: \href{mailto:math@johnnyshields.com}{math@johnnyshields.com}.  ORCID: \href{https://orcid.org/0009-0004-3882-4571}{0009-0004-3882-4571}.\\
+\hspace*{\parindent}This work is archived at \href{https://doi.org/10.5281/zenodo.23133770}{doi:10.5281/zenodo.23133770}.}
+
+\subjclass[2020]{Primary 05E05; Secondary 05-08, 05A15}
+\keywords{skew Schur function, skew-equivalence, McNamara--van Willigenburg conjecture, computer-assisted proof,
+marked composition, exact enumeration, Jacobi--Trudi determinant}
+
+\begin{document}
+
+\begin{abstract}
+We prove, with computer assistance, the necessity direction of the composition-and-reversal conjecture of McNamara and van Willigenburg for every connected skew diagram with at most 35 cells.  A census of all 2,758,249,011,429 such diagrams finds exactly 57,137 Schur classes with more than one rotation orbit; modular evaluation only separates classes, and every nonrotation class is confirmed by exact polynomial equality.  Two searches for marked compositions, both proved complete, show that every member of these classes is a proper composition satisfying Hypotheses I--IV, and that Schur-equal members share the keys of their minimal compositions.  Induction on outer prefixes then gives a common factorization for every Schur-equal pair; sufficiency is the theorem of Olson and Harris.  Thus the conjecture holds through 35 cells, and each nonrotation class has size \(2^r\), where \(r\) is the number of nonsymmetric irreducible factors.  Our finite result leaves open the conjecture beyond this range.
+\end{abstract}
+
+\maketitle
+
+\section{Introduction}\label{sec:introduction}
+
+For a skew diagram \(D=\lambda/\mu\), the skew Schur function \(s_D\) is the Jacobi--Trudi determinant \(\det(h_{\lambda_i-\mu_j-i+j})\) in the complete homogeneous symmetric functions.  When do two skew diagrams have the same skew Schur function?  Rotation through \(180\) degrees never changes it \cite[Prop.~3.4]{McNamara2009Classification}.  Reiner, Shaw and van Willigenburg showed that the rows, columns and overlaps of a diagram are read off \(s_D\), and built families of nontrivial equalities \cite{Reiner2007Coincidences}.  For ribbons the question is settled: Billera, Thomas and van Willigenburg proved that two ribbons are Schur-equal exactly when they factor compatibly, factor by factor up to reversal, so that a class of ribbons has \(2^r\) elements for \(r\) the number of nonsymmetric irreducible factors \cite[Thm.~4.1]{Billera2006DecomposableCompositions}.
+
+McNamara and van Willigenburg extended this to arbitrary skew diagrams.  They defined a composition \(D\circ_W E\), in which every cell of \(D\) is replaced by a copy of \(E\) and neighboring copies are amalgamated along a marked subdiagram \(W\) \cite[Def.~3.11]{McNamara2009Classification}, and proved that reversing any factor of an iterated composition preserves the skew Schur function when the factors satisfy their Hypotheses I--V \cite[Thm.~5.3]{McNamara2009Classification}.  They conjectured that, with Hypotheses I--IV, such factor reversals account for every equality, and that a class has \(2^r\) elements for \(r\) the number of nonsymmetric factors of an irreducible factorization \cite[Conj.~5.7]{McNamara2009Classification}; they verified the conjecture for all skew diagrams with at most 20 cells.  Olson-Harris proved the sufficiency direction without Hypothesis V \cite[Thms.~5.3.9 and~5.3.10]{OlsonHarris2024HopfApplications}.  Necessity remains open.
+
+This paper settles necessity for every connected skew diagram with at most 35 cells.  The proof is a finite computation whose algorithms are proved here, together with a short induction that turns its output into the factorizations the conjecture asks for.  Write \([F]\) for the set of skew diagrams \(H\) with \(s_H=s_F\), identified up to translation, and \(F^*\) for the rotation of \(F\).  A \emph{proper chart} of \(F\) is a composition \(F=D\circ_\omega E\) with connected factors of at least two cells each and a marked inner \(\omega=(E,W)\) satisfying Hypotheses I--IV \cite{Shields2026Gluing}; these are exactly the nontrivial factorizations of \cite[Def.~5.5]{McNamara2009Classification}.  A chart is \emph{minimal} when its cost \((N_W,N_E)\), the numbers of diagonals occupied by \(W\) and \(E\), is least.  Its \emph{key} is its marked inner up to rotation together with the outer function \(s_D\).  These notions are made precise in \Cref{sec:composition,sec:keys}.
+
+\begin{theorem}\label{thm:main}
+The following hold for the \(2{,}758{,}249{,}011{,}429\) connected skew diagrams with at most 35 cells.
+\begin{enumerate}
+\item[(i)] Exactly \(57{,}137\) of their Schur classes contain two or more rotation orbits, that is, have \(|[F]|\ge4\).  These classes have \(228{,}740\) members.  Every other class is \(\{F,F^*\}\).
+\item[(ii)] Every member of each of these \(57{,}137\) classes has a proper chart.  Consequently a diagram with no proper chart satisfies \([F]=\{F,F^*\}\).
+\item[(iii)] Schur-equal diagrams with proper charts have the same set of keys of minimal charts.
+\item[(iv)] The equivalence of Conjecture~5.7 of \cite{McNamara2009Classification} holds for every such diagram \(E\): every \(E'\) with \(s_{E'}=s_E\) is obtained from a factorization \(E=(\cdots(E_1\circ_{W_2}E_2)\cdots)\circ_{W_r}E_r\) by reversing some of its factors together with their marks, and conversely.  Its class-size clause \(|[E]|=2^r\), with \(r\) the number of factors \(E_i\ne E_i^*\), holds with the same \(r\) for every irreducible factorization.
+\end{enumerate}
+\end{theorem}
+
+Part (iv) is the necessity direction for these diagrams; its converse is Olson-Harris's theorem, and nothing beyond it is used for sufficiency.  Necessity reduces, by an induction on outer prefixes \cite{Shields2026Gluing}, to two assertions at smaller spans: \emph{terminal rigidity}, that a diagram without proper charts is alone in its class up to rotation, and \emph{rooted-key invariance}, that Schur-equal diagrams with proper charts have the same keys of minimal charts.  Parts (ii) and (iii) establish these two assertions for diagrams of at most 35 cells.
+
+Disconnected diagrams are omitted, as in \cite{McNamara2009Classification}: the problem for arbitrary diagrams reduces to the connected case \cite[Prop.~3.2]{McNamara2009Classification}, and \Cref{rem:disconnected} records what the census says about them.  Ribbons are included and treated like every other diagram.
+
+\Cref{sec:diagrams} identifies connected diagrams with profiles and lists the Schur invariants used.  \Cref{sec:census} gives the census and proves that it returns exactly the Schur classes.  \Cref{sec:composition} recalls marked composition and states the conjecture.  \Cref{sec:roots} proves the geometry of a chart and the completeness of two chart searches and of a forward generation of charts.  \Cref{sec:keys} defines keys and derives necessity from parts (ii) and (iii).  \Cref{sec:results} reports the computation and proves \Cref{thm:main}.
+
+\section{Profiles and Schur invariants}\label{sec:diagrams}
+
+Diagrams are finite skew Young diagrams in English notation, identified up to translation.  A cell \((i,j)\) lies in row \(i\), counted downward, and column \(j\); its content is \(c(i,j)=j-i\), and \(e=(1,1)\).  A diagram is connected when it is nonempty and edge-connected.  Write \(D^*\) for the rotation of \(D\) through \(180\) degrees, \(D^{\mathsf t}\) for its transpose, \(N_D\) for the number of contents it occupies, and \(\Lam=\Z[h_1,h_2,\ldots]\), with \(h_0=1\) and \(h_k=0\) for \(k<0\).
+
+\begin{lemma}\label{lem:profiles}
+A connected diagram with \(n\) rows is determined up to translation by its \emph{profile} \((r_1,\ldots,r_n;g_1,\ldots,g_{n-1})\), where \(r_i\) is the length of row \(i\) and \(g_i+1\) is the number of columns shared by rows \(i\) and \(i+1\).  A sequence is a profile exactly when \(r_i\ge1\) and \(0\le g_i<\min(r_i,r_{i+1})\).  With \(x_n=r_n\), \(y_i=x_{i+1}-g_i\) and \(x_i=y_i+r_i\),
+\begin{equation}\label{eq:jt}
+ s_F=\det\bigl(h_{x_i-y_j}\bigr)_{i,j=1}^n,\qquad N_F=x_1=\sum_ir_i-\sum_ig_i,
+\end{equation}
+and row \(i\) occupies the contents \(y_i,\ldots,x_i-1\).  Rotation reverses both sequences.
+\end{lemma}
+
+\begin{proof}
+Write row \(i\) as the column interval \([\mu_i,\lambda_i-1]\).  The diagram is skew exactly when \(\mu_{i+1}\le\mu_i\) and \(\lambda_{i+1}\le\lambda_i\), and connected exactly when consecutive rows share \(o_i=\lambda_{i+1}-\mu_i\ge1\) columns.  Given \(r_i,r_{i+1}\) and \(o_i\), the two inequalities read \(o_i\le r_i\) and \(o_i\le r_{i+1}\).  Hence the profile determines every row from the first, and it is legal exactly when \(1\le g_i+1\le\min(r_i,r_{i+1})\).  The lists \(x_i=\lambda_i-i\) and \(y_i=\mu_i-i\), shifted so that \(y_n=0\), satisfy the stated recursion, and the Jacobi--Trudi formula is \(s_F=\det(h_{x_i-y_j})\).  Row \(i\) occupies the contents \(\mu_i-i,\ldots,\lambda_i-i-1\).  Both \(x_i\) and \(y_i\) strictly decrease, so the contents run from \(y_n=0\) to \(x_1-1\).  Rotation reverses the order of the rows and the overlaps.
+\end{proof}
+
+Write \(a_N\) for the number of connected diagrams with \(N\) cells.  Appending a row of length \(r'\) below a last row of length \(r\) allows \(\min(r,r')\) gaps, so \(a_N=\sum_rf(N,r)\), where \(f(r,r)=1\) and
+\begin{equation}\label{eq:dp}
+ f(N+r',r')=\sum_{r\ge1}f(N,r)\min(r,r').
+\end{equation}
+\Cref{tab:census} lists \(a_N\) for \(N\le35\).
+
+\begin{lemma}\label{lem:invariants}
+Let \(F\) be connected and \(s_H=s_F\).  Then \(H\) is connected, \(|H|=|F|\), and \(H\) has the same multiset of row lengths and the same multiset of gaps \(g_i\) as \(F\).  More generally, for every \(k\ge1\), \(H\) and \(F\) have the same multiset of the numbers of columns shared by \(k\) consecutive rows.  Moreover \(s_{F^*}=s_F\).
+\end{lemma}
+
+\begin{proof}
+The skew Schur function of a diagram is the product of those of its connected components, each nonconstant, and the skew Schur function of a connected diagram is irreducible in \(\Lam\) \cite{Barekat2009CoincidencesCorrigendum}; so \(H\) has one component.  Area is the degree.  The multiset of the numbers of columns shared by \(k\) consecutive rows is the row overlap partition \(\rho^{(k)}\) of \cite[Def.~8.2]{Reiner2007Coincidences}, and \(s_F\) determines all of them \cite[Cor.~8.11]{Reiner2007Coincidences}.  The multisets of row lengths and of adjacent row overlaps are \(\rho^{(1)}\) and \(\rho^{(2)}\); for connected diagrams every overlap is positive, and the gaps are the overlaps minus one.  Rotation invariance is \cite[Prop.~3.4]{McNamara2009Classification}.
+\end{proof}
+
+Thus \([F]\) is a union of rotation orbits of connected diagrams of one area and one sequence of row overlap partitions.  Equality in \(\Lam\) is equality of skew Schur functions, because \(h_1,h_2,\ldots\) are algebraically independent.  A class is a \emph{rotation class} when it is a single orbit \(\{F,F^*\}\), and a \emph{nonrotation class} otherwise.
+
+\section{The census}\label{sec:census}
+
+The census groups the connected diagrams of each area by invariants and by values at fixed points, and confirms every grouping it reports exactly.  Fix primes \(p\) and \(p'\).  For a point \(\eta=(\eta_1,\eta_2,\ldots)\in\mathbb F_p^{\,\mathbb N}\), evaluation \(h_k\mapsto\eta_k\) is a ring homomorphism \(\Lam\to\mathbb F_p\); write \(s_F(\eta)\) for the image of \(s_F\).  Fix points \(\eta^{(1)}\in\mathbb F_p^{\,\mathbb N}\) and \(\eta^{(2)}\in\mathbb F_{p'}^{\,\mathbb N}\), and a function \(I\) of the sequence of row overlap partitions of a diagram.
+
+\begin{definition}\label{def:census}
+For each area \(N\) and each partition \(\rho\) of \(N\), the census performs the following steps on the \emph{shard} of profiles with row multiset \(\rho\).
+\begin{enumerate}
+\item Keep one representative of each rotation orbit, the lexicographically smaller of \(F\) and \(F^*\).
+\item Group the representatives by the pair \((I(F),s_F(\eta^{(1)}))\).
+\item In each group of two or more representatives, regroup by \(s_F(\eta^{(2)})\).
+\item In each remaining group of two or more representatives, compute the polynomials \(s_F\in\Lam\) and partition by equality.
+\item Report each final part, with the rotations of its representatives adjoined.
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}\label{thm:census}
+The parts reported by the census are exactly the Schur classes of connected diagrams.
+\end{theorem}
+
+\begin{proof}
+Every connected profile has one row multiset and is reached once.  Each value computed at steps (2) and (3) is exactly the image \(s_F(\eta)\): evaluation commutes with the determinant \eqref{eq:jt}, and the values are computed in exact arithmetic in \(\mathbb F_p\) and \(\mathbb F_{p'}\).  Let \(F\) and \(H\) be Schur-equal.  By \Cref{lem:invariants} they have the same area and the same row overlap partitions, in particular the same row multiset and the same value of \(I\), so they are treated in the same shard and placed in the same group at step~(2); equal polynomials have equal values at every point, so steps (2) and (3) keep their representatives together, and step (4) keeps them in one part.  Conversely, a final part with one representative is a rotation orbit, hence Schur-equal throughout by \Cref{lem:invariants}, and a final part with more representatives was confirmed equal in \(\Lam\) at step (4).  Representatives in different parts differ in an invariant, in a value, or in their polynomials, so their skew Schur functions differ.  A rotation orbit lies entirely in the part of its representative.
+\end{proof}
+
+No randomness enters the conclusion: the points only decide how much exact work is needed.  The census uses no conjecture; it computes the classes against which the conjecture is tested in \Cref{sec:results}.
+
+In the computation, the primes are \(p=2^{61}-1\) and \(p'=2^{61}-31\), and \(I(F)\) is computed from all the row overlap partitions of \(F\).  The polynomials at step~(4) are computed exactly, with integer coefficients, and every class with two or more rotation orbits was confirmed there.  Step~(4) never had to separate two classes.  At \(32\), \(33\), \(34\) and \(35\) cells the first value coincided for a few pairs of different classes, as is expected for values modulo a \(61\)-bit prime over that many diagrams, and in each case \(I\) or the second value told them apart.  The bound of \(35\) cells is the extent of the computation, not a limit of the method: the census ran on consumer CPU hardware in about two days, its algorithm does not depend on the area, and each further cell costs about \(2.3\) times as much.
+
+\begin{table}[ht]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{rrrrrrrr}
+\toprule
+\(N\) & diagrams & classes & \(|[F]|=1\) & \(|[F]|=2\) & \(|[F]|=4\) & \(|[F]|=8\) & with a chart\\
+\midrule
+1 & 1 & 1 & 1 & 0 & 0 & 0 & 0 \\
+2 & 2 & 2 & 2 & 0 & 0 & 0 & 0 \\
+3 & 4 & 3 & 2 & 1 & 0 & 0 & 0 \\
+4 & 9 & 7 & 5 & 2 & 0 & 0 & 4 \\
+5 & 20 & 12 & 4 & 8 & 0 & 0 & 4 \\
+6 & 46 & 29 & 12 & 17 & 0 & 0 & 18 \\
+7 & 105 & 57 & 9 & 48 & 0 & 0 & 10 \\
+8 & 242 & 134 & 28 & 105 & 1 & 0 & 50 \\
+9 & 557 & 288 & 21 & 266 & 1 & 0 & 34 \\
+10 & 1{,}285 & 674 & 65 & 608 & 1 & 0 & 136 \\
+11 & 2{,}964 & 1{,}503 & 48 & 1{,}452 & 3 & 0 & 88 \\
+12 & 6{,}842 & 3{,}490 & 152 & 3{,}331 & 7 & 0 & 332 \\
+13 & 15{,}793 & 7{,}947 & 111 & 7{,}831 & 5 & 0 & 194 \\
+14 & 36{,}463 & 18{,}395 & 351 & 18{,}032 & 12 & 0 & 780 \\
+15 & 84{,}187 & 42{,}193 & 257 & 41{,}907 & 29 & 0 & 605 \\
+16 & 194{,}388 & 97{,}580 & 814 & 96{,}745 & 21 & 0 & 1{,}748 \\
+17 & 448{,}847 & 224{,}686 & 593 & 224{,}059 & 34 & 0 & 1{,}152 \\
+18 & 1{,}036{,}426 & 519{,}073 & 1{,}882 & 517{,}110 & 81 & 0 & 4{,}422 \\
+19 & 2{,}393{,}208 & 1{,}197{,}225 & 1{,}370 & 1{,}195{,}791 & 64 & 0 & 2{,}604 \\
+20 & 5{,}526{,}198 & 2{,}765{,}141 & 4{,}352 & 2{,}760{,}657 & 131 & 1 & 9{,}591 \\
+21 & 12{,}760{,}671 & 6{,}381{,}706 & 3{,}165 & 6{,}378{,}329 & 212 & 0 & 6{,}594 \\
+22 & 29{,}466{,}050 & 14{,}737{,}862 & 10{,}054 & 14{,}727{,}618 & 190 & 0 & 22{,}084 \\
+23 & 68{,}041{,}019 & 34{,}023{,}851 & 7{,}309 & 34{,}016{,}231 & 310 & 1 & 13{,}688 \\
+24 & 157{,}115{,}917 & 78{,}568{,}933 & 23{,}231 & 78{,}545{,}063 & 638 & 1 & 52{,}080 \\
+25 & 362{,}802{,}072 & 181{,}408{,}955 & 16{,}880 & 181{,}391{,}556 & 518 & 1 & 30{,}896 \\
+26 & 837{,}759{,}792 & 418{,}905{,}913 & 53{,}654 & 418{,}851{,}451 & 807 & 1 & 116{,}408 \\
+27 & 1{,}934{,}502{,}740 & 967{,}269{,}326 & 38{,}982 & 967{,}228{,}813 & 1{,}529 & 2 & 73{,}942 \\
+28 & 4{,}467{,}033{,}943 & 2{,}233{,}577{,}372 & 123{,}923 & 2{,}233{,}451{,}892 & 1{,}555 & 2 & 267{,}078 \\
+29 & 10{,}314{,}998{,}977 & 5{,}157{,}542{,}391 & 90{,}019 & 5{,}157{,}450{,}271 & 2{,}098 & 3 & 159{,}764 \\
+30 & 23{,}818{,}760{,}154 & 11{,}909{,}519{,}170 & 286{,}184 & 11{,}909{,}228{,}997 & 3{,}984 & 5 & 622{,}302 \\
+31 & 55{,}000{,}815{,}222 & 27{,}500{,}507{,}933 & 207{,}874 & 27{,}500{,}296{,}448 & 3{,}609 & 2 & 363{,}891 \\
+32 & 127{,}004{,}500{,}762 & 63{,}502{,}574{,}667 & 660{,}894 & 63{,}501{,}907{,}632 & 6{,}131 & 10 & 1{,}411{,}508 \\
+33 & 293{,}270{,}987{,}832 & 146{,}635{,}724{,}175 & 480{,}022 & 146{,}635{,}234{,}411 & 9{,}737 & 5 & 851{,}095 \\
+34 & 677{,}203{,}347{,}266 & 338{,}602{,}426{,}758 & 1{,}526{,}158 & 338{,}600{,}890{,}656 & 9{,}939 & 5 & 3{,}244{,}110 \\
+35 & 1{,}563{,}756{,}371{,}425 & 781{,}878{,}724{,}470 & 1{,}108{,}453 & 781{,}877{,}600{,}566 & 15{,}442 & 9 & 1{,}908{,}096 \\
+\midrule
+all & 2{,}758{,}249{,}011{,}429 & 1{,}379{,}126{,}771{,}922 & 4{,}646{,}881 & 1{,}379{,}122{,}067{,}904 & 57{,}089 & 48 & 9{,}165{,}308 \\
+\bottomrule
+\end{tabular}
+\par\bigskip
+\caption{Connected skew diagrams of \(N\) cells and their Schur classes, by class size.  The classes of size one are exactly the self-rotational diagrams; a class of size two is a rotation orbit; the classes of sizes four and eight are the nonrotation classes.  The last column counts the diagrams with a proper chart, found by the forward generation of \Cref{def:searches}.}
+\label{tab:census}
+\end{table}
+
+\section{Marked composition and the conjecture}\label{sec:composition}
+
+We use the composition of McNamara and van Willigenburg \cite[Def.~3.11]{McNamara2009Classification} in its cell form, as in \cite{Shields2026Gluing}.  Let \(E\) be connected.  A connected subdiagram \(W\) lies in the bottom (top) of \(E\) when a translate of it contains the southwesternmost (northeasternmost) cell of \(E\); write \(W_-\) and \(W_+=W_-+v\) for the two copies.  The pair is a \emph{legal mark} when the following hold \cite[Hyps.~3.8 and~3.22]{McNamara2009Classification}.
+\begin{enumerate}
+\item[(I)] No strictly larger skew diagram containing \(W_-\), on the same contents, lies in the top and bottom of \(E\).
+\item[(II)] Some content strictly between the copies meets neither.
+\item[(III)] Removing either copy leaves a connected skew diagram.
+\item[(IV)] In the infinite amalgamation \(\bigcup_{k\in\Z}(E+kv)\), no copy of \(\widehat O=\{x\in O:x+e\in O\}\) is adjacent to a copy of \(\widehat W=\{x\in\boldsymbol E:x+e\in W_1\}\cup\{x\in W_1:x+e\in\boldsymbol E\}\), where \(O=E\setminus(W_-\cup W_+)\), \(\boldsymbol E\) is the amalgamation, and \(O\) and \(W_1\) run over the copies of \(O\) and \(W\).
+\end{enumerate}
+By (II) and (III), \(O\) is a nonempty connected skew diagram, and each copy of \(W\) is attached to \(O\) horizontally or vertically; the cases (a), (b), (c), (d) are the lower and upper attachments \((H,H)\), \((V,V)\), \((H,V)\), \((V,H)\).  The empty \(W\) is always legal, with the horizontal edge reading of \cite[Ex.~3.7]{McNamara2009Classification}: case (a), \(v=\operatorname{ne}(E)-\operatorname{sw}(E)+(0,1)\).  The \emph{period} of the marked inner \(\omega=(E,W_-,W_+,\text{case})\) is \(q=c(v)\), and its \emph{width} is \(w=N_W\), with \(N_\varnothing=0\).  The copies occupy the contents \([0,w-1]\) and \([q,N_E-1]\) of \(E\), so \(N_E=q+w\) and, by (II), \(w<q\).
+
+For a connected \(D\), let the content-\(t\) diagonal of \(D\) occupy the rows \([\ell_t,u_t]\).  The cell \(d=(i,i+t)\) contributes the copy \(E+L(d)\), where
+\begin{equation}\label{eq:offsets}
+ L(d)=
+ \begin{cases}
+ tv+ie,&\mathrm{(a)},\\
+ tv-ie,&\mathrm{(b)},\\
+ tv+(i-\ell_t)e,&\mathrm{(c)},\\
+ tv-(u_t-i)e,&\mathrm{(d)}.
+ \end{cases}
+\end{equation}
+In case (c), respectively (d), each pair of vertically adjacent cells of \(D\) on one northwest, respectively southeast, boundary ribbon contributes in addition \(W_++L(d)+e\), respectively \(W_++L(d)-e\), where \(d\) is the lower cell of the pair.  The union of all these is \(D\circ_\omega E\).  In cases (a) and (b), rules (i) and (ii) of \cite[Def.~3.11]{McNamara2009Classification} place the copy of a cell at that of its west neighbor plus \(v\), and at that of its south neighbor plus \(v-e\), respectively \(v+e\); formula \eqref{eq:offsets} is their solution.  In case (c) the rules place the copy of a cell at that of its west or south neighbor on the same northwest boundary ribbon plus \(v\), and at that of its northwest neighbor plus \(e\); since the rank of \((i,i+t)\) on its ribbon is \(i-\ell_t+1\), formula \eqref{eq:offsets} satisfies all three, and the supplemental copy is the extra copy of \(W\) that the definition places one position southeast of the shared copy.  Case (d) is symmetric, with southeast ribbons of rank \(u_t-i+1\).
+
+A \emph{chart} of a connected \(F\) is a pair \((D,\omega)\) with \(D\circ_\omega E=F\), and it is \emph{proper} when \(D\) and \(E\) are connected with \(|D|,|E|\ge2\).  As in \cite{McNamara2009Classification}, all diagrams are connected.  The trivial factorizations of \cite[Def.~5.5]{McNamara2009Classification}, \((1)\circ_WF\), \(F\circ_\varnothing(1)\) and \(\varnothing\circ_FE\), are exactly those with \(|D|\le1\) or \(|E|=1\): a one-cell outer reproduces the inner, and a one-cell inner carries only the empty mark.  So the nontrivial factorizations of \(F\) are its proper charts.  A factorization is \emph{minimal} when it is nontrivial and has least \((N_W,N_E)\), lexicographically, among the nontrivial factorizations of \(F\) \cite[Def.~5.5]{McNamara2009Classification}; we call \((N_W,N_E)\) the \emph{cost} of the chart.  An iterated factorization
+\begin{equation}\label{eq:tower}
+ F=(\cdots((E_1\circ_{W_2}E_2)\circ_{W_3}E_3)\cdots)\circ_{W_r}E_r
+\end{equation}
+is \emph{irreducible} when \(E_1\) has no proper chart and each step \(D_i\circ_{W_i}E_i\), with \(D_i\) the composition of the first \(i-1\) factors, is a minimal factorization of \(D_{i+1}\).
+
+\begin{conjecture}[{\cite[Conj.~5.7]{McNamara2009Classification}}]\label{conj:mvw}
+Two skew diagrams \(E\) and \(E'\) satisfy \(s_E=s_{E'}\) if and only if, for some \(r\), \(E\) is the iterated composition \eqref{eq:tower} and \(E'\) is the same composition with each \(E_i\), together with \(W_i\), replaced by itself or by its rotation, where each \(E_i\), \(i\ge2\), carries a legal mark.  The class \([E]\) has \(2^r\) elements, where \(r\) is the number of factors \(E_i\ne E_i^*\) in any irreducible factorization of \(E\).
+\end{conjecture}
+
+\begin{remark}\label{rem:disconnected}
+The conjecture is stated in \cite{McNamara2009Classification} under the standing assumption that diagrams are connected; the equivalence problem for arbitrary diagrams reduces to connected ones \cite[Prop.~3.2]{McNamara2009Classification}.  The census also determines Schur equality of disconnected diagrams whose components have together at most 35 cells: by unique factorization in \(\Lam\) and the irreducibility used in \Cref{lem:invariants}, \(s_H=s_F\) holds exactly when the components of \(H\) and \(F\) can be matched in Schur-equal pairs.
+\end{remark}
+
+\section{The geometry of a chart and two complete searches}\label{sec:roots}
+
+Fix a proper chart \(F=D\circ_\omega E\) of period \(q\) and width \(w\).  Translate so that the least contents of \(D\), \(E\) and \(F\) are \(0\), write \(h_X(c)\) for the number of cells of \(X\) on content \(c\), and \(a_X(c)\) for the least row on it.  The rows meeting one content of a skew diagram form an interval, and in a connected skew diagram the least and greatest contents hold a single cell each: if \((i,i)\) and \((i+1,i+1)\) both lay on the least content, convexity of \(\lambda/\mu\) would put \((i+1,i)\), of smaller content, in the diagram.  Let \(d_0\) and \(d_1\) be the cells of \(D\) on its least and greatest contents.
+
+\begin{lemma}\label{lem:copies}
+\begin{enumerate}
+\item[(i)] The copy of \(d\) occupies the contents \([c(d)q,\,c(d)q+N_E-1]\), and a supplemental copy attached at a lower cell \(d\) occupies contents in \([c(d)q+q,\,c(d)q+N_E-1]\).
+\item[(ii)] For each content \(t\) of \(D\), the origins \(L(d)\) of the copies of the \(h_D(t)\) cells on content \(t\) are \(tv+ke\) for \(k\) in an interval of \(h_D(t)\) consecutive integers; in cases (c) and (d) this interval is \([0,h_D(t)-1]\) and \([1-h_D(t),0]\).
+\item[(iii)] \(N_F=N_Dq+w\) with \(0\le w<q\); in particular \(w=N_F\bmod q\) and \(N_D=\lfloor N_F/q\rfloor\ge2\).
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+Since \(c(e)=0\), formula \eqref{eq:offsets} gives \(c(L(d))=tq\) for \(d\) on content \(t\), and \(E\) occupies \([0,N_E-1]\).  A supplemental copy is a translate of \(W_+\), which occupies \([q,N_E-1]\) in \(E\), by \(L(d)\pm e\).  As \(i\) runs over \([\ell_t,u_t]\), the coefficient of \(e\) in \eqref{eq:offsets} runs over \([\ell_t,u_t]\), \([-u_t,-\ell_t]\), \([0,u_t-\ell_t]\) and \([\ell_t-u_t,0]\) in the four cases.  This proves (i) and (ii).  The copies of consecutive contents of \(D\) cover overlapping or abutting content intervals, because \(q\le N_E\), and the supplements stay inside them, so \(F\) occupies \([0,(N_D-1)q+N_E-1]\).  Since \(D\) has at least two cells, \(N_D\ge2\).
+\end{proof}
+
+Call the contents \(tq+w'\) with \(0\le t<N_D\) and \(w\le w'\le q-1\) the \emph{private} contents of \(F\).
+
+\begin{lemma}\label{lem:bands}
+\begin{enumerate}
+\item[(i)] On the contents \([0,q-1]\), \(F\) coincides with the copy of \(d_0\); on the contents \([N_F-q,N_F-1]\), it coincides with the copy of \(d_1\).
+\item[(ii)] On the private content \(tq+w'\), the cells of \(F\) are a run of \(h_D(t)+h_E(w')-1\) consecutive cells along the diagonal, whose least row is \(a_E(w')+\kappa_t\), where \(\kappa_t\) is the least row coordinate of the origins of the copies on content \(t\) of \(D\).
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+By \Cref{lem:copies}(i), a content \(c<q\) is met only by copies of cells on content \(0\) of \(D\), which is \(d_0\) alone, and by no supplement.  A content \(c\ge N_F-q=(N_D-1)q+w\) is not met by a copy of a cell on content \(s\le N_D-2\), whose last content is \(sq+q+w-1<c\), nor by a supplement attached at such a cell; a supplement is never attached at content \(N_D-1\), which has no content above it.  This proves (i).  For (ii), a copy of a cell on content \(s\) meets \(tq+w'\) only if \(sq\le tq+w'\le sq+N_E-1\).  The choice \(s=t-1\) would need \(w'\le w-1\), and \(s=t+1\) would need \(w'\ge q\), so only content \(t\) of \(D\) contributes, and no supplement does.  By \Cref{lem:copies}(ii) these copies are \(E+tv+ke\) for \(h_D(t)\) consecutive values of \(k\).  On content \(w'\), \(E\) is a run of \(h_E(w')\) cells, and its translates by consecutive multiples of \(e\) form a run of the stated length beginning at \(a_E(w')+\kappa_t\).
+\end{proof}
+
+\begin{corollary}\label{cor:outer}
+For every private content,
+\begin{equation}\label{eq:private}
+ h_D(t)=h_F(tq+w')-h_F(w')+1,\qquad
+ a_F(tq+w')-a_F(w')=\kappa_t-\kappa_0,
+\end{equation}
+independently of \(w'\in[w,q-1]\).  In case (a), \(\ell_t-\ell_0=\kappa_t-\kappa_0-tv_1\), and in case (b), \(u_0-u_t=\kappa_t-\kappa_0-tv_1\), where \(v=(v_1,v_2)\).  In cases (a) and (b), the outer \(D\) is therefore determined up to translation by \(F\), the marked inner and the period.
+\end{corollary}
+
+\begin{proof}
+By \Cref{lem:bands}(i), \(h_E(w')=h_F(w')\); apply \Cref{lem:bands}(ii) at \(t\) and at \(0\), where \(h_D(0)=1\).  In case (a) the least origin row on content \(t\) is \(tv_1+\ell_t\), and in case (b) it is \(tv_1-u_t\), up to one common translation.  The intervals \([\ell_t,u_t]\), of known lengths \(h_D(t)\), determine \(D\).
+\end{proof}
+
+\begin{lemma}\label{lem:heights}
+Every connected skew diagram whose contents carry the heights \(h(0),\ldots,h(m-1)\) arises from the following recursion: content \(0\) is the cell \((0,0)\), and if content \(c\) occupies the rows \([\alpha,\alpha+h(c)-1]\), then content \(c+1\) occupies \([\alpha',\alpha'+h(c+1)-1]\) with \(\alpha'\in\{\alpha-1,\alpha\}\) and \(\alpha'+h(c+1)-1\in\{\alpha+h(c)-2,\alpha+h(c)-1\}\).
+\end{lemma}
+
+\begin{proof}
+In \(\lambda/\mu\), row \(i\) meets content \(c\) exactly when \(\mu_i-i\le c\le\lambda_i-i-1\).  Both bounds decrease by at least one from each row to the next, so the rows meeting content \(c\) form an interval whose least and greatest elements are each either unchanged or one less on content \(c+1\).
+\end{proof}
+
+\begin{lemma}\label{lem:size}
+Every proper chart satisfies \(|F|\ge q|D|+w\).  In particular \(|D|\le|F|/2\), and \(|D|\le17\) when \(|F|\le35\).
+\end{lemma}
+
+\begin{proof}
+For \(0\le t<N_D\), the contents \(tq,\ldots,tq+q-1\) form block \(t\).  On every content \(tq+j\) of block \(t\), the copies of the cells on content \(t\) of \(D\) contribute the run of \(E\) on content \(j\) translated by \(h_D(t)\) consecutive multiples of \(e\), hence at least \(h_D(t)\) cells.  The last \(w\) contents of \(F\) hold at least one cell each.  Summing, \(|F|\ge q\sum_th_D(t)+w=q|D|+w\), and \(q\ge2\) because \(2q>N_E\ge2\).
+\end{proof}
+
+\begin{lemma}\label{lem:inner-size}
+Every proper chart satisfies \(3|E|\le2|F|-1\).
+\end{lemma}
+
+\begin{proof}
+By \Cref{lem:copies}(i), the copies of \(d_0\) and \(d_1\) are translates of \(E\) in \(F\) on the contents \([0,N_E-1]\) and \([(N_D-1)q,(N_D-1)q+N_E-1]\).  Since \(N_E=q+w<2q\), these ranges are disjoint when \(N_D\ge3\), and then \(|F|\ge2|E|\).  Let \(N_D=2\), and let \(a\), \(b\) and \(c\) be the numbers of cells of \(E\) on the contents \([0,w-1]\), \([w,q-1]\) and \([q,N_E-1]\).  The two copies meet only on the contents \([q,N_E-1]\), where the copy of \(d_0\) has \(c\) cells and the copy of \(d_1\) has \(a\), so \(|F|\ge2|E|-\min(a,c)\).  Every content of \(E\) holds a cell, so \(b\ge q-w\ge1\) and \(\min(a,c)\le(|E|-b)/2\le(|E|-1)/2\).
+\end{proof}
+
+The bounds show that an outer never needs more than \(17\) cells, and an inner more than \(23\), in the range of \Cref{thm:main}.  Neither search below uses a bound on the outer; the forward generation uses both.
+
+\begin{definition}\label{def:searches}
+\emph{Search S} runs over every connected skew subdiagram \(S\subseteq F\) with \(|S|\ge2\), with \(E\) the translate of \(S\) to the origin; over every legal mark of \(E\) whose period \(q\) divides \(N_F-N_E\) with \(N_D=(N_F-N_E)/q+1\ge2\); over the heights \eqref{eq:private}, required to agree for all \(w'\); and over every connected \(D\) with those heights, generated by \Cref{lem:heights}.  It keeps the triples with \(D\circ_\omega E=F\).
+
+\emph{Search B} runs over \(q=2,\ldots,\lfloor N_F/2\rfloor\), with \(w=N_F\bmod q\) and \(N_D=\lfloor N_F/q\rfloor\).  It requires the two differences in \eqref{eq:private} to be independent of \(w'\); forms \(E\) from the cells of \(F\) on the contents \([0,q-1]\) and the cells on \([N_F-q,N_F-1]\), the latter translated so that content \(N_F-q\) falls on content \(w\) with the least row of \(F\) there; requires the two pieces to agree on the contents \([w,q-1]\) and \(E\) to be a connected skew diagram; and runs over the legal marks of \(E\) of period \(q\).  In cases (a) and (b) it takes the outer of \Cref{cor:outer}.  In cases (c) and (d) it first requires every copy \(E+s_0+tv\pm ke\), \(0\le k<h_D(t)\), to lie in \(F\), where \(s_0\) places \(E\) on its lowest band, and then runs over every connected \(D\) with the heights \eqref{eq:private}.  It keeps the triples with \(D\circ_\omega E=F\).
+
+The \emph{forward generation} with bound \(n\) runs over every connected \(E\) with \(2\le|E|\le(2n-1)/3\), every legal mark of \(E\), of period \(q\) and width \(w\), and every connected \(D\) with \(2\le|D|\le(n-w)/q\).  It keeps each composition \(D\circ_\omega E\) that is a connected skew diagram of at most \(n\) cells, as a chart of that diagram.
+\end{definition}
+
+The mark predicates implement Hypotheses I--IV literally.  A pair of nonempty copies \(W_-,W_+\) satisfying (I)--(III) always has a defined attachment case: a west and a south neighbor in \(W_-\) of the southwesternmost cell \(o\) of \(O\) would put \(o\) in the skew diagram \(W_-\), and by (III) the connected skew diagram \(W_-\cup O\) has no cell other than its southwesternmost one without a west or south neighbor, so \(o\) has one in \(W_-\); likewise at the top.  Hypothesis~IV is decided on the amalgamation \(\bigcup_{k=0}^{7}(E+kv)\) of eight copies: since \(w<q\), the content window of a copy \(W_s=W_-+sv\) of \(W\) meets only the copies \(E+(s-1)v\) and \(E+sv\), so the sets \(\widehat W\) of \(W_1,\ldots,W_7\) and \(\widehat O\) of the copies \(O+kv\), \(2\le k\le5\), coincide with those of the infinite amalgamation, and the condition is invariant under translation by \(v\).
+
+\begin{theorem}\label{thm:searches}
+Each search returns exactly the proper charts of \(F\).  The forward generation with bound \(n\) returns exactly the proper charts of every connected diagram of at most \(n\) cells.
+\end{theorem}
+
+\begin{proof}
+Both searches keep only literal compositions with legal marks, connected factors and \(|D|,|E|\ge2\).  Conversely, let \(F=D\circ_\omega E\) be a proper chart.  The copy of \(d_0\) is a connected skew subdiagram of \(F\) and a translate of \(E\), so search S meets \(E\); the mark is legal, its period divides \(N_F-N_E\) by \Cref{lem:copies}(iii), and \eqref{eq:private} holds with the true heights of \(D\), so \(D\) is generated by \Cref{lem:heights} and the chart is kept.  For search B, \Cref{lem:copies}(iii) fixes \(w\) and \(N_D\) from \(q\).  The differences in \eqref{eq:private} are independent of \(w'\) by \Cref{cor:outer}.  By \Cref{lem:bands}(i), the cells on the contents \([0,q-1]\) are the copy of \(d_0\) there, and the cells on \([N_F-q,N_F-1]\) are the copy of \(d_1\), which is the copy of \(d_0\) translated by a vector of content \((N_D-1)q\).  Since \(N_E=q+w<2q\), the two content ranges \([0,q-1]\) and \([w,q+w-1]\) of \(E\) cover it and overlap in \([w,q-1]\), and the translation is the one matching the runs on content \(w\).  So search B reconstructs \(E\) with its position in \(F\).  In cases (a) and (b) \Cref{cor:outer} gives \(D\).  In cases (c) and (d) the copies listed are, by \Cref{lem:copies}(ii), the actual copies of \(D\circ_\omega E\), so they lie in \(F\), and \(D\) has the heights \eqref{eq:private}.  The forward generation keeps only proper charts, and a proper chart of a diagram of at most \(n\) cells has \(|E|\le(2n-1)/3\) by \Cref{lem:inner-size} and \(|D|\le(n-w)/q\) by \Cref{lem:size}, so it is generated.
+\end{proof}
+
+On every connected profile of \(2\) to \(20\) cells the two searches and the forward generation return the same charts.
+
+\section{Keys and necessity}\label{sec:keys}
+
+For a chart of period \(q\), \Cref{lem:copies}(iii) gives the cost \((N_W,N_E)=(N_F\bmod q,\,q+N_F\bmod q)\), so the minimal factorizations of \cite[Def.~5.5]{McNamara2009Classification} are the proper charts of least cost, determined by their periods.
+
+\begin{definition}\label{def:key}
+The \emph{key} of a proper chart \(F=D\circ_\omega E\) is the pair consisting of \(\omega\) up to rotation and the polynomial \(s_D\in\Lam\).  Write \(K(F)\) for the set of keys of the minimal charts of \(F\).
+\end{definition}
+
+The rotation of a chart is a chart of \(F^*\) \cite[Lem.~3.19(ii)]{McNamara2009Classification}, with the same cost and key, so \(K(F^*)=K(F)\).  The key does not identify the ordinary gauge: when an inner carries two ordinary marks of one width whose displacements differ by \(e\), formula \eqref{eq:offsets} gives \(D\circ_{\omega_a}E=\operatorname{AT}(D)\circ_{\omega_b}E\) with \(\operatorname{AT}(i,j)=(-j,-i)\) \cite{Shields2026Gluing}, and the two charts have the same cost, so both keys lie in \(K(F)\).  Reading every case-(b) chart through its case-(a) partner, with \(s_D\) replaced by \(s_{D^{\mathsf t}}\), leaves every member of a nonrotation class of at most 35 cells with a single key; so the key of any one minimal chart is well defined there.
+
+\begin{proposition}\label{prop:induction}
+Let \(n\ge1\).  Suppose that \(K(X)\cap K(Y)\ne\varnothing\) for every connected \(X\) with at most \(n\) cells and every \(Y\in[X]\setminus\{X,X^*\}\).  Then the necessity direction of \Cref{conj:mvw} holds for every connected diagram with at most \(n\) cells.
+\end{proposition}
+
+\begin{proof}
+Induct on \(|X|\).  Let \(Y\in[X]\).  If \(Y\in\{X,X^*\}\), the one-factor presentations \(E_1=X\) and \(E_1'=Y\) suffice.  Otherwise choose a common key: charts \(X=D_X\circ_\omega E\) and \(Y=D_Y\circ_{\omega'}E'\) with \(\omega'\in\{\omega,\omega^*\}\) and \(s_{D_X}=s_{D_Y}\).  The outers are connected, Schur-equal and smaller than \(X\), so by induction \(D_X\) and \(D_Y\) are iterated compositions of common factors, each kept or rotated with its marks.  Appending \(\omega\) and \(\omega'\) gives the presentation required for \(X\) and \(Y\).
+\end{proof}
+
+\section{The computation and the proof of the main theorem}\label{sec:results}
+
+\Cref{tab:census} is the output of the census.  Every count \(a_N\) produced by the enumeration equals the value of \eqref{eq:dp}, and the self-rotational counts equal an independent count of palindromic profiles.
+
+\begin{table}[ht]
+\centering
+\footnotesize
+\begin{tabular}{rrrrrrrrrrrr}
+\toprule
+\(N\) & classes & members & charts & \multicolumn{4}{c}{members with \(k\) charts} & largest & \multicolumn{3}{c}{charts by case} \\
+ & & & & \(k=1\) & \(2\) & \(3\) & \(4\) & \(|D|\) & (a) & (b) & (c) \(=\) (d)\\
+\midrule
+8 & 1 & 4 & 4 & 4 & 0 & 0 & 0 & 3 & 0 & 0 & 2 \\
+9 & 1 & 4 & 4 & 4 & 0 & 0 & 0 & 3 & 4 & 0 & 0 \\
+10 & 1 & 4 & 4 & 4 & 0 & 0 & 0 & 4 & 0 & 0 & 2 \\
+11 & 3 & 12 & 12 & 12 & 0 & 0 & 0 & 4 & 0 & 0 & 6 \\
+12 & 7 & 28 & 28 & 28 & 0 & 0 & 0 & 5 & 16 & 0 & 6 \\
+13 & 5 & 20 & 24 & 16 & 4 & 0 & 0 & 5 & 0 & 0 & 12 \\
+14 & 12 & 48 & 52 & 44 & 4 & 0 & 0 & 6 & 4 & 4 & 22 \\
+15 & 29 & 116 & 128 & 104 & 12 & 0 & 0 & 6 & 68 & 4 & 28 \\
+16 & 21 & 84 & 96 & 72 & 12 & 0 & 0 & 8 & 24 & 0 & 36 \\
+17 & 34 & 136 & 144 & 128 & 8 & 0 & 0 & 7 & 8 & 8 & 64 \\
+18 & 81 & 324 & 372 & 276 & 48 & 0 & 0 & 9 & 168 & 16 & 94 \\
+19 & 64 & 256 & 276 & 236 & 20 & 0 & 0 & 8 & 16 & 16 & 122 \\
+20 & 132 & 532 & 580 & 484 & 48 & 0 & 0 & 10 & 184 & 48 & 174 \\
+21 & 212 & 848 & 900 & 796 & 52 & 0 & 0 & 9 & 408 & 24 & 234 \\
+22 & 190 & 760 & 840 & 680 & 80 & 0 & 0 & 11 & 76 & 52 & 356 \\
+23 & 311 & 1{,}248 & 1{,}352 & 1{,}152 & 88 & 8 & 0 & 10 & 140 & 140 & 536 \\
+24 & 639 & 2{,}560 & 2{,}820 & 2{,}300 & 260 & 0 & 0 & 12 & 1{,}344 & 104 & 686 \\
+25 & 519 & 2{,}080 & 2{,}196 & 1{,}968 & 108 & 4 & 0 & 11 & 360 & 120 & 858 \\
+26 & 808 & 3{,}236 & 3{,}448 & 3{,}036 & 188 & 12 & 0 & 13 & 368 & 328 & 1{,}376 \\
+27 & 1{,}531 & 6{,}132 & 6{,}464 & 5{,}816 & 300 & 16 & 0 & 12 & 2{,}488 & 328 & 1{,}824 \\
+28 & 1{,}557 & 6{,}236 & 6{,}616 & 5{,}876 & 340 & 20 & 0 & 14 & 1{,}248 & 384 & 2{,}492 \\
+29 & 2{,}101 & 8{,}416 & 8{,}784 & 8{,}064 & 336 & 16 & 0 & 13 & 848 & 768 & 3{,}584 \\
+30 & 3{,}989 & 15{,}976 & 17{,}040 & 14{,}956 & 976 & 44 & 0 & 15 & 6{,}948 & 692 & 4{,}700 \\
+31 & 3{,}611 & 14{,}452 & 14{,}872 & 14{,}044 & 396 & 12 & 0 & 14 & 940 & 936 & 6{,}498 \\
+32 & 6{,}141 & 24{,}604 & 25{,}576 & 23{,}696 & 844 & 64 & 0 & 16 & 3{,}936 & 2{,}008 & 9{,}816 \\
+33 & 9{,}742 & 38{,}988 & 40{,}128 & 37{,}900 & 1{,}040 & 44 & 4 & 15 & 13{,}356 & 1{,}604 & 12{,}584 \\
+34 & 9{,}944 & 39{,}796 & 41{,}016 & 38{,}608 & 1{,}156 & 32 & 0 & 17 & 2{,}876 & 2{,}348 & 17{,}896 \\
+35 & 15{,}451 & 61{,}840 & 63{,}428 & 60{,}312 & 1{,}468 & 60 & 0 & 16 & 7{,}256 & 4{,}404 & 25{,}884 \\
+\midrule
+all & 57{,}137 & 228{,}740 & 237{,}204 & 220{,}616 & 7{,}788 & 332 & 4 & 17 & 43{,}084 & 14{,}336 & 89{,}892 \\
+\bottomrule
+\end{tabular}
+\par\bigskip
+\caption{Proper charts of the members of the nonrotation classes.  No member has more than four charts.  Cases (c) and (d) occur equally often, since rotation exchanges them; the last column gives the number of each.}
+\label{tab:roots}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\footnotesize
+\begin{tabular}{rrrrrrrrrrrr}
+\toprule
+\(N\) & classes & \multicolumn{10}{c}{classes by period of the minimal charts} \\
+ & & \(2\) & \(3\) & \(4\) & \(5\) & \(6\) & \(7\) & \(8\) & \(9\) & \(10\) & \(11\)\\
+\midrule
+8 & 1 & 1 &  &  &  &  &  &  &  &  &  \\
+9 & 1 &  & 1 &  &  &  &  &  &  &  &  \\
+10 & 1 & 1 &  &  &  &  &  &  &  &  &  \\
+11 & 3 & 1 & 2 &  &  &  &  &  &  &  &  \\
+12 & 7 & 3 & 2 & 2 &  &  &  &  &  &  &  \\
+13 & 5 & 3 & 2 &  &  &  &  &  &  &  &  \\
+14 & 12 & 5 & 2 & 5 &  &  &  &  &  &  &  \\
+15 & 29 & 7 & 14 & 2 & 6 &  &  &  &  &  &  \\
+16 & 21 & 13 & 2 & 6 &  &  &  &  &  &  &  \\
+17 & 34 & 16 & 6 &  & 12 &  &  &  &  &  &  \\
+18 & 81 & 25 & 25 & 18 & 5 & 8 &  &  &  &  &  \\
+19 & 64 & 33 & 14 & 5 & 12 &  &  &  &  &  &  \\
+20 & 132 & 51 & 10 & 26 & 20 & 25 &  &  &  &  &  \\
+21 & 212 & 68 & 68 &  & 32 & 16 & 28 &  &  &  &  \\
+22 & 190 & 107 & 20 & 31 & 14 & 18 &  &  &  &  &  \\
+23 & 311 & 141 & 32 & 23 & 43 & 16 & 56 &  &  &  &  \\
+24 & 639 & 219 & 158 & 68 & 27 & 81 & 38 & 48 &  &  &  \\
+25 & 519 & 288 & 54 & 21 & 84 & 16 & 56 &  &  &  &  \\
+26 & 808 & 430 & 42 & 37 & 32 & 89 & 64 & 114 &  &  &  \\
+27 & 1{,}531 & 588 & 373 & 48 & 98 & 52 & 162 & 96 & 114 &  &  \\
+28 & 1{,}557 & 870 & 108 & 163 & 74 & 144 & 100 & 98 &  &  &  \\
+29 & 2{,}101 & 1{,}199 & 128 & 63 & 136 & 11 & 180 & 146 & 238 &  &  \\
+30 & 3{,}989 & 1{,}777 & 789 & 112 & 138 & 221 & 170 & 346 & 220 & 216 &  \\
+31 & 3{,}611 & 2{,}430 & 243 & 79 & 139 & 56 & 298 & 128 & 238 &  &  \\
+32 & 6{,}141 & 3{,}513 & 288 & 359 & 112 & 294 & 221 & 495 & 376 & 483 &  \\
+33 & 9{,}742 & 4{,}919 & 1{,}823 & 132 & 264 & 132 & 350 & 324 & 790 & 512 & 496 \\
+34 & 9{,}944 & 7{,}082 & 446 & 213 & 244 & 308 & 252 & 643 & 312 & 444 &  \\
+35 & 15{,}451 & 9{,}951 & 638 & 243 & 446 & 183 & 732 & 414 & 984 & 868 & 992 \\
+\midrule
+all & 57{,}137 & 33{,}741 & 5{,}290 & 1{,}656 & 1{,}938 & 1{,}670 & 2{,}707 & 2{,}852 & 3{,}272 & 2{,}523 & 1{,}488 \\
+\bottomrule
+\end{tabular}
+\par\bigskip
+\caption{The common period of the minimal charts in each nonrotation class.}
+\label{tab:periods}
+\end{table}
+
+Both searches of \Cref{def:searches} were run on each of the \(228{,}740\) members of the nonrotation classes and returned the same nonempty chart sets as the forward generation.  \Cref{tab:roots} summarizes the charts.
+
+For every member, the costs of all charts were computed, the minimal ones selected, and their keys formed with \(s_D\) computed exactly.  In each of the \(57{,}137\) classes all members have the same set \(K(F)\), and all minimal charts of all members have one period (\Cref{tab:periods}).  Using all charts instead of the minimal ones would split \(1{,}117\) classes, so minimality is needed.
+
+Each factor reversal of each chart of each member was composed and found in the member's class.  For each member, every irreducible factorization was enumerated by choosing, at each step, any minimal chart of the current outer, until an outer without proper charts was reached.  In every class of four members each irreducible factorization has exactly two factors \(E_i\ne E_i^*\), and in every class of eight members exactly three; reversing the factors of any one irreducible factorization in all possible ways produces exactly the class.  For every connected diagram of at most \(35\) cells with a proper chart, of which there are \(9{,}165{,}308\), the same enumeration over the charts of the forward generation gives \(|[F]|=2^r\) for every irreducible factorization, with \(|[F]|\) read from \Cref{tab:census}, and the reversals of the factors of each irreducible factorization produce exactly \([F]\).
+
+\begin{proof}[Proof of \Cref{thm:main}]
+Part (i) is \Cref{thm:census} and \Cref{tab:census}.  Part (ii) is \Cref{thm:searches} and the search results above.  For part (iii), a class with two or more rotation orbits was checked directly, and a rotation class \(\{F,F^*\}\) satisfies \(K(F^*)=K(F)\).  For part (iv), the hypothesis of \Cref{prop:induction} with \(n=35\) is part (iii) together with part (ii), which makes every member of a nonrotation class rooted; this gives necessity, and sufficiency is \cite[Thm.~5.3.10]{OlsonHarris2024HopfApplications}.  The class-size clause is the enumeration over the forward generation above, which is complete by \Cref{thm:searches}.  A diagram without proper charts lies in a rotation class by part (ii), and its only irreducible factorization is \(E_1=E\), with \(r=1\) exactly when \(E\ne E^*\).
+\end{proof}
+
+\begin{remark}\label{rem:sixteen}
+No class through \(35\) cells has more than eight members, but larger classes exist.  Compose each member of the eight-member class at \(20\) cells with the ribbon \((1,2;0)\) under a mark of period \(2\) in case~(c), and with its rotation under the rotated mark.  The sixteen results are distinct diagrams of \(48\) cells, and they are Schur-equal by \cite[Thm.~5.3.10]{OlsonHarris2024HopfApplications}, so their class has at least sixteen members.
+\end{remark}
+
+\section{Concluding remarks}\label{sec:remarks}
+
+Within its range, the computation confirms the two statements a general induction on outer prefixes needs: terminal rigidity and rooted-key invariance.  The nonrotation classes are rare: \(57{,}137\) of the \(1{,}379{,}126{,}771{,}922\) classes through \(35\) cells, each generated by reversing the factors of any one irreducible factorization of any of its members.
+
+\section*{Declarations}
+{\footnotesize
+
+\noindent\textbf{Funding.} This research received no external funding.
+
+\smallskip
+\noindent\textbf{Competing interests.} The author has no relevant interests to disclose.
+
+\smallskip
+\noindent\textbf{Data availability.} The class lists and tables are generated by the scripts referenced below; no other data were used.
+
+\smallskip
+\noindent\textbf{Computational verification.} The proof of \Cref{thm:main} rests on the computation described in \Cref{sec:census,sec:results}, carried out by the algorithms proved in \Cref{thm:census,thm:searches}.  These theorems and their inputs are formalized in Lean~4.  The census algorithm implementation, the Lean source, and scripts used for verification and figures are available at \url{https://github.com/johnnyshields/papers}.
+
+\smallskip
+\noindent\textbf{Generative AI use.} During the preparation of this work, the author used OpenAI's ChatGPT (GPT-6 Astra, GPT-5.6 Sol) and Anthropic's Claude (Opus 5.5, Opus 5) to assist with mathematical research, manuscript drafting, and the development of auxiliary verification code.  After using these tools, the author reviewed and edited as needed.  The author takes full responsibility for the content of the work.\par}
+
+\begin{thebibliography}{99}
+
+\bibitem{Barekat2009CoincidencesCorrigendum}
+F.~Barekat, V.~Reiner and S.~van Willigenburg,
+\emph{Corrigendum to ``Coincidences among skew Schur functions''},
+Adv. Math. \textbf{220} (2009), no.~5, 1655--1656,
+DOI: \href{https://doi.org/10.1016/j.aim.2008.10.010}{10.1016/\allowbreak j.aim.2008.10.010}.
+
+\bibitem{Billera2006DecomposableCompositions}
+L.~J. Billera, H.~Thomas and S.~van Willigenburg,
+\emph{Decomposable compositions, symmetric quasisymmetric functions and equality of ribbon Schur functions},
+Adv. Math. \textbf{204} (2006), no.~1, 204--240,
+DOI: \href{https://doi.org/10.1016/j.aim.2005.05.014}{10.1016/\allowbreak j.aim.2005.05.014}.
+
+\bibitem{McNamara2009Classification}
+P.~R.~W. McNamara and S.~van Willigenburg,
+\emph{Towards a combinatorial classification of skew Schur functions},
+Trans. Amer. Math. Soc. \textbf{361} (2009), no.~8, 4437--4470,
+DOI: \href{https://doi.org/10.1090/S0002-9947-09-04683-2}{10.1090/\allowbreak S0002-9947-09-04683-2}.
+
+\bibitem{OlsonHarris2024HopfApplications}
+N.~Olson-Harris,
+\emph{Some applications of combinatorial Hopf algebras to integro-differential equations and symmetric function identities},
+Ph.D.\ thesis, University of Waterloo, 2024.
+\url{https://hdl.handle.net/10012/20710}.
+
+\bibitem{Reiner2007Coincidences}
+V.~Reiner, K.~M. Shaw and S.~van Willigenburg,
+\emph{Coincidences among skew Schur functions},
+Adv. Math. \textbf{216} (2007), no.~1, 118--152,
+DOI: \href{https://doi.org/10.1016/j.aim.2007.05.006}{10.1016/\allowbreak j.aim.2007.05.006}.
+
+\bibitem{Shields2026Gluing}
+J.~Shields,
+\emph{Local common-factor gluing and reduction of composition necessity for skew Schur functions},
+preprint, 2026,
+DOI: \href{https://doi.org/10.5281/zenodo.23133702}{10.5281/\allowbreak zenodo.23133702}.
+\end{thebibliography}
+
+\end{document}

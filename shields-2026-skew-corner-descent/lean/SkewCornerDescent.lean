@@ -1,0 +1,122 @@
+/-
+Copyright (c) 2026 John Shields. All rights reserved.
+Released under the MIT license as described in the file LICENSE.txt.
+Authors: John Shields
+-/
+import SkewCornerDescent.Matrix.Witnesses
+import SkewCornerDescent.Matrix.CornerCofactor
+import SkewCornerDescent.Matrix.GeneratorSpan
+import SkewCornerDescent.AxiomCheck
+import SkewGluing.Composition
+import SkewGluing.Interior
+import SkewGluing.Irreducibility
+import SkewGluing.CellComponents
+import SkewGluing.DiagramSchur
+import SkewGluing.InteriorProfile
+import SkewGluing.FieldIrreducibility
+import SkewGluing.CofactorAssembly
+import SkewGluing.CapSchur
+import SkewGluing.PeriodicHat
+import SkewGluing.EmptyRowErosion
+import SkewGluing.RowNormalization
+import SkewGluing.TransportCoefficient
+import SkewGluing.TransportFactors
+import SkewCornerDescent.SourceMinimal
+import SkewCornerDescent.LinePeriod
+import SkewCornerDescent.ChartCofactor
+import SkewCornerDescent.PeriodDescent
+import SkewCornerDescent.BetaReduction
+import SkewGluing.SchurAssociates
+import SkewGluing.ChartBridge
+import SkewCornerDescent.PeriodTests
+import SkewCornerDescent.Matrix.PrimeOrder
+import SkewGluing.ComponentOrders
+import SkewGluing.ProfileDiscrete
+import SkewGluing.AlphaRowCandidate
+import SkewCornerDescent.Matrix.SelectedCoordinate
+import SkewCornerDescent.Matrix.SharedCore
+import SkewCornerDescent.CyclicWindows
+import SkewCornerDescent.Matrix.ComponentPivot
+import SkewCornerDescent.Matrix.ComponentRegularity
+import SkewCornerDescent.BinaryTransitions
+import SkewCornerDescent.SinglePositive
+import SkewCornerDescent.Matrix.ComponentIntervals
+import SkewCornerDescent.Matrix.Hessenberg
+import SkewCornerDescent.PhaseInventory
+import SkewCornerDescent.Matrix.ComponentDenominators
+import SkewCornerDescent.Matrix.ProtectedGenerator
+import SkewCornerDescent.Matrix.OrderedResponses
+import SkewCornerDescent.Matrix.ResidueProtectedGenerator
+import SkewCornerDescent.Matrix.ComponentRegularMatrices
+import SkewCornerDescent.Matrix.ComponentElimination
+import SkewCornerDescent.Matrix.OriginalHorizontalSplice
+import SkewCornerDescent.Matrix.OriginalPolynomialResponses
+import SkewCornerDescent.Matrix.OriginalEndpointProfiles
+import SkewCornerDescent.Matrix.OriginalClosureResponse
+import SkewCornerDescent.CyclicPeriodDetector
+import SkewCornerDescent.CyclicAxioms
+import SkewCornerDescent.NonVAxioms
+import SkewCornerDescent.TransportSignAxioms
+import SkewCornerDescent.ExposureAxioms
+import SkewCornerDescent.Matrix.ActualExposureAxioms
+import SkewCornerDescent.SimultaneousExposureAxioms
+import SkewCornerDescent.FullWindowAxioms
+import SkewCornerDescent.LiteralWindowAxioms
+import SkewCornerDescent.ComponentWindowAxioms
+import SkewCornerDescent.ResiduePrimeAxioms
+import SkewCornerDescent.RationalLabelAxioms
+import SkewCornerDescent.TriangularDivisorAxioms
+import SkewCornerDescent.PlaneClassificationAxioms
+import SkewCornerDescent.ResidueFactorAxioms
+import SkewCornerDescent.ResidueClassAxioms
+import SkewCornerDescent.SingleWindowClassAxioms
+import SkewCornerDescent.RationalFactorAxioms
+import SkewCornerDescent.UnitNormalizationAxioms
+import SkewCornerDescent.OriginalInventoryAxioms
+import SkewCornerDescent.OriginalCancellationAxioms
+import SkewCornerDescent.OriginalCapAxioms
+import SkewCornerDescent.OriginalDefectAxioms
+import SkewCornerDescent.OriginalWindowAxioms
+import SkewCornerDescent.OrdinaryMapAxioms
+import SkewCornerDescent.ExposedPoleAxioms
+import SkewCornerDescent.ExposedRootAxioms
+import SkewCornerDescent.ExposedValuationAxioms
+import SkewCornerDescent.ExposedForwardAxioms
+import SkewCornerDescent.InactivePeelingAxioms
+import SkewCornerDescent.OriginalDetectorAxioms
+import SkewCornerDescent.ReplacementExposureAxioms
+import SkewCornerDescent.FiniteExposureAxioms
+import SkewCornerDescent.ActualSourceDualAxioms
+import SkewCornerDescent.RealDualAxioms
+import SkewCornerDescent.OriginalNormalAxioms
+import SkewCornerDescent.OriginalJetAxioms
+import SkewCornerDescent.NormalCoefficientAxioms
+import SkewCornerDescent.OriginalNormalCostAxioms
+import SkewCornerDescent.NormalInterfaceAxioms
+import SkewCornerDescent.RecoveryAxioms
+import SkewCornerDescent.PositiveSupportAxioms
+import SkewCornerDescent.ClosureProjectionAxioms
+import SkewCornerDescent.RowPencilAxioms
+import SkewCornerDescent.UniversalOmegaAxioms
+import SkewCornerDescent.SquareWordAxioms
+import SkewCornerDescent.ProfileJetAxioms
+import SkewCornerDescent.EndpointLocalityAxioms
+import SkewCornerDescent.NormalCoreAxioms
+import SkewCornerDescent.EndComparisonAxioms
+import SkewCornerDescent.NormalCalculationAxioms
+import SkewCornerDescent.IntervalActivityAxioms
+import SkewCornerDescent.IntervalJetAxioms
+import SkewCornerDescent.OrdinaryGaugeClassification
+/-!
+# Corner descent and repeated inners in skew Schur compositions
+
+Exports the generator-span product law, canonical connected-diagram Jacobi--Trudi bridge,
+component Schur products, integral primitivity, connected-diagram irreducibility over every field,
+summed interior-component bounds, geometric deleted-minor shape, marked-composition span,
+and the integral corner expansion.  The actual interior-component product equals the top
+cofactor independently of a translated profile presentation.  Complete-block determinant
+elimination, original-generator derivatives, actual dual inventories, many-active and signed
+short detection, and protected unit-component recovery are exported. The actual one-active
+normal interface, intrinsic order bounds, literal-root alternative, and response-prime
+valuations are supplied by their construction modules.
+-/

@@ -124,19 +124,19 @@ def rowWord (hmu : mu ≤ lam) (T : BoundedSkewSSYT lam mu b) (i : ℕ) :
      row_weak' := by
        intro i' j₁ j₂ hj hcell
        obtain ⟨hi', hj₂⟩ := mem_rect.mp hcell
-       rw [if_pos ⟨by omega, by omega⟩, if_pos ⟨by omega, hj₂⟩]
+       rw [ite_eq_left ⟨by omega, by omega⟩, ite_eq_left ⟨by omega, hj₂⟩]
        exact skewRow_mono hmu T i hj.le hj₂
      col_strict' := by
        intro i₁ i₂ j' hi hcell
        exact absurd (mem_rect.mp hcell).1 (by omega)
      zeros' := by
        intro i' j' hcell
-       exact if_neg fun hc => hcell (mem_rect.mpr ⟨by omega, hc.2⟩) },
+       exact ite_eq_right fun hc => hcell (mem_rect.mpr ⟨by omega, hc.2⟩) },
    by
      intro i' j' hcell
      obtain ⟨hi', hj'⟩ := mem_rect.mp hcell
      change (if i' = 0 ∧ j' < lam.rowLen i - mu.rowLen i then T.1 i (mu.rowLen i + j') else 0) < b
-     rw [if_pos ⟨by omega, hj'⟩]
+     rw [ite_eq_left ⟨by omega, hj'⟩]
      exact T.lt_of_mem_cells (mem_skewCells_row hmu i hj')⟩
 
 theorem rowWord_apply (hmu : mu ≤ lam) (T : BoundedSkewSSYT lam mu b) (i : ℕ) {j : ℕ}
@@ -144,7 +144,7 @@ theorem rowWord_apply (hmu : mu ≤ lam) (T : BoundedSkewSSYT lam mu b) (i : ℕ
     rowWord hmu T i 0 j = T.1 i (mu.rowLen i + j) := by
   change (if (0 : ℕ) = 0 ∧ j < lam.rowLen i - mu.rowLen i then T.1 i (mu.rowLen i + j) else 0)
       = T.1 i (mu.rowLen i + j)
-  rw [if_pos ⟨rfl, hj⟩]
+  rw [ite_eq_left ⟨rfl, hj⟩]
 
 theorem rowWord_mono (hmu : mu ≤ lam) (T : BoundedSkewSSYT lam mu b) (i : ℕ) {j₁ j₂ : ℕ}
     (hj : j₁ ≤ j₂) (hj₂ : j₂ < lam.rowLen i - mu.rowLen i) :
@@ -240,16 +240,16 @@ def eColWord (a : ℕ) (lam nu : YoungDiagram)
      col_strict' := by
        intro j₁ j₂ i' hj hcell
        obtain ⟨hj₂, hi'⟩ := mem_rect.mp hcell
-       rw [if_pos ⟨by omega, by omega⟩, if_pos ⟨by omega, hj₂⟩]
+       rw [ite_eq_left ⟨by omega, by omega⟩, ite_eq_left ⟨by omega, hj₂⟩]
        exact eSkewCol_strict T i hj hj₂
      zeros' := by
        intro j i' hcell
-       exact if_neg fun hc => hcell (mem_rect.mpr ⟨hc.2, by omega⟩) },
+       exact ite_eq_right fun hc => hcell (mem_rect.mpr ⟨hc.2, by omega⟩) },
    by
      intro j i' hcell
      obtain ⟨hj, hi'⟩ := mem_rect.mp hcell
      change (if i' = 0 ∧ j < lam.rowLen i - nu.rowLen i then T.1 (nu.rowLen i + j) i else 0) < a
-     rw [if_pos ⟨by omega, hj⟩]
+     rw [ite_eq_left ⟨by omega, hj⟩]
      exact T.lt_of_mem_cells (mem_skewCells_transpose_col i hj)⟩
 
 theorem eColWord_apply (T : BoundedSkewSSYT lam.transpose nu.transpose a) (i : ℕ) {j : ℕ}
@@ -257,7 +257,7 @@ theorem eColWord_apply (T : BoundedSkewSSYT lam.transpose nu.transpose a) (i : �
     eColWord a lam nu T i j 0 = T.1 (nu.rowLen i + j) i := by
   change (if (0 : ℕ) = 0 ∧ j < lam.rowLen i - nu.rowLen i then T.1 (nu.rowLen i + j) i else 0)
       = T.1 (nu.rowLen i + j) i
-  rw [if_pos ⟨rfl, hj⟩]
+  rw [ite_eq_left ⟨rfl, hj⟩]
 
 theorem eColWord_mono (T : BoundedSkewSSYT lam.transpose nu.transpose a) (i : ℕ) {j₁ j₂ : ℕ}
     (hj : j₁ ≤ j₂) (hj₂ : j₂ < lam.rowLen i - nu.rowLen i) :

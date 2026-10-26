@@ -1,0 +1,21 @@
+Title
+-----
+Local common-factor gluing and reduction of composition necessity for skew Schur functions
+
+Keywords
+--------
+skew Schur function
+skew-equivalence
+common final factor
+marked composition
+common-factor graph
+McNamara–van Willigenburg conjecture
+periodic boundary word
+
+Abstract (Plain)
+----------------
+We prove that every component of the common-factor graph of a skew Schur class is a clique. Each rooted component is the fiber of any source-minimal chart at any of its vertices. Edges encode proper marked compositions with a common final factor and Schur-equal outer factors, under Hypotheses I–IV of McNamara and van Willigenburg. Comparing equal, divisible, and nondividing periods gives fiber equality, containment, and a legal common-divisor factor or a line-inner alternative. The source-minimal marked inner and outer Schur function then determine a component key, with the ordinary gauge acting on both entries. After rotation is identified, global connectivity is equivalent to rigidity at diagrams without proper charts and equality of keys for rooted mates. An induction on outer prefixes makes these two unresolved assertions equivalent to composition-and-reversal necessity; local gluing alone proves neither.
+
+Abstract (Rich Text)
+--------------------
+We prove that every component of the common-factor graph of a skew Schur class is a clique. Each rooted component is the fiber of any source-minimal chart at any of its vertices. Edges encode proper marked compositions with a common final factor and Schur-equal outer factors, under Hypotheses I–IV of McNamara and van Willigenburg. Comparing equal, divisible, and nondividing periods gives fiber equality, containment, and a legal common-divisor factor or a line-inner alternative. The source-minimal marked inner and outer Schur function then determine a component key, with the ordinary gauge acting on both entries. After rotation is identified, global connectivity is equivalent to rigidity at diagrams without proper charts and equality of keys for rooted mates. An induction on outer prefixes makes these two unresolved assertions equivalent to composition-and-reversal necessity; local gluing alone proves neither.

@@ -29,9 +29,10 @@ bidiagonal Toeplitz matrix of a single root factor `1 + x t` with `x ≥ 0`.
 `MinorsNonneg` is stated on strictly monotone selections `Fin r → Fin n` rather than on `Finset`s,
 matching `Shields.det_mul_eq_sum_increasing`, which is what makes closure under products immediate.
 
-Mathlib has no total-positivity class at the pinned revision. One is in flight as
-`feat(LinearAlgebra): totally nonnegative matrices` (#41813), defining the class and a basic API but
-none of the results here. `Matrix.TotallyUnimodular` is a different notion -- entries in `{0, ±1}`.
+Mathlib has no total-positivity class at revision `8e45b05`. `feat(LinearAlgebra): totally
+nonnegative matrices` (#41813) has since merged upstream, adding `Matrix.IsTotallyNonneg` and a
+basic API at `Mathlib/LinearAlgebra/Matrix/Determinant/TotallyNonneg`, but none of the results
+here. `Matrix.TotallyUnimodular` is a different notion -- entries in `{0, ±1}`.
 
 ## Tags
 
@@ -59,7 +60,7 @@ theorem rootFactor_apply_of_ne {x : R} {n : ℕ} {i j : Fin n} (h1 : (i : ℕ) �
 /-- The determinant of the full bidiagonal block is `1`: it is lower triangular
 with unit diagonal. -/
 theorem det_rootFactor (x : R) (n : ℕ) : (rootFactor x n).det = 1 := by
-  rw [Matrix.det_of_lowerTriangular]
+  rw [Matrix.det_of_isLowerTriangular]
   · simp
   · intro i j hij
     have hij' : (i : ℕ) < (j : ℕ) := hij
@@ -143,7 +144,7 @@ is the unique increasing enumeration of that image. -/
 theorem strictMono_eq_of_image_eq {k n : ℕ} {f g : Fin k → Fin n}
     (hf : StrictMono f) (hg : StrictMono g)
     (h : Finset.univ.image f = Finset.univ.image g) : f = g := by
-  refine Set.range_injOn_strictMono hf hg ?_
+  refine Set.range_injOn_strictMono_of_wellFoundedLT hf hg ?_
   have hcoe : ∀ p : Fin k → Fin n, Set.range p = ↑(Finset.univ.image p) := fun p => by
     simp [Finset.coe_image, Set.image_univ]
   rw [hcoe f, hcoe g, h]
@@ -174,8 +175,8 @@ theorem det_submatrix_one {n k : ℕ} {f g : Fin k → Fin n}
     ((1 : Matrix (Fin n) (Fin n) R).submatrix f g).det = if f = g then 1 else 0 := by
   by_cases h : f = g
   · subst h
-    rw [Matrix.submatrix_one f hf.injective, Matrix.det_one, if_pos rfl]
-  · rw [if_neg h]
+    rw [Matrix.submatrix_one f hf.injective, Matrix.det_one, ite_eq_left rfl]
+  · rw [ite_eq_right h]
     obtain ⟨a, ha⟩ := exists_forall_ne_of_strictMono_ne hf hg h
     exact Matrix.det_eq_zero_of_row_eq_zero a fun b => by simp [ha b]
 

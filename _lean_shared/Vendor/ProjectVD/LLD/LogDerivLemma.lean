@@ -25,8 +25,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
-import Vendor.MathlibPR.PR42000.PosLogEstimates
-import Vendor.MathlibPR.PR41529.BorelGrowth
+import Mathlib.Analysis.SpecialFunctions.Log.PosLog
+import Mathlib.MeasureTheory.Function.BorelGrowth
 import Vendor.ProjectVD.LLD.LogDerivTwoRadius
 
 /-!
@@ -137,9 +137,7 @@ theorem ValueDistribution.isBigO_proximity_logDeriv {f : ℂ → ℂ} (hf : Mero
     have h₂ : characteristic f ⊤ (r + (S r)⁻¹) ≤ 2 * S r :=
       le_trans (le_max_right _ _) hBor
     calc log⁺ (characteristic f ⊤ (r + (S r)⁻¹))
-        -- Adapted to the pinned revision: the pinned `posLog_le_posLog` takes `0 ≤ x`, where
-        -- upstream (Mathlib PR #42000) takes `-1 ≤ x`; the wrapper is dropped.
-        ≤ log⁺ (2 * S r) := posLog_le_posLog (hT₀R) h₂
+        ≤ log⁺ (2 * S r) := posLog_le_posLog (neg_one_lt_zero.le.trans hT₀R) h₂
       _ ≤ log⁺ 2 + log⁺ (S r) := posLog_mul
       _ ≤ Real.log 2 + log⁺ (characteristic f ⊤ r) := by
           rw [posLog_eq_log (by norm_num), eS]
@@ -229,9 +227,7 @@ theorem ValueDistribution.isBigO_proximity_logDeriv_of_isBigO_rpow {f : ℂ → 
   have e₃ : log⁺ (characteristic f ⊤ (2 * r))
       ≤ log⁺ |C| + p * (Real.log 2 + Real.log r) := by
     calc log⁺ (characteristic f ⊤ (2 * r))
-        -- Adapted to the pinned revision: the pinned `posLog_le_posLog` takes `0 ≤ x`, where
-        -- upstream (Mathlib PR #42000) takes `-1 ≤ x`; the wrapper is dropped.
-        ≤ log⁺ (|C| * (2 * r) ^ p) := posLog_le_posLog (hT₀) hT2r
+        ≤ log⁺ (|C| * (2 * r) ^ p) := posLog_le_posLog (neg_one_lt_zero.le.trans hT₀) hT2r
       _ ≤ log⁺ |C| + log⁺ ((2 * r) ^ p) := posLog_mul
       _ = log⁺ |C| + p * log⁺ (2 * r) := by
             rw [posLog_rpow (neg_one_lt_zero.le.trans (by positivity)) hp₀]

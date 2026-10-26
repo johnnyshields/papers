@@ -4,6 +4,7 @@ Released under the MIT license as described in the file LICENSE.txt.
 Authors: Johnny Shields
 -/
 import Shields.MeasureTheory.CompactIntervalMoments
+import Shields.MeasureTheory.Measure.Empirical
 import Mathlib.MeasureTheory.Integral.Prod
 import Mathlib.MeasureTheory.Measure.Lebesgue.Complex
 import Mathlib.MeasureTheory.Measure.Portmanteau
@@ -43,6 +44,9 @@ replaces every uniform-integrability argument.
   `p ↦ log ‖· - p‖` from the real line into `L¹(Q)` for compact `Q`, concretely as convergence
   of the `L¹(Q)` distance and as continuity of a map into the Bochner space.
 * `Shields.isCompact_image_logKernelL1`: the image of `[0,1]` is compact.
+* `Shields.logPotential_empirical`: for a monic product over a finite family of real roots,
+  the normalized logarithm of its modulus is the logarithmic potential of the empirical
+  measure of those roots.
 * `Shields.tendsto_logPotential_of_tendsto`, `Shields.tendsto_integral_abs_logPotential_sub`: if
   probability measures on `[0,1]` converge weakly, their logarithmic potentials converge
   pointwise off the real axis and in `L¹(Q)` for every compact `Q ⊆ ℂ`, including the part of
@@ -52,7 +56,8 @@ replaces every uniform-integrability argument.
 
 ## Tags
 
-logarithmic potential, subharmonic, weak convergence, Riesz measure, Bochner space
+logarithmic potential, subharmonic, weak convergence, Riesz measure, Bochner space,
+empirical measure
 -/
 
 open MeasureTheory Filter Topology Set
@@ -432,6 +437,16 @@ theorem tendsto_integral_abs_logPotential_sub {ι : Type*} {L : Filter ι}
       tendsto_iff_dist_tendsto_zero.mp (tendsto_logPotential_of_tendsto hμs hμ hlim hzim)
 
 
+/-! ## The potential of an empirical measure -/
+
+/-- For a monic product over a finite family of real roots, the normalized logarithm of its
+modulus is exactly the logarithmic potential of the empirical measure of those roots, away from
+them. -/
+theorem logPotential_empirical {m : ℕ} (ρ : Fin m → ℝ) {z : ℂ} (hz : ∀ j, z ≠ (ρ j : ℂ)) :
+    logPotential (empirical ρ) z = (m : ℝ)⁻¹ * Real.log ‖∏ j, (z - (ρ j : ℂ))‖ := by
+  rw [logPotential, integral_empirical ρ _, norm_prod,
+    Real.log_prod fun j _ => norm_ne_zero_iff.mpr (sub_ne_zero.mpr (hz j))]
+
 /-! ### Axiom footprint -/
 
 /-- info: 'Shields.logPotential' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -441,5 +456,9 @@ theorem tendsto_integral_abs_logPotential_sub {ι : Type*} {L : Filter ι}
 /-- info: 'Shields.logKernelL1' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms logKernelL1
+
+/-- info: 'Shields.logPotential_empirical' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms logPotential_empirical
 
 end Shields

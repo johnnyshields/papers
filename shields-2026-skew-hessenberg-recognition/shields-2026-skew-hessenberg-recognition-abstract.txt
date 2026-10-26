@@ -1,0 +1,21 @@
+Title
+-----
+Polynomial recognition and inflation of Hessenberg skew Schur classes
+
+Keywords
+--------
+skew Schur function
+skew-equivalence
+power rigidity
+Hessenberg determinant
+cut-set reconstruction
+profile inflation
+ribbon Schur function
+
+Abstract (Plain)
+----------------
+We recover the connected skew Schur class of every ribbon composite over a zero-free inner whose near-concatenation powers are rigid up to rotation.  For three zero-free blocks with a rigid total merger, the connected class has one, two, or four members; commuting blocks admit legal factor-reversal presentations without individual block rigidity.  Recognition of constant-gap Hessenberg powers is complete through five rows.  At a balanced Hessenberg inflation threshold, the lowest component determines the outer cuts up to reflection, and every inner with at most four rows admits a complete orientation argument.  Consequently positive constant-gap Hessenberg inners through four rows have complete inflation classes and legal generation at every nonnegative time.  Further criteria apply at unbounded height and beyond Hessenberg matrices.  Higher-row orientation and general three-block legal generation remain open.
+
+Abstract (Rich Text)
+--------------------
+We recover the connected skew Schur class of every ribbon composite over a zero-free inner whose near-concatenation powers are rigid up to rotation.  For three zero-free blocks with a rigid total merger, the connected class has one, two, or four members; commuting blocks admit legal factor-reversal presentations without individual block rigidity.  Recognition of constant-gap Hessenberg powers is complete through five rows.  At a balanced Hessenberg inflation threshold, the lowest component determines the outer cuts up to reflection, and every inner with at most four rows admits a complete orientation argument.  Consequently positive constant-gap Hessenberg inners through four rows have complete inflation classes and legal generation at every nonnegative time.  Further criteria apply at unbounded height and beyond Hessenberg matrices.  Higher-row orientation and general three-block legal generation remain open.

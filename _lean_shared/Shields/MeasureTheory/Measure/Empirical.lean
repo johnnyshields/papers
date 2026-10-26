@@ -6,7 +6,6 @@ Authors: Johnny Shields
 import Mathlib.MeasureTheory.Integral.Bochner.SumMeasure
 import Mathlib.MeasureTheory.Measure.Portmanteau
 import Mathlib.MeasureTheory.Measure.Support
-import Shields.Analysis.Complex.LogPotential
 
 /-!
 # The empirical measure of a finite family of points
@@ -33,8 +32,6 @@ consequences of the portmanteau theorem.
 * `Shields.integral_empirical` — integration is the normalized sum, with no hypothesis on `f`
 * `Shields.map_empirical`, `Shields.empirical_comp_perm`
 * `Shields.empirical_compl_eq_zero`, `Shields.support_empirical_subset`
-* `Shields.logPotential_empirical` — the normalized log-modulus of a monic product is the
-  logarithmic potential of the empirical measure of its roots
 * `Shields.measure_eq_one_of_tendsto`, `Shields.support_subset_of_tendsto`
 
 ## Implementation notes
@@ -50,7 +47,7 @@ Support statements then take the containing set as a hypothesis.
 
 ## Tags
 
-empirical measure, counting measure, portmanteau, weak convergence, logarithmic potential
+empirical measure, counting measure, portmanteau, weak convergence
 -/
 
 open MeasureTheory Filter Topology Set
@@ -103,14 +100,6 @@ theorem empirical_comp_perm {m : ℕ} (ρ : Fin m → ℝ) (σ : Equiv.Perm (Fin
   simp only [empirical]
   congr 1
   exact Fintype.sum_equiv σ _ _ fun j => rfl
-
-/-- For a monic product over a finite family of real roots, the normalized logarithm of its
-modulus is exactly the logarithmic potential of the empirical measure of those roots, away from
-them. -/
-theorem logPotential_empirical {m : ℕ} (ρ : Fin m → ℝ) {z : ℂ} (hz : ∀ j, z ≠ (ρ j : ℂ)) :
-    logPotential (empirical ρ) z = (m : ℝ)⁻¹ * Real.log ‖∏ j, (z - (ρ j : ℂ))‖ := by
-  rw [logPotential, integral_empirical ρ _, norm_prod,
-    Real.log_prod fun j _ => norm_ne_zero_iff.mpr (sub_ne_zero.mpr (hz j))]
 
 /-- An empirical measure charges nothing outside a measurable set containing its roots. -/
 theorem empirical_compl_eq_zero {m : ℕ} {ρ : Fin m → ℝ} {s : Set ℝ} (hs : MeasurableSet s)
@@ -169,10 +158,6 @@ theorem support_subset_of_tendsto {ι : Type*} {L : Filter ι} [L.NeBot]
 /-- info: 'Shields.support_empirical_subset' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms support_empirical_subset
-
-/-- info: 'Shields.logPotential_empirical' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs in
-#print axioms logPotential_empirical
 
 /-- info: 'Shields.support_subset_of_tendsto' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in

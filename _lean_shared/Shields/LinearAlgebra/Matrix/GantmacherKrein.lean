@@ -4,7 +4,7 @@ Released under the MIT license as described in the file LICENSE.txt.
 Authors: Johnny Shields
 -/
 import Shields.LinearAlgebra.Matrix.Charpoly.Basic
-import Shields.LinearAlgebra.Matrix.GenVandermonde
+import Shields.LinearAlgebra.Matrix.PerronFrobenius
 import Shields.Order.Monotone.TopSelection
 
 /-!
@@ -34,7 +34,7 @@ about matrices, and is `Shields.Order.Monotone.TopSelection`.
 ## References
 
 * [F. R. Gantmacher and M. G. Krein, *Oscillation Matrices and Kernels and Small Vibrations of
-  Mechanical Systems*][GantmacherKrein2002]
+  Mechanical Systems*][Gantmacher2002Oscillation]
 
 ## Tags
 

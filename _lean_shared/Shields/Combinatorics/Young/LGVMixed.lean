@@ -184,9 +184,9 @@ theorem mixedWeight_eq_pathWeight (b a : ℕ) (β α : ℕ → R) (q : ℕ → �
   rw [mixedWeight, pathWeight, pathWeight, pathWeight, Finset.prod_range_add]
   refine congrArg₂ (· * ·) (Finset.prod_congr rfl fun i hi => ?_)
     (Finset.prod_congr rfl fun i _ => ?_)
-  · rw [mixedVar, if_pos (Finset.mem_range.mp hi)]
+  · rw [mixedVar, ite_eq_left (Finset.mem_range.mp hi)]
   · have h1 : shiftAt b q (i + 1) = q (b + i + 1) := rfl
-    rw [mixedVar, if_neg (by omega), Nat.add_sub_cancel_left, h1]
+    rw [mixedVar, ite_eq_right (by omega), Nat.add_sub_cancel_left, h1]
     rfl
 
 end Weight
@@ -610,8 +610,8 @@ theorem mEdgeSum_eq_jtCoeff (b a : ℕ) (β α : ℕ → R) (s e : ℕ) :
   rw [jtCoeff]
   rcases le_or_gt s e with h | h
   · obtain ⟨k, rfl⟩ : ∃ k, e = s + k := ⟨e - s, by omega⟩
-    rw [if_pos h, mEdgeSum, mixedPaths_sum_eq_superHom, Nat.add_sub_cancel_left]
-  · rw [if_neg (by omega), mEdgeSum, mixedPaths_eq_empty_of_lt h, Finset.sum_empty]
+    rw [ite_eq_left h, mEdgeSum, mixedPaths_sum_eq_superHom, Nat.add_sub_cancel_left]
+  · rw [ite_eq_right (by omega), mEdgeSum, mixedPaths_eq_empty_of_lt h, Finset.sum_empty]
 
 /-- **The determinant as a signed sum over mixed families.**  The Leibniz
 expansion of the `m × m` Jacobi--Trudi matrix over `ρ_D` is the signed weight of
@@ -761,7 +761,7 @@ theorem lowPath_mem : lowPath ∈ mixedPaths 1 1 0 1 := by
     fun i h1 h2 => ?_⟩
   · rw [hval, hval]
     split_ifs <;> omega
-  · rw [hval, if_neg (by omega)]
+  · rw [hval, ite_eq_right (by omega)]
   · have hi : i = 1 := by omega
     subst hi
     change lowPath 2 ≤ lowPath 1 + 1

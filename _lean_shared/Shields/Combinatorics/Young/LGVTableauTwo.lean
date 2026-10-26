@@ -169,15 +169,15 @@ noncomputable def skewEntry (b : ℕ) (lam mu : YoungDiagram) (x : (ℕ → ℕ)
 
 theorem skewEntry_zero (x : (ℕ → ℕ) × (ℕ → ℕ)) {j : ℕ} (h : (0, j) ∈ skewCells lam mu) :
     skewEntry b lam mu x 0 j = pathLetter b (mu.rowLen 0 + 1) x.1 (j - mu.rowLen 0) := by
-  rw [skewEntry, if_pos h, if_pos rfl]
+  rw [skewEntry, ite_eq_left h, ite_eq_left rfl]
 
 theorem skewEntry_one (x : (ℕ → ℕ) × (ℕ → ℕ)) {j : ℕ} (h : (1, j) ∈ skewCells lam mu) :
     skewEntry b lam mu x 1 j = pathLetter b (mu.rowLen 1) x.2 (j - mu.rowLen 1) := by
-  rw [skewEntry, if_pos h, if_neg (by omega : ¬ (1 : ℕ) = 0)]
+  rw [skewEntry, ite_eq_left h, ite_eq_right (by omega : ¬ (1 : ℕ) = 0)]
 
 theorem skewEntry_of_notMem (x : (ℕ → ℕ) × (ℕ → ℕ)) {i j : ℕ}
     (h : (i, j) ∉ skewCells lam mu) : skewEntry b lam mu x i j = 0 :=
-  if_neg h
+  ite_eq_right h
 
 /-- **The column of a two-row filling increases strictly.**  The letter the
 right-hand path writes at `j + 1` is below the one the left-hand path writes at

@@ -26,8 +26,12 @@ Authors: Stefan Kebekus
 -/
 import Vendor.ProjectVD.Field.CodiscreteWithinEventually
 import Vendor.ProjectVD.LLD.LogDerivLemma
-import Vendor.ProjectVD.MathlibSubmitted.SeparationLemma
-import Vendor.MathlibPR.PR42227.CodiscreteAPI
+import Mathlib.Analysis.Complex.ValueDistribution.SecondMainTheorem
+import Mathlib.Topology.DiscreteSubset
+import Mathlib.Topology.Algebra.Polynomial
+import Mathlib.Analysis.Calculus.FDeriv.Congr
+import Mathlib.Analysis.Calculus.Deriv.Basic
+import Mathlib.Algebra.Polynomial.Roots
 
 /-!
 # Proximity Estimates for the Second Main Theorem — SMT work package D
@@ -207,9 +211,7 @@ theorem isBigO_proximity_logDeriv_shift {f : ℂ → ℂ} (hf : Meromorphic f) (
     linarith [h₁.1]
   have h₂ : log⁺ (characteristic (f · - a) ⊤ r)
       ≤ Real.log 2 + log⁺ (characteristic f ⊤ r) + log⁺ (log⁺ ‖a‖ + Real.log 2) :=
-    -- Adapted to the pinned revision: the pinned `posLog_le_posLog` takes `0 ≤ x`, where
-    -- upstream (Mathlib PR #42000) takes `-1 ≤ x`; the wrapper is dropped.
-    (posLog_le_posLog ((characteristic_nonneg hr1)) hT).trans posLog_add
+    (posLog_le_posLog (neg_one_lt_zero.le.trans (characteristic_nonneg hr1)) hT).trans posLog_add
   -- Assemble, absorbing the additive constant into the `log r` term.
   have hM : 0 ≤ Real.log 2 + log⁺ (log⁺ ‖a‖ + Real.log 2) :=
     add_nonneg (log_nonneg one_le_two) posLog_nonneg

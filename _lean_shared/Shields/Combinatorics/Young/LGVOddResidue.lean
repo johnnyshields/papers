@@ -375,7 +375,7 @@ theorem abscissaRowLen_anti {m : ℕ} {c : Fin m → ℕ} (h : AbscissaDrop c) :
     ∀ k₁ k₂, k₁ ≤ k₂ → k₂ < m → abscissaRowLen m c k₂ ≤ abscissaRowLen m c k₁ := by
   intro k₁ k₂ h12 h2
   have hgap := add_sub_le_of_abscissaDrop h k₂ k₁ h12 h2
-  rw [abscissaRowLen, abscissaRowLen, dif_pos h2, dif_pos (show k₁ < m by omega)]
+  rw [abscissaRowLen, abscissaRowLen, dite_eq_left h2, dite_eq_left (show k₁ < m by omega)]
   omega
 
 theorem rowLen_shapeOfAbscissae {m : ℕ} {c : Fin m → ℕ} (h : AbscissaDrop c) (i : ℕ) :
@@ -383,7 +383,7 @@ theorem rowLen_shapeOfAbscissae {m : ℕ} {c : Fin m → ℕ} (h : AbscissaDrop 
   rw [shapeOfAbscissae, rowLen_mRows (abscissaRowLen_anti h)]
   split_ifs with hi
   · rfl
-  · rw [abscissaRowLen, dif_neg hi]
+  · rw [abscissaRowLen, dite_eq_right hi]
 
 /-- **The abscissae are the shape.**  `jtSource` of the shape a vector names is
 the vector itself, provided every abscissa clears its own offset. -/
@@ -392,7 +392,7 @@ theorem jtSource_shapeOfAbscissae {m : ℕ} {c : Fin m → ℕ} (h : AbscissaDro
     jtSource (shapeOfAbscissae m c) m w = c w := by
   have hw := w.isLt
   have hc := hoff w
-  rw [jtSource, rowLen_shapeOfAbscissae h, abscissaRowLen, dif_pos hw]
+  rw [jtSource, rowLen_shapeOfAbscissae h, abscissaRowLen, dite_eq_left hw]
   have : (⟨(w : ℕ), hw⟩ : Fin m) = w := rfl
   rw [this]
   omega
@@ -407,13 +407,13 @@ theorem shapeOfAbscissae_jtSource {m : ℕ} {nu : YoungDiagram}
     intro k₁ k₂ h12 h2
     have h1 : k₁ < m := by omega
     have hle : nu.rowLen k₂ ≤ nu.rowLen k₁ := nu.rowLen_anti k₁ k₂ h12
-    rw [abscissaRowLen, abscissaRowLen, dif_pos h2, dif_pos h1]
+    rw [abscissaRowLen, abscissaRowLen, dite_eq_left h2, dite_eq_left h1]
     change nu.rowLen k₂ + (m - 1 - k₂) - (m - 1 - k₂) ≤ nu.rowLen k₁ + (m - 1 - k₁) - (m - 1 - k₁)
     omega
   refine eq_of_rowLen fun i => ?_
   rw [shapeOfAbscissae, rowLen_mRows hanti]
   split_ifs with hi
-  · rw [abscissaRowLen, dif_pos hi]
+  · rw [abscissaRowLen, dite_eq_left hi]
     change nu.rowLen i + (m - 1 - i) - (m - 1 - i) = nu.rowLen i
     omega
   · exact (hnu i (by omega)).symm
@@ -444,18 +444,18 @@ theorem shapeOfAbscissae_mem_youngIcc {m : ℕ} {c : Fin m → ℕ} {lam mu : Yo
   refine ⟨le_iff_rowLen.mpr fun i => ?_, le_iff_rowLen.mpr fun i => ?_⟩ <;>
     rw [hrl i, abscissaRowLen]
   · by_cases hi : i < m
-    · rw [dif_pos hi]
+    · rw [dite_eq_left hi]
       have := hbox i hi
       omega
-    · rw [dif_neg hi]
+    · rw [dite_eq_right hi]
       have : lam.rowLen i = 0 := hrow i (by omega)
       have := rowLen_mono hmu i
       omega
   · by_cases hi : i < m
-    · rw [dif_pos hi]
+    · rw [dite_eq_left hi]
       have := hbox i hi
       omega
-    · rw [dif_neg hi]
+    · rw [dite_eq_right hi]
       omega
 
 variable {R : Type*} [CommRing R]
@@ -588,7 +588,7 @@ theorem sum_nonIntersecting_mixed_eq_superSkewSchur {b a m : ℕ} {β α : ℕ �
     jtSource_shapeOfAbscissae hdrop hoff
   have hsink : ∀ w : Fin m, jtSink (shapeOfAbscissae m c) m w = c w := fun w => hsrc w
   have hnurow : ∀ i, m ≤ i → (shapeOfAbscissae m c).rowLen i = 0 := fun i hi => by
-    rw [rowLen_shapeOfAbscissae hdrop i, abscissaRowLen, dif_neg (by omega)]
+    rw [rowLen_shapeOfAbscissae hdrop i, abscissaRowLen, dite_eq_right (by omega)]
   obtain ⟨hmunu, hnulam⟩ := shapeOfAbscissae_mem_youngIcc hdrop hmu hrow hbox
   have heven := hH (shapeOfAbscissae m c) mu hmunu hnurow
   have hodd := hE lam (shapeOfAbscissae m c) hnulam hrow

@@ -22,8 +22,7 @@ public import Vendor.HexRealRootsMathlib.TwoCircleSector
 * **Revision** `30c19a426b3c195e067f2c15d5a6ca06eff7df66`
 * **Licence** Apache 2.0, granted in the repository's `LICENSE`.
 * **Upstream pins** Lean `v4.33.0-rc1`, Mathlib at tag `v4.33.0-rc1`.  Ours are Lean
-  `v4.33.0-rc1` and Mathlib `8e45b0548034eeda677a64e1e0b07837390835b6`, a slightly later
-  master.
+  `v4.34.1` and Mathlib `v4.34.1` (`d13f23b723b8a846827a245b89c10fc7d3f11612`).
 
 ## What we took, and why
 
@@ -83,8 +82,9 @@ assumed analytic input, so it is unlike our own `AtomicPickData` or `PacketFamil
 binder of every vendored theorem is an ordinary mathematical hypothesis or a Mathlib
 typeclass.
 
-**Builds clean at our pin**, unadapted and with zero warnings.  No proof was touched and no
-import was rewritten: the file's only import is `Mathlib`.
+**Builds clean at our pin**, with no errors; the only warnings are five from Mathlib's
+`linter.style.show`.  No proof was adapted and no import was rewritten: the file's only import
+is `Mathlib`.  The deprecated `if_pos`/`if_neg` were renamed to `ite_eq_left`/`ite_eq_right`.
 
 **Namespace hygiene.**  All 32 declarations are under `Polynomial` (28) and
 `Polynomial.PosLogConcave` (4); none is at the root.  Nothing clashes with Mathlib — the

@@ -24,12 +24,11 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import Vendor.MathlibPR.PR41225.CircleIntegrableFunProp
+import Mathlib.MeasureTheory.Integral.CircleIntegral
 import Mathlib.Analysis.Convex.Integral
 import Mathlib.Analysis.SpecialFunctions.Integrability.Basic
 import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 import Mathlib.Analysis.SpecialFunctions.Log.PosLog
-import Vendor.MathlibPR.PR42000.PosLogEstimates
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Bounds
 import Mathlib.MeasureTheory.Integral.CircleAverage
 

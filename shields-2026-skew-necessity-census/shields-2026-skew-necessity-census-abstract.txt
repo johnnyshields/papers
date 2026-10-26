@@ -1,0 +1,21 @@
+Title
+-----
+Skew Schur classes through thirty-five cells and composition necessity
+
+Keywords
+--------
+skew Schur function
+skew-equivalence
+McNamara–van Willigenburg conjecture
+computer-assisted proof
+marked composition
+exact enumeration
+Jacobi–Trudi determinant
+
+Abstract (Plain)
+----------------
+We prove, with computer assistance, the necessity direction of the composition-and-reversal conjecture of McNamara and van Willigenburg for every connected skew diagram with at most 35 cells. A census of all 2,758,249,011,429 such diagrams finds exactly 57,137 Schur classes with more than one rotation orbit; modular evaluation only separates classes, and every nonrotation class is confirmed by exact polynomial equality. Two searches for marked compositions, both proved complete, show that every member of these classes is a proper composition satisfying Hypotheses I–IV, and that Schur-equal members share the keys of their minimal compositions. Induction on outer prefixes then gives a common factorization for every Schur-equal pair; sufficiency is the theorem of Olson and Harris. Thus the conjecture holds through 35 cells, and each nonrotation class has size 2^r, where r is the number of nonsymmetric irreducible factors. Our finite result leaves open the conjecture beyond this range.
+
+Abstract (Rich Text)
+--------------------
+We prove, with computer assistance, the necessity direction of the composition-and-reversal conjecture of McNamara and van Willigenburg for every connected skew diagram with at most 35 cells. A census of all 2,758,249,011,429 such diagrams finds exactly 57,137 Schur classes with more than one rotation orbit; modular evaluation only separates classes, and every nonrotation class is confirmed by exact polynomial equality. Two searches for marked compositions, both proved complete, show that every member of these classes is a proper composition satisfying Hypotheses I–IV, and that Schur-equal members share the keys of their minimal compositions. Induction on outer prefixes then gives a common factorization for every Schur-equal pair; sufficiency is the theorem of Olson and Harris. Thus the conjecture holds through 35 cells, and each nonrotation class has size \(2^r\), where \(r\) is the number of nonsymmetric irreducible factors. Our finite result leaves open the conjecture beyond this range.

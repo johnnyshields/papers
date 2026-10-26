@@ -1,0 +1,21 @@
+Title
+-----
+Class recovery and inflation for repeated-block skew diagrams
+
+Keywords
+--------
+skew Schur function
+skew-equivalence
+repeated-block diagram
+ribbon Schur function
+profile inflation
+marked composition
+class recovery
+
+Abstract (Plain)
+----------------
+We recover complete connected skew Schur classes for two specified repeated-block constructions. For separated constant-gap inners repeated at least twice, every mate comes from the outer ribbon class and global rotation, without assuming that the inner diagram is rigid. Symmetric inners remove the otherwise separate orientation copy. For an asymmetric two-row inner, adding the same nonnegative integer to every row length and adjacent overlap-minus-one preserves the full class below the shorter row's excess over the inner gap. At that exact threshold, and at every larger inflation, only rotation remains. Inflation is injective: the images of formerly equal diagrams split into distinct classes. Total contraction proves the first inverse; a lowest-degree boundary determinant with private column residues proves the second. Both theorems quantify over arbitrary connected mates.
+
+Abstract (Rich Text)
+--------------------
+We recover complete connected skew Schur classes for two specified repeated-block constructions. For separated constant-gap inners repeated at least twice, every mate comes from the outer ribbon class and global rotation, without assuming that the inner diagram is rigid. Symmetric inners remove the otherwise separate orientation copy. For an asymmetric two-row inner, adding the same nonnegative integer to every row length and adjacent overlap-minus-one preserves the full class below the shorter row's excess over the inner gap. At that exact threshold, and at every larger inflation, only rotation remains. Inflation is injective: the images of formerly equal diagrams split into distinct classes. Total contraction proves the first inverse; a lowest-degree boundary determinant with private column residues proves the second. Both theorems quantify over arbitrary connected mates.

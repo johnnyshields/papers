@@ -136,9 +136,10 @@ theorem tendstoUniformlyOn_div {ι α : Type*} {φ : Filter ι} {S : Set α}
 /-- A factorization of `f` over its zeros in the closed disc `‖t‖ ≤ r`: `k` roots inside the
 open disc and an entire cofactor with no zero on the closed disc.
 
-Mathlib has no local factorization theorem, so this is carried as data.  The roots are listed with
-multiplicity — `root` is a function on `Fin k`, not an injection — so the structure describes a
-packet with internal collisions as readily as a separated one. -/
+Mathlib factors a zero out only locally -- the `g` of `AnalyticAt.analyticOrderAt_eq_natCast` is
+analytic at one point -- and has no factorization over a disc, so this is carried as data.  The
+roots are listed with multiplicity — `root` is a function on `Fin k`, not an injection — so the
+structure describes a packet with internal collisions as readily as a separated one. -/
 structure PacketFactor (f : ℂ → ℂ) (r : ℝ) (k : ℕ) where
   /-- The contour radius is positive. -/
   radius_pos : 0 < r

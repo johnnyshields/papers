@@ -240,11 +240,11 @@ theorem eSkewEntryM_of_mem {G : Fin m → ℕ → ℕ} {i j : ℕ}
     (h : (j, i) ∈ skewCells lam.transpose nu.transpose) :
     eSkewEntryM a m lam nu G j i
       = pathLetter a (rowSource nu m i) (famPath G i) (j - nu.rowLen i) :=
-  if_pos h
+  ite_eq_left h
 
 theorem eSkewEntryM_of_notMem {G : Fin m → ℕ → ℕ} {i j : ℕ}
     (h : (j, i) ∉ skewCells lam.transpose nu.transpose) : eSkewEntryM a m lam nu G j i = 0 :=
-  if_neg h
+  ite_eq_right h
 
 /-- **The row of the reading increases weakly.**  The letter column `i₁` writes
 at abscissa `j + (m-1-i₁)` is at most the one column `i₂` writes at

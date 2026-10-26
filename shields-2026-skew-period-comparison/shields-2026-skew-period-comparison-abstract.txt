@@ -1,0 +1,21 @@
+Title
+-----
+Primitive period comparison and smaller skew Schur probes
+
+Keywords
+--------
+skew Schur function
+composition period
+marked composition
+ribbon Schur function
+skew-equivalence
+Jacobi–Trudi determinant
+polynomial factorization
+
+Abstract (Plain)
+----------------
+We exclude primitive least-common-multiple comparisons of source-minimal nonline inners in empty-mark skew Schur compositions with ribbon outers. The proof treats both orientations and recovers literal motifs in the parallel case, without lower-area induction. Under strict discrete-interior entry hypotheses, we also construct equal proper ribbon-outer probes of strictly smaller area from positive ordinary comparison charts with a nonribbon source inner and uniform ribbon candidate inventory. Complete signed high identities give primitive polynomial rays, and a two-window calculation recognizes actual ribbons after the required endpoint words have been identified. Lower rooted transport converts these constructions into a conditional period obstruction. Residue grading, Hall tails, and an imported original-determinant theorem give further scoped comparison consequences. Chart restoration and equal-period marked-key recognition remain separate obligations.
+
+Abstract (Rich Text)
+--------------------
+We exclude primitive least-common-multiple comparisons of source-minimal nonline inners in empty-mark skew Schur compositions with ribbon outers. The proof treats both orientations and recovers literal motifs in the parallel case, without lower-area induction. Under strict discrete-interior entry hypotheses, we also construct equal proper ribbon-outer probes of strictly smaller area from positive ordinary comparison charts with a nonribbon source inner and uniform ribbon candidate inventory. Complete signed high identities give primitive polynomial rays, and a two-window calculation recognizes actual ribbons after the required endpoint words have been identified. Lower rooted transport converts these constructions into a conditional period obstruction. Residue grading, Hall tails, and an imported original-determinant theorem give further scoped comparison consequences. Chart restoration and equal-period marked-key recognition remain separate obligations.

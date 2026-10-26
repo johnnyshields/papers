@@ -37,7 +37,7 @@ on selections to a `LinearOrder`.
 
 ## References
 
-* [A. Pinkus, *Totally Positive Matrices*][Pinkus2010], Cor. 5.5
+* [A. Pinkus, *Totally Positive Matrices*][Pinkus2010TotallyPositive], Cor. 5.5
 
 ## Tags
 
@@ -127,7 +127,7 @@ theorem det_smul_one_add_pos {A : Matrix (Fin n) (Fin n) ℝ}
     (lt_of_lt_of_le zero_lt_one (one_le_det_one_add_smul hA (inv_nonneg.mpr ht.le)))
 
 /-- **A matrix with nonnegative minors has no negative eigenvalue.**  This is the
-nonnegativity half of Cor. 5.5 of [Pinkus2010].
+nonnegativity half of Cor. 5.5 of [Pinkus2010TotallyPositive].
 
 Proved outright: it needs only that the principal minors are nonnegative, so no
 approximation argument and no Perron–Frobenius enter.  The *reality* half is the
@@ -153,7 +153,7 @@ theorem charpoly_roots_nonneg {A : Matrix (Fin n) (Fin n) ℝ}
 
 The `r`-th compound `∧^r A` has the `r × r` minors of `A` as its entries, and is
 multiplicative in `A` — which is Cauchy–Binet, already proved in `Andreief`.
-This is the object the reality half of `\cite[Cor.~5.5]{Pinkus2010}` runs
+This is the object the reality half of `\cite[Cor.~5.5]{Pinkus2010TotallyPositive}` runs
 Perron–Frobenius on.  The pinned Mathlib revision carries no compound matrix, and
 none is in flight; Cauchy–Binet itself is in flight as
 `feat(LinearAlgebra/Matrix): the Cauchy-Binet formula` (#40473). -/
@@ -281,7 +281,7 @@ theorem det_submatrix_diag_of_upperTriangular {R : Type*} [CommRing R] {k : ℕ}
   have hblock : (T.submatrix f f).BlockTriangular id := by
     intro i j hij
     exact hT _ _ (hf hij)
-  rw [Matrix.det_of_upperTriangular hblock]
+  rw [Matrix.det_of_isUpperTriangular hblock]
   rfl
 
 /-- **The compound of a triangular matrix is triangular**, in the componentwise
@@ -400,8 +400,8 @@ statement to putting `A` in triangular form — and nothing else. -/
   rw [compound_apply, det_submatrix_one (mem_increasingSelections.mp f.2)
     (mem_increasingSelections.mp g.2), Matrix.one_apply]
   by_cases h : f = g
-  · rw [if_pos (congrArg Subtype.val h), if_pos h]
-  · rw [if_neg (fun hc => h (Subtype.ext hc)), if_neg h]
+  · rw [ite_eq_left (congrArg Subtype.val h), ite_eq_left h]
+  · rw [ite_eq_right (fun hc => h (Subtype.ext hc)), ite_eq_right h]
 
 /-- The compound of a unit is a unit, with the compound of the inverse as its
 inverse — immediate from `compound_mul` and `compound_one`. -/

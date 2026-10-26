@@ -1,0 +1,1635 @@
+\documentclass[11pt,a4paper]{amsart}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{graphicx}
+\usepackage[expansion=false]{microtype}
+\usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black]{hyperref}
+\usepackage[nameinlink,capitalize]{cleveref}
+
+\hypersetup{
+  pdftitle={Local common-factor gluing and reduction of composition necessity for skew Schur functions},
+  pdfauthor={John Shields},
+  pdfkeywords={skew Schur function, skew-equivalence, common final factor, marked composition, common-factor graph, McNamara--van Willigenburg conjecture, periodic boundary word}
+}
+\pdfinfo{
+  /ORCID (https://orcid.org/0009-0004-3882-4571)
+}
+
+\numberwithin{equation}{section}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{question}[theorem]{Question}
+
+\newcommand{\Lam}{\Lambda}
+\newcommand{\Z}{\mathbb Z}
+\newcommand{\Q}{\mathbb Q}
+
+\title[Local common-factor gluing and necessity reduction]{Local common-factor gluing and reduction of composition necessity for skew Schur functions}
+\author{John Shields}
+\date{October 22, 2026}
+\thanks{Independent researcher, Ginza 2-15-2, KR Ginza II 5F, Chuo-ku, Tokyo, Japan 104-0061.\\
+\hspace*{\parindent}Corresponding author: \href{mailto:math@johnnyshields.com}{math@johnnyshields.com}.  ORCID: \href{https://orcid.org/0009-0004-3882-4571}{0009-0004-3882-4571}.\\
+\hspace*{\parindent}This work is archived at \href{https://doi.org/10.5281/zenodo.23133702}{doi:10.5281/zenodo.23133702}.}
+\subjclass[2020]{Primary 05E05; Secondary 05A17}
+\keywords{skew Schur function, skew-equivalence, common final factor, marked composition, common-factor graph, McNamara--van Willigenburg conjecture, periodic boundary word}
+
+\begin{document}
+
+\begin{abstract}
+We prove that every component of the common-factor graph of a skew Schur class is a clique.  Each rooted component is the fiber of any source-minimal chart at any of its vertices.  Edges encode proper marked compositions with a common final factor and Schur-equal outer factors, under Hypotheses I--IV of McNamara and van Willigenburg.  Comparing equal, divisible, and nondividing periods gives fiber equality, containment, and a legal common-divisor factor or a line-inner alternative.  The source-minimal marked inner and outer Schur function then determine a component key, with the ordinary gauge acting on both entries.  After rotation is identified, global connectivity is equivalent to rigidity at diagrams without proper charts and equality of keys for rooted mates.  An induction on outer prefixes makes these two unresolved assertions equivalent to composition-and-reversal necessity; local gluing alone proves neither.
+\end{abstract}
+
+\maketitle
+
+\section{Introduction}\label{sec:introduction}
+
+We prove that a chain of common-final-factor equalities can be replaced by one common-final-factor equality between its endpoints.  The factors retain their marks and attachment data, and the outer diagrams may be arbitrary Schur-equal diagrams.  In particular, the assertion is stronger than a statement about reversing only the two factors of one presentation.
+
+McNamara and van Willigenburg introduced a composition of skew diagrams that unifies several constructions of skew Schur equalities \cite[Def.~3.11]{McNamara2009Classification}.  Their necessity conjecture \cite[Conjecture~5.7]{McNamara2009Classification} asks whether every equality of connected skew Schur functions admits a common left-associated composition presentation in which corresponding factors agree up to rotation.  Rotation includes the marked overlap data.  Yeats proved outer-factor reversal for a rectangle with one corner cell removed and an ordinary marked inner with no loose end ribbons, including examples outside Hypothesis V \cite[Thm.~13 and \S5]{Yeats2017HopfSchur}.  Olson-Harris proved the forward composition and reversal statements under Hypotheses I--IV, without the additional Hypothesis V \cite[Thms.~5.3.9 and~5.3.10]{OlsonHarris2024HopfApplications}.  Those forward statements are the symmetric-function input to the present theorem.
+
+For a fixed skew Schur function, form a graph on its diagram realizations up to translation.  A \emph{chart} presents a diagram as the composition of an outer diagram with a marked inner; it is \emph{legal} when the mark satisfies Hypotheses I--IV, and \emph{proper} when both factors are connected and have at least two cells.  A diagram is \emph{rooted} if it has a proper chart, and \emph{chartless} otherwise.  Join two distinct vertices when they have proper legal charts with the same marked final factor up to transported rotation and with equal outer Schur functions.  The main result is \Cref{thm:gluing}: every connected component of the common-factor graph is a clique.  Equivalently, two incident common-factor edges force the third edge.  The hypotheses supply the two charts at their common vertex; equality of skew Schur functions alone is not used to infer either chart.
+
+A stronger component description follows from the same comparison.  Minimize first the overlap span and then the inner span, as in the minimal-factorization convention of McNamara and van Willigenburg \cite[Def.~5.5]{McNamara2009Classification}.  \Cref{thm:source-minimal-domination} shows that every such prescribed chart has the entire rooted component as its fiber.  Its marked inner and outer Schur function give a component key, after the ordinary gauge and its action on the outer function are included.
+
+A full Schur class need not be connected in the literal graph: the two three-cell hooks have no proper chart.  The appropriate global question identifies rotation mates.  \Cref{thm:connectivity-reduction,thm:necessity-reduction} reduce this corrected connectivity, and hence composition-and-reversal necessity, to terminal rigidity and agreement of the keys for already-rooted mates.  Neither assertion is proved here.  The conclusion concerns common final factors with equal outers, not simultaneous refinement of arbitrary complete composition chains.
+
+The proof in \Cref{sec:gluing} uses both diagonal boundary words.  The full coding formulas have an inverse: a supplied legal marked inner and its native word values reconstruct the outer and the actual composition.  Equal periods give identical fibers, and divisible periods give reassociation, with the antitransposition gauge, for every connected outer.  At nondividing periods, finite period graphs and the singleton boundary diagonals supply the native residue conditions on an actual inner.  The ordinary, empty, and mixed residue folds then construct a legal common-divisor factor, and aligned composition lifts it to the original parent.  The two words, their true end values, and the full marks are retained throughout; periodic heights alone do not supply a chart.  \Cref{sec:minimal-fibers} gives the component description and examples delimiting its hypotheses.  \Cref{sec:necessity-reduction} proves the reduction by induction on the actual outer prefixes.
+
+\section{Local common-factor gluing}\label{sec:gluing}
+
+Diagrams are finite skew Young diagrams in English notation, identified up to translation.  A connected diagram is nonempty and edge-connected.  Write \(D^*\) for rotation through \(180\) degrees, \(D^{\mathsf t}\) for transpose, and \(s_D\in\Lam=\Q[h_1,h_2,\ldots]\) for its skew Schur function.  The content of a cell \((i,j)\) is \(c(i,j)=j-i\), and \(N_D\) is the number of occupied diagonals.  A southwest normalization puts these contents at \(0,\ldots,N_D-1\) and the southwest cell at \((0,0)\).  Put \(e=(1,1)\).
+
+\subsection{Charts and the common-factor graph}
+
+The composition convention is that of McNamara and van Willigenburg \cite[Def.~3.11]{McNamara2009Classification}.  A marked inner consists of a connected diagram \(E\), two congruent connected end subdiagrams \(W_-,W_+=W_-+v\), and their attachment case.  The lower copy contains the southwest cell of \(E\), and the upper copy contains its northeast cell.  Put \(O=E\setminus(W_-\cup W_+)\), \(w=N_W\), and \(q=N_E-w=c(v)\).  The four cases, in the order lower attachment, upper attachment, are
+{\abovedisplayskip=14pt plus3pt minus4pt \belowdisplayskip=14pt plus3pt minus4pt
+ \abovedisplayshortskip=14pt plus3pt minus4pt \belowdisplayshortskip=14pt plus3pt minus4pt
+\begin{equation*}
+ \begin{array}{c|cccc}
+ \text{case}&\mathrm{(a)}&\mathrm{(b)}&\mathrm{(c)}&\mathrm{(d)}\\ \hline
+ \text{attachments}&(H,H)&(V,V)&(H,V)&(V,H).
+ \end{array}
+\end{equation*}}
+Here a horizontal lower attachment joins the southwest cell of \(O\) to its western neighbor in \(W_-\); a vertical lower attachment uses its southern neighbor.  The upper attachments use the eastern or northern neighbor of the northeast cell of \(O\).  Cases (a) and (b) are called ordinary; cases (c) and (d) are called mixed.
+
+The mark is \emph{legal} when it satisfies the following four conditions.
+\begin{enumerate}
+\item[(I)] No strictly larger skew diagram containing \(W_-\), on the same content diagonals, has translates at both ends of \(E\).
+\item[(II)] There is an occupied diagonal between the two copies that meets neither copy; equivalently, \(0\le w<q\).
+\item[(III)] Removing either copy leaves a connected skew diagram.
+\item[(IV)] In \(\boldsymbol E=\bigcup_{k\in\Z}(E+kv)\), no copy of the hatted middle is adjacent to a copy of the hatted mark.  For a middle copy \(O_1\) and a marked copy \(W_1\), these sets are
+\begin{equation*}
+ \begin{split}
+ \widehat O_1&=\{x\in O_1:x+e\in O_1\},\\
+ \widehat W_1&=\{x\in\boldsymbol E:x+e\in W_1\}
+             \cup\{x\in W_1:x+e\in\boldsymbol E\}.
+ \end{split}
+\end{equation*}
+Adjacency means sharing an edge.  This is the bi-infinite form of Hypothesis IV; it agrees with the two-copy properness condition of \cite[Rem.~5.3.6]{OlsonHarris2024HopfApplications}.
+\end{enumerate}
+For \(w=0\), the two marks are the west edge of the southwest cell and the east edge of the northeast cell.  This is the horizontal empty-overlap convention.  The corresponding displacement is \(v_H=\operatorname{ne}(E)-\operatorname{sw}(E)+(0,1)\).  A vertical edge reading, when used in a change of coordinates, has displacement \(v_V=v_H-e\).  It will always be converted back to the horizontal reading; by \eqref{eq:gluing-gauge} the conversion antitransposes the outer.  Hypothesis V of McNamara and van Willigenburg \cite[Hyp.~3.27]{McNamara2009Classification}, which requires, for an ordinary mark, that at least one copy of \(W\) have just one cell adjacent to \(O\), is not imposed.
+
+Write \(\omega\) for the entire marked inner, not just its underlying diagram, and write \(D\circ_\omega E\) for its composition with \(D\).  Such a presentation of a diagram is a \emph{chart} of it.  \Cref{fig:chart} draws one.  A \emph{proper chart} \(F=D\circ_\omega E\) has connected factors with \(|D|,|E|\ge2\); it is also called a \emph{proper root} of its parent \(F\).  The period of the chart is \(q\).  Rotating a marked inner rotates both end copies, interchanges their roles, and transports the attachment data; denote the result by \(\omega^*\).
+
+For clarity, the copy placements can be given without ribbon notation.  If the rows of the content-\(j\) diagonal of \(D\) form \([\ell_j,h_j]\), the copy indexed by \(d=(i,i+j)\) has origin
+\begin{equation}\label{eq:gluing-offsets}
+ L_\omega(d)=
+ \begin{cases}
+ jv+ie,&\mathrm{(a)},\\
+ jv-ie,&\mathrm{(b)},\\
+ jv+(i-\ell_j)e,&\mathrm{(c)},\\
+ jv-(h_j-i)e,&\mathrm{(d)}.
+ \end{cases}
+\end{equation}
+In the mixed cases a vertical pair on the same northwest, respectively southeast, boundary ribbon also contributes \(W_++L_\omega(d)+e\), respectively \(W_++L_\omega(d)-e\), where \(d\) is the lower cell of the pair.  These supplemental copies are part of the composition.  The boundary ribbons are obtained by successively removing the northwest or southeast boundary; their ranks on a diagonal are \(i-\ell_j+1\) and \(h_j-i+1\).  Formula \eqref{eq:gluing-offsets}, with these supplemental copies, is the cell form of the composition definition in \cite[Def.~3.11]{McNamara2009Classification}.  The empty-outer convention is \(\varnothing\circ_\omega E=W\), not an empty union; all outer diagrams used below are nonempty.
+
+\begin{definition}\label{def:gluing-graph}
+Two distinct diagrams have a \emph{common final factor} if they have proper charts with the same marked inner up to transported rotation, and with equal outer Schur functions.  For a fixed Schur function \(P\), its \emph{common-factor graph} has the translation classes of diagrams \(F\) with \(s_F=P\) as vertices, with an edge exactly when the endpoints have a common final factor.
+\end{definition}
+
+For a marked inner \(\omega\) on \(E\), with \(|E|\ge2\), and an outer Schur function \(Q\), its fiber is
+\begin{equation*}
+ \mathcal F(\omega,Q)=
+ \{A\circ_\omega E,
+   A\circ_{\omega^*}E^*: A\text{ connected},\ |A|\ge2,\ s_A=Q\}.
+\end{equation*}
+The I--IV composition and reversal theorems of Olson-Harris \cite[Thms.~5.3.9 and~5.3.10]{OlsonHarris2024HopfApplications} imply that this set lies in one Schur class.  Each fiber is a clique.  The outer functions in this definition are equal; the outer diagrams need not be rotations.  The I--V theorem in \cite[Thm.~3.31]{McNamara2009Classification} alone would not justify this assertion when V fails.
+
+\begin{theorem}[Local common-factor gluing]\label{thm:gluing}
+Every connected component of every common-factor graph is a clique.  Equivalently, if \(X,Y,Z\) are distinct diagrams and \(X,Y\) and \(Y,Z\) each have a common final factor, then \(X,Z\) have a common final factor.
+\end{theorem}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.6\linewidth]{figures/chart-composition.pdf}
+\caption{A chart \(F=D\circ_\omega E\) in the ordinary case (a), with displacement \(v=(-1,2)\), overlap width \(w=2\), and period \(q=3\).  In the marked inner \(\omega\) the two end copies \(W_-\) and \(W_+=W_-+v\) are shaded and signed, and the middle \(O=E\setminus(W_-\cup W_+)\) is plain.  The outer \(D\) is a domino, so \(F\) carries two copies of the inner: they are shaded apart, and the hatched cells are the mark they share.}\label{fig:chart}
+\end{figure}
+
+The assertion does not say that a Schur class is connected in this graph.  It proves neither rigidity of chartless diagrams nor composition-and-reversal necessity.  Its hypothesis supplies two proper charts of the middle diagram; no chart is extracted from an arbitrary equality.
+
+\subsection{Diagonal geometry}
+
+On a connected diagram of span \(N\), write \([\ell_k,h_k]\) for the row interval on content \(k\), and put
+\begin{equation}\label{eq:gluing-bits}
+ A_k=\ell_{k-1}-\ell_k,\qquad B_k=h_{k-1}-h_k,
+ \qquad H_k=h_k-\ell_k+1.
+\end{equation}
+The bits \(A_k,B_k\) belong to \(\{0,1\}\), and \(H_k-H_{k-1}=A_k-B_k\).  Conversely, two such bit words, with positive heights beginning and ending at one, define a connected skew diagram up to translation.  Indeed the reconstructed diagonal intervals have decreasing endpoints with steps zero or minus one; their singleton ends give the two ends of the skew boundary.  Read on cells, this diagonal criterion says that a finite cell set is a connected skew diagram if and only if its contents form an interval, each of its diagonals is a row interval \([\ell_k,h_k]\), the steps \(\ell_{k-1}-\ell_k\) and \(h_{k-1}-h_k\) lie in \(\{0,1\}\), and its two end diagonals are singletons; it is edge-connected because each cell off the last diagonal has its eastern or northern neighbor on the next one.  This criterion will also be applied to unions of overlapping diagonal windows.
+
+\begin{lemma}\label{lem:gluing-local}
+For a legal nonempty mark of width \(w\) and period \(q\), the following hold.
+\begin{enumerate}
+\item The marked copies are full intersections: \(W_-=E\cap(E-v)\).  The middle has at most one cell on each marked diagonal.  The private diagonals \(w\) and \(q-1\) are singletons.
+\item The middle occupies an interval \([s,q+t-1]\), where \(1\le s\le w\) and \(0\le t<w\).  For mixed marks, \(t<s\).  In case (d) both marks are southeast-justified, and there is a marked residue meeting neither middle tail.  In case (c) the corresponding justification is northwest.
+\item If \(F=D\circ_\omega E\) and \(r=N_D\), then \(N_F=rq+w\).  Its first \(q\) diagonals are those of \(E\), and its last \(q\) diagonals are a translate of the diagonals \([w,q+w-1]\) of \(E\), by \((r-1)v\) for every connected \(D\) when the mark is mixed.  These two windows determine \(E\) uniquely.
+\end{enumerate}
+\end{lemma}
+\begin{proof}
+The intersection has interval diagonals.  On their common content range its endpoint sequences are a maximum and a minimum of two sequences with steps zero or minus one.  It contains the given connected end mark, meets every one of its diagonals, and has its extreme singleton cells.  It is therefore connected skew.  Maximality gives the first assertion.
+
+Disjoint skew subdiagrams cannot exchange their northwest and southeast order on consecutive common diagonals.  Such an exchange would put a cell of one inside the rectangle between two cells of the other, contrary to disjointness.  The attachment at the first shared diagonal consequently fixes the order throughout the shared range.  The lower middle tail is southeast of its mark in cases (a), (c), and northwest in cases (b), (d); the upper middle tail is northwest in cases (a), (d), and southeast in cases (b), (c).
+
+Let \(k\) be the first marked diagonal on which the middle has at least two cells, and suppose they lie southeast of the mark.  The preceding diagonal carries a middle cell: with none, the southeast endpoint steps of \(E\) and of \(W_-\) at \(k\) could not both lie in \(\{0,1\}\).  Skewness of the middle, the intersection of the two skew complements in III, then leaves exactly two middle cells on \(k\).  The northwest one is a hatted-middle cell, and it is the eastern neighbor of the southeast cell of the mark on \(k-1\), which lies in the hatted mark because the middle cell on \(k-1\) is its southeastern diagonal neighbor.  This contradicts IV, and a northwest tail is symmetric.  If the middle has no cell on \(w-1\), then \(E\setminus W_-\) begins on diagonal \(w\), which is therefore a singleton by III and the diagonal criterion; otherwise the same adjacency, with \(k=w\), excludes a second cell on \(w\).  Rotation, which interchanges the two copies, treats the upper tail and the diagonal \(q-1\).  Conversely, thin marked tails and these two private singletons imply IV: the hatted middle is confined to \([w+1,q-2]\), whereas every hatted mark has content in \([0,w-1]\) modulo \(q\).  The content distance is at least two, also across the periodic boundary.
+
+In case (d), noncrossing gives southeast justification at both ends.  Two middle tails at one relative marked content would lie northwest of the same marked interval, so their common extra cell would belong to \(E\cap(E-v)\), a contradiction.  Thus \(N_O\le q\).  Equality is impossible as well.  If \(x=\operatorname{sw}(O)\), \(y=\operatorname{ne}(O)\), and \(c(y)=c(x)+q-1\), the upper horizontal attachment gives \(y+(0,1)-v\in W_-\) southeast of \(x\), hence \(y_1>x_1+v_1\).  But \(y-v\notin E\), and the preceding marked diagonal has a cell southeast of \(y-v\).  The endpoint step bound then gives \(x_1\ge y_1-v_1\), a contradiction.  Hence \(N_O\le q-1\), or \(t<s\).  The residue \(s-1\) meets neither tail.  Rotation proves the case-(c) statements.
+
+The copy contents in \eqref{eq:gluing-offsets} are \(jq+[0,q+w-1]\); supplemental contents lie in \(jq+[q,q+w-1]\).  This proves the span formula.  No other copy enters the first window, and no supplemental copy enters either extreme window.  Their overlap has contents \([w,q-1]\).  Its first diagonal is a singleton, so it fixes the translation used to join the windows.  In the mixed cases the rank terms of \eqref{eq:gluing-offsets} vanish on the singleton end diagonals of \(D\), so the two extreme copies have origins \(0\) and \((r-1)v\).  The empty-width versions use the singleton extreme diagonals and the same copy calculation.
+\end{proof}
+
+For an outer diagram write
+\begin{equation}\label{eq:gluing-profile}
+ M_j=h_j-\ell_j+1,\qquad
+ S_j=h_{j-1}-\ell_j+1\ (1\le j<r),\qquad S_0=S_r=1,
+\end{equation}
+and put \(M_{-1}=M_r=0\).  In case (d), let \(\Omega_a\) be the overlap height on residue \(a<w\), and \(\nu_a\) the inner height on a private residue.  Direct union of the copy intervals gives
+\begin{equation}\label{eq:gluing-mixed-profile}
+ H_F(qj+a)=
+ \begin{cases}
+ \nu_a+M_j-1,&w\le a<q,\quad 0\le j<r,\\
+ \Omega_a+M_{j-1},&0\le a<t,\quad 0\le j\le r,\\
+ \Omega_a+S_j-1,&t\le a<s,\quad 0\le j\le r,\\
+ \Omega_a+M_j,&s\le a<w,\quad 0\le j\le r.
+ \end{cases}
+\end{equation}
+Its southeast endpoint is \(\operatorname{se}_E(a)+jv\).  To verify the middle line, the ordinary copies have ranks \([0,M_j-1]\) and \([0,M_{j-1}-1]\).  When \(B^D_j=1\), supplemental copies extend their union to rank \(S_j-1\); when \(B^D_j=0\), the ordinary copies already do so.  The other two marked lines add the single middle-tail cell to the appropriate family.  This also checks the two end bands.  There is no terminal private band.
+
+\begin{lemma}\label{lem:gluing-coding}
+Let a proper chart have period \(q\), width \(w>0\), and middle phases \(t,s\) as in Lemma~\ref{lem:gluing-local}.  Its parent boundary words are \(q\)-periodic except possibly on the following residues:
+{\abovedisplayskip=14pt plus3pt minus4pt \belowdisplayskip=14pt plus3pt minus4pt
+ \abovedisplayshortskip=14pt plus3pt minus4pt \belowdisplayshortskip=14pt plus3pt minus4pt
+\begin{equation}\label{eq:gluing-holes}
+ \begin{array}{c|@{\quad}c@{\qquad}c}
+ &A&B\\ \hline
+ \mathrm{(a)}&t&s\\
+ \mathrm{(b)}&s&t\\
+ \mathrm{(c)}&\varnothing&t,s\\
+ \mathrm{(d)}&t,s&\varnothing.
+ \end{array}
+\end{equation}}
+The initial and terminal exceptional bits are
+{\abovedisplayskip=14pt plus3pt minus4pt \belowdisplayskip=14pt plus3pt minus4pt
+ \abovedisplayshortskip=14pt plus3pt minus4pt \belowdisplayshortskip=14pt plus3pt minus4pt
+\begin{equation}\label{eq:gluing-caps}
+ \begin{array}{c|@{\quad}c@{\qquad}c}
+ &\text{initial}&\text{terminal}\\ \hline
+ \mathrm{(a)}&A_t=1,\ B_s=0&A_{N-w+t}=0,\ B_{N-w+s}=1\\
+ \mathrm{(b)}&B_t=0,\ A_s=1&B_{N-w+t}=1,\ A_{N-w+s}=0\\
+ \mathrm{(c)}&B_t=B_s=0&B_{N-w+t}=B_{N-w+s}=1\\
+ \mathrm{(d)}&A_t=A_s=1&A_{N-w+t}=A_{N-w+s}=0.
+ \end{array}
+\end{equation}}
+Steps at zero and \(N\) are omitted.  In case (d), \(B_w=1\), \(B_q=0\), and
+\begin{equation}\label{eq:gluing-interface}
+ A_{jq+t}=A^D_j,\qquad A_{jq+s}=1-B^D_j\qquad(1\le j<N_D).
+\end{equation}
+Antitransposition carries a case-(d) chart \(D\circ_\omega E\) to a case-(c) chart with the same outer \(D\) and the same phases, and changes the bit pair to \((1-B,1-A)\).  Case (c) therefore has \(A_w=0\), \(A_q=1\), and \(B_{jq+s}=B^D_j\), \(B_{jq+t}=1-A^D_j\) for \(1\le j<N_D\).  At width zero both boundaries have the sole possible exceptional residue zero in the horizontal convention.
+\end{lemma}
+\begin{proof}
+In case (a), write \([a_z,b_z]\) for the row interval of \(W_-\) on residue \(z<w\).  The two inner intervals are \([a_z,b_z+\mathbf1_{z\ge s}]\) and \([a_z-\mathbf1_{z<t},b_z]\), after translating the upper one back.  On an interior marked band the composite endpoints are
+\begin{equation}\label{eq:gluing-ordinary-endpoints}
+ \begin{split}
+ \ell_F(qj+z)&=jv_1+a_z+
+  \begin{cases}\ell_{j-1}-1&z<t,\\\ell_j&z\ge t,\end{cases}\\
+ h_F(qj+z)&=jv_1+b_z+
+  \begin{cases}h_{j-1}&z<s,\\h_j+1&z\ge s.\end{cases}
+ \end{split}
+\end{equation}
+On a private band both endpoints use diagonal \(j\).  Thus only the two displayed switches can depend on the outer.  At either end the single contributing copy gives the same rule and the cap values.  Antitransposition changes the bit pair to \((1-B,1-A)\), giving case (b).
+
+In case (d) the supplemental copies \(W_++L_\omega(d)-e\) are translates by \(-e\) of marked copies already present, so they never change a southeast endpoint; with the southeast justification of both marks this gives the endpoint \(\operatorname{se}_E(a)+jv\) stated after \eqref{eq:gluing-mixed-profile}, so \(h_F(qj+a)=h_E(a)+jv_1\) on every diagonal and the southeast word is \(q\)-periodic with no exceptional residue.  Formula \eqref{eq:gluing-mixed-profile} gives the two switches in case (d).  At the first switch the mark's northwest bit is one, and at the second it is zero.  Subtracting consecutive heights, and using \eqref{eq:gluing-profile}, gives \eqref{eq:gluing-interface}, including \(t=0\) and \(s=w\).  The first and last copies give \eqref{eq:gluing-caps}.
+
+The private-endpoint bits require attention when a middle tail is present.  At the lower end let the last marked cell have row \(z\) and the first private cell row \(x\).  In case (d), a tail at content \(w-1\) has row \(z-1\).  Skewness of both \(E\) and \(O\) gives \(z-x\in\{0,1\}\) and \(z-1-x\in\{0,1\}\), forcing \(z-x=1\).  Without a tail this is the vertical attachment itself.  The upper horizontal attachment gives \(B_q=0\) by the reverse argument.  Thus the actual middle endpoints have not been identified with the private endpoints.  Empty composition repeats the inner words away from its joining steps, which read the two outer bits.
+\end{proof}
+
+\subsection{Reconstructing a chart from its two words}
+
+For a connected diagram \(P\), define its full row and column flag sets by
+\[
+ X_P=\{N_P\}\cup\{k:1\le k<N_P,\ B_k=1\},\qquad
+ Y_P=\{0\}\cup\{k:1\le k<N_P,\ A_k=1\}.
+\]
+They have equal cardinality.  These are the full beta sets in southwest normalization, including every common row and column position.
+We use the closed membership words
+\[
+ X_P(k)=\mathbf1_{k\in X_P},\qquad Y_P(k)=\mathbf1_{k\in Y_P}
+ \quad(0\le k\le N_P).
+\]
+In particular \(X_P(0)=Y_P(N_P)=0\) and
+\(Y_P(0)=X_P(N_P)=1\).
+On genuine internal positions the dictionary is \(X_P(k)=B_k\), \(Y_P(k)=A_k\); the four caps just specified are added separately, not treated as internal endpoint steps.  Set
+\[
+ h_P(k)=\sum_{i=0}^{k}\bigl(Y_P(i)-X_P(i)\bigr),
+ \qquad h_P(-1)=h_P(N_P)=0.
+\]
+Thus \(h_P(k)>0\) for \(0\le k<N_P\).  Membership words retain the
+common row and column positions; the height word alone does not.
+
+Let \((K,\kappa)\) be a legal marked inner of period \(f\ge2\), width
+\(0\le a<f\), and span \(f+a\).  At positive width write
+\(0\le t<a\), \(1\le s\le a\) for its contacts; mixed marks satisfy
+\(t<s\).  For an outer \(A\) of span \(m\), put
+\(x_j=X_A(j)\), \(y_j=Y_A(j)\).  The complete composition formulas give
+\begin{equation}\label{ge:eq:ports}
+\begin{array}{c|c|c|r}
+\text{type}&\text{first variable slot}&\text{second variable slot}
+ &\text{generic }(Y-X)\text{ charge}\\ \hline
+\mathrm{(a)}&X(jf+s)=x_j&Y(jf+t)=y_j&0\\
+\mathrm{(b)}&X(jf+t)=1-y_j&Y(jf+s)=1-x_j&0\\
+\mathrm{(c)}&X(jf+s)=x_j&X(jf+t)=1-y_j&1\\
+\mathrm{(d)}&Y(jf+t)=y_j&Y(jf+s)=1-x_j&-1\\
+\text{horizontal EMPTY}&X(jf)=x_j&Y(jf)=y_j&0.
+\end{array}
+\end{equation}
+Every other word position repeats its native \(K\)-value.  A variable
+\emph{slot} includes its word label: a row slot and a column slot with the
+same numerical residue remain different slots.  The last column records
+one complete block after the variable slots have been removed.  The
+formulas include the true initial and terminal values and, in the mixed
+cases, the supplemental copies in the definition of composition.
+They follow from \Cref{lem:gluing-coding} and its proof, with the
+closed caps added; we call these full formulas the compiler.
+
+\begin{theorem}[Recovery from the generic words]\label{ge:decoder}
+Let \(P\) be connected of span \(mf+a\), \(m\ge1\).  Suppose that in
+\emph{each} closed boundary word every nonvariable slot agrees with the
+native word of the given full legal marked inner \((K,\kappa)\).  No
+condition is imposed on the interior variable strings.  Then there is a
+unique connected outer \(A\), up to translation, such that
+\[
+ P=A\circ_\kappa K.
+\]
+Its two full words are obtained by inverting \eqref{ge:eq:ports}, and
+\begin{equation}\label{ge:eq:sample}
+ h_A(j)=h_P(jf+a)=h_P((j+1)f-1)>0\qquad(0\le j<m).
+\end{equation}
+Both extreme \(f\)-diagonal windows are the genuine windows of this
+composition.  All marked copies, attachments, and mixed supplements are
+preserved.  If \(m\ge2\), both factors are proper and have smaller occupied
+area than \(P\).  If \(m=1\), then \(A\) is a cell and \(P=K\).
+\end{theorem}
+\begin{proof}
+The private diagonals \(a\) and \(f-1\) of \(K\) are singletons, by
+\Cref{lem:gluing-local}; for EMPTY they
+are its two extreme diagonals.  The initial row slots have value zero
+and the initial column slots value one.  Changing either kind to an
+incorrect value reduces the height at \(a\) by one.  Consequently
+\[
+ h_P(a)=1-\#\{\text{incorrect initial word slots}\}.
+\]
+Connectedness forces every initial value.  This argument also applies when
+the two slots have the same residue, since both changes have the same
+sign.  Put \(b=(m-1)f+a\).  The interval \((b,mf+a]\) has the same
+generic bits as \((a,f+a]\) in \(K\).  An incorrect terminal row or
+column slot increases its charge by one; both closed top heights are zero.
+Thus
+\[
+ h_P(b)=1-\#\{\text{incorrect terminal word slots}\},
+\]
+and all terminal values are forced as well, including a slot at the top.
+
+Decode \(x_j,y_j\) by the table.  Their caps are
+\(x_0=0,y_0=1,x_m=1,y_m=0\).  In a complete block
+\(((j-1)f+a,jf+a]\), the variable contribution is, in the five rows of
+the table,
+\[
+ y_j-x_j,\quad y_j-x_j,\quad y_j-x_j-1,
+ \quad y_j-x_j+1,\quad y_j-x_j.
+\]
+Adding the generic charge gives \(y_j-x_j\) in every case.  The sampled
+heights therefore satisfy the binary interval criterion for a connected
+outer.  They start and end at one, and are positive.  Between \(jf+a\)
+and \((j+1)f-1\) there is no further variable slot and the native height
+change is zero, proving both equalities in \eqref{ge:eq:sample}.
+
+Compose this actual outer with the given legal \(K\).  Its full compiler
+has the same generic positions, the same two decoded variable strings,
+and the same caps as \(P\).  Hence both complete boundary words agree;
+the diagonal intervals and all cells agree.  In particular every mixed
+supplement is included by the actual composition, rather than inferred
+from its area.  The port table proves uniqueness.  The extreme windows
+are now windows of an actual composition.
+
+For \(m\ge2\), the inner is a retained copy and the outer adds occupied
+contents, so \(|K|<|P|\).  Also
+\[
+ |A|=\sum_{j=0}^{m-1}h_P(jf+a)<\sum_{k=0}^{mf+a-1}h_P(k)=|P|,
+\]
+because \(f\ge2\) leaves positive unsampled diagonals.  Both factors have
+at least two cells.  The case \(m=1\) follows from the same reconstruction.
+\end{proof}
+
+\begin{remark}\label{ge:remark:cut}
+If two actual cut windows cover \(P\), their full marked inners have the
+same phase, and restoring the cuts changes only their correctly labeled
+variable slots, then \Cref{ge:decoder} reconstructs \(P\).  Phase
+compatibility has to be proved before this observation is applied.
+\end{remark}
+
+For a fixed full legal marked inner of period at least two, the
+parent span fixes the outer span \(m\).  If \(m=1\), the outer
+is a cell.  If \(m\ge2\), both factors are proper, and
+\Cref{lem:gluing-coding} supplies every native-slot hypothesis of
+\Cref{ge:decoder}.  The theorem therefore proves fixed-chart
+injectivity on connected outers.  In the mixed
+profile, private residue \(w\) reads every \(M_j\), while a residue
+in \([t,s-1]\) reads every \(S_j\); their differences recover the
+two outer bits.  In the ordinary cases the two labeled slots of
+\eqref{ge:eq:ports} recover those bits separately.  A period-one
+legal inner is an empty-marked cell, for which the offset formula
+is the identity in the horizontal reading and antitransposition
+in the vertical reading, so injectivity holds there too.
+
+\subsection{Locality of the full mark}
+
+
+The two windows of Lemma~\ref{lem:gluing-local}(3) also decide the legal marks of width below \(q\) that a composite carries.
+
+\begin{lemma}\label{lem:gluing-mark-locality}
+Let \(E\) and \(E'\) be southwest-normalized connected diagrams of span \(N\), and let \(w\ge1\) with \(2w<N\).  Suppose that they have the same cells on the contents \([0,w]\), and that \(E'\) agrees with \(E+\tau\) on the contents \([N-w-1,N-1]\), where \(c(\tau)=0\).  Then, for every \(W_-\subseteq E\) on the contents \([0,w-1]\) and every translation \(v\) of content \(N-w\), the sets \(W_-\) and \(W_-+v\) are the copies of a legal mark of \(E\) exactly when \(W_-\) and \(W_-+v+\tau\) are the copies of a legal mark of \(E'\).  The two marks then have connected skew middles, the same attachment case, and the same hatted mark \(\widehat W_-\).
+\end{lemma}
+\begin{proof}
+Put \(q=N-w\); Hypothesis II is \(w<q\), which is the assumption \(2w<N\).  The copies lie on the contents \([0,w-1]\) and \([q,N-1]\), inside the two windows, so \(W_+\mapsto W_++\tau\) matches the candidate copies of \(E\) and \(E'\).  Hypothesis I compares \(W_-\) with larger diagrams on the same contents whose translates containing the two end cells lie in \(E\), so it reads only the same two content ranges.
+
+Removing \(W_-\) leaves \(E\) unchanged on \([w,N-1]\), where every clause of the diagonal criterion holds because \(E\) is connected skew.  The remaining clauses concern the diagonals below \(w\), the steps into the diagonals up to \(w\), and the first nonempty diagonal, and they read only \([0,w]\).  Symmetrically, removing \(W_+\) is read on \([N-w-1,N-1]\), up to \(\tau\).  This settles III.  On \([0,q-1]\) the middle agrees with \(E\setminus W_-\), and on \([w,N-1]\) with \(E\setminus W_+\).  Since \(w<q\), every pair of consecutive diagonals lies in one of these ranges, so III makes the middle connected skew.  Its southwest cell lies on a content \(s\le w\), because diagonal \(w\) meets neither copy, so the lower attachment is read on \([s-1,s]\); the upper attachment is read in the other window.
+
+For IV, the hatted copy \(\widehat W_-+kv\) has contents in \([kq,kq+w-1]\), so an adjacent hatted-middle cell has content in \([kq-1,kq+w]\).  Since \(w<q\), only the copies \(E+kv\) and \(E+(k-1)v\) meet this range, on their relative contents \([0,w]\) and \([N-w-1,N-1]\), and these cells determine both hatted sets there.  Passing to \(E'\) and \(v+\tau\) translates the configuration by \(k\tau\), which preserves adjacency; at \(k=0\) it gives the same \(\widehat W_-\).
+\end{proof}
+
+The windows cannot be narrowed by one diagonal.  The row \((3)\) and the hook \((2,1)\) agree on content \(0\) and, up to translation, on \([1,2]\), but their legal width-one marks have cases (a) and (d); rotation gives the other end.
+
+\begin{corollary}\label{cor:gluing-mark-transfer}
+Let \(\omega\) be a legal mixed mark on \(E\), of period \(q\), and let \(V,V'\) be connected diagrams of equal span.  For every \(0\le u\le q\), the southwest-normalized diagrams \(V\circ_\omega E\) and \(V'\circ_\omega E\) carry the same legal marks of width \(u\), with the same cells, displacement, attachment case and hatted mark.  At \(u=q\) neither carries one.
+\end{corollary}
+\begin{proof}
+Put \(r=N_V=N_{V'}\).  If \(r=1\) the two diagrams coincide.  Otherwise Lemma~\ref{lem:gluing-local}(3) gives both of them the span \(N=rq+w\), where \(w\) is the width of \(\omega\), and the same cells on the contents \([0,q-1]\) and \([N-q,N-1]\), because the translation \((r-1)v\) does not depend on the outer.  For \(1\le u\le q-1\) the windows \([0,u]\) and \([N-u-1,N-1]\) lie in these ranges and \(2u<N\), so Lemma~\ref{lem:gluing-mark-locality} applies at width \(u\) with \(\tau=0\).  At \(u=0\) the only mark is the horizontal empty one, whose displacement \(\operatorname{ne}-\operatorname{sw}+(0,1)\) is read in the same windows.
+
+At \(u=q\) and \(r=1\), a mark would have period \(w<q\), contrary to II.  Let \(r\ge2\) and take case (d); case (c) follows by antitransposition.  By Lemma~\ref{lem:gluing-local}(1) and (3), the diagonals \(q-1\) and \(N-q\) of \(F=V\circ_\omega E\) are the private singletons \(q-1\) and \(w\) of \(E\); let \(x\) and \(y\) be their cells.  The lower copy of a width-\(q\) mark meets every content in \([0,q-1]\), so its displacement carries \(\operatorname{sw}(F)\) and \(x\) to the cells of \(F\) on the contents \(N-q\) and \(N-1\).  It therefore equals both \(y-\operatorname{sw}(F)\) and \(\operatorname{ne}(F)-x\).  All four cells lie on singleton diagonals, so the rows of these two vectors are minus the sums of the southeast bits over the steps \(1,\ldots,N-q\) and \(q,\ldots,N-1\).  The southeast word is \(q\)-periodic by Lemma~\ref{lem:gluing-coding}, so, after shifting the second sum by \(q\), the two sums differ by \(B_{N-q}-B_q\); since \(N-q\equiv w\) modulo \(q\), this is \(B_w-B_q=1\), a contradiction.
+\end{proof}
+
+No relation between \(s_V\) and \(s_{V'}\) is assumed.  Schur-equal connected outers have equal span: they have the same number of rows \cite[Cor.~8.11]{Reiner2007Coincidences} and, by the involution, of columns, and the span of a connected diagram is one less than the sum.  Hence the diagrams \(A\circ_\omega E\) in the fiber \(\mathcal F(\omega,s_V)\) all carry the same legal marks of each width at most \(q\).  The range of \(u\) is sharp.  At \(u=q+1\) the conclusion fails for the singleton case-(d) mark on the hook \((2,1)\), of period two: \((3)\circ_\omega(2,1)\) carries a legal mark of width three, and \((2,2)\circ_\omega(2,1)\) carries none.
+
+\subsection{Equal and divisible periods}
+
+\begin{lemma}\label{lem:gluing-equal}
+Two proper charts of the same parent with equal periods define the same fiber.
+\end{lemma}
+\begin{proof}
+The span law fixes \(w=N\bmod q\) and \(N_E=q+w\).  Lemma~\ref{lem:gluing-local} reconstructs the same inner.  At positive width, write a possible displacement as \((d,d+q)\).  The translated southwest cell must be an endpoint of the content-\(q\) interval: deleting an interior singleton would violate III.  The mirrored condition puts the inverse image of the northeast cell at an endpoint of the content-\(w-1\) interval.  Each interval consists of the extreme singleton of a mark and at most one middle cell, so there are at most two choices, differing by \(e\).  Noncrossing fixes their cases.  If the northeast cell has row \(n\), the two endpoint constraints are \(d\in\{\ell_q,h_q\}\) and \(d\in\{n-h_{w-1},n-\ell_{w-1}\}\).  When two choices exist these two-element sets agree.  The larger \(d\) places the upper mark southeast and the lower mark northwest, so both attachments are horizontal.  The smaller \(d\) gives both vertical attachments.  A mixed case cannot occur in a double.  Maximality fixes the mark at each displacement.
+
+For the two ordinary choices, \(v_a-v_b=e\).  Put \(\operatorname{AT}(i,j)=(-j,-i)\).  Formula \eqref{eq:gluing-offsets} gives, cell by cell,
+\begin{equation}\label{eq:gluing-gauge}
+ D\circ_{\omega_a}E=\operatorname{AT}(D)\circ_{\omega_b}E.
+\end{equation}
+The identity also holds after rotating the entire marked inner.  Since \(s_{\operatorname{AT}(D)}\) is the image of \(s_D\) under the usual involution on symmetric functions, equality of outer functions is preserved in both directions.  Fixed-chart injectivity identifies the two source outers, and the fibers agree.
+
+At width zero the nonempty-mark argument is not used.  The two edge displacements are
+\(v_H=\operatorname{ne}(E)-\operatorname{sw}(E)+(0,1)\) and
+\(v_V=\operatorname{ne}(E)-\operatorname{sw}(E)+(-1,0)\).
+Their difference is \(e\), so the same offset identity gives \eqref{eq:gluing-gauge}.  This calculation does not use a transpose identity for empty overlaps.
+\end{proof}
+
+\begin{lemma}\label{lem:gluing-aligned}
+Let \(U=V\circ_\omega E\), and let \(\eta\) be a legal mark on \(U\) whose displacement \(v_\eta\) has content \(aq\), where \(q\) is the period of \(\omega\).  There are a legal mark \(\mu\) on \(V\) and \(\gamma\in\{\mathrm{id},\operatorname{AT}\}\), both depending only on the two charts, such that, for every connected \(C\),
+\begin{equation}\label{eq:gluing-reassociation}
+ C\circ_\eta U=(\gamma(C)\circ_\mu V)\circ_\omega E.
+\end{equation}
+An empty \(\mu\) is the horizontal edge, and \(\gamma=\mathrm{id}\) unless \(\mu\) is empty.  When \(\gamma=\operatorname{AT}\), \eqref{eq:gluing-gauge} rewrites \(\operatorname{AT}(C)\circ_\mu V\) as \(C\) composed through the vertical edge reading of \(V\).
+\end{lemma}
+\begin{proof}
+Put \(m=N_V\) and \(b=m-a\).  The upper width is \(bq+w\), so \(b\ge0\); upper separation gives \(a>b\).
+
+First suppose \(\omega\) is case (a).  The linear map \(L(i,i+j)=jv+ie\) bijects \(\Z^2\) with the lattice of translations whose contents are divisible by \(q\).  Let \(z=L^{-1}(v_\eta)\).  If \(b>0\), private sampling of the upper intersection gives
+\(Z=V\cap(V-z)\), with nonempty diagonals \(0,\ldots,b-1\), containing the lower extreme cell and translating to the upper one.  The maximum and minimum endpoint formulas make \(Z\) connected skew.  Formula \eqref{eq:gluing-ordinary-endpoints} acts separately on the two endpoints, so it commutes with those maxima and minima.  Consequently the upper marked copies are exactly the compositions of \(Z\) and \(Z+z\) with \(E\).
+
+Here are the legality checks for \(Z\).  Any larger lower mark would give a larger upper mark by taking its copy union, contradicting upper I; private sampling makes the inclusion strict.  Separation is \(a>b\).  The complement of \(Z\) has consecutive content support and stays on one side of \(Z\) on shared diagonals, because its private samples have those properties in the upper complement.  Its next diagonal \(V_b\) is a singleton, read at the upper first private diagonal.  These conditions imply that the complement is connected skew: on shared diagonals its endpoints are either \([h_Z+1,h_V]\) or \([\ell_V,\ell_Z-1]\); the first nonempty difference is one, and the singleton join preserves the endpoint step bounds.  Rotation proves the other complement condition.  Upper thinness, sampled privately, makes the lower middle thin on marked diagonals, and the two upper private singletons give \(M_b=M_{a-1}=1\).  The content-distance argument in Lemma~\ref{lem:gluing-local} proves IV.
+
+Linearity of \(L\), distribution over unions, and \(L(e)=e\) now prove \eqref{eq:gluing-reassociation}.  Ordinary copy shifts, mixed ribbon ranks, and supplemental marked copies all transform into the corresponding upper construction.  The attachment case is fixed by which of the four two-copy joining constructions is skew.  For inner case (b), the same calculation uses \(L(e)=-e\) and interchanges the corresponding attachments.
+
+If \(b=0\), write \(\operatorname{ne}(V)=(h,h+m-1)\).  The image of the extreme marked singleton on content \(mq\) lies in an interval with one or two cells, so \(z\) is one of
+\((h,h+m)\) and \((h-1,h+m-1)\).  These are exactly the horizontal and vertical edge displacements, and the same two-copy calculation proves the identity with the corresponding edge reading of \(V\) and with \(C\) unchanged.  At the horizontal displacement this is the assertion with \(\gamma=\mathrm{id}\).  At the vertical one the upper chart uses the alternate ordinary mark \(E\cap(E-(v-e))\) on \(E\); its complements and thinness are read in the two extreme windows of the upper chart.  It is legal by the complement test just given, so \(\eta\) has the opposite ordinary case.  Equation \eqref{eq:gluing-gauge} converts the vertical edge reading of \(V\) back to the horizontal one and antitransposes \(C\); this is the case \(\gamma=\operatorname{AT}\).  Empty inner marks use the explicit edge shifts directly.
+
+It remains to prove the mixed assertion; take case (d).  Its southeast boundary is periodic.  The images of the southwest and northeast cells under an upper marked translation give opposite row inequalities, hence \(v_\eta=av\).  The two intersecting intervals have the same southeast endpoint.  Any upper middle tail is therefore northwest of the intersection; this gives case (d) at that end.  When a tail is absent, the private-endpoint bits in Lemma~\ref{lem:gluing-coding} give the same attachment.  Thus the upper mark is also case (d).
+
+Suppose \(b>0\).  Define the interleaved profile \(f(2j)=S_j\), \(f(2j+1)=M_j\), and
+\(\delta_k=f(k)-f(k+2a)\), for \(0\le k\le2b+1\).
+The upper private singleton diagonals first give \(M_b=M_{a-1}=1\).  Formula \eqref{eq:gluing-mixed-profile} samples every profile index \(0,\ldots,2b\) monotonically along its marked band; a type-zero residue supplies the even indices.  Upper thinness and the interval support of its two tails imply
+\begin{equation}\label{eq:gluing-walk-signs}
+ \delta_k\in\{-1,0,1\},\qquad
+ (\delta_k)=-\cdots-\,0\cdots0\,+\cdots+,
+ \qquad \delta_0\le0,\quad\delta_{2b+1}=1.
+\end{equation}
+The last equality is obtained from \(M_b=1\) and \(M_m=0\); the last index need not be sampled in the marked band.
+
+Put \(g_j=\ell_{j+a}-\ell_j\) and \(k_j=h_{j+a}-h_j\).  The walk
+\begin{equation*}
+ g_0,k_0,g_1,k_1,\ldots,g_{b-1},k_{b-1}
+\end{equation*}
+has successive increments \((-1)^i\delta_i\).  During the negative and positive portions of \eqref{eq:gluing-walk-signs} it alternates between adjacent integer levels; during the zero portion it is constant.  Let \(\theta\) be the level at the end of the negative portion, or its initial level if that portion has no step.  Every segment contains \(\theta\).  The intersection of the odd segments is \(\{\theta\}\) or \(\{\theta-1,\theta\}\): an intersection containing \(\theta+1\) would require the negative portion to end and the positive portion to start at even indices, leaving an odd zero step between them.  It follows that
+\begin{equation*}
+ \theta=\max\bigcap_{0\le j<b}[\min(g_j,k_j),\max(g_j,k_j)].
+\end{equation*}
+Choose \(z=(\theta,\theta+a)\), \(Z=V\cap(V-z)\).  Both the individual diagonal intervals and the consecutive-diagonal spans are nested with their translated partners.  The second assertion uses the even walk segments, whose endpoints are \(k_{j-1},g_j\).
+
+Each diagonal of \(Z\) has height \(\min(M_j,M_{j+a})>0\), and its endpoint sequences are maxima and minima of valid endpoint sequences.  It has singleton ends.  The lower middle extras occur in a terminal interval of marked contents and the upper extras in an initial interval, by \eqref{eq:gluing-walk-signs}; each has at most one cell.  The walk fixes one side for each tail.  Together with \(M_b=M_{a-1}=1\), these facts give a connected skew middle and both connected skew complements.  At a first lower tail, an even transition to \(+1\) forces a north step and hence a vertical attachment; an odd transition forces an east step and a horizontal attachment.  The reversed rule gives the upper attachment.  With no tail the two adjacent singleton diagonals decide the attachment.  Thus all four lower cases are included.  No enlargement at any displacement can increase a diagonal beyond \(\min(M_j,M_{j+a})\), proving I.  Conditions II and IV follow from \(a>b\) and the content-distance argument.
+
+For completeness, nesting proves the identity for every outer, not just a row.  If two nested intervals differ by \(\varepsilon\in\{-1,0,1\}\) cells, the union of their translates indexed by consecutive outer diagonals has height
+\begin{equation}\label{eq:gluing-nested-count}
+ \min(|R|,|R'|)+
+ \begin{cases}S^C_j-1&\varepsilon=0,\\M^C_j&\varepsilon=1,\\M^C_{j-1}&\varepsilon=-1.
+ \end{cases}
+\end{equation}
+For ordinary lower cases this follows by taking the minimum of the two left endpoints and the maximum of the right endpoints.  For mixed lower cases the intervals share a justified end, and the supplemental copies supply the consecutive-span value, as in \eqref{eq:gluing-mixed-profile}.  Apply \eqref{eq:gluing-nested-count} first to the individual diagonals and then to the consecutive spans.  Their minima are intersection sizes precisely because both nestings have been proved.  It gives the profile of both sides of \eqref{eq:gluing-reassociation}; private bands, on a diagonal \(\rho\) of \(V\) private to \(\mu\), give \(M^V_\rho+M^C_j-1\).  The endpoint conventions in \eqref{eq:gluing-profile} include the terminal marked band but not a terminal private band.  The southeast boundaries agree, proving literal equality.
+
+For \(b=0\), take the horizontal lower edge.  Its private diagonal heights are \(M^V_\rho+M^C_j-1\), and its joining spans are \(S^C_j\), because the end diagonals of \(V\) are singletons.  Substitution in \eqref{eq:gluing-mixed-profile} proves the same identity.  Rotation handles inner case (c).
+\end{proof}
+
+\begin{proposition}\label{prop:gluing-divisible}
+Suppose \(F=D\circ_\omega E=C\circ_\eta B\) are proper legal charts of periods \(q<Q\), with \(q\mid Q\).  Then \(B=V\circ_\omega E\) for a connected \(V\) with at least two cells.  A legal lower mark on \(V\) gives \eqref{eq:gluing-reassociation} for the coarse chart, and its fiber is contained in the fine chart's fiber.
+\end{proposition}
+\begin{proof}
+Write \(r=N_D\), \(Q=aq\), \(u=bq+w\), and \(m=a+b\).  The span laws and separation give \(0\le b<a\), \(a\ge2\), and \(N_B=mq+w\).  The first and last \(Q\) diagonals of \(F\) are the two windows of \(B\).
+
+For an ordinary smaller chart, their relative translation \(\tau\), of content \((r-m)q\), has a unique inverse \(z\) under \(L\) in \eqref{eq:gluing-offsets}.  The outer pieces
+\(D_{[0,a-1]}\) and \(D_{[r-a,r-1]}-z\)
+have content ranges \([0,a-1]\) and \([b,m-1]\).  Private sampling on \(qj+w\), \(b\le j<a\), makes them agree on the entire overlap.
+
+For a case-(d) smaller chart, equality of the southeast endpoints of any overlapping private sample forces \(\tau=(r-m)v\).  The private samples give \(M_j=M_{j+r-m}\) for \(b\le j<a\).  A type-zero marked residue gives \(S_j=S_{j+r-m}\) for \(b<j<a\).  Since \(\ell_{j-1}-\ell_j=S_j-M_{j-1}\), these two readings align the same outer pieces after one row translation.  The second index range may be empty; then the overlap has just one diagonal.  Rotation gives case (c).
+
+Let \(V\) be the union of the aligned pieces.  Every adjacent transition is inherited from one piece, their overlap is nonempty, and their extreme diagonals are the extreme singletons of \(D\).  Hence \(V\) is connected skew of span \(m\ge2\).  Its composition agrees with the first \(aq\) diagonals of \(B\) and with the last \(aq\).  In a mixed chart ranks are preserved by the suffix translation; supplemental copies use only adjoining diagonals.  The last window starts at the private residue \(bq+w\), so it needs no preceding diagonal, and every subsequent supplemental band uses two suffix diagonals.  Since \(bq+w<aq\), the windows cover \(B\).  Thus \(B=V\circ_\omega E\).
+
+The upper displacement has content \(aq\).  Lemma~\ref{lem:gluing-aligned} applies, and fixed-chart injectivity identifies \(D=\gamma(C)\circ_\mu V\).  Let \(C'\) satisfy \(s_{C'}=s_C\).  Then \(s_{\gamma(C')}=s_{\gamma(C)}\), since the functions of \(\operatorname{AT}(C')\) and \(\operatorname{AT}(C)\) are the involution images of \(s_{C'}=s_C\).  I--IV forward sufficiency gives \(s_{\gamma(C')\circ_\mu V}=s_D\), and \eqref{eq:gluing-reassociation} puts \(C'\circ_\eta B\) in the fine fiber.  Rotating the marked coarse inner rotates both lower marked factors; forward factor reversal gives the same outer function and the permitted rotated fine inner.  This proves full-fiber containment, including both orientations.
+\end{proof}
+
+In particular, a proper root of period \(d>1\) dividing two supplied periods puts both fibers inside one fiber, by Proposition~\ref{prop:gluing-divisible} and Lemma~\ref{lem:gluing-equal}.  This conclusion requires an actual legal divisor root.
+
+\subsection{Period words, line inners, and small overlaps}
+
+A word has period \(p\) except at a set of residues if positions of each other residue have equal values.  Its period graph joins positions constrained to be equal.  The following finite-word facts will be used for either boundary word.
+
+\begin{lemma}\label{lem:gluing-periods}
+\begin{enumerate}
+\item[(i)] Suppose neither of \(a,b\) divides the other.  A word with a full period \(a\) and period \(b\) except at one residue has period \(\gcd(a,b)\) if its length is at least \(2\max(a,b)\).  When \(a<b\), length \(2b-1\) suffices.
+\item[(ii)] Suppose \(N=rp+w=mQ+u\), where \(r,m\ge2\), \(0\le w<p\), \(0\le u<Q\), and neither period divides the other.  A word on \(1,\ldots,N-1\) with one exceptional phase in \([0,w]\) modulo \(p\) and one in \([0,u]\) modulo \(Q\) has one component on each gcd residue, apart from simultaneous holes.  Each simultaneous hole is isolated.  At width zero the phase is zero.
+\item[(iii)] If \(p<Q\), a word with full period \(p\) and period \(Q\) except at at most two residues in \([0,u]\), \(u<Q\), has period \(\gcd(p,Q)\) when its length is at least \(2Q+u-1\).
+\end{enumerate}
+\end{lemma}
+\begin{proof}
+Contract full-period classes.  Translation by the other period gives cycles on the contracted residues, one for each gcd class.  With coprime periods there is one cycle.  One removed edge leaves it connected; deleting one vertex leaves a path.  For (i), when the punctured period is larger, representatives in a complete set modulo the smaller period give all but at most one edge, already within length \(2b-1\).  In the reverse order, delete the punctured vertex and use two representatives of each full-period class to attach it to the remaining path.  Consecutive representatives cannot both lie in the omitted residue.  The same argument on the gcd cycles proves the general statement.
+
+For (ii), suppose \(p<Q\), delete the exceptional \(p\)-vertex, and compare representatives with their translates by \(Q\).  A representative equal to the exceptional \(Q\)-phase \(h\) can be replaced by \(h+p\).  Its comparison remains in range because
+\(h+p+Q\le u+p+Q\le2Q+u-1\le N-1\).
+Interchange the periods for the reverse order.  Every active class on the other side has two representatives and joins this component; a class with only one representative at empty width is exactly the omitted zero class.  A position omitted on both sides has no edges.  On each gcd class the same argument deletes at most one vertex; the reduced periods exceed one, so a generic component remains.  Simultaneous holes form at most one progression of spacing \(\operatorname{lcm}(p,Q)\).
+
+For (iii), use representatives \(1,\ldots,p\) and comparisons by \(Q\).  If a representative is a hole, replace it by its translate by \(p\); the comparison endpoint is at most \(u+p+Q\le2Q+u-1\).  A cyclic edge is lost only when both representatives are holes.  Two lost edges would make the two holes exchange under addition by \(p\) modulo \(Q\), forcing \(Q=2p\) and putting the second initial representative above \(p\).  Hence at most one edge is lost, and every gcd cycle is still connected.
+\end{proof}
+
+These arguments can also be used after restricting to a gcd residue.  The endpoint length is not automatic: if \(g=\gcd(p,Q)\), \(Q=cg\), \(u=dg+w_g\), and \(N=Mg+w_g\) with \(0\le w_g<g\), then \(M\ge2c+d\).  A residue word has length \(M\) or \(M+1\), except that the zero class has length \(M-1\) when \(w_g=0\).  Reindexed overlap phases are at most \(d\) or \(d+1\).  If \(d+1<c\), the two-hole bound requires at most \(2c+d\) positions; if \(d=c-1\), normalization modulo \(c\) and \(M\ge3c-1\) give the bound.  The shortened zero class is used only with the shorter clause of (i), or with a positive multiple-of-\(g\) overlap supplying the missing position.
+
+For a connected diagram with \(n\) rows, write \((r;g)=(r_1,\ldots,r_n;g_1,\ldots,g_{n-1})\) for its row lengths and adjacent overlaps minus one, from top to bottom.  This profile determines the diagram up to translation, and \(0\le g_i<\min(r_i,r_{i+1})\).  Its beta lists \(\xi_1>\cdots>\xi_n\) and \(\zeta_1>\cdots>\zeta_n\) are determined by \(\zeta_n=0\), \(r_i=\xi_i-\zeta_i\), and \(g_i=\xi_{i+1}-\zeta_i\), and Jacobi--Trudi reads \(s_D=\det(h_{\xi_i-\zeta_j})_{i,j=1}^n\), with \(h_0=1\) and \(h_j=0\) for \(j<0\).  The skew Schur function of a connected diagram is irreducible \cite[Thm.~1]{Barekat2009CoincidencesCorrigendum}.  The function of a skew diagram is the product of the nonconstant functions of its connected components, so every diagram with the same function as a connected diagram is connected.  It also has the same number of rows, the same multiset of row lengths, and the same multiset of adjacent overlaps \cite[Cor.~8.11]{Reiner2007Coincidences}.
+
+\begin{lemma}\label{lem:gluing-row-action}
+For \(q\ge2\) and \(0\le w<q\), let \(\omega_{q,w}\) be the case-(a) mark on the row \(E=(q+w)\) whose lower and upper copies are its first and last \(w\) cells, on the contents \([0,w-1]\) and \([q,q+w-1]\); its period is \(q\) and its width is \(w\).  It is legal, and for every connected outer profile
+\begin{equation}\label{eq:gluing-row-action}
+ (r;g)\circ_{\omega_{q,w}}E=(qr+w;qg+w).
+\end{equation}
+If a diagram \(F\) with at least two rows has a proper chart whose inner is a row, read horizontally, then that chart has this form for some \(q\ge2\), and every row length and every overlap minus one of \(F\) is congruent to \(w\) modulo \(q\).  The outer of that chart is unique, with beta lists \((\xi_i-w)/q\) and \(\zeta_i/q\), where \(\xi\) and \(\zeta\) are the beta lists of \(F\).
+\end{lemma}
+\begin{proof}
+By \eqref{eq:gluing-offsets} in case (a), an east outer step moves a copy by \((0,q)\), and a north step by \((-1,q-1)\).  An outer row interval \([a_i,b_i]\) in row \(i\) becomes
+\[
+ [qa_i+i(1-q),\ qb_i+i(1-q)+q+w-1].
+\]
+This gives the row lengths and overlaps in \eqref{eq:gluing-row-action}.  The terminal diagonal bands are maximal; separation is \(q>w\); removing either mark leaves a row of length \(q\); and the middle row has empty hat.  At \(w=0\), use the horizontal empty-overlap convention.
+
+Conversely, a row inner has precisely these two terminal intervals.  Its affine action forces every row length and every overlap minus one of \(F\) into the residue \(w\) modulo \(q\).  When they lie in that residue, the divided overlaps minus one \((g_i-w)/q\) are nonnegative and the divided differences \((r_i-g_i)/q\) and \((r_{i+1}-g_i)/q\) are positive integers.  The quotient is therefore a connected integral profile.  The beta lists above prove uniqueness.
+\end{proof}
+
+\begin{lemma}\label{lem:gluing-row-transport}
+Put \(\mathcal L_{q,w}(r;g)=(qr+w;qg+w)\), for \(q\ge2\), \(0\le w<q\).  For every connected \(D\), this map bijects the diagrams whose skew Schur function is \(s_D\) with those whose skew Schur function is \(s_{\mathcal L_{q,w}D}\), commutes with rotation, and preserves the set of positions \((i,j)\) at which the Jacobi--Trudi index \(\xi_i-\zeta_j\) is negative.
+\end{lemma}
+\begin{proof}
+Let \(D\) have \(n\) rows.  The relations \(\zeta_n=0\), \(r_i=\xi_i-\zeta_i\), and \(g_i=\xi_{i+1}-\zeta_i\) give \(\mathcal L_{q,w}D\) the beta lists \(q\xi_i+w\) and \(q\zeta_i\), so its Jacobi--Trudi indices are \(q(\xi_i-\zeta_j)+w\).  Hence the polynomial substitution replacing each monomial \(h_{\kappa_1}\cdots h_{\kappa_k}\) of positive indices by \(h_w^{\,n-k}h_{q\kappa_1+w}\cdots h_{q\kappa_k+w}\) carries \(s_D\) to \(s_{\mathcal L_{q,w}D}\).  The substitution is understood after homogenizing to degree \(n\) with an independent unit variable \(\tilde h_0\), writing \(\tilde h_j=h_j\) for \(j\ge1\).  It sends \(\tilde h_j\) to \(\tilde h_{qj+w}\) for \(j\ge0\), injectively, and specializing \(\tilde h_0=1\) loses no monomial information at fixed homogeneous degree.  So the substitution has a left inverse.
+
+A diagram \(H\) with \(s_H=s_{\mathcal L_{q,w}D}\) is connected, has \(n\) rows, and has the same multisets of row lengths and adjacent overlaps, so all its row lengths and overlaps minus one lie in the residue \(w\) modulo \(q\).  As in the proof of \Cref{lem:gluing-row-action}, \(H\) has a unique divided profile \(H'\), with \(\mathcal L_{q,w}H'=H\), and the left inverse gives \(s_{H'}=s_D\).  Conversely, every \(H'\) with \(s_{H'}=s_D\) is connected with \(n\) rows, so the same substitution gives \(s_{\mathcal L_{q,w}H'}=s_{\mathcal L_{q,w}D}\).  Since \(\mathcal L_{q,w}\) is injective on profiles, it bijects the two sets.  The affine profile map commutes with reversal, and \(q(\xi_i-\zeta_j)+w<0\) if and only if \(\xi_i-\zeta_j<0\), including when \(\xi_i=\zeta_j\).
+\end{proof}
+
+\begin{lemma}\label{lem:gluing-lines}
+Coprime periods of two proper roots force both charts to be ordinary and both inners to be rows or columns.  If a diagram has any proper line inner, every fork at that diagram glues.
+\end{lemma}
+\begin{proof}
+Suppose first that both roots are ordinary, of periods \(p,Q\).  Lemma~\ref{lem:gluing-periods}(ii) makes each boundary constant off one progression of spacing \(L=pQ\).  Write \(m=N-1\).  Here \(m\ge5\), \(L\ge6\), and \(2\lceil m/L\rceil<m\).  Different generic bits could not be balanced by the exceptional positions, whereas the total changes of the two endpoints are equal.  Thus the generic bits agree.
+
+If their common value is zero, all southeast bits in the first \(p-1\) steps are zero: there is at most one exception there and its initial value is zero by \eqref{eq:gluing-caps}.  The private singleton at \(p-1\) forces every northwest bit in that prefix to be zero as well.  For a nonempty mark, case (b) is impossible because its positive initial northwest exceptional bit is one.  In case (a), the lower mark is a row and a positive upper-tail phase would again force a northwest bit one.  The upper horizontal attachment therefore completes a row inner.  The empty case is immediate.  Apply the same reasoning to the other root.  Generic value one gives columns by the complementary argument.
+
+If one root is mixed and the other ordinary, its fixed boundary has a full period against one punctured period.  Lemma~\ref{lem:gluing-periods}(i), including the shorter clause for an empty ordinary mark, makes it constant, contrary to its two different private-endpoint bits.  For equal mixed cases use their common full boundary.  For opposite cases order \(p<Q\) and apply (iii) to the smaller chart's fixed boundary.  This gives the same contradiction.
+
+For a parent with at least two rows, \Cref{lem:gluing-row-action} writes a proper row inner, read horizontally, as \(\omega_{q,w}\), acting on row lengths and overlaps minus one by \eqref{eq:gluing-row-action} with a unique outer.  By \Cref{lem:gluing-row-transport}, this map bijects the diagrams with the outer's function with those with the parent's.  Every mate consequently has that same marked row inner and an equal outer function.  Actual diagram transposition gives the column statement; empty vertical readings first use \eqref{eq:gluing-gauge}.  A line parent itself has a singleton Schur class.  Thus every fork in a class containing a proper line inner glues.
+\end{proof}
+
+\subsection{A cell criterion for an ordinary mark}\label{ge:ordinary-cell}
+
+The following converse to the word formulas supplies the physical mark
+in the residue constructions.  Write the interval on diagonal \(c\) as
+\([\lambda_c,\mu_c]\), so its length is \(h(c)\), and let
+\(A_c=\lambda_{c-1}-\lambda_c\),
+\(B_c=\mu_{c-1}-\mu_c\).  These are its column and row bits.
+
+\begin{lemma}[Ordinary cell criterion]\label{ge:cell-criterion}
+Let \(K\) be a connected skew diagram of span \(g+a\), where
+\(1\le a<g\), and let \(0\le\tau<a\), \(1\le\sigma\le a\).
+Suppose
+\begin{align*}
+ A_{g+c}&=A_c-\mathbf1_{c=\tau},&
+ B_{g+c}&=B_c+\mathbf1_{c=\sigma} &&(1\le c<a),\\
+ h(g)&=1+\mathbf1_{\tau>0},&
+ h(c)-\mathbf1_{c\ge\sigma}&\ge1 &&(0\le c<a),\\
+ h(a)&=h(g-1)=1,
+\end{align*}
+with \(B_a=0\) if \(\sigma=a\), and \(A_g=0\) if \(\tau=0\).
+Then \(K\) has a full legal ordinary mark of period \(g\), width
+\(a\), and contacts \((\sigma,\tau)\).  Its lower copy is
+\[
+ W_-\cap\{c\}=[\lambda_c,\mu_c-\mathbf1_{c\ge\sigma}]
+ \quad(0\le c<a),
+\]
+and its upper copy on diagonal \(g+c\) is
+\([\lambda_{g+c}+\mathbf1_{c<\tau},\mu_{g+c}]\).
+\end{lemma}
+\begin{proof}
+Put \(\nu_1=\lambda_g+\mathbf1_{\tau>0}-\lambda_0\) and
+\(\nu=(\nu_1,\nu_1+g)\).  The two pairs of interval endpoints
+have identical consecutive differences by the first two equations.
+Their initial constants agree because \(h(g)-h(0)=\mathbf1_{\tau>0}\).
+Thus \(W_+=W_-+\nu\).  The prescribed positive interval lengths,
+binary steps and singleton ends make both copies connected skew diagrams.
+The translated overlap is exactly
+\[
+ K\cap(K-\nu)=W_-:
+ \quad \max(\lambda_c,\lambda_c-\mathbf1_{c<\tau})=\lambda_c,
+ \quad \min(\mu_c,\mu_c-\mathbf1_{c\ge\sigma})
+       =\mu_c-\mathbf1_{c\ge\sigma}.
+\]
+For maximality, a competing larger mark on the same content band has
+translation of content \(g\).  Its containment at a lower endpoint with
+\(c\ge\tau\) forces its row displacement to be at least \(\nu_1\);
+containment at an upper endpoint forces it to be at most \(\nu_1\).
+Its displacement is therefore \(\nu\), and the full intersection leaves
+no enlargement.  This proves I; II is \(a<g\).
+
+Deleting \(W_+\) leaves the lower part of \(K\) and the northwest
+singletons on \(g,\ldots,g+\tau-1\).  Deleting \(W_-\) leaves
+the southeast singletons on \(\sigma,\ldots,a-1\) and the upper
+part.  Their joins obey the binary interval criterion: at the upper join
+\(\mu_{g-1}-\lambda_g=B_g+h(g)-1=1\) when \(\tau>0\), and at
+the lower join \(\mu_{a-1}-\lambda_a=B_a+h(a)-1=B_a\).
+Both complements have singleton extreme diagonals.  The middle agrees
+with the first complement through \(g-1\) and with the second from
+\(a\) onward.  Since \(a<g\), every adjacent pair of its diagonals
+lies in one of these two ranges.  It is therefore connected and skew.
+The lower neighbor is horizontal: for \(\sigma<a\) this follows from
+\(h(\sigma)\ge2\) and the endpoint steps; for \(\sigma=a\) it
+follows from \(B_a=0\) and the two singleton diagonals.  At the upper
+contact, \(A_{g+\tau}=A_\tau-1\) forces the required horizontal
+neighbor when \(\tau>0\); when \(\tau=0\), use \(A_g=0\).
+This proves III with the indicated ordinary orientation.
+
+The middle is thin on both marked tails, and its private end diagonals
+\(a,g-1\) are singletons.  Its hatted part has contents only in
+\([a+1,g-2]\).  Every integer translate of a hatted marked copy lies
+in \([kg,kg+a-1]\), \(k\in\Z\).  These intervals are separated
+from the hatted middle intervals by at least two content units.  They
+neither intersect nor have adjacent cells.  This proves both clauses of
+IV for every integer translate.  Antitransposing the entire construction
+gives the other ordinary gauge with the actual transformed mark.
+\end{proof}
+
+\subsection{Residue folds with one exceptional class in each word}
+
+In the residue-fold lemmas \(r\) is the supplied inner period and
+\(v\) its width; displacement vectors are denoted by \(\nu\).
+The native lists below keep their full row ranks, including common
+row and column positions.
+
+\begin{lemma}[Ordinary residue fold]\label{ge:ordinary-fold}
+Let an actual ordinary marked inner \(J\) have period \(r\), positive
+width \(v<r\), and contacts \(1\le s\le v\), \(0\le t<v\).
+In its type-(a) reading let \(B,C\subset[0,r)\) be the completed
+native row and column sets.  Explicitly, for the southwest-normalized
+mark \(W\), put \(B_-=X_J\cap(v,r)\), \(C_-=Y_J\cap(v,r)\);
+then \(B=X_W\sqcup B_-\), \(C=Y_W\sqcup C_-\).
+Equivalently \(B=(X_J\cap[0,r))\cup\{s\}\) and
+\(C=Y_J\cap[0,r)\).  Thus
+\[
+ |B|=|C|,\quad 0\notin B,\ v\in B,\quad
+ 0\in C,\ v\notin C,
+\]
+and the initial row word omits \(s\), whereas the final column word
+omits \(t\).  Suppose \(g\mid r\), \(2\le g<r\), every
+\(B\)-class other than \(s\bmod g\) is full or empty, and every
+\(C\)-class other than \(t\bmod g\) is full or empty.  The two
+exceptional classes may be arbitrary nonempty subsets.
+
+There is an actual proper chart \(J=D\circ_\kappa K\) of period
+\(g\), width \(a=v\bmod g\), with both factors of smaller
+occupied area.  The mark is ordinary, or genuinely EMPTY when \(a=0\).
+If \(a>0\), its gauge is determined by the order of the two projected
+contacts; no assertion that the original gauge always survives is needed.
+The entire full mark, both end windows and both boundary words are retained.
+\end{lemma}
+\begin{proof}
+Write \(R=r/g\), \(v=dg+a\),
+\(r_s=s\bmod g\), \(r_t=t\bmod g\).  Remove the exceptional
+classes and let \(\phi_B,\phi_C\) be the full-class indicator words.
+Let \(x_k=\mathbf1_B(kg+r_s)\),
+\(y_k=\mathbf1_C(kg+r_t)\).  Their sums lie in \([1,R]\), so
+\[
+ R\bigl(|\phi_B|-|\phi_C|\bigr)=\sum_k y_k-\sum_k x_k
+ \quad\Longrightarrow\quad |\phi_B|=|\phi_C|,
+ \quad\sum_kx_k=\sum_ky_k.
+\]
+Set
+\[
+ \Psi(z)=\sum_{i=0}^z(\phi_C(i)-\phi_B(i)),\qquad
+ E(k)=\sum_{i<k}(y_i-x_i).
+\]
+The genuine mark heights \(H\), positive on \([0,v)\) and zero
+at \(v\), satisfy the exact formula
+\begin{equation}\label{ge:eq:ordinary-block}
+ H(kg+z)=E(k)+\Psi(z)+\mathbf1_{z\ge r_t}y_k
+                         -\mathbf1_{z\ge r_s}x_k,
+ \qquad \Psi(g-1)=0.
+\end{equation}
+
+Suppose first \(a>0\) and \(d\ge1\).  The first complete
+\(g\)-window has positive terminal height, so \(y_0=1,x_0=0\),
+and \(\Psi(z)\ge1-\mathbf1_{z\ge r_t}\).  The last complete window
+ends at height zero, so its exceptional row bit is one and its exceptional
+column bit zero.  At the start of the last partial block
+\(E(d)=H(dg-1)\ge1\), whereas
+\[
+ 0=E(d)+\Psi(a)+\mathbf1_{r_t\le a}y_d
+                      -\mathbf1_{r_s\le a}x_d.
+\]
+If \(r_s>a\), the rightmost three terms are nonnegative.  If
+\(r_t>a\), their sum is again nonnegative because \(\Psi(a)\ge1\).
+Both are impossible.  Hence \(r_s,r_t\le a\).  The last-window
+bits are now \(x_d=1,y_d=0\), giving \(E(d)=1,\Psi(a)=0\),
+and the remaining genuine mark heights give
+\[
+ \Psi(z)\ge\mathbf1_{z\ge r_s}\quad(0\le z<a).
+\]
+The pairs \((r_s,r_t)=(0,0),(a,a)\) are impossible: the first
+would give \(H(dg)=0\), and the second would give
+\(\Psi(a)=\Psi(a-1)\ge1\).
+
+Take the first \(g\) diagonals and last \(g\) diagonals of \(J\)
+and identify their overlapping private interval.  The two readings agree
+there because neither exceptional residue lies in \((a,g)\), and the
+joining diagonals have height one.  This constructs a connected skew
+\(K\) of span \(g+a\), whose native row return is zero initially
+and one finally, and whose native column return is one initially and zero
+finally.  If \(r_t\le r_s\), its data satisfy
+\Cref{ge:cell-criterion} with \((\sigma,\tau)=(r_s,r_t)\): the
+required mark height is
+\(\Psi(z)+\mathbf1_{z\ge r_t}-\mathbf1_{z\ge r_s}\), positive by the
+two displayed inequalities.  If \(r_s\le r_t\), apply that lemma
+to the actual antitranspose, with contacts \((r_t,r_s)\), then
+transport the full mark back.  This is type (b), not an alteration of
+one of the old words.
+
+If \(v<g\), then \(a=v\), and the genuine contacts already lie
+in the required band.  Keep the literal original mark.  The same first
+and last \(g\)-windows agree on their private overlap: the full-class
+formula gives both joining heights one.  Their positive heights are
+actual heights of \(J\); subtracting the actual lower return leaves
+the original positive mark heights.  Thus
+\Cref{ge:cell-criterion} applies in type (a).  This covers the small
+width case without assuming a complete \(g\)-window inside the mark.
+
+If \(a=0\), the incidences \(0\notin B,v\in B\) force
+\(r_s=0\), and \(0\in C,v\notin C\) force \(r_t=0\).
+Every nonzero residue is a complete native class.  Its row and column
+ranks agree.  Form the inner of span \(g\) with closed words
+\[
+ X_K=\{g\}\cup\operatorname{supp}(\phi_B),\qquad
+ Y_K=\{0\}\cup\operatorname{supp}(\phi_C).
+\]
+Its heights are the actual initial \(g\)-window heights and have
+singleton ends.  The horizontal empty mark is legal: both attachments
+are the genuine boundary edges, the proper copy strips are disjoint,
+and the hatted empty diagram is empty.  This is the EMPTY convention,
+not a positive mark of zero width.
+
+In each case all nonreturn positions of \(J\) are precisely those of
+the constructed \(K\).  Its two exceptional strings give the two
+outer words in \Cref{ge:decoder}, and its actual initial and terminal
+values force the genuine caps.  Therefore that theorem reconstructs the
+entire \(J\), including the ordinary gauge, and supplies strict areas.
+Alternatively \(|D|\) is the sum of the distinct positive samples
+\(h_J(jg+a)\), while the root uses the disjoint first \(g\) and
+last \(a\) diagonals of \(J\); positive diagonals remain unused
+in both counts because \(g<r\).
+\end{proof}
+
+Here \(\operatorname{Row}_m\) and \(\operatorname{Col}_m\) denote the
+row and column of \(m\) cells, respectively.
+
+\begin{lemma}[Empty residue fold]\label{ge:empty-fold}
+Let \(K\) be an actual connected inner of span \(g\), with its
+horizontal empty mark.  Let \(2\le d<g\), \(d\mid g\).
+In both native words on \(\Z/g\Z\), replace the value at the
+returned residue zero by one common \(\lambda\in\{0,1\}\).
+If these two completed words are \(d\)-periodic, then
+\[
+ K=\begin{cases}
+ \operatorname{Row}_{g/d}\circ_{\mathrm{EMPTY}_H}K_0,&\lambda=0,\\
+ \operatorname{Col}_{g/d}\circ_{\mathrm{EMPTY}_H}K_0,&\lambda=1,
+ \end{cases}
+\]
+for an actual connected \(K_0\) of span \(d\).  The displayed
+mark is fully legal, both factors are proper and strict in occupied
+area, and both complete words are retained.
+\end{lemma}
+\begin{proof}
+The two completed native words have equal total counts: the physical
+row word omits its top from the residue list and the column word
+includes zero, so filling their respective return slots by the same
+value removes that one-count difference.  Periodicity makes the
+column-minus-row charge of each complete \(d\)-block zero.
+The first physical block differs from the completed block by the true
+initial caps \(X_K(0)=0,Y_K(0)=1\), adding net one.
+Thus its last height is one, and all its heights are positive because
+they are actual heights of \(K\).
+
+Take those first \(d\) diagonals, with their actual intervals, as
+\(K_0\).  Its two ends are singletons and its boundary steps are
+binary, so it is connected skew.  Away from multiples of \(d\),
+both full words of \(K\) repeat the proper words of \(K_0\).
+At each internal multiple of \(d\), both bits are \(\lambda\).
+These are exactly the horizontal empty composition formulas with a row
+outer when \(\lambda=0\), and a column outer when \(\lambda=1\).
+The true final caps agree as well, proving literal equality of both
+complete words and hence of all cells.
+
+The empty mark is the actual pair of boundary edges.  There is no
+marked content band to enlarge; separation is \(d>0\); deleting
+either empty mark leaves connected \(K_0\); and both hatted marked
+sets are empty for every integer translate.  This proves I--IV.
+With \(m=g/d\ge2\), the exact empty line-composition area is
+\(|K|=m|K_0|\).  Since \(|K_0|\ge d\ge2\), both factors
+have at least two cells and strictly smaller area.  A vertical edge
+reading is converted by its genuine outer involution.
+\end{proof}
+
+\subsection{The mixed residue fold in every width range}
+
+\begin{lemma}[Mixed residue fold]\label{ge:mixed-fold}
+Let \(J\) carry a legal type-(d) mark of period \(r\), width
+\(0<v<r\), with \(0\le t<s\le v\).  Let \(B\) be its complete
+native row word and let \(C\) be its square native column word, in
+which the genuine \(t\)-entry is removed and the genuine \(s\)-entry
+inserted.  Explicitly, with \(B_-=X_J\cap(v,r)\) and
+\(C_-=Y_J\cap(v,r)\),
+\[
+ B=X_W\sqcup B_-,\qquad
+ C=(Y_W\setminus\{t\})\sqcup\{s\}\sqcup C_-.
+\]
+The actual mark has \(t\in Y_W\), \(s\notin Y_W\), so these
+lists have equal rank.  Suppose \(g\mid r\), \(1<g<r\), every \(B\)-class
+is full or empty, and every \(C\)-class outside
+\(t\bmod g,s\bmod g\) is full or empty.  Then an actual proper
+type-(d) chart on \(J\) has period \(g\) and width
+\(a=v\bmod g\), with \(0<a<g\), full I--IV, all supplemental
+copies, both genuine end windows, and strictly smaller factors.  No
+inequality between \(v\) and \(g\) is required.
+\end{lemma}
+\begin{proof}
+Let \(R\) be the occupied row residues.  Since the genuine native
+row word omits zero and contains \(v\), we have \(0\notin R\),
+\(a\in R\), and \(a\ne0\).  Put \(m=r/g\).  If the two
+exceptional column residues coincided, their native occupancy would lie
+strictly between zero and \(m\), because the actual \(s\)-position
+is present and the actual \(t\)-position absent.  This contradicts the
+rank identity \(|B|=|C|\).  Thus the residues are distinct.  If
+\(T\) denotes the occupied generic column residues, the two exceptional
+occupancies sum to a positive multiple of \(m\) strictly below \(2m\).
+They therefore sum to \(m\), and \(|T|=|R|-1\).
+Write their increasing residues as \(\tau<\sigma\), and put
+\[
+ \Phi(z)=\#(T\cap[0,z])-\#(R\cap[0,z]),\qquad
+ \Phi(g-1)=-1.
+\]
+
+First suppose \(v\ge g\).  A complete first \(g\)-window of
+the actual mark has generic charge \(-1\).  Its positive final height
+forces both exceptional mark bits to be one and its height to be one.
+In the last complete window the height drops to zero, so both exceptional
+bits are zero.  Write \(v=dg+a\).  The final partial interval gives
+\(0=h_W(dg-1)+\Phi(a)\), with \(h_W(dg-1)\ge1\).
+The first window at \(a\) gives
+\(\Phi(a)+\mathbf1_{\tau\le a}+\mathbf1_{\sigma\le a}>0\).
+Both projected contacts must therefore lie in \([0,a]\), and
+\[
+ 0\le\tau<\sigma\le a,\qquad
+ \Phi(a)=-1,\qquad \Phi(z)\ge0\ (z<a),\qquad
+ \Phi(z)\ge1\ (z<\tau).
+\]
+Also \(a\notin T\), since a full generic class there would put
+a column at the top of the original mark.  If \(v<g\), then
+\(a=v\), the actual contacts are already confined, and the same
+inequalities follow directly from its actual mark heights.  In that
+case keep the actual contact order and literal mark.  No nonexistent
+full \(g\)-window inside the mark is invoked.
+
+Define the full words of the new inner and its mark by
+\begin{align*}
+ X_K&=R\cup\bigl(g+(R\cap[0,a])\bigr),\\
+ Y_K&=T\cup\bigl(g+(T\cap[0,a])\bigr)\cup\{\tau,\sigma\},\\
+ X_{W'}&=R\cap[0,a],&
+ Y_{W'}&=(T\cap[0,a])\cup\{\tau\}.
+\end{align*}
+The mark heights are \(\Phi(z)+\mathbf1_{z\ge\tau}>0\) for
+\(z<a\), with terminal height zero.  The inner heights are
+\[
+ \Phi(z)+\mathbf1_{z\ge\tau}+\mathbf1_{z\ge\sigma}\quad(0\le z<g),
+ \qquad 1+\Phi(z)\quad(0\le z<a)
+\]
+on its first and last pieces.  They are positive, with singleton ends
+and singleton private diagonals \(a,g-1\).  For \(v<g\), the
+first expression is exactly the actual first inner window; positivity
+on the last partial follows from the actual mark inequality.  Thus both
+\(K\) and \(W'\) are actual connected skew diagrams.
+
+Place the two copies of \(W'\) southeast justified in the low and
+high bands.  The periodic row endpoint word gives one constant
+translation of content \(g\); their matching heights make the two
+copies literal translates.  Their full intersection has heights
+\[
+ \min\{\Phi(z)+\mathbf1_{z\ge\tau}+\mathbf1_{z\ge\sigma},
+                 1+\Phi(z)\}
+       =\Phi(z)+\mathbf1_{z\ge\tau}.
+\]
+A proposed enlargement must retain the unique northeast end cell of the
+lower mark and send it to the singleton upper northeast end.  Its
+translation is forced to be the same, and the full intersection forbids
+an enlargement.  This proves I; II is \(0<a<g\).  The low middle
+tail consists of one northwest cell on \(\sigma,\ldots,a-1\), and
+the high tail of one northwest cell on \(g,\ldots,g+\tau-1\).
+The private interval joins both at its singletons.  The diagonal interval
+criterion verifies both complements and the middle, with the actual
+vertical/horizontal type-(d) contacts.  This proves III.  Its hatted
+middle is confined to \([a+1,g-2]\); all translated hatted marked
+bands are \([kg,kg+a-1]\), \(k\in\Z\).  The content separation
+proves both clauses of IV for every integer translate.
+
+All original nonport row and column positions now agree with \(K\).
+Decode the two outer words by
+\[
+ Y_D(j)=Y_J(jg+\tau),\qquad
+ X_D(j)=1-Y_J(jg+\sigma).
+\]
+The actual initial ports are both one and the final ports both zero.
+The mixed generic charge \(-1\) cancels the additional port charge,
+giving \(h_D(j)=h_J(jg+a)>0\).  Thus \Cref{ge:decoder}
+reconstructs every cell and every supplement of \(J\), with strict
+occupied areas.  A complete antitranspose gives the opposite mixed type;
+none of the two exceptional occupancies has been discarded.
+\end{proof}
+
+\subsection{Small-overlap roots}
+
+\begin{lemma}\label{lem:gluing-small}
+Suppose a diagram has a proper root of width zero or one, of period \(p\), and another proper root of period \(Q\), with \(g=\gcd(p,Q)>1\).  It has a proper period-\(g\) root of the same small width.  If the diagram is line-inner-free, its least small-root period divides every proper root period, and every fork at this diagram glues.
+\end{lemma}
+\begin{proof}
+Equal or dividing periods follow from the span remainder and the smaller supplied root; a smaller period dividing \(p\) also has remainder zero or one.  Assume the periods do not divide one another.
+
+For an empty root, \(g\mid N\), and the other width is a multiple of \(g\).  On every nonzero gcd residue the empty root has a full reduced period and an ordinary partner has at most one hole.  Lemma~\ref{lem:gluing-periods}(i) makes both words constant there.  A mixed partner is impossible: its fixed boundary becomes \(g\)-periodic also on residue zero, but its distinct private-endpoint bits occur at two multiples of \(g\).  The positive mixed width and the shortened clause in (i) give the endpoint length in this invocation.
+
+The common height change across the \(g-1\) internal steps of an empty block is nonnegative in the block beginning at height one, and nonpositive in the block ending at the supplied private singleton at \(p-1\).  It is zero.  We now restrict to the actual supplied empty inner \(E\), of span \(p\), rather than fill a parent return arbitrarily.  The partner is ordinary, so \Cref{lem:gluing-periods}(ii) applies to both parent words.  A simultaneous hole must be a multiple of \(p\); none lies at \(g,2g,\ldots,p-g\).  These proper joining positions consequently have one common row value \(\lambda_X\) and one common column value \(\lambda_Y\) in the first \(p\)-window, which is exactly \(E\).
+
+Put \(R=p/g\ge2\), and let \(\Delta\) be the column-minus-row
+charge on the \(g-1\) nonzero residues.  The actual singleton ends
+of \(E\), or equivalently its equal full flag ranks, give
+\[
+ R\Delta+(R-1)(\lambda_Y-\lambda_X)=0.
+\]
+Reduction modulo \(R\), with
+\(\lambda_Y-\lambda_X\in\{-1,0,1\}\), forces
+\(\lambda_Y=\lambda_X=\lambda\) and \(\Delta=0\).
+Only now fill both native returns at zero by \(\lambda\).
+The resulting words of \(E\) are \(g\)-periodic, so
+\Cref{ge:empty-fold}, with its \((K,g,d)=(E,p,g)\),
+constructs \(E=A_E\circ_\kappa K_0\), with \(A_E\) the actual
+row or column of span \(p/g\) and \(\kappa\) the horizontal empty
+mark of period \(g\).  The original empty mark on \(E\) has
+displacement content \(p\), divisible by \(g\).  Apply
+\Cref{lem:gluing-aligned} to lift the original connected outer
+through this same full \(K_0\), retaining its actual descended
+edge gauge.  Its span is \(N/g\ge2\); \Cref{ge:decoder}, now
+on this actual composition, gives both strict factor areas.
+The first \(g\)-window, both joining strings and the true final
+caps are those of the original parent.
+
+For a singleton root, its first and last steps determine its case.  The boundary coding at period \(p\) is
+{\abovedisplayskip=14pt plus3pt minus4pt \belowdisplayskip=14pt plus3pt minus4pt
+ \abovedisplayshortskip=14pt plus3pt minus4pt \belowdisplayshortskip=14pt plus3pt minus4pt
+\begin{equation}\label{eq:gluing-singleton}
+ \begin{array}{c|cc|c}
+ &\text{free }A&\text{free }B&\text{fixed values}\\ \hline
+ \mathrm{(a)}&0&1&A_1=B_0=0\\
+ \mathrm{(b)}&1&0&A_0=B_1=1\\
+ \mathrm{(c)}&\varnothing&0,1&A_1=0,\ A_0=1\\
+ \mathrm{(d)}&0,1&\varnothing&B_1=1,\ B_0=0.
+ \end{array}
+\end{equation}}
+Subscripts zero mean positive multiples of the period.  Now \(N-1\) is divisible by \(g\), the other width is \(1+bg\), and every reduced residue word has at least twice both reduced periods.  If the other chart is ordinary, (i) makes every residue outside the allowed free residues constant, so \eqref{eq:gluing-singleton} holds at period \(g\).  If the singleton chart is ordinary and its partner mixed, the latter's fixed boundary becomes fully \(g\)-periodic, contradicting the endpoint values in the table.  Opposite mixed cases give the same conflict, since zero and one are different gcd residues.
+
+For two case-(d) charts, \(B\) is \(g\)-periodic.  Every private residue of \(A\) is constant by (i), unless both partner phases project there.  At most one private residue \(R\) remains.  If it does, the zero and one classes have no partner hole and are constant too; their endpoint values agree with \(B\), so the joins between private blocks contribute zero height change.  Only one bit varies within a private block, giving two consecutive possible integer drifts \(d,d+1\).  Diagonals \(1\) and \(p-1\) are the private singletons of the supplied root, so the first private block starts, and the \((p/g)\)-th ends, at height one.  Their drifts sum to zero and cannot have opposite strict signs, so every drift is zero.  The bit at \(R\) is constant; the supplied period propagates this through the parent.  Case (c) follows by antitransposition.
+
+The period-\(g\) singleton coding now constructs a legal root.  Every block of private diagonals \([jg+1,\,jg+g-1]\) has the same drift.  The block on \([1,g-1]\) starts at height one and the block ending on diagonal \(p-1\) ends at height one, so positivity of the heights at their other ends forces the common drift to be zero.  Take the first \(g\) parent diagonals and append the terminal singleton in the direction prescribed by the table.  The singleton marks are maximal and separated; their complements are connected skew.  Their marked hats are empty, so IV holds.  For an ordinary case, sample the two free bits to recover the outer.  For case (d), private heights \(M_j=H_{jg+1}\) and joining heights \(S_j=H_{jg}\) give binary differences \(S_j-M_{j-1}\) and \(S_j-M_j\); these construct the outer and \eqref{eq:gluing-mixed-profile} reproduces the parent.  Its heights are positive with singleton ends.  Both factors are proper.
+
+This includes the equal-small-width cases.  With two empty roots, \(N\) contains a full least-common-multiple block; with two singleton roots, \(N-1\) does.  Their residue graphs give exactly the preceding constructions.  An empty and singleton pair has coprime periods, since they divide \(N\) and \(N-1\); it belongs to the line-inner alternative, not to a proper period-one construction.
+
+For the last assertion, assume the diagram is line-inner-free and choose the least period \(p_0\) among roots of the occurring small width.  Lemma~\ref{lem:gluing-lines} makes its gcd with any other proper period greater than one.  Empty and singleton roots cannot both occur in such a diagram.  Applying the construction to \(p_0\) and any other period \(Q\), or using the smaller supplied root in the dividing case, makes \(\gcd(p_0,Q)\) a root of that same width.  Minimality gives \(p_0\mid Q\).  All fibers lie in the \(p_0\)-fiber by Proposition~\ref{prop:gluing-divisible} and Lemma~\ref{lem:gluing-equal}.
+\end{proof}
+
+\subsection{Two ordinary roots}
+
+Assume the periods do not divide one another and put
+\begin{equation}\label{eq:gluing-gcd-data}
+ \begin{gathered}
+ p=ag,\quad Q=cg,\quad\gcd(a,c)=1,\quad a,c\ge2,\\
+ N=gM+w_g,\quad0\le w_g<g,\qquad w=bg+w_g,\quad u=dg+w_g.
+ \end{gathered}
+\end{equation}
+Coprime periods and small-overlap roots have already been treated.  Thus \(g>1\), and the supplied widths may be assumed at least two.
+
+\begin{lemma}\label{lem:gluing-ordinary-drift}
+For two ordinary roots, let \(A^0_j,B^0_j\) be the generic bits on residue \(j\) modulo \(g\), as given by Lemma~\ref{lem:gluing-periods}(ii).  Put
+\begin{equation*}
+ C_j=A^0_j-B^0_j,\quad \Delta=\sum_{j=0}^{g-1}C_j,
+ \quad\epsilon=C_0,\quad P_{w_g}=\sum_{j=1}^{w_g}C_j.
+\end{equation*}
+Then \(\Delta=0\).  Every initial deviation from the generic words occurs within the first \(w_g\) steps, and every terminal deviation within the last \(w_g\) steps.  Moreover
+\begin{equation}\label{eq:gluing-pinches}
+ H_{w_g}=H_{g-1}=H_{N-g}=H_{N-w_g-1}=1.
+\end{equation}
+\end{lemma}
+\begin{proof}
+Before content \(p\), every deviation is at an initial exceptional phase.  A northwest deviation changes zero to one; a southeast deviation changes one to zero.  Both increase height, and there are at most two in total.  If their sum is \(\delta_p\), the supplied private singletons give
+\begin{equation}\label{eq:gluing-pinch-equations}
+ b\Delta+P_{w_g}+\delta_p=0,\qquad
+ a\Delta-\epsilon+\delta_p=0,\qquad0\le\delta_p\le2.
+\end{equation}
+The other root gives the same equations with \((a,b,\delta_p)\) replaced by \((c,d,\delta_Q)\).  Positive drift contradicts \(0\le\epsilon-a\Delta\), since \(\epsilon\le1\).  Negative drift can satisfy both bounds only when
+\(\{a,c\}=\{2,3\}\), \(\Delta=-1\), and \(\epsilon=-1\).
+Subtracting the equations then gives \(a-b=c-d=k\in\{1,2\}\).  Properness and the two congruences give \(M\ge9-k\) and \(M\equiv-k\pmod6\), hence \(M\ge10\).  Content \(6g-1\) is present.  Its generic height is \(1+6\Delta-\epsilon=-4\), and the two possible simultaneous-hole deviations before \(6g\) add at most two.  This contradicts positivity.
+
+Thus \(\Delta=0\), \(\delta_p=\delta_Q=\epsilon\in\{0,1\}\), and \(P_{w_g}=-\epsilon\).  If \(\epsilon=1\), the generic height at \(w_g\) is zero; positivity forces the unique correction to have occurred by then.  If \(\epsilon=0\), there is no initial correction.  Reversing the two roots gives the terminal assertion, with budget \(-C_{w_g}\in\{0,1\}\).  There are no further exceptional positions in either \(g\)-window, since each boundary has at most one progression of spacing \(acg\).  The stated singleton heights follow.
+\end{proof}
+
+\begin{proposition}\label{prop:gluing-ordinary-fold}
+Two ordinary roots of nondividing periods, with gcd \(g>1\), have a proper legal period-\(g\) root.
+\end{proposition}
+\begin{proof}
+Use \eqref{eq:gluing-gcd-data}.  A supplied width zero or one is
+already covered by \Cref{lem:gluing-small}; otherwise both widths
+are at least two.  Physically antitranspose the whole comparison
+if necessary so that its period-\(p\) chart \(F=D\circ_\omega E\)
+is case (a).  This transports both full marks and keeps the same
+coarse outer in the new case-(a) coordinates, by
+\eqref{eq:gluing-offsets}.  Write \(X_W,Y_W\) for the full
+southwest-normalized flags of its actual lower mark, and put
+\(B_-=X_E\cap(w,p)\), \(C_-=Y_E\cap(w,p)\).
+The complete coding formulas give the disjoint lists
+\[
+ \begin{aligned}
+ X_E&=(p+X_W)\sqcup B_-\sqcup(X_W\setminus\{s\}),\\
+ Y_E&=(p+(Y_W\setminus\{t\}))\sqcup C_-\sqcup Y_W.
+ \end{aligned}
+\]
+In particular, \(|B_-|=|C_-|\), since the full row and column
+ranks of \(E\) and \(W\) agree.  The completed native lists are
+\[
+ \mathcal B=X_W\sqcup B_-=(X_E\cap[0,p))\cup\{s\},
+ \qquad
+ \mathcal C=Y_W\sqcup C_-=Y_E\cap[0,p).
+\]
+Thus \(|\mathcal B|=|\mathcal C|\), with
+\(0\notin\mathcal B\), \(w\in\mathcal B\),
+\(0\in\mathcal C\), \(w\notin\mathcal C\).
+The genuine returns \(s\in X_W\), \(t\in Y_W\) make both
+exceptional subsets nonempty, including \(s=w\) and \(t=0\).
+
+By \Cref{lem:gluing-local}(3), both extreme \(p\)-windows of
+\(F\) are the actual windows of \(E\), up to translations of
+content divisible by \(p\).  Restrict \Cref{lem:gluing-periods}(ii)
+to these windows.  All simultaneous row holes lie in \(s\bmod g\),
+and all column holes in \(t\bmod g\).  Completing the row return
+therefore makes every \(\mathcal B\)-class off \(s\bmod g\) and
+every \(\mathcal C\)-class off \(t\bmod g\) full or empty.
+At residue zero, the native row value zero is also read at the
+actual step \(p\).  The column cap one is read there when \(t>0\);
+when \(t=0\), its class is exceptional.  These representatives in
+the actual windows supply the endpoints, without a periodic extension.
+
+Apply \Cref{ge:ordinary-fold} with
+\((J,r,v,g)=(E,p,w,g)\), where \(2\le g<p\).
+It gives \(E=A_E\circ_\kappa K\), with width
+\(w\bmod g=w_g\), span \(N_K=g+w_g\), both full end windows,
+and a legal ordinary mark, genuinely empty at \(w_g=0\) and a
+single cell at \(w_g=1\).  The original mark \(\omega\) on this
+actual \(E\) has displacement content \(p\).  Since \(g\mid p\),
+\Cref{lem:gluing-aligned} gives, for the original connected \(D\),
+\[
+ F=D_g\circ_\kappa K,\qquad
+ D_g=\gamma(D)\circ_\lambda A_E,\qquad
+ \gamma\in\{\mathrm{id},\operatorname{AT}\}.
+\]
+Here \(\lambda\) is the actual descended full mark, and
+\(\gamma\ne\mathrm{id}\) only when it is empty.  The new outer has
+span \(M=(N-w_g)/g\ge2\), so \Cref{ge:decoder} on this actual
+composition makes both factors proper and strictly smaller in
+occupied area.  Undo the initial physical antitranspose.
+If it leaves a vertical empty reading on \(K\),
+\eqref{eq:gluing-gauge} restores the horizontal edges while applying
+the involution to the new outer function.
+
+\end{proof}
+
+\subsection{Pairs involving mixed charts}
+
+Continue with nondividing periods and \(g>1\).  A fixed boundary of a mixed chart becomes \(g\)-periodic in every pairing: use Lemma~\ref{lem:gluing-periods}(i) against an ordinary chart, the two full periods for equal mixed cases, and (iii), with the periods ordered, for opposite mixed cases.  The residue lengths are those checked after that lemma.  If \(w_g=0\), the overlap width and the period of the mixed chart are both multiples of \(g\); its two different private-endpoint bits contradict this periodicity.  Thus mixed pairs at remainder zero are impossible.
+
+\begin{lemma}\label{lem:gluing-collision}
+Suppose \(N=Mg+w_g\), \(0<w_g<g\), \(B\) is \(g\)-periodic, and \(A\) is \(g\)-periodic outside one residue \(R\).  A case-(d) root of period a multiple of \(g\) cannot have both middle phases congruent to \(R\).
+\end{lemma}
+\begin{proof}
+Every complete \(g\)-block has height increment \(D+x\), for one fixed integer \(D\) and a bit \(x\).  Heights on every fixed residue are monotone in the same direction.  If \(D\ge0\), heights on residue \(w_g-1\) are nondecreasing and end at one; positivity makes them all one.  Thus all corresponding increments are zero and their bits are zero.  But \(s-t\ge g\), so \(s\ge g>w_g-1\); its initial cap bit is one, a contradiction.  If \(D\le-1\), the residue-zero heights are nonincreasing and begin at one.  Their zero increments force the corresponding bits to be one.  The terminal \(t\)-step has bit zero and satisfies
+\(0<N-w+t\le N-g\le Mg\), again a contradiction.
+\end{proof}
+
+For two same-case mixed roots, a collision of the smaller chart's phases leaves only that residue possibly nonperiodic: elsewhere use a full period against at most two larger-period holes, with Lemma~\ref{lem:gluing-periods}(iii).  If only the larger chart has a collision, use its full period against at most one smaller-period hole.  A mixed/ordinary pair has at most one ordinary hole.  Lemma~\ref{lem:gluing-collision} therefore excludes every repeated projected mixed phase in these pairings.
+
+\begin{lemma}\label{lem:gluing-incompatible}
+At nondividing periods a mixed/ordinary pair and an opposite-mixed pair are impossible.
+\end{lemma}
+\begin{proof}
+The zero remainder was just excluded.  For a mixed/ordinary pair, antitranspose to make the mixed chart case (d).  Its fixed word has \(B^0_0=0\), \(B^0_{w_g}=1\).  Let the ordinary width be \(u\) and its phases \(t,s\).  In case (a), the opposite initial and terminal values at \(s\) contradict periodicity unless \(s=u\); then its initial value zero contradicts \(B^0_{w_g}=1\).  In case (b), the opposite values at \(t\) force \(t=0\); its terminal value one then contradicts \(B^0_0=0\).  An empty ordinary mark has already been covered by remainder zero.
+
+For opposite mixed cases, order \(p<Q\) and make the smaller chart case (d).  The ordered two-hole argument makes \(B\) \(g\)-periodic.  If the smaller phases collide, \(A\) is periodic outside that residue and Lemma~\ref{lem:gluing-collision} applies.  Otherwise each residue has a full period against at most one hole, so \(A\) is \(g\)-periodic too.  The two cases give \(A^0_0=1\), \(B^0_0=0\).  If \(\Delta=\sum(A^0_j-B^0_j)\), the supplied private singleton at \(p-1=ag-1\) requires \(a\Delta=1\), impossible for integers with \(a\ge2\).
+\end{proof}
+
+\begin{proposition}\label{prop:gluing-mixed-fold}
+Two same-case mixed roots of nondividing periods, with gcd \(g>1\), have a proper legal period-\(g\) root.  At remainder one its inner is singleton-marked; at gcd two it is the three-cell hook.
+\end{proposition}
+\begin{proof}
+Antitranspose both full charts if necessary to take case (d), and
+use \eqref{eq:gluing-gcd-data}.  The remainder is positive by the
+fixed-boundary argument above.  By \Cref{lem:gluing-collision},
+the two phases of each chart have distinct gcd residues.  Thus
+each residue has at most one hole from each period, and
+\Cref{lem:gluing-periods}(ii) gives generic northwest bits
+\(A^0_j\); the southeast bits \(B^0_j\) are fully periodic.  Put
+\begin{equation*}
+ C_j=A^0_j-B^0_j,\qquad
+ \Delta=\sum_{j=0}^{g-1}C_j,\qquad e_0=C_0.
+\end{equation*}
+Here \(B^0_0=0\), so \(e_0\in\{0,1\}\).  The initial deviations are at most two inward northwest changes.  The two private singleton equations are exactly \eqref{eq:gluing-pinch-equations}, with \(e_0\) in place of \(\epsilon\).  Positive drift makes \(e_0-a\Delta<0\); negative drift makes \(e_0-\max(a,c)\Delta\ge3\).  Both contradict the two-unit bound.  Thus \(\Delta=0\), the initial budget is \(e_0\), and \(\sum_{j=1}^{w_g}C_j=-e_0\).  Positivity confines the initial correction to the first \(w_g\) steps.  Reading backward confines the terminal deficit to the last \(w_g\), with budget \(-C_{w_g}\in\{0,1\}\).  The four singleton identities \eqref{eq:gluing-pinches} follow.
+
+For either supplied chart, the two interface slots in \eqref{eq:gluing-interface} contribute \(A^D_j+1-B^D_j\), while the height change is \(A^D_j-B^D_j\).  The fixed part between private samples is therefore \(-1\), giving
+\begin{equation*}
+ a\Delta=-1+A^0_{t\bmod g}+A^0_{s\bmod g}.
+\end{equation*}
+The two generic slot bits are one zero and one one.  Call their actual phases \(z,o\), respectively.  An existing initial step at \(z\) is the unique correction, and an existing terminal step at \(o\) is the unique deficit.  Concentration, also allowing the absent steps zero and \(N\), gives
+\begin{equation}\label{eq:gluing-mixed-phases}
+ \begin{gathered}
+ 0\le z\le w_g,\qquad bg\le o\le bg+w_g,\\
+ \tau=z,\quad\sigma=o-bg,\quad
+ \alpha=\min(\tau,\sigma),\quad\beta=\max(\tau,\sigma),\\
+ 0\le\alpha<\beta\le w_g,\qquad
+ C_0=\mathbf1_{\tau>0},\quad -C_{w_g}=\mathbf1_{\sigma<w_g}.
+ \end{gathered}
+\end{equation}
+At \(w_g=1\) these same bounds give \((\alpha,\beta)=(0,1)\).
+
+Write the first actual supplied chart as \(F=D\circ_\omega E\).
+Its type-(d) mark has normalized full flags \(X_W,Y_W\), with
+\(t\in Y_W\), \(s\notin Y_W\), and private lists
+\(B_-=X_E\cap(w,p)\), \(C_-=Y_E\cap(w,p)\).
+The full composition coding gives
+\[
+ \begin{aligned}
+ X_E&=X_W\sqcup B_-\sqcup(p+X_W),\\
+ Y_E&=(Y_W\cup\{s\})\sqcup C_-\sqcup(p+(Y_W\setminus\{t\})).
+ \end{aligned}
+\]
+Equal full ranks give \(|B_-|=|C_-|\).  The complete native
+row and square column sets are therefore
+\[
+ \mathcal B=X_W\sqcup B_-=X_E\cap[0,p),\qquad
+ \mathcal C=(Y_W\setminus\{t\})\sqcup\{s\}\sqcup C_-
+            =(Y_E\cap[0,p))\setminus\{t\}.
+\]
+Restrict the parent words to both actual \(p\)-windows of \(E\),
+as in \Cref{lem:gluing-local}(3).  The row word is \(g\)-periodic;
+its native zero is absent, also at the actual step \(p\), and
+its native \(w\) is present.  Every \(\mathcal B\)-class is
+therefore full or empty.  The residue graphs of
+\Cref{lem:gluing-periods}(ii), with the endpoint lengths checked
+there, make every column class constant apart from simultaneous
+holes, which lie in \(t\bmod g\) or \(s\bmod g\).
+Passing to the square list changes only these two classes.
+The column cap at zero is represented by the actual value one
+at \(p\) when \(t>0\); when \(t=0\), it is exceptional.
+Thus every other \(\mathcal C\)-class is full or empty.
+
+The equal ranks \(|\mathcal B|=|\mathcal C|\) retain both
+exceptional occupancies: the true \(t\)-position is absent and
+the true \(s\)-position present.  Their sum is a positive multiple
+of \(m_0=p/g\) below \(2m_0\), hence \(m_0\).
+Apply \Cref{ge:mixed-fold} with
+\((J,r,v,g)=(E,p,w,g)\), where \(2\le g<p\).
+It gives \(E=A_E\circ_\kappa K\) with a full legal type-(d) mark,
+both genuine end windows, and width \(w\bmod g=w_g>0\), for
+both \(w<g\) and \(w\ge g\).  Its two contacts are the ordered
+projections \(\alpha<\beta\) in \eqref{eq:gluing-mixed-phases}.
+
+The original mark on this actual \(E\) has displacement content
+\(p\).  Since \(g\mid p\), \Cref{lem:gluing-aligned} gives
+\[
+ F=D_g\circ_\kappa K,\qquad
+ D_g=\gamma(D)\circ_\lambda A_E.
+\]
+The descended full mark \(\lambda\) and its possible empty
+gauge \(\gamma\) are those of that lemma.  The identity includes
+every supplement for the original arbitrary connected \(D\).
+Since \(N_{D_g}=M\ge2\), \Cref{ge:decoder} makes both factors
+proper and strictly smaller in occupied area.
+
+At \(w_g=1\), the actual connected mark has span one and is a
+cell.  If \(g=2\), necessarily \(w_g=1\); the private diagonal
+and both end diagonals of \(K\) are singletons, and its type-(d)
+attachments give north/east steps.  Thus \(K\) is the three-cell
+hook.  Transporting the full charts back by antitransposition
+gives case (c).  Appendix~\ref{app:gluing-fold-data} records the
+cap heights and outer words for both folds.
+\end{proof}
+
+\subsection{Completion of the gluing proof}
+
+\begin{proof}[Proof of Theorem~\ref{thm:gluing}]
+Normalize the two incident witnesses as proper roots of \(Y\), transporting the full marked inner whenever it is rotated.  Write their periods \(p,Q\), widths \(w,u\), and outer spans \(r,m\).  Then
+\begin{equation*}
+ N=rp+w=mQ+u,\qquad r,m\ge2,\qquad
+ p,Q\ge2,\qquad0\le w<p,\quad0\le u<Q.
+\end{equation*}
+Period one would force a one-cell inner and is not a proper case.
+
+If any proper line inner exists at \(Y\), Lemma~\ref{lem:gluing-lines} gives the edge \(X,Z\).  Otherwise equal periods give identical fibers by Lemma~\ref{lem:gluing-equal}, and distinct dividing periods give nested fibers by Proposition~\ref{prop:gluing-divisible}.
+
+For nondividing periods put \(g=\gcd(p,Q)\).  Coprimality contradicts the absence of line inners.  If any width-zero or width-one root exists at \(Y\), Lemma~\ref{lem:gluing-small} puts both incident fibers in its least-period fiber.  This includes the small/small and small/arbitrary overlap cases, regardless of the selected witnesses.
+
+The remaining witnesses have widths at least two and \(g>1\).  If both charts are ordinary, Proposition~\ref{prop:gluing-ordinary-fold} constructs the gcd root at every remainder: empty at zero, singleton at one, and the folded mark otherwise.  All four ordered ordinary attachment pairs are covered; the fold is permitted to change the ordinary case.  If at least one chart is mixed, remainder zero is impossible.  At positive remainder, Lemma~\ref{lem:gluing-incompatible} excludes mixed/ordinary and opposite-mixed pairs; Proposition~\ref{prop:gluing-mixed-fold} constructs the gcd root for equal mixed cases.  Its remainder-one specialization is the singleton construction, including the gcd-two hook, and its remaining remainders include both phase orders, boundary phases, interior phases, and zero coarse-overlap quotient \(b\).
+
+Every constructive leaf supplies an actual proper I--IV root at \(g>1\), with \(g<p,Q\).  Proposition~\ref{prop:gluing-divisible} puts both incident fibers inside this one fiber.  It transports arbitrary equal outer functions, and its rotated-factor identity includes both endpoint orientations.  Hence \(X,Z\) are adjacent.
+
+Finally, a shortest path between nonadjacent vertices in a connected graph contains three successive vertices with two edges and a missing third edge.  The preceding argument excludes this configuration.  Vertices without proper charts, including disconnected diagrams under Definition~\ref{def:gluing-graph}, are isolated and satisfy the assertion as well.
+\end{proof}
+
+\begin{remark}
+The proof does not give a common refinement of arbitrary complete irreducible composition chains.  Equal-period charts are related by a gauge; strict divisible periods and the constructed gcd roots instead prove reducibility of the relevant larger inner.  Nor does the theorem supply an edge between different common-factor components.  Full-class connectivity, arbitrary-mate chart extraction, and terminal rigidity remain separate questions; the McNamara--van Willigenburg necessity conjecture is not a consequence of local gluing alone.
+\end{remark}
+
+\section{Source-minimal fibers}\label{sec:minimal-fibers}
+
+Throughout this section and \Cref{sec:necessity-reduction}, Schur classes contain only connected diagrams.  Write \([F]=\{G:s_G=s_F\}\), and recall that a diagram is rooted if it has a proper chart, and chartless otherwise.  Let \(\Gamma(P)\) be the common-factor graph on this connected class, let \(\Gamma^+(P)\) be obtained by adjoining edges between distinct rotation mates, and let \(\overline\Gamma(P)\) be the quotient by rotation.
+
+The literal graph need not be connected.  Put \(H=(2,1)\) and \(H^*=(2,2)/(1)\).  The four connected three-cell diagrams are the row, the column, and these two hooks.  Jacobi--Trudi gives
+\[
+ s_H=s_{H^*}=h_1h_2-h_3,\qquad
+ s_{(3)}=h_3,\qquad s_{(1,1,1)}=h_1^3-2h_1h_2+h_3.
+\]
+Homogeneity therefore gives \([H]=\{H,H^*\}\).  Both hooks have span three, whereas a proper chart has span \(rq+w\ge4\).  Thus \(\Gamma(s_H)\) has two isolated vertices, but its rotation quotient has one vertex.  This is not a counterexample to composition-and-reversal necessity: the pair has a one-factor reversal presentation.
+
+\begin{lemma}\label{lem:rotation-components}
+Every component of \(\Gamma^+(P)\) and of \(\overline\Gamma(P)\) is a clique.  Rotation augmentation changes no rooted component.
+\end{lemma}
+\begin{proof}
+Rotating either endpoint of a common-factor edge rotates its full marked presentation and replaces the outer by its rotation, without changing its Schur function.  In particular, a rooted diagram already shares a fiber with its rotation.  Every genuinely new rotation edge therefore joins two chartless isolated vertices.  It creates a two-vertex clique, and every other component remains a clique by \Cref{thm:gluing}.  Each augmented component is rotation-stable, so quotienting it preserves completeness and does not merge distinct components.
+\end{proof}
+
+\subsection{Minimizing a chart}
+
+The following minimum is the one in \cite[Def.~5.5]{McNamara2009Classification}; the adjective \emph{source-minimal} specifies the diagram at which it is taken.  For a proper chart \(\chi=(D,E,\omega)\) of \(F\), of period \(p\) and width \(w\), define
+\begin{equation}\label{eq:chart-score}
+ \operatorname{score}(\chi)=(w,N_E)
+   =(N_F\bmod p,\ p+N_F\bmod p).
+\end{equation}
+A chart is source-minimal if its score is lexicographically least among the proper charts of \(F\).  Such a chart exists whenever \(F\) is rooted: its period belongs to the finite set \(2\le p\le N_F/2\), and \eqref{eq:chart-score} depends only on the period.  This definition does not assert that \(E\) is chartless.  Write \(\mathcal F_\chi=\mathcal F(\omega,s_D)\).
+
+\begin{theorem}[Source-minimal domination]\label{thm:source-minimal-domination}
+For every prescribed source-minimal chart \(\chi\) of a connected diagram \(F\), every proper-chart fiber through \(F\) is contained in \(\mathcal F_\chi\).  Consequently
+\[
+ \operatorname{Comp}_{\Gamma(s_F)}(F)
+ =\operatorname{Comp}_{\Gamma^+(s_F)}(F)=\mathcal F_\chi.
+\]
+\end{theorem}
+\begin{proof}
+Let \(p\) be the period of \(\chi\), and compare it with any other proper period \(q\) at \(F\).  Equal periods give equal fibers by \Cref{lem:gluing-equal}.  If \(p\mid q\) and \(p<q\), \Cref{prop:gluing-divisible} gives the required containment.
+
+If \(q\mid p\) and \(q<p\), then \(N_F\bmod q=(N_F\bmod p)\bmod q\le N_F\bmod p\).  Either the width decreases or, at equal width, the inner span decreases.  The period-\(q\) chart contradicts source-minimality.
+
+Suppose neither period divides the other and \(g=\gcd(p,q)>1\).  A supplied small-width chart gives a proper period-\(g\) root by \Cref{lem:gluing-small}.  Otherwise \Cref{prop:gluing-ordinary-fold,prop:gluing-mixed-fold} construct that root for the possible attachment pairs; \Cref{lem:gluing-incompatible} excludes the others.  Its width is \((N_F\bmod p)\bmod g\), so the same strict score comparison again contradicts minimality.  This argument uses a legal divisor chart, not just a common period of words.
+
+Finally, if \(\gcd(p,q)=1\), \Cref{lem:gluing-lines} forces the displayed inner of \(\chi\) to be a line.  The full-class row or column transport in its proof gives \(\mathcal F_\chi=[F]\), so containment holds in this case too.
+
+The fiber is a clique containing \(F\).  Every other vertex in its component is adjacent to \(F\), by \Cref{thm:gluing}, and that edge is witnessed by a proper-chart fiber through \(F\).  The containments just proved put the vertex in \(\mathcal F_\chi\).  \Cref{lem:rotation-components} gives the augmented-graph assertion.
+\end{proof}
+
+\begin{table}[t]
+\parbox{\textwidth}{In the comparison below \(p\) is the period of \(\chi\), \(q\) is any other proper period at \(F\), and \(g=\gcd(p,q)\).  Two comparisons are excluded by the score; the other three give the containment.}
+
+\medskip
+\begin{tabular}{l|l|l}
+Comparison & Consequence for \(\mathcal F_\chi\) & By\\ \hline
+\(q=p\) & Equal fibers & \ref{lem:gluing-equal}\\
+\(p\mid q\), \(p<q\) & Contains the period-\(q\) fiber & \ref{prop:gluing-divisible}\\
+\(q\mid p\), \(q<p\) & Excluded by score & \eqref{eq:chart-score}\\
+Neither divides, \(g>1\) & Excluded, via a period-\(g\) root & \ref{lem:gluing-small}, \ref{prop:gluing-ordinary-fold}, \ref{lem:gluing-incompatible}, \ref{prop:gluing-mixed-fold}\\
+\(\gcd(p,q)=1\) & \(\mathcal F_\chi=[F]\) & \ref{lem:gluing-lines}
+\end{tabular}
+\end{table}
+
+\begin{corollary}\label{cor:least-root-period}
+If a rooted connected diagram has no proper chart with a line inner, its least proper period divides every proper period.  Its least-period charts are exactly its source-minimal charts.  More generally, the period of any source-minimal chart with a nonline inner divides every proper period at its source.
+\end{corollary}
+\begin{proof}
+Let \(p_0\) be a least period.  A nonmultiple period gives either a smaller divisor chart or a smaller proper gcd chart by the constructions used above; a coprime period forces line inners.  Hence every period is a multiple of \(p_0\).  If \(w_0=N_F\bmod p_0\), every other width is \(bp_0+w_0\) for an integer \(b\ge0\).  A larger period consequently has a strictly larger score.  For a prescribed source-minimal nonline chart, the five comparisons in the preceding proof leave only equal periods and multiples of its period.
+\end{proof}
+
+The line-inner qualification is necessary.  The row has two legal singleton-overlap presentations
+\[
+ (7)=(3)\circ_{(1)}(3)=(2)\circ_{(1)}(4),
+\]
+with periods two and three, respectively.  Its least proper period is two and does not divide three.
+
+\subsection{Component keys}
+
+Let \(\iota\) be the usual involution on symmetric functions, so that \(\iota(h_j)=e_j\) and \(\iota(s_D)=s_{D^{\mathsf t}}=s_{\operatorname{AT}(D)}\).  For a rooted diagram \(F\), choose a source-minimal chart \(F=D\circ_\omega E\) and set
+\begin{equation}\label{eq:component-key}
+ K(F)=[(\omega,s_D)].
+\end{equation}
+The brackets identify translations, transported rotation \((\omega,Q)\sim(\omega^*,Q)\), and the legal ordinary gauge
+\[
+ (\omega_a,Q)\sim(\omega_b,\iota(Q))
+\]
+from \eqref{eq:gluing-gauge}.  Empty vertical readings are converted to the horizontal convention by this same rule.  The key consists of marked diagram data and a polynomial; it is not defined to be the component.
+
+\begin{proposition}\label{prop:component-key}
+The key \(K(F)\) is independent of the source-minimal chart chosen.  For rooted diagrams \(F,H\) in one connected Schur class,
+\[
+ K(F)=K(H)\quad\Longleftrightarrow\quad
+ F,H\text{ lie in the same common-factor component}.
+\]
+\end{proposition}
+\begin{proof}
+At one source, equal minimum scores imply equal periods.  The proof of \Cref{lem:gluing-equal} reconstructs the inner from the two extreme windows; its only remaining alternative is the ordinary gauge.  Fixed-chart injectivity identifies the outer, with antitransposition in the gauge case.  This proves well-definedness, including the required involution on its polynomial.
+
+If \(F,H\) lie in one component, \Cref{thm:source-minimal-domination} puts \(H\) in every source-minimal fiber at \(F\).  The transferred chart has the same score, so the minimum at \(H\) is no larger.  Reversing the argument gives the opposite inequality.  These minima agree, and equal-period reconstruction at \(H\) identifies its key with that of the transferred chart.  Conversely, equal keys give the same marked fiber after the permitted transports, hence the same component.
+\end{proof}
+
+The involution in \eqref{eq:component-key} cannot be omitted.  In coordinates with row and column indices starting at zero, let \(E=(4,4,2)/(2)\).  It has two legal width-two, period-four ordinary marks:
+{\abovedisplayskip=14pt plus3pt minus4pt \belowdisplayskip=14pt plus3pt minus4pt
+ \abovedisplayshortskip=14pt plus3pt minus4pt \belowdisplayshortskip=14pt plus3pt minus4pt
+\[
+ \begin{array}{c|c|c}
+ &W_-&v\\ \hline
+ \omega_a&\{(1,0),(2,0)\}&(-1,3)\\
+ \omega_b&\{(2,0),(2,1)\}&(-2,2).
+ \end{array}
+\]}
+Each is its end intersection; its one-mark complements are connected skew, and its middle is a ribbon, so IV holds.  The two placements in \eqref{eq:gluing-offsets} give
+\[
+ (2)\circ_{\omega_a}E=(1,1)\circ_{\omega_b}E.
+\]
+The outer functions are \(h_2\) and \(e_2=h_1^2-h_2\), not equal.  They are identified by \(\iota\), exactly as the key requires.  Here each end copy has two cells adjacent to the middle, so Hypothesis V fails, and the same interfaces admit the two ordinary readings; their interchange antitransposes the outer, while \(h_2\ne e_2\) makes the ambiguity visible in the key.
+
+\subsection{A nonminimal fiber}
+
+An arbitrary prescribed proper chart need not describe the component.  For the following example write \((r_1,\ldots,r_k;g_1,\ldots,g_{k-1})\) for the row lengths and the overlaps minus one, from top to bottom.  Let \(H=(2,1)\), \(V=(4,1)\), and give both their singleton case-(d) marks.  Denote these by \(\omega\) and \(\mu\); their periods are two and four.  Define
+\begin{equation}\label{eq:nonminimal-fiber}
+ \begin{gathered}
+ D=H\circ_\mu V,\qquad B=V\circ_\omega H,\\
+ Y=D\circ_\omega H,\qquad
+ X=(H\circ_{\mu^*}V^*)\circ_\omega H.
+ \end{gathered}
+\end{equation}
+Forward reversal and composition give \(s_X=s_Y\).  Substitution in \eqref{eq:gluing-offsets} gives
+\[
+ D=(4,5,4,1;0,1,0),\qquad
+ B=(2,2,2,3,2,1;0,0,0,1,0).
+\]
+Normalize \(B\) with bottom row \(\{(5,0)\}\).  The lower mark
+\(\{(4,0),(4,1),(5,0)\}\) and displacement \((-4,4)\) define a legal case-(d) mark \(\eta\), of period eight and width three.  Its end copies are maximal intersections, the complements are connected skew, and its middle is a ribbon.  The same copy placements give
+\[
+ Y=H\circ_\eta B.
+\]
+Since \([H]=\{H,H^*\}\), its coarse fiber consists precisely of the four diagrams with outer \(H\) or \(H^*\) and marked inner \(\eta\) or \(\eta^*\).  Put \(Z=H^*\circ_\eta B\).  Their row-length sequences, and that of \(X\), are determined by the placements as follows:
+\[
+ \begin{aligned}
+ \mathbf r(Y)&=(2,2,2,3,2,2,2,4,3,2,2,3,2,1),\\
+ \mathbf r(Z)&=(2,2,2,4,3,2,2,3,2,2,2,3,2,1),\\
+ \mathbf r(X)&=(3,2,2,2,3,2,2,4,3,2,2,2,2,1).
+ \end{aligned}
+\]
+The other two sequences are the reversals of \(\mathbf r(Y)\) and \(\mathbf r(Z)\).  These four are distinct and start with one or two; \(\mathbf r(X)\) starts with three.  Thus \(X\) is outside the coarse fiber, although it shares the fine fiber with \(Y\).  Both parents have 32 cells and span 27, and they are not rotations.
+
+The fine score is \((1,3)\), whereas the coarse score is \((3,11)\).  A score below \((1,3)\) would require width zero.  At span 27 the only possible proper empty-overlap periods are three and nine.  Both are coprime to the supplied period-two mixed chart, contradicting \Cref{lem:gluing-lines}.  The fine chart is therefore source-minimal.  The example disproves domination by an arbitrary proper chart, not connectivity of the class.
+
+\section{Reduction of composition necessity}\label{sec:necessity-reduction}
+
+For a connected Schur class \(\mathcal C\), consider the two assertions
+\begin{align*}
+ \mathrm{(TR)}\quad&\text{\emph{terminal rigidity}: if \(F\in\mathcal C\) is chartless, then \(\mathcal C=\{F,F^*\}\).}\\
+ \mathrm{(RI)}\quad&\text{\emph{rooted-key invariance}: if \(F,H\in\mathcal C\) are rooted, then \(K(F)=K(H)\).}
+\end{align*}
+(TR) concerns chartless diagrams, at which a complete source-minimal tower, defined below, terminates.  (RI) is confined to inputs already known to have proper charts, and by \Cref{thm:gluing,thm:source-minimal-domination,prop:component-key} the key is a classifying invariant of its component.
+
+\begin{theorem}\label{thm:connectivity-reduction}
+For a connected Schur class \(\mathcal C\), the following are equivalent:
+\begin{enumerate}
+\item Its rotation-augmented common-factor graph is connected.
+\item Its rotation-quotiented common-factor graph is connected.
+\item Every nonrotation pair in \(\mathcal C\) has a common final factor.
+\item Both (TR) and (RI) hold on \(\mathcal C\).
+\end{enumerate}
+\end{theorem}
+\begin{proof}
+The first two statements are equivalent by the definition of the quotient.  By \Cref{lem:rotation-components}, a connected augmented graph is complete.  An augmented edge between nonrotation mates is an original common-factor edge, proving the third statement; its converse is immediate.
+
+Connectedness excludes a chartless rotation orbit with a nonrotation mate, because that orbit is an isolated vertex of the quotient.  It therefore gives (TR), and \Cref{prop:component-key} gives (RI).  Conversely, if the class has a chartless member, (TR) makes the quotient a singleton.  Otherwise every member is rooted, and (RI) together with \Cref{prop:component-key} puts them all in one component.
+\end{proof}
+
+Both assertions are needed in this reduction.  From the graph properties alone, absence of isolated vertices does not imply connectivity: two disjoint four-vertex cliques, with rotation pairing vertices inside each clique, have dominating fibers and no isolated vertex.  This is an abstract graph example, not a claimed Schur class.
+
+A \emph{complete source-minimal tower} is obtained by choosing a source-minimal chart \(F=D\circ_\omega E\), then repeating on its actual outer \(D\), until a chartless diagram is reached.  The span law \(N_F=pN_D+w>N_D\) makes the procedure finite.  This is the outer-prefix factorization convention of \cite[Def.~5.5]{McNamara2009Classification}; the attached inner need not itself be chartless.  Its \emph{reversal family} consists of all diagrams obtained by independently retaining or rotating each factor, with the entire mark transported.  The expressions remain left-associated.  Repeated choices may give the same diagram.
+
+\begin{theorem}[Reduction of necessity]\label{thm:necessity-reduction}
+The following global assertions about connected diagrams are equivalent:
+\begin{enumerate}
+\item Every Schur-equal pair admits a common legal left-associated composition presentation with connected factors, whose corresponding factors and marks agree up to transported rotation.
+\item Assertions (TR) and (RI) hold in every connected Schur class.
+\item Every prescribed complete source-minimal tower has reversal family equal to its source's full connected Schur class.
+\end{enumerate}
+The first assertion is the composition-and-reversal necessity part of \cite[Conjecture~5.7]{McNamara2009Classification}, without its class-cardinality clause.
+\end{theorem}
+\begin{proof}
+Assume the first assertion.  Remove trivial stages from a common presentation.  A one-factor presentation gives a rotation pair.  Otherwise the final stage is proper, and its two outer prefixes are Schur-equal by forward composition and reversal.  A nonrotation pair consequently gives a common-factor edge.  \Cref{thm:connectivity-reduction} proves the second assertion.
+
+Assume the second assertion and fix any complete source-minimal tower of \(F\).  Induct on \(N_F\).  If \(F\) is chartless, (TR) identifies its class with its one-factor reversal family.  Otherwise write its prescribed last stage as \(F=D\circ_\omega E\).  \Cref{thm:connectivity-reduction,thm:source-minimal-domination} give
+\[
+ [F]=\mathcal F(\omega,s_D).
+\]
+The actual outer \(D\) has strictly smaller span.  By induction its full class is exhausted by the reversal family of the prescribed outer tower.  Append \((E,\omega)\) or its transported rotation to every such outer.  The resulting family is precisely the displayed fiber.  Forward I--IV composition and reversal give the reverse inclusion as well.  This proves the third assertion, and it immediately supplies a common presentation for every equal pair.
+\end{proof}
+
+The induction consumes (TR) and (RI) at the source and at smaller outer prefixes; it does not refine an attached inner or assume that arbitrary independently chosen towers have a common refinement.  Nor does it give a power-of-two class-size formula: exhaustion alone does not distinguish the reversal choices.  General terminal rigidity and rooted-key invariance remain unproved.  The local geometry identifies each rooted component, but does not show that equality of parent Schur functions identifies their component keys.
+
+\appendix
+\section{Quantitative data for the gcd charts}\label{app:gluing-fold-data}
+
+Use \eqref{eq:gluing-gcd-data} for two ordinary or two same-case
+mixed proper roots of \(F\), with nondividing periods, \(g>1\),
+and supplied widths at least two.  Let
+\(F=D\circ_\omega E\) be the selected chart, with lower mark
+\(W_-\) and contacts \(s,t\), and write
+\(E=A_E\circ_\kappa K\), \(F=D_g\circ_\kappa K\) for the charts
+supplied by \Cref{prop:gluing-ordinary-fold,prop:gluing-mixed-fold}.
+The two extreme \(g\)-windows of \(F\) determine the underlying
+\(K\) by \Cref{lem:gluing-local}(3).  In the ordinary case choose
+the compatible gauge specified below, transporting the full mark
+and the outer together by \eqref{eq:gluing-gauge}.
+
+Write \(A^0_j,B^0_j\) for the generic bits on the gcd residues and
+put \(C_j=A^0_j-B^0_j\), \(\Delta=\sum_{j=0}^{g-1}C_j\), and
+\(H^0_r=1+\sum_{j=1}^r C_j\) for \(0\le r<g\).
+The equality \(\Delta=0\) and the four pinches
+\eqref{eq:gluing-pinches} follow from
+\Cref{lem:gluing-ordinary-drift} in the ordinary case and from the
+proof of \Cref{prop:gluing-mixed-fold} in the mixed case.
+
+\subsection{Ordinary cap data}
+
+Take the supplied chart to be case (a).  At \(w_g=0\), the cap
+budgets give \(C_0=0\), so the generic joining bits agree.
+Both actual \(p\)-windows of \(E\) have no cap defects and cover
+\(E\).  Hence \(K\) is its first \(g\)-window with genuine empty
+edges, and \(A_E\) is the row or column of span \(a+b\), according
+as the common joining bit is zero or one.
+
+If \(w_g=1\), cap concentration gives \(C_0=\epsilon\), \(C_1=-\epsilon\), \(\epsilon\in\{0,1\}\).  In a supplied case-(a) chart, the opposite initial and terminal values at its two phases force
+{\abovedisplayskip=14pt plus3pt minus4pt \belowdisplayskip=14pt plus3pt minus4pt
+ \abovedisplayshortskip=14pt plus3pt minus4pt \belowdisplayshortskip=14pt plus3pt minus4pt
+\begin{equation*}
+ \begin{array}{c|c|c|c}
+ (t,s)&\epsilon&\text{projected }(A,B)\text{ phases}&\text{end steps}\\ \hline
+ (0,w)&0&(0,1)&(E,E)\\
+ (1,w-1)&1&(1,0)&(N,N).
+ \end{array}
+\end{equation*}}
+The one-unit budgets force \(t\in\{0,1,w-1\}\) and
+\(s\in\{1,w-1,w\}\).  Since \(w=bg+1\) with \(b\ge1\),
+\(s=1\) would give a lower middle tail on diagonal \(1<w\),
+contrary to \(H_1=1\).  The remaining choices are the two rows.
+Here \(E\) denotes an east step, with \(A=B=0\), and \(N\) a
+north step, with \(A=B=1\); the pinches make these the actual
+end steps.  They fix the same projected pair for both roots and
+give \eqref{eq:gluing-singleton}.  Antitransposition gives case (b).
+
+For \(2\le w_g<g\), put \(\tau=t\bmod g\), \(\sigma=s\bmod g\).
+Cap concentration gives \(0\le\tau,\sigma\le w_g\): a phase
+projecting above \(w_g\) would force one generic bit to have both
+cap values.  Composing \(E\) with a two-cell row gives zero
+interface bits and unit private heights, hence
+\(a\Delta-A^0_\tau+B^0_\sigma=0\).  Thus
+\begin{equation}\label{eq:gluing-ordinary-slot}
+ A^0_\tau=B^0_\sigma=\rho\in\{0,1\}.
+\end{equation}
+
+If \(\rho=1\), concentration forces \(s=\sigma\in[1,w_g]\) and
+\(t=bg+\tau\), \(\tau<w_g\); choose case (a).  If \(\rho=0\),
+it forces \(t=\tau\), \(s=bg+\sigma\); choose case (a) for
+\(\tau<\sigma\) and case (b) for \(\tau\ge\sigma\).
+In the latter choice the pairs \((0,0)\), \((w_g,w_g)\) are
+excluded by the actual mark heights.  Indeed, in the \(\rho=0\)
+case the lower band is the mark plus its southeast tail, so for
+\(0\le r<w\),
+\begin{equation}\label{eq:gluing-original-ordinary-mark}
+ H_{W_-}(r)=H^0_{r\bmod g}
+       +\mathbf1_{\{t>0,\ r\ge t\}}-\mathbf1_{\{r\ge s\}}.
+\end{equation}
+The first excluded pair makes its diagonal at \(bg\) empty.  The second, together with its northeast singleton, makes the parent diagonal at \(w_g-1\) empty.  Thus the case-(a) choice has \(\tau<w_g,\sigma>0\), and the case-(b) choice has \(\tau>0,\sigma<w_g\).
+
+These contact choices are those of \Cref{ge:ordinary-fold}.
+For \(w<g\) it first retains the literal mark; for \(w\ge g\),
+\eqref{ge:eq:ordinary-block} selects the appropriate gauge.
+At equal projected interior contacts in the \(\rho=0\) case,
+the choice above uses the alternate case-(b) mark and transports
+the outer with it.
+
+The initial and terminal budgets in case (a) give, with
+\(i=\mathbf1_{\tau>0}\), \(j=\mathbf1_{\sigma<w_g}\),
+\[
+ C_0=i(1-\rho)+\rho,\qquad -C_{w_g}=\rho+j(1-\rho),
+ \qquad\sum_{r=1}^{w_g-1}C_r+(i-j)(1-\rho)=0.
+\]
+The last equality also uses \(\sum_{r=1}^{w_g}C_r=-C_0\).
+The two labeled slots of \eqref{ge:eq:ports} read the actual outer:
+\[
+ (A^{D_g}_j,B^{D_g}_j)=
+ \begin{cases}
+ (A_F(jg+\tau),B_F(jg+\sigma)),&\mathrm{(a)},\\
+ (1-B_F(jg+\sigma),1-A_F(jg+\tau)),&\mathrm{(b)},
+ \end{cases}
+ \qquad 1\le j<M.
+\]
+Its positive heights are the private samples in \eqref{ge:eq:sample}.
+
+\subsection{Mixed cap data}
+
+Take case (d), with \(z,o\) the actual phases of generic bits zero
+and one.  Put \(\tau=z\), \(\sigma=o-bg\),
+\(\alpha=\min(\tau,\sigma)\), \(\beta=\max(\tau,\sigma)\), as in
+\eqref{eq:gluing-mixed-phases}.  The periodic southeast word gives
+the marked displacement
+\[
+ \nu=(-h,g-h),\qquad h=\sum_{r=0}^{g-1}B^0_r.
+\]
+For \(0\le r<w_g\), cap concentration gives the lower and upper
+heights before removing the northwest tails:
+\begin{equation*}
+ L_r=H^0_r+\mathbf1_{\{\tau>0,r\ge\tau\}},\qquad
+ U_r=H^0_r+\mathbf1_{\tau>0}-\mathbf1_{\{\sigma<w_g,r\ge\sigma\}}.
+\end{equation*}
+The lower tail starts at \(\beta\) and the upper tail ends below
+\(\alpha\), so the retained heights satisfy
+\begin{equation}\label{eq:gluing-mixed-heights}
+ L_r-\mathbf1_{r\ge\beta}=U_r-\mathbf1_{r<\alpha}
+ =\begin{cases}
+ H^0_r+\mathbf1_{\{\tau>0,r\ge\tau\}}-\mathbf1_{r\ge\sigma},&\tau<\sigma,\\
+ H^0_r,&\tau>\sigma.
+ \end{cases}
+\end{equation}
+Likewise, deleting the original lower middle tail from the first
+parent band gives
+\begin{equation}\label{eq:gluing-original-mixed-mark}
+ H_{W_-}(r)=H^0_{r\bmod g}
+   +\mathbf1_{\{z>0,r\ge z\}}-\mathbf1_{r\ge s}
+ \qquad(0\le r<w).
+\end{equation}
+These formulas also read positivity from the supplied chart.
+If \(\tau<\sigma\), then \(t=z\), \(s=o=bg+\sigma\);
+\eqref{eq:gluing-mixed-heights} is the initial parent height for
+\(r<\sigma\), and \eqref{eq:gluing-original-mixed-mark} at
+\(bg+r\) otherwise.  If \(\tau>\sigma\) and \(b=0\), the original
+mark itself has height \(H^0_r\).  For \(b>0\), use the initial
+parent for \(r<\tau\) and the original mark at \(bg+r\) for
+\(r\ge\sigma\); these ranges cover every marked diagonal.
+
+The retained copies have row word \(B^0\) and column word \(A^0\)
+with the internal \(\alpha\)-slot set to one and the
+\(\beta\)-slot set to zero.  These are the full marked copies of
+\Cref{ge:mixed-fold}, including \(\alpha=0\) and \(\beta=w_g\).
+
+The two labeled variable slots in \eqref{ge:eq:ports} read the
+outer already supplied by aligned composition as
+\begin{equation}\label{eq:gluing-mixed-inverse}
+ A^{D_g}_j=A_F(jg+\alpha),\qquad
+ B^{D_g}_j=1-A_F(jg+\beta)\qquad(1\le j<M).
+\end{equation}
+Its positive heights are the private samples in \eqref{ge:eq:sample};
+in particular, the increment at \(j\) is
+\(H_F(jg+w_g)-H_F((j-1)g+w_g)\).
+
+\section*{Declarations}
+{\footnotesize
+
+\noindent\textbf{Funding.} This research received no external funding.
+
+\smallskip
+\noindent\textbf{Competing interests.} The author has no relevant interests to disclose.
+
+\smallskip
+\noindent\textbf{Data availability.} No datasets were generated or analyzed.
+
+\smallskip
+\noindent\textbf{Computational verification.} The proofs do not depend on numerical computation.  Scripts used for verification and figures are available at \url{https://github.com/johnnyshields/papers}.
+
+\smallskip
+\noindent\textbf{Generative AI use.} During the preparation of this work, the author used OpenAI's ChatGPT (GPT-6 Astra, GPT-5.6 Sol) and Anthropic's Claude (Opus 5.5, Opus 5) to assist with mathematical research, manuscript drafting, and the development of auxiliary verification code.  After using these tools, the author reviewed and edited as needed.  The author takes full responsibility for the content of the work.\par}
+
+\begin{thebibliography}{9}
+
+\bibitem{Barekat2009CoincidencesCorrigendum}
+F.~Barekat, V.~Reiner, and S.~van Willigenburg,
+\emph{Corrigendum to ``Coincidences among skew Schur functions'' [Adv. Math. 216 (1) (2007) 118--152]},
+Adv. Math. \textbf{220} (2009), no.~5, 1655--1656,
+DOI: \href{https://doi.org/10.1016/j.aim.2008.10.010}{10.1016/\allowbreak j.aim.2008.10.010}.
+
+\bibitem{McNamara2009Classification}
+P.~R.~W. McNamara and S.~van Willigenburg,
+\emph{Towards a combinatorial classification of skew Schur functions},
+Trans. Amer. Math. Soc. \textbf{361} (2009), no.~8, 4437--4470,
+DOI: \href{https://doi.org/10.1090/S0002-9947-09-04683-2}{10.1090/\allowbreak S0002-9947-09-04683-2}.
+
+\bibitem{OlsonHarris2024HopfApplications}
+N.~Olson-Harris,
+\emph{Some applications of combinatorial Hopf algebras to integro-differential equations and symmetric function identities},
+Ph.D.\ thesis, University of Waterloo, 2024.
+\url{https://hdl.handle.net/10012/20710}.
+
+\bibitem{Reiner2007Coincidences}
+V.~Reiner, K.~M.~Shaw, and S.~van Willigenburg,
+\emph{Coincidences among skew Schur functions},
+Adv. Math. \textbf{216} (2007), no.~1, 118--152,
+DOI: \href{https://doi.org/10.1016/j.aim.2007.05.006}{10.1016/\allowbreak j.aim.2007.05.006}.
+
+\bibitem{Yeats2017HopfSchur}
+K.~Yeats,
+\emph{A Hopf algebraic approach to Schur function identities},
+Electron. J. Combin. \textbf{24} (2017), no.~3, \#P3.10,
+DOI: \href{https://doi.org/10.37236/5741}{10.37236/\allowbreak 5741}.
+
+\end{thebibliography}
+
+\end{document}

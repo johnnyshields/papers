@@ -186,11 +186,11 @@ def superWeight (b : ℕ) (β α : ℕ → R) (k : ℕ) : R := if k < b then β 
 
 omit [CommSemiring R] in
 @[simp] theorem superWeight_of_lt {b k : ℕ} (β α : ℕ → R) (h : k < b) :
-    superWeight b β α k = β k := if_pos h
+    superWeight b β α k = β k := ite_eq_left h
 
 omit [CommSemiring R] in
 @[simp] theorem superWeight_of_le {b k : ℕ} (β α : ℕ → R) (h : b ≤ k) :
-    superWeight b β α k = α (k - b) := if_neg (Nat.not_lt.mpr h)
+    superWeight b β α k = α (k - b) := ite_eq_right (Nat.not_lt.mpr h)
 
 /-- **The supersymmetric skew Schur function**, defined as Berele--Regev define it: the
 generating function of the super tableaux of shape `lam / mu`, each weighted by the product of
@@ -297,17 +297,17 @@ def evenTab (T : SuperSkewSSYT lam mu b a) : BoundedSkewSSYT T.evenPart mu b :=
      row_weak' := by
        intro i j₁ j₂ hj hnu hmu
        obtain ⟨h₁, h₂⟩ := mem_skewCells_of_row hj hnu hmu
-       rw [if_pos h₁, if_pos h₂]
+       rw [ite_eq_left h₁, ite_eq_left h₂]
        exact T.row_weak hj (mem_lam_of_mem_even h₂) hmu
      col_strict' := by
        intro i₁ i₂ j hi hnu hmu
        obtain ⟨h₁, h₂⟩ := mem_skewCells_of_col hi hnu hmu
-       rw [if_pos h₁, if_pos h₂]
+       rw [ite_eq_left h₁, ite_eq_left h₂]
        exact T.col_strict_even hi (mem_lam_of_mem_even h₂) hmu (lt_of_mem_evenPart h₁)
-     zeros' := by intro i j h; rw [if_neg h] }, by
+     zeros' := by intro i j h; rw [ite_eq_right h] }, by
     intro i j h
     change (if (i, j) ∈ skewCells T.evenPart mu then T i j else 0) < b
-    rw [if_pos h]
+    rw [ite_eq_left h]
     exact lt_of_mem_evenPart h⟩
 
 /-- The odd half, transposed: the entries on `lam / evenPart T`, shifted down by `b` and read
@@ -397,9 +397,10 @@ def ofParts {nu : YoungDiagram} (hmn : mu ≤ nu) (hnl : nu ≤ lam)
   lt' := by
     intro i j h
     rcases (mem_skewCells_split hmn hnl).mp h with he | ho
-    · rw [if_pos he]
+    · rw [ite_eq_left he]
       exact lt_of_lt_of_le (E.lt_of_mem_cells he) (Nat.le_add_right _ _)
-    · rw [if_neg (Finset.disjoint_left.mp skewCells_disjoint · ho |> fun f => f), if_pos ho]
+    · rw [ite_eq_right (Finset.disjoint_left.mp skewCells_disjoint · ho |> fun f => f),
+        ite_eq_left ho]
       have : O j i < a := O.lt_of_mem_cells (by
         rw [mem_skewCells, YoungDiagram.mem_transpose, Prod.swap_prod_mk,
           YoungDiagram.mem_transpose, Prod.swap_prod_mk]
@@ -410,20 +411,20 @@ def ofParts {nu : YoungDiagram} (hmn : mu ≤ nu) (hnl : nu ≤ lam)
     have h₁lam : (i, j₁) ∈ lam := lam.up_left_mem le_rfl hj.le hlam
     by_cases hn₁ : (i, j₁) ∈ nu
     · have he₁ : (i, j₁) ∈ skewCells nu mu := mem_skewCells.mpr ⟨hn₁, hmu⟩
-      rw [if_pos he₁]
+      rw [ite_eq_left he₁]
       by_cases hn₂ : (i, j₂) ∈ nu
       · have he₂ : (i, j₂) ∈ skewCells nu mu :=
           mem_skewCells.mpr ⟨hn₂, fun hc => hmu (mu.up_left_mem le_rfl hj.le hc)⟩
-        rw [if_pos he₂]
+        rw [ite_eq_left he₂]
         exact E.1.row_weak hj hn₂ hmu
       · have ho₂ : (i, j₂) ∈ skewCells lam nu := mem_skewCells.mpr ⟨hlam, hn₂⟩
-        rw [if_neg (notMem_skewCells_of_notMem hn₂), if_pos ho₂]
+        rw [ite_eq_right (notMem_skewCells_of_notMem hn₂), ite_eq_left ho₂]
         exact le_trans (E.lt_of_mem_cells he₁).le (Nat.le_add_left _ _)
     · have hn₂ : (i, j₂) ∉ nu := fun hc => hn₁ (nu.up_left_mem le_rfl hj.le hc)
       have ho₁ : (i, j₁) ∈ skewCells lam nu := mem_skewCells.mpr ⟨h₁lam, hn₁⟩
       have ho₂ : (i, j₂) ∈ skewCells lam nu := mem_skewCells.mpr ⟨hlam, hn₂⟩
-      rw [if_neg (notMem_skewCells_of_notMem hn₁), if_pos ho₁,
-        if_neg (notMem_skewCells_of_notMem hn₂), if_pos ho₂]
+      rw [ite_eq_right (notMem_skewCells_of_notMem hn₁), ite_eq_left ho₁,
+        ite_eq_right (notMem_skewCells_of_notMem hn₂), ite_eq_left ho₂]
       have := O.1.col_strict hj (by
         rw [YoungDiagram.mem_transpose, Prod.swap_prod_mk]; exact hlam) (by
         rw [YoungDiagram.mem_transpose, Prod.swap_prod_mk]; exact hn₁)
@@ -433,20 +434,20 @@ def ofParts {nu : YoungDiagram} (hmn : mu ≤ nu) (hnl : nu ≤ lam)
     have h₁lam : (i₁, j) ∈ lam := lam.up_left_mem hi.le le_rfl hlam
     by_cases hn₁ : (i₁, j) ∈ nu
     · have he₁ : (i₁, j) ∈ skewCells nu mu := mem_skewCells.mpr ⟨hn₁, hmu⟩
-      rw [if_pos he₁]
+      rw [ite_eq_left he₁]
       by_cases hn₂ : (i₂, j) ∈ nu
       · have he₂ : (i₂, j) ∈ skewCells nu mu :=
           mem_skewCells.mpr ⟨hn₂, fun hc => hmu (mu.up_left_mem hi.le le_rfl hc)⟩
-        rw [if_pos he₂]
+        rw [ite_eq_left he₂]
         exact (E.1.col_strict hi hn₂ hmu).le
       · have ho₂ : (i₂, j) ∈ skewCells lam nu := mem_skewCells.mpr ⟨hlam, hn₂⟩
-        rw [if_neg (notMem_skewCells_of_notMem hn₂), if_pos ho₂]
+        rw [ite_eq_right (notMem_skewCells_of_notMem hn₂), ite_eq_left ho₂]
         exact le_trans (E.lt_of_mem_cells he₁).le (Nat.le_add_left _ _)
     · have hn₂ : (i₂, j) ∉ nu := fun hc => hn₁ (nu.up_left_mem hi.le le_rfl hc)
       have ho₁ : (i₁, j) ∈ skewCells lam nu := mem_skewCells.mpr ⟨h₁lam, hn₁⟩
       have ho₂ : (i₂, j) ∈ skewCells lam nu := mem_skewCells.mpr ⟨hlam, hn₂⟩
-      rw [if_neg (notMem_skewCells_of_notMem hn₁), if_pos ho₁,
-        if_neg (notMem_skewCells_of_notMem hn₂), if_pos ho₂]
+      rw [ite_eq_right (notMem_skewCells_of_notMem hn₁), ite_eq_left ho₁,
+        ite_eq_right (notMem_skewCells_of_notMem hn₂), ite_eq_left ho₂]
       have := O.1.row_weak hi (by
         rw [YoungDiagram.mem_transpose, Prod.swap_prod_mk]; exact hlam) (by
         rw [YoungDiagram.mem_transpose, Prod.swap_prod_mk]; exact hn₁)
@@ -457,16 +458,16 @@ def ofParts {nu : YoungDiagram} (hmn : mu ≤ nu) (hnl : nu ≤ lam)
     have hn₁ : (i₁, j) ∈ nu := by
       by_contra hn
       have ho₁ : (i₁, j) ∈ skewCells lam nu := mem_skewCells.mpr ⟨h₁lam, hn⟩
-      rw [if_neg (notMem_skewCells_of_notMem hn), if_pos ho₁] at hb
+      rw [ite_eq_right (notMem_skewCells_of_notMem hn), ite_eq_left ho₁] at hb
       omega
     have he₁ : (i₁, j) ∈ skewCells nu mu := mem_skewCells.mpr ⟨hn₁, hmu⟩
-    rw [if_pos he₁]
+    rw [ite_eq_left he₁]
     by_cases hn₂ : (i₂, j) ∈ nu
-    · rw [if_pos (mem_skewCells.mpr
+    · rw [ite_eq_left (mem_skewCells.mpr
         ⟨hn₂, fun hc => hmu (mu.up_left_mem hi.le le_rfl hc)⟩)]
       exact E.1.col_strict hi hn₂ hmu
     · have ho₂ : (i₂, j) ∈ skewCells lam nu := mem_skewCells.mpr ⟨hlam, hn₂⟩
-      rw [if_neg (notMem_skewCells_of_notMem hn₂), if_pos ho₂]
+      rw [ite_eq_right (notMem_skewCells_of_notMem hn₂), ite_eq_left ho₂]
       have hE : E i₁ j < b := E.lt_of_mem_cells he₁
       omega
   row_strict_odd' := by
@@ -474,14 +475,14 @@ def ofParts {nu : YoungDiagram} (hmn : mu ≤ nu) (hnl : nu ≤ lam)
     have h₁lam : (i, j₁) ∈ lam := lam.up_left_mem le_rfl hj.le hlam
     have hn₁ : (i, j₁) ∉ nu := by
       intro hn
-      rw [if_pos (mem_skewCells.mpr ⟨hn, hmu⟩)] at hb
+      rw [ite_eq_left (mem_skewCells.mpr ⟨hn, hmu⟩)] at hb
       have hE : E i j₁ < b := E.lt_of_mem_cells (mem_skewCells.mpr ⟨hn, hmu⟩)
       omega
     have hn₂ : (i, j₂) ∉ nu := fun hc => hn₁ (nu.up_left_mem le_rfl hj.le hc)
     have ho₁ : (i, j₁) ∈ skewCells lam nu := mem_skewCells.mpr ⟨h₁lam, hn₁⟩
     have ho₂ : (i, j₂) ∈ skewCells lam nu := mem_skewCells.mpr ⟨hlam, hn₂⟩
-    rw [if_neg (notMem_skewCells_of_notMem hn₁), if_pos ho₁,
-      if_neg (notMem_skewCells_of_notMem hn₂), if_pos ho₂]
+    rw [ite_eq_right (notMem_skewCells_of_notMem hn₁), ite_eq_left ho₁,
+      ite_eq_right (notMem_skewCells_of_notMem hn₂), ite_eq_left ho₂]
     have hO : O j₁ i < O j₂ i := O.1.col_strict hj (by
       rw [YoungDiagram.mem_transpose, Prod.swap_prod_mk]; exact hlam) (by
       rw [YoungDiagram.mem_transpose, Prod.swap_prod_mk]; exact hn₁)
@@ -490,7 +491,7 @@ def ofParts {nu : YoungDiagram} (hmn : mu ≤ nu) (hnl : nu ≤ lam)
     intro i j h
     rw [mem_skewCells_split hmn hnl] at h
     push Not at h
-    rw [if_neg h.1, if_neg h.2]
+    rw [ite_eq_right h.1, ite_eq_right h.2]
 
 end SuperSkewSSYT
 
@@ -520,14 +521,14 @@ theorem evenPart_ofParts {nu : YoungDiagram} (hmn : mu ≤ nu) (hnl : nu ≤ lam
       · exact hn
       · exfalso
         have ho : (i, j) ∈ skewCells lam nu := mem_skewCells.mpr ⟨(mem_skewCells.mp hc).1, hn⟩
-        rw [ofParts_apply, if_neg (notMem_skewCells_of_notMem hn), if_pos ho] at hlt
+        rw [ofParts_apply, ite_eq_right (notMem_skewCells_of_notMem hn), ite_eq_left ho] at hlt
         omega
   · intro hn
     by_cases hm : (i, j) ∈ mu
     · exact Or.inl hm
     · have he : (i, j) ∈ skewCells nu mu := mem_skewCells.mpr ⟨hn, hm⟩
       refine Or.inr ⟨mem_skewCells.mpr ⟨hnl hn, hm⟩, ?_⟩
-      rw [ofParts_apply, if_pos he]
+      rw [ofParts_apply, ite_eq_left he]
       exact E.lt_of_mem_cells he
 
 /-- Reassembling a tableau from its own two halves returns it. -/
@@ -536,16 +537,16 @@ theorem ofParts_evenTab_oddTab (T : SuperSkewSSYT lam mu b a) (hmu : mu ≤ lam)
   ext i j
   rw [ofParts_apply]
   by_cases he : (i, j) ∈ skewCells T.evenPart mu
-  · rw [if_pos he]
+  · rw [ite_eq_left he]
     change (if (i, j) ∈ skewCells T.evenPart mu then T i j else 0) = T i j
-    rw [if_pos he]
-  · rw [if_neg he]
+    rw [ite_eq_left he]
+  · rw [ite_eq_right he]
     by_cases ho : (i, j) ∈ skewCells lam T.evenPart
-    · rw [if_pos ho]
+    · rw [ite_eq_left ho]
       change T i j - b + b = T i j
       have := le_of_mem_odd ho
       omega
-    · rw [if_neg ho]
+    · rw [ite_eq_right ho]
       exact (T.zeros fun hc => by
         rcases (mem_skewCells_split T.mu_le_evenPart (T.evenPart_le hmu)).mp hc with h | h
         · exact he h
@@ -560,8 +561,8 @@ theorem evenTab_ofParts_apply {nu : YoungDiagram} (hmn : mu ≤ nu) (hnl : nu �
     then (ofParts hmn hnl E O) i j else 0) = E i j
   rw [evenPart_ofParts]
   by_cases he : (i, j) ∈ skewCells nu mu
-  · rw [if_pos he, ofParts_apply, if_pos he]
-  · rw [if_neg he, E.1.zeros he]
+  · rw [ite_eq_left he, ofParts_apply, ite_eq_left he]
+  · rw [ite_eq_right he, E.1.zeros he]
 
 /-- The odd half of an assembled tableau agrees with the half it was assembled from. -/
 theorem oddTab_ofParts_apply {nu : YoungDiagram} (hmn : mu ≤ nu) (hnl : nu ≤ lam)
@@ -569,8 +570,8 @@ theorem oddTab_ofParts_apply {nu : YoungDiagram} (hmn : mu ≤ nu) (hnl : nu ≤
     (ofParts hmn hnl E O).oddTab c r = O c r := by
   change (ofParts hmn hnl E O) r c - b = O c r
   by_cases ho : (r, c) ∈ skewCells lam nu
-  · rw [ofParts_apply, if_neg (notMem_skewCells_of_notMem (mem_skewCells.mp ho).2),
-      if_pos ho]
+  · rw [ofParts_apply, ite_eq_right (notMem_skewCells_of_notMem (mem_skewCells.mp ho).2),
+      ite_eq_left ho]
     omega
   · have hz : O c r = 0 := O.1.zeros (by
       rw [mem_skewCells, YoungDiagram.mem_transpose, Prod.swap_prod_mk,
@@ -580,10 +581,10 @@ theorem oddTab_ofParts_apply {nu : YoungDiagram} (hmn : mu ≤ nu) (hnl : nu ≤
       exact fun hcon => hcon.2 (ho hcon.1))
     rw [hz, ofParts_apply]
     by_cases he : (r, c) ∈ skewCells nu mu
-    · rw [if_pos he]
+    · rw [ite_eq_left he]
       have hE : E r c < b := E.lt_of_mem_cells he
       omega
-    · rw [if_neg he, if_neg ho]
+    · rw [ite_eq_right he, ite_eq_right ho]
       omega
 
 @[simp] theorem evenTab_apply (T : SuperSkewSSYT lam mu b a) (i j : ℕ) :
@@ -669,7 +670,7 @@ theorem superSkewSchur_eq_branching (lam mu : YoungDiagram) (b a : ℕ) (β α :
       refine Finset.prod_congr rfl fun c hc => ?_
       have hlt : T c.1 c.2 < b := by subst hT'; exact SuperSkewSSYT.lt_of_mem_evenPart hc
       rw [superWeight_of_lt _ _ hlt, SuperSkewSSYT.evenTabAt_apply,
-        SuperSkewSSYT.evenTab_apply, if_pos (by subst hT'; exact hc)]
+        SuperSkewSSYT.evenTab_apply, ite_eq_left (by subst hT'; exact hc)]
     have h2 : ∏ c ∈ skewCells lam nu, superWeight b β α (T c.1 c.2)
         = ∏ c ∈ skewCells lam.transpose nu.transpose, α (T.oddTabAt hT' c.1 c.2) := by
       rw [prod_skewCells_transpose lam nu fun i j => α (T.oddTabAt hT' i j)]

@@ -1,0 +1,1 @@
+{"fields":["area","profiles","rotation_orbits","fixed","classes","histogram","nonrotation","exact_groups","exact_profiles","exact_false_merges_split","first_collision_groups","second_evaluations","first_false_merges_split"],"passed":true,"reference_spilled_records":0,"reference_threads":[16],"rerun_spilled_records":2630107,"rerun_threads":[4],"through":20}

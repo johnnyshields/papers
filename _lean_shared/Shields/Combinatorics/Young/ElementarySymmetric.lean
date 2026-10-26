@@ -92,10 +92,10 @@ noncomputable def colEntry (S : Finset ℕ) (hS : S.card = q) (i j : ℕ) : ℕ 
 
 theorem colEntry_of {S : Finset ℕ} (hS : S.card = q) {i : ℕ} (hi : i < q) :
     colEntry S hS i 0 = S.orderEmbOfFin hS ⟨i, hi⟩ := by
-  rw [colEntry, dif_pos (⟨hi, rfl⟩ : i < q ∧ (0 : ℕ) = 0)]
+  rw [colEntry, dite_eq_left (⟨hi, rfl⟩ : i < q ∧ (0 : ℕ) = 0)]
 
 theorem colEntry_of_not {S : Finset ℕ} (hS : S.card = q) {i j : ℕ}
-    (h : ¬ (i < q ∧ j = 0)) : colEntry S hS i j = 0 := dif_neg h
+    (h : ¬ (i < q ∧ j = 0)) : colEntry S hS i j = 0 := dite_eq_right h
 
 /-- The column tableau with a prescribed set of entries. -/
 noncomputable def colTableau (S : Finset ℕ) (hS : S.card = q) (hSa : S ⊆ Finset.range a) :
@@ -359,7 +359,7 @@ theorem elemHom_congr {a q : ℕ} {α α' : ℕ → R} (h : ∀ i < a, α i = α
 /-- On its first block the concatenated alphabet is the first one. -/
 theorem elemHom_concatAlphabet_left {a q a₀ : ℕ} (h : a₀ ≤ a) (α β : ℕ → R) :
     elemHom a₀ q (concatAlphabet a α β) = elemHom a₀ q α :=
-  elemHom_congr fun _i hi => if_pos (lt_of_lt_of_le hi h)
+  elemHom_congr fun _i hi => ite_eq_left (lt_of_lt_of_le hi h)
 
 /-- **The two-alphabet convolution** `e_q(A ∪ B) = ∑_{p+p'=q} e_p(A) e_{p'}(B)`.  This is
 what lets an infinite alphabet and a free parameter be passed to the limit together. -/
@@ -390,7 +390,7 @@ theorem elemHom_concat (a : ℕ) (α β : ℕ → R) :
       | succ q =>
           have hab : a + (b + 1) = (a + b) + 1 := by ring
           have hlast : concatAlphabet a α β (a + b) = β b := by
-            rw [concatAlphabet, if_neg (by omega)]
+            rw [concatAlphabet, ite_eq_right (by omega)]
             congr 1
             omega
           have hS : (∑ p ∈ Finset.range (q + 1), elemHom a p α * elemHom b (q + 1 - p) β)

@@ -3,7 +3,7 @@ Copyright (c) 2026 Johnny Shields. All rights reserved.
 Released under the MIT license as described in the file LICENSE.txt.
 Authors: Johnny Shields
 -/
-import Mathlib.Data.Complex.Basic
+import Mathlib.Basic.Complex.Basic
 import Mathlib.LinearAlgebra.Matrix.Charpoly.Basic
 import Mathlib.LinearAlgebra.Matrix.ToLinearEquiv
 
@@ -52,7 +52,7 @@ the entrywise form. -/
 theorem charpoly_eq_prod_diag_of_upperTriangular {R : Type*} [CommRing R] {m : ℕ}
     {T : Matrix (Fin m) (Fin m) R} (hT : ∀ i j, j < i → T i j = 0) :
     T.charpoly = ∏ i, (Polynomial.X - Polynomial.C (T i i)) :=
-  Matrix.charpoly_of_upperTriangular T fun _ _ hij => hT _ _ hij
+  Matrix.charpoly_of_isUpperTriangular T fun _ _ hij => hT _ _ hij
 
 section Eigenvalues
 

@@ -1,0 +1,21 @@
+Title
+-----
+Power rigidity and inflation for constant-excess skew diagrams
+
+Keywords
+--------
+skew Schur function
+power rigidity
+skew-equivalence
+profile inflation
+ribbon Schur function
+boundary reconstruction
+Jacobi–Trudi determinant
+
+Abstract (Plain)
+----------------
+We classify all connected skew Schur mates of repeated constant-excess diagrams under profile inflation when the inner gap word has unequal endpoints, is symmetric, or satisfies a specified balanced-prefix condition.  These domains include every constant-excess inner with at most six rows.  Below the common terminal beta gap, the full class consists of the outer ribbon class and global rotations; at and above that gap, only the rotation orbit remains.  The proof reconstructs arbitrary mates from reduced rational boundary fractions, then recovers literal blocks by cutting and contracting zero seams.  At the balanced wall, a two-alphabet determinant and its first correction determine the outer word and its orientation.  A complementary theorem recovers outer cuts for fixed inners with unequal terminal beta gaps.  Additional balanced-prefix exchanges remain outside the classification.
+
+Abstract (Rich Text)
+--------------------
+We classify all connected skew Schur mates of repeated constant-excess diagrams under profile inflation when the inner gap word has unequal endpoints, is symmetric, or satisfies a specified balanced-prefix condition.  These domains include every constant-excess inner with at most six rows.  Below the common terminal beta gap, the full class consists of the outer ribbon class and global rotations; at and above that gap, only the rotation orbit remains.  The proof reconstructs arbitrary mates from reduced rational boundary fractions, then recovers literal blocks by cutting and contracting zero seams.  At the balanced wall, a two-alphabet determinant and its first correction determine the outer word and its orientation.  A complementary theorem recovers outer cuts for fixed inners with unequal terminal beta gaps.  Additional balanced-prefix exchanges remain outside the classification.

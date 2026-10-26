@@ -24,7 +24,10 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import Vendor.MathlibPR.PR40533.TranslationInvariance
+import Mathlib.Analysis.Meromorphic.TrailingCoefficient
+import Mathlib.Analysis.Meromorphic.NormalForm
+import Mathlib.Analysis.Meromorphic.Divisor
+import Mathlib.Analysis.Normed.Group.Pointwise
 import Vendor.ProjectVD.MathlibSubmitted.PoissonJensen
 
 /-!

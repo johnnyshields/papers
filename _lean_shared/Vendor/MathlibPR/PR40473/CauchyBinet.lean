@@ -28,7 +28,7 @@ PR merges.
 Upstream adds a single new file,
 `Mathlib/LinearAlgebra/Matrix/Determinant/CauchyBinet.lean`, together with its
 line in `Mathlib.lean`.  That file is copied whole: every declaration in it is
-absent from the pinned Mathlib `8e45b0548034eeda677a64e1e0b07837390835b6`, whose
+absent from the pinned Mathlib `v4.34.1` (`d13f23b723b8a846827a245b89c10fc7d3f11612`), whose
 `Matrix.det_mul` is the square case only.  Upstream's namespace (`Matrix`),
 section scaffolding, `variable` blocks, `omit` lines and declaration names are
 unchanged, so consuming code is written exactly as it will be against a merged

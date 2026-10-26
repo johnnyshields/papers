@@ -149,10 +149,7 @@ theorem secondMainTheorem_ramification {f : ℂ → ℂ} (hf : Meromorphic f) (s
           ≤ ‖proximity (logDeriv f) ⊤ r + ∑ a ∈ s, proximity (logDeriv (f · - a)) ⊤ r‖ :=
             le_abs_self _
         _ ≤ C₀ * ‖log⁺ (characteristic f ⊤ r) + Real.log r‖ := by
-          -- Adapted to the pinned revision, where `Asymptotics.IsBigO.sum` concludes about
-          -- `fun x ↦ ∑ i ∈ s, A i x` rather than the `Finset` sum of functions, so `hbound` is
-          -- already in the pointwise form of the goal and needs no `Finset.sum_apply` rewrite.
-          exact hbound
+          simpa only [Finset.sum_apply] using hbound
         _ = C₀ * (log⁺ (characteristic f ⊤ r) + Real.log r) := by
             rw [Real.norm_of_nonneg (by linarith)]
     -- Absorb the additive constants `c₁` and `c₂` into the error term.

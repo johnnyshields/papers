@@ -133,8 +133,8 @@ theorem coeff_eq_ite_esymm_roots_of_monic {W : Polynomial ℂ} (hW : W.Monic) {r
     (hdeg : W.natDegree = r) (k : ℕ) :
     W.coeff k = if k ≤ r then (-1) ^ (r - k) * W.roots.esymm (r - k) else 0 := by
   by_cases hk : k ≤ r
-  · rw [if_pos hk, coeff_eq_esymm_roots_of_monic hW hdeg hk]
-  · rw [if_neg hk, coeff_eq_zero_of_natDegree_lt (by rw [hdeg]; omega)]
+  · rw [ite_eq_left hk, coeff_eq_esymm_roots_of_monic hW hdeg hk]
+  · rw [ite_eq_right hk, coeff_eq_zero_of_natDegree_lt (by rw [hdeg]; omega)]
 
 /-- The monic factor of `P` carrying exactly the roots in the open disc `ball c R`, with
 multiplicity.  This is the monic factor `W` of the preparation, for a polynomial family. -/
@@ -510,7 +510,7 @@ theorem eqOn_pow_mul_logDeriv_zeroFactor {f g : ℂ → ℂ} {c : ℂ} {R : ℝ}
       (sphere c R) := by
   intro z hz
   have hzc : z ∈ closedBall c R := sphere_subset_closedBall hz
-  have hsplit := logDeriv_mul (f := zeroFactor s) (g := g) z
+  have hsplit := logDeriv_fun_mul (f := zeroFactor s) (g := g) z
     (zeroFactor_ne_zero (hsphne z hz)) (hgne z hzc) ((differentiable_zeroFactor s) z)
     (hg z hzc).differentiableAt
   rw [logDeriv_zeroFactor (hsphne z hz)] at hsplit
@@ -684,7 +684,7 @@ theorem eq_X_pow_of_monic_of_roots_eq_zero {W : Polynomial ℂ} (hW : W.Monic)
 theorem coeff_eq_zero_of_monic_of_roots_eq_zero {W : Polynomial ℂ} (hW : W.Monic)
     (hr : ∀ u ∈ W.roots, u = 0) {k : ℕ} (hk : k < W.natDegree) : W.coeff k = 0 := by
   rw [eq_X_pow_of_monic_of_roots_eq_zero hW hr, coeff_X_pow]
-  exact if_neg hk.ne
+  exact ite_eq_right hk.ne
 
 /-- **The normalized form.**  If the only zero of `f` in the disc is at the origin, the monic factor
 supplied by `exists_analytic_preparation` is `x^r`.  Together with

@@ -314,19 +314,19 @@ def skewHighestWeight (lam mu : YoungDiagram) (n : ℕ)
             row_weak' := ?_, col_strict' := ?_, zeros' := ?_ }, ?_⟩
   · intro i j₁ j₂ hj hlam hmu
     obtain ⟨hc₁, hc₂⟩ := mem_skewCells_of_row hj hlam hmu
-    rw [if_pos hc₁, if_pos hc₂]
+    rw [ite_eq_left hc₁, ite_eq_left hc₂]
     have := mu.colLen_anti j₁ j₂ hj.le
     omega
   · intro i₁ i₂ j hi hlam hmu
     obtain ⟨hc₁, hc₂⟩ := mem_skewCells_of_col hi hlam hmu
-    rw [if_pos hc₁, if_pos hc₂]
+    rw [ite_eq_left hc₁, ite_eq_left hc₂]
     have hge : mu.colLen j ≤ i₁ := YoungDiagram.notMem_iff_le_colLen.mp hmu
     omega
   · intro i j hc
-    exact if_neg hc
+    exact ite_eq_right hc
   · intro i j hc
     change (if (i, j) ∈ skewCells lam mu then i - mu.colLen j else 0) < n
-    rw [if_pos hc]
+    rw [ite_eq_left hc]
     obtain ⟨hlam, hmu⟩ := mem_skewCells.mp hc
     have h1 : i < lam.colLen j := YoungDiagram.mem_iff_lt_colLen.mp hlam
     have h2 : mu.colLen j ≤ i := YoungDiagram.notMem_iff_le_colLen.mp hmu

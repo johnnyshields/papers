@@ -1,0 +1,21 @@
+Title
+-----
+Recognition of ribbon-outer skew Schur compositions
+
+Keywords
+--------
+skew Schur function
+marked composition
+source-minimal factorization
+ribbon outer
+prescribed fiber
+Jacobi–Trudi determinant
+boundary reconstruction
+
+Abstract (Plain)
+----------------
+We prove a recognition theorem for skew diagram compositions satisfying Hypotheses I–IV of McNamara and van Willigenburg. The inner diagram carries two translated end copies of an overlap, or boundary edges for an empty overlap, and their attachments; the period is their content displacement. A composition is proper when both factors are connected and have at least two cells. Minimality at a fixed parent first minimizes the overlap's diagonal span, then the inner diagram's. For Schur-equal minimal compositions of diagrams with at least 24 cells, assume the first has a ribbon outer and no smaller period. We recover its marked inner and outer Schur function on the other diagram, up to rotation of the full marking data and permitted attachment changes with their outer involution. The original Schur class contains no proper row- or column-inner composition. At every smaller cell count, we assume that proper-composition existence transfers under Schur equality, every class with more than one rotation orbit contains a proper composition, and Schur-equal minimal compositions have the same marked inner and outer Schur function modulo these identifications. A finite Jacobi–Trudi identity and two boundary records construct the legal factors before minimality is applied.
+
+Abstract (Rich Text)
+--------------------
+We prove a recognition theorem for skew diagram compositions satisfying Hypotheses I–IV of McNamara and van Willigenburg. The inner diagram carries two translated end copies of an overlap, or boundary edges for an empty overlap, and their attachments; the period is their content displacement. A composition is proper when both factors are connected and have at least two cells. Minimality at a fixed parent first minimizes the overlap's diagonal span, then the inner diagram's. For Schur-equal minimal compositions of diagrams with at least 24 cells, assume the first has a ribbon outer and no smaller period. We recover its marked inner and outer Schur function on the other diagram, up to rotation of the full marking data and permitted attachment changes with their outer involution. The original Schur class contains no proper row- or column-inner composition. At every smaller cell count, we assume that proper-composition existence transfers under Schur equality, every class with more than one rotation orbit contains a proper composition, and Schur-equal minimal compositions have the same marked inner and outer Schur function modulo these identifications. A finite Jacobi–Trudi identity and two boundary records construct the legal factors before minimality is applied.

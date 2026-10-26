@@ -1,0 +1,1114 @@
+\documentclass[11pt,a4paper]{amsart}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage[expansion=false]{microtype}
+\usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black]{hyperref}
+\usepackage[nameinlink,capitalize]{cleveref}
+
+\hypersetup{
+  pdftitle={Corner descent and repeated inners in skew Schur compositions},
+  pdfauthor={John Shields},
+  pdfkeywords={skew Schur function, marked composition, Jacobi--Trudi determinant, corner cofactor, composition period, repeated inner, skew-equivalence}
+}
+\pdfinfo{/ORCID (https://orcid.org/0009-0004-3882-4571)}
+\numberwithin{equation}{section}
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{question}[theorem]{Question}
+
+\title[Corner descent and repeated inners in skew Schur compositions]{Corner descent and repeated inners\\in skew Schur compositions}
+\author{John Shields}
+\date{October 9, 2026}
+\thanks{Independent researcher, Ginza 2-15-2, KR Ginza II 5F, Chuo-ku, Tokyo, Japan 104-0061.\\
+\hspace*{\parindent}Corresponding author: \href{mailto:math@johnnyshields.com}{math@johnnyshields.com}.  ORCID: \href{https://orcid.org/0009-0004-3882-4571}{0009-0004-3882-4571}.\\
+\hspace*{\parindent}This work is archived at \href{https://doi.org/10.5281/zenodo.23133721}{doi:10.5281/zenodo.23133721}.}
+\subjclass[2020]{Primary 05E05; Secondary 05A17, 15A15}
+\keywords{skew Schur function, marked composition, Jacobi--Trudi determinant, corner cofactor, composition period, repeated inner, skew-equivalence}
+
+\begin{document}
+\begin{abstract}
+We prove exact corner transport for marked skew Schur compositions under Hypotheses I--IV of McNamara and van Willigenburg, using Olson-Harris's composition homomorphism.  Generator-span separation identifies transported child functions with their multiplicities and reduces source-minimal period comparison to discrete outer interiors.  One-cell occurrences do not provide proper child charts.  On the separately specified ordinary complete-window domain, exact rational residue matching forces either a bounded-order defect of the original Jacobi--Trudi determinant or a literal repeated inner with a specified copy number and span.  The bound records the selected maximal-span prime's multiplicity and the reduced window deficit; multiple active classes and pure inventories give stronger bounds.  Complete component elimination retains both end caps and normal-dependent inverse units, while endpoint profiles recover literal row and column lists.  Function extraction alone supplies neither the complete windows nor residue matching.  General period invariance and chart recognition remain open.
+\end{abstract}
+\maketitle
+
+\section{Introduction}\label{sec:introduction}
+
+A marked composition expresses a connected skew diagram as copies of one diagram joined according to another.  Its extreme Jacobi--Trudi cofactor identifies transported child functions, with exact multiplicities, and reduces comparison of source-minimal periods to discrete outer interiors.  When those children have one-cell outers, they no longer carry proper charts.  On a separately specified complete-window domain, the original determinant forces either a bounded-order defect or a specified literal repeated inner.  The passage from child functions to that literal domain is not automatic.
+
+For a connected diagram \(G\), let \(r(G)\) be its number of rows and \(N_G\) its number of occupied diagonals.  Put
+\begin{equation}\label{eq:corner-intro}
+ G^- = \{(i,j)\in G:(i+1,j+1)\in G\},\qquad
+ \kappa(s_G)=(-1)^{r(G)-1}[h_{N_G}]s_G=s_{G^-}.
+\end{equation}
+This cofactor identification is present in Reiner, Shaw, and van Willigenburg's Jacobi--Trudi analysis \cite[p.~132]{Reiner2007Coincidences}; its rim-removal interpretation is explicit in the corrected irreducibility proof of Barekat, Reiner, and van Willigenburg \cite[p.~1656]{Barekat2009CoincidencesCorrigendum}.  The dependence of \(\kappa\) on the row count and largest generator is specified in \Cref{sec:corner}.
+
+If \(F=D\circ_\omega E\) has period \(p\), and \(D_1,\ldots,D_t\) are the connected components of \(D^-\), then
+\begin{equation}\label{eq:transport-intro}
+ \kappa(s_F)=Z_\omega(D)\prod_{i=1}^t s_{D_i\circ_\omega E},
+ \qquad \operatorname{sp} Z_\omega(D)<p.
+\end{equation}
+Here \(\operatorname{sp}\) is the largest index of a complete symmetric function occurring in a polynomial.  Each child has span \(pN_{D_i}+w\), where \(w\) is the overlap width.  \Cref{thm:transport} gives the exact I--IV normalization, including all four attachment types and the empty-overlap readings.  Connected-skew irreducibility separates these child factors from the lower-span normalizers.  Together with the same-parent gluing results of \cite{Shields2026Gluing}, this proves \Cref{thm:descent}: a least-span unequal source-minimal period comparison has a discrete interior in its larger-period outer.  This is a reduction, not period invariance.
+
+The quantitative determinant result concerns connected \(U\) with equal complete end windows \(W\), matching ordinary private cuts, and actual connected overlap and edge chains.  Suppose
+\[
+ N_U=b\delta,\qquad N_W=v\delta,\qquad
+ K_U=\Lambda^b,\qquad K_W=\Lambda^v,
+\]
+where \(K_X=\kappa(s_X)\), \(b\ge3\), \(1\le v\le b-2\), and \(\gcd(b,v)=1\).  For a maximal-generator-span prime \(\psi\mid\Lambda\) of multiplicity \(r\), exact rational residue matching defines the original defect \(\Theta_U\) in \eqref{eq:original-defect}.  \Cref{thm:intrinsic-order} gives
+\[
+ \operatorname{ord}_\psi\Theta_U\le r(b-v)
+ \quad\text{or}\quad
+ U\text{ is an empty row or column composition of }b\text{ copies}
+\]
+of an actual inner of span \(\delta\).  Multiple active residue classes improve the bound to \(r(b-v)-1\); the pure inventory \(\Lambda=\psi\) gives \(b-v-1\).  The alternatives need not be exclusive.  Absence of that specified root suffices for the bound; absence of every proper root is not required.  The boundary \(v=b-1\) has a separate literal-window proof.
+
+The composition operation is due to McNamara and van Willigenburg \cite{McNamara2009Classification}, extending the ribbon constructions of Billera, Thomas, and van Willigenburg \cite{Billera2006DecomposableCompositions} and the amalgamations of \cite{Reiner2007Coincidences}.  Hatted overlap and middle diagrams already occur in \cite[\S4]{McNamara2009Classification}.  Its ordinary composition proof uses Hypothesis V to contain the hatted overlaps and separate residual pieces \cite[pp.~4457 and~4461]{McNamara2009Classification}.  Olson-Harris removes V from the algebraic identity \cite[Thms.~5.6.1 and~5.6.4]{OlsonHarris2024HopfApplications}.  The finite-cap calculation in \Cref{lem:row-amalgamation}, rather than a new composition map, supplies the span separation needed for \eqref{eq:transport-intro}.
+
+In the nonempty discrete residual, \Cref{prop:beta-reduction} identifies the larger-period inner function as an actual child function of the other chart.  It does not put that chart on the supplied inner diagram.  A one-cell component forces matching interior multiplicities, gap-one rows, and two strict normalizer bounds (\Cref{lem:alpha-row-candidate}), but supplies no smaller proper chart.  In particular these cofactor conclusions establish neither the complete literal windows nor the exact rational residue matching required by the determinant theorem.
+
+The original-determinant proof eliminates complete interior components while retaining both true end responses and all normal-dependent inverse entries, including maximal-span ties.  Cyclic response sums identify a fresh original generator at a specified normal order; nonzero scalar sums alone would not supply that transfer.  If the response identities vanish, endpoint profiles recover complete literal row and column lists, including a possible midpoint \(h_0\) vertex.  The signed five-square example in \Cref{rem:square-word} has a nonzero first-normal defect.  No lower-area classification is assumed in the determinant argument.  Scalar extensions without coprimality do not enlarge its geometric root domain.
+
+\Cref{sec:corner} gives the common cofactor and determinant toolkit.  \Cref{sec:marks,sec:transport} prove finite-cap normalization and exact transport.  \Cref{sec:periods} gives the descent and its residual constraints.  \Cref{sec:normal-chart} specifies the complete-window domain and the quantitative alternative.  \Cref{sec:dual} transfers cyclic inventories to original coefficients; \Cref{sec:one-active} recovers literal copies and completes the theorem.  \Cref{sec:strengthening} separates the scalar and geometric refinements.
+
+\section{Corner cofactors and common cores}\label{sec:corner}
+
+Diagrams are finite skew Young diagrams in English notation, considered up to translation.  Connected means nonempty and edge-connected.  The content of \((i,j)\) is \(j-i\), and \(e=(1,1)\).  Write \(|G|\), \(r(G)\), and \(c(G)\) for area, row count, and column count; subscripts \(r_G,c_G\) denote the same counts.  A ribbon has empty interior; a line is one row or one column.  The row profile \((a_1,\ldots,a_s;g_1,\ldots,g_{s-1})\) records row lengths and adjacent overlaps minus one, with \(N_G=\sum a_i-\sum g_i\).  For connected \(G\),
+\begin{equation*}
+ N_G=r(G)+c(G)-1.
+\end{equation*}
+The southeast border has one cell on each occupied diagonal; its complement is \(G^-\).  In particular,
+\begin{equation*}
+ |G^-|=|G|-N_G.
+\end{equation*}
+Also \(G^-+e=\{x\in G:x-e\in G\}\), which is \(G\) with its northwest border removed.  Thus the southeast-interior convention in \eqref{eq:corner-intro} and the northwest-rim convention in \cite[p.~1656]{Barekat2009CoincidencesCorrigendum} agree up to translation.
+
+Work in \(\Lambda=\mathbb Q[h_1,h_2,\ldots]\), with \(h_0=1\), \(h_j=0\) for \(j<0\), and weight \(j\) on \(h_j\).  For nonzero \(P\in\Lambda\), define
+\begin{equation}\label{eq:polynomial-span}
+ \operatorname{sp}P=\max\{j:h_j\text{ occurs in }P\},\qquad
+ \operatorname{sp}(a)=0\quad(a\in\mathbb Q\setminus\{0\}).
+\end{equation}
+Since \(\Lambda\) is a polynomial domain,
+\begin{equation}\label{eq:product-span}
+ \operatorname{sp}(PQ)=\max(\operatorname{sp}P,\operatorname{sp}Q)
+\end{equation}
+for nonzero \(P,Q\).  This is a generator index, not weighted degree.  For a disconnected skew diagram its function has span equal to the largest component span, not the distance between its extreme contents.
+
+Express connected \(G\) as \(\lambda/\mu\), with \(n\) nonempty rows and \(\mu_n=0\).  The Jacobi--Trudi matrix is
+\begin{equation}\label{eq:jt}
+ J_G=(h_{\lambda_i-\mu_j-i+j})_{i,j=1}^n.
+\end{equation}
+Its largest index is \(N_G=\lambda_1+n-1\), occurring only in entry \((1,n)\).  Removing row 1 and column \(n\) gives the Jacobi--Trudi matrix of
+\begin{equation}\label{eq:minor-shape}
+ (\lambda_2-1,\ldots,\lambda_n-1)/(\mu_1,\ldots,\mu_{n-1}).
+\end{equation}
+Adjacent rows of \(G\) overlap, so this is a genuine skew diagram, possibly with empty rows.  It is exactly \(G^-\), with the empty last row omitted.  Expansion at \((1,n)\) gives \eqref{eq:corner-intro}, also when \(n=1\), when the minor is 1.  In particular \(\operatorname{sp}(s_G)=N_G\).  The row count is the greatest number of positive-index factors in a monomial of \(s_G\): the row-length monomial has coefficient 1, and a determinant term has at most \(n\) factors \cite[Prop.~6.2]{Reiner2007Coincidences}.  Consequently \(\kappa(P)\) is well defined on connected skew Schur functions independently of their chosen diagram realization.  No linear operator on all of \(\Lambda\) with fixed \(n,N\) is being asserted.
+
+\begin{lemma}\label{lem:cofactor}
+For connected \(X\), the largest generator in \(s_X\) is \(h_{N_X}\), occurs linearly, and
+\[
+ s_X=(-1)^{r_X-1}h_{N_X}s_{X^-}+R_X,
+ \qquad R_X\in\mathbb Z[h_1,\ldots,h_{N_X-1}].
+\]
+Every skew Schur polynomial is primitive.  Every nonempty connected skew Schur polynomial is irreducible over every field.
+\end{lemma}
+\begin{proof}
+Write the Jacobi--Trudi matrix as \((h_{x_i-y_j})\), where \(x_i=e_i-i+1\), \(y_i=s_i-i\), and \([s_i,e_i]\) is row \(i\).  Both lists strictly decrease.  The unique largest difference is \(x_0-y_{r_X-1}=N_X\).  Deleting its row and column gives exactly the matrix of \(X^-\), with empty rows contributing unit pivots.  This proves the formula.
+
+For primitivity, order both lists increasingly.  The identity permutation uniquely minimizes \(\sum_i(x_i-y_{\pi(i)})^2\), by the strict rearrangement inequality.  Its diagonal monomial is nonzero, and no other surviving permutation has the same monomial, including after zero indices are discarded.  Its coefficient is one.
+
+For irreducibility, induct on area over an arbitrary field.  Put \(s_X=a h_N+c\).  Its coefficient \(a\) is a signed product of smaller connected interior functions, irreducible by induction.  Delete the top or bottom row of \(X\); both remaining nonempty diagrams are connected.  Desnanot--Jacobi gives \(s_X J=L R-a Q\), up to harmless signs.  Each connected component \(T\) of \(X^-\) has area at most \(\sum g_i\), strictly below the area of each of the top- and bottom-row deletions, because \(g_i<a_i,a_{i+1}\).  Thus no factor of \(a\) can divide the irreducible \(L\) or \(R\).  A common factor of \(a,c\) would divide \(LR\), a contradiction.  The primitive linear polynomial \(a h_N+c\) is irreducible by Gauss's lemma.  A one-row diagram and the empty central minor start the induction.  This is the characteristic-independent form of the corrected irreducibility argument in \cite[Thm.~1]{Barekat2009CoincidencesCorrigendum}.
+\end{proof}
+
+If \(G_1,\ldots,G_t\) are the nonempty connected components of \(G^-\), then
+\begin{equation}\label{eq:corner-factors}
+ \kappa(s_G)=\prod_{i=1}^t s_{G_i}.
+\end{equation}
+Irreducibility identifies this multiset of component functions from \(s_G\), including multiplicities.  It does not identify the component diagrams within their Schur classes.  Unit ambiguities are removed by the coefficient-1 row-length monomial and the positive Schur expansion.
+
+\begin{lemma}\label{lem:interior-bounds}
+Let \(D\) be connected with at least two cells, and let \(D_1,\ldots,D_t\) be the connected components of \(D^-\).  Put
+\begin{equation}\label{eq:outer-statistics}
+ r=r(D),\quad c=c(D),\quad M=N_D,\quad
+ \rho=\sum_i r(D_i),\quad \chi=\sum_i c(D_i),\quad L=\sum_i N_{D_i}.
+\end{equation}
+Then \(\rho\le r-1\), \(\chi\le c-1\), and \(L\le M-2\).
+\end{lemma}
+\begin{proof}
+Distinct components of a skew diagram occupy disjoint rows and disjoint columns: every row and column is an interval.  The last row and last column of \(D\) contain no cell of \(D^-\), which proves the first two inequalities.  Components of a skew diagram also occupy disjoint content intervals, because cells of one component lie strictly northeast or strictly southwest of another.  The two extreme diagonals of connected \(D\) are singletons and contribute no interior cell.  Thus the union of the component content intervals contains at most \(M-2\) diagonals.  This includes the empty-interior case, since \(M\ge2\).
+\end{proof}
+
+\subsection{Common-core divisibility}\label{sec:corner-data}
+
+Write \(K_X=\kappa(s_X)\).
+
+For connected diagrams \(A,B\), the empty horizontal join \(AHB\) places the southwest cell of the second diagram immediately east of the northeast cell of the first; the vertical join \(AVB\) uses the cell immediately north.  Each join occupies consecutive disjoint content bands.  Iterated equal joins are the empty row and column compositions in \Cref{thm:intrinsic-order}.  Whole transposition interchanges the joins and acts on symmetric functions by the usual involution; \(e_j\) denotes the elementary symmetric function.
+
+\begin{lemma}\label{lem:shared-core}
+For compatible blocks
+\[
+ M_{00}=\begin{pmatrix}r&z\\ C&s\end{pmatrix},\quad
+ M_{10}=\begin{pmatrix}A&R&t\\0&C&s\end{pmatrix},\quad
+ M_{01}=\begin{pmatrix}r&q\\ C&S\\0&B\end{pmatrix},\quad
+ M_{11}=\begin{pmatrix}A&R&T\\0&C&S\\0&0&B\end{pmatrix},
+\]
+where the left and right border imbalances are one, one has
+\[
+ \det C\mid\det M_{11}\det M_{00}-\det M_{10}\det M_{01}.
+\]
+For opposite content-end extensions of a connected skew \(U\), this gives
+\[
+ K_U\mid s_{ULR}s_U-s_{UL}s_{UR}.
+\]
+\end{lemma}
+\begin{proof}
+First use a generic central matrix over the integers.  On its dense rank-one-deficient locus, eliminate a common invertible proper minor.  The remaining central block is zero; each border determinant is a product of its left and right responses, with compatible signs.  The cross difference vanishes.  The generic determinant is prime and primitive, so divisibility is integral and survives all specializations with every multiplicity.
+
+In Jacobi--Trudi endpoint coordinates an upper-content extension changes only the top row endpoint and adds rows above; a lower extension changes only the bottom starting endpoint and adds rows below.  The unchanged common core is source rows \(1,\ldots\) and columns \(0,\ldots,r-2\), exactly the matrix of \(U^-\).  The indicated zero blocks have strictly negative indices.  Boundary \(h_0\)'s remain in the border blocks, not in the declared zeros.
+\end{proof}
+
+\section{Marked inners and finite end caps}\label{sec:marks}
+
+Finite end caps and complete hatted overlaps need not agree.  Their separate bounds determine which cofactor factors can be children.
+
+\subsection{Composition conventions}
+
+Use the marked composition of \cite[Def.~3.11]{McNamara2009Classification}, in the cell coordinates of \cite{Shields2026Gluing}.  A marked inner \(\omega\) consists of a connected diagram \(E\), congruent connected end subdiagrams \(W_-,W_+=W_-+v\), and their attachments.  The first contains the southwest cell and the second the northeast cell.  Normalize the southwest cell to \((0,0)\), and put
+\begin{equation}\label{eq:mark-data}
+ O=E\setminus(W_-\cup W_+),\qquad w=N_W,\qquad
+ p=v_2-v_1=N_E-w.
+\end{equation}
+The four attachment cases are (a) horizontal--horizontal, (b) vertical--vertical, (c) horizontal--vertical, and (d) vertical--horizontal, with lower attachment listed first.  Cases (a), (b) are ordinary, and (c), (d) are mixed.  A horizontal lower attachment joins the southwest cell of \(O\) to its western neighbor in \(W_-\); a vertical one uses its southern neighbor.  At the upper end the corresponding neighbors are east and north.
+
+A mark is \emph{legal} when it satisfies Hypotheses I--IV:
+\begin{enumerate}
+\item[(I)] No strictly larger skew diagram containing \(W_-\) on the same diagonals has translates at both ends of \(E\).
+\item[(II)] A nonempty diagonal separates the two marked copies; equivalently \(0\le w<p\).
+\item[(III)] Removing either marked copy leaves a connected skew diagram.
+\item[(IV)] In the infinite amalgamation \(\boldsymbol E=\bigcup_{j\in\mathbb Z}(E+jv)\), the hatted middle and hatted mark copies are pairwise nonadjacent across these two types, where
+\begin{equation}\label{eq:hatted-sets}
+ \widehat O=O^-,\qquad
+ \widehat W=\{x\in\boldsymbol E:x+e\in W_-\}
+       \cup\{x\in W_-:x+e\in\boldsymbol E\}.
+\end{equation}
+\end{enumerate}
+Hypothesis V, which requires in an ordinary chart that at least one marked copy have just one cell adjacent to \(O\), is not imposed.  Hatted diagrams may be disconnected.  In particular \(\widehat W\) is not generally \(W^-\), nor need it be contained in \(W\).
+
+At \(w=0\), the horizontal edge reading has displacement
+\(v_H=\operatorname{ne}(E)-\operatorname{sw}(E)+(0,1)\); its vertical reading is \(v_V=v_H-e\).  Both have period \(N_E\).  They are ordinary readings related by antitransposition of the outer.  In either reading \(W=\widehat W=\varnothing\) and \(O=E\).
+
+For a connected outer \(D\), let the rows on content \(t\) be \([\ell_t,h_t]\).  The copy of \(E\) indexed by \((i,i+t)\in D\) has origin
+\begin{equation}\label{eq:placements}
+ tv+\begin{cases}
+ ie,&\text{(a)},\\
+ -ie,&\text{(b)},\\
+ (i-\ell_t)e,&\text{(c)},\\
+ (i-h_t)e,&\text{(d)}.
+ \end{cases}
+\end{equation}
+In case (c), a vertical pair on one northwest boundary ribbon adds a copy of \(W_+\), displaced by \(+e\) from the lower cell's origin.  In case (d), use a southeast boundary ribbon and displacement \(-e\).  These supplemental copies are included in \(D\circ_\omega E\).  This is the cell form of the composition definition.  The resulting diagram is connected and satisfies
+\begin{equation}\label{eq:composition-span}
+ N_{D\circ_\omega E}=pN_D+w.
+\end{equation}
+All composition charts in \Cref{sec:transport,sec:periods} use legal marks.  A chart is \emph{proper} when \(D,E\) are connected and \(|D|,|E|\ge2\).  Only nonempty outers are composed here; the geometric convention for an empty outer is not used.
+
+\subsection{The row amalgamation}
+
+The local geometry lemma in \cite{Shields2026Gluing} gives three properties of a nonempty legal mark:
+\begin{equation}\label{eq:local-properties}
+ \begin{gathered}
+ W_-=E\cap(E-v),\qquad
+ O\text{ has at most one cell on each marked diagonal},\\
+ E_w\text{ and }E_{p-1}\text{ are singleton diagonals}.
+ \end{gathered}
+\end{equation}
+Here \(E_k\) denotes the content-\(k\) diagonal.  The roles of these hypotheses are geometric.  Maximality identifies the overlap with the full intersection.  If a middle tail first acquired two cells on a marked diagonal, its previous diagonal would be a singleton; the new interior cell would share an edge with the hatted-mark interface, contrary to IV.  Applying this argument at the first private diagonal and reversing it at the last gives the two private singletons.  Neither argument uses V.
+
+Define the finite caps by
+\begin{equation}\label{eq:caps}
+ K_-=E^-\cap\{0\le j-i<w\},\qquad
+ K_+=E^-\cap\{p\le j-i<p+w\}.
+\end{equation}
+Put
+\begin{equation}\label{eq:normalization}
+ A=s_W,\quad B=s_{\widehat W},\quad C=s_{\widehat O},\quad
+ \Theta=s_{K_-}s_{K_+}.
+\end{equation}
+Empty diagrams have function 1.
+
+\begin{lemma}\label{lem:row-amalgamation}
+For every legal marked inner and every \(m\ge1\), put \(F_m=(m)\circ_\omega E\), \(b_m=s_{F_m}\).  Then
+\begin{equation}\label{eq:row-cofactor}
+ \kappa(b_m)=\Theta C^m B^{m-1},\qquad
+ \kappa(s_E)=\Theta C.
+\end{equation}
+In particular \(\Theta=\kappa(s_E)/C\) is a polynomial.  The bounds are
+\begin{equation}\label{eq:normalization-bounds}
+ \begin{split}
+ \operatorname{sp}A,\operatorname{sp}B&\le w<p,\\
+ \operatorname{sp}\Theta&\le\max(0,w-1),\\
+ \operatorname{sp}C&\le\max(0,p-w-2).
+ \end{split}
+\end{equation}
+\end{lemma}
+\begin{proof}
+For a row outer all origins in \eqref{eq:placements} are \(jv\), and there is no vertical pair contributing a supplement.  Hence
+\(F_m=\bigcup_{j=0}^{m-1}(E+jv)\).
+Assume first \(w>0\).  Only consecutive copies share a content diagonal, since \(w<p\), and their intersection is \(W_-+jv\).  On any common diagonal they are overlapping integer intervals.  Every consecutive pair in the union of two overlapping intervals is contained in one interval.  Therefore
+\begin{equation}\label{eq:erosion-union}
+ F_m^-=\bigcup_{j=0}^{m-1}(E^-+jv).
+\end{equation}
+Thinness of the middle on marked diagonals and the two private singletons give
+\begin{equation*}
+ E^-=K_-\sqcup\widehat O\sqcup K_+.
+\end{equation*}
+Their possible contents lie respectively in \([1,w-1]\), \([w+1,p-2]\), and \([p,p+w-2]\).  The missing extreme contents follow from the singleton extreme diagonals of \(E\).
+
+On contents \([0,w-1]\), the infinite amalgamation equals \(E\cup(E-v)\).  An eroded pair there lies in one copy by the interval observation.  Such a pair meets \(W_-\), because the middle has at most one cell on that diagonal.  Conversely every pair counted by \(\widehat W\) is of this form.  Consequently
+\begin{equation}\label{eq:cap-hat}
+ \widehat W=K_-\cup(K_+-v).
+\end{equation}
+This is a union, not in general a disjoint union; its intersection is \(W^-\).
+Regrouping \eqref{eq:erosion-union} yields the disjoint union
+\begin{equation*}
+ \begin{split}
+ F_m^-={}&K_-\sqcup(K_++(m-1)v)\\
+ &\sqcup\bigsqcup_{j=0}^{m-1}(\widehat O+jv)
+ \sqcup\bigsqcup_{j=1}^{m-1}(\widehat W+jv).
+ \end{split}
+\end{equation*}
+The displayed pieces are pairwise nonadjacent.  Indeed the singleton private contents \(jp+w\) and \(jp-1\) leave an empty diagonal between each middle band and its neighboring marked bands.  Edge-adjacent cells differ in content by one.  Each piece is therefore a union of connected components, and taking skew Schur functions proves \eqref{eq:row-cofactor}.
+
+The caps occupy at most \(w-1\) consecutive contents each, and \(\widehat W\) occupies at most \(w\).  The middle interior occupies at most \(p-w-2\).  Apply \eqref{eq:product-span} componentwise to obtain \eqref{eq:normalization-bounds}.
+
+When \(w=0\), the copies occupy disjoint content blocks of length \(p\), for either edge displacement.  Each \(E^-\) is supported on \([1,p-2]\), so these interiors are pairwise nonadjacent.  Thus \(\kappa(b_m)=s_{E^-}^m\), with \(A=B=\Theta=1\) and \(C=s_{E^-}\), proving all assertions in this case as well.
+\end{proof}
+
+\begin{remark}\label{rem:comparison-v}
+The finite caps cannot be replaced by two full copies of \(\widehat W\).  In the ordinary-case proof of \cite[p.~4457]{McNamara2009Classification}, Hypothesis V permits an orientation in which the hatted overlaps fit inside the corresponding marked copies.  The third bullet following equation (4.3) of that paper \cite[p.~4461]{McNamara2009Classification} then invokes IV and V to separate three residual pieces by an empty diagonal.  Our proof instead uses the actual finite caps in \eqref{eq:caps}; only an interior junction contains the full union \eqref{eq:cap-hat}.  In \eqref{eq:non-v-family}, \(W\) is a column of length two while \(\widehat W\) is a row of length two, so neither end can be identified with a full hatted mark.  This is not merely removal of an unused hypothesis from the earlier proof.  The algebraic composition theorem without V is Olson-Harris's; \Cref{lem:row-amalgamation} supplies the finite-boundary calculation needed to extract its extreme cofactor.
+\end{remark}
+
+\section{Cofactor transport under composition}\label{sec:transport}
+
+\begin{theorem}[Corner transport]\label{thm:transport}
+Let \(F=D\circ_\omega E\) be a proper legal chart of period \(p\) and width \(w\).  With \(D_i\), \(r,c,M,\rho,\chi,L\) as in \Cref{lem:interior-bounds}, and \(A,B,C,\Theta\) as in \eqref{eq:normalization},
+\begin{equation}\label{eq:transport}
+ \kappa(s_F)=
+ \Theta A^{r-1-\rho}B^{c-1-\chi}C^{M-L}
+ \prod_{i=1}^t s_{D_i\circ_\omega E}.
+\end{equation}
+All exponents are nonnegative and \(M-L\ge2\).  Every irreducible factor of \(\kappa(s_F)\) of generator span at least \(p\) is one of the displayed child factors, with exactly its displayed multiplicity.  Its span is \(pN_{D_i}+w\).
+\end{theorem}
+\begin{proof}
+Olson-Harris's modified composition homomorphism \cite[Thm.~5.6.1 and Prop.~5.6.3]{OlsonHarris2024HopfApplications} is the algebra map \(\mathcal M_\omega:\Lambda\to\Lambda\) determined by
+\begin{equation}\label{eq:homomorphism}
+ \mathcal M_\omega(h_j)=A^{j-1}b_j\quad(j\ge1),\qquad
+ \mathcal M_\omega(s_D)=\varepsilon_D
+ A^{|D|-r}B^{|D|-c}C^{|D|-M}s_F.
+\end{equation}
+The sign \(\varepsilon_D\) is positive in the ordinary cases and may depend on \(D\) in the mixed cases.  The formula holds under I--IV, without V.  Its algebraic value on 1 is 1, not the function of the geometric empty-outer convention.
+
+Write \(s_D=(-1)^{r-1}h_Ms_{D^-}+R\), where \(R\) uses only \(h_j\) with \(j<M\).  By \eqref{eq:composition-span}, \(b_j\) has span \(jp+w\).  The bounds \eqref{eq:normalization-bounds} show that the normalization factors have span below \(p\).  Therefore the variable \(h_{Mp+w}\) can enter \(\mathcal M_\omega(s_D)\) only through \(\mathcal M_\omega(h_M)\).  Taking its coefficient in \eqref{eq:homomorphism}, using \eqref{eq:row-cofactor}, gives, up to sign,
+\begin{equation}\label{eq:coefficient-transport}
+ A^{|D|-r}B^{|D|-c}C^{|D|-M}\kappa(s_F)
+ =\pm A^{M-1}\Theta C^M B^{M-1}
+       \prod_i\mathcal M_\omega(s_{D_i}).
+\end{equation}
+Each \(D_i\) is connected.  The one-cell case is allowed in the homomorphism formula, with image \(s_E\).  Since \(\sum_i|D_i|=|D|-M\), substituting \eqref{eq:homomorphism} for every component and canceling gives the three exponents
+\begin{equation*}
+ \begin{split}
+ (M-1)+(|D|-M-\rho)-(|D|-r)&=r-1-\rho,\\
+ (M-1)+(|D|-M-\chi)-(|D|-c)&=c-1-\chi,\\
+ M+(|D|-M-L)-(|D|-M)&=M-L.
+ \end{split}
+\end{equation*}
+They are nonnegative by \Cref{lem:interior-bounds}.  Both remaining sides are products of nonzero skew Schur functions, so their values on sufficiently many variables all equal to 1 are positive.  The remaining sign is therefore positive, proving \eqref{eq:transport}.
+
+Every normalization factor has span strictly below \(p\), whereas each connected child has span \(pN_{D_i}+w\ge p\).  Connected-skew irreducibility and unique factorization now prove the last assertion, including multiplicities.
+\end{proof}
+
+\begin{corollary}\label{cor:proper-child}
+If \(|D_i|\ge2\), then \(D_i\circ_\omega E\) is a proper child with
+\begin{equation}\label{eq:child-descent}
+ N_{D_i\circ_\omega E}\le N_F-2p,
+ \qquad |D_i\circ_\omega E|<|F|.
+\end{equation}
+If \(D_i\) is one cell, the corresponding factor is \(s_E\).  Thus at most one distinct irreducible factor has span \(p+w\).
+\end{corollary}
+\begin{proof}
+The span inequality follows from \(N_{D_i}\le M-2\).  The child function divides \(\kappa(s_F)=s_{F^-}\); weighted degrees give \(|D_i\circ_\omega E|\le |F^-|<|F|\).  Finally \(pN_{D_i}+w=p+w\) forces \(N_{D_i}=1\), hence a one-cell component.
+\end{proof}
+
+\subsection{An ordinary mark outside Hypothesis V}
+
+For \(k\ge3\), take
+\begin{equation}\label{eq:non-v-family}
+ E_k=(k,k,2)/(k-2),\qquad
+ W_- = \{(-1,0),(0,0)\},\qquad v=(-1,k-1).
+\end{equation}
+The coordinate rows of \(E_k\), from bottom to top, are
+\([0,1]\), \([0,k-1]\), and \([k-2,k-1]\).  Both attachments are horizontal; the mark is a column of length two, with \(p=k\) and \(w=2\).  At \(k=4\), the letters distinguish the two marked copies:
+\begin{equation*}
+ \begin{array}{cccc}
+ &&\circ&u\\
+ w&\circ&\circ&u\\
+ w&\circ&&
+ \end{array}
+ \qquad E_4=(4,4,2)/(2).
+\end{equation*}
+
+The only cell that could enlarge \(W_-\) on its two content diagonals is \((0,1)\); adjoining it makes the right row endpoints increase from top to bottom, so the enlarged set is not skew.  Thus the mark is maximal.  Its copies are separated because \(k>2\), and either deletion leaves a connected skew diagram.  The middle is a ribbon, so \(\widehat O=\varnothing\), making IV automatic.  Each copy of \(W\) has two cells adjacent to \(O\), so V fails at both ends.  The infinite-strip definition and the two finite caps give
+\begin{equation}\label{eq:non-v-factors}
+ A=h_1^2-h_2,\qquad B=h_2,\qquad C=1,\qquad\Theta=h_1^2.
+\end{equation}
+Indeed \(\widehat W\) is the row \(\{(-1,-1),(-1,0)\}\), and the two caps are the singletons \((-1,0)\) and \((-2,k-2)\).  These have polynomial spans \(2,2,0,1\), respectively, satisfying every bound in \eqref{eq:normalization-bounds}.  Independently, Jacobi--Trudi gives
+\begin{equation}\label{eq:non-v-jt}
+ s_{E_k}=\det\begin{pmatrix}
+ h_2&h_{k+1}&h_{k+2}\\
+ h_1&h_k&h_{k+1}\\
+ 0&h_1&h_2
+ \end{pmatrix}
+ =h_2^2h_k-2h_1h_2h_{k+1}+h_1^2h_{k+2}.
+\end{equation}
+Thus \(\kappa(s_{E_k})/C=h_1^2\), also without the cap calculation.
+
+For a row outer, \eqref{eq:row-cofactor} specializes to
+\(\kappa(s_{(m)\circ_\omega E_k})=h_1^2h_2^{m-1}\).
+Replacing the two finite caps by two full hatted marks would give \(h_2^{m+1}\), which is different already at \(m=1\).  For the rectangle \(D=(3,3)\), its interior is the row \((2)\), and \eqref{eq:transport} gives the nontrivial child formula
+\begin{equation}\label{eq:non-v-child}
+ \kappa(s_{(3,3)\circ_\omega E_k})=h_1^2s_{(2)\circ_\omega E_k}.
+\end{equation}
+The parent and child spans are \(4k+2\) and \(2k+2\).
+
+\begin{remark}\label{rem:ordinary-gauge}
+For \(E_4\), the two-cell end interfaces also admit the vertical ordinary reading, with displacement \(v-e\); switching readings antitransposes the outer, so distinguishing their outer functions additionally requires a nonsymmetric outer, such as \(s_{(2)}=h_2\ne s_{(1,1)}=h_1^2-h_2\).  In the exhaustive range through eight cells, the three positive-width ordinary gauge pairs are precisely the three pairs of marks failing V; empty-edge readings of \(E=(2,1)\) already require the same involution without a non-V adjacency, so no general equivalence is claimed.
+\end{remark}
+
+\section{Period comparison and polynomial obstructions}\label{sec:periods}
+
+For a proper chart of a connected parent \(F\), define its score by
+\begin{equation}\label{eq:score}
+ (w,N_E)=(N_F\bmod p,\ p+N_F\bmod p).
+\end{equation}
+A \emph{source-minimal} chart has lexicographically least score among all proper charts of \(F\).  There are finitely many scores, since \(2p\le N_F\), and the period is determined by the score.
+
+We use the following same-parent results from \cite{Shields2026Gluing}.  Two proper charts of one literal diagram with coprime periods have line inners.  If neither period divides the other and their greatest common divisor exceeds one, there is a proper legal chart at that divisor.  If a smaller supplied period divides a larger one, the larger inner itself has a composition with the smaller marked inner.  Aligned reassociation lifts this inner composition through every connected outer, possibly antitransposing that outer in the empty-edge convention.  These statements concern two charts of the same diagram.  They will not be applied directly to two different Schur-equal parents.
+
+\begin{lemma}\label{lem:outer-independent}
+Suppose \(D\circ_\omega E\) is source-minimal, \(E\) is not a line, and its period is \(p\).  Then for every connected \(V\) with \(|V|\ge2\), the chart \(V\circ_\omega E\) is source-minimal and \(p\) divides every proper root period of this parent.
+\end{lemma}
+\begin{proof}
+Suppose \(G=V\circ_\omega E\) has a proper root of period \(q\) not divisible by \(p\).  Coprime periods would force \(E\) to be a line.  Otherwise put \(g=\gcd(p,q)>1\).  The same-parent divisor construction gives a proper period-\(g\) chart of \(G\), either as a supplied chart when \(q\mid p\), or as a constructed chart otherwise.  Divisible-period reconstruction then expresses \(E\) through a proper period-\(g\) inner.  The original mark on \(E\) has displacement content \(p\), divisible by \(g\), so aligned reassociation gives \(D\circ_\omega E\) a proper period-\(g\) chart.  Since \(g<p\) and \(g\mid p\),
+\begin{equation*}
+ N_F\bmod g=(N_F\bmod p)\bmod g\le N_F\bmod p.
+\end{equation*}
+If the widths are equal, the period-\(g\) inner has smaller span.  Both alternatives contradict source-minimality.
+
+Every proper root period of \(G\) is therefore a multiple \(ap\).  Write \(N_G=pN_V+w\), with \(w<p\).  Its remainder modulo \(ap\) is \(w+p(N_V\bmod a)\), at least \(w\).  If equal to \(w\), its inner span \(ap+w\) is no smaller than \(p+w\).  Thus the displayed chart is source-minimal.
+\end{proof}
+
+The nonline condition cannot be dropped.  The empty-mark row inner \((3)\) is source-minimal in the row \((9)\), with score \((0,3)\), whereas the same inner under the row outer \((4)\) gives \((12)\), which has score \((0,2)\) from the row inner \((2)\).  The lemma makes no claim about using the one-cell outer and therefore does not assert that \(E\) is composition-irreducible.
+
+\begin{definition}\label{def:discrete-interior}
+A connected diagram has a \emph{discrete interior} if every nonempty connected component of its southeast interior is one cell.  The empty interior is included.
+\end{definition}
+By \eqref{eq:corner-factors} and connected-skew irreducibility, this is equivalent to
+\begin{equation}\label{eq:discrete-polynomial}
+ \kappa(s_D)=h_1^{|D|-N_D}.
+\end{equation}
+For a row profile \((r_1,\ldots,r_n;g_1,\ldots,g_{n-1})\), where \(g_i\) is adjacent-row overlap minus one, it says that all \(g_i\) belong to \(\{0,1\}\) and \(r_{i+1}\ge3\) whenever \(g_i=g_{i+1}=1\).  Indeed the nonempty rows of \(D^-\) then have one cell each; consecutive such cells are edge-adjacent exactly when the intervening original row has length two.
+
+\begin{theorem}[Discrete-interior descent]\label{thm:descent}
+Suppose there exist connected Schur-equal diagrams having source-minimal proper charts of distinct periods.  Among such pairs choose one of least parent span, and order its periods as \(p<q\).  The outer diagram in its period-\(q\) chart has a discrete interior.
+\end{theorem}
+\begin{proof}
+First exclude a class containing a line-inner chart.  Full-class line transport in \cite{Shields2026Gluing} makes its line fiber the whole class.  Source-minimal fiber domination in the same reference implies that the fiber of every source-minimal chart in that class is also the whole class.  Each parent therefore carries a chart of the other's source-minimal period.  Since the parent span is the same, comparison of the scores in both directions makes them equal, and hence makes the periods equal.  A failure cannot be in such a class.
+
+Write a least-span failure as
+\begin{equation*}
+ F=D\circ_\omega E,\qquad H=V\circ_\eta U,\qquad
+ s_F=s_H,
+\end{equation*}
+with source-minimal periods \(p<q\) and widths \(w,u\), respectively.  Neither inner is a line.  Suppose \(V^-\) has a component \(T\) of at least two cells.  By \Cref{thm:transport},
+\(s_{T\circ_\eta U}\) is an irreducible factor of the common cofactor \(\kappa(s_F)=\kappa(s_H)\), of span at least \(2q+u\).  This exceeds \(p+w\), since \(w<p<q\).  On the period-\(p\) side it can be neither a normalization factor nor a child from a one-cell component.  Unique factorization gives a component \(S\) of \(D^-\) with \(|S|\ge2\) and
+\begin{equation*}
+ s_{T\circ_\eta U}=s_{S\circ_\omega E}.
+\end{equation*}
+By \Cref{lem:outer-independent}, both supplied child charts are source-minimal, of periods \(q\) and \(p\).  By \Cref{cor:proper-child}, their common span is at most \(N_H-2q<N_H\).  This contradicts the choice of the pair.
+\end{proof}
+
+\begin{corollary}\label{cor:equivalent-base}
+Source-minimal periods are equal for all connected Schur-equal rooted diagrams if and only if they are equal whenever the larger-period outer has a discrete interior.
+\end{corollary}
+\begin{proof}
+One implication is restriction.  For the other, a counterexample of least span would contradict \Cref{thm:descent} and the restricted statement.
+\end{proof}
+
+The restricted statement in \Cref{cor:equivalent-base} is not proved here.  If its larger-period outer is a ribbon, there is no high-span child at all.  Otherwise all high-span factors are copies of \(s_U\); their outers have one cell.  Those occurrences do not carry proper charts, so \Cref{lem:outer-independent} supplies no descent through them.
+
+\subsection{The nonempty discrete residual}
+
+For the nonempty discrete case, write
+\begin{equation*}
+ F=D\circ_\omega E,\qquad H=R\circ_\eta U,
+\end{equation*}
+now with periods \(p>q\) and widths \(w,u\), respectively.  The normalizations from \eqref{eq:normalization} carry subscripts \(\omega\) and \(\eta\).
+
+\begin{proposition}\label{prop:beta-reduction}
+Suppose the two charts are proper, legal, and source-minimal with nonline inners, \(s_F=s_H\), and \(D^-\) consists of \(t\ge1\) isolated cells.  There is an actual connected component \(V\) of \(R^-\) such that
+\begin{equation*}
+ s_E=s_{V\circ_\eta U},\qquad
+ p+w=mq+u,\qquad m=N_V.
+\end{equation*}
+If \(m=1\), then \(s_E=s_U\) and \(q<p<2q\).  If \(m\ge2\), then \(V\circ_\eta U\) is a proper source-minimal chart of area \(|E|<|F|\).  The function equality does not assert that the literal diagram \(E\) has that chart.
+\end{proposition}
+\begin{proof}
+By \Cref{thm:transport}, the source cofactor contains \(s_E^t\), and all its remaining factors have span below \(p\).  The connected prime \(s_E\) has span \(p+w>q\).  Every candidate normalization factor has span below \(q\), so unique factorization of the common corner polynomial supplies a connected component \(V\) of \(R^-\) whose transported function is associated to \(s_E\).  Both functions are primitive integer polynomials; the scalar is therefore \(\pm1\), and positive specialization makes it \(+1\).  The span law gives \(p+w=mq+u\).
+
+At \(m=1\), \(V\) is one cell, and \(p+w=q+u<2q\).  At \(m\ge2\), the child is proper.  Its area is \(|E|\) by homogeneity, and \(|E|<|F|\) since it divides the source corner.  Its source minimum follows from \Cref{lem:outer-independent}, applied to the source-minimal chart of \(H\), its nonline inner \(U\), and the actual connected outer \(V\) with at least two cells.
+\end{proof}
+
+\begin{lemma}\label{lem:alpha-row-candidate}
+Suppose the two charts are proper and legal, \(p>q\), \(D^-\) consists of \(t\ge1\) isolated cells, and
+\begin{equation*}
+ N_F=N_H,\qquad \kappa(s_F)=\kappa(s_H),\qquad s_E=s_U=f.
+\end{equation*}
+Then \(R^-\) has exactly \(t\) isolated cells, every row gap of \(R\) is one, and
+\begin{equation*}
+ \operatorname{sp}\kappa(f)<u,\qquad
+ \operatorname{sp}B_\eta<u.
+\end{equation*}
+These assertions require neither source-minimality nor full parent-function equality.
+\end{lemma}
+\begin{proof}
+Put \(\ell=\operatorname{sp}f=p+w=q+u\), \(M=N_D\), and \(M'=N_R\).  A nonsingleton component of \(R^-\) would supply a prime of span at least \(2q+u>\ell\).  The source has no factor of that span: its normalizers are below \(p\) and all its children have function \(f\).  Hence \(R^-\) is discrete.  Since \(\ell\) exceeds both periods, the normalizers contain no copy of \(f\); its exact multiplicity is therefore \(t\) on each side.  In particular \(|R^-|=t\).
+
+The parent span equations and the equality of inner spans give
+\begin{equation*}
+ p(M-1)=q(M'-1),\qquad M'>M,\qquad u>w.
+\end{equation*}
+After canceling \(f^t\), \eqref{eq:transport} becomes
+\begin{equation*}
+ \Theta_\omega A_\omega^{r(D)-1-t}B_\omega^{c(D)-1-t}C_\omega^{M-t}
+ =\Theta_\eta A_\eta^{r(R)-1-t}B_\eta^{c(R)-1-t}C_\eta^{M'-t}.
+\end{equation*}
+For a connected skew Schur prime \(\pi\), let \(\operatorname{ord}_\pi\) denote its multiplicity.  If \(\operatorname{sp}\pi\ge u\), the source mark and hat have span at most \(w<u\), and both finite-cap factors have span below \(u\).  Moreover \(\kappa(f)=\Theta_\omega C_\omega=\Theta_\eta C_\eta\), so \(\pi\) has the same multiplicity in both middle factors as in \(\kappa(f)\).  Taking valuations gives
+\begin{equation*}
+ 0=(r(R)-1-t)\operatorname{ord}_\pi A_\eta
+  +(c(R)-1-t)\operatorname{ord}_\pi B_\eta
+  +(M'-M)\operatorname{ord}_\pi\kappa(f).
+\end{equation*}
+All summands are nonnegative by \Cref{lem:interior-bounds}, and \(M'-M>0\).  Since \(u>0\), the mark factor \(A_\eta\) is itself a connected prime of span \(u\).  Using it for \(\pi\) forces \(r(R)=t+1\).  Discreteness makes every row gap at most one, while their sum is \(|R^-|=t\).  There are \(t\) gaps, so all equal one.  The positive last coefficient in the valuation identity also excludes every prime of span at least \(u\) from \(\kappa(f)\), proving its strict span bound.
+
+Distinct isolated interior cells occupy content positions separated by an empty diagonal, and the two extreme diagonals are absent from the interior.  Thus \(M\ge2t+1\).  Since \(M'>M\) and \(r(R)=t+1\),
+\begin{equation*}
+ c(R)-1-t=M'-2t-1>0.
+\end{equation*}
+The positive middle coefficient in the valuation identity now excludes every prime of \(B_\eta\) of span at least \(u\), proving the second bound.
+\end{proof}
+
+The inherited function in \Cref{prop:beta-reduction} does not supply a chart on \(E\).  When its outer component has one cell, \Cref{lem:alpha-row-candidate} restricts the other outer and its normalizers but gives no smaller proper chart.  These conclusions sharpen the nonempty residual without settling it; the ribbon-outer case still has no child to extract.
+
+\subsection{Tests for a proposed period}
+
+Let \(P\) be a connected skew Schur function of span \(N\).  Factor its corner polynomial into primitive connected skew Schur factors,
+\begin{equation*}
+ \kappa(P)=\prod_\phi\phi^{m_\phi},
+\end{equation*}
+and let \(q\ge2\) be a proposed proper root period.  Set \(N=Mq+u\), \(0\le u<q\), and write \(\ell_\phi=\operatorname{sp}\phi\).
+
+\begin{proposition}\label{prop:period-tests}
+If any connected realization of \(P\) has a proper legal period-\(q\) chart, then \(M\ge2\) and the following conditions hold:
+\begin{enumerate}
+\item For \(\ell_\phi\ge q\), one has \(\ell_\phi\ge q+u\) and \(\ell_\phi\equiv u\pmod q\).  At most one distinct factor has span \(q+u\).
+\item With
+\begin{equation}\label{eq:candidate-defect}
+ L_q=\sum_{\ell_\phi\ge q}m_\phi\frac{\ell_\phi-u}{q},\qquad d_q=M-L_q,
+\end{equation}
+one has \(d_q\ge2\).
+\item If \(u<\ell_\phi<q\), then \(\ell_\phi\le q-u-2\) and \(d_q\mid m_\phi\).
+\end{enumerate}
+\end{proposition}
+\begin{proof}
+By \Cref{thm:transport}, a high-span prime is a connected child with span \(qN_{D_i}+u\).  This proves (i), including its uniqueness clause.  Summing with multiplicities identifies \(L_q\) with \(\sum_iN_{D_i}\), so (ii) is \Cref{lem:interior-bounds}.  Finally a factor whose span lies strictly between \(u\) and \(q\) can divide none of \(\Theta,A,B\), by \eqref{eq:normalization-bounds}.  It occurs only in \(C^{d_q}\).  Its span is at most \(q-u-2\), and its multiplicity is a multiple of \(d_q\).
+\end{proof}
+
+These are necessary tests, not a chart reconstruction.  Even the complete corner polynomial need not distinguish parents of the same area and span.  For example, the two-row profiles \((3,3;1)\) and \((2,4;1)\) have functions
+\begin{equation*}
+ h_3^2-h_1h_5\quad\text{and}\quad h_2h_4-h_1h_5,
+\end{equation*}
+respectively.  Both have corner polynomial \(h_1\), but their full functions differ.
+
+\section{Equal windows and the determinant defect}\label{sec:normal-chart}
+
+The cofactor constraints above do not recognize complete literal windows or establish a rational residue identity.  The following determinant alternative starts with those data supplied; it is not a conclusion for every discrete-interior residual.
+
+The ordinary private cuts use the attachments of \Cref{sec:marks}.  The full-window domain consists of connected \(U,W\) for which the first and last width-\(w\) content bands of \(U\) are literally translates of the complete diagram \(W\).  The two private cuts are inherited from an ordinary source: the adjacent private diagonals are singletons and the two cut directions agree, horizontally or vertically.  All overlap and edge chains below, including their prefixes and suffixes, are required to be actual connected skew diagrams.  In particular \(U\amalg_W U\) denotes the union along those full windows, whereas \(UHU\) is the empty horizontal join.  These conditions concern literal windows, not merely equal functions.
+
+Fix
+\[
+ \begin{gathered}
+ q=N_U=b\delta,\qquad w=N_W=v\delta,\qquad
+ K_U=\Lambda^b,\qquad K_W=\Lambda^v,\\
+ b\ge3,\qquad1\le v\le b-2,\qquad\gcd(b,v)=1.
+ \end{gathered}
+\]
+Here \(\Lambda\) denotes the corner-inventory polynomial, not the ambient symmetric-function ring used in \Cref{sec:corner}.  In \Cref{sec:normal-chart,sec:dual,sec:one-active,sec:strengthening}, \(r,B,C,t,u\) are the local multiplicity, word lengths, normal coordinate, and residue ratio below, not the outer statistics and normalization factors of \Cref{sec:transport,sec:periods}.
+
+Choose a connected prime \(\psi=a h_N+c\) of maximal generator span among the factors of \(\Lambda\), with multiplicity \(r\).  Ties are allowed.  Write
+\[
+ t=\psi,\qquad d=b-v,\qquad B=rb,\qquad C=rv,\qquad n=rd.
+\]
+Here \(a\) is the signed top cofactor of \(\psi\).  It is a nonzero lower polynomial.  Substitute \(h_N=(t-c)/a\) and work over the rational field in the other generators.  A bar denotes residue at \(t=0\), and \(\operatorname{ord}_\psi\) is the resulting discrete valuation, with the zero function assigned infinite order.
+
+Put \(f=s_U\), \(A_W=s_W\), \(E_2=s_{U\amalg_WU}\), \(\beta=s_{UHU}\), and \(u=\beta/f^2\).  Exact residue matching means that a rational function \(\rho\in\mathbb Q(X)\) satisfies
+\begin{equation}\label{eq:residue-match}
+ \overline{f^v/A_W^b}=\rho(\bar u).
+\end{equation}
+The residue variable \(\bar u\) is transcendental, as follows from the monic closure coordinate in \Cref{lem:actual-elimination}; hence \(\rho\) is unique.  Define the original defect
+\begin{equation}\label{eq:original-defect}
+ \Theta_U=f^v(E_2/f^2)^b-\rho(\beta/f^2).
+\end{equation}
+Applying \Cref{lem:shared-core} with common window \(W\) gives \(E_2/f^2\equiv1/A_W\pmod\psi\), so \eqref{eq:residue-match} is exactly \(\overline{\Theta_U}=0\).  The factorization in \Cref{lem:residue-classifier} defines the active residue classes.
+
+\begin{theorem}[Determinant defect or literal repetition]\label{thm:intrinsic-order}
+On the actual ordinary full-window domain just specified, with exact residue matching and a maximal-span prime \(\psi\) of multiplicity \(r\), either
+\[
+ \operatorname{ord}_\psi\Theta_U\le r(b-v)
+\]
+or \(U\) is a literal empty row or column composition of \(b\) copies of an inner of span \(\delta\).  At least two active classes improve the bound to \(r(b-v)-1\).  If \(\Lambda=\psi\), the bound in the alternative improves to \(b-v-1\).
+\end{theorem}
+
+The alternatives are not asserted to be disjoint.  Neither nonmaximal primes nor incomplete windows belong to this statement.  Its proof is completed at the end of \Cref{sec:one-active}.  The boundary \(v=b-1\) is \Cref{lem:boundary-full-window}.
+
+\subsection{Actual responses and residue classes}
+
+\begin{lemma}\label{lem:actual-elimination}
+Over the \(t\)-local field obtained by \(h_N=(t-c)/a\), the complete original Jacobi--Trudi matrices reduce to upper-Hessenberg matrices with exact subdiagonal \(t/a\).  Every retained upper response is
+\[
+ S_I(t)=h_{K_I}+A_I(t),\qquad K_I>N,
+\]
+where \(A_I(t)\) uses only indices below \(K_I\) and denominators regular at \(t=0\) using indices at most \(N\).  At residue its coefficients lie in \(L=\mathbb Q(h_1,\ldots,h_{N-1})\).  Both true end responses have protected tops \(p_0,q_0>N\).  If \(d_*\) is the cap-splice distance, the actual horizontal closure has top
+\[
+ K=N+d_*=p_0+q_0.
+\]
+\end{lemma}
+\begin{proof}
+A component of \(U^-\) occupying rows \(j,\ldots,j+k-1\) has its complete actual matrix in source rows \(j+1,\ldots,j+k\) and columns \(j,\ldots,j+k-1\).  At a component break, all lower blocks vanish.  Empty interior rows contribute actual \(h_0\) pivots.  Retain the first block row and last block column of each selected component.  Its complementary minor has signed determinant \(a\); its exact remaining scalar is \(t/a\).  Every different component has span at most \(N\) and nonzero residue determinant: otherwise \(\psi\) would divide a distinct connected prime.  This includes maximal-span ties.
+
+The removed matrix is block upper triangular.  Its diagonal-block inverses and every denominator are lower-local.  Its entire inverse need not be: off-diagonal entries are alternating ordered path sums through the coupling blocks.  For a retained row endpoint \(x\) and column endpoint \(y\), only blocks strictly between them can contribute to \(h_{x-y}-rP^{-1}c\).  Every entry on such a path has index strictly below \(x-y\).  Thus no correction can change its top coefficient one or introduce a larger generator.  This argument retains all normal-dependent inverse entries.
+
+If selected least contents are \(\gamma_1>\cdots>\gamma_B\), their retained endpoints are \(\gamma_i+N,\gamma_i\).  Let \(x_0,y_B\) be the source exterior endpoints.  Then \(p_0=x_0-\gamma_1>N\), \(q_0=\gamma_B+N-y_B>N\).  Distinct component bands are separated by an empty interior diagonal, so \(d_i=\gamma_i-\gamma_{i+1}>N\).  Subtracting endpoints gives \(q=\sum_{i<B}d_i+d_*\) and \(p_0+q_0=N+d_*\).
+\end{proof}
+
+\begin{lemma}[Component elimination]\label{lem:component-elimination}
+Let \(X\) be connected, and let \(g\) be the unique maximal-span prime of \(K_X\), of span \(m\) and multiplicity \(t\).  Retain its actual component occurrences and eliminate the other complete components and unit pivots.  Over the field in indices below \(m\), reduction modulo \(g\) gives a product of \(t+1\) monic triangular responses, up to a nonzero lower factor.  Their top indices are the two true cap distances and the \(t-1\) intervening selected distances plus \(m\), with multiplicity.  No equal-window hypothesis is required.
+\end{lemma}
+\begin{proof}
+Use the ordered elimination in the proof of \Cref{lem:actual-elimination} on the single original matrix of \(X\).  Every other component has smaller span and nonzero residue determinant by \Cref{lem:cofactor}.  The proper selected minors are also nonzero lower units.  At residue, the selected subdiagonal entries vanish, and the determinant becomes the product of the diagonal responses times the removed lower factor.  Ordered path support gives monicity in each response's own highest generator.  Subtracting the retained original row and column endpoints gives exactly the stated indices.  Equal windows were not used in this calculation.
+\end{proof}
+
+\begin{lemma}\label{lem:actual-words}
+Let \(l\) be the internal response word of \(U\), of length \(B-1\), and \(P=l[:n]\).  The word \(l\) and its actual gap sequence have period \(n\) on their overlapping ranges.  With the same true exterior germs, the four internal words are
+\[
+ U:l,\quad W:l[:C-1],\quad
+ U\amalg_W U:P\,l,\quad UHU:l\,S_*\,l.
+\]
+All complete removed determinant factors cancel at full normal precision in the logarithmic defect defined below.
+\end{lemma}
+\begin{proof}
+A private boundary has singleton adjacent diagonals and hence cannot cut through an interior component.  Complete equal windows identify whole selected components, all intervening nonselected blocks, and actual empty-row pivots.  Locality of the Schur complement gives the word identities before residue reduction.  Source ordinary attachments are precisely the private directions in \(U\): consecutive empty copies occupy disjoint bands of length \(q\), and \(w<q\) keeps the marks inside the extreme copies.  This conclusion would fail for partial or merely Schur-equal windows.
+
+A nonselected factor of inventory multiplicity \(m\) appears in the four removed determinants with respective exponents \(bm,vm,(2b-v)m,2bm\).  Selected proper minors have the same inventory law.  Their net exponent in the defect is
+\(b(2b-v)-vb-2b(b-v)=0\).  This cancels their complete \(t\)-germs, not the inverse entries that remain inside an upper response.  Association and permutation signs are fixed rational units and are retained until unit normalization.
+\end{proof}
+
+In residue calculations, \(S_I\) denotes \(S_I(0)\); full normal germs retain the argument \(t\).  Equal response classes mean equality of these rational functions, not equality of literal component diagrams.
+
+\begin{lemma}\label{lem:residue-classifier}
+Put \(f=s_U\), \(A_W=s_W\), \(\beta=s_{UHU}\), \(u=\beta/f^2\).  Assume exact residue dependence \(\overline{f^v/A_W^b}\in\mathbb Q(\bar u)\).  Then the unique rational function representing it has the form
+\[
+ \rho(u)=\epsilon\prod_\alpha(u-\alpha)^{e_\alpha},
+ \quad\alpha\in\mathbb Q,\quad e_\alpha\in\mathbb Z\setminus\{0\},
+ \quad\sum e_\alpha=d,\quad\epsilon\in\{1,-1\}.
+\]
+Writing \(L_0,Q_0\) for the two monic end responses and \(F=L_0Q_0\), the active classes are exactly the full identities \(S_\alpha=S_*-\alpha F\).  All other used classes, including end aliases, have balanced counts.  At \(r=1\) there are no balanced internal classes and all selected gaps are equal.
+\end{lemma}
+\begin{proof}
+Each monic triangular response is prime in \(L[h_{N+1},\ldots]\): quotient by it eliminates its own top coordinate.  Two monic associates are equal as full functions; no equality of literal representatives is asserted.  Also \(F\) avoids the closure top \(h_K\), and each of its factors is monic triangular with smaller top.
+
+A constant irreducible polynomial of degree \(j\) in \(u\), pulled back by \(u=S_*/F\), is irreducible as a polynomial in \(h_K\) over the purely transcendental lower field.  If it is associated to a response, that response's top must first be shown to equal \(K\): a larger top is absent from the pullback, while a smaller top cannot involve \(h_K\).  Its degree in \(h_K\) is then one, forcing \(j=1\) and a rational label.  This top-index step is essential.
+
+Let \(D\) be the sum of plane exponents and let \(m_T\) be the multiplicity of an end-prime class in \(F\).  If \(E_T=v\#_U(T)-b\#_W(T)\) is its internal exponent, end valuation gives \(E_T=(d-D)m_T\).  Total internal exponent is \(v(B-1)-b(C-1)=d\), while \(\sum m_T=2\).  Hence \(d=D+2(d-D)\), giving \(D=d\), and every end exponent is zero.  Every nonplane class has \(v\#_U=b\#_W\), so its counts are \((bk,vk)\).  Monic leading terms fix the residual scalar to the fixed determinant sign.  If \(r=1\), \(\#_U\le b-1\) forces \(k=0\).  All remaining responses have top \(K\), hence all gaps equal \(d_*\); their sum is \(q=b\delta\).
+\end{proof}
+
+\begin{lemma}\label{lem:exposure}
+For the finite response chart above, there exist two nonempty open real chambers, with both true caps negative or both positive.  Their product \(F\) is positive.  At every same-anchor root simultaneously, all off-anchor responses have the chosen sign.  At the least remaining anchor label in the negative chamber, and the greatest in the positive chamber, every remaining other factor has that sign.
+\end{lemma}
+\begin{proof}
+Choose the coordinates below \(N\) outside the finitely many denominator zeros.  For \(N<j<K\), choose \(h_j\) successively sufficiently negative or sufficiently positive to satisfy all finitely many response and cap inequalities with top \(j\).  These conditions are open.  Distinct same-anchor normalized functions have distinct rational labels \(\lambda_X=(S_*-S_X)/F\); their differences are nonzero functions of lower coordinates.  Avoid their finitely many zero loci inside the open chamber.  At \(S_X=0\),
+\[
+ h_K=F\lambda_X-A_*,\qquad S_Y=F(\lambda_X-\lambda_Y).
+\]
+For \(j>K\), choose \(h_j\) successively to dominate the corrections at every one of these finitely many roots.  The roots do not depend on later coordinates.  This controls higher responses even when they depend on \(h_K\).  At the least label all other same-anchor responses are negative; at the greatest they are positive.  Active labels are rational constants, so the identities of the least and greatest active classes agree across the two chambers.  No independence of derived response functions was used.
+\end{proof}
+
+\section{Cyclic inventories and original coefficients}\label{sec:dual}
+Write \(b=kd+s\), \(1\le s<d\), \(m=rs\).  Then \(B=kn+m\), \(C=(k-1)n+m\), and \(\gcd(m,n)=r\).  The periodic word has \(l=P^kR\), \(R=P[:m-1]\).  Put
+\[
+ A_P=\prod_{i\in P}S_i,\quad D_R=\prod_{i\in R}S_i,\quad T=\prod_{i\in l}S_i=A_P^kD_R,
+\]
+\[
+ c_X=\#_X(P),\quad t_X=\#_X(R),\quad e_X=sc_X-dt_X.
+\]
+The sum of the \(e_X\) is \(d\); active means \(e_X\ne0\).  For any cyclic word \(V\), count every start, including repeated wraps:
+\[
+ F_j(V)=\sum_{i=0}^{|V|-1}\prod_{a=0}^{j-1}S_{V_{i+a}}^{-1},\quad
+ H_C(P)=\sum_{i=0}^{n-1}\prod_{a=0}^{C-1}S_{P_{i+a}},
+\]
+with cyclic subscripts.  Set \(Q_\alpha=l\alpha\), \(L_S=\sum e_\alpha/S_\alpha\), and
+\[
+ N_j=bF_j(P)-\sum e_\alpha F_j(Q_\alpha),\qquad
+ \Phi_B=bF_B(P)-\frac{B L_S}{T}.
+\]
+
+\begin{lemma}\label{lem:dual-identities}
+In the actual dependent response field,
+\begin{align}
+ N_n&=\frac{nd}{A_P}-\frac{L_SH_C(P)}{T},\label{eq:dual-first}\\
+ N_m&=sF_m(P)-\frac{mL_S}{D_R},\label{eq:dual-short}\\
+ \Phi_B=N_B&=\frac bs A_P^{-k}N_m.\label{eq:dual-last}
+\end{align}
+In particular \(L_S\ne0\), and \(F_B(Q_\alpha)=B/(TS_\alpha)\).
+\end{lemma}
+\begin{proof}
+Every full \(n\)-window in \(P\) has product \(A_P\).  The \(C\) nonclosure \(n\)-windows in \(Q_\alpha\) have the same product.  The complements of the \(n\) crossing windows in \(l\) are exactly the cyclic forward \(C\)-windows of \(P\).  Subtraction gives \eqref{eq:dual-first}, because \(bn-dC=nd\).
+
+For \(m\)-windows, the \(kn\) noncrossing starts give \(kF_m(P)\).  Each of the \(m\) crossing windows has nonclosure product \(D_R\), by periodicity.  Hence \eqref{eq:dual-short}.  Finally \(F_B(P)=A_P^{-k}F_m(P)\), and all \(B\) starts in \(Q_\alpha\) have product \(TS_\alpha\).  Substitution proves \eqref{eq:dual-last}.  The factor \(B\) must not be omitted or deduplicated.  As a function of \(h_K\), \(L_S=d/h_K+O(h_K^{-2})\), so it is nonzero.
+\end{proof}
+
+\begin{lemma}\label{lem:peeling}
+Assume \(N_m=0\).  At an exposed inactive same-anchor class \(X\), let \(d_X=\operatorname{ord}_{S_X}L_S\ge0\).  Either \(d_X>0\) already gives a contradiction, or the occurrence mask of \(X\) has period \(r\), with its omitted phase unoccupied.  Its residue factors may then be removed as common powers from all window sums, without deleting any word position or changing the valuation at another class.
+\end{lemma}
+\begin{proof}
+Let \(M_X\) be the maximum number of \(X\)'s in an \(m\)-window.  After previously justified common powers are factored, all leading inverse terms have the same sign in the exposed chamber: their remaining lengths are \(m-\sum\mu_Y-M_X\).  Thus their sum has exact valuation \(-M_X\).  Equation~\eqref{eq:dual-short} gives \(-M_X=d_X-t_X\).  Since \(e_X=0\), the average window count is \(sc_X/d=t_X\).  Therefore \(M_X\ge t_X\); a positive \(d_X\) is impossible.  Otherwise every window count equals its average.  Sliding gives \(\chi_X(i+m)=\chi_X(i)\), hence period \(r=\gcd(m,n)\).
+
+Write \(c_X=dh_X\).  Every \(m\)-window has \(sh_X\) occurrences and every \(C\)-window has \(vh_X\); the prefix of length \(m-1\) has \(sh_X-\chi_X(m-1)\).  Therefore \(e_X=d\chi_X(m-1)=0\).  The factors \(S_X^{-sh_X}\) and \(S_X^{vh_X}\) are common to the inverse and forward sums.  At a distinct prime they are nonzero units.  Factoring them leaves all starts, all positions, and all off-anchor functions in place, so the same-sign argument can be repeated.
+\end{proof}
+
+\begin{theorem}[Dual-period nonvanishing]\label{thm:dual-period}
+If at least two response classes are active, then \(N_n\) and \(\Phi_B\) cannot both vanish.
+\end{theorem}
+\begin{proof}
+Suppose they do.  Equation~\eqref{eq:dual-last} gives \(N_m=0\).  Apply Lemma~\ref{lem:peeling} successively to inactive same-anchor classes before the least active label in the negative chamber; repeat independently before the greatest active label in the positive chamber.  Either a contradiction occurs already or both active extremes are exposed.  Other classes are nonzero units at either divisor, and \(\operatorname{ord}_{S_\alpha}L_S=-1\).
+
+Let \(\mu_\alpha\) be the minimum \(C\)-window count and \(M_\alpha\) the maximum \(m\)-window count.  The surviving equal-length sign sums show these are exact valuations, not just combinatorial bounds.  Equations~\eqref{eq:dual-first} and \eqref{eq:dual-short} give
+\[
+ \mu_\alpha=(k-1)c_\alpha+t_\alpha+1,
+ \qquad M_\alpha=t_\alpha+1.
+\]
+The minimum is at most its average \(vc_\alpha/d\), and the maximum at least its average \(sc_\alpha/d\).  Together these say \(e_\alpha\ge d\) and \(e_\alpha\le d\), respectively.  Thus \(e_\alpha=d\), and all \(m\)-window counts are constant.  Its mask has period \(r\), whence \(e_\alpha=d\chi_\alpha(m-1)\).  Each of the two distinct active extremes must occupy the same omitted position.  A position has one class, a contradiction.
+\end{proof}
+
+\subsection{Transfer to the original determinant}
+
+\begin{lemma}\label{lem:original-transfer}
+Set \(E_2=s_{U\amalg_WU}\), \(T_\alpha=\beta-\alpha f^2\), and
+\[
+ \mathcal R=\frac{E_2^b}{\epsilon f^v\prod T_\alpha^{e_\alpha}},\quad
+ D=\log\mathcal R,\quad
+ \Theta_U=f^v(E_2/f^2)^b-\rho(\beta/f^2).
+\]
+Put \(u_0=\bar u\).  Exact residue matching gives \(\mathcal R(0)=1\).  Suppose the completed actual selected-gap cycle is \(r\)-periodic.  For every \(2\le j\le B\) with \(r\mid j\), put \(H_j=N+(j/r)\delta\).  Then
+\[
+ \partial_{h_{H_j}}[t^{j-1}]\Theta_U
+ =\rho(u_0)(-1)^{j-1}a^{1-j}N_j.
+\]
+In particular, \(H_n=N+d\delta\), \(H_B=N+q\), and
+\begin{align*}
+ \partial_{h_{H_n}}[t^{n-1}]\Theta_U
+ &=\rho(u_0)(-1)^{n-1}a^{1-n}N_n,\\
+ \partial_{h_{H_B}}[t^{B-1}]\Theta_U
+ &=\rho(u_0)(-1)^{B-1}a^{1-B}\Phi_B.
+\end{align*}
+All earlier coefficients omit the corresponding generator, and the displayed coefficients are affine in it.
+\end{lemma}
+\begin{proof}
+An upper-Hessenberg determinant is the sum over partitions of its states into consecutive intervals.  An interval of \(j\) states contributes its top entry, \(j-1\) selected subdiagonals, and sign \((-1)^{j-1}\).  For every indicated \(j\), every completed \(j\)-gap window has sum \((j/r)\delta\).  Its protected generator is \(h_{H_j}\), at minimal cost \(j-1\), with coefficient \(\eta_j=(-1)^{j-1}a^{1-j}\).
+
+A shorter interval extends to a completed \(j\)-window and gains positive distance.  A longer interval costs at least \(j\).  Proper fill-in uses smaller indices.  A true left-end interval has top \(p_0+\sum_{i=1}^{j-1}d_i\).  Its completion adds \(d_*=p_0+q_0-N\), so its top is exactly \(H_j-q_0\); a right-end interval similarly has top \(H_j-p_0\).  Both are strictly below \(H_j\), also when \(j<n\).  Every singleton and both caps omit \(h_{H_j}\), since \(j\ge2\) and all gaps are positive.  Intrinsic derivatives of these shorter terms do not enlarge their generator supports.  Thus at the selected cost there is exactly one complete contraction containing that generator and all other factors are at residue.  Earlier products in the logarithm omit it.
+
+Expand the virtual expression \(T_\alpha\) in its two original summands before logging.  A noncrossing contraction has the same activity in both; the residual central factor is \(S_\alpha\).  A crossing contraction occurs only in \(\beta\).  If \(\operatorname{Lin}_j(l)\) is the linear internal sum, the normalized-log coefficients of \(f,E_2,T_\alpha\) are
+\[
+ \eta_j\operatorname{Lin}_j(l),\quad
+ \eta_j\{\operatorname{Lin}_j(l)+F_j(P)\},\quad
+ \eta_j\{2\operatorname{Lin}_j(l)+\operatorname{Cross}_j(\alpha)\}.
+\]
+These counts hold for every \(j\le B\): the words \(l\) and \(Pl\) have respectively \(B-j\) and \(n+B-j\) linear starts.  The extra \(n\) starts traverse exactly one cyclic period of \(P\), including repeated wraps.  The word \(l\alpha l\) has \(2(B-j)\) noncrossing and \(j\) crossing starts, while the cycle \(Q_\alpha\) has \(B-j\) and \(j\).  Hence \(F_j(Q_\alpha)=\operatorname{Lin}_j(l)+\operatorname{Cross}_j(\alpha)\).  The linear terms cancel using \(b-v-\sum e_\alpha=0\); hence the high derivative of \([t^{j-1}]D\) is \(\eta_jN_j\).  This includes the \(B\) distinct full-cycle starts.
+
+Finally \(\Theta_U=\rho(u)(\exp D-1)\).  The residue \(\rho(u_0)\) is a nonzero unit.  Every earlier coefficient of \(D\) and \(\rho(u)\) omits the resolving generator; a possible first high term of \(\rho(u)\) multiplies \(\exp D(0)-1=0\).  This proves the exact displayed derivatives without assuming that earlier intrinsic coefficients vanish.  A nonzero derivative proves an upper bound on the first nonzero order, not equality with that order.
+\end{proof}
+
+\begin{lemma}\label{lem:maximal-bin}
+Let \(M\) be the maximum cyclic sum of \(n\) completed gaps.  Its mean is \(d\delta\).  At the generator \(h_{N+M}\), the original logarithmic coefficient of order \(n-1\) is
+\[
+ (-1)^{n-1}a^{1-n}\left\{bF_{n,M}(P)-\sum_\alpha e_\alpha F_{n,M}(Q_\alpha)\right\},
+\]
+where only windows of gap sum \(M\) are retained.  If \(M>d\delta\), it is nonzero for arbitrary signed exponents.  If \(M=d\delta\), the completed gap cycle is \(r\)-periodic.
+\end{lemma}
+\begin{proof}
+The same minimal-cost proof as Lemma~\ref{lem:original-transfer} works in the largest span bin, with both true cap completions.  A cyclic \(P\)-window has total \(d\delta\), so contributes nothing at a strict maximum.  Every remaining maximizing window crosses the unique closure once.  Their sum is a common nonzero context sum times \(L_S\).  The context sum is nonzero on the simultaneous monic-positive chamber; \(L_S\ne0\).  At equality every \(n\)-gap sum equals its average.  Sliding gives period \(n\) on the completed \(B\)-cycle, hence period \(\gcd(n,B)=r\).
+\end{proof}
+
+\begin{corollary}\label{cor:many-active}
+On the actual chart with at least two active classes,
+\[
+ \operatorname{ord}_{\psi}\Theta_U\le n-1=rd-1.
+\]
+On the \(r\)-periodic completed-gap domain, if \(N_m\ne0\), the stronger bound is \(m-1=rs-1\).  The identity locus \(\Phi_B=0\) retains the bound \(n-1\); no shorter bound on that locus is asserted.
+\end{corollary}
+\begin{proof}
+First suppose the completed gaps are \(r\)-periodic.  The dual-period theorem and \eqref{eq:dual-last} give \(N_n\ne0\) or \(N_m\ne0\).  If \(m\ge2\), both lengths are eligible in Lemma~\ref{lem:original-transfer}, and \(m<n\).  If \(m=1\), then \(r=s=1\), the short prefix is empty, and exact class balance gives \(N_1=0\); thus \(N_n\ne0\).  No order-zero or \(j=1\) extraction is used.  On \(\Phi_B=0\), \(N_m=0\), so the full-period coefficient detects.
+
+For arbitrary actual gaps, use \Cref{lem:maximal-bin}.  A strict \(n\)-gap maximum detects at order \(n-1\).  Equality with its mean makes the completed gaps \(r\)-periodic and the preceding proof applies.  This dichotomy does not apply the short-window transfer to a nonperiodic gap word.  All conclusions are upper bounds on original normal order, with nonzero prefactor \(\rho(u_0)(-1)^{j-1}a^{1-j}\).
+\end{proof}
+
+\begin{remark}\label{rem:square-word}
+Let \(T=(2,2)\) be a square, and form \(U\) from five empty copies with successive joins \(H,V,V,H\).  The complete first and last two-copy windows are both \(W=THT\).  Their two private cuts are vertical.  In row-profile notation,
+\[
+ U=(2,4,2,2,2,2,4,2;1,1,0,1,0,1,1),\qquad
+ W=(2,4,2;1,1).
+\]
+Thus \(b=5\), \(v=2\), \(\delta=3\), and \(\Lambda=\psi=h_1\).  Direct elimination of the unit pivots gives the two residue responses
+\(S_0=h_4\), \(S_1=h_4-h_2^2\), with word \((0,1,1,0)\), period \((0,1,1)\), and exponents \((-1,4)\).  Hence
+\[
+ \rho(u)=\frac{(1-u)^4}{u},\qquad
+ N_2=2(S_0^{-1}-S_1^{-1})^2.
+\]
+The original short-bin identity gives
+\[
+ \partial_{h_7}[h_1]\Theta_U
+ =-\frac{2(h_4-h_2^2)^2}{h_4^3h_2^2}\ne0.
+\]
+The defect therefore has order exactly one.  The specified five-copy line root cannot occur: its inner would have area four and span three, hence would be the square, whereas the displayed joins are not all equal.
+\end{remark}
+
+\section{From response functions to literal copies}\label{sec:one-active}
+
+One active class can leave periodic response functions without a literal repeated diagram.  The remaining distinction is recorded by the original endpoint profiles.
+
+\begin{lemma}\label{lem:positive-support}
+If all active exponents are positive, the order-\(n-1\) coefficient detects unless there is one active class and the completed response and gap words are \(r\)-periodic.  Multiple positive active classes always detect by \(n-1\).
+\end{lemma}
+\begin{proof}
+Only equal gap sums remain after Lemma~\ref{lem:maximal-bin}.  The exact count balance gives
+\[
+ A_P^b=T^d\prod_\alpha S_\alpha^{e_\alpha}.
+\]
+There are \(dB=bn\) positively weighted reciprocal windows in the closure sum; their geometric mean is \(A_P^{-1}\).  AM--GM on the actual common positive chamber gives
+\(\sum e_\alpha F_n(Q_\alpha)\ge bn/A_P\).
+For two distinct positive labels, corresponding crossing windows differ by the nontrivial ratio of their closure responses, so equality is impossible.  With one label, equality makes every window product the same.  Sliding yields response period \(n\), and thus \(r\); the gap period was proved separately.  This is rational-function periodicity only.
+\end{proof}
+
+\subsection{Endpoint profiles and the actual closure}
+
+\begin{lemma}\label{lem:profile-derivative}
+For an actual retained interval with endpoints \(x,y\), \(K=x-y\), and removed matrix \(P\), define
+\[
+ S=h_K-rP^{-1}c,\quad
+ A(z)=1-\sum_R(rP^{-1})_Rz^{x-R},\quad
+ B(z)=1-\sum_C(P^{-1}c)_Cz^{C-y}.
+\]
+Then, before normal substitution,
+\[
+ \partial_{h_j}S=[z^{K-j}]AB.
+\]
+On \(t=\psi\), \(a\partial_tS=[z^{K-N}]AB\), and for a lower generator
+\[
+ \partial_{h_j}^{\rm raw}S
+ =\partial_{h_j}^{\rm chart}S+(\partial_tS)\partial_{h_j}\psi.
+\]
+\end{lemma}
+\begin{proof}
+Differentiate the Schur complement:
+\[
+ dS=dh_K-(dr)P^{-1}c-rP^{-1}(dc)+rP^{-1}(dP)P^{-1}c.
+\]
+A matrix entry at \((R,C)\) has index \(K-(x-R)-(C-y)\).  Grouping all four terms by this index gives the product coefficient.  The other formulas are the chain rule for \(h_N=(t-c)/a\).  The internal \(dP\) term is essential; residue-zero inverse entries are not deleted.
+\end{proof}
+
+\begin{lemma}\label{lem:early-recovery}
+For a selected-to-selected interval \(K>2N\), its actual response and the two actual endpoint profiles in degrees strictly below \(K/2\) determine its complete original row and column lists.  Every nonliteral equal-response pair has opposite nonzero first profile differences at some \(w<K/2\).  If the selected core profiles already agree, then \(w>N\).
+\end{lemma}
+\begin{proof}
+A full nonselected component lies between the selected strips, with \(y+N<C_j\le R_j<x-N\).  In its inverse, the entire vector \(I_{C_{\min},R_j}\) and the entire vector \(I_{C_j,R_{\max}}\) are nonzero.  Their cofactors delete an extreme row or column; the remaining aligned skew minors have nonnegative row lengths and largest index strictly below that component's span, hence below \(N\).  Lemma~\ref{lem:cofactor} prevents their disappearance on the selected chart.  No such assertion holds for every internal inverse entry.
+
+Process blocks from the left.  Its effective incoming coordinate is
+\[
+ L(C)=h_{x-C}-\sum_{R'\text{ earlier}}v_{R'}h_{R'-C}.
+\]
+It is monic at \(h_{x-C}\).  Each row coefficient \(v_R=\sum_{C\in T}L(C)I_{C,R}\) has common top \(x-C_{\min}\), with nonzero coefficient.  Thus visible left-profile rows group into their exact full blocks.  If a block's least column is at or above the midpoint, all its rows are visible.  Its extreme row and the protected inverse vector recover the columns successively: extract the largest generator and subtract its coefficient times the entire known \(L(C)\), then repeat.  This recovers the original block, not just its function.  The right-profile argument reconstructs right-hand blocks using the opposite protected vector.
+
+There is at most one positive-span block strictly straddling the midpoint.  Its extreme row and column are both visible and recover both complete lists by the same process.  Proper selected-core profiles have degree below \(N\) and product
+\[
+ G(z)=\sum_{j=0}^{N-1}a^{-1}\overline{\partial_{h_{N-j}}\psi}\,z^j
+ \pmod {z^N},\qquad G(0)=1.
+\]
+One profile determines the other; their protected supports recover the selected core lists.  Once all these blocks are fixed, only a literal midpoint \(h_0\) vertex can remain invisible.  Inserting it changes \(S\) by \(-L(m)M(m)\), whose coefficient of \(h_{K/2}^2\) is \(-1\).  Since \(K/2>N\), the response decides its presence.
+
+The first discrepancy \(w\) is therefore below half-span.  Lemma~\ref{lem:profile-derivative} at \(h_{K-w}\) makes the two first differences opposite.  Equal selected core profiles remove every degree below \(N\), while a full other block or empty vertex starts strictly beyond \(N\).  Thus \(w>N\).
+\end{proof}
+
+\begin{proposition}\label{prop:closure-pin}
+In the one-active \(r\)-periodic response/gap nullspace, the active plane is the actual horizontal closure for ordinary \(H,H\), and the actual vertical closure for ordinary \(V,V\).  This includes selected row and column primes with arbitrary full nonrow unit components.
+\end{proposition}
+\begin{proof}
+A phase class with multiplicity \(m_T\) has internal counts \(bm_T-\mathbf1_{T=T_0}\) and \(vm_T-\mathbf1_{T=T_0}\).  Its exponent is \(d\mathbf1_{T=T_0}\); the active class is the omitted phase.  If \(D_0\) is one phase-cycle gap sum and \(d_0\) the missing gap, endpoint subtraction gives
+\(q=bD_0-d_0+d_*\), \(w=vD_0-d_0+d_*\).
+Thus \(d_*=d_0\).
+
+Let \(A_i,B_i\) be proper selected-core profiles.  Their common product is \(G\) modulo \(z^N\).  Phase-matched responses give \(A_iB_{i+1}=A_{i+r}B_{i+r+1}\) in that ring.  The ratios \(A_{i+r}/A_i\) are one common unit \(Z\), and \(Z^b=1\), \(Z(0)=1\).  The finite formal logarithm in characteristic zero gives \(Z=1\).  For a selected row the profiles are both one; for a column they are \(\sum_{j<N}(-1)^je_jz^j\).  These cases need no thick-core assumption.
+
+Here is the coefficient that pins the omitted phase.  For a response of top \(p_0+q_0\), set \(z_p=x-p_0\), \(z_q=x-q_0\), and
+\[
+ \Xi(z)=\mathbf1_{\text{unit vertex at }z}
+ +\sum_T\sum_{a,b\ge0}A_aB_b
+ (M_T^{-1})_{C_T=z-a,\ R_T=z+b}.
+\]
+The two-high-entry path expansion gives coefficient \(-\Xi(z_p)-\Xi(z_q)\) at \(h_{p_0}h_{q_0}\), or \(-\Xi(z_p)\) for the coincident square.  Indeed the intervening inverse entry needs row minus column \(a+b\ge0\).  A cross-component upper-triangular inverse entry has negative such difference and cannot contribute.  The remaining full component has span at most \(N\), so the endpoint weights are exactly the proper selected-core profiles.  Complete inverses inside a component, not only diagonal entries, remain.
+
+Choose the private interval retaining the longer true cap, at selected index \(C\) or \(n\).  Both candidate positions lie in that cap piece.  No interior component crosses or touches its private singleton boundary.  All full inverse contractions agree with those in the actual cap closure, by literal window equality and proper-core phase equality.  A vertical cut adds exactly one \(h_0\) vertex, while a horizontal cut adds none.  The end product has coefficient one at this two-part monomial.  Comparing \(S_\alpha=S_*-\alpha F\) therefore gives \(\alpha=0\) or \(1\), respectively.  This pins support; it is not by itself a literal-state theorem.
+\end{proof}
+
+\subsection{Normal detection and literal reconstruction}
+
+\begin{proposition}\label{prop:normal-interface}
+Assume the one-active nullspace has its actual closure identified and its completed response and gap words are \(r\)-periodic.  Its normal comparison has the following explicit coefficient identity.  Let \(K_i=N+d_i\), let \(w_i\) be the first disagreement between shift-\(n\) endpoint profiles, set
+\[
+ \Delta=\max_i(K_i-2w_i)>0,\quad H=d\delta+\Delta,
+ \quad\eta_i=[z^{w_i}](A_i-A_{i+n}),\quad Z_P=\prod_{i\in P}S_i^{-1}.
+\]
+Write \(D_1=[t]D\).  The identity is
+\begin{equation}\label{eq:normal-interface}
+ [h_H][t^n]D=\frac{(-1)^{n-1}Z_P}{a^n}
+ \left\{\frac d2\sum_{K_i-2w_i=\Delta}\frac{\eta_i^2}{S_i}
+ -(n+1)\overline{\partial_{h_\Delta}\psi}\,D_1\right\}.
+\end{equation}
+Detection occurs by order \(n<B\), or the actual diagram has a proper empty \(b\)-copy line-outer root of span \(\delta\).
+\end{proposition}
+\begin{proof}
+Proper-core phase periodicity follows as in Proposition~\ref{prop:closure-pin}; protected supports make it literal.  Lemma~\ref{lem:early-recovery} makes any nonliteral remaining interval have \(N<w_i<K_i/2\).  Around each directed shift cycle, \(\prod A_i/A_{i+n}=1\).  Taking logarithms, the first surviving sum of ratios is one half the sum of squares of the leading differences; reversed-edge symmetry is unnecessary.  The sum in \eqref{eq:normal-interface} is positive on the monic-positive chamber.  If \(D_1\ne0\), detection is already at order one.  Otherwise the displayed coefficient is nonzero.
+
+If no profiles differ, early recovery supplies identical complete literal lists on each shift cycle.  Since \(\gcd(n,B)=r\), they repeat every \(r\) phases, by one actual cell translation.  Transport the actual closure cut to these phases and take the board between consecutive cuts.  Its span is \(\delta\), its selected component makes it nonline, and gluing \(b\) copies reproduces every row, column and both exterior caps of \(U\).  This is a literal proper root.
+
+It remains to prove the coefficient identity rather than infer it from the square.  Divide each scalar determinant by its diagonal product.  Its remaining partition function has interval activity
+\[
+ (-1)^{j-1}(t/a)^{j-1}q_I(t)/\prod_{i\in I}S_i(t)
+\]
+for a \(j\)-state interval.  Expanding its logarithm cancels disjoint products; one pair of incompatible overlapping intervals has coefficient minus their product, and a repeated activity has coefficient minus one half its square.  These statements follow directly from \(\log(1+x)\), without an independence assumption on the activities.
+
+Every connected cluster touching both caps costs at least \(B\).  A one-cap cluster of cost at most \(n\) is contained in the cap and its first or last \(n\) internal states.  These literal neighborhoods agree in the three words, by their period \(n\); their weighted multiplicity is \(b-v-d=0\).  Thus the complete end clusters, including inverse jets, cancel.  This cancellation includes end entries that may contain the chosen generator.  The remaining internal expression is \(b\) cyclic cluster sums on \(P\) minus \(d\) on the completed \(B\)-word \(Q\).
+
+Put \(\nu_i=\partial_tS_i(0)/S_i\), \(\omega_i=q_{i,i+1}(0)/(aS_iS_{i+1})\),
+\[
+ V=b\sum_P\nu_i-d\sum_Q\nu_i,\quad
+ O=b\sum_P\omega_i-d\sum_Q\omega_i,\quad D_1=V-O.
+\]
+An interval of at most \(n-1\) states has top below \(d\delta<H\).  An \(n\)-state interval has high coefficient \(\overline{\partial_{h_\Delta}\psi}/a\) when \(\Delta\le N\), zero otherwise.  It is independent of \(t\): its endpoint coefficient uses only proper selected strips of offset \(N-\Delta<N\).  The \((n+1)\)-state high coefficient is \([z^{K_i-\Delta}]A_iB_{i+n}\).  These are consequences of the full raw derivative formula and ordered path support, not frozen-unit substitutions.
+
+Factor out \((-1)^{n-1}Z_P/a^n\).  There are exactly three contributions at cost \(n\).  The full \((n+1)\)-interval gives \(d\mathcal E/2\), where \(\mathcal E=\sum_{K_i-2w_i=\Delta}\eta_i^2/S_i\), minus \(\overline{\partial_{h_\Delta}\psi}V\) from the raw/chart self-product difference.  The first derivative of an \(n\)-interval denominator counts each cyclic vertex \(n\) times, giving \(-n\overline{\partial_{h_\Delta}\psi}V\).  Its interaction with a pair interval counts \(n-1\) internal pairs and two exterior overlapping pairs, giving \((n+1)\overline{\partial_{h_\Delta}\psi}O\); the sign is the negative logarithmic incompatibility sign times the negative pair activity.  All other clusters either omit \(H\) or exceed the cost.  The sum is exactly \eqref{eq:normal-interface}.
+
+For \(n\ge3\), two high \(n\)-activities cost \(2(n-1)>n\).  For \(n=2\), necessarily \(r=1,d=2\), retain their self-square and neighboring-pair terms.  Each pair has the same coefficient in \(H\); the actual three-state entry cannot contain \(H^2\), since that would require a backward path or a block crossing a selected core.  The original weighted counts of pairs and neighbors cancel their quadratic terms:
+\[
+ b^2-(b-2)^2-2(2b-2)=0,\quad
+ b(b-1)-(b-2)(b-3)-2(2b-3)=0.
+\]
+Differentiating the self-square contributes one pair charge, and the two neighboring overlaps contribute the other two.  Thus the linear count is still \(n+1=3\).  The same formula follows, including its total \(D_1\) and full lower gradient.  This completes the normal calculation.
+\end{proof}
+
+\begin{theorem}\label{thm:pure-primitive-first}
+In the pure primitive domain \(\Lambda=\psi\), with ordinary full private cuts, a constant residue-response word either gives the actual smaller empty root or has a nonzero original first-normal coefficient.  Thus this standalone normal bound is one, not merely the general bound \(d\).
+\end{theorem}
+\begin{proof}
+Closure pinning identifies the actual horizontal or vertical closure.  Proper-core phase periodicity at \(r=1\), together with protected cofactor supports, makes every selected core literally equal.  No full nonselected component remains in a pure inventory.  Therefore any first unequal connector is presence or absence of one gap-zero unit vertex.  Early recovery gives \(N<w<K/2\); with one common nonzero proper cofactor \(\eta\), its first endpoint differences are \(\eta x_I,-\eta x_I\), where \(x_I\in\{0,1\}\) and the actual closure has bit zero.
+
+Set \(H=2K-N-2w\).  Work with the cleared first-normal numerator \(aS^2D_1\), not a rational coefficient with a frozen denominator.  The original two-state Schur complement and Lemma~\ref{lem:profile-derivative} give the mixed coefficient \([z^{2w}]A_IB_J\).  The raw/chart self-product difference is \((\partial_tS_I-\partial_tS_0)\partial_{h_{K-2w}}\psi\).  Meanwhile the coefficient of \(h_H\) in the common diagonal is \(\partial_{h_{K-2w}}\psi/a\).  These two terms cancel exactly against the onsite part of the cleared numerator, including when \(K-2w<N\).  The remaining directed cross products telescope in their linear terms and give, up to its fixed normalization sign,
+\[
+ \frac{\eta^2}{2}\{bT(P)-dT(Q)\},\qquad
+ T(V)=\sum_{i\text{ cyclic}}(x_i-x_{i+1})^2,
+\]
+where \(Q\) is the internal word completed by its actual closure and \(P\) its period.  All factors in \(\eta\) have index below \(H\).  For one shared copy, the actual longer cap fixes one endpoint bit to zero, so its possible curvature product is zero.  For larger shared windows, the literal last shared state identifies the two boundary terms and cancels them.  This accounts for both actual ends rather than assuming their symmetry.
+
+If \(P\) is nonconstant, \(0<T(P)\le d\).  Vanishing would force \(d\mid T(P)\), hence \(T(P)=d\) and \(T(Q)=b\).  Both cyclic binary transition counts are even, contrary to \(\gcd(b,d)=1\).  If \(P\) is constant one, the difference is \(-2d\); if constant zero, there was no chosen first disagreement.  Thus any nonliteral word has a nonzero cleared numerator and hence \(D_1\ne0\).  If no connector differs, the literal root construction already proved in Proposition~\ref{prop:normal-interface} applies.  This proof is restricted to the pure inventory: arbitrary mixed-unit first differences need not be binary.
+\end{proof}
+
+\begin{proof}[Proof of \Cref{thm:intrinsic-order}]
+Multiple active classes use Corollary~\ref{cor:many-active}.  One active exponent equals \(d>0\).  Lemma~\ref{lem:positive-support} either detects by \(rd-1\) or gives the periodic response/gap nullspace.  Proposition~\ref{prop:closure-pin} identifies its actual closure.  Early recovery gives a positive endpoint margin for every nonliteral state, and Proposition~\ref{prop:normal-interface} then detects by \(rd\).  If no state differs, its complete-list reconstruction gives the displayed literal root.  For a pure primitive inventory, Theorem~\ref{thm:pure-primitive-first} improves the constant-class branch to order one, while a nonconstant word has bound \(d-1\); here \(d\ge2\).
+
+\end{proof}
+
+\subsection{The full-window boundary}
+
+\begin{lemma}\label{lem:boundary-full-window}
+The ordinary full-window geometric boundary is \(v=b-1\), with \(b\ge2\), and has a direct geometric conclusion.  Equal complete windows of width \((b-1)\delta\) in a span-\(b\delta\) inner, with the inherited matching ordinary private cuts, force an actual \(b\)-copy empty row or column root of span \(\delta\).
+\end{lemma}
+\begin{proof}
+The two literal windows are translates by one displacement of content \(\delta\).  Their overlap identifies each successive \(\delta\)-band with the preceding one.  Thus every band is a translate of the first by successive multiples of the same cell displacement.  The inherited ordinary private cut at \(\delta\), and its translated counterpart at \((b-1)\delta\), fix the joining edge to be horizontal or vertical; periodicity gives that same actual cut at every boundary.  The first band is connected skew with singleton ends.  Reattaching its translates reproduces every diagonal interval of \(U\), proving the root identity.  If \(U\) is nonribbon, the band retains an interior component and is nonline.  No rational residue match is needed.  Fullness and actual matching cuts are retained.
+\end{proof}
+
+\section{Scalar and geometric refinements}\label{sec:strengthening}
+
+Scalar nonvanishing does not alone imply an original coefficient or a literal root.  Each geometric refinement retains its own window, support, and span-bin hypotheses.
+
+\subsection{Scalar extensions}
+
+\begin{theorem}\label{thm:dual-general}
+The scalar conclusion of \Cref{thm:dual-period} holds for arbitrary integers \(b>d\ge1\), \(r\ge1\), without a coprimality or geometric-gap hypothesis.  Retain the triangular response and exposure hypotheses, with constant distinct active labels.  Put \(B=rb\), \(n=rd\), and use the positive remainder convention
+\[
+ b=kd+s,\quad1\le s\le d,\quad m=rs,
+\]
+and define the same words, counts and inventories.  With at least two active classes, \(N_n\) and \(\Phi_B\) cannot both vanish.  If \(d\mid b\), at most one class is active, so the many-active premise is empty.  For this scalar theorem the constant field may be any subfield of \(\mathbb R\); active labels need only be distinct constants in that field.  The actual symmetric-function classifier still supplies rational labels.
+\end{theorem}
+\begin{proof}
+If \(d\mid b\), the positive remainder is \(s=d\), so \(m=n\), \(R=P[:-1]\), and \(e_X=d\mathbf1_{X=P_{n-1}}\).  Otherwise put \(g=\gcd(b,d)\) and replace
+\[
+ (b,d,r,e_X)\quad\hbox{by}\quad(b/g,d/g,rg,e_X/g).
+\]
+All new exponents are integers by their count definition.  The word lengths \(B,n,m\), the actual words and the active classes are unchanged, while every \(N_j\) and \(\Phi_B\) is divided by \(g\).  The new reduced period is at least two and coprime to its reduced outer size, so Theorem~\ref{thm:dual-period} applies directly.  Its proof is scalar and uses no corner-inventory realization or gap hypothesis; this is a reparametrization of the same response data, not the construction of a new chart.  Its mask period is \(rg=\gcd(m,n)\), not necessarily the original \(r\).
+
+Finally the exposure proof uses only finitely many strict inequalities over real coefficients, and the divisor/count argument uses only characteristic zero.  Both remain valid over any subfield of \(\mathbb R\) with constant distinct active labels.  Neither this scalar reparametrization nor this constant-field extension supplies an original coefficient without the actual span-bin contract.
+\end{proof}
+
+\begin{corollary}\label{cor:automatic-open}
+If \(r=1\) and \(b\equiv1\pmod d\), then \(\Phi_B=0\) identically for every response assignment satisfying the count formulas.  Under the triangular response/exposure hypotheses of Theorem~\ref{thm:dual-general}, at least two active classes force the full-period detector \(N_d\) to be nonzero.  On an actual equal-gap chart this gives original order at most \(d-1\).
+\end{corollary}
+\begin{proof}
+Here \(m=1\), the short prefix is empty, and \(e_X=c_X\).  Directly,
+\[
+ N_1=b\sum_{i\in P}S_i^{-1}
+ -\sum_Xc_X\left(\sum_{i\in l}S_i^{-1}+S_X^{-1}\right)=0,
+\]
+since \(l=P^{(b-1)/d}\).  Equation~\eqref{eq:dual-last} gives \(\Phi_B=0\), and the dual theorem gives \(N_d\ne0\).  This is a correctly characterized automatic identity locus, not a general claim that the last-window detector vanishes.  The two alternative coefficients need not both be nonzero.
+\end{proof}
+
+\subsection{Signed supports and actual cuts}
+
+\begin{lemma}\label{lem:two-support}
+In the residue-matched actual chart, exactly two signed active exponents of opposite signs and sum \(d\) make the last-window detector nonzero on the equal-gap-sum domain.  The original order is in fact at most \(m-1=rs-1<n-1\), by the intermediate period bin.
+\end{lemma}
+\begin{proof}
+Write the exponents as \(d\tau,d(1-\tau)\), \(\tau>1\), and \(Z_\alpha=(TS_\alpha)^{-1}\).  The geometric mean of the \(B\)-window products \(W_i\) in \(P\) is \(G=Z_\alpha^\tau Z_\beta^{1-\tau}\).  Put \(W_i=G e^{d_i}\), \(\sum d_i=0\), and \(z=Z_\alpha/Z_\beta\).  Direct subtraction gives
+\[
+ \Phi_B=bG\sum_i d_i^2\int_0^1(1-s)e^{sd_i}\,ds
+ +bnZ_\beta\{z^\tau-1-\tau(z-1)\}.
+\]
+The first term is nonnegative; the second is strictly positive by strict convexity and \(z\ne1\).  All quantities are simultaneously positive on a nonempty monic chamber, even though their functions are dependent.  Nonzero there means a nonzero rational identity.  Equation~\eqref{eq:dual-last} makes \(N_m\ne0\), and Lemma~\ref{lem:original-transfer} transfers this shorter coefficient at cost \(m-1\).  The case \(m=1\) cannot occur here: then \(r=s=1\) and every exponent is its nonnegative period count.  The analogous centered energy for arbitrary signed many-support weights is indefinite and is not used.
+\end{proof}
+
+\begin{corollary}\label{cor:one-positive-short}
+On the actual residue-matched periodic-gap domain, any signed residue with exactly one positive active exponent and at least one negative exponent detects by \(m-1\).  The number of negative supports is unrestricted.
+\end{corollary}
+\begin{proof}
+Put \(w_\alpha=e_\alpha/d\) and \(Z_\alpha=(TS_\alpha)^{-1}\).  On the common positive chamber, the geometric mean of the \(B\)-window products in \(P\) is \(G=\prod Z_\alpha^{w_\alpha}\), by exact class balance.  Write the unique positive weight as \(w_+=1+\sum c_\alpha\), with \(c_\alpha=-w_\alpha>0\) on the negative supports, and set \(x_\alpha=Z_\alpha/Z_+\).  The elementary inequalities \(-\log x\ge1-x\) and \(e^y\ge1+y\) give
+\[
+ G/Z_+=\exp\left(-\sum c_\alpha\log x_\alpha\right)
+ \ge1+\sum c_\alpha(1-x_\alpha)
+ =\sum w_\alpha Z_\alpha/Z_+.
+\]
+The inequality is strict because distinct active planes give some \(x_\alpha\ne1\).  AM--GM for the actual positive window products yields
+\(\Phi_B\ge bn(G-\sum w_\alpha Z_\alpha)>0\).
+Thus \(N_m\ne0\) by \eqref{eq:dual-last}; the intermediate-bin formula gives original order at most \(m-1\).  As in the two-support case, \(m=1\) is incompatible with a negative exponent.  Dependence among response functions is harmless; all inequalities hold on one actual positive chamber.
+\end{proof}
+
+\begin{corollary}\label{cor:cut-independent-many-active}
+The many-active bound also holds without matching ordinary private-cut directions under the following explicit geometric hypotheses.  Let \(U,W\) be connected skew diagrams of spans \(q=b\delta,w=v\delta\), with \(b\ge3\), \(1\le v\le b-2\), \(\gcd(b,v)=1\), and the same complete literal first and last windows \(W\).  Normalize the contents of \(U\) to \([0,q-1]\), and require its diagonals at \(w-1,w,q-w-1,q-w\) to be singleton.  Require \(U\amalg_WU\) and \(UHU\) to be connected skew, \(K_U=\Lambda^b\), \(K_W=\Lambda^v\), the same maximal-span choice and exact rational residue matching as above, and at least two active classes.  The two cuts may have different H/V directions.  Then \(\operatorname{ord}_\psi\Theta_U\le rd-1\).
+\end{corollary}
+\begin{proof}
+A singleton diagonal has no interior cell.  Hence neither cut truncates or joins an interior component.  The complete equal windows identify whole selected components, every intervening full unit block and their actual positions.  Ordered JT elimination therefore has the same exact \(t/a\) seams, true caps and strict monicity as before; no attachment direction was used in that endpoint subtraction.  Both cap germs agree between \(U\) and \(W\), because each window shares one extreme with \(U\) and is literally equal to the other window.
+
+The overlap union identifies exactly the complete shared component blocks.  Erosion commutes with that union on its identical overlapping content intervals, and the empty interior diagonals separate the remaining components.  Thus its selected and nonselected inventories are \(2b-v\) times the atomic inventory; the empty horizontal join has inventory \(2b\).  Its actual words are again \(l,Pl,lS_*l\), with the same ends and complete normal-dependent unit matrices.  This proves the realization and full-factor cancellation directly for the displayed diagrams, without assigning them an ordinary source mark.
+
+The residue classification uses only those monic responses, common ends and exact matching.  Exposure, the dual-period proof, and the original period-bin transfer then apply unchanged.  A strict maximum detects at order \(rd-1\); otherwise the actual gaps become periodic and the short/full pair gives the same bound.  The original exact \(\rho(u_0)\) factor remains.  No closure pinning or literal-root theorem for a one-active mixed-cut input is inferred, and parent exclusions retain their separately stated ordinary and support hypotheses.
+\end{proof}
+
+\subsection{Pure row and primitive inventories}
+
+\begin{corollary}\label{cor:row-pencil}
+If every geometric corner component is a horizontal row and the selected prime is the largest row factor \(h_N\), the actual rational-plane labels lie in at most three consecutive integers.  If the two cap tops coincide, at most two labels occur.  The whole-diagram transposed statement holds for an all-column inventory; this is not a statement for a row-selected chart with nonrow units.
+\end{corollary}
+\begin{proof}
+The proper selected-row profiles are both one, so the local projected-inverse coefficient calculation in Proposition~\ref{prop:closure-pin} needs no phase-periodicity for this application.  In that formula, a nonselected row component of positive length \(d\) has one row parameter \(R\) and one column parameter \(C\), with \(R-C=d>0\).  It cannot contribute to the required entry with \(R=C=z\).  Thus \(\Xi(z)\) counts only presence of the literal \(h_0\) vertex at \(z\).  Each parameter occurs once.  The coefficient at \(h_{p_0}h_{q_0}\) is consequently one of \(0,-1,-2\), or \(0,-1\) at a coincident square.  The actual cap product has coefficient one there.  Comparing \(S_\alpha=S_*-\alpha F\) gives the asserted consecutive integral labels.  A full nonrow component can have a nonzero off-diagonal inverse entry at matching row/column parameters, so this cut-count proof does not extend to that domain.  A nonintegral projected coefficient alone is not a counterexample to a bound on full rational-plane classes.  Transpose the entire diagram and every unit component for the column version; the horizontal coordinate becomes \(1-u\), reflecting labels by \(\alpha\mapsto1-\alpha\).
+\end{proof}
+
+\begin{theorem}\label{thm:primitive-short}
+On the actual full-window chart with \(r=1\), every nonconstant rational-plane word has an original detector of order at most \(d-1\).  Signed exponents and arbitrary maximal-span unit inventories are permitted.  This is the primitive specialization of the improved general \(n-1\) bound, and does not require the last-window test.
+\end{theorem}
+\begin{proof}
+By \Cref{lem:residue-classifier}, the gaps are equal and no internal class is balanced at \(r=1\).  A nonconstant word therefore has at least two active classes, and \Cref{cor:many-active} gives \(d-1\).
+\end{proof}
+
+\section{Concluding remarks}\label{sec:concluding}
+
+Corner transport reads child functions and multiplicities without identifying their literal diagrams.  On a supplied complete-window domain, the original determinant additionally distinguishes bounded normal-order failure from a specified literal repetition.  The two statements meet at the corner inventory, not at a recognition theorem: neither function extraction nor scalar response periodicity supplies a chart on another realization.  Complete literal windows and exact rational residue matching remain separate entry requirements.  The same-parent gluing used in the descent preserves source-minimality after changing an outer; it is not a geometric gcd operation across distinct Schur-equal parents.  The determinant alternative therefore does not settle the discrete-interior comparison, general period invariance, marked-inner recognition, chart restoration, or composition classification.
+
+\section*{Declarations}
+{\footnotesize
+\noindent\textbf{Funding.} This research received no external funding.
+
+\smallskip
+\noindent\textbf{Competing interests.} The author has no relevant interests to disclose.
+
+\smallskip
+\noindent\textbf{Data availability.} No datasets were generated or analyzed.
+
+\smallskip
+\noindent\textbf{Computational verification.} The proofs do not depend on numerical computation.  Scripts used for verification and figures are available at \url{https://github.com/johnnyshields/papers}.
+
+\smallskip
+\noindent\textbf{Generative AI use.} During the preparation of this work, the author used OpenAI's ChatGPT (GPT-6 Astra, GPT-6.1 Sol, GPT-5.6 Sol, GPT-6 Luna) and Anthropic's Claude (Opus 5.5, Opus 5, Sonnet 5.5) to assist with mathematical research, manuscript drafting, and the development of auxiliary verification code.  After using these tools, the author reviewed and edited as needed.  The author takes full responsibility for the content of the work.\par}
+
+\begin{thebibliography}{99}
+
+\bibitem{Barekat2009CoincidencesCorrigendum}
+F.~Barekat, V.~Reiner, and S.~van Willigenburg,
+\emph{Corrigendum to ``Coincidences among skew Schur functions'' [Adv. Math. 216 (1) (2007) 118--152]},
+Adv. Math. \textbf{220} (2009), no.~5, 1655--1656,
+DOI: \href{https://doi.org/10.1016/j.aim.2008.10.010}{10.1016/\allowbreak j.aim.2008.10.010}.
+
+\bibitem{Billera2006DecomposableCompositions}
+L.~J.~Billera, H.~Thomas, and S.~van Willigenburg,
+\emph{Decomposable compositions, symmetric quasisymmetric functions and equality of ribbon Schur functions},
+Adv. Math. \textbf{204} (2006), no.~1, 204--240,
+DOI: \href{https://doi.org/10.1016/j.aim.2005.05.014}{10.1016/\allowbreak j.aim.2005.05.014}.
+
+\bibitem{McNamara2009Classification}
+P.~R.~W.~McNamara and S.~van Willigenburg,
+\emph{Towards a combinatorial classification of skew Schur functions},
+Trans. Amer. Math. Soc. \textbf{361} (2009), no.~8, 4437--4470,
+DOI: \href{https://doi.org/10.1090/S0002-9947-09-04683-2}{10.1090/\allowbreak S0002-9947-09-04683-2}.
+
+\bibitem{OlsonHarris2024HopfApplications}
+N.~Olson-Harris,
+\emph{Some applications of combinatorial Hopf algebras to integro-differential equations and symmetric function identities},
+Ph.D. thesis, University of Waterloo, 2024,
+\url{https://hdl.handle.net/10012/20710}.
+
+\bibitem{Reiner2007Coincidences}
+V.~Reiner, K.~M.~Shaw, and S.~van Willigenburg,
+\emph{Coincidences among skew Schur functions},
+Adv. Math. \textbf{216} (2007), no.~1, 118--152,
+DOI: \href{https://doi.org/10.1016/j.aim.2007.05.006}{10.1016/\allowbreak j.aim.2007.05.006}.
+
+\bibitem{Shields2026Gluing}
+J.~Shields,
+\emph{Local common-factor gluing and reduction of composition necessity for skew Schur functions},
+preprint, 2026,
+DOI: \href{https://doi.org/10.5281/zenodo.23133702}{10.5281/\allowbreak zenodo.23133702}.
+\end{thebibliography}
+\end{document}

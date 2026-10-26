@@ -90,7 +90,7 @@ theorem taylorCoeff_one_sub_const_mul (c : ℂ) (H : ℂ → ℂ) (m : ℕ) :
       = if m = 0 then 1 - c * H 0 else -(c * taylorCoeff H m) := by
   rcases Nat.eq_zero_or_pos m with rfl | hm
   · simp
-  · rw [if_neg hm.ne', taylorCoeff, iteratedDeriv_const_sub (f := fun z => c * H z) hm 1,
+  · rw [ite_eq_right hm.ne', taylorCoeff, iteratedDeriv_const_sub (f := fun z => c * H z) hm 1,
       iteratedDeriv_neg, iteratedDeriv_const_mul_field, taylorCoeff]
     ring
 

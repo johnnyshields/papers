@@ -8,6 +8,7 @@ import Mathlib.Analysis.Complex.LocallyUniformLimit
 import Mathlib.Analysis.Normed.Module.MultipliableUniformlyOn
 import Mathlib.Analysis.SpecialFunctions.Log.Summable
 import Shields.Order.Finset.StrictSeparation
+import Mathlib.Analysis.Analytic.Order
 
 /-!
 # Canonical products of genus zero
@@ -309,9 +310,9 @@ theorem summable_inv_norm_zeroed (hsum : Summable fun n => ‖a n‖⁻¹) (S : 
     Summable fun n => ‖if n ∈ S then 0 else a n‖⁻¹ := by
   refine Summable.of_nonneg_of_le (fun n => by positivity) (fun n => ?_) hsum
   by_cases hn : n ∈ S
-  · rw [if_pos hn, norm_zero, inv_zero]
+  · rw [ite_eq_left hn, norm_zero, inv_zero]
     positivity
-  · rw [if_neg hn]
+  · rw [ite_eq_right hn]
 
 /-- **Peeling a whole packet.**  If every index of a finite set `S` carries the same value `z₀`,
 the canonical product factors as `(1 - z/z₀)^{#S}` times the product over the family with those
@@ -333,10 +334,10 @@ theorem canonicalProduct_eq_pow_mul (hsum : Summable fun n => ‖a n‖⁻¹) {z
         = fun n => if n ∈ insert m T then 0 else a n := by
       funext n
       by_cases hnT : n ∈ T
-      · rw [if_pos hnT, if_pos (Finset.mem_insert_of_mem hnT)]
+      · rw [ite_eq_left hnT, ite_eq_left (Finset.mem_insert_of_mem hnT)]
       · rcases eq_or_ne n m with rfl | hnm
-        · rw [if_neg hnT, Function.update_self, if_pos (Finset.mem_insert_self _ _)]
-        · rw [if_neg hnT, Function.update_of_ne hnm, if_neg ?_]
+        · rw [ite_eq_right hnT, Function.update_self, ite_eq_left (Finset.mem_insert_self _ _)]
+        · rw [ite_eq_right hnT, Function.update_of_ne hnm, ite_eq_right ?_]
           intro h
           rcases Finset.mem_insert.mp h with h | h
           · exact hnm h
@@ -352,9 +353,9 @@ theorem canonicalProduct_zeroed_ne_zero (ha : ∀ n, a n ≠ 0)
     canonicalProduct (fun n => if n ∈ S then 0 else a n) z₀ ≠ 0 := by
   refine canonicalProduct_ne_zero' (summable_inv_norm_zeroed hsum S) fun n => ?_
   by_cases hn : n ∈ S
-  · rw [if_pos hn]
+  · rw [ite_eq_left hn]
     simp
-  · rw [if_neg hn]
+  · rw [ite_eq_right hn]
     intro hcon
     rw [sub_eq_zero, eq_comm, div_eq_one_iff_eq (ha n)] at hcon
     exact hn (hS n hcon.symm)

@@ -208,11 +208,11 @@ noncomputable def skewEntryM (b m : ℕ) (lam mu : YoungDiagram) (F : Fin m → 
 theorem skewEntryM_of_mem {F : Fin m → ℕ → ℕ} {i j : ℕ} (h : (i, j) ∈ skewCells lam mu) :
     skewEntryM b m lam mu F i j
       = pathLetter b (rowSource mu m i) (famPath F i) (j - mu.rowLen i) :=
-  if_pos h
+  ite_eq_left h
 
 theorem skewEntryM_of_notMem {F : Fin m → ℕ → ℕ} {i j : ℕ}
     (h : (i, j) ∉ skewCells lam mu) : skewEntryM b m lam mu F i j = 0 :=
-  if_neg h
+  ite_eq_right h
 
 /-- A path of the family read at a natural index below `m`, with its endpoints. -/
 theorem famPath_mem {F : Fin m → ℕ → ℕ}

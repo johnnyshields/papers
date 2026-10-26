@@ -4,6 +4,7 @@ Released under the MIT license as described in the file LICENSE.txt.
 Authors: Johnny Shields
 -/
 import Shields.LinearAlgebra.Matrix.GantmacherKrein
+import Shields.LinearAlgebra.Matrix.GenVandermonde
 import Shields.LinearAlgebra.Matrix.Charpoly.SplitLimit
 
 /-!
@@ -16,6 +17,9 @@ Smoothing by a totally positive kernel, and the reality theorem it yields.
 * `Shields.gaussKernel`: the kernel `G_t = [t ^ ((i - j) ^ 2)]`, totally positive for `0 < t < 1`.
 * `Shields.charpoly_roots_card_of_minorsNonneg`: **a matrix all of whose minors are nonnegative has
   a real spectrum** -- its characteristic polynomial has `n` real roots with multiplicity.
+* `Shields.genVandermonde_charpoly_roots_card`, `Shields.genVandermonde_perron_nonvacuous`:
+  the generalized Vandermonde matrix inhabits both hypothesis classes, so neither theorem
+  is a statement about an empty one.
 
 ## Implementation notes
 
@@ -38,7 +42,7 @@ over the expansion of `exp (x * y)` is needed.
 
 ## References
 
-* [A. Pinkus, *Totally Positive Matrices*][Pinkus2010], Cor. 5.5
+* [A. Pinkus, *Totally Positive Matrices*][Pinkus2010TotallyPositive], Cor. 5.5
 
 ## Tags
 
@@ -213,7 +217,7 @@ theorem compound_smoothed_pos {r : ℕ} {t : ℝ} (ht0 : 0 < t) (ht1 : t < 1)
 
 /-- **The characteristic polynomial of a totally nonnegative real matrix splits
 over `ℝ`.**  This is the reality half of
-Cor. 5.5 of [Pinkus2010]; with `charpoly_roots_nonneg` it is the whole of that
+Cor. 5.5 of [Pinkus2010TotallyPositive]; with `charpoly_roots_nonneg` it is the whole of that
 corollary.
 
 `G_t A G_t` is totally nonnegative with the compound dichotomy, so
@@ -252,10 +256,28 @@ theorem genVandermonde_charpoly_roots_card {m : ℕ} {x : Fin m → ℝ} {k : Fi
   charpoly_roots_card_of_minorsNonneg _ fun r => minorsNonneg_genVandermonde hx hxpos hk r
 
 
+/-- **The totally positive machinery is non-vacuous.**  On a generalized Vandermonde matrix:
+every compound has a strictly positive Perron root, and every real eigenvalue of the matrix
+itself is nonnegative.
+
+`MinorsPos`, `exists_perron_compound` and `charpoly_roots_nonneg` are statements *about* a class,
+and without an inhabitant they would be statements about an empty one. -/
+theorem genVandermonde_perron_nonvacuous {m r : ℕ} (hrm : r ≤ m) {x : Fin m → ℝ}
+    {k : Fin m → ℕ} (hx : StrictMono x) (hxpos : ∀ i, 0 < x i) (hk : StrictMono k) :
+    0 < perronRoot (compound r (genVandermonde x k)) ∧
+      ∀ lam ∈ (genVandermonde x k).charpoly.roots, 0 ≤ lam := by
+  refine ⟨(exists_perron_compound hrm _ (minorsPos_genVandermonde hx hxpos hk r)).1,
+    fun lam hlam => ?_⟩
+  exact charpoly_roots_nonneg (fun j => minorsNonneg_genVandermonde hx hxpos hk j) hlam
+
 /-! ### Axiom footprint -/
 
 /-- info: 'Shields.charpoly_roots_card_of_minorsNonneg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms charpoly_roots_card_of_minorsNonneg
+
+/-- info: 'Shields.genVandermonde_perron_nonvacuous' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms genVandermonde_perron_nonvacuous
 
 end Shields

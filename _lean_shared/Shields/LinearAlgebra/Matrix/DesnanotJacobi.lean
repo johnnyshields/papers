@@ -80,7 +80,7 @@ theorem mul_auxN_apply (A : Matrix (Fin (m + 2)) (Fin (m + 2)) R) (i j : Fin (m 
   rw [Matrix.mul_apply]
   by_cases h0 : j = 0
   · subst h0
-    simp only [auxN, Matrix.of_apply, if_true]
+    simp only [auxN, Matrix.of_apply, ite_true]
     have := Matrix.mul_adjugate A
     have hij := congrFun (congrFun this i) 0
     simp only [Matrix.mul_apply, Matrix.smul_apply, Matrix.one_apply, smul_eq_mul] at hij
@@ -88,16 +88,16 @@ theorem mul_auxN_apply (A : Matrix (Fin (m + 2)) (Fin (m + 2)) R) (i j : Fin (m 
     by_cases hi : i = 0 <;> simp [hi]
   · by_cases hl : j = Fin.last (m + 1)
     · subst hl
-      simp only [auxN, Matrix.of_apply, if_neg h0, if_true]
+      simp only [auxN, Matrix.of_apply, ite_eq_right h0, ite_true]
       have := Matrix.mul_adjugate A
       have hij := congrFun (congrFun this i) (Fin.last (m + 1))
       simp only [Matrix.mul_apply, Matrix.smul_apply, Matrix.one_apply, smul_eq_mul] at hij
       rw [hij]
       by_cases hi : i = Fin.last (m + 1) <;> simp [hi]
-    · simp only [auxN, Matrix.of_apply, if_neg h0, if_neg hl]
+    · simp only [auxN, Matrix.of_apply, ite_eq_right h0, ite_eq_right hl]
       rw [Finset.sum_eq_single j]
       · simp
-      · intro b _ hb; rw [if_neg hb, mul_zero]
+      · intro b _ hb; rw [ite_eq_right hb, mul_zero]
       · intro h; exact absurd (Finset.mem_univ j) h
 
 /-- **Expansion along a basis-vector column.**  If column `c` of `M` is the
@@ -110,9 +110,9 @@ theorem det_of_basis_column (M : Matrix (Fin (m + 1)) (Fin (m + 1)) R) (r c : Fi
     (hcol : ∀ i, M i c = if i = r then 1 else 0) :
     M.det = (-1) ^ ((r : ℕ) + (c : ℕ)) * (M.submatrix r.succAbove c.succAbove).det := by
   rw [Matrix.det_succ_column _ c, Finset.sum_eq_single r]
-  · rw [hcol r, if_pos rfl, mul_one]
+  · rw [hcol r, ite_eq_left rfl, mul_one]
   · intro i _ hi
-    rw [hcol i, if_neg hi, mul_zero, zero_mul]
+    rw [hcol i, ite_eq_right hi, mul_zero, zero_mul]
   · intro h; exact absurd (Finset.mem_univ r) h
 
 /-- The matrix left after `det A` is factored out of both corner columns: columns
@@ -150,7 +150,7 @@ theorem det_mul_auxN (A : Matrix (Fin (m + 2)) (Fin (m + 2)) R) :
     simp
   · intro c _ hc
     simp only [Finset.mem_insert, Finset.mem_singleton, not_or] at hc
-    rw [if_neg hc.1, if_neg hc.2]
+    rw [ite_eq_right hc.1, ite_eq_right hc.2]
 
 /-- Clearing column `0` of `cornerCleared A`, which is the basis vector `e_0`. -/
 theorem det_cornerCleared_step (A : Matrix (Fin (m + 2)) (Fin (m + 2)) R) :
@@ -173,10 +173,10 @@ theorem cornerCleared_last_col (A : Matrix (Fin (m + 2)) (Fin (m + 2)) R) (k : F
     · intro h; exact Fin.succ_injective _ (by rw [h, ← hl])
     · intro h; rw [h, hl]
   simp only [Matrix.submatrix_apply, Fin.zero_succAbove, cornerCleared, Matrix.of_apply, hl,
-    if_neg (show ¬ (Fin.last (m + 1) : Fin (m + 2)) = 0 by simp [Fin.ext_iff])]
+    ite_eq_right (show ¬ (Fin.last (m + 1) : Fin (m + 2)) = 0 by simp [Fin.ext_iff])]
   by_cases hk : k = Fin.last m
-  · rw [if_pos (hiff.mpr hk), if_pos hk]; simp
-  · rw [if_neg (fun hc => hk (hiff.mp hc)), if_neg hk]; simp
+  · rw [ite_eq_left (hiff.mpr hk), ite_eq_left hk]; simp
+  · rw [ite_eq_right (fun hc => hk (hiff.mp hc)), ite_eq_right hk]; simp
 
 /-- **The first determinant reduction, complete.**
 `det (A · auxN A) = (det A)² · det(interior of A)`, where the interior deletes rows
@@ -316,7 +316,7 @@ theorem cornerCleared_interior (A : Matrix (Fin (m + 2)) (Fin (m + 2)) R) :
     simp only [Fin.val_succ, Fin.val_castSucc, Fin.val_last] at hv
     omega
   simp only [Matrix.submatrix_apply, Fin.succAbove_zero, Fin.succAbove_last, cornerCleared,
-    Matrix.of_apply, if_neg hne0, if_neg hnel]
+    Matrix.of_apply, ite_eq_right hne0, ite_eq_right hnel]
 
 /-! ### Desnanot--Jacobi -/
 
